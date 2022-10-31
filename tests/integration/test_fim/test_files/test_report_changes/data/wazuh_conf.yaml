@@ -4,7 +4,6 @@
   - ossec_conf_report
   apply_to_modules:
   - test_large_changes
-  - test_report_changes_and_diff
   - test_report_deleted_diff
   sections:
   - section: sca

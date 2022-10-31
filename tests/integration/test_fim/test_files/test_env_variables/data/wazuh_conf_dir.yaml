@@ -2,7 +2,8 @@
 - tags:
   - ossec_conf
   apply_to_modules:
-  - MODULE_NAME
+  - test_dir
+  - test_dir_win32
   sections:
   - section: syscheck
     elements:

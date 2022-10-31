@@ -1,0 +1,59 @@
+- name: Doubled sync_interval smaller than max_interval
+  description: Detect that sync_interval is doubled when a new sync tries to start before sync has ended
+  configuration_parameters:
+    INTERVAL: 5
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    folder: testdir_reports
+    fim_mode: scheduled
+
+- name: Doubled sync_interval smaller than max_interval
+  description: Detect that sync_interval is doubled when a new sync tries to start before sync has ended
+  configuration_parameters:
+    INTERVAL: 5
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    folder: testdir_nodiff
+    fim_mode: scheduled
+
+- name: Doubled sync_interval smaller than max_interval
+  description: Detect that sync_interval is doubled when a new sync tries to start before sync has ended
+  configuration_parameters:
+    INTERVAL: 1000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    folder: testdir_reports
+    fim_mode: realtime
+
+- name: Doubled sync_interval smaller than max_interval
+  description: Detect that sync_interval is doubled when a new sync tries to start before sync has ended
+  configuration_parameters:
+    INTERVAL: 1000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    folder: testdir_nodiff
+    fim_mode: realtime
+
+- name: Doubled sync_interval smaller than max_interval
+  description: Detect that sync_interval is doubled when a new sync tries to start before sync has ended
+  configuration_parameters:
+    INTERVAL: 1000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    folder: testdir_reports
+    fim_mode: whodata
+
+- name: Doubled sync_interval smaller than max_interval
+  description: Detect that sync_interval is doubled when a new sync tries to start before sync has ended
+  configuration_parameters:
+    INTERVAL: 1000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    folder: testdir_nodiff
+    fim_mode: whodata
