@@ -81,7 +81,8 @@ today = datetime.date.today()
 day = today.day
 
 weekDays = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-monthDays = {"1": 31, "2": 28, "3": 31, "4": 30, "5": 31, "6": 30, "7": 31, "8": 31, "9": 30, "10": 31, "11": 30, "12": 31}
+monthDays = {"1": 31, "2": 28, "3": 31, "4": 30, "5": 31, "6": 30, "7": 31, "8": 31, "9": 30, "10": 31, "11": 30,
+             "12": 31}
 wday = weekDays[today.weekday()]
 
 now = datetime.datetime.now()
@@ -125,7 +126,8 @@ def get_configuration(request):
     ({'ossec_time_conf'})
 ])
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_day_wday(tags_to_apply, get_configuration, configure_environment, reset_ossec_log, daemons_handler, wait_for_gcp_start):
+def test_day_wday(tags_to_apply, get_configuration, configure_environment, reset_ossec_log, daemons_handler,
+                  wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module starts to pull logs according to the day of the week,
                  of the month, or time set in the configuration. For this purpose, the test will use
@@ -199,10 +201,10 @@ def test_day_wday(tags_to_apply, get_configuration, configure_environment, reset
     ({'ossec_wday_multiple_conf'}),
     ({'ossec_time_multiple_conf'})
 ])
-
 @pytest.mark.xfail(reason="It will be blocked by wazuh/wazuh#15255, when it is resolved, we can enable the test")
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environment, reset_ossec_log, daemons_handler, wait_for_gcp_start):
+def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environment, reset_ossec_log, daemons_handler,
+                           wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module calculates the next scan correctly using time intervals
                  greater than one month, one week, or one day. For this purpose, the test will use different
