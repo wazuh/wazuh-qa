@@ -5,24 +5,6 @@
     - test_large_changes
     - test_report_deleted_diff
   sections:
-    - section: sca
-      elements:
-        - enabled:
-          value: 'no'
-    - section: rootcheck
-      elements:
-        - disabled:
-          value: 'yes'
-    - section: active-response
-      elements:
-        - disabled:
-          value: 'yes'
-    - section: wodle
-      attributes:
-        - syscollector
-      elements:
-        - disabled:
-          value: 'yes'
     - section: syscheck
       elements:
         - disabled:
@@ -37,6 +19,24 @@
               - REPORT_CHANGES
         - nodiff:
             value: NODIFF_FILE
+    - section: sca
+      elements:
+        - enabled:
+            value: 'no'
+    - section: rootcheck
+      elements:
+        - disabled:
+            value: 'yes'
+    - section: active-response
+      elements:
+        - disabled:
+            value: 'yes'
+    - section: wodle
+      attributes:
+        - name: syscollector
+      elements:
+        - disabled:
+            value: 'yes'
 
 # conf 2
 - tags:
@@ -48,21 +48,21 @@
     - section: sca
       elements:
         - enabled:
-          value: 'no'
+            value: 'no'
     - section: rootcheck
       elements:
         - disabled:
-          value: 'yes'
+            value: 'yes'
     - section: active-response
       elements:
         - disabled:
-          value: 'yes'
+            value: 'yes'
     - section: wodle
       attributes:
-        - syscollector
+        - name: syscollector
       elements:
         - disabled:
-          value: 'yes'
+            value: 'yes'
     - section: syscheck
       elements:
         - disabled:
@@ -87,21 +87,21 @@
     - section: sca
       elements:
         - enabled:
-          value: 'no'
+            value: 'no'
     - section: rootcheck
       elements:
         - disabled:
-          value: 'yes'
+            value: 'yes'
     - section: active-response
       elements:
         - disabled:
-          value: 'yes'
+            value: 'yes'
     - section: wodle
       attributes:
-        - syscollector
+        - name: syscollector
       elements:
         - disabled:
-          value: 'yes'
+            value: 'yes'
     - section: syscheck
       elements:
         - disabled:
@@ -117,11 +117,11 @@
         - diff:
             elements:
               - file_size:
-                elements:
-                  - enabled:
-                      value: FILE_SIZE_ENABLED
-                  - limit:
-                      value: FILE_SIZE_LIMIT
+                  elements:
+                    - enabled:
+                        value: FILE_SIZE_ENABLED
+                    - limit:
+                        value: FILE_SIZE_LIMIT
         - disk_quota:
             elements:
               - enabled:

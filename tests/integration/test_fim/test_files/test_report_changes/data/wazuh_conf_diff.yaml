@@ -7,7 +7,7 @@
     - section: sca
       elements:
         - enabled:
-          value: 'no'
+            value: 'no'
     - section: syscheck
       elements:
         - disabled:
