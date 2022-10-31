@@ -159,7 +159,7 @@ metadata = [
                 f"Received message: '#!-agent ack '"
             ],
             [
-                #f'Lost connection with manager. Setting lock.',
+                # f'Lost connection with manager. Setting lock.',
                 f'Trying to connect to server ([{SERVER_HOSTS[0]}]:{REMOTED_PORTS[0]}',
                 f'Trying to connect to server ([{SERVER_HOSTS[1]}]:{REMOTED_PORTS[1]}',
                 f'Connected to the server ([{SERVER_HOSTS[1]}]:{REMOTED_PORTS[1]}',
