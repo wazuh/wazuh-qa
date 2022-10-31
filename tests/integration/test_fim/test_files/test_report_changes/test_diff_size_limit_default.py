@@ -30,7 +30,7 @@ os_platform:
     - linux
     - windows
     - macos
-    - solaris  
+    - solaris
 
 os_version:
     - Arch Linux

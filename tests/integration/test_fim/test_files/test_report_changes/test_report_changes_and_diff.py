@@ -73,7 +73,7 @@ from test_fim.test_files.test_report_changes.common import make_diff_file_path
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.tools import PREFIX,configuration
+from wazuh_testing.tools import PREFIX, configuration
 from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
@@ -112,8 +112,8 @@ configurations = configuration.load_configuration_template(configurations_path, 
 # tests
 @pytest.mark.parametrize('test_folders', [test_directories])
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
-def test_reports_file_and_nodiff(configuration, metadata, create_monitored_folders_function, set_wazuh_configuration_fim,
-                                 restart_syscheck_function, wait_fim_start_function):
+def test_reports_file_and_nodiff(configuration, metadata, create_monitored_folders_function,
+                                 set_wazuh_configuration_fim, restart_syscheck_function, wait_fim_start_function):
     '''
     description: Check if the 'wazuh-syscheckd' daemon reports the file changes (or truncates if required)
                  in the generated events using the 'nodiff' tag and vice versa. For this purpose, the test
@@ -166,7 +166,7 @@ def test_reports_file_and_nodiff(configuration, metadata, create_monitored_folde
     file_list = [f"regular_file"]
     is_truncated = metadata['folder'] == 'testdir_nodiff'
     folder = os.path.join(PREFIX, metadata['folder'])
-    
+
     def report_changes_validator(event):
         """Validate content_changes attribute exists in the event"""
         for file in file_list:
@@ -182,7 +182,7 @@ def test_reports_file_and_nodiff(configuration, metadata, create_monitored_folde
         else:
             assert '<Diff truncated because nodiff option>' not in event['data'].get('content_changes'), \
                 f'content_changes is truncated'
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)           
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, time_travel=False,
                      min_timeout=global_parameters.default_timeout*20, triggers_event=True,
                      validators_after_update=[report_changes_validator, no_diff_validator])

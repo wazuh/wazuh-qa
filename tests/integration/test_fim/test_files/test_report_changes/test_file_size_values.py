@@ -196,8 +196,6 @@ def test_file_size_values(filename, folder, get_configuration, configure_environ
     to_write = generate_string(int(size_limit / 2), '0')
     create_file(REGULAR, folder, filename, content=to_write)
 
-    #check_time_travel(scheduled)
-
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                             error_message='Did not receive expected "Sending FIM event: ..." event.')
 
@@ -207,8 +205,6 @@ def test_file_size_values(filename, folder, get_configuration, configure_environ
     # Increase the size of the file over the configured value
     to_write = generate_string(size_limit, '0')
     modify_file_content(folder, filename, new_content=to_write * 3)
-
-    #check_time_travel(scheduled)
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_deleted_diff_folder,
                             error_message='Did not receive expected "Folder ... has been deleted." event.')

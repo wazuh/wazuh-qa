@@ -170,11 +170,11 @@ def make_diff_file_path(folder='/testdir1', filename='regular_0'):
         Path to compressed file.
     """
 
-    file_path = os.path.join(PREFIX, folder,filename)
+    file_path = os.path.join(PREFIX, folder, filename)
     sha_1 = hashlib.sha1()
     sha_1.update(file_path.encode('utf-8'))
     file_sha1 = sha_1.hexdigest()
-    
+
     diff_file_path = os.path.join(WAZUH_PATH, 'queue', 'diff', 'file', file_sha1, 'last-entry.gz')
 
     return diff_file_path

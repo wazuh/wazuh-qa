@@ -144,7 +144,7 @@ def wait_for_event(fim_mode):
     fim_mode : str
         FIM mode (scheduled, realtime, whodata)
     """
-    
+
     # Wait until event is detected
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                             error_message='Did not receive expected "Sending FIM event: ..." event')
@@ -168,10 +168,10 @@ def create_file_and_check_diff(name, path, fim_mode):
         String with the duplicated file path (diff)
     """
     create_file(REGULAR, path, name, content='Sample content')
-    
+
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                             error_message='Did not receive expected "Sending FIM event: ..." event')
-    
+
     diff_file = make_diff_file_path(path, name)
     assert os.path.exists(diff_file), f'{diff_file} does not exist'
     return diff_file

@@ -66,7 +66,7 @@ import pytest
 from test_fim.test_files.test_report_changes.common import generate_string, translate_size, make_diff_file_path
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file,
-                              callback_detect_event, modify_file_content)
+                               callback_detect_event, modify_file_content)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -157,7 +157,7 @@ def test_file_size_default(filename, folder, get_configuration, configure_enviro
         - diff
         - scheduled
     '''
-    
+
     size_limit = translate_size('50MB')
     diff_file_path = make_diff_file_path(folder=folder, filename=filename)
 
@@ -165,7 +165,6 @@ def test_file_size_default(filename, folder, get_configuration, configure_enviro
     to_write = generate_string(int(size_limit / 10), '0')
     create_file(REGULAR, folder, filename, content=to_write)
 
-    
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
                             error_message='Did not receive expected "Sending FIM event: ..." event.')
 
