@@ -66,7 +66,7 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_disk_quota_default, generate_params
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 
@@ -103,8 +103,7 @@ def get_configuration(request):
 
 # Tests
 
-@pytest.mark.parametrize('tags_to_apply', [{'ossec_conf_diff_default'}])
-def test_disk_quota_default(tags_to_apply, get_configuration, configure_environment,
+def test_disk_quota_default(get_configuration, configure_environment,
                             configure_local_internal_options_module, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon limits the size of the folder where the data used to perform
@@ -118,9 +117,6 @@ def test_disk_quota_default(tags_to_apply, get_configuration, configure_environm
     tier: 1
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -150,7 +146,6 @@ def test_disk_quota_default(tags_to_apply, get_configuration, configure_environm
         - disk_quota
         - scheduled
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
 
     disk_quota_value = wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
