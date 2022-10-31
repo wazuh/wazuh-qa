@@ -386,6 +386,7 @@ def wait_until(x, log_str):
 
 
 # @pytest.mark.parametrize('test_case', [case for case in tests])
+@pytest.mark.skip(reason='https://github.com/wazuh/wazuh-qa/issues/3536')
 def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id, clean_keys, configure_environment,
                              get_configuration):
     '''
