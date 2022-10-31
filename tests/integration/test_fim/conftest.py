@@ -8,12 +8,12 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.configuration import (get_wazuh_local_internal_options, set_wazuh_local_internal_options,
-                                         create_local_internal_options)
+                                               create_local_internal_options)
 from wazuh_testing.fim import (create_registry, registry_parser, KEY_WOW64_64KEY, delete_registry,
                                LOG_FILE_PATH, callback_detect_registry_integrity_clear_event,
                                detect_whodata_start, detect_realtime_start, detect_initial_scan)
 from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, SYNC_INTERVAL_VALUE, 
+from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, SYNC_INTERVAL_VALUE,
                                        FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS)
 from wazuh_testing.wazuh_variables import WAZUH_SERVICES_START, WAZUH_SERVICES_STOP, WAZUH_LOG_MONITOR
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -103,6 +103,8 @@ def restart_syscheck_function():
 def create_monitored_folders_function(test_folders):
     """
     Create the folders that will be monitored and delete them at the end.
+    Args:
+        test_folders(list): List of folders to create and delete
     """
     for folder in test_folders:
         if os.path.exists(folder):

@@ -1,33 +1,33 @@
 - tags:
-  - ossec_conf
+    - ossec_conf
   apply_to_modules:
-  - test_nodiff
+    - test_nodiff
   sections:
-  - section: syscheck
-    elements:
-    - disabled:
-        value: 'no'
-    - frequency:
-        value: 3
-    - nodiff:
-        value: TEST_ENV_VARIABLES
-    - directories:
-        value: TEST_DIRECTORIES
-        attributes:
-        - check_all: 'yes'
-        - FIM_MODE
-        - report_changes: 'yes'
-  - section: sca
-    elements:
-    - enabled:
-        value: 'no'
-  - section: rootcheck
-    elements:
-    - disabled:
-        value: 'yes'
-  - section: wodle
-    attributes:
-      - name: 'syscollector'
-    elements:
-      - disabled:
-          value: 'yes'
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - frequency:
+            value: 3
+        - nodiff:
+            value: TEST_ENV_VARIABLES
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - check_all: 'yes'
+              - FIM_MODE
+              - report_changes: 'yes'
+    - section: sca
+      elements:
+        - enabled:
+            value: 'no'
+    - section: rootcheck
+      elements:
+        - disabled:
+            value: 'yes'
+    - section: wodle
+      attributes:
+        - name: syscollector
+      elements:
+        - disabled:
+            value: 'yes'
