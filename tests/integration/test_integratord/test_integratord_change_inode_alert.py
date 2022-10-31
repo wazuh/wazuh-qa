@@ -118,7 +118,7 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     run_local_command_returning_output(command)
 
     # Check that the alert was read
-    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
+    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2,
                             callback=callback_generator(integrator.CB_INTEGRATORD_SENDING_ALERT),
                             error_message=integrator.ERR_MSG_SENDING_ALERT_NOT_FOUND,
                             update_position=False)
@@ -134,7 +134,7 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     time.sleep(integrator.TIME_TO_DETECT_FILE)
 
     # Monitor Inode Changed
-    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
+    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2,
                             callback=callback_generator(integrator.CB_ALERTS_FILE_INODE_CHANGED),
                             error_message=integrator.ERR_MSG_ALERT_INODE_CHANGED_NOT_FOUND)
 
@@ -142,6 +142,6 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     run_local_command_returning_output(command)
 
     # Read Response in ossec.log
-    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
+    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2,
                             callback=callback_generator(integrator.CB_PROCESSING_ALERT),
                             error_message=integrator.ERR_MSG_SLACK_ALERT_NOT_DETECTED)
