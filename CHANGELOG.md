@@ -13,6 +13,7 @@ Release report: TBD
 
 ### Changed
 
+- Update report_changes tests ([#3405](https://github.com/wazuh/wazuh-qa/pull/3405)) \- (Tests)
 - Update cluster logs in reliability tests ([#2772](https://github.com/wazuh/wazuh-qa/pull/2772)) \- (Tests)
 - Use correct version format in agent_simulator tool ([#3198](https://github.com/wazuh/wazuh-qa/pull/3198)) \- (Tools)
 
