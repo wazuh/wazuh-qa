@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import shutil
 import pytest
 
 from wazuh_testing import global_parameters
@@ -113,3 +114,6 @@ def create_monitored_folders_function(test_folders):
     yield
     for folder in test_folders:
         delete_path_recursively(folder)
+
+
+
