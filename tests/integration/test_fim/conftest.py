@@ -114,6 +114,3 @@ def create_monitored_folders_function(test_folders):
     yield
     for folder in test_folders:
         delete_path_recursively(folder)
-
-
-
