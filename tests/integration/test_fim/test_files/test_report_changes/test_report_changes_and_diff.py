@@ -28,7 +28,6 @@ daemons:
 
 os_platform:
     - linux
-    - windows
 
 os_version:
     - Arch Linux
@@ -78,7 +77,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 
 # Marks
 
-pytestmark = pytest.mark.tier(level=1)
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 
 # Reference paths
