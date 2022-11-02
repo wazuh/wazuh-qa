@@ -34,6 +34,7 @@ Release report: TBD
 
 ### Changed
 
+- Refactor FIM test `test_remove_audit` to retry to execute a command if fail ([#3555](https://github.com/wazuh/wazuh-qa/pull/3555)) \- (Tests)
 - Skip unstable integration test for agentd ([#3538](https://github.com/wazuh/wazuh-qa/pull/3538))
 - Update wazuhdb_getconfig and EPS limit integration tests ([#3146](https://github.com/wazuh/wazuh-qa/pull/3146)) \- (Tests)
 - Refactor: logcollector `test_only_future_events` according to new standard. ([3484](https://github.com/wazuh/wazuh-qa/pull/3484)) \- (Framework + Tests)
