@@ -118,7 +118,16 @@ def uninstall_install_audit():
         raise ValueError(f"Linux distro ({linux_distro}) not supported for uninstall/install audit")
 
     # Uninstall audit
-    process = subprocess.run([package_management, "remove", audit, option], check=True)
+    for i in range(RETRIES):
+        try:
+            process = subprocess.run([package_management, "remove", audit, option], check=True)
+        except subprocess.CalledProcessError as called_process_error:
+            if i < RETRIES - 1:
+                sleep(SLEEP_TIME)
+                continue
+            else:
+                raise called_process_error
+        break
 
     yield
 
