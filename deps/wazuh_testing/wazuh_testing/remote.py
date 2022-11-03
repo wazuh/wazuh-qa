@@ -499,7 +499,7 @@ def wait_to_remoted_update_groups(wazuh_log_monitor):
     # The log is truncated to ensure that the information has been loaded after the agent has been registered.
     truncate_file(LOG_FILE_PATH)
 
-    callback_pattern = '.*c_files().*End updating shared files sums.'
+    callback_pattern = '.*c_files().*End updating shared files.'
     error_message = 'Could not find the groups reload log'
 
     check_remoted_log_event(wazuh_log_monitor, callback_pattern, error_message, timeout=SYNC_FILES_TIMEOUT)
