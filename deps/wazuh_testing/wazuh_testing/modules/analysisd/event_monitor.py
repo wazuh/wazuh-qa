@@ -81,3 +81,25 @@ def get_analysisd_state():
     analysisd_state = dict((a.strip(), b.strip()) for a, b in (element.split('=') for element in data.split('\n')))
 
     return analysisd_state
+
+
+def check_queues_are_full_and_no_eps_credits_log(log_level='WARNING', timeout=T_10):
+    """Check if the start dropping events log is shown.
+
+    Args:
+        log_level (str): Log level.
+        timeout (int): Timeout for checking the event in log.
+    """
+    check_analysisd_event(callback=fr'.*{log_level}: Queues are full and no EPS credits, dropping events.*',
+                          timeout=timeout)
+
+
+def check_stop_dropping_events_and_credits_available_log(log_level='WARNING', timeout=T_10):
+    """Check if the stop dropping events log is shown
+
+    Args:
+        log_level (str): Log level.
+        timeout (int): Timeout for checking the event in log.
+    """
+    check_analysisd_event(callback=fr'.*{log_level}: Queues back to normal and EPS credits, no dropping events.*',
+                          timeout=timeout)
