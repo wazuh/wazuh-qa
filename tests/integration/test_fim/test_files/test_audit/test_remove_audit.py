@@ -63,6 +63,7 @@ tags:
 import os
 import re
 import subprocess
+from time import sleep
 
 import pytest
 import wazuh_testing.fim as fim
@@ -76,6 +77,8 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 # Variables
 
+RETRIES = 5
+SLEEP_TIME = 10
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2'), os.path.join('/', 'testdir3')]
@@ -115,13 +118,31 @@ def uninstall_install_audit():
         raise ValueError(f"Linux distro ({linux_distro}) not supported for uninstall/install audit")
 
     # Uninstall audit
-    process = subprocess.run([package_management, "remove", audit, option], check=True)
+    for i in range(RETRIES):
+        try:
+            process = subprocess.run([package_management, "remove", audit, option], check=True)
+        except subprocess.CalledProcessError as called_process_error:
+            if i < RETRIES - 1:
+                sleep(SLEEP_TIME)
+                continue
+            else:
+                raise called_process_error
+        break
 
     yield
 
     # Install audit and start the service
-    process = subprocess.run([package_management, "install", audit, option], check=True)
-    process = subprocess.run(["service", "auditd", "start"], check=True)
+    for i in range(RETRIES):
+        try:
+            process = subprocess.run([package_management, "install", audit, option], check=True)
+            process = subprocess.run(["service", "auditd", "start"], check=True)
+        except subprocess.CalledProcessError as called_process_error:
+            if i < RETRIES - 1:
+                sleep(SLEEP_TIME)
+                continue
+            else:
+                raise called_process_error
+        break
 
 
 # Test
