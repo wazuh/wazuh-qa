@@ -70,6 +70,7 @@ import wazuh_testing.fim as fim
 from distro import id
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.utils import retry
 
 # Marks
 
@@ -77,8 +78,6 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 # Variables
 
-RETRIES = 5
-SLEEP_TIME = 10
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2'), os.path.join('/', 'testdir3')]
@@ -89,6 +88,21 @@ wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 # Configurations
 
 configurations = load_wazuh_configurations(configurations_path, __name__)
+
+
+# Function
+
+@retry(subprocess.CalledProcessError, attempts=5, delay=10)
+def run_process(command_list):
+    """Execute the command_list command
+
+    Args:
+        command_list (list): Command to be executed.
+
+    Returns:
+        subprocess.CompletedProcess: Command executed.
+    """
+    return subprocess.run(command_list, check=True)
 
 
 # Fixtures
@@ -118,31 +132,13 @@ def uninstall_install_audit():
         raise ValueError(f"Linux distro ({linux_distro}) not supported for uninstall/install audit")
 
     # Uninstall audit
-    for i in range(RETRIES):
-        try:
-            process = subprocess.run([package_management, "remove", audit, option], check=True)
-        except subprocess.CalledProcessError as called_process_error:
-            if i < RETRIES - 1:
-                sleep(SLEEP_TIME)
-                continue
-            else:
-                raise called_process_error
-        break
+    process = run_process([package_management, "remove", audit, option])
 
     yield
 
     # Install audit and start the service
-    for i in range(RETRIES):
-        try:
-            process = subprocess.run([package_management, "install", audit, option], check=True)
-            process = subprocess.run(["service", "auditd", "start"], check=True)
-        except subprocess.CalledProcessError as called_process_error:
-            if i < RETRIES - 1:
-                sleep(SLEEP_TIME)
-                continue
-            else:
-                raise called_process_error
-        break
+    process = run_process([package_management, "install", audit, option])
+    process = run_process(["service", "auditd", "start"])
 
 
 # Test
