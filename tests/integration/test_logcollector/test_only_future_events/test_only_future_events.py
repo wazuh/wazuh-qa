@@ -56,71 +56,58 @@ tags:
 import os
 import tempfile
 import sys
-
 import pytest
+
+from wazuh_testing import T_10, T_20
 import wazuh_testing.logcollector as logcollector
-from wazuh_testing import global_parameters
-from wazuh_testing.tools import monitoring, file
-from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
+from wazuh_testing.modules.logcollector import LOG_COLLECTOR_PREFIX, WINDOWS_AGENT_PREFIX, \
+                                               GENERIC_CALLBACK_ERROR_COMMAND_MONITORING
+from wazuh_testing.modules.logcollector import event_monitor as evm
 
 
-if sys.platform == 'win32':
-    prefix = monitoring.WINDOWS_AGENT_DETECTOR_PREFIX
-else:
-    prefix = monitoring.LOG_COLLECTOR_DETECTOR_PREFIX
-
-# Marks
 pytestmark = [pytest.mark.tier(level=0)]
 
-# Configuration
-DAEMON_NAME = "wazuh-logcollector"
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_only_future_events_conf.yaml')
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
+
+# Configuration and cases data
+t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_only_future_events.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_only_future_events.yaml')
+
 temp_dir = tempfile.gettempdir()
 log_test_path = os.path.join(temp_dir, 'wazuh-testing', 'test.log')
-current_line = 0
+LOG_LINE = 'Jan  1 00:00:00 localhost test[0]: line='
+prefix = LOG_COLLECTOR_PREFIX
+local_internal_options = {'logcollector.vcheck_files': '5', 'logcollector.debug': '2', 'windows.debug': '2'}
 
-local_internal_options = {'logcollector.vcheck_files': '5', 'logcollector.debug': '2', 'windows.debug': 2}
+if sys.platform == 'win32':
+    prefix = WINDOWS_AGENT_PREFIX
 
-parameters = [
-    {'LOG_FORMAT': 'syslog', 'LOCATION': log_test_path, 'ONLY_FUTURE_EVENTS': 'no', 'MAX_SIZE': '10MB'},
-    {'LOG_FORMAT': 'syslog', 'LOCATION': log_test_path, 'ONLY_FUTURE_EVENTS': 'yes', 'MAX_SIZE': '10MB'}
-]
-metadata = [
-    {'log_format': 'syslog', 'location': log_test_path, 'only_future_events': 'no',
-     'log_line': "Jan  1 00:00:00 localhost test[0]: line="},
-    {'log_format': 'syslog', 'location': log_test_path, 'only_future_events': 'yes',
-     'log_line': "Jan  1 00:00:00 localhost test[0]: line="}
-]
+# Only_future_events values test configurations (t1)
+t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 
-log_line = metadata[0]['log_line']
+for index in range(len(t1_configuration_metadata)):
+    t1_configuration_metadata[index]['location'] = log_test_path
+    t1_configuration_parameters[index]['LOCATION'] = log_test_path
+
+t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
+                                                t1_configuration_metadata)
+
+# Configuration
+LOGCOLLECTOR_DAEMON = "wazuh-logcollector"
 
 file_structure = [
     {
         'folder_path': os.path.join(temp_dir, 'wazuh-testing'),
         'filename': ['test.log'],
-        'content': log_line,
+        'content': LOG_LINE,
         'size_kib': 10240
     }
 ]
-
-configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-configuration_ids = [f"rotate_{x['location']}_in_{x['log_format']}_format" for x in metadata]
-
-
-# Fixtures
-@pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
-
-
-@pytest.fixture(scope="module")
-def get_local_internal_options():
-    """Get internal configuration."""
-    return local_internal_options
 
 
 @pytest.fixture(scope="module")
@@ -129,46 +116,66 @@ def get_files_list():
     return file_structure
 
 
-def test_only_future_events(configure_local_internal_options_module, get_configuration, file_monitoring,
-                            configure_environment, get_files_list, create_file_structure_module, restart_logcollector):
+@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
+def test_only_future_events(configuration, metadata, set_wazuh_configuration,
+                            configure_local_internal_options_module, setup_log_monitor, get_files_list,
+                            create_file_structure_module, restart_wazuh_daemon_function):
     '''
     description: Check if the 'only-future-events' option is used properly by the 'wazuh-logcollector' when
                  monitoring a log file. This option allows reading new log content since the logcollector
-                 was stopped. For this purpose, the test will create a testing log file and configure a
-                 'localfile' section to monitor it. Once the logcollector is started, it will verify that
-                 the log file is monitored, add data to it, and verify that the data addition is detected.
-                 Then, the test will stop the 'wazuh-logcollector' daemon, and while it is stopped, add more
-                 data to the log file. After this, it will check if the addition event has been detected or not
-                 (depending on the value of the 'only-future-events' tag). Finally, the test will perform one
-                 aditional verification by adding data one more time to the log file and verifying that event
-                 indicating the data addition is detected.
+                 was stopped.
+
+    test_phases:
+        - setup:
+            - Load Wazuh light configuration.
+            - Apply ossec.conf configuration changes according to the configuration template and use case.
+            - Apply custom settings in local_internal_options.conf.
+            - Create the specified file tree structure.
+            - Truncate wazuh logs.
+            - Restart wazuh-manager service to apply configuration changes.
+        - test:
+            - Start the log monitor and check the log in `ossec.log` that the respective file is being analyzed.
+            - Add n log lines corresponding to 1KB.
+            - Check that the last written line has been read by logcollector.
+            - Stop logcollector daemon
+            - Add additional n log lines corresponding to 1KB when logcollector is stopped
+            - Start logcollector daemon
+            - If only_future_events is set to no, check that all written lines have been read.
+            - If only_future_events is set to yes, check that all written lines have not been read.
+            - If only_future_events is set to yes, write new lines and check that they are read when logcollector is on.
+        - tierdown:
+            - Truncate wazuh logs.
+            - Restore initial configuration, both ossec.conf and local_internal_options.conf.
 
     wazuh_min_version: 4.2.0
 
     tier: 0
 
     parameters:
-        - get_local_internal_options:
-            type: fixture
-            brief: Get local internal options from the module.
-        - configure_local_internal_options:
-            type: fixture
-            brief: Configure the Wazuh local internal options.
-        - get_configuration:
-            type: fixture
+        - configuration:
+            type: dict
             brief: Get configurations from the module.
-        - configure_environment:
+        - metadata:
+            type: dict
+            brief: Get metadata from the module.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Configure a custom environment for testing.
+            brief: Apply changes to the ossec.conf configuration.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the Wazuh local internal options file.
+        - setup_log_monitor:
+            type: fixture
+            brief: Create the log monitor.
         - get_files_list:
             type: fixture
             brief: Get file list to create from the module.
         - create_file_structure_module:
             type: fixture
             brief: Create the specified file tree structure.
-        - restart_logcollector:
+        - restart_wazuh_daemon_function:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: Restart the wazuh service.
 
     assertions:
         - Verify that the logcollector starts monitoring the log file.
@@ -180,83 +187,74 @@ def test_only_future_events(configure_local_internal_options_module, get_configu
         - Verify that the log collector continues detecting new logs messages when it is started.
 
     input_description: A configuration template (test_only_future_events) is contained in an external YAML file
-                       (wazuh_only_future_events_conf.yaml). That template is combined with two test cases defined
-                       in the module. Those include configuration settings for the 'wazuh-logcollector' daemon.
+                       (configuration_only_future_events.yaml). That template is combined with two test cases defined
+                       in the file cases_only_future_events.yaml.
 
     expected_output:
         - r'Analyzing file.*'
         - r'Reading syslog message.*'
-
-    tags:
-        - logs
     '''
-    config = get_configuration['metadata']
-    global current_line
+    current_line = 0
+    log_monitor = setup_log_monitor
 
     # Ensure that the file is being analyzed
-    message = f"Analyzing file: '{log_test_path}'."
-    callback_message = monitoring.make_callback(pattern=message, prefix=prefix, escape=True)
-    log_monitor.start(timeout=global_parameters.default_timeout,
-                      error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                      callback=callback_message)
+    evm.check_analyzing_file(file_monitor=log_monitor, file=log_test_path,
+                             error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix)
 
-    # Add one KiB of data to log
-    current_line = logcollector.add_log_data(log_path=config['location'], log_line_message=config['log_line'],
+    # Add n log lines corresponding to 1KB
+    current_line = logcollector.add_log_data(log_path=metadata['location'], log_line_message=LOG_LINE,
                                              size_kib=1, line_start=current_line + 1, print_line_num=True)
 
-    message = f"DEBUG: Reading syslog message: '{config['log_line']}{current_line}'"
-    callback_message = monitoring.make_callback(pattern=message, prefix=prefix, escape=True)
-    log_monitor.start(timeout=global_parameters.default_timeout,
-                      error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                      callback=callback_message)
+    # Check that the last written line has been read by logcollector
+    last_line = current_line + 1
+    message = f"{LOG_LINE}{last_line}"
+    evm.check_syslog_messages(file_monitor=log_monitor, message=message,
+                              error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
+                              timeout=T_10, escape=True)
+    # Stop logcollector daemon
+    control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
 
-    control_service('stop', daemon=DAEMON_NAME)
+    # Add additional n log lines corresponding to 1KB when logcollector is stopped
+    first_next_line = last_line + 1
+    current_line = logcollector.add_log_data(log_path=metadata['location'], log_line_message=LOG_LINE,
+                                             size_kib=1, line_start=first_next_line, print_line_num=True)
+    # Start logcollector daemon
+    control_service('start', daemon=LOGCOLLECTOR_DAEMON)
 
-    # Add another KiB of data to log while logcollector is stopped
-    first_line = current_line + 1
-    current_line = logcollector.add_log_data(log_path=config['location'], log_line_message=config['log_line'],
-                                             size_kib=1, line_start=first_line, print_line_num=True)
-
-    control_service('start', daemon=DAEMON_NAME)
-
-    if config['only_future_events'] == 'no':
-        # Logcollector should detect the first line written while it was stopped
-        # Check first line
-        message = f"DEBUG: Reading syslog message: '{config['log_line']}{first_line}'"
-        callback_message = monitoring.make_callback(pattern=message, prefix=prefix, escape=True)
-        log_monitor.start(timeout=global_parameters.default_timeout,
-                          error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                          callback=callback_message)
-        # Check last line
-        message = f"DEBUG: Reading syslog message: '{config['log_line']}{current_line}'"
-        callback_message = monitoring.make_callback(pattern=message, prefix=prefix, escape=True)
-        log_monitor.start(timeout=global_parameters.default_timeout,
-                          error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                          callback=callback_message)
+    # Logcollector should detect all written lines when logcollector was stopped
+    if metadata['only_future_events'] == 'no':
+        # Check first log line
+        message = f"{LOG_LINE}{first_next_line}"
+        evm.check_syslog_messages(file_monitor=log_monitor, message=message,
+                                  error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
+                                  timeout=T_20, escape=True)
+        # Check last log line
+        message = f"{LOG_LINE}{current_line + 1}"
+        evm.check_syslog_messages(file_monitor=log_monitor, message=message,
+                                  error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
+                                  timeout=T_20, escape=True)
+    # if only_future_events yes, logcollector should NOT detect the log lines written while it was stopped
     else:
-        # Logcollector should NOT detect the log lines written while it was stopped
+        message = f"{LOG_LINE}{first_next_line}"
+        # Check that the first written line is not read
         with pytest.raises(TimeoutError):
-            # Check first line
-            message = f"DEBUG: Reading syslog message: '{config['log_line']}{first_line}'"
-            callback_message = monitoring.make_callback(pattern=message, prefix=prefix,
-                                                        escape=True)
-            log_monitor.start(timeout=global_parameters.default_timeout,
-                              error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                              callback=callback_message)
+            message = f"{LOG_LINE}{first_next_line}"
+            evm.check_syslog_messages(file_monitor=log_monitor, message=message,
+                                      error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
+                                      timeout=T_10, escape=True)
+
+        # Check that the last written line is not read
+        with pytest.raises(TimeoutError):
             # Check last line
-            message = f"DEBUG: Reading syslog message: '{config['log_line']}{current_line}'"
-            callback_message = monitoring.make_callback(pattern=message, prefix=prefix,
-                                                        escape=True)
-            log_monitor.start(timeout=global_parameters.default_timeout,
-                              error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                              callback=callback_message)
+            message = f"{LOG_LINE}{current_line + 1}"
+            evm.check_syslog_messages(file_monitor=log_monitor, message=message,
+                                      error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
+                                      timeout=T_10, escape=True)
 
-    # Add another KiB of data to log (additional check)
-    current_line = logcollector.add_log_data(log_path=config['location'], log_line_message=config['log_line'],
-                                             size_kib=1, line_start=current_line + 1, print_line_num=True)
-
-    message = f"DEBUG: Reading syslog message: '{config['log_line']}{current_line}'"
-    callback_message = monitoring.make_callback(pattern=message, prefix=prefix, escape=True)
-    log_monitor.start(timeout=global_parameters.default_timeout,
-                      error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING,
-                      callback=callback_message)
+        # Check that if we write new data when the daemon is turned on, it is read normally
+        current_line = logcollector.add_log_data(log_path=metadata['location'], log_line_message=LOG_LINE,
+                                                 size_kib=1, line_start=current_line + 1, print_line_num=True)
+        message = f"{LOG_LINE}{current_line + 1}"
+        evm.check_syslog_messages(file_monitor=log_monitor, message=message,
+                                  error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
+                                  timeout=T_10, escape=True)

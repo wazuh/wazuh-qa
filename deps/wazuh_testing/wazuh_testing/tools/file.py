@@ -14,12 +14,12 @@ import sys
 import string
 import xml.etree.ElementTree as ET
 import zipfile
+import re
 
 import filetype
 import requests
 import yaml
 from wazuh_testing import logger
-
 
 
 def read_json(file_path):
@@ -129,6 +129,7 @@ def random_string(length, encode=None):
 
     return st
 
+
 def generate_string(stringLength=10, character='0'):
     """Generate a string with line breaks.
 
@@ -153,6 +154,7 @@ def generate_string(stringLength=10, character='0'):
             generated_string += '\n'
 
     return generated_string
+
 
 def read_file(file_path):
     with open(file_path) as f:
@@ -516,3 +518,26 @@ def download_text_file(file_url, local_destination_path):
 def get_file_lines(path):
     with open(path, "r+") as file_to_read:
         return file_to_read.readlines()
+
+
+def replace_regex_in_file(search_regex, replace_regex, file_path):
+    """Perform replacements in a file data according to the specified regex.
+
+    Args:
+        search_regex (list(str)): Search regex list.
+        replace_regex (list(str)): Replacements regex list.
+        file_path (str): File path to read and update.
+    """
+    if (len(search_regex) != len(replace_regex)):
+        raise ValueError('search_regex has to have the same number of items than replace_regex. '
+                         f"{len(search_regex)} != {len(replace_regex)}")
+
+    # Read the file content
+    file_data = read_file(file_path)
+
+    # Perform the replacements
+    for search, replace in zip(search_regex, replace_regex):
+        file_data = re.sub(search, replace, file_data)
+
+    # Write the file data
+    write_file(file_path, file_data)

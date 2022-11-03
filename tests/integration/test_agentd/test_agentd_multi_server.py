@@ -159,7 +159,7 @@ metadata = [
                 f"Received message: '#!-agent ack '"
             ],
             [
-                #f'Lost connection with manager. Setting lock.',
+                # f'Lost connection with manager. Setting lock.',
                 f'Trying to connect to server ([{SERVER_HOSTS[0]}]:{REMOTED_PORTS[0]}',
                 f'Trying to connect to server ([{SERVER_HOSTS[1]}]:{REMOTED_PORTS[1]}',
                 f'Connected to the server ([{SERVER_HOSTS[1]}]:{REMOTED_PORTS[1]}',
@@ -386,6 +386,7 @@ def wait_until(x, log_str):
 
 
 # @pytest.mark.parametrize('test_case', [case for case in tests])
+@pytest.mark.skip(reason='https://github.com/wazuh/wazuh-qa/issues/3536')
 def test_agentd_multi_server(add_hostnames, configure_authd_server, set_authd_id, clean_keys, configure_environment,
                              get_configuration):
     '''

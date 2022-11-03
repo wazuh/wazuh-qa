@@ -16,7 +16,8 @@ xfailed_items = {
     '/active-response': {'message': 'Agent simulator not handling active-response messages: '
                                     'https://github.com/wazuh/wazuh-qa/issues/1266',
                          'method': 'put'},
-    '/agents/group': {'message': 'Slow agent-group files creation: https://github.com/wazuh/wazuh/issues/8625',
+    '/agents/group': {'message': 'Investigate performance issues with PUT /agents/group API endpoint: '
+                                 'https://github.com/wazuh/wazuh/issues/13872',
                       'method': 'put'}
 }
 

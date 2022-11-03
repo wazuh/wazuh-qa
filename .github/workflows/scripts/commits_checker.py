@@ -76,7 +76,7 @@ def check_conventional_commits_regex(commit_names):
     """
     failed = [[], []]  # Position 0 for convention failures, and 1 for excess character limit
     allowed_regex = [
-        r'(fix|feat|docs|refactor|style|ci|build|merge|revert)(\(#\d+\))?!?:\s[a-z].*'
+        r'(fix|feat|docs|refactor|style|ci|build|merge|revert)(\(#\d+\))?!?:\s.*'
     ]
 
     # Check if the commit name complies with the established convention
