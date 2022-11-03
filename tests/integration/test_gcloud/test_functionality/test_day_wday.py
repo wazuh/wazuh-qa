@@ -201,7 +201,7 @@ def test_day_wday(tags_to_apply, get_configuration, configure_environment, reset
     ({'ossec_wday_multiple_conf'}),
     ({'ossec_time_multiple_conf'})
 ])
-@pytest.mark.xfail(reason="It will be blocked by wazuh/wazuh#15255, when it is resolved, we can enable the test")
+@pytest.mark.xfail(reason="Blocked by wazuh/wazuh#15255")
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environment, reset_ossec_log, daemons_handler,
                            wait_for_gcp_start):
