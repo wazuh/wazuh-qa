@@ -250,7 +250,7 @@ def test_missing_configuration(configuration, metadata, restart_wazuh_daemon_aft
                                                                      'crashed'
     elif metadata['behavior'] == 'disabled':
         control_service('restart')
-        evm.check_eps_disabled()
+        evm.check_eps_missing_maximum()
         assert check_if_daemons_are_running(['wazuh-analysisd'])[0], 'wazuh-analysisd is not running. Maybe it has ' \
                                                                      'crashed'
     else:
