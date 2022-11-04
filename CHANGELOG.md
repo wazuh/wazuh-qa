@@ -34,7 +34,7 @@ Release report: TBD
 
 ### Changed
 
-- Fix FIM test `test_remove_audit` to retry to execute install and remove command if fail ([#3562](https://github.com/wazuh/wazuh-qa/pull/3562)) \- (Tests)
+- Improve `test_remove_audit` FIM test to retry install and remove command ([#3562](https://github.com/wazuh/wazuh-qa/pull/3562)) \- (Tests)
 - Skip unstable integration tests for gcloud ([#3531](https://github.com/wazuh/wazuh-qa/pull/3531)) \- (Tests)
 - Skip unstable integration test for agentd ([#3538](https://github.com/wazuh/wazuh-qa/pull/3538))
 - Update wazuhdb_getconfig and EPS limit integration tests ([#3146](https://github.com/wazuh/wazuh-qa/pull/3146)) \- (Tests)

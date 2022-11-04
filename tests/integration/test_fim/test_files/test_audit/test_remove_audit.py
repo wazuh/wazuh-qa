@@ -63,7 +63,6 @@ tags:
 import os
 import re
 import subprocess
-from time import sleep
 
 import pytest
 import wazuh_testing.fim as fim
