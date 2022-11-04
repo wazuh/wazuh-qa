@@ -69,6 +69,7 @@ import wazuh_testing.fim as fim
 from distro import id
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.utils import retry
 
 # Marks
 
@@ -86,6 +87,21 @@ wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
 # Configurations
 
 configurations = load_wazuh_configurations(configurations_path, __name__)
+
+
+# Function
+
+@retry(subprocess.CalledProcessError, attempts=5, delay=10)
+def run_process(command_list):
+    """Execute the command_list command
+
+    Args:
+        command_list (list): Command to be executed.
+
+    Returns:
+        subprocess.CompletedProcess: Command executed.
+    """
+    return subprocess.run(command_list, check=True)
 
 
 # Fixtures
@@ -115,13 +131,13 @@ def uninstall_install_audit():
         raise ValueError(f"Linux distro ({linux_distro}) not supported for uninstall/install audit")
 
     # Uninstall audit
-    process = subprocess.run([package_management, "remove", audit, option], check=True)
+    process = run_process([package_management, "remove", audit, option])
 
     yield
 
     # Install audit and start the service
-    process = subprocess.run([package_management, "install", audit, option], check=True)
-    process = subprocess.run(["service", "auditd", "start"], check=True)
+    process = run_process([package_management, "install", audit, option])
+    process = run_process(["service", "auditd", "start"])
 
 
 # Test
