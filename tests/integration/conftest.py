@@ -1018,26 +1018,27 @@ def set_wazuh_configuration(configuration):
 
 
 @pytest.fixture(scope='function')
-def set_wazuh_configuration_with_local_internal_options(configuration, set_wazuh_configuration, set_local_internal_options):
+def set_wazuh_configuration_with_local_internal_options(configuration, set_wazuh_configuration,
+                                                        set_local_internal_options, local_internal_options):
     """Set wazuh configuration
 
     Args:
         configuration (dict): Configuration template data to write in the ossec.conf.
+        local_internal_options(dict): Object containing the local_internal_options_values to be configured.
         set_wazuh_configuration (fixture): Set the wazuh configuration according to the configuration data.
-        configure_local_internal_options (fixture): Set the local_internal_options.conf file.
+        set_local_internal_options (fixture): Set the local_internal_options.conf file.
     """
     yield
 
 
-@pytest.fixture(scope='session')
-def set_local_internal_options(request):
-    """Fixture to configure the local internal options file."""
+@pytest.fixture(scope='function')
+def set_local_internal_options(local_internal_options):
+    """Fixture to configure the local internal options file.
 
-    # Configure local internal options
-    try:
-        local_internal_options = getattr(request.module, 'local_internal_options')
-    except AttributeError as local_internal_configuration_not_set:
-        local_internal_options = {}
+    Args:
+        local_internal_options(dict): Object containing the local_internal_options_values to be configured.
+    """
+
     # Backup the old local internal options
     backup_local_internal_options = conf.get_wazuh_local_internal_options()
 
@@ -1049,6 +1050,7 @@ def set_local_internal_options(request):
     # Backup the old local internal options cofiguration
     conf.set_wazuh_local_internal_options(backup_local_internal_options)
 
+
 @pytest.fixture(scope='function')
 def configure_local_internal_options_function(request):
     """Fixture to configure the local internal options file.
@@ -1059,6 +1061,7 @@ def configure_local_internal_options_function(request):
     """
     try:
         local_internal_options = getattr(request.module, 'local_internal_options')
+        print("LOCAL_INTERNAL_OPTIONS" + str(local_internal_options))
     except AttributeError as local_internal_configuration_not_set:
         logger.debug('local_internal_options is not set')
         raise local_internal_configuration_not_set
