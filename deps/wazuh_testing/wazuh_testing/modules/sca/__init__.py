@@ -2,11 +2,6 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import sys
-import os
-from wazuh_testing import WAZUH_PATH
-
-
 # Variables
 TEMP_FILE_PATH = '/tmp'
 
