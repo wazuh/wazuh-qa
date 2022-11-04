@@ -20,7 +20,6 @@ else:
         WAZUH_PATH = os.path.join("/var", "ossec")
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
 
-
 WAZUH_CONF_PATH = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc' if platform.system() == 'Linux' else '', 'client.keys')
@@ -39,6 +38,7 @@ API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
 API_JSON_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.json')
 API_LOG_FOLDER = os.path.join(WAZUH_PATH, 'logs', 'api')
 WAZUH_TESTING_PATH = os.path.dirname(os.path.abspath(__file__))
+CIS_RULESET_PATH = os.path.join(WAZUH_PATH, 'ruleset', 'sca')
 
 # Daemons
 LOGCOLLECTOR_DAEMON = 'wazuh-logcollector'
