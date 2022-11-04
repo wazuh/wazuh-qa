@@ -50,12 +50,12 @@ def check_analysisd_event(file_monitor=None, callback='', error_message=None, up
 
 def check_eps_disabled():
     """Check if the eps module is disabled"""
-    check_analysisd_event(callback=fr'.*INFO: EPS limit disabled.*', timeout=T_10)
+    check_analysisd_event(callback=r".*INFO: EPS limit disabled.*", timeout=T_10)
 
 
 def check_eps_missing_maximum():
     """Check if the eps block has the maximum tag"""
-    check_analysisd_event(callback=fr".*WARNING: EPS limit disabled. "
+    check_analysisd_event(callback=r".*WARNING: EPS limit disabled. "
                                    "The maximum value is missing in the configuration block.*",
                           timeout=T_10)
 

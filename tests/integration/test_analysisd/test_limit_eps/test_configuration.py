@@ -248,7 +248,7 @@ def test_missing_configuration(configuration, metadata, restart_wazuh_daemon_aft
         evm.check_eps_enabled(metadata['maximum'], 10)  # 10 is the default timeframe
         assert check_if_daemons_are_running(['wazuh-analysisd'])[0], 'wazuh-analysisd is not running. Maybe it has ' \
                                                                      'crashed'
-    elif metadata['behavior'] == 'disabled':
+    elif metadata['behavior'] == 'missing_maximum':
         control_service('restart')
         evm.check_eps_missing_maximum()
         assert check_if_daemons_are_running(['wazuh-analysisd'])[0], 'wazuh-analysisd is not running. Maybe it has ' \
