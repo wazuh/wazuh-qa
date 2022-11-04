@@ -8,7 +8,7 @@ TEMP_FILE_PATH = '/tmp'
 
 # Callback Messages
 CB_SCA_ENABLED = r".*sca.*INFO: (Module started.)"
-CB_SCA_DISABLED = r".*sca.*INFO: (Module disabled.) Exiting."
+CB_SCA_DISABLED = r".*sca.*INFO: (Module disabled). Exiting."
 CB_SCA_SCAN_STARTED = r".*sca.*INFO: (Starting Security Configuration Assessment scan)."
 CB_SCA_SCAN_ENDED = r".*sca.*INFO: Security Configuration Assessment scan finished. Duration: (\d+) seconds."
 CB_SCA_OSREGEX_ENGINE = r".*sca.*DEBUG: SCA will use '(.*)' engine to check the rules."

@@ -7,6 +7,11 @@
             value: 'yes'
         - interval:
             value: INTERVAL
+        - policies:
+            elements:
+              - policy:
+                  value: POLICY_FILE
+
     - section: rootcheck
       elements:
         - disabled:
@@ -22,5 +27,5 @@
         - name: 'syscollector'
       elements:
         - disabled:
-            value: 'no'
+            value: 'yes'
 

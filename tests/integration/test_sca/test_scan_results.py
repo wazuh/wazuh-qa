@@ -117,7 +117,7 @@ def test_scan_results(configuration, metadata, local_internal_options, prepare_c
         - r'.*sca.*INFO: (Module started.)'
         - r'.*sca.*INFO: (Starting Security Configuration Assessment scan).'
         - r".*sca.*DEBUG: SCA will use '(.*)' engine to check the rules."
-        - r".*sca.*wm_sca_hash_integrity.*DEBUG: ID: (\d+); Result: '(.*)'"
+        - r".*sca.*wm_sca_hash_integrity.*DEBUG: ID: (\\d+); Result: '(.*)'"
         - r'.*sca_send_alert.*Sending event: (.*)'
     '''
 
