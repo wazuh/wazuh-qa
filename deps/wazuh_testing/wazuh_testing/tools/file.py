@@ -19,6 +19,7 @@ import re
 import filetype
 import requests
 import yaml
+import pytest
 from wazuh_testing import logger
 
 
@@ -213,9 +214,17 @@ def rename_file(file_path, new_path):
         os.rename(file_path, new_path)
 
 
-def delete_file(file_path):
-    if os.path.exists(file_path):
-        os.remove(file_path)
+def delete_file(path, name):
+    """Delete a regular file.
+
+    Args:
+        path (str): path to the file to be deleted.
+        name (str): name of the file to be deleted.
+    """
+    logger.info(f"Removing file {str(os.path.join(path, name))}")
+    regular_path = os.path.join(path, name)
+    if os.path.exists(regular_path):
+        os.remove(regular_path)
 
 
 def delete_path_recursively(path):
@@ -564,3 +573,200 @@ def replace_regex_in_file(search_regex, replace_regex, file_path):
 
     # Write the file data
     write_file(file_path, file_data)
+
+
+def create_file(type_, path, name, **kwargs):
+    """Create a file in a given path. The path will be created in case it does not exists.
+
+    Args:
+        type_ (str): defined constant that specifies the type. It can be: FIFO, SYSLINK, Socket or REGULAR.
+        path (str): path where the file will be created.
+        name (str): file name.
+        **kwargs: Arbitrary keyword arguments.
+
+    Keyword Args:
+            **content (str): content of the created regular file.
+            **target (str): path where the link will be pointing to.
+
+    Raises:
+        ValueError: if `target` is missing for SYMLINK or HARDINK.
+    """
+
+    try:
+        logger.info("Creating file " + str(os.path.join(path, name)) + " of " + str(type_) + " type")
+        os.makedirs(path, exist_ok=True, mode=0o777)
+        if type_ != fim.REGULAR:
+            try:
+                kwargs.pop('content')
+            except KeyError:
+                pass
+        if type_ in (fim.SYMLINK, fim.HARDLINK) and 'target' not in kwargs:
+            raise ValueError(f"'target' param is mandatory for type {type_}")
+        getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
+    except OSError:
+        logger.info("File could not be created.")
+        pytest.skip("OS does not allow creating this file.")
+
+
+def modify_file_content(path, name, new_content=None, is_binary=False):
+    """Modify the content of a file.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+        new_content (str, optional): new content to append to the file. Previous content will remain. Defaults `None`
+        is_binary (boolean, optional): True if the file's content is in binary format. False otherwise. Defaults `False`
+    """
+    path_to_file = os.path.join(path, name)
+    logger.info("- Changing content of " + str(path_to_file))
+    content = "1234567890qwertyu" if new_content is None else new_content
+    with open(path_to_file, 'ab' if is_binary else 'a') as f:
+        f.write(content.encode() if is_binary else content)
+
+
+def modify_file_mtime(path, name):
+    """Change the modification time of a file.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+    """
+    path_to_file = os.path.join(path, name)
+    logger.info("- Changing mtime of " + str(path_to_file))
+    stat = os.stat(path_to_file)
+    access_time = stat[ST_ATIME]
+    modification_time = stat[ST_MTIME]
+    modification_time = modification_time + 1000
+    os.utime(path_to_file, (access_time, modification_time))
+
+
+def modify_file_owner(path, name):
+    """Change the owner of a file. The new owner will be '1'.
+
+    On Windows, uid will always be 0.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+    """
+
+    def modify_file_owner_windows():
+        cmd = f"takeown /S 127.0.0.1 /U {os.getlogin()} /F " + path_to_file
+        subprocess.call(cmd)
+
+    def modify_file_owner_unix():
+        os.chown(path_to_file, 1, -1)
+
+    path_to_file = os.path.join(path, name)
+    logger.info("- Changing owner of " + str(path_to_file))
+
+    if sys.platform == 'win32':
+        modify_file_owner_windows()
+    else:
+        modify_file_owner_unix()
+
+
+def modify_file_group(path, name):
+    """Change the group of a file. The new group will be '1'.
+
+    Available for UNIX. On Windows, gid will always be 0 and the group name will be blank.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+    """
+    if sys.platform == 'win32':
+        return
+
+    path_to_file = os.path.join(path, name)
+    logger.info("- Changing group of " + str(path_to_file))
+    os.chown(path_to_file, -1, 1)
+
+
+def modify_file_permission(path, name):
+    """Change the permission of a file.
+
+    On UNIX the new permissions will be '666'.
+    On Windows, a list of denied and allowed permissions will be given for each user or group since version 3.8.0.
+    Only works on NTFS partitions on Windows systems.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+    """
+
+    def modify_file_permission_windows():
+        user, _, _ = win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")
+        sd = win32sec.GetFileSecurity(path_to_file, win32sec.DACL_SECURITY_INFORMATION)
+        dacl = sd.GetSecurityDescriptorDacl()
+        dacl.AddAccessAllowedAce(win32sec.ACL_REVISION, ntc.FILE_ALL_ACCESS, user)
+        sd.SetSecurityDescriptorDacl(1, dacl, 0)
+        win32sec.SetFileSecurity(path_to_file, win32sec.DACL_SECURITY_INFORMATION, sd)
+
+    def modify_file_permission_unix():
+        os.chmod(path_to_file, 0o666)
+
+    path_to_file = os.path.join(path, name)
+
+    logger.info("- Changing permission of " + str(path_to_file))
+
+    if sys.platform == 'win32':
+        modify_file_permission_windows()
+    else:
+        modify_file_permission_unix()
+
+
+def modify_file_inode(path, name):
+    """Change the inode of a file for Linux.
+
+    On Windows, this function does nothing.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+    """
+    if sys.platform == 'win32':
+        return
+
+    logger.info("- Changing inode of " + str(os.path.join(path, name)))
+    inode_file = 'inodetmp'
+    path_to_file = os.path.join(path, name)
+
+    shutil.copy2(path_to_file, os.path.join(tempfile.gettempdir(), inode_file))
+    shutil.move(os.path.join(tempfile.gettempdir(), inode_file), path_to_file)
+
+
+def modify_file_win_attributes(path, name):
+    """Change the attribute of a file in Windows
+
+    On other OS, this function does nothing.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+    """
+    if sys.platform != 'win32':
+        return
+
+    logger.info("- Changing win attributes of " + str(os.path.join(path, name)))
+    path_to_file = os.path.join(path, name)
+    win32api.SetFileAttributes(path_to_file, win32con.FILE_ATTRIBUTE_HIDDEN)
+
+
+def modify_file(path, name, new_content=None, is_binary=False):
+    """Modify a Regular file.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+        new_content (str, optional): new content to add to the file. Defaults `None`.
+        is_binary: (boolean, optional): True if the file is binary. False otherwise. Defaults `False`
+    """
+    logger.info("Modifying file " + str(os.path.join(path, name)))
+    modify_file_inode(path, name)
+    modify_file_content(path, name, new_content, is_binary)
+    modify_file_mtime(path, name)
+    modify_file_owner(path, name)
+    modify_file_group(path, name)
+    modify_file_permission(path, name)
+    modify_file_win_attributes(path, name)

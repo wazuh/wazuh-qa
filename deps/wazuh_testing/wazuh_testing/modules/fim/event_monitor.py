@@ -12,31 +12,21 @@ from wazuh_testing.modules import fim
 
 
 # Callbacks
-def callback_connection_message(line):
-    match = re.match(fim.CB_AGENT_CONNECT, line)
-    if match:
-        return True
+def callback_detect_event(line):
+    """
+    Detect an 'event' type FIM log.
+    """
+    msg = fim.CB_DETECT_FIM_EVENT
+    match = re.match(msg, line)
+    if not match:
+        return None
 
-
-def callback_detect_integrity_control_event(line):
-    match = re.match(fim.CB_INTEGRITY_CONTROL_MESSAGE, line)
-    if match:
-        return json.loads(match.group(1))
-    return None
-
-
-def callback_integrity_message(line):
-    if callback_detect_integrity_control_event(line):
-        match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*({.*?})$", line)
-        if match:
-            return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))
-
-
-def callback_detect_registry_integrity_clear_event(line):
-    event = callback_detect_integrity_control_event(line)
-    if event and event['component'] == 'fim_registry' and event['type'] == 'integrity_clear':
-        return True
-    return None
+    try:
+        json_event = json.loads(match.group(1))
+        if json_event['type'] == 'event':
+            return json_event
+    except (json.JSONDecodeError, AttributeError, KeyError) as e:
+        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
 
 
 def callback_detect_end_scan(line):
@@ -71,6 +61,40 @@ def callback_detect_scan_start(line):
             return True
     except (json.JSONDecodeError, AttributeError, KeyError) as e:
         logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+
+
+def callback_connection_message(line):
+    match = re.match(fim.CB_AGENT_CONNECT, line)
+    if match:
+        return True
+
+
+def callback_detect_integrity_control_event(line):
+    match = re.match(fim.CB_INTEGRITY_CONTROL_MESSAGE, line)
+    if match:
+        return json.loads(match.group(1))
+    return None
+
+
+def callback_integrity_message(line):
+    if callback_detect_integrity_control_event(line):
+        match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*({.*?})$", line)
+        if match:
+            return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))
+
+
+def callback_detect_registry_integrity_clear_event(line):
+    event = callback_detect_integrity_control_event(line)
+    if event and event['component'] == 'fim_registry' and event['type'] == 'integrity_clear':
+        return True
+    return None
+
+
+def callback_disk_quota_limit_reached(line):
+    match = re.match(fim.CB_FILE_EXCEEDS_DISK_QUOTA, line)
+
+    if match:
+        return match.group(2)
 
 
 # Event checkers
