@@ -18,7 +18,7 @@ Release report: TBD
 
 ### Fixed
 
-- Fix a regex error in the FIM integration tests ([#3061](https://github.com/wazuh/wazuh-qa/issues/3061)) \- (Framework + Tests) 
+- Fix a regex error in the FIM integration tests ([#3061](https://github.com/wazuh/wazuh-qa/issues/3061)) \- (Framework + Tests)
 - Fix an error in the cluster performance tests related to CSV parser ([#2999](https://github.com/wazuh/wazuh-qa/pull/2999)) \- (Framework + Tests)
 
 
@@ -54,6 +54,7 @@ Release report: TBD
 
 ### Changed
 
+- Refactor `test_basic_usage_realtime_unsupported` FIM test to avoid using time travel ([#3575](https://github.com/wazuh/wazuh-qa/pull/3575)) \- (Tests)
 - Skip unstable integration tests for gcloud ([#3531](https://github.com/wazuh/wazuh-qa/pull/3531)) \- (Tests)
 - Skip unstable integration test for agentd ([#3538](https://github.com/wazuh/wazuh-qa/pull/3538))
 - Update wazuhdb_getconfig and EPS limit integration tests ([#3146](https://github.com/wazuh/wazuh-qa/pull/3146)) \- (Tests)
