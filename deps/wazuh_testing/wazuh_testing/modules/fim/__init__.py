@@ -10,6 +10,78 @@ maintain if one of them changes in the future.
 import sys
 
 # Variables
+if sys.platform == 'win32':
+    registry_parser = {
+        'HKEY_CLASSES_ROOT': win32con.HKEY_CLASSES_ROOT,
+        'HKEY_CURRENT_USER': win32con.HKEY_CURRENT_USER,
+        'HKEY_LOCAL_MACHINE': win32con.HKEY_LOCAL_MACHINE,
+        'HKEY_USERS': win32con.HKEY_USERS,
+        'HKEY_CURRENT_CONFIG': win32con.HKEY_CURRENT_CONFIG
+    }
+
+    registry_class_name = {
+        win32con.HKEY_CLASSES_ROOT: 'HKEY_CLASSES_ROOT',
+        win32con.HKEY_CURRENT_USER: 'HKEY_CURRENT_USER',
+        win32con.HKEY_LOCAL_MACHINE: 'HKEY_LOCAL_MACHINE',
+        win32con.HKEY_USERS: 'HKEY_USERS',
+        win32con.HKEY_CURRENT_CONFIG: 'HKEY_CURRENT_CONFIG'
+    }
+
+    registry_value_type = {
+        win32con.REG_NONE: 'REG_NONE',
+        win32con.REG_SZ: 'REG_SZ',
+        win32con.REG_EXPAND_SZ: 'REG_EXPAND_SZ',
+        win32con.REG_BINARY: 'REG_BINARY',
+        win32con.REG_DWORD: 'REG_DWORD',
+        win32con.REG_DWORD_BIG_ENDIAN: 'REG_DWORD_BIG_ENDIAN',
+        win32con.REG_LINK: 'REG_LINK',
+        win32con.REG_MULTI_SZ: 'REG_MULTI_SZ',
+        win32con.REG_RESOURCE_LIST: 'REG_RESOURCE_LIST',
+        win32con.REG_FULL_RESOURCE_DESCRIPTOR: 'REG_FULL_RESOURCE_DESCRIPTOR',
+        win32con.REG_RESOURCE_REQUIREMENTS_LIST: 'REG_RESOURCE_REQUIREMENTS_LIST',
+        win32con.REG_QWORD: 'REG_QWORD'
+    }
+
+    REG_NONE = win32con.REG_NONE
+    REG_SZ = win32con.REG_SZ
+    REG_EXPAND_SZ = win32con.REG_EXPAND_SZ
+    REG_BINARY = win32con.REG_BINARY
+    REG_DWORD = win32con.REG_DWORD
+    REG_DWORD_BIG_ENDIAN = win32con.REG_DWORD_BIG_ENDIAN
+    REG_LINK = win32con.REG_LINK
+    REG_MULTI_SZ = win32con.REG_MULTI_SZ
+    REG_RESOURCE_LIST = win32con.REG_RESOURCE_LIST
+    REG_FULL_RESOURCE_DESCRIPTOR = win32con.REG_FULL_RESOURCE_DESCRIPTOR
+    REG_RESOURCE_REQUIREMENTS_LIST = win32con.REG_RESOURCE_REQUIREMENTS_LIST
+    REG_QWORD = win32con.REG_QWORD
+    KEY_WOW64_32KEY = win32con.KEY_WOW64_32KEY
+    KEY_WOW64_64KEY = win32con.KEY_WOW64_64KEY
+    KEY_ALL_ACCESS = win32con.KEY_ALL_ACCESS
+    RegOpenKeyEx = win32api.RegOpenKeyEx
+    RegCloseKey = win32api.RegCloseKey
+else:
+
+    registry_parser = {}
+    registry_class_name = {}
+    registry_value_type = {}
+
+    KEY_WOW64_32KEY = 0
+    KEY_WOW64_64KEY = 0
+    REG_NONE = 0
+    REG_SZ = 0
+    REG_EXPAND_SZ = 0
+    REG_BINARY = 0
+    REG_DWORD = 0
+    REG_DWORD_BIG_ENDIAN = 0
+    REG_LINK = 0
+    REG_MULTI_SZ = 0
+    REG_RESOURCE_LIST = 0
+    REG_FULL_RESOURCE_DESCRIPTOR = 0
+    REG_RESOURCE_REQUIREMENTS_LIST = 0
+    REG_QWORD = 0
+    KEY_ALL_ACCESS = 0
+
+
 
 # Key variables
 WINDOWS_HKEY_LOCAL_MACHINE = 'HKEY_LOCAL_MACHINE'
@@ -19,7 +91,8 @@ WINDOWS_REGISTRY = 'WINDOWS_REGISTRY'
 
 # Value key
 SYNC_INTERVAL = 'SYNC_INTERVAL'
-SYNC_INTERVAL_VALUE = MAX_EVENTS_VALUE = 20
+SYNC_INTERVAL_VALUE = 30
+MAX_EVENTS_VALUE = 20
 
 
 # Folders variables
@@ -41,7 +114,7 @@ DIFF_LIMIT_VALUE = 2
 DIFF_DEFAULT_LIMIT_VALUE = 51200
 
 
-# FIM modules
+# FIM modes
 SCHEDULE_MODE = 'scheduled'
 REALTIME_MODE = 'realtime'
 WHODATA_MODE = 'whodata'
@@ -57,19 +130,26 @@ SYNCHRONIZATION_ENABLED = 'SYNCHRONIZATION_ENABLED'
 SYNCHRONIZATION_REGISTRY_ENABLED = 'SYNCHRONIZATION_REGISTRY_ENABLED'
 
 # Callbacks message
+CB_DETECT_FIM_EVENT = r'.*Sending FIM event: (.+)$'
 CB_INTEGRITY_CONTROL_MESSAGE = r'.*Sending integrity control message: (.+)$'
 CB_REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
 CB_MAXIMUM_FILE_SIZE = r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*'
 CB_AGENT_CONNECT = r'.* Connected to the server .*'
+CB_FOLDERS_MONITORED_REALTIME = r'.*Folders monitored with real-time engine: (\d+)'
+CB_REALTIME_WHODATA_ENGINE_STARTED = r'.*File integrity monitoring (real-time Whodata) engine started.*'
 
 # Error message
 ERR_MSG_MAXIMUM_FILE_SIZE = 'Did not receive expected "Maximum file size limit configured to \'... KB\'..." event'
 ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE = 'Wrong value for diff_size_limit'
 ERR_MSG_AGENT_DISCONNECT = 'Agent couldn\'t connect to server.'
 ERR_MSG_INTEGRITY_CONTROL_MSG = 'Didn\'t receive control message(integrity_check_global)'
+ERR_MSG_FOLDERS_MONITORED_REALTIME = 'Did not receive expected "Folders monitored with real-time engine..." event'
+ERR_MSG_WHODATA_ENGINE_EVENT = 'Did not receive expected "File integrity monitoring real-time Whodata engine started" event'
+ERR_MSG_SCHEDULED_SCAN_STARTED = 'Did not receive expected "File integrity monitoring scan started" event'
+ERR_MSG_SCHEDULED_SCAN_ENDED ='Did not receive expected "File integrity monitoring scan ended" event'
+
 
 # Setting Local_internal_option file
-
 if sys.platform == 'win32':
     FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
         'windows.debug': '2',

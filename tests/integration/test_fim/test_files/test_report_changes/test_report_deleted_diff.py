@@ -68,7 +68,7 @@ import sys
 import time
 
 import pytest
-from test_fim.test_files.test_report_changes.common import make_diff_file_path
+from test_fim.test_files.common import make_diff_file_path
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_event, REGULAR, create_file, generate_params,
                                detect_initial_scan)
@@ -311,6 +311,7 @@ def test_report_changes_after_restart(get_configuration, configure_environment,
     backup_conf = get_wazuh_conf()
     try:
         disable_report_changes(fim_mode)
+        # Wait FIM to complete start and delete the diff_file
         time.sleep(5)
         assert not os.path.exists(diff_file_path), f'{diff_file_path} exists'
     finally:

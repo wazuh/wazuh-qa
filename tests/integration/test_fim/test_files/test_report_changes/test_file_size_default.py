@@ -63,7 +63,7 @@ tags:
 import os
 
 import pytest
-from test_fim.test_files.test_report_changes.common import generate_string, translate_size, make_diff_file_path
+from test_fim.test_files.common import generate_string, translate_size, make_diff_file_path
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import (LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file,
                                callback_detect_event, modify_file_content)

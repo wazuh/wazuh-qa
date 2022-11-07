@@ -63,7 +63,7 @@ tags:
 import os
 
 import pytest
-from test_fim.test_files.test_report_changes.common import generate_string
+from test_fim.test_files.common import generate_string
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options

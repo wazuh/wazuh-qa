@@ -71,7 +71,7 @@ import subprocess
 import sys
 
 import pytest
-from test_fim.test_files.test_report_changes.common import generate_string, make_diff_file_path
+from test_fim.test_files.common import generate_string, make_diff_file_path
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, REGULAR, create_file, generate_params
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options

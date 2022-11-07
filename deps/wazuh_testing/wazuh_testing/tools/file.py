@@ -220,25 +220,28 @@ def delete_file(file_path):
 
 def delete_path_recursively(path):
     if os.path.exists(path):
-        shutil.rmtree(path, onerror=onerror)
+        shutil.rmtree(path, onerror=on_write_error)
 
 
-def onerror(func, path, exc_info):
-    """
-    Error handler for ``shutil.rmtree``.
+def on_write_error(function, path, exc_info):
+    """ Error handler for functions that try to modify a file. If the error is due to an access error (read only file),
+    it attempts to add write permission and then retries. If the error is for another reason it re-raises the error.
+    
+    Args: 
+        function (function): function that called the handler.
+        path (str): Path to the file the function is trying to modify
+        exc_info (object): function instance execution information. Passed in by function in runtime.
 
-    If the error is due to an access error (read only file)
-    it attempts to add write permission and then retries.
-
-    If the error is for another reason it re-raises the error.
-
-    Usage : ``shutil.rmtree(path, onerror=onerror)``
+    Example:
+        > shutil.rmtree(path, onerror=on_write_error)
     """
     import stat
-    # Is the error an access error?
+    # Check if the error is an access error for Write permissions.
     if not os.access(path, os.W_OK):
+        # Add write permissions so file can be edited and execute function.
         os.chmod(path, stat.S_IWUSR)
-        func(path)
+        function(path)
+    # If error is not Write access error, raise the error
     else:
         raise
 

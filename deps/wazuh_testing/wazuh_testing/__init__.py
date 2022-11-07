@@ -70,6 +70,22 @@ T_30 = 30
 T_60 = 60
 
 
+
+# Local internal options
+WINDOWS_DEBUG = 'windows.debug'
+SYSCHECK_DEBUG = 'syscheck.debug'
+VERBOSE_DEBUG_OUTPUT = 2
+
+# Wazuh Service commands
+WAZUH_SERVICES_STOP = 'stop'
+WAZUH_SERVICES_START = 'start'
+
+
+# Configurations
+DATA = 'data'
+WAZUH_LOG_MONITOR = 'wazuh_log_monitor'
+
+
 # Protocols
 UDP = 'UDP'
 TCP = 'TCP'

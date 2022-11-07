@@ -70,7 +70,7 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import global_parameters, DATA
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -79,7 +79,6 @@ from wazuh_testing.modules.fim import (TEST_DIR_1, DIFF_LIMIT_VALUE, DIFF_SIZE_L
                                        REPORT_CHANGES, TEST_DIRECTORIES, ERR_MSG_MAXIMUM_FILE_SIZE,
                                        ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.wazuh_variables import DATA, SYSCHECK_DEBUG, VERBOSE_DEBUG_OUTPUT
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 
 
@@ -106,7 +105,6 @@ parameters, metadata = generate_params(extra_params={REPORT_CHANGES.upper(): {RE
                                                      DISK_QUOTA_LIMIT: '2KB'})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-local_internal_options = {SYSCHECK_DEBUG: VERBOSE_DEBUG_OUTPUT}
 
 
 # Fixtures

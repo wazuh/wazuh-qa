@@ -68,7 +68,7 @@ import os
 
 
 import pytest
-from test_fim.test_files.test_report_changes.common import make_diff_file_path
+from test_fim.test_files.common import make_diff_file_path
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
