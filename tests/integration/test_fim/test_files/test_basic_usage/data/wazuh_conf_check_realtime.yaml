@@ -13,8 +13,8 @@
         - directories:
             value: TEST_DIRECTORIES
             attributes:
-            - check_all: 'yes'
-            - realtime: 'yes'
+              - check_all: 'yes'
+              - realtime: 'yes'
     - section: sca
       elements:
         - enabled:
