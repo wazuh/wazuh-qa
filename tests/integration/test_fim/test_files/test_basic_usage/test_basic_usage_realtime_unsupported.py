@@ -140,6 +140,6 @@ def test_realtime_unsupported(get_configuration, configure_environment, file_mon
 
     detect_initial_scan(log_monitor)
 
-    regular_file_cud(directory_str, log_monitor, file_list=[test_file], time_travel=True, triggers_event=True,
+    regular_file_cud(directory_str, log_monitor, file_list=[test_file], time_travel=False, triggers_event=True,
                      event_mode="scheduled", min_timeout=15)
 
