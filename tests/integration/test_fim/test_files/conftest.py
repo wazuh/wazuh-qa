@@ -5,8 +5,8 @@
 import pytest
 
 from wazuh_testing import LOG_FILE_PATH
-from wazuh_testing.modules.fim import (detect_initial_scan, detect_realtime_start, detect_whodata_start, 
-                               detect_initial_scan_start)
+from wazuh_testing.modules.fim import (detect_initial_scan, detect_realtime_start, detect_whodata_start,
+                                       detect_initial_scan_start)
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
@@ -39,7 +39,7 @@ def restart_syscheckd_function(get_configuration, request):
 @pytest.fixture(scope="module")
 def wait_for_fim_start(get_configuration, request):
     """
-    Wait for fim to start 
+    Wait for fim to start
     """
     wait_for_fim_active(get_configuration, request)
 

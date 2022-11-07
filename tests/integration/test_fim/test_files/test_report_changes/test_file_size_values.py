@@ -68,7 +68,8 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules.fim import (REGULAR, CB_FILE_SIZE_LIMIT_REACHED, CB_DIFF_FOLDER_DELETED,
-                                       ERR_MSG_FIM_EVENT_NOT_DETECTED, ERR_MSG_FILE_LIMIT_REACHED)
+                                       ERR_MSG_FIM_EVENT_NOT_DETECTED, ERR_MSG_FILE_LIMIT_REACHED,
+                                       ERR_MSG_FOLDER_DELETED)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim.event_monitor import callback_detect_event
 from wazuh_testing.modules.fim.utils import generate_params, create_file, modify_file_content
@@ -207,7 +208,7 @@ def test_file_size_values(filename, folder, get_configuration, configure_environ
     to_write = generate_string(size_limit, '0')
     modify_file_content(folder, filename, new_content=to_write * 3)
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, 
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                             callback=generate_monitoring_callback(CB_DIFF_FOLDER_DELETED),
                             error_message=ERR_MSG_FOLDER_DELETED)
 

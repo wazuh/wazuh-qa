@@ -177,7 +177,7 @@ def test_file_size_default(filename, folder, get_configuration, configure_enviro
     to_write = generate_string(size_limit, '0')
     modify_file_content(folder, filename, new_content=to_write * 3)
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3, 
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3,
                             callback=generate_monitoring_callback(CB_FILE_SIZE_LIMIT_REACHED),
                             error_message=ERR_MSG_FILE_LIMIT_REACHED)
 

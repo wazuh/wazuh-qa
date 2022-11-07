@@ -81,7 +81,6 @@ from wazuh_testing.modules.fim.utils import generate_params
 from wazuh_testing.modules.fim.event_monitor import detect_initial_scan, callback_detect_event
 
 
-
 # Marks
 
 pytestmark = pytest.mark.tier(level=1)

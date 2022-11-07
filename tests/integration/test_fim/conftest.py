@@ -12,7 +12,7 @@ from wazuh_testing.tools.configuration import (get_wazuh_local_internal_options,
 from wazuh_testing.tools.file import truncate_file, delete_path_recursively
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.modules.fim import (registry_parser,KEY_WOW64_64KEY, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
+from wazuh_testing.modules.fim import (registry_parser, KEY_WOW64_64KEY, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
                                        SYNC_INTERVAL_VALUE, FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS)
 from wazuh_testing.modules.fim import event_monitor as evm
 from wazuh_testing.modules.fim.utils import create_registry, delete_registry

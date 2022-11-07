@@ -166,5 +166,5 @@ def test_file_size_disabled(filename, folder, size, get_configuration, configure
     create_file(REGULAR, folder, filename, content=to_write)
 
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, 
+        wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                 callback=generate_monitoring_callback(CB_FILE_SIZE_LIMIT_REACHED))
