@@ -684,7 +684,7 @@ def check_push_shared_config(agent, sender, injector=None):
                                                    args=(sender,))
         keep_alive_agent.start()
 
-        log_callback = make_callback(pattern=".*End sending file '.+' to agent '\d+'\.", prefix='.*wazuh-remoted.*')
+        log_callback = make_callback(pattern=r".*End sending file '.+' to agent '\d+'\.", prefix=r'.*wazuh-remoted.*')
         log_monitor = FileMonitor(LOG_FILE_PATH)
         log_monitor.start(timeout=REMOTED_GLOBAL_TIMEOUT, callback=log_callback,
                           error_message="New shared configuration was not sent")
