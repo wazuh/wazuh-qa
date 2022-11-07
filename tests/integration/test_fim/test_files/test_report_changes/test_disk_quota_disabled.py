@@ -63,20 +63,21 @@ tags:
 import os
 
 import pytest
-from test_fim.test_files.common import generate_string
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, callback_disk_quota_limit_reached, generate_params, create_file
-from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing import global_parameters, LOG_FILE_PATH
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules import fim
+from wazuh_testing.modules.fim.event_monitor import callback_disk_quota_limit_reached
+from wazuh_testing.modules.fim.utils import generate_params, create_file
+from test_fim.test_files.common import generate_string
 
 # Marks
 
 pytestmark = [pytest.mark.tier(level=1)]
 
 # Variables
-
+local_internal_options = fim.FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_directories = [os.path.join(PREFIX, 'testdir1')]
 directory_str = ','.join(test_directories)
@@ -162,7 +163,7 @@ def test_disk_quota_disabled(filename, folder, size, get_configuration, configur
         - scheduled
     '''
     to_write = generate_string(size, '0')
-    create_file(REGULAR, folder, filename, content=to_write)
+    create_file(fim.REGULAR, folder, filename, content=to_write)
 
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_disk_quota_limit_reached)

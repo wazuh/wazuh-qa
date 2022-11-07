@@ -68,12 +68,12 @@ import os
 
 
 import pytest
-from test_fim.test_files.common import make_diff_file_path
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud
-from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.tools import PREFIX, configuration
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing import global_parameters, LOG_FILE_PATH
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing.modules.fim.utils import regular_file_cud
+from test_fim.test_files.common import make_diff_file_path
 
 # Marks
 

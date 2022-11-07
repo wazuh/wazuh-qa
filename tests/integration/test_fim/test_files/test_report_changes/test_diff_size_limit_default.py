@@ -70,8 +70,7 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters, DATA
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params
+from wazuh_testing import global_parameters, DATA, LOG_FILE_PATH
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
@@ -79,7 +78,7 @@ from wazuh_testing.modules.fim import (DIFF_DEFAULT_LIMIT_VALUE, CB_MAXIMUM_FILE
                                        TEST_DIRECTORIES, ERR_MSG_MAXIMUM_FILE_SIZE,
                                        ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-
+from wazuh_testing.modules.fim.utils import generate_params
 # Marks
 
 pytestmark = [pytest.mark.tier(level=1)]

@@ -64,20 +64,22 @@ import os
 
 import pytest
 from test_fim.test_files.common import generate_string, translate_size, make_diff_file_path
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, REGULAR, callback_file_size_limit_reached, generate_params, create_file,
-                               callback_detect_event, modify_file_content)
-from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing import global_parameters, LOG_FILE_PATH
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules import (REGULAR, CB_FILE_SIZE_LIMIT_REACHED, FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS,
+                                   ERR_MSG_FIM_EVENT_NOT_DETECTED, ERR_MSG_FILE_LIMIT_REACHED)
+from wazuh_testing.modules.fim.event_monitor import callback_detect_event
+from wazuh_testing.modules.fim.utils import generate_params, create_file, modify_file_content
+
 
 # Marks
 
 pytestmark = [pytest.mark.tier(level=1)]
 
 # Variables
-
+local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_directories = [os.path.join(PREFIX, 'testdir1')]
 directory_str = ','.join(test_directories)
@@ -166,7 +168,7 @@ def test_file_size_default(filename, folder, get_configuration, configure_enviro
     create_file(REGULAR, folder, filename, content=to_write)
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
-                            error_message='Did not receive expected "Sending FIM event: ..." event.')
+                            error_message=ERR_MSG_FIM_EVENT_NOT_DETECTED)
 
     if not os.path.exists(diff_file_path):
         pytest.raises(FileNotFoundError(f"{diff_file_path} not found. It should exist before increasing the size."))
@@ -175,9 +177,9 @@ def test_file_size_default(filename, folder, get_configuration, configure_enviro
     to_write = generate_string(size_limit, '0')
     modify_file_content(folder, filename, new_content=to_write * 3)
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3, callback=callback_file_size_limit_reached,
-                            error_message='Did not receive expected "File ... is too big for configured maximum '
-                                          'size to perform diff operation" event.')
+    wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3, 
+                            callback=generate_monitoring_callback(CB_FILE_SIZE_LIMIT_REACHED),
+                            error_message=ERR_MSG_FILE_LIMIT_REACHED)
 
     if os.path.exists(diff_file_path):
         pytest.raises(FileExistsError(f"{diff_file_path} found. It should not exist after incresing the size."))

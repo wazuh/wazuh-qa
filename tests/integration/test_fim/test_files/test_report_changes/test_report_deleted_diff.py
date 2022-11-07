@@ -69,21 +69,25 @@ import time
 
 import pytest
 from test_fim.test_files.common import make_diff_file_path
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, callback_detect_event, REGULAR, create_file, generate_params,
-                               detect_initial_scan)
-from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing import global_parameters, LOG_FILE_PATH
+
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, load_wazuh_configurations
+from wazuh_testing.tools.file import create_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import restart_wazuh_with_new_conf
+from wazuh_testing.modules.fim import REGULAR, FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing.modules.fim.utils import generate_params
+from wazuh_testing.modules.fim.event_monitor import detect_initial_scan, callback_detect_event
+
+
 
 # Marks
 
 pytestmark = pytest.mark.tier(level=1)
 
 # variables
-
+local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')

@@ -63,19 +63,20 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, callback_disk_quota_default, generate_params
+from wazuh_testing import global_parameters, LOG_FILE_PATH
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules import fim
+from wazuh_testing.modules.fim.utils import generate_params
+
 
 # Marks
 
 pytestmark = [pytest.mark.tier(level=1)]
 
 # Variables
-
+local_internal_options = fim.FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_directories = [os.path.join(PREFIX, 'testdir1')]
 directory_str = ','.join(test_directories)
@@ -87,8 +88,7 @@ DEFAULT_SIZE = 1 * 1024 * 1024
 # Configurations
 
 conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
-                                                           'TEST_DIRECTORIES': directory_str,
-                                                           'MODULE_NAME': __name__})
+                                                           'TEST_DIRECTORIES': directory_str})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
@@ -149,9 +149,8 @@ def test_disk_quota_default(get_configuration, configure_environment,
 
     disk_quota_value = wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
-        callback=callback_disk_quota_default,
-        error_message='Did not receive expected "Maximum disk quota size limit configured to \'... KB\'." event'
-                                               ).result()
+        callback=generate_monitoring_callback(fim.CB_DISK_QUOTA_LIMIT_CONFIGURED_VALUE),
+        error_message=fim.ERR_MSG_DISK_QUOTA_LIMIT).result()
 
     if disk_quota_value:
         assert disk_quota_value == str(DEFAULT_SIZE), 'Wrong value for disk_quota'
