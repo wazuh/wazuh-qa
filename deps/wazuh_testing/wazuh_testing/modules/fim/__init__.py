@@ -14,8 +14,6 @@ if sys.platform == 'win32':
     import win32api
 
 
-
-
 # Variables
 if sys.platform == 'win32':
 
@@ -196,7 +194,7 @@ ERR_MSG_FOLDERS_MONITORED_REALTIME = 'Did not receive expected "Folders monitore
 ERR_MSG_WHODATA_ENGINE_EVENT = 'Did not receive "File integrity monitoring real-time Whodata engine started" event'
 ERR_MSG_FIM_EVENT_NOT_DETECTED = 'Did not receive expected "Sending FIM event: ..." event.'
 ERR_MSG_SCHEDULED_SCAN_STARTED = 'Did not receive expected "File integrity monitoring scan started" event'
-ERR_MSG_SCHEDULED_SCAN_ENDED ='Did not receive expected "File integrity monitoring scan ended" event'
+ERR_MSG_SCHEDULED_SCAN_ENDED = 'Did not receive expected "File integrity monitoring scan ended" event'
 ERR_MSG_DISK_QUOTA_LIMIT = 'Did not receive "Maximum disk quota size limit configured to \'... KB\'." event'
 ERR_MSG_FILE_LIMIT_REACHED = 'Did not receive "File ... is too big ... to perform diff operation" event.'
 ERR_MSG_FOLDER_DELETED = 'Did not receive expected "Folder ... has been deleted." event.'

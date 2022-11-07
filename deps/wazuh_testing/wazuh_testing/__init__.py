@@ -70,7 +70,6 @@ T_30 = 30
 T_60 = 60
 
 
-
 # Local internal options
 WINDOWS_DEBUG = 'windows.debug'
 SYSCHECK_DEBUG = 'syscheck.debug'
@@ -85,6 +84,13 @@ WAZUH_SERVICES_START = 'start'
 DATA = 'data'
 WAZUH_LOG_MONITOR = 'wazuh_log_monitor'
 
+
+# File Types
+FIFO = 'fifo'
+SYMLINK = 'sym_link'
+HARDLINK = 'hard_link'
+SOCKET = 'socket'
+REGULAR = 'regular'
 
 # Protocols
 UDP = 'UDP'

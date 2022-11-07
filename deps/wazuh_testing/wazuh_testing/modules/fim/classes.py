@@ -14,6 +14,7 @@ from wazuh_testing.modules.fim.utils import validate_event
 if sys.platform == 'linux2' or sys.platform == 'linux':
     from jq import jq
 
+
 class CustomValidator:
     """Enable using user-defined validators over the events when validating them with EventChecker"""
 

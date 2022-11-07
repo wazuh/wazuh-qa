@@ -28,6 +28,7 @@ if sys.platform == 'win32':
 _os_excluded_from_rt_wd = ['darwin', 'sunos5']
 _data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
+
 # Functions
 def create_registry(key, subkey, arch):
     """Create a registry given the key and the subkey. The registry is opened if it already exists.
@@ -71,9 +72,9 @@ def delete_registry(key, subkey, arch):
             win32api.RegDeleteTree(key_h, None)
             win32api.RegDeleteKeyEx(key, subkey, samDesired=arch)
         except OSError as e:
-            logger.warning(f"Couldn't remove registry key {str(os.path.join(fim.registry_class_name[key], subkey))}: {e}")
+            logger.warning(f"Couldn't remove key {str(os.path.join(fim.registry_class_name[key], subkey))}: {e}")
         except pywintypes.error as e:
-            logger.warning(f"Couldn't remove registry key {str(os.path.join(fim.registry_class_name[key], subkey))}: {e}")
+            logger.warning(f"Couldn't remove key {str(os.path.join(fim.registry_class_name[key], subkey))}: {e}")
 
 
 # Old Configuration framework
@@ -285,9 +286,9 @@ def validate_event(event, checks=None, mode=None):
 
 
 def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
-                     triggers_event=True, encoding=None, callback=fim.callback_detect_event, validators_after_create=None,
-                     validators_after_update=None, validators_after_delete=None, validators_after_cud=None,
-                     event_mode=None):
+                     triggers_event=True, encoding=None, callback=fim.callback_detect_event,
+                     validators_after_create=None, validators_after_update=None, validators_after_delete=None,
+                     validators_after_cud=None, event_mode=None):
     """Check if creation, update and delete events are detected by syscheck.
 
     This function provides multiple tools to validate events with custom validators.

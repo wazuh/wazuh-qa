@@ -15,12 +15,19 @@ import string
 import xml.etree.ElementTree as ET
 import zipfile
 import re
-
+import subprocess
+import platform
+import tempfile
 import filetype
 import requests
 import yaml
 import pytest
-from wazuh_testing import logger
+from stat import ST_ATIME, ST_MTIME
+from wazuh_testing import logger, REGULAR, SYMLINK, HARDLINK
+
+if sys.platform == 'win32':
+    import win32security as win32sec
+    import ntsecuritycon as ntc
 
 
 def read_json(file_path):
@@ -235,8 +242,8 @@ def delete_path_recursively(path):
 def on_write_error(function, path, exc_info):
     """ Error handler for functions that try to modify a file. If the error is due to an access error (read only file),
     it attempts to add write permission and then retries. If the error is for another reason it re-raises the error.
-    
-    Args: 
+
+    Args:
         function (function): function that called the handler.
         path (str): Path to the file the function is trying to modify
         exc_info (object): function instance execution information. Passed in by function in runtime.
@@ -595,12 +602,12 @@ def create_file(type_, path, name, **kwargs):
     try:
         logger.info("Creating file " + str(os.path.join(path, name)) + " of " + str(type_) + " type")
         os.makedirs(path, exist_ok=True, mode=0o777)
-        if type_ != fim.REGULAR:
+        if type_ != REGULAR:
             try:
                 kwargs.pop('content')
             except KeyError:
                 pass
-        if type_ in (fim.SYMLINK, fim.HARDLINK) and 'target' not in kwargs:
+        if type_ in (SYMLINK, HARDLINK) and 'target' not in kwargs:
             raise ValueError(f"'target' param is mandatory for type {type_}")
         getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
     except OSError:

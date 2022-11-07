@@ -8,7 +8,7 @@ import json
 from datetime import datetime
 from wazuh_testing import logger
 from wazuh_testing.tools.monitoring import generate_monitoring_callback
-from wazuh_testing.modules import fim 
+from wazuh_testing.modules import fim
 
 
 # Callbacks
