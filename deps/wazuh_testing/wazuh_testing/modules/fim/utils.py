@@ -63,7 +63,7 @@ def delete_registry(key, subkey, arch):
         arch (int): architecture of the registry (KEY_WOW64_32KEY or KEY_WOW64_64KEY).
     """
     if sys.platform == 'win32':
-        print_arch = '[x64]' if arch == KEY_WOW64_64KEY else '[x32]'
+        print_arch = '[x64]' if arch == fim.KEY_WOW64_64KEY else '[x32]'
         logger.info(f"Removing registry key {print_arch}{str(os.path.join(fim.registry_class_name[key], subkey))}")
 
         try:
