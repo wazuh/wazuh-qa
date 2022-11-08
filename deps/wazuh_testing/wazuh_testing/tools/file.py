@@ -582,6 +582,107 @@ def replace_regex_in_file(search_regex, replace_regex, file_path):
     write_file(file_path, file_data)
 
 
+def _create_fifo(path, name):
+    """Create a FIFO file.
+
+    Args:
+        path (str): path where the file will be created.
+        name (str): file name.
+
+    Raises:
+        OSError: if `mkfifo` fails.
+    """
+    fifo_path = os.path.join(path, name)
+    try:
+        os.mkfifo(fifo_path)
+    except OSError:
+        raise
+
+
+def _create_sym_link(path, name, target):
+    """Create a symbolic link.
+
+    Args:
+        path (str): path where the symbolic link will be created.
+        name (str): file name.
+        target (str): path where the symbolic link will be pointing to.
+
+    Raises:
+        OSError: if `symlink` fails.
+    """
+    symlink_path = os.path.join(path, name)
+    try:
+        os.symlink(target, symlink_path)
+    except OSError:
+        raise
+
+
+def _create_hard_link(path, name, target):
+    """Create a hard link.
+
+    Args:
+        path (str): path where the hard link will be created.
+        name (str): file name.
+        target (str): path where the hard link will be pointing to.
+
+    Raises:
+        OSError: if `link` fails.
+    """
+    link_path = os.path.join(path, name)
+    try:
+        os.link(target, link_path)
+    except OSError:
+        raise
+
+
+def _create_socket(path, name):
+    """Create a Socket file.
+
+    Args:
+        path (str): path where the socket will be created.
+        name (str): file name.
+
+    Raises:
+        OSError: if `unlink` fails.
+    """
+    socket_path = os.path.join(path, name)
+    try:
+        os.unlink(socket_path)
+    except OSError:
+        if os.path.exists(socket_path):
+            raise
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.bind(socket_path)
+
+
+def _create_regular(path, name, content=''):
+    """Create a regular file.
+
+    Args:
+        path (str): path where the regular file will be created.
+        name (str): file name.
+        content (str, optional): content of the created file. Default `''`
+    """
+    regular_path = os.path.join(path, name)
+    mode = 'wb' if isinstance(content, bytes) else 'w'
+
+    with open(regular_path, mode) as f:
+        f.write(content)
+
+
+def _create_regular_windows(path, name, content=''):
+    """Create a regular file in Windows
+
+    Args:
+        path (str): path where the regular file will be created.
+        name (str): file name.
+        content (str, optional): content of the created file. Default `''`
+    """
+    regular_path = os.path.join(path, name)
+    os.popen("echo " + content + " > " + regular_path + f" runas /user:{os.getlogin()}")
+
+
+
 def create_file(type_, path, name, **kwargs):
     """Create a file in a given path. The path will be created in case it does not exists.
 

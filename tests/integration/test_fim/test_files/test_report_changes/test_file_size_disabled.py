@@ -69,7 +69,7 @@ from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_call
 from wazuh_testing import global_parameters, LOG_FILE_PATH
 from wazuh_testing.modules.fim import REGULAR, CB_FILE_SIZE_LIMIT_REACHED, FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.modules.fim.utils import generate_params, create_file
-from test_fim.test_files.common import generate_string
+from test_fim.common import generate_string
 
 
 # Marks

@@ -68,9 +68,7 @@ import sys
 import time
 
 import pytest
-from test_fim.test_files.common import make_diff_file_path
 from wazuh_testing import global_parameters, LOG_FILE_PATH
-
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, load_wazuh_configurations
 from wazuh_testing.tools.file import create_file
@@ -79,7 +77,7 @@ from wazuh_testing.tools.services import restart_wazuh_with_new_conf
 from wazuh_testing.modules.fim import REGULAR, FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.modules.fim.utils import generate_params
 from wazuh_testing.modules.fim.event_monitor import detect_initial_scan, callback_detect_event
-
+from test_fim.common import make_diff_file_path
 
 # Marks
 

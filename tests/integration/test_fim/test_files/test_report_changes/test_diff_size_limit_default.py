@@ -70,7 +70,7 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters, DATA, LOG_FILE_PATH
+from wazuh_testing import global_parameters, DATA, LOG_FILE_PATH, SYSCHECK_DEBUG, VERBOSE_DEBUG_OUTPUT
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback

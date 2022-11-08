@@ -66,7 +66,7 @@ import os
 import sys
 
 import pytest
-from test_fim.test_files.common import make_diff_file_path
+from test_fim.common import make_diff_file_path
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing.tools.configuration import load_wazuh_configurations, PREFIX

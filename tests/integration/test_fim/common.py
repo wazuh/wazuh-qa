@@ -3,12 +3,11 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
-import re
 import sys
 import hashlib
 
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.fim import WAZUH_PATH
+from wazuh_testing import WAZUH_PATH
 
 
 def generate_string(stringLength=10, character='0'):

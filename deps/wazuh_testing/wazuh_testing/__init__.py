@@ -39,6 +39,8 @@ API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
 API_JSON_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.json')
 API_LOG_FOLDER = os.path.join(WAZUH_PATH, 'logs', 'api')
 WAZUH_TESTING_PATH = os.path.dirname(os.path.abspath(__file__))
+WAZUH_TESTING_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+
 
 # Daemons
 LOGCOLLECTOR_DAEMON = 'wazuh-logcollector'

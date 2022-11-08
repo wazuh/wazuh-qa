@@ -70,7 +70,7 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules import fim
 from wazuh_testing.modules.fim.event_monitor import callback_disk_quota_limit_reached
 from wazuh_testing.modules.fim.utils import generate_params, create_file
-from test_fim.test_files.common import generate_string
+from test_fim.common import generate_string
 
 # Marks
 
