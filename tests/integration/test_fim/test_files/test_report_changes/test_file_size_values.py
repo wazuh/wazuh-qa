@@ -75,7 +75,7 @@ from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as loca
 from wazuh_testing.modules.fim.event_monitor import callback_detect_event
 from wazuh_testing.modules.fim.utils import generate_params
 from test_fim.common import (generate_string, translate_size, disable_file_max_size, restore_file_max_size,
-                                        make_diff_file_path, disable_rt_delay, restore_rt_delay)
+                             make_diff_file_path, disable_rt_delay, restore_rt_delay)
 # Marks
 
 pytestmark = [pytest.mark.tier(level=1)]
