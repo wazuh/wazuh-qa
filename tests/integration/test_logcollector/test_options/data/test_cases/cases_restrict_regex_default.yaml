@@ -1,0 +1,17 @@
+- name: Test Restrict Default - Match
+  description: Test Restrict with default regex, with matching log
+  configuration_parameters:
+    REGEX: .+test
+  metadata:
+    regex: .+test
+    log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
+    matches: True
+
+- name: Test Restrict Default - Does not Match
+  description: Test Restrict with default regex, with not matching log
+  configuration_parameters:
+    REGEX: .+test
+  metadata:
+    regex: .+test
+    log_sample: "Nov 10 12:19:04 localhost sshd: log does not match"
+    matches: False

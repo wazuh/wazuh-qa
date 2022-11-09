@@ -1,0 +1,17 @@
+- name: 'Test Ignore Default - Match'
+  description: 'Test Ignore with default regex, with matching log'
+  configuration_parameters:
+    REGEX: .+test
+  metadata:
+    regex: .+test
+    log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
+    matches: True
+
+- name: 'Test Ignore Default - Does not Match'
+  description: 'Test Ignore with default regex, with not matching log'
+  configuration_parameters:
+    REGEX: .+test
+  metadata:
+    regex: .+test
+    log_sample: "Nov 10 12:19:04 localhost sshd: log does not match"
+    matches: False
