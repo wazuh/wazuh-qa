@@ -1077,10 +1077,14 @@ def configure_local_internal_options_function(request):
     conf.set_local_internal_options_dict(backup_local_internal_options)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def truncate_monitored_files():
     """Truncate all the log files and json alerts files before and after the test execution"""
-    log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
+
+    if 'agent' in get_service():
+        log_files = [LOG_FILE_PATH]
+    else:
+        log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
 
     for log_file in log_files:
         truncate_file(log_file)
