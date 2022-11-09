@@ -47,13 +47,14 @@ def wait_for_analysisd_startup(request):
 
 
 @pytest.fixture(scope='module')
-def configure_custom_rules(request, get_configuration):
+def configure_custom_rules(request):
     """Configure a syscollector custom rules for testing.
     Restarting wazuh-analysisd is required to apply this changes.
     """
-    data_dir = getattr(request.module, 'data_dir')
-    source_rule = os.path.join(data_dir, get_configuration['rule_file'])
-    target_rule = os.path.join(CUSTOM_RULES_PATH, get_configuration['rule_file'])
+    data_dir = getattr(request.module, 'TEST_RULES_PATH')
+    data_file = getattr(request.module, 'rule_file')
+    source_rule = os.path.join(data_dir, data_file)
+    target_rule = os.path.join(CUSTOM_RULES_PATH, data_file)
 
     # copy custom rule with specific privileges
     shutil.copy(source_rule, target_rule)
