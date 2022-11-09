@@ -1,6 +1,6 @@
 import re
 
-from wazuh_testing import T_30
+from wazuh_testing import T_30, T_10
 from wazuh_testing.modules.logcollector import LOG_COLLECTOR_PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing import LOG_FILE_PATH
@@ -27,6 +27,7 @@ def make_logcollector_callback(pattern, prefix=LOG_COLLECTOR_PREFIX, escape=Fals
     else:
         pattern = r'\s+'.join(pattern.split())
     regex = re.compile(r'{}{}'.format(prefix, pattern))
+    print("REGEX------------" + str(regex))
 
     return lambda line: regex.match(line) is not None
 
@@ -50,11 +51,13 @@ def check_logcollector_event(file_monitor=None, callback='', error_message=None,
     error_message = f"Could not find this event in {file_to_monitor}: {callback}" if error_message is None else \
         error_message
 
-    file_monitor.start(timeout=timeout, update_position=update_position, accum_results=accum_results,
-                       callback=make_logcollector_callback(callback, prefix, escape), error_message=error_message)
+    result = file_monitor.start(timeout=timeout, update_position=update_position, accum_results=accum_results,
+                       callback=make_logcollector_callback(callback, prefix, escape),
+                       error_message=error_message).result()
+    return result
 
 
-def check_analyzing_file(file, error_message, prefix, file_monitor=None):
+def check_analyzing_file(file, prefix, error_message=None, file_monitor=None):
     """Create a callback to detect if logcollector is monitoring a file.
 
     Args:
@@ -63,12 +66,15 @@ def check_analyzing_file(file, error_message, prefix, file_monitor=None):
         prefix (str): Daemon that generates the error log.
         file_monitor (FileMonitor): Log monitor.
     """
+    if error_message is None:
+        error_message = f"Did not receive the expected 'Analizing file: {file}' event"
+    
     check_logcollector_event(file_monitor=file_monitor, timeout=T_30,
-                             callback=fr".*Analyzing file: '{re.escape(file)}'.*",
+                             callback=fr".*Analyzing file: '{file}'.*",
                              error_message=error_message, prefix=prefix)
 
 
-def check_syslog_messages(message, error_message, prefix, file_monitor=None, timeout=T_30, escape=False):
+def check_syslog_messages(message, prefix, error_message=None, file_monitor=None, timeout=T_30, escape=False):
     """Create a callback to detect "DEBUG: Read <number> lines from command <command>" debug line.
     Args:
         message (str): Command to be monitored.
@@ -78,6 +84,30 @@ def check_syslog_messages(message, error_message, prefix, file_monitor=None, tim
         timeout (int): Timeout to check the log.
         escape (bool): Flag to escape special characters in the pattern.
     """
+    if error_message is None:
+        error_message = f"Did not receive the expected 'Reading syslog message: {message}' event"
     callback_msg = fr"DEBUG: Reading syslog message: '{message}'"
+
     check_logcollector_event(file_monitor=file_monitor, timeout=timeout, callback=callback_msg,
                              error_message=error_message, prefix=prefix, escape=escape)
+
+
+def check_ignore_restrict_messages(message, regex, tag, prefix, error_message=None, file_monitor=None, timeout=T_10, 
+                                   escape=False):
+    """Create a callback to detect "DEBUG: Ignoring the log ... due to config" debug line.
+    Args:
+        message (str): Command to be monitored.
+        regex (str): regex pattern configured to ignore or restrict to.
+        tag (str): string with the configured tag. Values: 'ignore' or 'restrict'
+        error_message (str): Error message.
+        prefix (str): Daemon that generates the error log.
+        file_monitor (FileMonitor): Log monitor.
+        timeout (int): Timeout to check the log.
+        escape (bool): Flag to escape special characters in the pattern.
+    """
+    if error_message is None:
+        error_message = f"Did not receive the expected 'Ignoring the log line: {message} due to {tag} config' event"
+    callback_msg = fr"Ignoring the log line '{message}' due to {tag} config: '{regex}'"
+
+    return check_logcollector_event(file_monitor=file_monitor, timeout=timeout, callback=callback_msg, 
+                                    error_message=error_message, prefix=prefix, escape=escape)
