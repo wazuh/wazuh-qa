@@ -28,16 +28,58 @@ t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_syscollector_integration.ya
 rule_file = "syscollector_rules.xml"
 
 # Enabled test configurations (t1)
-_, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
+_, configuration_metadata, case_ids = get_test_cases_data(t1_cases_path)
 
 
 @pytest.mark.tier(level=2)
-@pytest.mark.parametrize('metadata', t1_configuration_metadata, ids=t1_case_ids)
-def test_syscollector(metadata, configure_local_internal_options_module, mock_agent_module,
-                 configure_custom_rules, restart_analysisd, wait_for_analysisd_startup,
-                 connect_to_sockets_function, file_monitoring):
+@pytest.mark.parametrize('metadata', configuration_metadata, ids=case_ids)
+def test_syscollector_integration(metadata, configure_local_internal_options_module, mock_agent_module,
+                                  configure_custom_rules, restart_analysisd, wait_for_analysisd_startup,
+                                  connect_to_sockets_function, file_monitoring):
     """
-    test description
+    description: Check if Analysisd handle Syscollector deltas properly by generating alerts.
+
+    wazuh_min_version: 4.4.0
+
+    tier: 2
+
+    parameters:
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - mock_agent_module:
+            type: fixture
+            brief: Create mock agent and get agent_id
+        - configure_custom_rules:
+            type: fixture
+            brief: Copy custom rules to test.
+        - restart_analysisd:
+            type: fixture
+            brief: Restart analysisd daemon and truncate related log files.
+        - wait_for_analysisd_startup:
+            type: fixture
+            brief: Wait until analysisd is ready.
+        - connect_to_sockets_function:
+            type: fixture
+            brief: Connect to analysisd event queue.
+        - file_monitoring:
+            type: fixture
+            brief: Handle the monitoring of a specified file.
+
+    assertions:
+        - Verify that specific syscollector deltas trigger specific custom alert with certain values.
+
+    input_description:
+        Input dataset (defined as event_header + event_payload in syscollector.yaml)
+        cover, in most of the cases, INSERTED, MODIFIED and DELETED deltas
+        for each of the available scan; osinfo, hwinfo, processes, packages, network_interface,
+        network_address, network_protocol, ports and hotfixes.
+
+    expected_output:
+        Expected output (defined as alert_expected_values in syscollector.yaml)
+
+    tags:
+        - rules
     """
 
     # Get mock agent_id to create syscollector header
