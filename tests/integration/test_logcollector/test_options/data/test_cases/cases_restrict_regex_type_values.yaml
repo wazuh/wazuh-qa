@@ -1,0 +1,65 @@
+- name: Test Restrict PCRE2 - Match
+  description: Test Restrict with PCRE2 regex, with matching log
+  configuration_parameters:
+    REGEX: .*test
+    REGEX_TYPE: PCRE2
+  metadata:
+    regex: .*test
+    regex_type: PCRE2
+    log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
+    matches: True
+
+- name: Test Restrict PCRE2 - Does not Match
+  description: Test Restrict with PCRE2 regex, with not matching log
+  configuration_parameters:
+    REGEX: .*test
+    REGEX_TYPE: PCRE2
+  metadata:
+    regex: .*test
+    regex_type: PCRE2
+    log_sample: "Nov 10 12:19:04 localhost sshd: log does not match"
+    matches: False
+
+- name: Test Restrict osmatch - Match
+  description: Test Restrict with osmatch regex, with matching log
+  configuration_parameters:
+    REGEX: test$
+    REGEX_TYPE: osmatch
+  metadata:
+    regex: test\$
+    regex_type: osmatch
+    log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
+    matches: True
+
+- name: Test Restrict osmatch - Does not Match
+  description: Test Restrict with osmatch regex, with not matching log
+  configuration_parameters:
+    REGEX: test$
+    REGEX_TYPE: osmatch
+  metadata:
+    regex: test\$
+    regex_type: osmatch
+    log_sample: "Nov 10 12:19:04 localhost sshd: log does not match"
+    matches: False
+
+- name: Test Restrict osregex - Match
+  description: Test Restrict with osregex regex, with matching log
+  configuration_parameters:
+    REGEX: \.test
+    REGEX_TYPE: osregex
+  metadata:
+    regex: \\.test
+    regex_type: osregex
+    log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
+    matches: True
+
+- name: Test Restrict osregex - Does not Match
+  description: Test Restrict with osregex regex, with not matching log
+  configuration_parameters:
+    REGEX: \.test
+    REGEX_TYPE: osregex
+  metadata:
+    regex: \\.test
+    regex_type: osregex
+    log_sample: "Nov 10 12:19:04 localhost sshd: log does not match"
+    matches: False

@@ -73,8 +73,8 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_restrict_regex_default.yaml')
 t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_restrict_regex_default.yaml')
 
-t2_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_restrict_regex_default.yaml')
-t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_restrict_regex_default.yaml')
+t2_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_restrict_regex_type_values.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_restrict_regex_type_values.yaml')
 
 # Test configurations
 test_file = os.path.join(PREFIX, 'test.log')
@@ -92,7 +92,7 @@ t2_configurations = load_configuration_template(t2_configurations_path, t2_confi
 
 
 
-@pytest.mark.tier(level=0)
+@pytest.mark.tier(level=1)
 @pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
 @pytest.mark.parametrize('local_internal_options,', [lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS], ids=[''])
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
@@ -111,7 +111,7 @@ def test_restrict_default(configuration, metadata, new_file_path, truncate_monit
 
     wazuh_min_version: 4.5.0
 
-    tier: 0
+    tier: 1
 
     parameters:
         - configuration:
@@ -170,3 +170,79 @@ def test_restrict_default(configuration, metadata, new_file_path, truncate_monit
         evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='restrict', prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
 
 
+@pytest.mark.tier(level=1)
+@pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
+@pytest.mark.parametrize('local_internal_options,', [lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS], ids=[''])
+@pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
+def test_restrict_regex_type_values(configuration, metadata, new_file_path, truncate_monitored_files,
+                              local_internal_options, set_wazuh_configuration_with_local_internal_options,
+                              restart_wazuh_function):
+    '''
+    description: Check if logcollector reads or ignores a log according to a regex configured in the restrict tag for a
+    given log file, with each configured value for the restrict 'type' attribute value configured.
+
+    test_phases:
+        - Set a custom Wazuh configuration.
+        - Restart monitord.
+        - Insert the log message.
+        - Check expected response.
+
+    wazuh_min_version: 4.5.0
+
+    tier: 1
+
+    parameters:
+        - configuration:
+            type: dict
+            brief: Wazuh configuration data. Needed for set_wazuh_configuration fixture.
+        - metadata:
+            type: dict
+            brief: Wazuh configuration metadata
+        - new_file_path:
+            type: str
+            brief: path for the log file to be created and deleted after the test.
+        - local_internal_options
+            type: dict
+            brief: Contains the options to configure in local_internal_options
+        - truncate_monitored_files:
+            type: fixture
+            brief: Truncate all the log files and json alerts files before and after the test execution.
+        - set_wazuh_configuration_with_local_internal_options:
+            type: fixture
+            brief: Set the wazuh configuration according to the configuration data and local_internal_options.
+        - restart_wazuh_function:
+            type: fixture
+            brief: Restart wazuh.
+
+    assertions:
+        - Check that logcollector is analyzing the log file.
+        - Check that logs are ignored when they do not match with configured regex
+
+    input_description:
+        - The `configuration_ignore_regex_default.yaml` file provides the module configuration for this test.
+        - The `cases_ignore_regex_default` file provides the test cases.
+
+    expected_output:
+        - r".*wazuh-logcollector.*Analizing file: '{file}'.*"
+        - r".*wazuh-logcollector.*DEBUG: Reading syslog '{message}'.*"
+        - r".*wazuh-logcollector.*DEBUG: Ignoring the log line '{message}' due to {tag} config: '{regex}'"
+    '''
+    log = metadata['log_sample']
+    command = f"echo '{log}' >> {test_file}"
+
+    # Check log file is being analized
+    evm.check_analyzing_file(file=test_file, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+    
+    #  Insert log
+    run_local_command_returning_output(command)
+    # Check the log is read from the monitored file
+    evm.check_syslog_messages(message=log, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+    # Check response    
+    if metadata['matches']:
+        log_found = False
+        with pytest.raises(TimeoutError):
+            log_found = evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='restrict',
+                                                           prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+        assert log_found is False, lc.ERR_MSG_UNEXPECTED_IGNORE_EVENT
+    else:        
+        evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='restrict', prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
