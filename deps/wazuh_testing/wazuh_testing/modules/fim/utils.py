@@ -4,11 +4,11 @@
 
 import os
 import sys
-import json
+
 from datetime import datetime, timedelta
 from typing import Sequence, Union, Generator, Any
 from copy import deepcopy
-from wazuh_testing import global_parameters, logger
+from wazuh_testing import global_parameters, logger, REGULAR
 from wazuh_testing.tools.file import create_file, modify_file, delete_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import TimeMachine
@@ -268,7 +268,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     # Create text files
     for name, content in file_list.items():
-        create_file(fim.REGULAR, folder, name, content=content)
+        create_file(REGULAR, folder, name, content=content)
 
     check_time_travel(time_travel, monitor=log_monitor)
 

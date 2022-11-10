@@ -63,7 +63,7 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters, LOG_FILE_PATH
+from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -163,7 +163,7 @@ def test_disk_quota_disabled(filename, folder, size, get_configuration, configur
         - scheduled
     '''
     to_write = generate_string(size, '0')
-    create_file(fim.REGULAR, folder, filename, content=to_write)
+    create_file(REGULAR, folder, filename, content=to_write)
 
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_disk_quota_limit_reached)

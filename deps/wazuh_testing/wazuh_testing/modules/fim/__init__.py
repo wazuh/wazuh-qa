@@ -87,12 +87,6 @@ else:
     REG_QWORD = 0
     KEY_ALL_ACCESS = 0
 
-# File Types
-FIFO = 'fifo'
-SYMLINK = 'sym_link'
-HARDLINK = 'hard_link'
-SOCKET = 'socket'
-REGULAR = 'regular'
 
 # Check Types
 CHECK_ALL = 'check_all'

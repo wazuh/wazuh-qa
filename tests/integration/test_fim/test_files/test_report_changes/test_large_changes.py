@@ -74,8 +74,8 @@ import pytest
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing import global_parameters, LOG_FILE_PATH
-from wazuh_testing.modules.fim import REGULAR, FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.modules.fim.event_monitor import callback_detect_event
 from wazuh_testing.modules.fim.utils import create_file, generate_params
 from test_fim.common import generate_string, make_diff_file_path

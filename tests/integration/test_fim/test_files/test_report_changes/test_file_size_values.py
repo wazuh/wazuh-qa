@@ -63,12 +63,12 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters, LOG_FILE_PATH
+from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import create_file, modify_file_content
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.modules.fim import (REGULAR, CB_FILE_SIZE_LIMIT_REACHED, CB_DIFF_FOLDER_DELETED,
+from wazuh_testing.modules.fim import (CB_FILE_SIZE_LIMIT_REACHED, CB_DIFF_FOLDER_DELETED,
                                        ERR_MSG_FIM_EVENT_NOT_DETECTED, ERR_MSG_FILE_LIMIT_REACHED,
                                        ERR_MSG_FOLDER_DELETED)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
