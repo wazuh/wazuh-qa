@@ -19,7 +19,7 @@ receiver_sockets = None
 alert_timeout = 5
 file_to_monitor = ALERT_FILE_PATH
 
-# ---------------------------------------------------- TEST_SYSCOLLECTOR_EVENTS ----------------------------------------------------
+# ---------------------------------------- TEST_SYSCOLLECTOR_EVENTS -------------------------------------
 # Configuration and cases data
 cases_path = os.path.join(TEST_CASES_PATH, 'cases_syscollector_integration.yaml')
 rule_file = "syscollector_rules.xml"
@@ -98,5 +98,5 @@ def test_syscollector_integration(metadata, configure_local_internal_options_mod
 
     # Find expected outputs
     log_monitor.start(timeout=alert_timeout,
-                       callback=alert_callback,
-                       error_message=f"Timeout expecting {metadata['description']} message.")
+                      callback=alert_callback,
+                      error_message=f"Timeout expecting {metadata['description']} message.")
