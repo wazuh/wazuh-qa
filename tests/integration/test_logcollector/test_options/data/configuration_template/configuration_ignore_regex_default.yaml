@@ -5,7 +5,7 @@
             value: syslog
         - location:
             value: LOCATION
-        - ignore: 
+        - ignore:
             value: REGEX
 
     - section: vulnerability-detector
@@ -15,22 +15,22 @@
 
     - section: sca
       elements:
-      - enabled:
-          value: 'no'
+        - enabled:
+            value: 'no'
 
     - section: rootcheck
       elements:
-      - disabled:
-          value: 'yes'
+        - disabled:
+            value: 'yes'
 
     - section: syscheck
       elements:
-      - disabled:
-          value: 'yes'
+        - disabled:
+            value: 'yes'
 
     - section: wodle
       attributes:
-        - name: 'syscollector'
+        - name: syscollector
       elements:
         - disabled:
             value: 'yes'

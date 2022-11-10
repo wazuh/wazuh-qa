@@ -80,17 +80,18 @@ test_file = os.path.join(PREFIX, 'test.log')
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 for count, value in enumerate(t1_configuration_parameters):
     t1_configuration_parameters[count]['LOCATION'] = test_file
-t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters, t1_configuration_metadata)
+t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
+                                                t1_configuration_metadata)
 
 t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
 for count, value in enumerate(t2_configuration_parameters):
     t2_configuration_parameters[count]['LOCATION'] = test_file
-t2_configurations = load_configuration_template(t2_configurations_path, t2_configuration_parameters, t2_configuration_metadata)
+t2_configurations = load_configuration_template(t2_configurations_path, t2_configuration_parameters,
+                                                t2_configuration_metadata)
 
 
-
-
-@pytest.mark.tier(level=1)
+# Tests
+@pytest.mark.tier(level=0)
 @pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
 @pytest.mark.parametrize('local_internal_options,', [lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS], ids=[''])
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
@@ -108,7 +109,7 @@ def test_ignore_default(configuration, metadata, new_file_path, truncate_monitor
 
     wazuh_min_version: 4.5.0
 
-    tier: 1
+    tier: 0
 
     parameters:
         - configuration:
@@ -153,28 +154,29 @@ def test_ignore_default(configuration, metadata, new_file_path, truncate_monitor
     evm.check_analyzing_file(file=test_file, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
     #  Insert log
     run_local_command_returning_output(command)
-    
+
     # Check the log is read from the monitored file
     evm.check_syslog_messages(message=log, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
-    
+
     # Check response
     if metadata['matches'] is not True:
         log_found = False
         with pytest.raises(TimeoutError):
             log_found = evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='ignore',
-                                               prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+                                                           prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
         assert log_found is False, lc.ERR_MSG_UNEXPECTED_IGNORE_EVENT
-    else:        
+    else:
         evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='ignore',
-                                       prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+                                           prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
 
 
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
 @pytest.mark.parametrize('local_internal_options,', [lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS], ids=[''])
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
-def test_ignore_regex_type_values(configuration, metadata, new_file_path, truncate_monitored_files, local_internal_options,
-                        set_wazuh_configuration_with_local_internal_options, restart_wazuh_function):
+def test_ignore_regex_type_values(configuration, metadata, new_file_path, truncate_monitored_files,
+                                  local_internal_options, set_wazuh_configuration_with_local_internal_options,
+                                  restart_wazuh_function):
     '''
     description: Check if logcollector reads or ignores a log according to a regex configured in the ignored tag for a
     given log file, , with each configured value for the ignore 'type' attribute value configured.
@@ -232,17 +234,17 @@ def test_ignore_regex_type_values(configuration, metadata, new_file_path, trunca
     evm.check_analyzing_file(file=test_file, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
     #  Insert log
     run_local_command_returning_output(command)
-    
+
     # Check the log is read from the monitored file
     evm.check_syslog_messages(message=log, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
-    
+
     # Check response
     if metadata['matches'] is not True:
         log_found = False
         with pytest.raises(TimeoutError):
             log_found = evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='ignore',
-                                               prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+                                                           prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
         assert log_found is False, lc.ERR_MSG_UNEXPECTED_IGNORE_EVENT
-    else:        
+    else:
         evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='ignore',
-                                       prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+                                           prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
