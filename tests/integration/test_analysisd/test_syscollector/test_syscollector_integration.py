@@ -9,7 +9,6 @@ from wazuh_testing.analysis import CallbackWithContext, callback_check_syscollec
 
 pytestmark = [pytest.mark.server]
 
-
 # Generic vars
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
