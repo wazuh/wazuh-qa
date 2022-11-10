@@ -1,21 +1,21 @@
-- name: 'Centos 8 SCA scan - OSREGEX'
-  description: 'Run a SCA scan and check regex engine used and results'
+- name: Centos 8 SCA scan - OSREGEX
+  description: Run a SCA scan and check regex engine used and results
   configuration_parameters:
     ENABLED: 'yes'
     INTERVAL: 1000
-    POLICY_FILE: 'cis_centos8_osregex.yml'
+    POLICY_FILE: cis_centos8_osregex.yaml
   metadata:
-    policy_file: 'cis_centos8_osregex.yml'
+    policy_file: cis_centos8_osregex.yaml
     results: 2
     regex_type: osregex
 
-- name: 'Centos 8 SCA scan - PCRE2'
-  description: 'Run a SCA scan and check regex engine used and results'
+- name: Centos 8 SCA scan - PCRE2
+  description: Run a SCA scan and check regex engine used and results
   configuration_parameters:
     ENABLED: 'yes'
     INTERVAL: 1000
-    POLICY_FILE: 'cis_centos8_pcre2.yml'
+    POLICY_FILE: cis_centos8_pcre2.yaml
   metadata:
-    policy_file: 'cis_centos8_pcre2.yml'
+    policy_file: cis_centos8_pcre2.yaml
     results: 2
     regex_type: pcre2

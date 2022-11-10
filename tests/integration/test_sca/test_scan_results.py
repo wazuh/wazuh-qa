@@ -135,6 +135,6 @@ def test_scan_results(configuration, metadata, local_internal_options, prepare_c
 
     # Get scan summary event and check it matches with the policy file used
     summary = evm.get_sca_scan_summary(file_monitor=wazuh_log_monitor)
-    assert summary['policy_id'] == metadata['policy_file'][0:-4], f"Unexpected policy_id found. Got \
+    assert summary['policy_id'] == metadata['policy_file'][0:-5], f"Unexpected policy_id found. Got \
                                                                     {summary['policy_id']}, expected \
-                                                                    {metadata['policy_file'][0:-4]}"
+                                                                    {metadata['policy_file'][0:-5]}"
