@@ -143,16 +143,16 @@ def test_options_state_interval(get_local_internal_options, file_monitoring):
                                     error_message=f"The message: 'Invalid definition for "
                                                   f"logcollector.state_interval: {interval}.' didn't appear")
     else:
-            control_service('restart')
-            sleep(state_interval_update_timeout)
-            logcollector.wait_statistics_file(timeout=interval + 5)
-            previous_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
+        control_service('restart')
+        sleep(state_interval_update_timeout)
+        logcollector.wait_statistics_file(timeout=interval + 5)
+        previous_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
+        last_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
+        while last_modification_time == previous_modification_time:
+            sleep(elapsed_time_modification)
             last_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
-            while last_modification_time == previous_modification_time:
-                sleep(elapsed_time_modification)
-                last_modification_time = os.path.getmtime(LOGCOLLECTOR_STATISTICS_FILE)
-            elapsed = last_modification_time - previous_modification_time
-            if sys.platform == 'win32':
-                assert interval - 30 < elapsed < interval + 30
-            else:
-                assert interval - 1 < elapsed < interval + 1
+        elapsed = last_modification_time - previous_modification_time
+        if sys.platform == 'win32':
+            assert interval - 30 < elapsed < interval + 30
+        else:
+            assert interval - 1 < elapsed < interval + 1

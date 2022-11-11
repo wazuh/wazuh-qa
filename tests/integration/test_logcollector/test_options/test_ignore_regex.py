@@ -97,8 +97,9 @@ prefix = lc.LOG_COLLECTOR_PREFIX
 @pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
 @pytest.mark.parametrize('local_internal_options,', [lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS], ids=[''])
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
-def test_ignore_default(configuration, metadata, new_file_path, create_file, truncate_monitored_files, local_internal_options,
-                        set_wazuh_configuration_with_local_internal_options, restart_wazuh_function):
+def test_ignore_default(configuration, metadata, new_file_path, create_file, truncate_monitored_files,
+                        local_internal_options, set_wazuh_configuration_with_local_internal_options,
+                        restart_wazuh_function):
     '''
     description: Check if logcollector reads or ignores a log according to a regex configured in the ignored tag for a
     given log file.
