@@ -59,7 +59,6 @@ import pytest
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 from wazuh_testing.modules.logcollector import event_monitor as evm
 from wazuh_testing.modules import logcollector as lc
 
@@ -91,7 +90,7 @@ for count, value in enumerate(t2_configuration_parameters):
 t2_configurations = load_configuration_template(t2_configurations_path, t2_configuration_parameters,
                                                 t2_configuration_metadata)
 
-prefix = AGENT_DETECTOR_PREFIX if sys.platform == 'win32' else LOG_COLLECTOR_DETECTOR_PREFIX
+prefix = lc.LOG_COLLECTOR_PREFIX
 
 
 # Tests
@@ -99,7 +98,7 @@ prefix = AGENT_DETECTOR_PREFIX if sys.platform == 'win32' else LOG_COLLECTOR_DET
 @pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
 @pytest.mark.parametrize('local_internal_options,', [lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS], ids=[''])
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
-def test_restrict_default(configuration, metadata, new_file_path, truncate_monitored_files,
+def test_restrict_default(configuration, metadata, new_file_path, create_file, truncate_monitored_files,
                           local_internal_options, set_wazuh_configuration_with_local_internal_options,
                           restart_wazuh_function):
     '''
@@ -129,6 +128,9 @@ def test_restrict_default(configuration, metadata, new_file_path, truncate_monit
         - local_internal_options
             type: dict
             brief: Contains the options to configure in local_internal_options
+        - create_file:
+            type: fixture
+            brief: Create an empty file for logging
         - truncate_monitored_files:
             type: fixture
             brief: Truncate all the log files and json alerts files before and after the test execution.
@@ -178,7 +180,7 @@ def test_restrict_default(configuration, metadata, new_file_path, truncate_monit
 @pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
 @pytest.mark.parametrize('local_internal_options,', [lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS], ids=[''])
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
-def test_restrict_regex_type_values(configuration, metadata, new_file_path, truncate_monitored_files,
+def test_restrict_regex_type_values(configuration, metadata, new_file_path, create_file, truncate_monitored_files,
                                     local_internal_options, set_wazuh_configuration_with_local_internal_options,
                                     restart_wazuh_function):
     '''
@@ -208,6 +210,9 @@ def test_restrict_regex_type_values(configuration, metadata, new_file_path, trun
         - local_internal_options
             type: dict
             brief: Contains the options to configure in local_internal_options
+        - create_file:
+            type: fixture
+            brief: Create an empty file for logging
         - truncate_monitored_files:
             type: fixture
             brief: Truncate all the log files and json alerts files before and after the test execution.

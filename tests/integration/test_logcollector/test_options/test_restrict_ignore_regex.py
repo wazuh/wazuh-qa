@@ -59,7 +59,6 @@ import pytest
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 from wazuh_testing.modules.logcollector import event_monitor as evm
 from wazuh_testing.modules import logcollector as lc
 
@@ -80,14 +79,14 @@ configuration_parameters, configuration_metadata, case_ids = get_test_cases_data
 for count, value in enumerate(configuration_parameters):
     configuration_parameters[count]['LOCATION'] = test_file
 configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
-prefix = AGENT_DETECTOR_PREFIX if sys.platform == 'win32' else LOG_COLLECTOR_DETECTOR_PREFIX
+prefix = lc.LOG_COLLECTOR_PREFIX
 
 # Tests
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
 @pytest.mark.parametrize('local_internal_options,', [lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS], ids=[''])
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
-def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, truncate_monitored_files,
+def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, create_file, truncate_monitored_files,
                                       local_internal_options, set_wazuh_configuration_with_local_internal_options,
                                       restart_wazuh_function):
     '''
@@ -115,6 +114,9 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, tr
         - new_file_path:
             type: str
             brief: path for the log file to be created and deleted after the test.
+        - create_file:
+            type: fixture
+            brief: Create an empty file for logging
         - local_internal_options
             type: dict
             brief: Contains the options to configure in local_internal_options

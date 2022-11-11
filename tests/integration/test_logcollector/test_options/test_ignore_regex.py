@@ -55,10 +55,10 @@ tags:
 import os
 import sys
 import pytest
+import time
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX,AGENT_DETECTOR_PREFIX
 from wazuh_testing.modules.logcollector import event_monitor as evm
 from wazuh_testing.modules import logcollector as lc
 
@@ -90,14 +90,14 @@ for count, value in enumerate(t2_configuration_parameters):
 t2_configurations = load_configuration_template(t2_configurations_path, t2_configuration_parameters,
                                                 t2_configuration_metadata)
 
-prefix = AGENT_DETECTOR_PREFIX if sys.platform == 'win32' else LOG_COLLECTOR_DETECTOR_PREFIX
+prefix = lc.LOG_COLLECTOR_PREFIX
 
 # Tests
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
 @pytest.mark.parametrize('local_internal_options,', [lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS], ids=[''])
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
-def test_ignore_default(configuration, metadata, new_file_path, truncate_monitored_files, local_internal_options,
+def test_ignore_default(configuration, metadata, new_file_path, create_file, truncate_monitored_files, local_internal_options,
                         set_wazuh_configuration_with_local_internal_options, restart_wazuh_function):
     '''
     description: Check if logcollector reads or ignores a log according to a regex configured in the ignored tag for a
@@ -123,6 +123,9 @@ def test_ignore_default(configuration, metadata, new_file_path, truncate_monitor
         - new_file_path:
             type: str
             brief: path for the log file to be created and deleted after the test.
+        - create_file:
+            type: fixture
+            brief: Create an empty file for logging
         - local_internal_options
             type: dict
             brief: Contains the options to configure in local_internal_options
@@ -152,7 +155,7 @@ def test_ignore_default(configuration, metadata, new_file_path, truncate_monitor
     log = metadata['log_sample']
     command = f"echo '{log}' >> {test_file}"
 
-    # Check log file is being analized
+    # Check log file is being analyzed
     evm.check_analyzing_file(file=test_file, prefix=prefix)
     #  Insert log
     run_local_command_returning_output(command)
@@ -176,7 +179,7 @@ def test_ignore_default(configuration, metadata, new_file_path, truncate_monitor
 @pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
 @pytest.mark.parametrize('local_internal_options,', [lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS], ids=[''])
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
-def test_ignore_regex_type_values(configuration, metadata, new_file_path, truncate_monitored_files,
+def test_ignore_regex_type_values(configuration, metadata, new_file_path, create_file, truncate_monitored_files,
                                   local_internal_options, set_wazuh_configuration_with_local_internal_options,
                                   restart_wazuh_function):
     '''
@@ -203,6 +206,9 @@ def test_ignore_regex_type_values(configuration, metadata, new_file_path, trunca
         - new_file_path:
             type: str
             brief: path for the log file to be created and deleted after the test.
+        - create_file:
+            type: fixture
+            brief: Create an empty file for logging
         - local_internal_options
             type: dict
             brief: Contains the options to configure in local_internal_options
