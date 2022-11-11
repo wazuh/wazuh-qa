@@ -1,9 +1,8 @@
 import re
 
-from wazuh_testing import T_30, T_10
+from wazuh_testing import T_30, T_10, LOG_FILE_PATH
 from wazuh_testing.modules.logcollector import LOG_COLLECTOR_PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing import LOG_FILE_PATH
 
 
 def make_logcollector_callback(pattern, prefix=LOG_COLLECTOR_PREFIX, escape=False):
@@ -27,7 +26,6 @@ def make_logcollector_callback(pattern, prefix=LOG_COLLECTOR_PREFIX, escape=Fals
     else:
         pattern = r'\s+'.join(pattern.split())
     regex = re.compile(r'{}{}'.format(prefix, pattern))
-    print("REGEX------------" + str(regex))
 
     return lambda line: regex.match(line) is not None
 
@@ -67,7 +65,7 @@ def check_analyzing_file(file, prefix, error_message=None, file_monitor=None):
         file_monitor (FileMonitor): Log monitor.
     """
     if error_message is None:
-        error_message = f"Did not receive the expected 'Analizing file: {file}' event"
+        error_message = f"Did not receive the expected 'Analyzing file: {file}' event"
     
     check_logcollector_event(file_monitor=file_monitor, timeout=T_30,
                              callback=fr".*Analyzing file: '{file}'.*",

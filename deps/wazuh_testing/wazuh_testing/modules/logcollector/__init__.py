@@ -1,13 +1,15 @@
 import sys
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, AGENT_DETECTOR_PREFIX
 
 
-LOG_COLLECTOR_PREFIX = r'.*wazuh-logcollector.*'
+# Variables
+LOG_COLLECTOR_PREFIX = AGENT_DETECTOR_PREFIX if sys.platform == 'win32' else LOG_COLLECTOR_DETECTOR_PREFIX
 WINDOWS_AGENT_PREFIX = r'.*wazuh-agent.*'
 MAILD_PREFIX = r'.*wazuh-maild.*'
-GENERIC_CALLBACK_ERROR_COMMAND_MONITORING = 'The expected command monitoring log has not been produced'
 
 
 # Error Messages
+GENERIC_CALLBACK_ERROR_COMMAND_MONITORING = 'The expected command monitoring log has not been produced'
 ERR_MSG_UNEXPECTED_IGNORE_EVENT = "Found unexpected 'Ignoring the log... due to ignore/restrict config' event"
 
 
