@@ -1,9 +1,7 @@
 import os
 import pytest
 
-from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
-from wazuh_testing.modules.analysisd import event_monitor as evm
-from wazuh_testing.processes import check_if_daemons_are_running
+from wazuh_testing.tools.configuration import get_test_cases_data
 from wazuh_testing.tools import (ANALYSISD_QUEUE_SOCKET_PATH, ALERT_FILE_PATH)
 from wazuh_testing.analysis import CallbackWithContext, callback_check_syscollector_alert
 
