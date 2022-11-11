@@ -1,0 +1,4 @@
+- sections:
+    - section: wodle
+      attributes:
+        - name: syscollector

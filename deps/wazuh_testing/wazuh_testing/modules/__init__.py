@@ -6,6 +6,7 @@
 The purpose of this file is to contain all the variables necessary for Wazuh in order to be easier
 to maintain if one of them changes in the future.
 '''
+import re
 import pytest
 
 # Services Variables
@@ -31,3 +32,19 @@ SOLARIS = pytest.mark.sunos5
 
 AGENT = pytest.mark.agent
 SERVER = pytest.mark.server
+
+
+def make_callback(pattern, prefix=''):
+    """Create a callback function from a text pattern.
+
+    Args:
+        pattern (str): String to match on the log.
+        prefix (str): regular expression used as prefix before the pattern.
+
+    Returns:
+        lambda: function that returns matches in the file
+    """
+    pattern = r'\s+'.join(pattern.split())
+    regex = re.compile(r'{}{}'.format(prefix, pattern))
+
+    return lambda line: regex.match(line)

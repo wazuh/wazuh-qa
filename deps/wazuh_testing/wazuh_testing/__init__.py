@@ -64,6 +64,7 @@ SYSLOG_SIMULATOR = os.path.join(WAZUH_TESTING_PATH, 'scripts', 'syslog_simulator
 ANALYSISD_STATE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
 
 # Timeouts
+T_2 = 2
 T_5 = 5
 T_10 = 10
 T_20 = 20
