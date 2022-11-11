@@ -53,11 +53,12 @@ tags:
     - logcollector_options
 '''
 import os
+import sys
 import pytest
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX
+from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX,AGENT_DETECTOR_PREFIX
 from wazuh_testing.modules.logcollector import event_monitor as evm
 from wazuh_testing.modules import logcollector as lc
 
@@ -89,6 +90,7 @@ for count, value in enumerate(t2_configuration_parameters):
 t2_configurations = load_configuration_template(t2_configurations_path, t2_configuration_parameters,
                                                 t2_configuration_metadata)
 
+prefix = AGENT_DETECTOR_PREFIX if sys.platform == 'win32' else LOG_COLLECTOR_DETECTOR_PREFIX
 
 # Tests
 @pytest.mark.tier(level=0)
@@ -151,23 +153,23 @@ def test_ignore_default(configuration, metadata, new_file_path, truncate_monitor
     command = f"echo '{log}' >> {test_file}"
 
     # Check log file is being analized
-    evm.check_analyzing_file(file=test_file, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+    evm.check_analyzing_file(file=test_file, prefix=prefix)
     #  Insert log
     run_local_command_returning_output(command)
 
     # Check the log is read from the monitored file
-    evm.check_syslog_messages(message=log, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+    evm.check_syslog_messages(message=log, prefix=prefix)
 
     # Check response
     if metadata['matches'] is not True:
         log_found = False
         with pytest.raises(TimeoutError):
             log_found = evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='ignore',
-                                                           prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+                                                           prefix=prefix)
         assert log_found is False, lc.ERR_MSG_UNEXPECTED_IGNORE_EVENT
     else:
         evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='ignore',
-                                           prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+                                           prefix=prefix)
 
 
 @pytest.mark.tier(level=1)
@@ -231,20 +233,20 @@ def test_ignore_regex_type_values(configuration, metadata, new_file_path, trunca
     command = f"echo '{log}' >> {test_file}"
 
     # Check log file is being analized
-    evm.check_analyzing_file(file=test_file, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+    evm.check_analyzing_file(file=test_file, prefix=prefix)
     #  Insert log
     run_local_command_returning_output(command)
 
     # Check the log is read from the monitored file
-    evm.check_syslog_messages(message=log, prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+    evm.check_syslog_messages(message=log, prefix=prefix)
 
     # Check response
     if metadata['matches'] is not True:
         log_found = False
         with pytest.raises(TimeoutError):
             log_found = evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='ignore',
-                                                           prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+                                                           prefix=prefix)
         assert log_found is False, lc.ERR_MSG_UNEXPECTED_IGNORE_EVENT
     else:
         evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='ignore',
-                                           prefix=LOG_COLLECTOR_DETECTOR_PREFIX)
+                                           prefix=prefix)
