@@ -14,11 +14,6 @@
             attributes:
               - type: IGNORE_TYPE
 
-    - section: vulnerability-detector
-      elements:
-        - enabled:
-            value: 'no'
-
     - section: sca
       elements:
         - enabled:
@@ -40,13 +35,3 @@
       elements:
         - disabled:
             value: 'yes'
-
-    - section: auth
-      elements:
-        - disabled:
-            value: 'yes'
-
-    - section: rule_test
-      elements:
-        - enabled:
-            value: 'no'
