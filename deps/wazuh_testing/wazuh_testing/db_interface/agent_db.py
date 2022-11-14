@@ -56,7 +56,7 @@ def insert_hotfix(agent_id='000', scan_id=int(time()), scan_time=datetime.dateti
 def insert_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
                    hostname='centos8', architecture='x64', os_name='CentOS Linux', os_version='8.4', os_codename='',
                    os_major='8', os_minor='4', os_patch='', os_build='', os_platform='centos', sysname='Linux',
-                   release='', version='', os_release='', checksum='dummychecksum', os_display_version='', triaged=0,
+                   release='', version='', os_release='', checksum='dummychecksum', os_display_version='', triaged='0',
                    reference=''):
     """Insert the OS information in the agent database.
 
@@ -80,7 +80,7 @@ def insert_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datet
         os_release (str): Release of the OS.
         checksum (str): Checksum of the OS.
         os_display_version (str): Os displayed version
-        triaged (int): Triaged.
+        triaged (str): Triaged.
         reference (str): OS reference.
     """
     query_string = f"agent {agent_id} sql INSERT OR REPLACE INTO sys_osinfo (scan_id, scan_time, hostname, " \
@@ -97,7 +97,7 @@ def insert_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datet
 def insert_package(agent_id='000', scan_id=int(time()), format='rpm', name='custom-package-0',
                    priority='', section='Unspecified', size=99, vendor='wazuh-mocking', version='1.0.0-1.el7',
                    architecture='x64', multiarch='', description='Wazuh mocking packages', source='Wazuh QA tests',
-                   location='', triaged=0, install_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
+                   location='', triaged='0', install_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
                    scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"), checksum='dummychecksum',
                    item_id='dummyitemid'):
     """Insert a package in the agent DB.
@@ -117,7 +117,7 @@ def insert_package(agent_id='000', scan_id=int(time()), format='rpm', name='cust
         description (str): Package description.
         source (str): Package source.
         location (str): Package location.
-        triaged (int): Times that the package has been installed.
+        triaged (str): Times that the package has been installed.
         install_time (str): Installation timestamp.
         scan_time (str): Scan timestamp.
         checksum (str): Package checksum.
@@ -218,7 +218,7 @@ def delete_os_info(agent_id='000'):
 def update_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
                    hostname='centos8', architecture='x64', os_name='CentOS Linux', os_version='8.4', os_codename='',
                    os_major='8', os_minor='4', os_patch='', os_build='', os_platform='centos', sysname='Linux',
-                   release='', version='', os_release='', checksum='dummychecksum', os_display_version='', triaged=0,
+                   release='', version='', os_release='', checksum='dummychecksum', os_display_version='', triaged='0',
                    reference=''):
     """Update the sys_osinfo data from a specific agent.
 
@@ -242,7 +242,7 @@ def update_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datet
         os_release (str): Release of the OS.
         checksum (str): Checksum of the OS.
         os_display_version (str): Os displayed version
-        triaged (int): Triaged.
+        triaged (str): Triaged.
         reference (str): OS reference.
     """
     delete_os_info(agent_id)
