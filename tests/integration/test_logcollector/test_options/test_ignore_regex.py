@@ -53,9 +53,9 @@ tags:
     - logcollector_options
 '''
 import os
+import re
 import sys
 import pytest
-import time
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
@@ -76,7 +76,7 @@ t2_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_ignore
 t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_ignore_regex_type_values.yaml')
 
 # Test configurations
-test_file = os.path.join(PREFIX, 'test.log')
+test_file = os.path.join(PREFIX, 'test')
 
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 for count, value in enumerate(t1_configuration_parameters):
@@ -156,8 +156,13 @@ def test_ignore_default(configuration, metadata, new_file_path, create_file, tru
     log = metadata['log_sample']
     command = f"echo '{log}' >> {test_file}"
 
+    if sys.platform == 'win32':
+        file = re.escape(test_file)
+    else:
+        file = test_file
+
     # Check log file is being analyzed
-    evm.check_analyzing_file(file=test_file, prefix=prefix)
+    evm.check_analyzing_file(file=file, prefix=prefix)
     #  Insert log
     run_local_command_returning_output(command)
 
@@ -239,8 +244,13 @@ def test_ignore_regex_type_values(configuration, metadata, new_file_path, create
     log = metadata['log_sample']
     command = f"echo '{log}' >> {test_file}"
 
+    if sys.platform == 'win32':
+        file = re.escape(test_file)
+    else:
+        file = test_file
+
     # Check log file is being analized
-    evm.check_analyzing_file(file=test_file, prefix=prefix)
+    evm.check_analyzing_file(file=file, prefix=prefix)
     #  Insert log
     run_local_command_returning_output(command)
 

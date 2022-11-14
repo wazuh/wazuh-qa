@@ -54,6 +54,7 @@ tags:
 '''
 import os
 import sys
+import re
 import pytest
 
 from wazuh_testing.tools import PREFIX
@@ -73,7 +74,7 @@ configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_restrict_
 cases_path = os.path.join(TEST_CASES_PATH, 'cases_restrict_ignore_regex_values.yaml')
 
 # Test configurations
-test_file = os.path.join(PREFIX, 'test.log')
+test_file = os.path.join(PREFIX, 'test')
 
 configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
 for count, value in enumerate(configuration_parameters):
@@ -146,8 +147,13 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
     log = metadata['log_sample']
     command = f"echo '{log}' >> {test_file}"
 
+    if sys.platform == 'win32':
+        file = re.escape(test_file)
+    else:
+        file = test_file
+
     # Check log file is being analized
-    evm.check_analyzing_file(file=test_file, prefix=prefix)
+    evm.check_analyzing_file(file=file, prefix=prefix)
 
     #  Insert log
     run_local_command_returning_output(command)

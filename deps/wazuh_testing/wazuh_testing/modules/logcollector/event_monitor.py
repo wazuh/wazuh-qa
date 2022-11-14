@@ -1,5 +1,5 @@
 import re
-
+import sys
 from wazuh_testing import T_30, T_10, LOG_FILE_PATH
 from wazuh_testing.modules.logcollector import LOG_COLLECTOR_PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -50,8 +50,8 @@ def check_logcollector_event(file_monitor=None, callback='', error_message=None,
         error_message
 
     result = file_monitor.start(timeout=timeout, update_position=update_position, accum_results=accum_results,
-                       callback=make_logcollector_callback(callback, prefix, escape),
-                       error_message=error_message).result()
+                                callback=make_logcollector_callback(callback, prefix, escape),
+                                error_message=error_message).result()
     return result
 
 
@@ -66,7 +66,7 @@ def check_analyzing_file(file, prefix, error_message=None, file_monitor=None):
     """
     if error_message is None:
         error_message = f"Did not receive the expected 'Analyzing file: {file}' event"
-    
+
     check_logcollector_event(file_monitor=file_monitor, timeout=T_30,
                              callback=fr".*Analyzing file: '{file}'.*",
                              error_message=error_message, prefix=prefix)
@@ -84,13 +84,16 @@ def check_syslog_messages(message, prefix, error_message=None, file_monitor=None
     """
     if error_message is None:
         error_message = f"Did not receive the expected 'Reading syslog message: {message}' event"
-    callback_msg = fr"DEBUG: Reading syslog message: '{message}'"
+    if sys.platform == 'win32':
+        callback_msg = fr".*DEBUG: Reading syslog message: ''{message}' '.*"
+    else:
+        callback_msg = fr".*DEBUG: Reading syslog message: '{message}'.*"
 
     check_logcollector_event(file_monitor=file_monitor, timeout=timeout, callback=callback_msg,
                              error_message=error_message, prefix=prefix, escape=escape)
 
 
-def check_ignore_restrict_messages(message, regex, tag, prefix, error_message=None, file_monitor=None, timeout=T_10, 
+def check_ignore_restrict_messages(message, regex, tag, prefix, error_message=None, file_monitor=None, timeout=T_10,
                                    escape=False):
     """Create a callback to detect "DEBUG: Ignoring the log ... due to config" debug line.
     Args:
@@ -105,7 +108,10 @@ def check_ignore_restrict_messages(message, regex, tag, prefix, error_message=No
     """
     if error_message is None:
         error_message = f"Did not receive the expected 'Ignoring the log line: {message} due to {tag} config' event"
-    callback_msg = fr"Ignoring the log line '{message}' due to {tag} config: '{regex}'"
+    if sys.platform == 'win32':
+        callback_msg = fr"Ignoring the log line ''{message}' ' due to {tag} config: '{regex}'"
+    else:
+        callback_msg = fr"Ignoring the log line '{message}' due to {tag} config: '{regex}'"
 
-    return check_logcollector_event(file_monitor=file_monitor, timeout=timeout, callback=callback_msg, 
+    return check_logcollector_event(file_monitor=file_monitor, timeout=timeout, callback=callback_msg,
                                     error_message=error_message, prefix=prefix, escape=escape)
