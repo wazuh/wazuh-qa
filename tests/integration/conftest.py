@@ -1243,3 +1243,14 @@ def truncate_event_logs():
 
     for log_file in log_files:
         truncate_file(log_file)
+
+
+@pytest.fixture(scope='function')
+def truncate_log_file():
+    """Truncate the log file before and after the test execution.
+    """
+    truncate_file(LOG_FILE_PATH)
+
+    yield
+
+    truncate_file(LOG_FILE_PATH)

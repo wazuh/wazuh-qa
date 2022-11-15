@@ -79,11 +79,12 @@ import sys
 from datetime import datetime
 
 import pytest
-from wazuh_testing import ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON, T_2, DB_PATH
+from wazuh_testing import ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON, T_2, DB_PATH, LOG_FILE_PATH
 from wazuh_testing.db_interface import global_db
 from wazuh_testing.modules import TIER0, SERVER, AGENT
+from wazuh_testing.tools import get_service
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
-from wazuh_testing.tools.file import remove_file
+from wazuh_testing.tools.file import remove_file, truncate_file
 from wazuh_testing.modules.syscollector import event_monitor as evm
 
 
@@ -96,7 +97,8 @@ CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Variables
-daemons_handler_configuration = {'daemons': [ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON], 'ignore_errors': True}
+d_list = [ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON] if get_service() == 'manager' else [DB_DAEMON, MODULES_DAEMON]
+daemons_handler_configuration = {'daemons': d_list, 'ignore_errors': True}
 local_internal_options = {'wazuh_modules.debug': 2}
 
 # T1 Parameters
@@ -145,7 +147,7 @@ def remove_agent_syscollector_info(agent_id='000'):
 
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_config_metadata), ids=t1_case_ids)
 def test_syscollector_deactivation(configuration, metadata, set_wazuh_configuration,
-                                   configure_local_internal_options_module, truncate_monitored_files,
+                                   configure_local_internal_options_module, truncate_log_file,
                                    daemons_handler_function):
     '''
     description: Check that the module is disabled.
@@ -173,9 +175,9 @@ def test_syscollector_deactivation(configuration, metadata, set_wazuh_configurat
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - truncate_monitored_files:
+        - truncate_log_file:
             type: fixture
-            brief: Truncate all the log files and json alerts files before and after the test execution.
+            brief: Truncate the log file before and after the test execution.
         - daemons_handler_function:
             type: fixture
             brief: Handler of Wazuh daemons for each test case.
@@ -192,7 +194,7 @@ def test_syscollector_deactivation(configuration, metadata, set_wazuh_configurat
 
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_config_metadata), ids=t2_case_ids)
 def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_configuration,
-                                         configure_local_internal_options_module, truncate_monitored_files,
+                                         configure_local_internal_options_module, truncate_log_file,
                                          daemons_handler_function):
     '''
     description: Check that each scan is disabled.
@@ -220,9 +222,9 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - truncate_monitored_files:
+        - truncate_log_file:
             type: fixture
-            brief: Truncate all the log files and json alerts files before and after the test execution.
+            brief: Truncate the log file before and after the test execution.
         - daemons_handler_function:
             type: fixture
             brief: Handler of Wazuh daemons for each test case.
@@ -264,7 +266,7 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
 
 @pytest.mark.parametrize('configuration, metadata', zip(t3_configurations, t3_config_metadata), ids=t3_case_ids)
 def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_configuration,
-                                             configure_local_internal_options_module, truncate_monitored_files,
+                                             configure_local_internal_options_module, truncate_log_file,
                                              daemons_handler_function):
     '''
     description: Check the behaviour of the module while setting invalid configurations.
@@ -292,9 +294,9 @@ def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - truncate_monitored_files:
+        - truncate_log_file:
             type: fixture
-            brief: Truncate all the log files and json alerts files before and after the test execution.
+            brief: Truncate the log file before and after the test execution.
         - daemons_handler_function:
             type: fixture
             brief: Handler of Wazuh daemons for each test case.
@@ -332,7 +334,7 @@ def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_
 @pytest.mark.parametrize('configuration, metadata', zip(t4_configurations, t4_config_metadata), ids=t4_case_ids)
 @pytest.mark.xfail(reason='Bug in interval option when using empty syscollector config block.')
 def test_syscollector_default_values(configuration, metadata, set_wazuh_configuration,
-                                     configure_local_internal_options_module, truncate_monitored_files,
+                                     configure_local_internal_options_module, truncate_log_file,
                                      daemons_handler_function):
     '''
     description: Check that the module sets the default values when the configuration block is empty.
@@ -360,9 +362,9 @@ def test_syscollector_default_values(configuration, metadata, set_wazuh_configur
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - truncate_monitored_files:
+        - truncate_log_file:
             type: fixture
-            brief: Truncate all the log files and json alerts files before and after the test execution.
+            brief: Truncate the log file before and after the test execution.
         - daemons_handler_function:
             type: fixture
             brief: Handler of Wazuh daemons for each test case.
@@ -379,7 +381,7 @@ def test_syscollector_default_values(configuration, metadata, set_wazuh_configur
 
 @pytest.mark.parametrize('configuration, metadata', zip(t5_configurations, t5_config_metadata), ids=t5_case_ids)
 def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
-                              configure_local_internal_options_module, truncate_monitored_files,
+                              configure_local_internal_options_module, truncate_log_file,
                               remove_agent_syscollector_info, daemons_handler_function):
     '''
     description: Check that the module sets the default values when the configuration block is empty.
@@ -407,9 +409,9 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - truncate_monitored_files:
+        - truncate_log_file:
             type: fixture
-            brief: Truncate all the log files and json alerts files before and after the test execution.
+            brief: Truncate the log file before and after the test execution.
         - remove_agent_syscollector_info:
             type: fixture
             brief: Removes the previous scan information.
