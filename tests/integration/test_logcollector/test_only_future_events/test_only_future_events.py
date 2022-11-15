@@ -80,7 +80,7 @@ t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_only_future_events.yaml')
 
 temp_dir = tempfile.gettempdir()
 log_test_path = os.path.join(temp_dir, 'wazuh-testing', 'test.log')
-LOG_LINE = 'Jan  1 00:00:00 localhost test[0]: line='
+LOG_LINE = 'Jan  1 00:00:00 localhost test: line='
 prefix = LOG_COLLECTOR_PREFIX
 local_internal_options = {'logcollector.vcheck_files': '5', 'logcollector.debug': '2', 'windows.debug': '2'}
 
@@ -210,7 +210,7 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration,
     message = f"{LOG_LINE}{last_line}"
     evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                               error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
-                              timeout=T_10, escape=True)
+                              timeout=T_10, escape=False)
     # Stop logcollector daemon
     control_service('stop', daemon=LOGCOLLECTOR_DAEMON)
 
@@ -227,12 +227,12 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration,
         message = f"{LOG_LINE}{first_next_line}"
         evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                                   error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
-                                  timeout=T_20, escape=True)
+                                  timeout=T_20, escape=False)
         # Check last log line
         message = f"{LOG_LINE}{current_line + 1}"
         evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                                   error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
-                                  timeout=T_20, escape=True)
+                                  timeout=T_20, escape=False)
     # if only_future_events yes, logcollector should NOT detect the log lines written while it was stopped
     else:
         message = f"{LOG_LINE}{first_next_line}"
@@ -241,7 +241,7 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration,
             message = f"{LOG_LINE}{first_next_line}"
             evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                                       error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
-                                      timeout=T_10, escape=True)
+                                      timeout=T_10, escape=False)
 
         # Check that the last written line is not read
         with pytest.raises(TimeoutError):
@@ -249,7 +249,7 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration,
             message = f"{LOG_LINE}{current_line + 1}"
             evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                                       error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
-                                      timeout=T_10, escape=True)
+                                      timeout=T_10, escape=False)
 
         # Check that if we write new data when the daemon is turned on, it is read normally
         current_line = logcollector.add_log_data(log_path=metadata['location'], log_line_message=LOG_LINE,
@@ -257,4 +257,4 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration,
         message = f"{LOG_LINE}{current_line + 1}"
         evm.check_syslog_messages(file_monitor=log_monitor, message=message,
                                   error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix,
-                                  timeout=T_10, escape=True)
+                                  timeout=T_10, escape=False)
