@@ -84,10 +84,8 @@ def check_syslog_messages(message, prefix, error_message=None, file_monitor=None
     """
     if error_message is None:
         error_message = f"Did not receive the expected 'Reading syslog message: {message}' event"
-    if sys.platform == 'win32':
-        callback_msg = fr".*DEBUG: Reading syslog message: ''{message}' '.*"
-    else:
-        callback_msg = fr".*DEBUG: Reading syslog message: '{message}'.*"
+
+    callback_msg = fr".*DEBUG: Reading syslog message: '{message}'.*"
 
     check_logcollector_event(file_monitor=file_monitor, timeout=timeout, callback=callback_msg,
                              error_message=error_message, prefix=prefix, escape=escape)
@@ -108,10 +106,8 @@ def check_ignore_restrict_messages(message, regex, tag, prefix, error_message=No
     """
     if error_message is None:
         error_message = f"Did not receive the expected 'Ignoring the log line: {message} due to {tag} config' event"
-    if sys.platform == 'win32':
-        callback_msg = fr"Ignoring the log line ''{message}' ' due to {tag} config: '{regex}'"
-    else:
-        callback_msg = fr"Ignoring the log line '{message}' due to {tag} config: '{regex}'"
+
+    callback_msg = fr"Ignoring the log line '{message}' due to {tag} config: '{regex}'"
 
     return check_logcollector_event(file_monitor=file_monitor, timeout=timeout, callback=callback_msg,
                                     error_message=error_message, prefix=prefix, escape=escape)

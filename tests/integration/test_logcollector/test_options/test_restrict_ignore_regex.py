@@ -145,7 +145,7 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
         - r".*wazuh-logcollector.*DEBUG: Ignoring the log line '{message}' due to {tag} config: '{regex}'"
     '''
     log = metadata['log_sample']
-    command = f"echo '{log}' >> {test_file}"
+    command = f"echo {log}>> {test_file}"
 
     if sys.platform == 'win32':
         file = re.escape(test_file)
