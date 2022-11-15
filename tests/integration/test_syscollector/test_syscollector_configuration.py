@@ -79,7 +79,7 @@ import sys
 from datetime import datetime
 
 import pytest
-from wazuh_testing import ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON, T_2, DB_PATH, LOG_FILE_PATH
+from wazuh_testing import ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON, T_2, DB_PATH
 from wazuh_testing.db_interface import global_db
 from wazuh_testing.modules import TIER0, SERVER, AGENT
 from wazuh_testing.tools import get_service
@@ -97,8 +97,11 @@ CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Variables
-d_list = [ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON] if get_service() == 'manager' else [DB_DAEMON, MODULES_DAEMON]
-daemons_handler_configuration = {'daemons': d_list, 'ignore_errors': True}
+if get_service() == 'wazuh-manager':
+    daemons_handler_configuration = {'daemons': [ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON], 'ignore_errors': True}
+else:
+    daemons_handler_configuration = {'all_daemons': True, 'ignore_errors': True} if sys.platform == 'win32' else \
+        {'daemons': [DB_DAEMON, MODULES_DAEMON], 'ignore_errors': True}
 local_internal_options = {'wazuh_modules.debug': 2}
 
 # T1 Parameters
@@ -132,6 +135,7 @@ t5_config_parameters, t5_config_metadata, t5_case_ids = get_test_cases_data(t5_c
 t5_configurations = load_configuration_template(t5_config_path, t5_config_parameters, t5_config_metadata)
 
 
+#Fixtures
 @pytest.fixture(scope='function')
 def remove_agent_syscollector_info(agent_id='000'):
     """Removes the previous scan information.
@@ -145,6 +149,7 @@ def remove_agent_syscollector_info(agent_id='000'):
     remove_file(os.path.join(DB_PATH, f"{agent_id}.db"))
 
 
+# Tests
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_config_metadata), ids=t1_case_ids)
 def test_syscollector_deactivation(configuration, metadata, set_wazuh_configuration,
                                    configure_local_internal_options_module, truncate_log_file,
@@ -248,7 +253,7 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
     time_scan_str = evm.check_scan_started(prefix=prefix).group(1)
     time_module_started = datetime.strptime(time_module_str, '%Y/%m/%d %H:%M:%S')
     time_scan_started = datetime.strptime(time_scan_str, '%Y/%m/%d %H:%M:%S')
-    real_interval = (time_scan_started - time_module_started).total_seconds()
+    real_interval = int((time_scan_started - time_module_started).total_seconds())
     margin = scan_interval + 1
 
     # Check that the scan is triggered after the configured time interval, allowing 1 second as margin

@@ -917,7 +917,6 @@ def daemons_handler(request):
         in order to use this fixture along with invalid configuration. Default `False`
 
     Args:
-        get_configuration (fixture): Gets the current configuration of the test.
         request (fixture): Provide information on the executing test function.
     """
     daemons = []
