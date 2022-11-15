@@ -84,7 +84,7 @@ from wazuh_testing.db_interface import global_db
 from wazuh_testing.modules import TIER0, SERVER, AGENT
 from wazuh_testing.tools import get_service
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
-from wazuh_testing.tools.file import remove_file, truncate_file
+from wazuh_testing.tools.file import remove_file
 from wazuh_testing.modules.syscollector import event_monitor as evm
 
 
@@ -146,7 +146,10 @@ def remove_agent_syscollector_info(agent_id='000'):
     # Remove from global db
     global_db.delete_agent(agent_id)
     # Remove agent id DB file
-    remove_file(os.path.join(DB_PATH, f"{agent_id}.db"))
+    if sys.platform == 'win32':
+        remove_file(DB_PATH)
+    else:
+        remove_file(os.path.join(DB_PATH, f"{agent_id}.db"))
 
 
 # Tests
