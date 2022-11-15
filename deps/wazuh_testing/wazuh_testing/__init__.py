@@ -13,7 +13,7 @@ from collections import defaultdict
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
-    DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'syscollector', 'db', 'local.db')
+    SYSCOLLECTOR_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'syscollector', 'db', 'local.db')
 else:
     if sys.platform == 'darwin':
         WAZUH_PATH = os.path.join("/", "Library", "Ossec")

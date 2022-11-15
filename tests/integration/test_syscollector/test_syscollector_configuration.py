@@ -147,7 +147,7 @@ def remove_agent_syscollector_info(agent_id='000'):
     global_db.delete_agent(agent_id)
     # Remove agent id DB file
     if sys.platform == 'win32':
-        remove_file(DB_PATH)
+        remove_file(SYSCOLLECTOR_DB_PATH)
     else:
         remove_file(os.path.join(DB_PATH, f"{agent_id}.db"))
 
