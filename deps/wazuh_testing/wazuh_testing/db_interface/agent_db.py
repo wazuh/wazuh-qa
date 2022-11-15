@@ -355,8 +355,8 @@ def insert_vulnerability_in_agent_inventory(agent_id='000', name='', version='',
         published (str): Vulnerability published.
         updated (str): Vulnerability updated.
     """
-    query_wdb(f"agent {agent_id} sql INSERT OR REPLACE INTO vuln_cves (name, version, architecture, cve, " \
-              f"detection_time, severity, cvss2_score, cvss3_score, reference, type, status, external_references," \
-              f" condition, title, published, updated) VALUES ('{name}', '{version}', '{architecture}', '{cve}', " \
-              f"'{detection_time}', '{severity}', {cvss2_score}, {cvss3_score},'{reference}', '{type}', '{status}',  " \
+    query_wdb(f"agent {agent_id} sql INSERT OR REPLACE INTO vuln_cves (name, version, architecture, cve, "
+              f"detection_time, severity, cvss2_score, cvss3_score, reference, type, status, external_references,"
+              f" condition, title, published, updated) VALUES ('{name}', '{version}', '{architecture}', '{cve}', "
+              f"'{detection_time}', '{severity}', {cvss2_score}, {cvss3_score},'{reference}', '{type}', '{status}', "
               f"'{external_references}', '{condition}', '{title}', '{published}', '{updated}')")
