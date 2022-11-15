@@ -429,7 +429,7 @@
     PORTS_SCAN: 'yes'
     ALL_PORTS: 'no'
     PROCESSES_SCAN: 'yes'
-    HOTFIXES_SCAN: 'invalid'
+    HOTFIXES_SCAN: invalid
     MAX_EPS: 10
   metadata:
     field: hotfixes

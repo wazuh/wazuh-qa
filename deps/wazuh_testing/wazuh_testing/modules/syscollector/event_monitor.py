@@ -4,9 +4,8 @@ from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
 
-def check_syscollector_event(file_monitor=None, callback='', error_message=None, update_position=True,
-                              timeout=T_10, prefix=sysc.SYSCOLLECTOR_PREFIX, accum_results=1,
-                              file_to_monitor=LOG_FILE_PATH):
+def check_syscollector_event(file_monitor=None, callback='', error_message=None, update_position=True, timeout=T_10,
+                             prefix=sysc.SYSCOLLECTOR_PREFIX, accum_results=1, file_to_monitor=LOG_FILE_PATH):
     """Check if a syscollector event occurs
 
     Args:
@@ -90,8 +89,8 @@ def check_disabled(timeout=T_5):
 
 
 def check_config(disabled='no', interval=3600, scan_on_start='yes', hardware='yes', os='yes', ports='yes',
-                              network='yes', packages='yes', ports_all='no', processes='yes', hotfixes='yes',
-                              max_eps=10, timeout=T_5):
+                 network='yes', packages='yes', ports_all='no', processes='yes', hotfixes='yes', max_eps=10,
+                 timeout=T_5):
     """Check if the syscollector configuration was applied correctly.
 
     Args:
@@ -110,8 +109,7 @@ def check_config(disabled='no', interval=3600, scan_on_start='yes', hardware='ye
     """
     msg = 'DEBUG:.+"disabled":"{0}","scan-on-start":"{1}","interval":{2},'.format(disabled, scan_on_start, interval)
     msg += '"network":"{0}","os":"{1}","hardware":"{2}","packages":"{3}","ports":"{4}",'.format(network, os, hardware,
-        packages, ports
-    )
+                                                                                                packages, ports)
     msg += '"ports_all":"{0}","processes":"{1}","sync_max_eps":{2}.+'.format(ports_all, processes, max_eps)
 
     check_syscollector_event(callback=msg, timeout=timeout)

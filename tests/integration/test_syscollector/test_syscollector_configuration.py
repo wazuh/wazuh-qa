@@ -135,7 +135,7 @@ t5_config_parameters, t5_config_metadata, t5_case_ids = get_test_cases_data(t5_c
 t5_configurations = load_configuration_template(t5_config_path, t5_config_parameters, t5_config_metadata)
 
 
-#Fixtures
+# Fixtures
 @pytest.fixture(scope='function')
 def remove_agent_syscollector_info(agent_id='000'):
     """Removes the previous scan information.
@@ -249,8 +249,9 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
     scan_interval = metadata['interval_scan']
 
     check_functions = [evm.check_hardware_scan_started, evm.check_os_scan_started, evm.check_network_scan_started,
-        evm.check_packages_scan_started, evm.check_ports_scan_started, evm.check_processes_scan_started]
-    if sys.platform == 'win32': check_functions.append(evm.check_hotfixes_scan_started)
+                       evm.check_packages_scan_started, evm.check_ports_scan_started, evm.check_processes_scan_started]
+    if sys.platform == 'win32':
+        check_functions.append(evm.check_hotfixes_scan_started)
 
     prefix = r'(.+)\swazuh-modulesd:syscollector.+'
     time_module_str = evm.check_startup_finished(prefix=prefix).group(1)
@@ -323,7 +324,8 @@ def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_
     non_critical_fields = ('max_eps')
 
     if field is not None:
-        if field == 'hotfixes' and sys.platform != 'win32': return True
+        if field == 'hotfixes' and sys.platform != 'win32':
+            return True
 
         evm.check_tag_error(field=field)
 
@@ -442,8 +444,9 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
 
     # Check that each scan was accomplished
     scan_checks = [evm.check_hardware_scan_finished, evm.check_os_scan_finished, evm.check_network_scan_finished,
-        evm.check_packages_scan_finished, evm.check_ports_scan_finished, evm.check_processes_scan_finished]
-    if sys.platform == 'win32': scan_checks.append(evm.check_hotfixes_scan_finished)
+                   evm.check_packages_scan_finished, evm.check_ports_scan_finished, evm.check_processes_scan_finished]
+    if sys.platform == 'win32':
+        scan_checks.append(evm.check_hotfixes_scan_finished)
 
     for check in scan_checks:
         # Run check
