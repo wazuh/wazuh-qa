@@ -60,6 +60,7 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 - API - Test the format of the logs (JSON logs support) ([#2635](https://github.com/wazuh/wazuh-qa/pull/2635/)) \- (Tests)
 - Add a test to check the multigroups shared file content. ([#2746](https://github.com/wazuh/wazuh-qa/pull/2746)) \- (Framework + Tests)
 - Add wpk test documentation ([#2409](https://github.com/wazuh/wazuh-qa/pull/2409)) \- (Documentation)
+- Add test to check the Syscollector configuration. ([#3584](https://github.com/wazuh/wazuh-qa/pull/3584)) \- (Framework + Tests)
 
 ### Changed
 
