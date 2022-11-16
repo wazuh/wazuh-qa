@@ -76,6 +76,7 @@ state_interval = [-2, 753951, 'dummy', 5, 30, 10, 15]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 state_interval_update_timeout = 10
 
+
 # Fixtures
 @pytest.fixture(scope="module", params=state_interval)
 def get_local_internal_options(request):

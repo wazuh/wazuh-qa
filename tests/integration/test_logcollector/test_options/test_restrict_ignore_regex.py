@@ -82,6 +82,7 @@ for count, value in enumerate(configuration_parameters):
 configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
 prefix = lc.LOG_COLLECTOR_PREFIX
 
+
 # Tests
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
