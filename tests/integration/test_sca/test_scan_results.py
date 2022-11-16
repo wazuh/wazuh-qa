@@ -49,7 +49,7 @@ CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_scan_results.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_enabled.yaml')
 cases_path = os.path.join(TEST_CASES_PATH, 'cases_scan_results.yaml')
 
 # Test configurations
