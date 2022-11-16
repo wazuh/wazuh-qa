@@ -100,13 +100,15 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Variables
 local_internal_options = {'wazuh_modules.debug': 2}
-if sys.platform == 'win32':
+if get_service() == 'wazuh-manager':
+    daemons_handler_configuration = {'daemons': [ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON], 'ignore_errors': True}
+elif sys.platform == 'win32':
     daemons_handler_configuration = {'all_daemons': True, 'ignore_errors': True}
     local_internal_options = {'windows.debug': 2}
-elif get_service() == 'wazuh-manager':
-    daemons_handler_configuration = {'daemons': [ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON], 'ignore_errors': True}
-else:
+elif sys.platform != 'darwin':
     daemons_handler_configuration = {'daemons': [DB_DAEMON, MODULES_DAEMON], 'ignore_errors': True}
+else:
+    daemons_handler_configuration = {'daemons': [MODULES_DAEMON], 'ignore_errors': True}
 
 # T1 Parameters
 t1_config_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_syscollector.yaml')
@@ -147,7 +149,7 @@ def remove_agent_syscollector_info(agent_id='000'):
     Args:
         agent_id (str): ID of the agent whose information will be removed.
     """
-    if sys.platform == 'win32':
+    if get_service() == 'wazuh-agent':
         # Remove local DB
         remove_file(SYSCOLLECTOR_DB_PATH)
     else:
