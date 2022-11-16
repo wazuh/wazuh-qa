@@ -54,6 +54,7 @@ tags:
     - logcollector_only_future_events
 '''
 import os
+import re
 import tempfile
 import sys
 import pytest
@@ -197,8 +198,13 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration,
     current_line = 0
     log_monitor = setup_log_monitor
 
+    if sys.platform == 'win32':
+        file = re.escape(log_test_path)
+    else:
+        file = log_test_path
+
     # Ensure that the file is being analyzed
-    evm.check_analyzing_file(file_monitor=log_monitor, file=log_test_path,
+    evm.check_analyzing_file(file_monitor=log_monitor, file=file,
                              error_message=GENERIC_CALLBACK_ERROR_COMMAND_MONITORING, prefix=prefix)
 
     # Add n log lines corresponding to 1KB
