@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Added
 
+- Add new test to check if syslog message are parsed correctrly in the `alerts.json` file ([#3609](https://github.com/wazuh/wazuh-qa/pull/3609)) \- (Framework + Tests)
 - Add new logging tests for analysisd EPS limitation ([#3509](https://github.com/wazuh/wazuh-qa/pull/3509)) \- (Framework + Tests)
 - New testing suite for checking analysisd EPS limitation ([#2947](https://github.com/wazuh/wazuh-qa/pull/3181)) \- (Framework + Tests)
 - Add stress results comparator tool ([#3478](https://github.com/wazuh/wazuh-qa/pull/3478)) \- (Tools)
@@ -34,7 +35,7 @@ Release report: TBD
 
 ### Changed
 
-- Adapt analysisd integration tests for EPS ([#3559](https://github.com/wazuh/wazuh-qa/issues/3559)) \- (Tests) 
+- Adapt analysisd integration tests for EPS ([#3559](https://github.com/wazuh/wazuh-qa/issues/3559)) \- (Tests)
 - Improve `test_remove_audit` FIM test to retry install and remove command ([#3562](https://github.com/wazuh/wazuh-qa/pull/3562)) \- (Tests)
 - Skip unstable integration tests for gcloud ([#3531](https://github.com/wazuh/wazuh-qa/pull/3531)) \- (Tests)
 - Skip unstable integration test for agentd ([#3538](https://github.com/wazuh/wazuh-qa/pull/3538))
