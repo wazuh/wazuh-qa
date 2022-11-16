@@ -259,8 +259,8 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
         check_functions.append(evm.check_hotfixes_scan_started)
 
     prefix = r'(.+)\swazuh-modulesd:syscollector.+'
-    time_module_str = evm.check_startup_finished(prefix=prefix).group(1)
-    time_scan_str = evm.check_scan_started(prefix=prefix).group(1)
+    time_module_str = evm.check_startup_finished(file_monitor=file_monitor, prefix=prefix).group(1)
+    time_scan_str = evm.check_scan_started(file_monitor=file_monitor, prefix=prefix).group(1)
     time_module_started = datetime.strptime(time_module_str, '%Y/%m/%d %H:%M:%S')
     time_scan_started = datetime.strptime(time_scan_str, '%Y/%m/%d %H:%M:%S')
     real_interval = int((time_scan_started - time_module_started).total_seconds())
