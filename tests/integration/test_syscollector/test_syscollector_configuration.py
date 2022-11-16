@@ -79,7 +79,8 @@ import sys
 from datetime import datetime
 
 import pytest
-from wazuh_testing import ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON, T_2, DB_PATH, LOG_FILE_PATH, SYSCOLLECTOR_DB_PATH
+from wazuh_testing import ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON, DB_PATH, LOG_FILE_PATH, SYSCOLLECTOR_DB_PATH, \
+                          T_10
 from wazuh_testing.db_interface import global_db
 from wazuh_testing.modules import TIER0, SERVER, AGENT
 from wazuh_testing.tools import get_service
@@ -202,7 +203,7 @@ def test_syscollector_deactivation(configuration, metadata, set_wazuh_configurat
         - The `case_test_syscollector_deactivation.yaml` file provides the test cases.
     '''
     file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
-    evm.check_disabled(file_monitor=file_monitor)
+    evm.check_disabled(file_monitor=file_monitor, timeout=T_10)
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_config_metadata), ids=t2_case_ids)
@@ -243,14 +244,12 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
             brief: Handler of Wazuh daemons for each test case.
 
     assertions:
-        - Check if the scan is triggered after N seconds.
         - Check if a specific scan is disabled and not triggered.
 
     input_description:
         - The `configuration_syscollector_scans_disabled.yaml` file provides the module configuration for this test.
         - The `case_test_all_scans_disabled.yaml` file provides the test cases.
     '''
-    scan_interval = metadata['interval_scan']
     file_monitor = None
     check_functions = [evm.check_hardware_scan_started, evm.check_os_scan_started, evm.check_network_scan_started,
                        evm.check_packages_scan_started, evm.check_ports_scan_started, evm.check_processes_scan_started]
@@ -258,24 +257,12 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
         file_monitor = FileMonitor(LOG_FILE_PATH)
         check_functions.append(evm.check_hotfixes_scan_started)
 
-    prefix = r'(.+)\swazuh-modulesd:syscollector.+'
-    time_module_str = evm.check_startup_finished(file_monitor=file_monitor, prefix=prefix).group(1)
-    time_scan_str = evm.check_scan_started(file_monitor=file_monitor, prefix=prefix).group(1)
-    time_module_started = datetime.strptime(time_module_str, '%Y/%m/%d %H:%M:%S')
-    time_scan_started = datetime.strptime(time_scan_str, '%Y/%m/%d %H:%M:%S')
-    real_interval = int((time_scan_started - time_module_started).total_seconds())
-    margin = scan_interval + 1
-
-    # Check that the scan is triggered after the configured time interval, allowing 1 second as margin
-    assert scan_interval <= real_interval <= margin, 'The scan was not triggered in the expected time interval.\n' \
-                                                     f"Maximum wait time for scanning: {margin}\n" \
-                                                     f"Time it took to start the scan: {real_interval}\n"
     # Check that no scan is triggered
     for check_f in check_functions:
         # Expected: the function must throw a TimoutError
         with pytest.raises(TimeoutError):
             # Overwrite the default timeout (because the test configuration)
-            check_f(file_monitor=file_monitor, timeout=scan_interval)
+            check_f(file_monitor=file_monitor, timeout=T_10)
             pytest.fail(f"It seems that a scan was triggered. This check has a match in the log: {check_f.__name__}")
 
 
@@ -333,18 +320,18 @@ def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_
         if field == 'hotfixes' and sys.platform != 'win32':
             return True
 
-        evm.check_tag_error(file_monitor=file_monitor, field=field)
+        evm.check_tag_error(file_monitor=file_monitor, field=field, timeout=T_10)
 
         if field in non_critical_fields:
             # Check that the module has started if the field is not critical
-            evm.check_has_started(file_monitor=file_monitor, timeout=T_2)
+            evm.check_has_started(file_monitor=file_monitor, timeout=T_10)
             return True
     else:
-        evm.check_attr_error(file_monitor=file_monitor, attr=attribute)
+        evm.check_attr_error(file_monitor=file_monitor, attr=attribute, timeout=T_10)
 
     # Check that the module does not start
     with pytest.raises(TimeoutError):
-        evm.check_has_started(file_monitor=file_monitor, timeout=T_2)
+        evm.check_has_started(file_monitor=file_monitor, timeout=T_10)
         pytest.fail(f"The module has started anyway. This behaviour is not the expected.")
 
 
@@ -394,7 +381,7 @@ def test_syscollector_default_values(configuration, metadata, set_wazuh_configur
         - The `case_test_default_values.yaml` file provides the test cases.
     '''
     file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
-    evm.check_config(file_monitor=file_monitor)
+    evm.check_config(file_monitor=file_monitor, timeout=T_10)
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t5_configurations, t5_config_metadata), ids=t5_case_ids)
@@ -446,9 +433,9 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
         - The `case_test_scanning.yaml` file provides the test cases.
     '''
     file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
-    evm.check_has_started(file_monitor=file_monitor)
+    evm.check_has_started(file_monitor=file_monitor, timeout=T_10)
     # Check general scan has started
-    evm.check_scan_started(file_monitor=file_monitor)
+    evm.check_scan_started(file_monitor=file_monitor, timeout=T_10)
 
     # Check that each scan was accomplished
     scan_checks = [evm.check_hardware_scan_finished, evm.check_os_scan_finished, evm.check_network_scan_finished,
@@ -458,9 +445,9 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
 
     for check in scan_checks:
         # Run check
-        check(file_monitor=file_monitor)
+        check(file_monitor=file_monitor, timeout=T_10)
 
     # Check general scan has finished
-    evm.check_scan_finished(file_monitor=file_monitor)
+    evm.check_scan_finished(file_monitor=file_monitor, timeout=T_10)
     # Check that the sync has finished
-    evm.check_sync_finished(file_monitor=file_monitor)
+    evm.check_sync_finished(file_monitor=file_monitor, timeout=T_10)
