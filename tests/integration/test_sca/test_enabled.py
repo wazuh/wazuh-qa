@@ -114,7 +114,7 @@ def test_enabled(configuration, metadata, local_internal_options, prepare_cis_po
     assertions:
         - Verify that when the `enabled` option is set to `yes`, the SCA module is enabled.
         - Verify the sca scan starts.
-        - verify the sca scan ends.
+        - Verify the sca scan ends.
 
     input_description:
         - The `cases_scan_results.yaml` file provides the module configuration for this test.
