@@ -19,6 +19,7 @@ def syslog_simulator(parameters):
     run_parameters += f"-m '{parameters['message']}' " if 'message' in parameters else ''
     run_parameters += f"--numbered-messages {parameters['numbered_messages']} " if 'numbered_messages' in parameters \
         else ''
+    run_parameters += f"-p '{parameters['port']}' " if 'port' in parameters else ''
     run_parameters = run_parameters.strip()
 
     # Run the syslog simulator tool with custom parameters
