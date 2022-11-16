@@ -79,12 +79,13 @@ import sys
 from datetime import datetime
 
 import pytest
-from wazuh_testing import ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON, T_2, DB_PATH
+from wazuh_testing import ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON, T_2, DB_PATH, LOG_FILE_PATH, SYSCOLLECTOR_DB_PATH
 from wazuh_testing.db_interface import global_db
 from wazuh_testing.modules import TIER0, SERVER, AGENT
 from wazuh_testing.tools import get_service
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.tools.file import remove_file
+from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.syscollector import event_monitor as evm
 
 
@@ -97,12 +98,15 @@ CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Variables
-if get_service() == 'wazuh-manager':
+local_internal_options = {'wazuh_modules.debug': 2}
+if sys.platform == 'win32':
+    daemons_handler_configuration = {'all_daemons': True, 'ignore_errors': True}
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    local_internal_options = {'windows.debug': 2}
+elif get_service() == 'wazuh-manager':
     daemons_handler_configuration = {'daemons': [ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON], 'ignore_errors': True}
 else:
-    daemons_handler_configuration = {'all_daemons': True, 'ignore_errors': True} if sys.platform == 'win32' else \
-        {'daemons': [DB_DAEMON, MODULES_DAEMON], 'ignore_errors': True}
-local_internal_options = {'wazuh_modules.debug': 2}
+    daemons_handler_configuration = {'daemons': [DB_DAEMON, MODULES_DAEMON], 'ignore_errors': True}
 
 # T1 Parameters
 t1_config_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_syscollector.yaml')
@@ -198,7 +202,7 @@ def test_syscollector_deactivation(configuration, metadata, set_wazuh_configurat
         - The `configuration_syscollector.yaml` file provides the module configuration for this test.
         - The `case_test_syscollector_deactivation.yaml` file provides the test cases.
     '''
-    evm.check_disabled()
+    evm.check_disabled(file_monitor=file_monitor if sys.platform == 'win32' else None)
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_config_metadata), ids=t2_case_ids)
@@ -270,7 +274,7 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
         # Expected: the function must throw a TimoutError
         with pytest.raises(TimeoutError):
             # Overwrite the default timeout (because the test configuration)
-            check_f(timeout=scan_interval)
+            check_f(file_monitor=file_monitor if sys.platform == 'win32' else None, timeout=scan_interval)
             pytest.fail(f"It seems that a scan was triggered. This check has a match in the log: {check_f.__name__}")
 
 
@@ -327,23 +331,23 @@ def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_
         if field == 'hotfixes' and sys.platform != 'win32':
             return True
 
-        evm.check_tag_error(field=field)
+        evm.check_tag_error(file_monitor=file_monitor if sys.platform == 'win32' else None, field=field)
 
         if field in non_critical_fields:
             # Check that the module has started if the field is not critical
-            evm.check_has_started(timeout=T_2)
+            evm.check_has_started(file_monitor=file_monitor if sys.platform == 'win32' else None, timeout=T_2)
             return True
     else:
-        evm.check_attr_error(attr=attribute)
+        evm.check_attr_error(file_monitor=file_monitor if sys.platform == 'win32' else None, attr=attribute)
 
     # Check that the module does not start
     with pytest.raises(TimeoutError):
-        evm.check_has_started(timeout=T_2)
+        evm.check_has_started(file_monitor=file_monitor if sys.platform == 'win32' else None, timeout=T_2)
         pytest.fail(f"The module has started anyway. This behaviour is not the expected.")
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t4_configurations, t4_config_metadata), ids=t4_case_ids)
-@pytest.mark.xfail(reason='Bug in interval option when using empty syscollector config block.')
+@pytest.mark.xfail(reason='Reported in wazuh/wazuh#15413')
 def test_syscollector_default_values(configuration, metadata, set_wazuh_configuration,
                                      configure_local_internal_options_module, truncate_log_file,
                                      daemons_handler_function):
@@ -387,7 +391,7 @@ def test_syscollector_default_values(configuration, metadata, set_wazuh_configur
         - The `configuration_syscollector_no_tags.yaml` file provides the module configuration for this test.
         - The `case_test_default_values.yaml` file provides the test cases.
     '''
-    evm.check_config()
+    evm.check_config(file_monitor=file_monitor if sys.platform == 'win32' else None)
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t5_configurations, t5_config_metadata), ids=t5_case_ids)
@@ -438,7 +442,7 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
         - The `configuration_syscollector.yaml` file provides the module configuration for this test.
         - The `case_test_scanning.yaml` file provides the test cases.
     '''
-    evm.check_has_started()
+    evm.check_has_started(file_monitor=file_monitor if sys.platform == 'win32' else None)
     # Check general scan has started
     evm.check_scan_started()
 

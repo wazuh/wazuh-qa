@@ -20,6 +20,7 @@ else:
     else:
         WAZUH_PATH = os.path.join("/var", "ossec")
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    SYSCOLLECTOR_DB_PATH = None
 
 
 WAZUH_CONF_PATH = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
