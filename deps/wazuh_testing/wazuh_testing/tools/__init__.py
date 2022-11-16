@@ -88,6 +88,10 @@ else:
     except (ImportError, KeyError, ModuleNotFoundError):
         pass
 
+# Local Internal Options values
+MODULESD_DEBUG = 'wazuh_modules.debug'
+VERBOSE_DEBUG_OUTPUT = '2'
+
 
 def get_version():
 

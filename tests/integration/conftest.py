@@ -1017,7 +1017,7 @@ def set_wazuh_configuration(configuration):
     conf.write_wazuh_conf(backup_config)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def set_wazuh_configuration_with_local_internal_options(configuration, set_wazuh_configuration,
                                                         set_local_internal_options, local_internal_options):
     """Set wazuh configuration
@@ -1031,7 +1031,7 @@ def set_wazuh_configuration_with_local_internal_options(configuration, set_wazuh
     yield
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def set_local_internal_options(local_internal_options):
     """Fixture to configure the local internal options file.
 
@@ -1051,7 +1051,7 @@ def set_local_internal_options(local_internal_options):
     conf.set_wazuh_local_internal_options(backup_local_internal_options)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def configure_local_internal_options_function(request):
     """Fixture to configure the local internal options file.
 

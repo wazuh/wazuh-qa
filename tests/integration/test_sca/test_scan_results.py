@@ -76,7 +76,6 @@ def test_scan_results(configuration, metadata, local_internal_options, prepare_c
         - Get the result for each ID check
         - Check that the policy_id from the scan matches with the file used.
 
-
     wazuh_min_version: 4.5.0
 
     tier: 0
@@ -111,7 +110,7 @@ def test_scan_results(configuration, metadata, local_internal_options, prepare_c
 
     input_description:
         - The `cases_scan_results.yaml` file provides the module configuration for this test.
-        - the cis*.yaml files located in the policies folder provide the sca rules to check.
+        - The cis*.yaml files located in the policies folder provide the sca rules to check.
 
     expected_output:
         - r'.*sca.*INFO: (Module started.)'
@@ -128,7 +127,7 @@ def test_scan_results(configuration, metadata, local_internal_options, prepare_c
 
     # Check the regex engine used by SCA
     engine = evm.check_scan_regex_engine(wazuh_log_monitor)
-    assert engine == metadata['regex_type'], f"Wrong regex_engine found: expected{metadata['regex_type']}"
+    assert engine == metadata['regex_type'], f"Wrong regex-engine found: {engine}, expected: {metadata['regex_type']}"
 
     # Check all checks have been done
     evm.get_sca_scan_rule_id_results(file_monitor=wazuh_log_monitor, results_num=int(metadata['results']))

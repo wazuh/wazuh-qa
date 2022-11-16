@@ -18,7 +18,6 @@ targets:
 daemons:
     - wazuh-modulesd
 
-
 os_platform:
     - linux
 

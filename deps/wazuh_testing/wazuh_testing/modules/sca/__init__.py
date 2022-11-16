@@ -2,6 +2,8 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+from wazuh_testing import MODULESD_DEBUG, VERBOSE_DEBUG_OUTPUT
+
 # Variables
 TEMP_FILE_PATH = '/tmp'
 
@@ -20,8 +22,8 @@ CB_SCA_SCAN_EVENT = r".*sca_send_alert.*Sending event: (.*)"
 
 # Error Messages
 ERR_MSG_REGEX_ENGINE = "Did not receive the expected 'SCA will use '.*' engine to check the rules' event"
-ERR_MSG_ID_RESULTS = 'Expected sca_has_integrity Result events not found'
+ERR_MSG_ID_RESULTS = 'Expected sca_has_integrity result events not found'
 ERR_MSG_SCA_SUMMARY = 'Expected SCA Scan Summary type event not found.'
 
 # Setting Local_internal_option file
-SCA_DEFAULT_LOCAL_INTERNAL_OPTIONS = {'wazuh_modules.debug': '2'}
+SCA_DEFAULT_LOCAL_INTERNAL_OPTIONS = {MODULESD_DEBUG: VERBOSE_DEBUG_OUTPUT}
