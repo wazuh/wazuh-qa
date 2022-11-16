@@ -101,7 +101,6 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 local_internal_options = {'wazuh_modules.debug': 2}
 if sys.platform == 'win32':
     daemons_handler_configuration = {'all_daemons': True, 'ignore_errors': True}
-    file_monitor = FileMonitor(LOG_FILE_PATH)
     local_internal_options = {'windows.debug': 2}
 elif get_service() == 'wazuh-manager':
     daemons_handler_configuration = {'daemons': [ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON], 'ignore_errors': True}
@@ -202,7 +201,8 @@ def test_syscollector_deactivation(configuration, metadata, set_wazuh_configurat
         - The `configuration_syscollector.yaml` file provides the module configuration for this test.
         - The `case_test_syscollector_deactivation.yaml` file provides the test cases.
     '''
-    evm.check_disabled(file_monitor=file_monitor if sys.platform == 'win32' else None)
+    file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
+    evm.check_disabled(file_monitor=file_monitor)
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_config_metadata), ids=t2_case_ids)
@@ -251,10 +251,11 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
         - The `case_test_all_scans_disabled.yaml` file provides the test cases.
     '''
     scan_interval = metadata['interval_scan']
-
+    file_monitor = None
     check_functions = [evm.check_hardware_scan_started, evm.check_os_scan_started, evm.check_network_scan_started,
                        evm.check_packages_scan_started, evm.check_ports_scan_started, evm.check_processes_scan_started]
     if sys.platform == 'win32':
+        file_monitor = FileMonitor(LOG_FILE_PATH)
         check_functions.append(evm.check_hotfixes_scan_started)
 
     prefix = r'(.+)\swazuh-modulesd:syscollector.+'
@@ -274,7 +275,7 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
         # Expected: the function must throw a TimoutError
         with pytest.raises(TimeoutError):
             # Overwrite the default timeout (because the test configuration)
-            check_f(file_monitor=file_monitor if sys.platform == 'win32' else None, timeout=scan_interval)
+            check_f(file_monitor=file_monitor, timeout=scan_interval)
             pytest.fail(f"It seems that a scan was triggered. This check has a match in the log: {check_f.__name__}")
 
 
@@ -326,23 +327,24 @@ def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_
     field = metadata['field']
     attribute = metadata['attribute']
     non_critical_fields = ('max_eps')
+    file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
 
     if field is not None:
         if field == 'hotfixes' and sys.platform != 'win32':
             return True
 
-        evm.check_tag_error(file_monitor=file_monitor if sys.platform == 'win32' else None, field=field)
+        evm.check_tag_error(file_monitor=file_monitor, field=field)
 
         if field in non_critical_fields:
             # Check that the module has started if the field is not critical
-            evm.check_has_started(file_monitor=file_monitor if sys.platform == 'win32' else None, timeout=T_2)
+            evm.check_has_started(file_monitor=file_monitor, timeout=T_2)
             return True
     else:
-        evm.check_attr_error(file_monitor=file_monitor if sys.platform == 'win32' else None, attr=attribute)
+        evm.check_attr_error(file_monitor=file_monitor, attr=attribute)
 
     # Check that the module does not start
     with pytest.raises(TimeoutError):
-        evm.check_has_started(file_monitor=file_monitor if sys.platform == 'win32' else None, timeout=T_2)
+        evm.check_has_started(file_monitor=file_monitor, timeout=T_2)
         pytest.fail(f"The module has started anyway. This behaviour is not the expected.")
 
 
@@ -391,7 +393,8 @@ def test_syscollector_default_values(configuration, metadata, set_wazuh_configur
         - The `configuration_syscollector_no_tags.yaml` file provides the module configuration for this test.
         - The `case_test_default_values.yaml` file provides the test cases.
     '''
-    evm.check_config(file_monitor=file_monitor if sys.platform == 'win32' else None)
+    file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
+    evm.check_config(file_monitor=file_monitor)
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t5_configurations, t5_config_metadata), ids=t5_case_ids)
@@ -442,9 +445,10 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
         - The `configuration_syscollector.yaml` file provides the module configuration for this test.
         - The `case_test_scanning.yaml` file provides the test cases.
     '''
-    evm.check_has_started(file_monitor=file_monitor if sys.platform == 'win32' else None)
+    file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
+    evm.check_has_started(file_monitor=file_monitor)
     # Check general scan has started
-    evm.check_scan_started()
+    evm.check_scan_started(file_monitor=file_monitor)
 
     # Check that each scan was accomplished
     scan_checks = [evm.check_hardware_scan_finished, evm.check_os_scan_finished, evm.check_network_scan_finished,
@@ -454,9 +458,9 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
 
     for check in scan_checks:
         # Run check
-        check()
+        check(file_monitor=file_monitor)
 
     # Check general scan has finished
-    evm.check_scan_finished()
+    evm.check_scan_finished(file_monitor=file_monitor)
     # Check that the sync has finished
-    evm.check_sync_finished()
+    evm.check_sync_finished(file_monitor=file_monitor)
