@@ -4,7 +4,6 @@
 
 import tempfile
 import testinfra
-import pathlib
 import base64
 import os
 
@@ -40,10 +39,88 @@ class HostManager:
 
         Args:
             group (str): Group name
+
         Returns:
             list: List of hosts
         """
         return testinfra.get_host(f"ansible://all?ansible_inventory={self.inventory_path}")['groups'][group]
+
+    def get_host_variables(self, host):
+        """Get the Ansible object for communicating with the specified host.
+
+        Args:
+            host (str): Hostname
+
+        Returns:
+            testinfra.modules.base.Ansible: Host instance from hostspec
+        """
+        return self.get_host(host).ansible.get_variables()
+
+    def get_host_ansible_facts(self, host):
+        """Get the ansible facts of the specified host.
+
+        Args:
+            host (str): Hostname
+
+        Returns:
+            str: OS of the host
+        """
+        testinfra_host = self.get_host(host)
+        return testinfra_host.ansible("setup")
+
+    def get_host_os(self, host):
+        """Get the OS of the specified host.
+
+        Args:
+            host (str): Hostname
+
+        Returns:
+            str: OS of the host
+        """
+        ansible_facts = self.get_host_ansible_facts(host)
+        return (ansible_facts['ansible_facts']['ansible_distribution'],
+                ansible_facts['ansible_facts']['ansible_distribution_major_version'],
+                ansible_facts['ansible_facts']['ansible_distribution_version'])
+
+    def get_host_ips(self, host):
+        """Get the host IPs
+
+        Args:
+            host (str): Hostname
+
+        Returns:
+            dict: IPs of the host (ipv4 and ipv6)
+        """
+        ansible_facts = self.get_host_ansible_facts(host)
+        return { 'ipv4': ansible_facts['ansible_facts']['ansible_all_ipv4_addresses'],
+                'ipv6': ansible_facts['ansible_facts']['ansible_all_ipv6_addresses'] }
+
+    def get_host_interfaces(self, host):
+        """Get the interfaces of the specified host.
+
+        Args:
+            host (str): Hostname
+
+        Returns:
+            dict: Interfaces of the host
+        """
+        ansible_facts = self.get_host_ansible_facts(host)
+        return ansible_facts['ansible_facts']['ansible_interfaces']
+
+    def check_connection(self, host, windows=False):
+        """Check if the host is reachable.
+
+        Args:
+            host (str): Hostname
+            windows (bool): Use windows command
+
+        Returns:
+            bool: True if the host is reachable, False otherwise
+        """
+        testinfra_host = self.get_host(host)
+        ansible_command = 'ping' if not windows else 'win_ping'
+
+        return testinfra_host.ansible("ping", check=False)['ping'] == 'pong'
 
     def move_file(self, host, src_path, dest_path, remote_src=False, become=False, windows=False, ignore_errors=False):
         """Move from src_path to the desired location dest_path for the specified host.
@@ -56,8 +133,10 @@ class HostManager:
             become (bool): Use sudo
             windows (bool): Use windows command
             ignore_errors (bool): Ignore errors
+
         Returns:
             dict: Result of the command execution
+
         Raises:
             Exception: If the command execution fails
         """
@@ -74,24 +153,19 @@ class HostManager:
 
     def get_file_content(self, host, path, become=False, ignore_errors=False):
         """Read a file from the specified host.
+
         Args:
             host (str): Hostname
             path (str): File path
             become (bool): Use sudo
             ignore_errors (bool): Ignore errors
+
         Returns:
             str: File content
+
         Raises:
             Exception: If the file cannot be read
         """
-        # testinfra_host = self.get_host(host)
-        # if become:
-        #     with testinfra_host.sudo():
-        #         result = testinfra_host.file(path).content_string
-        # else:
-        #     result = testinfra_host.file(path).content_string
-
-        # return result
         testinfra_host = self.get_host(host)
         result = testinfra_host.ansible("slurp", f"src={path}", check=False, become=become)
         if (set(result.keys()) & set(self.error_fields)) and not ignore_errors:
@@ -99,20 +173,26 @@ class HostManager:
 
         return base64.b64decode(result['content']).decode('utf-8')
 
-    def synchronize_directory(self, host, dest_path, src_path=None, filesystem=None, become=False, windows=False, ignore_errors=False):
+    def synchronize_linux_directory(self, host, dest_path, src_path=None, filesystem=None, become=False, ignore_errors=False):
         """Create a file structure on the specified host.
+        Not supported on Windows.
 
         Args:
             host (str): Hostname
+            dest_path (str): Destination path
             filesystem (dict): File structure
-            become (bool, optional): Sudo . Defaults to False.
-            windows (bool, optional): Windows operation. Defaults to False.
+            become (bool, optional): Use sudo. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
+
+        Returns:
+            dict: Result of the command execution
+
+        Raises:
+            Exception: If the command execution fails
         """
         testinfra_host = self.get_host(host)
 
-
-        ansible_command = 'synchronize' if not windows else 'win_robocopy'
+        ansible_command = 'synchronize'
 
         if filesystem:
             tmp_directory = tempfile.TemporaryDirectory()
@@ -143,11 +223,11 @@ class HostManager:
             become (bool, optional): Use sudo. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
 
-        Raises:
-            Exception: If the file cannot be truncated
-
         Returns:
             dict: Command result
+
+        Raises:
+            Exception: If the file cannot be truncated
         """
         testinfra_host = self.get_host(host)
         result = None
@@ -166,14 +246,17 @@ class HostManager:
 
     def remove_file(self, host, file_path, windows=False, become=False, ignore_errors=False):
         """Remove a file from the specified host.
+
         Args:
             host (str): Hostname
             file_path (str): File path
             windows (bool, optional): Windows command. Defaults to False.
             become (bool, optional): Use sudo. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
+
         Returns:
             dict: Command result
+
         Raises:
             Exception: If the file cannot be removed
         """
@@ -193,6 +276,15 @@ class HostManager:
             host (str): Hostname
             path (str): path for the file to create and modify
             content (str, bytes): content to write into the file
+            become (bool, optional): Use sudo. Defaults to False.
+            windows (bool, optional): Windows command. Defaults to False.
+            ignore_errors (bool, optional): Ignore errors. Defaults to False.
+
+        Returns:
+            dict: Command result
+
+        Raises:
+            Exception: If the file cannot be modified
         """
         tmp_file = tempfile.NamedTemporaryFile()
         with open(tmp_file.name, 'w+') as tmp:
@@ -204,7 +296,8 @@ class HostManager:
 
         return result
 
-    def create_file(self, host, path, content, directory=False, owner=None, group=None, mode=None, become=False, windows=False, ignore_errors=False):
+    def create_file(self, host, path, content, directory=False, owner=None, group=None, mode=None, become=False,
+                    windows=False, ignore_errors=False):
         """Create a file with a specified content and copies it to a path.
 
         Args:
@@ -214,7 +307,15 @@ class HostManager:
             owner (str): owner of the file
             group (str): group of the file
             mode (str): mode of the file
+            become (bool, optional): Use sudo. Defaults to False.
+            windows (bool, optional): Windows command. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
+
+        Returns:
+            dict: Command result
+
+        Raises:
+            Exception: If the file cannot be created
         """
         testinfra_host = self.get_host(host)
         tmp_file = tempfile.NamedTemporaryFile()
@@ -237,6 +338,7 @@ class HostManager:
 
     def control_service(self, host, service, state, become=False, windows=False, ignore_errors=False):
         """Control a service on a host.
+
             Args:
                 host (str): Hostname
                 service (str): Service name
@@ -244,8 +346,10 @@ class HostManager:
                 become (bool, optional): Use sudo. Defaults to False.
                 windows (bool, optional): Windows command. Defaults to False.
                 ignore_errors (bool, optional): Ignore errors. Defaults to False.
+
             Returns:
                 dict: Command result
+
             Raises:
                 Exception: If the service cannot be controlled
         """
@@ -271,6 +375,9 @@ class HostManager:
 
         Returns:
             dict: Command result
+
+        Raises:
+            Exception: If the command cannot be run
         """
         testinfra_host = self.get_host(host)
         ansible_command = 'command' if not windows else 'win_command'
@@ -291,8 +398,10 @@ class HostManager:
             become (bool, optional): Use sudo. Defaults to False.
             windows (bool, optional): Windows command. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
+
         Returns:
             dict: Command result
+
         Raises:
             Exception: If the command cannot be run
         """
@@ -310,6 +419,7 @@ class HostManager:
     def find_file(self, host, path, pattern, recurse=False, use_regex= False, become=False, windows=False,
                   ignore_errors=False):
         """Search and return information of a file inside a path.
+
         Args:
             host (str): Hostname
             path (str): Path in which to search for the file that matches the pattern.
@@ -363,71 +473,3 @@ class HostManager:
             raise Exception(f"Error getting stats of {path} on host {host}: {result}")
 
         return result
-
-    def get_host_ip(self, host, interface):
-        """Get the Ansible object for communicating with the specified host.
-        Args:
-            host (str): Hostname
-        Returns:
-            testinfra.modules.base.Ansible: Host instance from hostspec
-        """
-        return self.get_host(host).interface(interface).addresses
-
-    def get_host_variables(self, host):
-        """Get the Ansible object for communicating with the specified host.
-        Args:
-            host (str): Hostname
-        Returns:
-            testinfra.modules.base.Ansible: Host instance from hostspec
-        """
-        return self.get_host(host).ansible.get_variables()
-
-    def get_host_ansible_facts(self, host):
-        """Get the OS of the specified host.
-        Args:
-            host (str): Hostname
-        Returns:
-            str: OS of the host
-        """
-
-        """
-        - debug:
-            msg: "{{ hostvars[inventory_hostname].ansible_distribution }}"
-        - debug:
-            msg: "{{ hostvars[inventory_hostname].ansible_distribution_major_version }}"
-        - debug:
-            msg: "{{ hostvars[inventory_hostname].ansible_distribution_version }}"
-        """
-        testinfra_host = self.get_host(host)
-        return testinfra_host.ansible("setup")
-
-    def get_host_os(self, host):
-        """Get the OS of the specified host.
-        Args:
-            host (str): Hostname
-        Returns:
-            str: OS of the host
-        """
-        ansible_facts = self.get_host_ansible_facts(host)
-        return (ansible_facts['ansible_facts']['ansible_distribution'], ansible_facts['ansible_facts']['ansible_distribution_major_version'], ansible_facts['ansible_facts']['ansible_distribution_version'])
-
-    def get_host_interfaces(self, host):
-        """Get the interfaces of the specified host.
-        Args:
-            host (str): Hostname
-        """
-        ansible_facts = self.get_host_ansible_facts(host)
-        return ansible_facts['ansible_facts']['interfaces']
-
-    def get_host_ips(self, host):
-        """Get the interfaces of the specified host.
-        Args:
-            host (str): Hostname
-        """
-        ansible_facts = self.get_host_ansible_facts(host)
-        return { 'ipv4': ansible_facts['ansible_facts']['ansible_all_ipv4_addresses'],
-                'ipv6': ansible_facts['ansible_facts']['ansible_all_ipv6_addresses'] }
-
-    def get_host_interfaces(self, host):
-        ansible_facts = self.get_host_ansible_facts(host)
-        return ansible_facts['ansible_facts']['ansible_interfaces']
