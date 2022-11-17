@@ -82,7 +82,7 @@ import pytest
 from wazuh_testing import ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON, DB_PATH, LOG_FILE_PATH, SYSCOLLECTOR_DB_PATH, \
                           T_10
 from wazuh_testing.db_interface import global_db
-from wazuh_testing.modules import TIER0, SERVER, AGENT
+from wazuh_testing.modules import TIER0, SERVER, AGENT, LINUX, MACOS
 from wazuh_testing.tools import get_service
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.tools.file import remove_file
@@ -91,7 +91,7 @@ from wazuh_testing.modules.syscollector import event_monitor as evm
 
 
 # Marks
-pytestmark = [TIER0, SERVER, AGENT]
+pytestmark = [TIER0, SERVER, AGENT, LINUX, MACOS]
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -105,8 +105,6 @@ if get_service() == 'wazuh-manager':
 elif sys.platform == 'win32':
     daemons_handler_configuration = {'all_daemons': True, 'ignore_errors': True}
     local_internal_options = {'windows.debug': 2}
-elif sys.platform != 'darwin':
-    daemons_handler_configuration = {'daemons': [DB_DAEMON, MODULES_DAEMON], 'ignore_errors': True}
 else:
     daemons_handler_configuration = {'daemons': [MODULES_DAEMON], 'ignore_errors': True}
 
