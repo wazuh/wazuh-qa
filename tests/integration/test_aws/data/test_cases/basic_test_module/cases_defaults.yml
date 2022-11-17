@@ -1,0 +1,8 @@
+- name: cloudtrail defaults
+  description: CloudTrail default configurations
+  configuration_parameters:
+    BUCKET_TYPE: cloudtrail
+    BUCKET_NAME: wazuh-cloudtrail-integration-tests
+  metadata:
+    bucket_type: cloudtrail
+    bucket_name: wazuh-cloudtrail-integration-tests
