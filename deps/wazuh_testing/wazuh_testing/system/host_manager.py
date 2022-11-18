@@ -92,8 +92,8 @@ class HostManager:
             dict: IPs of the host (ipv4 and ipv6)
         """
         ansible_facts = self.get_host_ansible_facts(host)
-        return { 'ipv4': ansible_facts['ansible_facts']['ansible_all_ipv4_addresses'],
-                'ipv6': ansible_facts['ansible_facts']['ansible_all_ipv6_addresses'] }
+        return {'ipv4': ansible_facts['ansible_facts']['ansible_all_ipv4_addresses'],
+                'ipv6': ansible_facts['ansible_facts']['ansible_all_ipv6_addresses']}
 
     def get_host_interfaces(self, host):
         """Get the interfaces of the specified host.
@@ -173,7 +173,8 @@ class HostManager:
 
         return base64.b64decode(result['content']).decode('utf-8')
 
-    def synchronize_linux_directory(self, host, dest_path, src_path=None, filesystem=None, become=False, ignore_errors=False):
+    def synchronize_linux_directory(self, host, dest_path, src_path=None, filesystem=None, become=False,
+                                    ignore_errors=False):
         """Create a file structure on the specified host.
         Not supported on Windows.
 
@@ -207,7 +208,7 @@ class HostManager:
 
         result = testinfra_host.ansible(ansible_command, f"src={src_path} dest={dest_path}", check=False, become=become)
 
-        if result and (set(result.keys()) & set(self.error_fields)) and not ignore_errors:
+        if result and (set(result.keys() - 'msg') & set(self.error_fields)) and not ignore_errors:
             raise Exception(f"Error creating file structure on host {host}: {result}")
 
         return result
@@ -237,7 +238,8 @@ class HostManager:
             result = testinfra_host.ansible(ansible_command, f"dest={file_path} content=''", check=False, become=become)
         else:
             ansible_command = 'file' if not windows else 'win_file'
-            result = testinfra_host.ansible(ansible_command, f"path={file_path} state=touch", check=False, become=become)
+            result = testinfra_host.ansible(ansible_command, f"path={file_path} state=touch", check=False,
+                                            become=become)
 
         if (set(result.keys()) & set(self.error_fields)) and not ignore_errors:
             raise Exception(f"Error truncating file {file_path} on host {host}: {result}")
@@ -415,8 +417,7 @@ class HostManager:
 
         return result['stdout']
 
-
-    def find_file(self, host, path, pattern, recurse=False, use_regex= False, become=False, windows=False,
+    def find_file(self, host, path, pattern, recurse=False, use_regex=False, become=False, windows=False,
                   ignore_errors=False):
         """Search and return information of a file inside a path.
 
