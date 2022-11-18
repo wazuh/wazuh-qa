@@ -76,8 +76,8 @@ t1_configurations = load_configuration_template(t1_configurations_path, t1_confi
 
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configurations_metadata),
                          ids=t1_cases_ids)
-def test_syslog_message_ipv6(configuration, metadata, set_wazuh_configuration, truncate_event_logs,
-                             restart_wazuh_daemon_function):
+def test_syslog_message_parser(configuration, metadata, set_wazuh_configuration, truncate_event_logs,
+                               restart_wazuh_daemon_function):
     '''
     description: Check if 'wazuh-remoted' can receive syslog messages through the socket.
 
@@ -87,7 +87,7 @@ def test_syslog_message_ipv6(configuration, metadata, set_wazuh_configuration, t
             - Truncate wazuh event logs.
             - Restart wazuh-manager service to apply configuration changes.
         - test:
-            - Check that the messages are parsed correctly in the alerts.json file.
+            - Check that the messages are parsed correctly in the archives.json file.
         - tierdown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
@@ -144,7 +144,7 @@ def test_syslog_message_ipv6(configuration, metadata, set_wazuh_configuration, t
 
     event_msg = [event for event in events_data if bool(re.match(fr".*{find_msg}.*", event))]
 
-    assert len(event_msg) == metadata['messages_number'], f"The events were not parsed as: {find_msg}"
+    assert len(event_msg) == metadata['messages_number'], "The event's format is not the expected one"
 
     # Wait until syslog simulator ends
     syslog_simulator_thread.join()

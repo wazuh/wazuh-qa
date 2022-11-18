@@ -1,4 +1,4 @@
-- name: Syslog_message_ipv6_test
+- name: Syslog_message_ipv6
   description: Send syslog message through IPV6
   configuration_parameters:
     PORT: 5050
@@ -11,7 +11,7 @@
     protocol: tcp
     messages_number: 1
 
-- name: Syslog_message_ipv4_test
+- name: Syslog_message_ipv4
   description: Send syslog message through IPV4
   configuration_parameters:
     PORT: 5050
