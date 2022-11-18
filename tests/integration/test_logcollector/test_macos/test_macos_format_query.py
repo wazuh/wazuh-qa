@@ -74,7 +74,8 @@ parameters_query = []
 metadata_query = []
 
 local_internal_options = {'logcollector.debug': 2,
-                          'logcollector.sample_log_length': 200}
+                          'logcollector.sample_log_length': 200,
+                          'monitord.rotate_log': 0}
 macos_log_message_timeout = 10
 macos_log_list = [
     {
@@ -430,7 +431,6 @@ def test_macos_format_query(configure_local_internal_options_module, restart_log
             logcollector.generate_macos_custom_log(macos_log['type'], macos_log['level'], macos_log['subsystem'],
                                                    macos_log['category'], macos_log['program_name'])
 
-        log_message_command = macos_log['program_name']
         clauses_values = []
 
         same_type = True
