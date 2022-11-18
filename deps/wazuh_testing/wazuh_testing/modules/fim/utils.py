@@ -302,7 +302,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     # Delete previous text files
     for name in file_list:
-        delete_file(os.path.joing(folder, name))
+        delete_file(os.path.join(folder, name))
 
     check_time_travel(time_travel, monitor=log_monitor)
 
