@@ -93,6 +93,7 @@ t2_configurations = load_configuration_template(t2_configurations_path, t2_confi
 prefix = lc.LOG_COLLECTOR_PREFIX
 local_internal_options = lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS
 
+
 # Tests
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])

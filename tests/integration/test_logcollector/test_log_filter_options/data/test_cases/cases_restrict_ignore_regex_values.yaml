@@ -52,7 +52,7 @@
     matches: None
 
 # Test osregex
-- name: Test Restrict+Ignore - Both osregex - Matches Restrict only 
+- name: Test Restrict+Ignore - Both osregex - Matches Restrict only
   description: Test Restrict + Ignore tags both with osregex regex. Log matches restrict
   configuration_parameters:
     RESTRICT_REGEX: \.restrict

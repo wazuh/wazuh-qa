@@ -185,7 +185,7 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
             log_found = evm.check_ignore_restrict_messages(message=log, regex=metadata['ignore_regex'],
                                                            tag='ignore', prefix=prefix)
         assert log_found is False, lc.ERR_MSG_UNEXPECTED_IGNORE_EVENT
-    
+
     # If it matches with None, the log should be ignored due to restrict config and not due to ignore config
     else:
         log_found = False
