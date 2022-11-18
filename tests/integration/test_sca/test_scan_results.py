@@ -58,11 +58,10 @@ configurations = load_configuration_template(configurations_path, configuration_
 
 
 # Tests
-@pytest.mark.parametrize('local_internal_options', [local_internal_options], ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
-def test_scan_results(configuration, metadata, local_internal_options, prepare_cis_policies_file,
-                      truncate_monitored_files, set_wazuh_configuration_with_local_internal_options,
-                      restart_wazuh_function, wait_for_sca_enabled):
+def test_scan_results(configuration, metadata, prepare_cis_policies_file, truncate_monitored_files,
+                      set_wazuh_configuration, configure_local_internal_options_function, restart_wazuh_function,
+                      wait_for_sca_enabled):
     '''
     description: This test will check that a SCA scan is correctly executed on an agent, with a given policy file and
                  a regex engine. For this it will copy a policy file located in the data folder and verify the engine
@@ -90,9 +89,12 @@ def test_scan_results(configuration, metadata, local_internal_options, prepare_c
         - prepare_cis_policies_file:
             type: fixture
             brief: copy test sca policy file. Delete it after test.
-        - set_wazuh_configuration_with_local_internal_options:
+        - set_wazuh_configuration:
             type: fixture
-            brief: Set the wazuh configuration and local_internal_options according to the configuration data.
+            brief: Set the wazuh configuration according to the configuration data.
+        - configure_local_internal_options_function:
+            type: fixture
+            brief: Configure the local_internal_options_file.
         - truncate_monitored_files:
             type: fixture
             brief: Truncate all the log files and json alerts files before and after the test execution.
