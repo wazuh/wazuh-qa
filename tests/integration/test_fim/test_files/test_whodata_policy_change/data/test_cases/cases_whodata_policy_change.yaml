@@ -1,5 +1,5 @@
 - name: audit_policy_change_event_checker
-  description: When a file is monitored with report_changes, the diff file and changes are reported (Scheduled mode)
+  description: Check when folders monitored w/ whodata mode, if audit policies change, fim changes to realtime mode
   configuration_parameters:
     AUDIT_INTERVAL: 5
   metadata:
@@ -8,10 +8,10 @@
     enabling_file: policy_enable.csv
 
 - name: audit_policy_change_event_4719
-  description: When a file is monitored with report_changes, the diff file and changes are reported (Scheduled mode)
+  description: Check when recreiving event 4719 for audit policies change, fim changes to realtime mode
   configuration_parameters:
-    AUDIT_INTERVAL: 5
+    AUDIT_INTERVAL: 2
   metadata:
     check_event: true
-    disabling_file: policy_no_success.csv
+    disabling_file: policy_success_removed.csv
     enabling_file: policy_enable.csv

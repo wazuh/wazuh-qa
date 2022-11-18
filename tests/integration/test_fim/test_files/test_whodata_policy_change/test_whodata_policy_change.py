@@ -80,7 +80,6 @@ configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_whodata_p
 # variables
 test_folders = [os.path.join(PREFIX, fim.TEST_DIR_1)]
 folder = test_folders[0]
-print("TESTFOLDER---------" +str(folder))
 file_list = [f"regular_file"]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -95,10 +94,9 @@ configurations = configuration.load_configuration_template(configurations_path, 
 
 # tests
 @pytest.mark.parametrize('test_folders', [test_folders], ids='')
-@pytest.mark.parametrize('local_internal_options', [local_internal_options], ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
-def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration_with_local_internal_options,
-                                 create_monitored_folders_function, restart_syscheck_function,
+def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration,
+                                 configure_local_internal_options_function, restart_syscheck_function, create_monitored_folders_function,
                                  wait_fim_start_function):
     '''
     description: Check if the 'wazuh-syscheckd' daemon reports the file changes (or truncates if required)
@@ -157,15 +155,13 @@ def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration_
     
     # Change policies
     if metadata['check_event']:
-        time.sleep(8)
+        time.sleep(6)
     command = f"auditpol /restore /file:{os.path.join(TEST_DATA_PATH,metadata['disabling_file'])}"
     output = run_local_command_returning_output(command)
     
     # Check it changes to realtime
     if metadata['check_event']:
-        wazuh_log_monitor.start(timeout=20, 
-        callback=generate_monitoring_callback(r'.*win_whodata.*(Event 4719 received due to changes in audit policy. Switching directories to realtime)'),
-        error_message="MESSAGE")
+        evm.check_fim_event(timeout=20, callback=fim.CB_RECIEVED_EVENT_4719)
     evm.detect_windows_whodata_mode_change(wazuh_log_monitor, '.*')
 
     # Create/Update/Delete file and check events   
