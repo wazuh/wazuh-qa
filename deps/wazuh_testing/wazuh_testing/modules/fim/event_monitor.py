@@ -136,3 +136,19 @@ def detect_whodata_start(file_monitor):
     """
     file_monitor.start(timeout=60, callback=generate_monitoring_callback(fim.CB_REALTIME_WHODATA_ENGINE_STARTED),
                        error_message=fim.ERR_MSG_WHODATA_ENGINE_EVENT)
+
+
+def detect_windows_sacl_configured(file_monitor, file):
+    
+    callback = fr".*win_whodata.*The SACL of '({file})' will be configured"
+    
+    file_monitor.start(timeout=60, callback=generate_monitoring_callback(callback),
+                       error_message=fim.ERR_MSG_SACL_CONFIGURED_EVENT)
+
+
+def detect_windows_whodata_mode_change(file_monitor, file):
+    
+    callback = fr".*set_whodata_mode_changes.*The '({file})' directory starts to be monitored in real-time mode."
+    
+    file_monitor.start(timeout=60, callback=generate_monitoring_callback(callback),
+                       error_message=fim.ERR_MSG_WHDATA_REALTIME_MODE_CHANGE_EVENT)
