@@ -120,7 +120,7 @@ class HostManager:
         testinfra_host = self.get_host(host)
         ansible_command = 'ping' if not windows else 'win_ping'
 
-        return testinfra_host.ansible("ping", check=False)['ping'] == 'pong'
+        return testinfra_host.ansible(ansible_command, check=False)['ping'] == 'pong'
 
     def move_file(self, host, src_path, dest_path, remote_src=False, become=False, windows=False, ignore_errors=False):
         """Move from src_path to the desired location dest_path for the specified host.
