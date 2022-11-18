@@ -10,7 +10,7 @@ MAILD_PREFIX = r'.*wazuh-maild.*'
 
 # Error Messages
 GENERIC_CALLBACK_ERROR_COMMAND_MONITORING = 'The expected command monitoring log has not been produced'
-ERR_MSG_UNEXPECTED_IGNORE_EVENT = "Found unexpected 'Ignoring the log... due to ignore/restrict config' event"
+ERR_MSG_UNEXPECTED_IGNORE_EVENT = "Found unexpected 'Ignoring the log <log_message> due to ignore/restrict config' event"
 
 
 # Local_internal_options
