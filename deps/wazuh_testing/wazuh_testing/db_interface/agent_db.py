@@ -360,3 +360,16 @@ def insert_vulnerability_in_agent_inventory(agent_id='000', name='', version='',
               f" condition, title, published, updated) VALUES ('{name}', '{version}', '{architecture}', '{cve}', "
               f"'{detection_time}', '{severity}', {cvss2_score}, {cvss3_score},'{reference}', '{type}', '{status}', "
               f"'{external_references}', '{condition}', '{title}', '{published}', '{updated}')")
+
+
+def get_vulnerability_triaged(agent_id='000'):
+    """Check the triaged of a vulnerability in the agent database table.
+
+    Args:
+        agent_id (str): Agent ID.
+    """
+    query = f"agent {agent_id} sql SELECT triaged FROM sys_programs"
+
+    result = query_wdb(query)[0]['triaged']
+
+    return result
