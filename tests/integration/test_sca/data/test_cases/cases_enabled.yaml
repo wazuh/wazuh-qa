@@ -1,4 +1,4 @@
-- name: enabled
+- name: Test SCA enabled
   description: Set enabled to yes value
   configuration_parameters:
     ENABLED: 'yes'
@@ -8,7 +8,7 @@
     enabled: true
     policy_file: cis_centos8_osregex.yaml
 
-- name: disabled
+- name: Test SCA disabled
   description: Set enabled to no value
   configuration_parameters:
     ENABLED: 'no'

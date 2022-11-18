@@ -1,4 +1,4 @@
-- name: Centos 8 SCA scan - OSREGEX
+- name: Test Centos8 SCA - OSREGEX Engine
   description: Run a SCA scan and check regex engine used and results
   configuration_parameters:
     ENABLED: 'yes'
@@ -9,7 +9,7 @@
     results: 2
     regex_type: osregex
 
-- name: Centos 8 SCA scan - PCRE2
+- name: Test Centos8 SCA - PCRE2 Engine
   description: Run a SCA scan and check regex engine used and results
   configuration_parameters:
     ENABLED: 'yes'

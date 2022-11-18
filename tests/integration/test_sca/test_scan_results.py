@@ -58,7 +58,7 @@ configurations = load_configuration_template(configurations_path, configuration_
 
 
 # Tests
-@pytest.mark.parametrize('local_internal_options', [local_internal_options])
+@pytest.mark.parametrize('local_internal_options', [local_internal_options], ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_scan_results(configuration, metadata, local_internal_options, prepare_cis_policies_file,
                       truncate_monitored_files, set_wazuh_configuration_with_local_internal_options,

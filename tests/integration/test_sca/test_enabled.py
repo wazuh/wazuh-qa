@@ -64,7 +64,7 @@ configuration_parameters, configuration_metadata, case_ids = get_test_cases_data
 configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
 
 
-@pytest.mark.parametrize('local_internal_options', [local_internal_options])
+@pytest.mark.parametrize('local_internal_options', [local_internal_options], ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_enabled(configuration, metadata, local_internal_options, prepare_cis_policies_file, truncate_monitored_files,
                  set_wazuh_configuration_with_local_internal_options, restart_wazuh_function):
