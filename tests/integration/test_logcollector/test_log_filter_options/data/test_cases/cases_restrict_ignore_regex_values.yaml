@@ -1,5 +1,5 @@
 # Test PCRE2
-- name: Test Restrict+Ignore - Matches Restrict
+- name: Test Restrict+Ignore - Both PCRE2 - Matches Restrict only
   description: Test Restrict + Ignore tags both with PCRE2 regex. Log matches restrict
   configuration_parameters:
     RESTRICT_REGEX: .*restrict
@@ -12,7 +12,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches restrict"
     matches: restrict
 
-- name: Test Restrict+Ignore - Matches Ignore Only
+- name: Test Restrict+Ignore - Both PCRE2 - Matches Ignore Only
   description: Test Restrict + Ignore tags both with PCRE2 regex. Log matches ignore
   configuration_parameters:
     RESTRICT_REGEX: .*restrict
@@ -25,7 +25,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore"
     matches: ignore
 
-- name: Test Restrict+Ignore - Matches Both
+- name: Test Restrict+Ignore - Both PCRE2- Matches Both
   description: Test Restrict + Ignore tags both with pcre2 regex. Log matches both
   configuration_parameters:
     RESTRICT_REGEX: .*restrict
@@ -38,7 +38,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore restrict"
     matches: ignore - restrict
 
-- name: Test Restrict+Ignore - Matches None
+- name: Test Restrict+Ignore - Both PCRE2 - Matches None
   description: Test Restrict + Ignore tags both with pcre2 regex. Log matches None
   configuration_parameters:
     RESTRICT_REGEX: .*restrict
@@ -52,7 +52,7 @@
     matches: None
 
 # Test osregex
-- name: Test Restrict+Ignore - Matches Restrict
+- name: Test Restrict+Ignore - Both osregex - Matches Restrict only 
   description: Test Restrict + Ignore tags both with osregex regex. Log matches restrict
   configuration_parameters:
     RESTRICT_REGEX: \.restrict
@@ -65,7 +65,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches restrict"
     matches: restrict
 
-- name: Test Restrict+Ignore - Matches Ignore Only
+- name: Test Restrict+Ignore - Both osregex - Matches Ignore Only
   description: Test Restrict + Ignore tags both with osregex regex. Log matches ignore
   configuration_parameters:
     RESTRICT_REGEX: \.restrict
@@ -78,7 +78,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore"
     matches: ignore
 
-- name: Test Restrict+Ignore - Matches Both
+- name: Test Restrict+Ignore -  Both osregex - Matches Both
   description: Test Restrict + Ignore tags both with osregex regex. Log matches both
   configuration_parameters:
     RESTRICT_REGEX: \.restrict
@@ -91,7 +91,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore restrict"
     matches: ignore - restrict
 
-- name: Test Restrict+Ignore - Matches None
+- name: Test Restrict+Ignore -  Both osregex - Matches None
   description: Test Restrict + Ignore tags both with osregex regex. Log matches None
   configuration_parameters:
     RESTRICT_REGEX: \.restrict
@@ -105,7 +105,7 @@
     matches: None
 
 # Test osmatch
-- name: Test Restrict+Ignore - Matches Restrict
+- name: Test Restrict+Ignore - Both osmatch - Matches Restrict
   description: Test Restrict + Ignore tags both with osmatch regex. Log matches restrict
   configuration_parameters:
     RESTRICT_REGEX: restrict$
@@ -118,7 +118,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches restrict"
     matches: restrict
 
-- name: Test Restrict+Ignore - Matches Ignore Only
+- name: Test Restrict+Ignore - Both osmatch - Matches Ignore Only
   description: Test Restrict + Ignore tags both with osmatch regex. Log matches ignore
   configuration_parameters:
     RESTRICT_REGEX: restrict$
@@ -131,7 +131,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore"
     matches: ignore
 
-- name: Test Restrict+Ignore - Matches Both
+- name: Test Restrict+Ignore - Both osmatch - Matches Both
   description: Test Restrict + Ignore tags both with osmatch regex. Log matches both
   configuration_parameters:
     RESTRICT_REGEX: restrict$
@@ -144,7 +144,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore restrict"
     matches: ignore - restrict
 
-- name: Test Restrict+Ignore - Matches None
+- name: Test Restrict+Ignore - Both osmatch - Matches None
   description: Test Restrict + Ignore tags both with osmatch regex. Log matches None
   configuration_parameters:
     RESTRICT_REGEX: restrict$
@@ -158,7 +158,7 @@
     matches: None
 
 # Test pcre2 + osregex
-- name: Test Restrict+Ignore - Matches Restrict
+- name: Test Restrict+Ignore - pcre2+osregex engine - Matches Restrict
   description: Test Restrict + Ignore tags (pcre2+osregex). Log matches restrict
   configuration_parameters:
     RESTRICT_REGEX: .*restrict
@@ -171,7 +171,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches restrict"
     matches: restrict
 
-- name: Test Restrict+Ignore - Matches Ignore Only
+- name: Test Restrict+Ignore  - pcre2+osregex engine - Matches Ignore Only
   description: Test Restrict + Ignore tags (pcre2+osregex). Log matches ignore
   configuration_parameters:
     RESTRICT_REGEX: .*restrict
@@ -184,7 +184,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore"
     matches: ignore
 
-- name: Test Restrict+Ignore - Matches Both
+- name: Test Restrict+Ignore - pcre2+osregex engine - Matches Both
   description: Test Restrict + Ignore tags (pcre2+osregex). Log matches both
   configuration_parameters:
     RESTRICT_REGEX: .*restrict
@@ -197,7 +197,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore restrict"
     matches: ignore - restrict
 
-- name: Test Restrict+Ignore - Matches None
+- name: Test Restrict+Ignore - pcre2+osregex engine - Matches None
   description: Test Restrict + Ignore tags (pcre2+osregex). Log matches None
   configuration_parameters:
     RESTRICT_REGEX: .*restrict
@@ -211,7 +211,7 @@
     matches: None
 
 # Test pcre2 + osmatch
-- name: Test Restrict+Ignore - Matches Restrict
+- name: Test Restrict+Ignore - pcre2+osmatch engine - Matches Restrict
   description: Test Restrict + Ignore tags (pcre2+osmatch). Log matches restrict
   configuration_parameters:
     RESTRICT_REGEX: .*restrict
@@ -224,7 +224,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches restrict"
     matches: restrict
 
-- name: Test Restrict+Ignore - Matches Ignore Only
+- name: Test Restrict+Ignore - pcre2+osmatch engine - Matches Ignore Only
   description: Test Restrict + Ignore tags (pcre2+osmatch). Log matches ignore
   configuration_parameters:
     RESTRICT_REGEX: .*restrict
@@ -237,7 +237,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore"
     matches: ignore
 
-- name: Test Restrict+Ignore - Matches Both
+- name: Test Restrict+Ignore - pcre2+osmatch engine - Matches Both
   description: Test Restrict + Ignore tags (pcre2+osmatch). Log matches both
   configuration_parameters:
     RESTRICT_REGEX: .*restrict
@@ -264,7 +264,7 @@
     matches: None
 
 # Test osmatch + osregex
-- name: Test Restrict+Ignore - Matches Restrict
+- name: Test Restrict+Ignore - osregex+osmatch engine - Matches Restrict
   description: Test Restrict + Ignore tags (osregex+osmatch). Log matches restrict
   configuration_parameters:
     RESTRICT_REGEX: \.restrict
@@ -277,7 +277,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches restrict"
     matches: restrict
 
-- name: Test Restrict+Ignore - Matches Ignore Only
+- name: Test Restrict+Ignore - osregex+osmatch engine - Matches Ignore Only
   description: Test Restrict + Ignore tags (osregex+osmatch). Log matches ignore
   configuration_parameters:
     RESTRICT_REGEX: \.restrict
@@ -290,7 +290,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore"
     matches: ignore
 
-- name: Test Restrict+Ignore - Matches Both
+- name: Test Restrict+Ignore - osregex+osmatch engine - Matches Both
   description: Test Restrict + Ignore tags (osregex+osmatch). Log matches both
   configuration_parameters:
     RESTRICT_REGEX: \.restrict
@@ -303,7 +303,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore restrict"
     matches: ignore - restrict
 
-- name: Test Restrict+Ignore - Matches None
+- name: Test Restrict+Ignore - osregex+osmatch engine - Matches None
   description: Test Restrict + Ignore tags (osregex+osmatch). Log matches None
   configuration_parameters:
     RESTRICT_REGEX: \.restrict

@@ -16,7 +16,7 @@ brief: The 'wazuh-logcollector' daemon monitors configured files and commands fo
 components:
     - logcollector
 
-suite: options
+suite: log_filter_options
 
 targets:
     - agent
@@ -81,15 +81,15 @@ for count, value in enumerate(configuration_parameters):
     configuration_parameters[count]['LOCATION'] = test_file
 configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
 prefix = lc.LOG_COLLECTOR_PREFIX
+local_internal_options = lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS
 
 
 # Tests
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
-@pytest.mark.parametrize('local_internal_options,', [lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS], ids=[''])
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, create_file, truncate_monitored_files,
-                                      local_internal_options, set_wazuh_configuration_with_local_internal_options,
+                                      set_wazuh_configuration, configure_local_internal_options_function,
                                       restart_wazuh_function):
     '''
     description: Check if logcollector reads or ignores a log according to a regex configured in the restrict and
@@ -119,15 +119,15 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
         - create_file:
             type: fixture
             brief: Create an empty file for logging
-        - local_internal_options
-            type: dict
-            brief: Contains the options to configure in local_internal_options
         - truncate_monitored_files:
             type: fixture
             brief: Truncate all the log files and json alerts files before and after the test execution.
-        - set_wazuh_configuration_with_local_internal_options:
+        - set_wazuh_configuration:
             type: fixture
-            brief: Set the wazuh configuration according to the configuration data and local_internal_options.
+            brief: Set the wazuh configuration according to the configuration data.
+        - configure_local_internal_options:
+            type: fixture
+            brief: Configure the local_internal_options file.
         - restart_wazuh_function:
             type: fixture
             brief: Restart wazuh.
@@ -137,8 +137,8 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
         - Check that logs are ignored when they do not match with configured regex
 
     input_description:
-        - The `configuration_ignore_regex_default.yaml` file provides the module configuration for this test.
-        - The `cases_ignore_regex_default` file provides the test cases.
+        - The `configuration_restrict_ignore_regex_values.yaml` file provides the module configuration for this test.
+        - The `cases_restrict_ignore_regex_values` file provides the test cases.
 
     expected_output:
         - r".*wazuh-logcollector.*Analizing file: '{file}'.*"
@@ -172,6 +172,7 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
                 log_found = evm.check_ignore_restrict_messages(message=log, regex=metadata['restrict_regex'],
                                                                tag='restrict', prefix=prefix)
             assert log_found is False, lc.ERR_MSG_UNEXPECTED_IGNORE_EVENT
+
     # If matches with restrict, it should not be ignored due to restrict config
     elif metadata['matches'] == 'restrict':
         log_found = False
@@ -184,8 +185,9 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
             log_found = evm.check_ignore_restrict_messages(message=log, regex=metadata['ignore_regex'],
                                                            tag='ignore', prefix=prefix)
         assert log_found is False, lc.ERR_MSG_UNEXPECTED_IGNORE_EVENT
+    
+    # If it matches with None, the log should be ignored due to restrict config and not due to ignore config
     else:
-        # If it matches with None, the log should be ignored due to restrict config and not due to ignore config
         log_found = False
         with pytest.raises(TimeoutError):
             log_found = evm.check_ignore_restrict_messages(message=log, regex=metadata['ignore_regex'], tag='ignore',

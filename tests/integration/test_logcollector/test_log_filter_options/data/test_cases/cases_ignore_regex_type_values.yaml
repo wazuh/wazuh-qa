@@ -1,5 +1,5 @@
-- name: Test Restrict PCRE2 - Match
-  description: Test Restrict with PCRE2 regex, with matching log
+- name: Test Ignore tag - PCRE2 engine - log match
+  description: Test Ignore tag tag with PCRE2 regex, with matching log
   configuration_parameters:
     REGEX: .*test
     REGEX_TYPE: PCRE2
@@ -9,8 +9,8 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
     matches: true
 
-- name: Test Restrict PCRE2 - Does not Match
-  description: Test Restrict with PCRE2 regex, with not matching log
+- name: Test Ignore tag - PCRE2 engine - log does not match
+  description: Test Ignore tag with PCRE2 regex, with not matching log
   configuration_parameters:
     REGEX: .*test
     REGEX_TYPE: PCRE2
@@ -20,8 +20,8 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log does not match"
     matches: false
 
-- name: Test Restrict osmatch - Match
-  description: Test Restrict with osmatch regex, with matching log
+- name: Test Ignore tag - osmatch engine - log match
+  description: Test Ignore tag with osmatch regex, with matching log
   configuration_parameters:
     REGEX: test$
     REGEX_TYPE: osmatch
@@ -31,8 +31,8 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
     matches: true
 
-- name: Test Restrict osmatch - Does not Match
-  description: Test Restrict with osmatch regex, with not matching log
+- name: Test Ignore tag - osmatch engine - log does not match
+  description: Test Ignore tag with osmatch regex, with not matching log
   configuration_parameters:
     REGEX: test$
     REGEX_TYPE: osmatch
@@ -42,8 +42,8 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log does not match"
     matches: false
 
-- name: Test Restrict osregex - Match
-  description: Test Restrict with osregex regex, with matching log
+- name: Test Ignore tag - osregex engine - log match
+  description: Test Ignore tag with osregex regex, with matching log
   configuration_parameters:
     REGEX: \.test
     REGEX_TYPE: osregex
@@ -53,8 +53,8 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
     matches: true
 
-- name: Test Restrict osregex - Does not Match
-  description: Test Restrict with osregex regex, with not matching log
+- name: Test Ignore tag - osregex engine - log does not match
+  description: Test Ignore tag with osregex regex, with not matching log
   configuration_parameters:
     REGEX: \.test
     REGEX_TYPE: osregex

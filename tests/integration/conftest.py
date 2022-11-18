@@ -1017,39 +1017,7 @@ def set_wazuh_configuration(configuration):
     conf.write_wazuh_conf(backup_config)
 
 
-@pytest.fixture(scope='function')
-def set_wazuh_configuration_with_local_internal_options(configuration, set_wazuh_configuration,
-                                                        set_local_internal_options, local_internal_options):
-    """Set wazuh configuration
-    Args:
-        configuration (dict): Configuration template data to write in the ossec.conf.
-        local_internal_options(dict): Object containing the local_internal_options_values to be configured.
-        set_wazuh_configuration (fixture): Set the wazuh configuration according to the configuration data.
-        set_local_internal_options (fixture): Set the local_internal_options.conf file.
-    """
-    yield
-
-
-@pytest.fixture(scope='function')
-def set_local_internal_options(local_internal_options):
-    """Fixture to configure the local internal options file.
-    Args:
-        local_internal_options(dict): Object containing the local_internal_options_values to be configured.
-    """
-
-    # Backup the old local internal options
-    backup_local_internal_options = conf.get_wazuh_local_internal_options()
-
-    # Set the new local internal options configuration
-    conf.set_wazuh_local_internal_options(conf.create_local_internal_options(local_internal_options))
-
-    yield
-
-    # Backup the old local internal options cofiguration
-    conf.set_wazuh_local_internal_options(backup_local_internal_options)
-
-
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def truncate_monitored_files():
     """Truncate all the log files and json alerts files before and after the test execution"""
 

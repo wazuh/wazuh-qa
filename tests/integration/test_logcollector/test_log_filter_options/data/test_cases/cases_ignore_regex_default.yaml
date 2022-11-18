@@ -1,4 +1,4 @@
-- name: Test Ignore Default - Match
+- name: Test Ignore tag - Default engine - Log Matches
   description: Test Ignore with default regex, with matching log
   configuration_parameters:
     REGEX: .+test
@@ -7,7 +7,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
     matches: true
 
-- name: Test Ignore Default - Does not Match
+- name: Test Ignore tag - Default engine - Log does not Match
   description: Test Ignore with default regex, with not matching log
   configuration_parameters:
     REGEX: .+test
