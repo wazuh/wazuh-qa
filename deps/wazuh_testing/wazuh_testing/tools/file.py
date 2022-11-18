@@ -224,17 +224,14 @@ def rename_file(file_path, new_path):
         os.rename(file_path, new_path)
 
 
-def delete_file(path, name):
+def delete_file(file_path):
     """Delete a regular file.
 
     Args:
-        path (str): path to the file to be deleted.
-        name (str): name of the file to be deleted.
+        file_path (str): File path to the file to be deleted.
     """
-    logger.info(f"Removing file {str(os.path.join(path, name))}")
-    regular_path = os.path.join(path, name)
-    if os.path.exists(regular_path):
-        os.remove(regular_path)
+    if os.path.exists(file_path):
+        os.remove(file_path)
 
 
 def delete_path_recursively(path):
