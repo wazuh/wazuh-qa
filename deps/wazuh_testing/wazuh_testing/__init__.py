@@ -70,6 +70,9 @@ T_20 = 20
 T_30 = 30
 T_60 = 60
 
+# Local Internal Options values
+MODULESD_DEBUG = 'wazuh_modules.debug'
+VERBOSE_DEBUG_OUTPUT = '2'
 
 # Protocols
 UDP = 'UDP'
