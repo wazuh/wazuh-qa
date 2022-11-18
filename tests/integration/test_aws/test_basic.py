@@ -34,7 +34,7 @@ configurations = load_configuration_template(configurations_path, configuration_
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_defaults(
-    configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
+    configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_s3_cloudtrail_db,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function
 ):
     """

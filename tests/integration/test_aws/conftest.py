@@ -1,7 +1,9 @@
 import pytest
 from wazuh_testing import logger
 from wazuh_testing.modules.aws.s3_utils import delete_file, upload_file
+from wazuh_testing.modules.aws.db_utils import delete_s3_db
 
+# S3 fixtures
 
 @pytest.fixture(scope='function')
 def upload_file_to_s3(metadata: dict) -> None:
@@ -36,3 +38,14 @@ def upload_and_delete_file_to_s3(metadata: dict):
 
     delete_file(filename=filename, bucket_name=bucket_name)
     logger.debug('Deleted file: %s from bucket %s', filename, bucket_name)
+
+# DB fixtures
+
+@pytest.fixture(scope='function')
+def clean_s3_cloudtrail_db():
+    """Delete the DB file before and after the test execution"""
+    delete_s3_db()
+
+    yield
+
+    delete_s3_db()

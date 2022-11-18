@@ -37,7 +37,7 @@ configurations = load_configuration_template(configurations_path, configuration_
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_remove_from_bucket(
     configuration, metadata, upload_file_to_s3, load_wazuh_basic_configuration, set_wazuh_configuration,
-    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function
+    clean_s3_cloudtrail_db, configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function
 ):
     """
     description: The uploaded file was removed after the execution.
