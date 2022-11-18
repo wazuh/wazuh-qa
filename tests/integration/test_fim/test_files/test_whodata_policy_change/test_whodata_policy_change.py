@@ -50,20 +50,21 @@ tags:
     - fim_whodata_policy_change
 '''
 import os
-
+import time
 
 import pytest
 from wazuh_testing.tools import PREFIX, configuration
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing import global_parameters, LOG_FILE_PATH
 from wazuh_testing.modules import fim
+from wazuh_testing.modules.fim import event_monitor as evm
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim.utils import regular_file_cud
-from test_fim.common import make_diff_file_path
 
 # Marks
 
-pytestmark = [pytest.mark.windows, pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 
 # Reference paths
@@ -77,24 +78,27 @@ configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_whodata_p
 
 
 # variables
-test_folder = os.path.join(PREFIX, fim.TEST_DIR_1)
+test_folders = [os.path.join(PREFIX, fim.TEST_DIR_1)]
+folder = test_folders[0]
+print("TESTFOLDER---------" +str(folder))
+file_list = [f"regular_file"]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
 # Test configurations
 configuration_parameters, configuration_metadata, test_case_ids = configuration.get_test_cases_data(test_cases_path)
 for count, value in enumerate(configuration_parameters):
-    configuration_parameters[count]['TEST_DIRECTORIES'] = test_folder
+    configuration_parameters[count]['TEST_DIRECTORIES'] = folder
 configurations = configuration.load_configuration_template(configurations_path, configuration_parameters,
                                                            configuration_metadata)
 
 
 # tests
-@pytest.mark.parametrize('test_folders', [test_folder], ids='')
+@pytest.mark.parametrize('test_folders', [test_folders], ids='')
 @pytest.mark.parametrize('local_internal_options', [local_internal_options], ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration_with_local_internal_options,
-                                 restart_syscheck_function, create_monitored_folders_function,
+                                 create_monitored_folders_function, restart_syscheck_function,
                                  wait_fim_start_function):
     '''
     description: Check if the 'wazuh-syscheckd' daemon reports the file changes (or truncates if required)
@@ -144,17 +148,32 @@ def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration_
     tags:
         - whodata
     '''
-    file_list = [f"regular_file"]
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     # Check it is being monitored in whodata
+    evm.detect_windows_sacl_configured(wazuh_log_monitor, '.*')
+    # Check Whodata engine has started
+    evm.detect_whodata_start(wazuh_log_monitor)
     
-    # Change permissions
-
+    # Change policies
+    if metadata['check_event']:
+        time.sleep(8)
+    command = f"auditpol /restore /file:{os.path.join(TEST_DATA_PATH,metadata['disabling_file'])}"
+    output = run_local_command_returning_output(command)
+    
     # Check it changes to realtime
-    
-    # CUD file and check events
-    
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    regular_file_cud(test_folder, wazuh_log_monitor, file_list=file_list, time_travel=False,
-                     min_timeout=global_parameters.default_timeout*4, triggers_event=True)
+    if metadata['check_event']:
+        wazuh_log_monitor.start(timeout=20, 
+        callback=generate_monitoring_callback(r'.*win_whodata.*(Event 4719 received due to changes in audit policy. Switching directories to realtime)'),
+        error_message="MESSAGE")
+    evm.detect_windows_whodata_mode_change(wazuh_log_monitor, '.*')
 
+    # Create/Update/Delete file and check events   
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, time_travel=False,
+                     event_mode=fim.REALTIME_MODE, min_timeout=global_parameters.default_timeout*4,
+                     triggers_event=True)
+
+    # Restore policies
+    command = f"auditpol /restore /file:{os.path.join(TEST_DATA_PATH,metadata['enabling_file'])}"
+    run_local_command_returning_output(command)

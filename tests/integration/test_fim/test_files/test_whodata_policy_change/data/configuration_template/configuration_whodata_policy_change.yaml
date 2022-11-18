@@ -3,17 +3,12 @@
       elements:
         - disabled:
             value: 'no'
-        - frequency:
-            value: INTERVAL
         - directories:
             value: TEST_DIRECTORIES
             attributes:
-              - check_all: 'yes'
-              - realtime: REALTIME
-              - whodata: WHODATA
-              - report_changes: 'yes'
-        - nodiff:
-            value: NODIFF_FILE
+              - whodata: 'yes'
+        - windows_audit_interval:
+            value: AUDIT_INTERVAL
 
     - section: sca
       elements:
