@@ -180,7 +180,7 @@ CB_FILE_SIZE_LIMIT_REACHED = r'.*File \'(.*)\' is too big for configured maximum
 CB_DIFF_FOLDER_DELETED = r'.*Folder \'(.*)\' has been deleted.*'
 CB_STARTING_WINDOWS_AUDIT = r'.*state_checker.*(Starting check of Windows Audit Policies and SACLs)'
 CB_SWITCHING_DIRECTORIES_TO_REALTIME = r'.*state_checker.*(Audit policy change detected. Switching directories to realtime)'
-
+CB_RECIEVED_EVENT_4719 = r'.*win_whodata.*(Event 4719).*Switching directories to realtime'
 
 # Error message
 ERR_MSG_MAXIMUM_FILE_SIZE = 'Did not receive expected "Maximum file size limit configured to \'... KB\'..." event'
@@ -195,7 +195,7 @@ ERR_MSG_SCHEDULED_SCAN_ENDED = 'Did not receive expected "File integrity monitor
 ERR_MSG_DISK_QUOTA_LIMIT = 'Did not receive "Maximum disk quota size limit configured to \'... KB\'." event'
 ERR_MSG_FILE_LIMIT_REACHED = 'Did not receive "File ... is too big ... to perform diff operation" event.'
 ERR_MSG_FOLDER_DELETED = 'Did not receive expected "Folder ... has been deleted." event.'
-ERR_MSG_SACL_CONFIGURED_EVENT = 'Did not receive the expected "The SACL of ... will be configured" event'
+ERR_MSG_SACL_CONFIGURED_EVENT = 'Did not receive the expected "The SACL of <file> will be configured" event'
 ERR_MSG_WHDATA_REALTIME_MODE_CHANGE_EVENT = 'Did no receive the expected "directory starts to be monitored in real-time mode" event'
 
 # Setting Local_internal_option file
