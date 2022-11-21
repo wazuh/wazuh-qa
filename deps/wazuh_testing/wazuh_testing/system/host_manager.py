@@ -13,7 +13,6 @@ class HostManager:
 
     It allows to manage remote hosts using ansible inventory files using testinfra framework.
     """
-    error_fields = ['stderr', 'stderr_lines', 'msg']
 
     def __init__(self, inventory_path):
         """Constructor of host manager class.
@@ -28,7 +27,6 @@ class HostManager:
 
         Args:
             host (str): Hostname
-
         Returns:
             testinfra.modules.base.Ansible: Host instance from hostspec
         """
@@ -39,7 +37,6 @@ class HostManager:
 
         Args:
             group (str): Group name
-
         Returns:
             list: List of hosts
         """
@@ -50,7 +47,6 @@ class HostManager:
 
         Args:
             host (str): Hostname
-
         Returns:
             testinfra.modules.base.Ansible: Host instance from hostspec
         """
@@ -61,7 +57,6 @@ class HostManager:
 
         Args:
             host (str): Hostname
-
         Returns:
             str: OS of the host
         """
@@ -73,7 +68,6 @@ class HostManager:
 
         Args:
             host (str): Hostname
-
         Returns:
             str: OS of the host
         """
@@ -87,7 +81,6 @@ class HostManager:
 
         Args:
             host (str): Hostname
-
         Returns:
             dict: IPs of the host (ipv4 and ipv6)
         """
@@ -100,7 +93,6 @@ class HostManager:
 
         Args:
             host (str): Hostname
-
         Returns:
             dict: Interfaces of the host
         """
@@ -113,7 +105,6 @@ class HostManager:
         Args:
             host (str): Hostname
             windows (bool): Use windows command
-
         Returns:
             bool: True if the host is reachable, False otherwise
         """
@@ -122,7 +113,7 @@ class HostManager:
 
         return testinfra_host.ansible(ansible_command, check=False)['ping'] == 'pong'
 
-    def move_file(self, host, src_path, dest_path, remote_src=False, become=False, windows=False, ignore_errors=False):
+    def copy_file(self, host, src_path, dest_path, remote_src=False, become=False, windows=False, ignore_errors=False):
         """Move from src_path to the desired location dest_path for the specified host.
 
         Args:
@@ -133,10 +124,8 @@ class HostManager:
             become (bool): Use sudo
             windows (bool): Use windows command
             ignore_errors (bool): Ignore errors
-
         Returns:
             dict: Result of the command execution
-
         Raises:
             Exception: If the command execution fails
         """
@@ -146,7 +135,8 @@ class HostManager:
 
         command_parameters = f"src={src_path} dest={dest_path} remote_src={remote_src}"
         result = testinfra_host.ansible(ansible_command, command_parameters, check=False, become=become)
-        if (set(result.keys()) & set(self.error_fields)) and not ignore_errors:
+
+        if result.get('msg', None) and not ignore_errors:
             raise Exception(f"Error moving file from {src_path} to {dest_path} on host {host}: {result}")
 
         return result
@@ -159,16 +149,15 @@ class HostManager:
             path (str): File path
             become (bool): Use sudo
             ignore_errors (bool): Ignore errors
-
         Returns:
             str: File content
-
         Raises:
             Exception: If the file cannot be read
         """
         testinfra_host = self.get_host(host)
         result = testinfra_host.ansible("slurp", f"src={path}", check=False, become=become)
-        if (set(result.keys()) & set(self.error_fields)) and not ignore_errors:
+
+        if result.get('msg', None) and not ignore_errors:
             raise Exception(f"Error reading file {path} on host {host}: {result}")
 
         return base64.b64decode(result['content']).decode('utf-8')
@@ -208,7 +197,7 @@ class HostManager:
 
         result = testinfra_host.ansible(ansible_command, f"src={src_path} dest={dest_path}", check=False, become=become)
 
-        if result and (set(result.keys() - 'msg') & set(self.error_fields)) and not ignore_errors:
+        if (result['rc'] != 0 or not result) and not ignore_errors:
             raise Exception(f"Error creating file structure on host {host}: {result}")
 
         return result
@@ -240,8 +229,7 @@ class HostManager:
             ansible_command = 'file' if not windows else 'win_file'
             result = testinfra_host.ansible(ansible_command, f"path={file_path} state=touch", check=False,
                                             become=become)
-
-        if (set(result.keys()) & set(self.error_fields)) and not ignore_errors:
+        if result.get('msg', None) and not ignore_errors:
             raise Exception(f"Error truncating file {file_path} on host {host}: {result}")
 
         return result
@@ -255,10 +243,8 @@ class HostManager:
             windows (bool, optional): Windows command. Defaults to False.
             become (bool, optional): Use sudo. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
-
         Returns:
             dict: Command result
-
         Raises:
             Exception: If the file cannot be removed
         """
@@ -266,7 +252,8 @@ class HostManager:
         testinfra_host = self.get_host(host)
         ansible_command = 'file' if not windows else 'win_file'
         result = testinfra_host.ansible(ansible_command, f"path={file_path} state=absent", check=False, become=become)
-        if (set(result.keys()) & set(self.error_fields)) and not ignore_errors:
+
+        if result.get('msg', None) and not ignore_errors:
             raise Exception(f"Error removing file {file_path} on host {host}: {result}")
 
         return result
@@ -281,10 +268,8 @@ class HostManager:
             become (bool, optional): Use sudo. Defaults to False.
             windows (bool, optional): Windows command. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
-
         Returns:
             dict: Command result
-
         Raises:
             Exception: If the file cannot be modified
         """
@@ -292,8 +277,9 @@ class HostManager:
         with open(tmp_file.name, 'w+') as tmp:
             tmp.write(content)
 
-        result = self.move_file(host, src_path=tmp_file.name, dest_path=path, become=become, windows=windows)
-        if (set(result.keys()) & set(self.error_fields)) and not ignore_errors:
+        result = self.copy_file(host, src_path=tmp_file.name, dest_path=path, become=become, windows=windows)
+
+        if result.get('msg', None) and not ignore_errors:
             raise Exception(f"Error modifying file {path} on host {host}: {result}")
 
         return result
@@ -312,10 +298,8 @@ class HostManager:
             become (bool, optional): Use sudo. Defaults to False.
             windows (bool, optional): Windows command. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
-
         Returns:
             dict: Command result
-
         Raises:
             Exception: If the file cannot be created
         """
@@ -334,7 +318,7 @@ class HostManager:
 
         result = testinfra_host.ansible(ansible_command, ansible_parameters, check=False, become=become)
 
-        if (set(result.keys()) & set(self.error_fields)) and not ignore_errors:
+        if result.get('msg', None) and not ignore_errors:
             raise Exception(f"Error creating file {path} on host {host}: {result}")
         return result
 
@@ -360,7 +344,7 @@ class HostManager:
 
         result = testinfra_host.ansible(ansible_command, f"name={service} state={state}", check=False, become=become)
 
-        if (set(result.keys()) & set(self.error_fields)) and not ignore_errors:
+        if result.get('msg', None) and not ignore_errors:
             raise Exception(f"Error controlling service {service} on host {host}: {result}")
 
         return result
@@ -384,11 +368,13 @@ class HostManager:
         testinfra_host = self.get_host(host)
         ansible_command = 'command' if not windows else 'win_command'
 
-        result = testinfra_host.ansible(ansible_command, f"cmd={cmd}", check=False, become=become)
-        if (set(result.keys()) & set(self.error_fields)) and not ignore_errors:
-            raise Exception(f"Error running command {cmd} on host {host}: {result}")
+        result = testinfra_host.ansible(ansible_command, f"{cmd}", check=False, become=become)
+        rc, stdout = result.get('rc', 1), result.get('stdout', '')
 
-        return result
+        if rc != 0 and not ignore_errors:
+            raise Exception(f"Error running command '{cmd}' on host {host}: {result}")
+
+        return rc, stdout
 
     def run_shell(self, host, cmd, become=False, windows=False, ignore_errors=False):
         """Run a shell command on a host.
@@ -408,16 +394,21 @@ class HostManager:
             Exception: If the command cannot be run
         """
         testinfra_host = self.get_host(host)
+        rc = None
+        stdout = None
+
         ansible_command = 'shell' if not windows else 'win_shell'
 
-        result = testinfra_host.ansible(ansible_command, f"cmd={cmd}", check=False, become=become)
+        result = testinfra_host.ansible(ansible_command, f"{cmd}", check=False, become=False)
 
-        if (set(result.keys()) & set(self.error_fields)) and not ignore_errors:
-            raise Exception(f"Error running shell command {cmd} on host {host}: {result}")
+        rc, stdout = result['rc'], result['stdout']
 
-        return result['stdout']
+        if rc != 0 and not ignore_errors:
+            raise Exception(f"Error running command {cmd} on host {host}: {result}")
 
-    def find_file(self, host, path, pattern, recurse=False, use_regex=False, become=False, windows=False,
+        return rc, stdout
+
+    def find_files(self, host, path, pattern, recurse=False, use_regex=False, become=False, windows=False,
                   ignore_errors=False):
         """Search and return information of a file inside a path.
 
@@ -439,12 +430,13 @@ class HostManager:
         """
         test_infra_host = self.get_host(host)
         ansible_command = 'find' if not windows else 'win_find'
+        ansible_pattern_arguments = 'pattern' if not windows else 'patterns'
 
-        result = test_infra_host.ansible(ansible_command, f"path={path} pattern={pattern} \
+        result = test_infra_host.ansible(ansible_command, f"paths={path} {ansible_pattern_arguments}='{pattern}' \
                                          recurse={recurse} use_regex={use_regex}",
-                                         become=True, check=False)
+                                         become=become, check=False)
 
-        if (set(result.keys()) & set(self.error_fields)) and not ignore_errors:
+        if not 'files' in result and not ignore_errors:
             raise Exception(f"Error finding file {path} on host {host}: {result}")
 
         return result['files']
@@ -470,7 +462,7 @@ class HostManager:
 
         result = testinfra_host.ansible(ansible_command, f"path={path}", check=False, become=become)
 
-        if (set(result.keys()) & set(self.error_fields)) and not ignore_errors:
+        if not 'stat' in result and not ignore_errors:
             raise Exception(f"Error getting stats of {path} on host {host}: {result}")
 
         return result
