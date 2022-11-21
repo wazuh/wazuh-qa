@@ -35,6 +35,7 @@ Release report: TBD
 ### Changed
 
 - Adapt wazuhdb integration tests for auto-vacuum ([#3613](https://github.com/wazuh/wazuh-qa/issues/3613)) \- (Tests)
+- Add `monitord.rotate_log` to `local_internal_options` file for `test_macos_format_query` ([#3602](https://github.com/wazuh/wazuh-qa/pull/3602)) \- (Tests)
 - Adapt analysisd integration tests for EPS ([#3559](https://github.com/wazuh/wazuh-qa/issues/3559)) \- (Tests)
 - Improve `test_remove_audit` FIM test to retry install and remove command ([#3562](https://github.com/wazuh/wazuh-qa/pull/3562)) \- (Tests)
 - Skip unstable integration tests for gcloud ([#3531](https://github.com/wazuh/wazuh-qa/pull/3531)) \- (Tests)
