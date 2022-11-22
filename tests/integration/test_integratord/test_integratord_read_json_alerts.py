@@ -41,7 +41,8 @@ from wazuh_testing.modules import integratord as integrator
 from wazuh_testing.modules.integratord.event_monitor import check_integratord_event
 from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
-from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+from wazuh_testing.modules.integratord import event_monitor as evm
+from wazuh_testing.tools.monitoring import FileMonitor
 
 
 # Marks
@@ -125,9 +126,7 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
     run_local_command_returning_output(f"echo '{sample}' >> {ALERT_FILE_PATH}")
 
     # Read Response in ossec.log
-    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
-                            callback=callback_generator(integrator.CB_SLACK_ALERT),
-                            error_message=integrator.ERR_MSG_SLACK_ALERT_NOT_DETECTED)
+    evm.check_response(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout)
 
 
 @pytest.mark.tier(level=1)
@@ -178,12 +177,12 @@ def test_integratord_read_invalid_alerts(configuration, metadata, set_wazuh_conf
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
 
     if metadata['alert_type'] == 'invalid':
-        callback = integrator.CB_INVALID_JSON_ALERT_READ
-        error_message = integrator.ERR_MSG_INVALID_ALERT_NOT_FOUND
+        callback = fr".*WARNING: Invalid JSON alert read.*"
+        error_message = 'Did not recieve the expected "...Invalid JSON alert read..." event'
 
     elif metadata['alert_type'] == 'overlong':
-        callback = integrator.CB_OVERLONG_JSON_ALERT_READ
-        error_message = integrator. ERR_MSG_OVERLONG_ALERT_NOT_FOUND
+        callback = fr".*WARNING: Overlong JSON alert read.*"
+        error_message = 'Did not recieve the expected "...Overlong JSON alert read..." event'
         # Add 90kb of padding to alert to make it go over the allowed value of 64KB.
         padding = "0"*90000
         sample = sample.replace("padding_input", "agent_" + padding)
@@ -191,5 +190,5 @@ def test_integratord_read_invalid_alerts(configuration, metadata, set_wazuh_conf
     run_local_command_returning_output(f"echo '{sample}' >> {ALERT_FILE_PATH}")
 
     # Read Response in ossec.log
-    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
-                            callback=callback_generator(callback), error_message=error_message)
+    evm.check_alert_read(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
+                         callback=callback, error_message=error_message)

@@ -39,9 +39,9 @@ from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, ALERT_FILE_PATH
 from wazuh_testing.tools.file import remove_file, copy
 from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.modules import integratord as integrator
-from wazuh_testing.modules.integratord.event_monitor import check_integratord_event
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
-from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.integratord import event_monitor as evm
 
 
 # Marks
@@ -118,10 +118,8 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     run_local_command_returning_output(command)
 
     # Check that the alert was read
-    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2,
-                            callback=callback_generator(integrator.CB_INTEGRATORD_SENDING_ALERT),
-                            error_message=integrator.ERR_MSG_SENDING_ALERT_NOT_FOUND,
-                            update_position=False)
+    evm.check_send_new_alers(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2,
+                             update_position=False)
 
     # Change file to change inode
     copy(ALERT_FILE_PATH, TEMP_FILE_PATH)
@@ -134,14 +132,10 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     time.sleep(integrator.TIME_TO_DETECT_FILE)
 
     # Monitor Inode Changed
-    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2,
-                            callback=callback_generator(integrator.CB_ALERTS_FILE_INODE_CHANGED),
-                            error_message=integrator.ERR_MSG_ALERT_INODE_CHANGED_NOT_FOUND)
+    evm.check_file_inode_changed(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2)
 
     # Insert a new alert
     run_local_command_returning_output(command)
 
     # Read Response in ossec.log
-    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2,
-                            callback=callback_generator(integrator.CB_PROCESSING_ALERT),
-                            error_message=integrator.ERR_MSG_SLACK_ALERT_NOT_DETECTED)
+    evm.check_process_alert(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2)
