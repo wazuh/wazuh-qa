@@ -1,0 +1,11 @@
+- sections:
+    - section: localfile
+      elements:
+        - location:
+            value: LOCATION
+        - log_format:
+            value: LOG_FORMAT
+        - only-future-events:
+            value: ONLY_FUTURE_EVENTS
+            attributes:
+              - max-size: MAX_SIZE

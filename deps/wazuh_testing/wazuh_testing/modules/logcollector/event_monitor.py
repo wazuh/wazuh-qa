@@ -54,6 +54,35 @@ def check_logcollector_event(file_monitor=None, callback='', error_message=None,
                        callback=make_logcollector_callback(callback, prefix, escape), error_message=error_message)
 
 
+def check_analyzing_file(file, error_message, prefix, file_monitor=None):
+    """Create a callback to detect if logcollector is monitoring a file.
+
+    Args:
+        file (str): Name with absolute path of the analyzed file.
+        error_message (str): Error message.
+        prefix (str): Daemon that generates the error log.
+        file_monitor (FileMonitor): Log monitor.
+    """
+    check_logcollector_event(file_monitor=file_monitor, timeout=T_30,
+                             callback=fr".*Analyzing file: '{re.escape(file)}'.*",
+                             error_message=error_message, prefix=prefix)
+
+
+def check_syslog_messages(message, error_message, prefix, file_monitor=None, timeout=T_30, escape=False):
+    """Create a callback to detect "DEBUG: Read <number> lines from command <command>" debug line.
+    Args:
+        message (str): Command to be monitored.
+        error_message (str): Error message.
+        prefix (str): Daemon that generates the error log.
+        file_monitor (FileMonitor): Log monitor.
+        timeout (int): Timeout to check the log.
+        escape (bool): Flag to escape special characters in the pattern.
+    """
+    callback_msg = fr"DEBUG: Reading syslog message: '{message}'"
+    check_logcollector_event(file_monitor=file_monitor, timeout=timeout, callback=callback_msg,
+                             error_message=error_message, prefix=prefix, escape=escape)
+
+
 def check_eventchannel_analyzing(event_location, error_message, prefix):
     """Check if logcollector is monitoring a event log.
 
@@ -78,18 +107,6 @@ def check_monitoring_macos_logs(error_message, old_logs=False):
                    if old_logs else f"Monitoring macOS logs with: {log_msg} stream --style syslog"
 
     check_logcollector_event(timeout=T_30, callback=callback_msg, error_message=error_message)
-
-
-def check_analyzing_file(file, error_message, prefix):
-    """Create a callback to detect if logcollector is monitoring a file.
-
-    Args:
-        file (str): Name with absolute path of the analyzed file.
-        error_message (str): Error message.
-        prefix (str): Daemon that generates the error log.
-    """
-    check_logcollector_event(timeout=T_30, callback=fr".*Analyzing file: '{re.escape(file)}'.*",
-                             error_message=error_message, prefix=prefix)
 
 
 def check_invalid_attribute(option, attribute, value, prefix, severity='WARNING'):
