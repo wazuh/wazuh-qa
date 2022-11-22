@@ -42,7 +42,8 @@ from wazuh_testing.modules import integratord as integrator
 from wazuh_testing.modules.integratord.event_monitor import check_integratord_event
 from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
-from wazuh_testing.tools.monitoring import FileMonitor, callback_generator
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.integratord import event_monitor as evm
 
 
 # Marks
@@ -123,9 +124,7 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
 
     # Delete alerts.json file
     remove_file(ALERT_FILE_PATH)
-    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2,
-                            callback=callback_generator(integrator.CB_CANNOT_RETRIEVE_JSON_FILE),
-                            error_message=integrator.ERR_MSG_CANNOT_RETRIEVE_MSG_NOT_FOUND)
+    evm.check_file_information(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2)
 
     # Create alerts.json file
     run_local_command_returning_output(command)
@@ -137,6 +136,4 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
     run_local_command_returning_output(f"echo '{metadata['alert_sample']}' >> {ALERT_FILE_PATH}")
 
     # Read Response in ossec.log
-    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2,
-                            callback=callback_generator(integrator.CB_SLACK_ALERT),
-                            error_message=integrator.ERR_MSG_SLACK_ALERT_NOT_DETECTED)
+    evm.check_response(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2)
