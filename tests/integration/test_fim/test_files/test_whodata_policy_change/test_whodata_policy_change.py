@@ -95,8 +95,8 @@ configurations = configuration.load_configuration_template(configurations_path, 
 # tests
 @pytest.mark.parametrize('test_folders', [test_folders], ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
-def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration,
-                                 configure_local_internal_options_function, restart_syscheck_function, create_monitored_folders_function,
+def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration, create_monitored_folders_function,
+                                 configure_local_internal_options_function, restart_syscheck_function,
                                  wait_fim_start_function):
     '''
     description: Check if the 'wazuh-syscheckd' daemon reports the file changes (or truncates if required)
