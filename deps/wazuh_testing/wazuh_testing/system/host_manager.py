@@ -409,7 +409,7 @@ class HostManager:
         return rc, stdout
 
     def find_files(self, host, path, pattern, recurse=False, use_regex=False, become=False, windows=False,
-                  ignore_errors=False):
+                   ignore_errors=False):
         """Search and return information of a file inside a path.
 
         Args:
@@ -436,7 +436,7 @@ class HostManager:
                                          recurse={recurse} use_regex={use_regex}",
                                          become=become, check=False)
 
-        if not 'files' in result and not ignore_errors:
+        if 'files' not in result and not ignore_errors:
             raise Exception(f"Error finding file {path} on host {host}: {result}")
 
         return result['files']
@@ -462,7 +462,7 @@ class HostManager:
 
         result = testinfra_host.ansible(ansible_command, f"path={path}", check=False, become=become)
 
-        if not 'stat' in result and not ignore_errors:
+        if 'stat' not in result and not ignore_errors:
             raise Exception(f"Error getting stats of {path} on host {host}: {result}")
 
         return result
