@@ -11,7 +11,7 @@ import os
 class HostManager:
     """Remote host management interface.
 
-    It allows to manage remote hosts using ansible inventory files using testinfra framework.
+    It allows to manage remote hosts using ansible inventory and testinfra framework.
     """
 
     def __init__(self, inventory_path):
@@ -212,10 +212,8 @@ class HostManager:
             windows (bool, optional): Windows command. Defaults to False.
             become (bool, optional): Use sudo. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
-
         Returns:
             dict: Command result
-
         Raises:
             Exception: If the file cannot be truncated
         """
@@ -332,10 +330,8 @@ class HostManager:
                 become (bool, optional): Use sudo. Defaults to False.
                 windows (bool, optional): Windows command. Defaults to False.
                 ignore_errors (bool, optional): Ignore errors. Defaults to False.
-
             Returns:
                 dict: Command result
-
             Raises:
                 Exception: If the service cannot be controlled
         """
@@ -358,10 +354,8 @@ class HostManager:
             become (bool, optional): Use sudo. Defaults to False.
             windows (bool, optional): Windows command. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
-
         Returns:
             dict: Command result
-
         Raises:
             Exception: If the command cannot be run
         """
@@ -386,10 +380,8 @@ class HostManager:
             become (bool, optional): Use sudo. Defaults to False.
             windows (bool, optional): Windows command. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
-
         Returns:
             dict: Command result
-
         Raises:
             Exception: If the command cannot be run
         """
@@ -421,10 +413,8 @@ class HostManager:
             become (bool, optional): Use sudo. Defaults to False.
             windows (bool, optional): Windows command. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
-
         Returns:
             Files (list): List of found files.
-
         Raises:
             Exception: If the command cannot be run
         """
@@ -450,10 +440,8 @@ class HostManager:
             become (bool, optional): Use sudo. Defaults to False.
             windows (bool, optional): Windows command. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
-
         Returns:
             dict: Command result.
-
         Raises:
             Exception: If the command cannot be run.
         """
