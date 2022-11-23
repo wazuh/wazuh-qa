@@ -58,17 +58,19 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 # Configuration and cases data
 configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_sca.yaml')
 
-# ---------------------------------------------------- TEST_ENABLED ----------------------------------------------------
+# ---------------------------------------------------- TEST_ENABLED ---------------------------------------------------
 # Test configurations
 t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_sca_enabled.yaml')
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
-t1_configurations = load_configuration_template(configurations_path, t1_configuration_parameters, t1_configuration_metadata)
+t1_configurations = load_configuration_template(configurations_path, t1_configuration_parameters,
+                                                t1_configuration_metadata)
 
-# ---------------------------------------------------- TEST_DISABLED ----------------------------------------------------
+# ---------------------------------------------------- TEST_DISABLED --------------------------------------------------
 # Test configurations
 t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_sca_disabled.yaml')
 t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
-t2_configurations = load_configuration_template(configurations_path, t2_configuration_parameters, t2_configuration_metadata)
+t2_configurations = load_configuration_template(configurations_path, t2_configuration_parameters,
+                                                t2_configuration_metadata)
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
