@@ -64,13 +64,11 @@ configuration_parameters, configuration_metadata, case_ids = get_test_cases_data
 configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
 
 
-
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
-def test_enabled(configuration, metadata, prepare_cis_policies_file, truncate_monitored_files, set_wazuh_configuration,
+def test_sca_enabled(configuration, metadata, prepare_cis_policies_file, truncate_monitored_files, set_wazuh_configuration,
                  configure_local_internal_options_function, restart_wazuh_function):
     '''
-    description: Check that sca is started when is set enabled yes. When enabled is set to no, the test will
-                 check that the sca is disabled and does not start.
+    description: Check SCA behavior when enabled tag is set to yes/no.
 
     test_phases:
         - Set a custom Wazuh configuration.

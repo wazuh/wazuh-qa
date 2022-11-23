@@ -59,7 +59,7 @@ configurations = load_configuration_template(configurations_path, configuration_
 
 # Tests
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
-def test_scan_results(configuration, metadata, prepare_cis_policies_file, truncate_monitored_files,
+def test_sca_scan_results(configuration, metadata, prepare_cis_policies_file, truncate_monitored_files,
                       set_wazuh_configuration, configure_local_internal_options_function, restart_wazuh_function,
                       wait_for_sca_enabled):
     '''
