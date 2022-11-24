@@ -163,7 +163,7 @@ def test_ignore_default(configuration, metadata, new_file_path, create_file, tru
 
     # Check log file is being analyzed
     evm.check_analyzing_file(file=file, prefix=prefix)
-    #  Insert log
+    # Insert log
     run_local_command_returning_output(command)
 
     # Check the log is read from the monitored file
@@ -232,8 +232,8 @@ def test_ignore_regex_type_values(configuration, metadata, new_file_path, create
         - Check that logs are ignored when they match with configured regex
 
     input_description:
-        - The `configuration_ignore_regex_default.yaml` file provides the module configuration for this test.
-        - The `cases_ignore_regex_default` file provides the test cases.
+        - The `configuration_ignore_regex_values.yaml` file provides the module configuration for this test.
+        - The `cases_ignore_regex_values` file provides the test cases.
 
     expected_output:
         - r".*wazuh-logcollector.*Analizing file: '{file}'.*"
@@ -250,7 +250,7 @@ def test_ignore_regex_type_values(configuration, metadata, new_file_path, create
 
     # Check log file is being analized
     evm.check_analyzing_file(file=file, prefix=prefix)
-    #  Insert log
+    # Insert log
     run_local_command_returning_output(command)
 
     # Check the log is read from the monitored file
