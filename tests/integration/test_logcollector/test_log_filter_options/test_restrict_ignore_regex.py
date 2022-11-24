@@ -167,31 +167,19 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
         evm.check_ignore_restrict_messages(message=log, regex=metadata['ignore_regex'], tag='ignore',
                                            prefix=prefix)
         if 'restrict' in metadata['matches']:
-            log_found = False
-            with pytest.raises(TimeoutError):
-                log_found = evm.check_ignore_restrict_messages(message=log, regex=metadata['restrict_regex'],
-                                                               tag='restrict', prefix=prefix)
-            assert log_found is False, lc.ERR_MSG_UNEXPECTED_IGNORE_EVENT
+            evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['restrict_regex'], tag='restrict',
+                                                        prefix=prefix)
 
     # If matches with restrict, it should not be ignored due to restrict config
     elif metadata['matches'] == 'restrict':
-        log_found = False
-        with pytest.raises(TimeoutError):
-            log_found = evm.check_ignore_restrict_messages(message=log, regex=metadata['restrict_regex'],
-                                                           tag='restrict', prefix=prefix)
-        assert log_found is False, lc.ERR_MSG_UNEXPECTED_IGNORE_EVENT
-        log_found = False
-        with pytest.raises(TimeoutError):
-            log_found = evm.check_ignore_restrict_messages(message=log, regex=metadata['ignore_regex'],
-                                                           tag='ignore', prefix=prefix)
-        assert log_found is False, lc.ERR_MSG_UNEXPECTED_IGNORE_EVENT
+        evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['restrict_regex'], tag='restrict',
+                                                    prefix=prefix)
+        evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['ignore_regex'], tag='ignore',
+                                                    prefix=prefix)
 
     # If it matches with None, the log should be ignored due to restrict config and not due to ignore config
     else:
-        log_found = False
-        with pytest.raises(TimeoutError):
-            log_found = evm.check_ignore_restrict_messages(message=log, regex=metadata['ignore_regex'], tag='ignore',
-                                                           prefix=prefix)
-        assert log_found is False, lc.ERR_MSG_UNEXPECTED_IGNORE_EVENT
+        evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['ignore_regex'], tag='ignore',
+                                                    prefix=prefix)
         evm.check_ignore_restrict_messages(message=log, regex=metadata['restrict_regex'], tag='restrict',
                                            prefix=prefix)

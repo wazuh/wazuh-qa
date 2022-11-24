@@ -171,11 +171,8 @@ def test_restrict_default(configuration, metadata, new_file_path, create_file, t
     evm.check_syslog_messages(message=log, prefix=prefix)
     # Check response
     if metadata['matches']:
-        log_found = False
-        with pytest.raises(TimeoutError):
-            log_found = evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='restrict',
-                                                           prefix=prefix)
-        assert log_found is False, lc.ERR_MSG_UNEXPECTED_IGNORE_EVENT
+        evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['regex'], tag='restrict',
+                                                    prefix=prefix)
     else:
         evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='restrict',
                                            prefix=prefix)
@@ -257,11 +254,8 @@ def test_restrict_regex_type_values(configuration, metadata, new_file_path, crea
     evm.check_syslog_messages(message=log, prefix=prefix)
     # Check response
     if metadata['matches']:
-        log_found = False
-        with pytest.raises(TimeoutError):
-            log_found = evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='restrict',
-                                                           prefix=prefix)
-        assert log_found is False, lc.ERR_MSG_UNEXPECTED_IGNORE_EVENT
+        evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['regex'],
+                                                    tag='restrict', prefix=prefix)
     else:
         evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='restrict',
                                            prefix=prefix)

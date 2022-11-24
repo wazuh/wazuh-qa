@@ -1,7 +1,8 @@
 import re
 import sys
+import pytest
 from wazuh_testing import T_30, T_10, LOG_FILE_PATH
-from wazuh_testing.modules.logcollector import LOG_COLLECTOR_PREFIX
+from wazuh_testing.modules.logcollector import LOG_COLLECTOR_PREFIX, ERR_MSG_UNEXPECTED_IGNORE_EVENT
 from wazuh_testing.tools.monitoring import FileMonitor
 
 
@@ -111,3 +112,18 @@ def check_ignore_restrict_messages(message, regex, tag, prefix, error_message=No
 
     return check_logcollector_event(file_monitor=file_monitor, timeout=timeout, callback=callback_msg,
                                     error_message=error_message, prefix=prefix, escape=escape)
+
+
+def check_ignore_restrict_message_not_found(message, regex, tag, prefix):
+    '''Check that an unexpected "Ignoring the log line..." event does not appear and a log is not ignored when it
+       does not match the regex.
+    Args:
+        message (str): Message to be monitored.
+        regex (str): regex pattern configured to ignore or restrict to.
+        tag (str): string with the configured tag. Values: 'ignore' or 'restrict'
+        prefix (str): Daemon that generates the error log.
+    '''
+    log_found = False
+    with pytest.raises(TimeoutError):
+        log_found = check_ignore_restrict_messages(message=message, regex=regex, tag=tag, prefix=prefix)
+    assert log_found is False, ERR_MSG_UNEXPECTED_IGNORE_EVENT
