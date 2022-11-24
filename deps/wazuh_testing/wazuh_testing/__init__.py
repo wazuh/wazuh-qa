@@ -39,6 +39,8 @@ API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
 API_JSON_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.json')
 API_LOG_FOLDER = os.path.join(WAZUH_PATH, 'logs', 'api')
 WAZUH_TESTING_PATH = os.path.dirname(os.path.abspath(__file__))
+WAZUH_TESTING_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+
 
 # Daemons
 LOGCOLLECTOR_DAEMON = 'wazuh-logcollector'
@@ -70,6 +72,28 @@ T_20 = 20
 T_30 = 30
 T_60 = 60
 
+
+# Local internal options
+WINDOWS_DEBUG = 'windows.debug'
+SYSCHECK_DEBUG = 'syscheck.debug'
+VERBOSE_DEBUG_OUTPUT = 2
+
+# Wazuh Service commands
+WAZUH_SERVICES_STOP = 'stop'
+WAZUH_SERVICES_START = 'start'
+
+
+# Configurations
+DATA = 'data'
+WAZUH_LOG_MONITOR = 'wazuh_log_monitor'
+
+
+# File Types
+FIFO = 'fifo'
+SYMLINK = 'sym_link'
+HARDLINK = 'hard_link'
+SOCKET = 'socket'
+REGULAR = 'regular'
 
 # Protocols
 UDP = 'UDP'

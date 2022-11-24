@@ -4,8 +4,9 @@
 
 import pytest
 
-from wazuh_testing.fim import (LOG_FILE_PATH, detect_initial_scan, detect_realtime_start, detect_whodata_start, 
-                               detect_initial_scan_start)
+from wazuh_testing import LOG_FILE_PATH
+from wazuh_testing.modules.fim.event_monitor import (detect_initial_scan, detect_realtime_start, detect_whodata_start,
+                                                     detect_initial_scan_start)
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
@@ -23,7 +24,7 @@ def restart_syscheckd(get_configuration, request):
     control_service("start", daemon="wazuh-syscheckd")
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def restart_syscheckd_function(get_configuration, request):
     """
     Restart syscheckd daemon.
@@ -38,12 +39,12 @@ def restart_syscheckd_function(get_configuration, request):
 @pytest.fixture(scope="module")
 def wait_for_fim_start(get_configuration, request):
     """
-    Wait for fim to start 
+    Wait for fim to start
     """
     wait_for_fim_active(get_configuration, request)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def wait_for_fim_start_function(get_configuration, request):
     """
     Wait for fim to start
@@ -51,7 +52,7 @@ def wait_for_fim_start_function(get_configuration, request):
     wait_for_fim_start(get_configuration, request)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def wait_for_scan_start(get_configuration, request):
     """
     Wait for start of initial FIM scan.
