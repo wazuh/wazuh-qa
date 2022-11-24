@@ -138,7 +138,7 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
 
     input_description:
         - The `configuration_restrict_ignore_regex_values.yaml` file provides the module configuration for this test.
-        - The `cases_restrict_ignore_regex_values` file provides the test cases.
+        - The `cases_restrict_ignore_regex_values.yaml` file provides the test cases.
 
     expected_output:
         - r".*wazuh-logcollector.*Analizing file: '{file}'.*"
@@ -156,7 +156,7 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
     # Check log file is being analized
     evm.check_analyzing_file(file=file, prefix=prefix)
 
-    #  Insert log
+    # Insert log
     run_local_command_returning_output(command)
     # Check the log is read from the monitored file
     evm.check_syslog_messages(message=log, prefix=prefix)

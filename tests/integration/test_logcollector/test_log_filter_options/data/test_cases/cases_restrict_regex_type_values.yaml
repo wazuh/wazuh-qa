@@ -1,4 +1,4 @@
-- name: Test Restrict tag - PCRE2 engine - log matches
+- name: Log match - PCRE2 regex and restrict tag
   description: Test Restrict with PCRE2 regex, with matching log
   configuration_parameters:
     REGEX: .*test
@@ -9,7 +9,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
     matches: true
 
-- name: Test Restrict tag - PCRE2 engine - log does not match
+- name: No log match - PCRE2 regex and restrict tag
   description: Test Restrict with PCRE2 regex, with not matching log
   configuration_parameters:
     REGEX: .*test
@@ -20,7 +20,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log does not match"
     matches: false
 
-- name: Test Restrict tag - osmatch engine - log match
+- name: Log match - osmatch regex and restrict tag
   description: Test Restrict with osmatch regex, with matching log
   configuration_parameters:
     REGEX: test$
@@ -31,7 +31,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
     matches: true
 
-- name: Test Restrict tag - osmatch engine - log does not match
+- name: No log match - osmatch regex and restrict tag
   description: Test Restrict with osmatch regex, with not matching log
   configuration_parameters:
     REGEX: test$
@@ -42,7 +42,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log does not match"
     matches: false
 
-- name: Test Restrict tag - osregex engine - log match
+- name: Log match - osregex regex and restrict tag
   description: Test Restrict with osregex regex, with matching log
   configuration_parameters:
     REGEX: \.test
@@ -53,7 +53,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
     matches: true
 
-- name: Test Restrict tag - osregex engine - log does not match
+- name: No log match - osregex regex and restrict tag
   description: Test Restrict with osregex regex, with not matching log
   configuration_parameters:
     REGEX: \.test

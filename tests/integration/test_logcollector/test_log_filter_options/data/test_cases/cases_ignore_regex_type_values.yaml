@@ -1,4 +1,4 @@
-- name: Test Ignore tag - PCRE2 engine - log match
+- name: Log match - PCRE2 regex and ignore tag
   description: Test Ignore tag tag with PCRE2 regex, with matching log
   configuration_parameters:
     REGEX: .*test
@@ -9,7 +9,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
     matches: true
 
-- name: Test Ignore tag - PCRE2 engine - log does not match
+- name: No log match - PCRE2 regex and ignore tag
   description: Test Ignore tag with PCRE2 regex, with not matching log
   configuration_parameters:
     REGEX: .*test
@@ -20,7 +20,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log does not match"
     matches: false
 
-- name: Test Ignore tag - osmatch engine - log match
+- name: Log match - osmatch regex and ignore tag
   description: Test Ignore tag with osmatch regex, with matching log
   configuration_parameters:
     REGEX: test$
@@ -31,7 +31,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
     matches: true
 
-- name: Test Ignore tag - osmatch engine - log does not match
+- name: No log match - osmatch regex and ignore tag
   description: Test Ignore tag with osmatch regex, with not matching log
   configuration_parameters:
     REGEX: test$
@@ -42,7 +42,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log does not match"
     matches: false
 
-- name: Test Ignore tag - osregex engine - log match
+- name: Log match - osregex regex and ignore tag
   description: Test Ignore tag with osregex regex, with matching log
   configuration_parameters:
     REGEX: \.test
@@ -53,7 +53,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
     matches: true
 
-- name: Test Ignore tag - osregex engine - log does not match
+- name: No log match - osregex regex and ignore tag
   description: Test Ignore tag with osregex regex, with not matching log
   configuration_parameters:
     REGEX: \.test
