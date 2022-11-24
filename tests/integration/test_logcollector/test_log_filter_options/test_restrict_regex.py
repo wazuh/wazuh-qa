@@ -146,8 +146,8 @@ def test_restrict_default(configuration, metadata, new_file_path, create_file, t
         - Check that logs are ignored when they do not match with configured regex
 
     input_description:
-        - The `configuration_ignore_regex_default.yaml` file provides the module configuration for this test.
-        - The `cases_ignore_regex_default` file provides the test cases.
+        - The `configuration_restrict_regex_default.yaml` file provides the module configuration for this test.
+        - The `cases_restrict_regex_default` file provides the test cases.
 
     expected_output:
         - r".*wazuh-logcollector.*Analizing file: '{file}'.*"
@@ -232,8 +232,8 @@ def test_restrict_regex_type_values(configuration, metadata, new_file_path, crea
         - Check that logs are ignored when they do not match with configured regex
 
     input_description:
-        - The `configuration_ignore_regex_values.yaml` file provides the module configuration for this test.
-        - The `cases_ignore_regex_values` file provides the test cases.
+        - The `configuration_restrict_regex_values.yaml` file provides the module configuration for this test.
+        - The `cases_restrict_regex_values` file provides the test cases.
 
     expected_output:
         - r".*wazuh-logcollector.*Analizing file: '{file}'.*"
