@@ -15,11 +15,19 @@ import string
 import xml.etree.ElementTree as ET
 import zipfile
 import re
-
+import subprocess
+import platform
+import tempfile
 import filetype
 import requests
 import yaml
-from wazuh_testing import logger
+import pytest
+from stat import ST_ATIME, ST_MTIME
+from wazuh_testing import logger, REGULAR, SYMLINK, HARDLINK
+
+if sys.platform == 'win32':
+    import win32security as win32sec
+    import ntsecuritycon as ntc
 
 
 def read_json(file_path):
@@ -214,13 +222,41 @@ def rename_file(file_path, new_path):
 
 
 def delete_file(file_path):
+    """Delete a regular file.
+
+    Args:
+        file_path (str): File path of the file to be deleted.
+    """
     if os.path.exists(file_path):
         os.remove(file_path)
 
 
 def delete_path_recursively(path):
     if os.path.exists(path):
-        shutil.rmtree(path)
+        shutil.rmtree(path, onerror=on_write_error)
+
+
+def on_write_error(function, path, exc_info):
+    """ Error handler for functions that try to modify a file. If the error is due to an access error (read only file),
+    it attempts to add write permission and then retries. If the error is for another reason it re-raises the error.
+
+    Args:
+        function (function): function that called the handler.
+        path (str): Path to the file the function is trying to modify
+        exc_info (object): function instance execution information. Passed in by function in runtime.
+
+    Example:
+        > shutil.rmtree(path, onerror=on_write_error)
+    """
+    import stat
+    # Check if the error is an access error for Write permissions.
+    if not os.access(path, os.W_OK):
+        # Add write permissions so file can be edited and execute function.
+        os.chmod(path, stat.S_IWUSR)
+        function(path)
+    # If error is not Write access error, raise the error
+    else:
+        raise
 
 
 def download_file(source_url, dest_path):
@@ -565,3 +601,300 @@ def replace_regex_in_file(search_regex, replace_regex, file_path):
 
     # Write the file data
     write_file(file_path, file_data)
+
+
+def _create_fifo(path, name):
+    """Create a FIFO file.
+
+    Args:
+        path (str): path where the file will be created.
+        name (str): file name.
+
+    Raises:
+        OSError: if `mkfifo` fails.
+    """
+    fifo_path = os.path.join(path, name)
+    try:
+        os.mkfifo(fifo_path)
+    except OSError:
+        raise
+
+
+def _create_sym_link(path, name, target):
+    """Create a symbolic link.
+
+    Args:
+        path (str): path where the symbolic link will be created.
+        name (str): file name.
+        target (str): path where the symbolic link will be pointing to.
+
+    Raises:
+        OSError: if `symlink` fails.
+    """
+    symlink_path = os.path.join(path, name)
+    try:
+        os.symlink(target, symlink_path)
+    except OSError:
+        raise
+
+
+def _create_hard_link(path, name, target):
+    """Create a hard link.
+
+    Args:
+        path (str): path where the hard link will be created.
+        name (str): file name.
+        target (str): path where the hard link will be pointing to.
+
+    Raises:
+        OSError: if `link` fails.
+    """
+    link_path = os.path.join(path, name)
+    try:
+        os.link(target, link_path)
+    except OSError:
+        raise
+
+
+def _create_socket(path, name):
+    """Create a Socket file.
+
+    Args:
+        path (str): path where the socket will be created.
+        name (str): file name.
+
+    Raises:
+        OSError: if `unlink` fails.
+    """
+    socket_path = os.path.join(path, name)
+    try:
+        os.unlink(socket_path)
+    except OSError:
+        if os.path.exists(socket_path):
+            raise
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.bind(socket_path)
+
+
+def _create_regular(path, name, content=''):
+    """Create a regular file.
+
+    Args:
+        path (str): path where the regular file will be created.
+        name (str): file name.
+        content (str, optional): content of the created file. Default `''`
+    """
+    regular_path = os.path.join(path, name)
+    mode = 'wb' if isinstance(content, bytes) else 'w'
+
+    with open(regular_path, mode) as f:
+        f.write(content)
+
+
+def _create_regular_windows(path, name, content=''):
+    """Create a regular file in Windows
+
+    Args:
+        path (str): path where the regular file will be created.
+        name (str): file name.
+        content (str, optional): content of the created file. Default `''`
+    """
+    regular_path = os.path.join(path, name)
+    os.popen("echo " + content + " > " + regular_path + f" runas /user:{os.getlogin()}")
+
+
+def create_file(type_, path, name, **kwargs):
+    """Create a file in a given path. The path will be created in case it does not exists.
+
+    Args:
+        type_ (str): defined constant that specifies the type. It can be: FIFO, SYSLINK, Socket or REGULAR.
+        path (str): path where the file will be created.
+        name (str): file name.
+        **kwargs: Arbitrary keyword arguments.
+
+    Keyword Args:
+            **content (str): content of the created regular file.
+            **target (str): path where the link will be pointing to.
+
+    Raises:
+        ValueError: if `target` is missing for SYMLINK or HARDINK.
+    """
+
+    try:
+        logger.info("Creating file " + str(os.path.join(path, name)) + " of " + str(type_) + " type")
+        os.makedirs(path, exist_ok=True, mode=0o777)
+        if type_ != REGULAR:
+            try:
+                kwargs.pop('content')
+            except KeyError:
+                pass
+        if type_ in (SYMLINK, HARDLINK) and 'target' not in kwargs:
+            raise ValueError(f"'target' param is mandatory for type {type_}")
+        getattr(sys.modules[__name__], f'_create_{type_}')(path, name, **kwargs)
+    except OSError:
+        logger.info("File could not be created.")
+        pytest.skip("OS does not allow creating this file.")
+
+
+def modify_file_content(path, name, new_content=None, is_binary=False):
+    """Modify the content of a file.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+        new_content (str, optional): new content to append to the file. Previous content will remain. Defaults `None`
+        is_binary (boolean, optional): True if the file's content is in binary format. False otherwise. Defaults `False`
+    """
+    path_to_file = os.path.join(path, name)
+    logger.info("- Changing content of " + str(path_to_file))
+    content = "1234567890qwertyu" if new_content is None else new_content
+    with open(path_to_file, 'ab' if is_binary else 'a') as f:
+        f.write(content.encode() if is_binary else content)
+
+
+def modify_file_mtime(path, name):
+    """Change the modification time of a file.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+    """
+    path_to_file = os.path.join(path, name)
+    logger.info("- Changing mtime of " + str(path_to_file))
+    stat = os.stat(path_to_file)
+    access_time = stat[ST_ATIME]
+    modification_time = stat[ST_MTIME]
+    modification_time = modification_time + 1000
+    os.utime(path_to_file, (access_time, modification_time))
+
+
+def modify_file_owner(path, name):
+    """Change the owner of a file. The new owner will be '1'.
+
+    On Windows, uid will always be 0.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+    """
+
+    def modify_file_owner_windows():
+        cmd = f"takeown /S 127.0.0.1 /U {os.getlogin()} /F " + path_to_file
+        subprocess.call(cmd)
+
+    def modify_file_owner_unix():
+        os.chown(path_to_file, 1, -1)
+
+    path_to_file = os.path.join(path, name)
+    logger.info("- Changing owner of " + str(path_to_file))
+
+    if sys.platform == 'win32':
+        modify_file_owner_windows()
+    else:
+        modify_file_owner_unix()
+
+
+def modify_file_group(path, name):
+    """Change the group of a file. The new group will be '1'.
+
+    Available for UNIX. On Windows, gid will always be 0 and the group name will be blank.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+    """
+    if sys.platform == 'win32':
+        return
+
+    path_to_file = os.path.join(path, name)
+    logger.info("- Changing group of " + str(path_to_file))
+    os.chown(path_to_file, -1, 1)
+
+
+def modify_file_permission(path, name):
+    """Change the permission of a file.
+
+    On UNIX the new permissions will be '666'.
+    On Windows, a list of denied and allowed permissions will be given for each user or group since version 3.8.0.
+    Only works on NTFS partitions on Windows systems.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+    """
+
+    def modify_file_permission_windows():
+        user, _, _ = win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")
+        sd = win32sec.GetFileSecurity(path_to_file, win32sec.DACL_SECURITY_INFORMATION)
+        dacl = sd.GetSecurityDescriptorDacl()
+        dacl.AddAccessAllowedAce(win32sec.ACL_REVISION, ntc.FILE_ALL_ACCESS, user)
+        sd.SetSecurityDescriptorDacl(1, dacl, 0)
+        win32sec.SetFileSecurity(path_to_file, win32sec.DACL_SECURITY_INFORMATION, sd)
+
+    def modify_file_permission_unix():
+        os.chmod(path_to_file, 0o666)
+
+    path_to_file = os.path.join(path, name)
+
+    logger.info("- Changing permission of " + str(path_to_file))
+
+    if sys.platform == 'win32':
+        modify_file_permission_windows()
+    else:
+        modify_file_permission_unix()
+
+
+def modify_file_inode(path, name):
+    """Change the inode of a file for Linux.
+
+    On Windows, this function does nothing.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+    """
+    if sys.platform == 'win32':
+        return
+
+    logger.info("- Changing inode of " + str(os.path.join(path, name)))
+    inode_file = 'inodetmp'
+    path_to_file = os.path.join(path, name)
+
+    shutil.copy2(path_to_file, os.path.join(tempfile.gettempdir(), inode_file))
+    shutil.move(os.path.join(tempfile.gettempdir(), inode_file), path_to_file)
+
+
+def modify_file_win_attributes(path, name):
+    """Change the attribute of a file in Windows
+
+    On other OS, this function does nothing.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+    """
+    if sys.platform != 'win32':
+        return
+
+    logger.info("- Changing win attributes of " + str(os.path.join(path, name)))
+    path_to_file = os.path.join(path, name)
+    win32api.SetFileAttributes(path_to_file, win32con.FILE_ATTRIBUTE_HIDDEN)
+
+
+def modify_file(path, name, new_content=None, is_binary=False):
+    """Modify a Regular file.
+
+    Args:
+        path (str): path to the file to be modified.
+        name (str): name of the file to be modified.
+        new_content (str, optional): new content to add to the file. Defaults `None`.
+        is_binary: (boolean, optional): True if the file is binary. False otherwise. Defaults `False`
+    """
+    logger.info("Modifying file " + str(os.path.join(path, name)))
+    modify_file_inode(path, name)
+    modify_file_content(path, name, new_content, is_binary)
+    modify_file_mtime(path, name)
+    modify_file_owner(path, name)
+    modify_file_group(path, name)
+    modify_file_permission(path, name)
+    modify_file_win_attributes(path, name)

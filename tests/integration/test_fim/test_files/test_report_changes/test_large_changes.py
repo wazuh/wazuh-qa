@@ -66,26 +66,27 @@ tags:
 '''
 import gzip
 import os
-import re
 import shutil
 import subprocess
 import sys
 
 import pytest
-from test_fim.test_files.test_report_changes.common import generate_string
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, REGULAR, create_file, \
-    generate_params, check_time_travel
-from wazuh_testing.tools import PREFIX, WAZUH_PATH
-from wazuh_testing.tools.configuration import check_apply_test, load_wazuh_configurations
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing.modules.fim.event_monitor import callback_detect_event
+from wazuh_testing.modules.fim.utils import create_file, generate_params
+from test_fim.common import generate_string, make_diff_file_path
 
 # Marks
 
 pytestmark = pytest.mark.tier(level=1)
 
-# variables
 
+# variables
+local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 test_directories = [os.path.join(PREFIX, 'testdir')]
 nodiff_file = os.path.join(PREFIX, 'testdir_nodiff', 'regular_file')
 directory_str = ','.join(test_directories)
@@ -100,8 +101,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 
 conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
                                                            'TEST_DIRECTORIES': directory_str,
-                                                           'NODIFF_FILE': nodiff_file,
-                                                           'MODULE_NAME': __name__})
+                                                           'NODIFF_FILE': nodiff_file})
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
 
@@ -128,9 +128,6 @@ def extra_configuration_after_yield():
 
 # Tests
 
-@pytest.mark.parametrize('tags_to_apply', [
-    {'ossec_conf_report'}
-])
 @pytest.mark.parametrize('filename, folder, original_size, modified_size', [
     ('regular_0', testdir, 500, 500),
     ('regular_1', testdir, 30000, 30000),
@@ -140,9 +137,8 @@ def extra_configuration_after_yield():
     ('regular_5', testdir, 20000, 10),
     ('regular_6', testdir, 70000, 10),
 ])
-@pytest.mark.skip(reason="It will be blocked by wazuh/wazuh#9298, when it was solve we can enable again this test")
-def test_large_changes(filename, folder, original_size, modified_size, tags_to_apply, get_configuration,
-                       configure_environment, restart_syscheckd, wait_for_fim_start):
+def test_large_changes(filename, folder, original_size, modified_size, get_configuration, configure_environment,
+                       configure_local_internal_options_module, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects the character limit in the file changes is reached
                  showing the 'More changes' tag in the 'content_changes' field of the generated events. For this
@@ -168,15 +164,15 @@ def test_large_changes(filename, folder, original_size, modified_size, tags_to_a
         - modified_size:
             type: int
             brief: Size of the testing file in bytes after being modified.
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Configure the local internal options file.
         - restart_syscheckd:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
@@ -205,27 +201,19 @@ def test_large_changes(filename, folder, original_size, modified_size, tags_to_a
     tags:
         - diff
         - scheduled
-        - time_travel
     '''
     limit = 59391
     has_more_changes = False
     original_file = os.path.join(folder, filename)
     unzip_diff_file = os.path.join(unzip_diff_dir, filename + '-old')
-    diff_file_path = os.path.join(WAZUH_PATH, 'queue', 'diff', 'local')
-    if sys.platform == 'win32':
-        diff_file_path = os.path.join(diff_file_path, 'c')
-        diff_file_path = os.path.join(diff_file_path, re.match(r'^[a-zA-Z]:(\\){1,2}(\w+)(\\){0,2}$', folder).group(2),
-                                      filename, 'last-entry.gz')
-    else:
-        diff_file_path = os.path.join(diff_file_path, folder.strip('/'), filename, 'last-entry.gz')
+    diff_file_path = make_diff_file_path(folder, filename)
 
-    check_apply_test(tags_to_apply, get_configuration['tags'])
     fim_mode = get_configuration['metadata']['fim_mode']
 
     # Create the file and and capture the event.
     original_string = generate_string(original_size, '0')
     create_file(REGULAR, folder, filename, content=original_string)
-    check_time_travel(fim_mode == 'scheduled', monitor=wazuh_log_monitor)
+
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     # Store uncompressed diff file in backup folder
@@ -236,7 +224,7 @@ def test_large_changes(filename, folder, original_size, modified_size, tags_to_a
     # Modify the file with new content
     modified_string = generate_string(modified_size, '1')
     create_file(REGULAR, folder, filename, content=modified_string)
-    check_time_travel(fim_mode == 'scheduled', monitor=wazuh_log_monitor)
+
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
     # Run the diff/fc command and get the output length

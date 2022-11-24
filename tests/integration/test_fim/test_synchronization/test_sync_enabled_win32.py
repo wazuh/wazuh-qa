@@ -58,12 +58,11 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import global_parameters, DATA
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_detect_integrity_event
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.wazuh_variables import DATA
 from wazuh_testing.fim_module.fim_variables import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
                                                     YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
                                                     SYNCHRONIZATION_ENABLED, SYNCHRONIZATION_REGISTRY_ENABLED)
