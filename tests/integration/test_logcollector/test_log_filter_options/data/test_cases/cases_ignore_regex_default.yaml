@@ -7,7 +7,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches test"
     matches: true
 
-- name:  No log match - Default regex and ignore tag
+- name: No log match - Default regex and ignore tag
   description: Test Ignore with default regex, with not matching log
   configuration_parameters:
     REGEX: .+test

@@ -25,7 +25,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore"
     matches: ignore
 
-- name: Log match - PCRE2 regex, ignore and restrict tags 
+- name: Log match - PCRE2 regex, ignore and restrict tags
   description: Test Restrict + Ignore tags both with pcre2 regex. Log matches both
   configuration_parameters:
     RESTRICT_REGEX: .*restrict
