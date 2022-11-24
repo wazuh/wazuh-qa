@@ -13,7 +13,7 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 
 
 # Fixtures
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def wait_for_sca_enabled():
     '''
     Wait for the sca module to start.
@@ -22,7 +22,7 @@ def wait_for_sca_enabled():
     evm.check_sca_enabled(wazuh_monitor)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def prepare_cis_policies_file(metadata):
     '''
     Copies policy file from named by metadata into agent's ruleset path. Deletes file after test.

@@ -1027,7 +1027,6 @@ def configure_local_internal_options_function(request):
     """
     try:
         local_internal_options = getattr(request.module, 'local_internal_options')
-        print("LOCAL_INTERNAL_OPTIONS" + str(local_internal_options))
     except AttributeError as local_internal_configuration_not_set:
         logger.debug('Error: local_internal_options is not set in test module')
         raise local_internal_configuration_not_set

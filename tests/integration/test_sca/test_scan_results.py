@@ -128,7 +128,7 @@ def test_sca_scan_results(configuration, metadata, prepare_cis_policies_file, tr
     evm.check_sca_scan_started(wazuh_log_monitor)
 
     # Check the regex engine used by SCA
-    engine = evm.check_scan_regex_engine(wazuh_log_monitor)
+    engine = evm.get_scan_regex_engine(wazuh_log_monitor)
     assert engine == metadata['regex_type'], f"Wrong regex-engine found: {engine}, expected: {metadata['regex_type']}"
 
     # Check all checks have been done

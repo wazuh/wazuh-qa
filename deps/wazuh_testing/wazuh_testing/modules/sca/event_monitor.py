@@ -65,8 +65,8 @@ def check_sca_event(file_monitor=None, callback='.*', error_message=None, update
         file_to_monitor (str): Path of the file where to check for the expected events
     """
     file_monitor = FileMonitor(file_to_monitor) if file_monitor is None else file_monitor
-    error_message = f"Could not find this event in {file_to_monitor}: {callback}" if error_message is None else \
-        error_message
+    error_message = f"Expected event to found in {file_to_monitor}: {callback}" if error_message is None else \
+                    error_message
 
     file_monitor.start(timeout=timeout, update_position=update_position, accum_results=accum_results,
                        callback=generate_monitoring_callback(callback), error_message=error_message)
@@ -104,7 +104,7 @@ def check_sca_scan_ended(file_monitor=None):
     check_sca_event(callback=CB_SCA_SCAN_ENDED, timeout=T_10, file_monitor=file_monitor)
 
 
-def check_scan_regex_engine(file_monitor=None):
+def get_scan_regex_engine(file_monitor=None):
     """Check returns the regex engine used on a SCA scan.
     Args:
         file_monitor (FileMonitor): FileMonitor object to monitor the file content.
