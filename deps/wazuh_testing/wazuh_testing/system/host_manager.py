@@ -6,6 +6,9 @@ import tempfile
 import testinfra
 import base64
 import os
+from ansible.inventory.manager import InventoryManager
+from ansible.parsing.dataloader import DataLoader
+from ansible.vars.manager import VariableManager
 
 
 class HostManager:
@@ -22,6 +25,10 @@ class HostManager:
         """
         self.inventory_path = inventory_path
 
+        data_loader = DataLoader()
+        self.inventory_manager = InventoryManager(loader=data_loader, sources=inventory_path)
+        self.variable_manager = VariableManager(loader=data_loader, inventory=self.inventory_manager)
+
     def get_host(self, host):
         """Get the testinfra host.
 
@@ -32,7 +39,15 @@ class HostManager:
         """
         return testinfra.get_host(f"ansible://{host}?ansible_inventory={self.inventory_path}")
 
-    def get_group_hosts(self, group):
+    def get_groups(self):
+        """Get the groups of the inventory.
+
+        Returns:
+            list: Groups of the inventory
+        """
+        return list(self.inventory_manager.groups.keys())
+
+    def get_group_hosts(self, pattern=None):
         """Get all hosts from inventory that belong to a group.
 
         Args:
@@ -40,7 +55,10 @@ class HostManager:
         Returns:
             list: List of hosts
         """
-        return testinfra.get_host(f"ansible://all?ansible_inventory={self.inventory_path}")['groups'][group]
+        if pattern:
+            return [str(host) for host in self.inventory_manager.get_hosts(pattern=pattern)]
+        else:
+            return [str(host) for host in self.inventory_manager.get_hosts()]
 
     def get_host_variables(self, host):
         """Get the Ansible object for communicating with the specified host.
@@ -50,9 +68,10 @@ class HostManager:
         Returns:
             testinfra.modules.base.Ansible: Host instance from hostspec
         """
-        return self.get_host(host).ansible.get_variables()
+        inventory_manager_host = self.inventory_manager.get_host(host)
+        return self.variable_manager.get_vars(host=inventory_manager_host)
 
-    def get_host_ansible_facts(self, host):
+    def collect_host_ansible_facts(self, host):
         """Get the ansible facts of the specified host.
 
         Args:
@@ -63,7 +82,7 @@ class HostManager:
         testinfra_host = self.get_host(host)
         return testinfra_host.ansible("setup")
 
-    def get_host_os(self, host):
+    def collect_host_os(self, host):
         """Get the OS of the specified host.
 
         Args:
@@ -76,7 +95,7 @@ class HostManager:
                 ansible_facts['ansible_facts']['ansible_distribution_major_version'],
                 ansible_facts['ansible_facts']['ansible_distribution_version'])
 
-    def get_host_ips(self, host):
+    def collect_host_ips(self, host):
         """Get the host IPs
 
         Args:
@@ -88,7 +107,7 @@ class HostManager:
         return {'ipv4': ansible_facts['ansible_facts']['ansible_all_ipv4_addresses'],
                 'ipv6': ansible_facts['ansible_facts']['ansible_all_ipv6_addresses']}
 
-    def get_host_interfaces(self, host):
+    def collect_host_interfaces(self, host):
         """Get the interfaces of the specified host.
 
         Args:
