@@ -2,6 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+
 import json
 import os
 import re
@@ -17,7 +18,8 @@ from py.xml import html
 import wazuh_testing.tools.configuration as conf
 from wazuh_testing import global_parameters, logger, ALERTS_JSON_PATH
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing.tools import (PREFIX, LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH,
+                                 WAZUH_LOCAL_INTERNAL_OPTIONS)
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file, recursive_directory_creation, remove_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
@@ -119,6 +121,7 @@ def restart_wazuh_daemon_function(daemon=None):
     truncate_file(LOG_FILE_PATH)
     control_service("restart", daemon=daemon)
 
+
 @pytest.fixture(scope='module')
 def restart_wazuh_daemon_after_finishing(daemon=None):
     """
@@ -127,6 +130,7 @@ def restart_wazuh_daemon_after_finishing(daemon=None):
     yield
     truncate_file(LOG_FILE_PATH)
     control_service("restart", daemon=daemon)
+
 
 @pytest.fixture(scope='module')
 def reset_ossec_log(get_configuration, request):
@@ -937,6 +941,7 @@ def set_wazuh_configuration(configuration):
     # Restore previous configuration
     conf.write_wazuh_conf(backup_config)
 
+
 @pytest.fixture(scope='function')
 def configure_local_internal_options_function(request):
     """Fixture to configure the local internal options file.
@@ -961,19 +966,21 @@ def configure_local_internal_options_function(request):
     logger.debug(f"Restore local_internal_option to {str(backup_local_internal_options)}")
     conf.set_local_internal_options_dict(backup_local_internal_options)
 
+
 @pytest.fixture(scope='function')
 def truncate_monitored_files():
     """Truncate all the log files and json alerts files before and after the test execution"""
     log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
 
     for log_file in log_files:
-        truncate_file(log_file)
+        if os.path.isfile(os.path.join(PREFIX, log_file)):
+            truncate_file(log_file)
 
     yield
 
     for log_file in log_files:
-        truncate_file(log_file)
-
+        if os.path.isfile(os.path.join(PREFIX, log_file)):
+            truncate_file(log_file)
 
 
 @pytest.fixture(scope='function')
@@ -1086,14 +1093,14 @@ def remove_backups(backups_path):
     recursive_directory_creation(backups_path)
     os.chmod(backups_path, 0o777)
 
-    
-@pytest.fixture(scope='function')    
+
+@pytest.fixture(scope='function')
 def mock_agent_with_custom_system(agent_system):
     """Fixture to create a mocked agent with custom system specified as parameter"""
     if agent_system not in mocking.SYSTEM_DATA:
         raise ValueError(f"{agent_system} is not supported as mocked system for an agent")
 
-    agent_id = mocking.create_mocked_agent(**mocking.SYSTEM_DATA[agent_system] )
+    agent_id = mocking.create_mocked_agent(**mocking.SYSTEM_DATA[agent_system])
 
     yield agent_id
 
