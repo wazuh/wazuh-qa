@@ -1,4 +1,4 @@
-- name: Test SCA disabled
+- name: SCA disabled
   description: Set enabled to no value
   configuration_parameters:
     ENABLED: 'no'
