@@ -20,7 +20,7 @@ def callback_detect_aws_module_called(parameters: list):
     return lambda line: regex.match(line)
 
 def callback_detect_aws_module_start(line):
-    if re.match(r".*INFO: Module AWS started", line):
+    if re.match(r".*INFO: Module AWS started*", line):
         return line
 
 def callback_detect_all_aws_err(line):
@@ -35,4 +35,8 @@ def callback_detect_aws_read_err(line):
 
 def callback_detect_aws_wmodule_err(line):
     if re.match(MODULE_ERROR, line):
+        return line
+
+def callback_detect_event_processed(line):
+    if r'.*Found new log: .*':
         return line

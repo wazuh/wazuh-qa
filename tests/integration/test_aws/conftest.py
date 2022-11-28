@@ -34,6 +34,7 @@ def upload_and_delete_file_to_s3(metadata: dict):
     filename = upload_file(bucket_type=metadata['bucket_type'], bucket_name=metadata['bucket_name'])
     if filename != '':
         logger.debug('Uploaded file: %s to bucket "%s"', filename, bucket_name)
+        metadata["uploaded_file"] = filename
 
     yield
 

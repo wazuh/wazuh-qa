@@ -1,0 +1,8 @@
+- name: cloudtrail only logs after
+  description: CloudTrail only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: cloudtrail
+    BUCKET_NAME: wazuh-cloudtrail-integration-tests
+  metadata:
+    bucket_type: cloudtrail
+    bucket_name: wazuh-cloudtrail-integration-tests
