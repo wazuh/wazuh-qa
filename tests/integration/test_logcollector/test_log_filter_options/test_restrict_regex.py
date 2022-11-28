@@ -72,7 +72,7 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 # Test configurations and cases data
 test_file = os.path.join(PREFIX, 'test')
 
-#---------------------------------TEST_DEFAULT_REGEX--------------------------------------------------
+# --------------------------------TEST_DEFAULT_REGEX--------------------------------------------------
 t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_restrict_regex_default.yaml')
 t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_restrict_regex_default.yaml')
 
@@ -82,7 +82,7 @@ for count, value in enumerate(t1_configuration_parameters):
 t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
                                                 t1_configuration_metadata)
 
-#---------------------------------TEST_IGNORE_REGEX_TYPE_VALUES--------------------------------------
+# --------------------------------TEST_IGNORE_REGEX_TYPE_VALUES--------------------------------------
 t2_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_restrict_regex_type_values.yaml')
 t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_restrict_regex_type_values.yaml')
 
@@ -93,7 +93,7 @@ t2_configurations = load_configuration_template(t2_configurations_path, t2_confi
                                                 t2_configuration_metadata)
 
 
-#---------------------------------TEST_RESTRICT_MULTIPLE_REGEX-------------------------------------------
+# --------------------------------TEST_RESTRICT_MULTIPLE_REGEX-------------------------------------------
 t3_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_restrict_multiple_regex.yaml')
 t3_cases_path = os.path.join(TEST_CASES_PATH, 'cases_restrict_multiple_regex.yaml')
 
@@ -276,8 +276,8 @@ def test_restrict_regex_type_values(configuration, metadata, new_file_path, crea
 @pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
 @pytest.mark.parametrize('configuration, metadata', zip(t3_configurations, t3_configuration_metadata), ids=t3_case_ids)
 def test_restrict_multiple_regex(configuration, metadata, new_file_path, create_file, truncate_monitored_files,
-                                  set_wazuh_configuration, configure_local_internal_options_function,
-                                  restart_wazuh_function):
+                                 set_wazuh_configuration, configure_local_internal_options_function,
+                                 restart_wazuh_function):
     '''
     description: Check if logcollector behavior when two restrict tags are added.
 
@@ -349,14 +349,15 @@ def test_restrict_multiple_regex(configuration, metadata, new_file_path, create_
     # Check response
     if 'regex1' in metadata['matches']:
         evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['regex1'], tag='restrict',
-                                                        prefix=prefix)
+                                                    prefix=prefix)
         if 'regex2' in metadata['matches']:
             evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['regex2'], tag='restrict',
                                                         prefix=prefix)
         else:
-            evm.check_ignore_restrict_messages(message=log, regex=metadata['regex2'], tag='restrict',prefix=prefix)
+            evm.check_ignore_restrict_messages(message=log, regex=metadata['regex2'], tag='restrict', prefix=prefix)
     elif metadata['matches'] == 'regex2':
-        evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['regex2'], tag='restrict', prefix=prefix)
-        evm.check_ignore_restrict_messages(message=log, regex=metadata['regex1'], tag='restrict',prefix=prefix)
+        evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['regex2'], tag='restrict',
+                                                    prefix=prefix)
+        evm.check_ignore_restrict_messages(message=log, regex=metadata['regex1'], tag='restrict', prefix=prefix)
     else:
-        evm.check_ignore_restrict_messages(message=log, regex=metadata['regex1'], tag='restrict',prefix=prefix)
+        evm.check_ignore_restrict_messages(message=log, regex=metadata['regex1'], tag='restrict', prefix=prefix)

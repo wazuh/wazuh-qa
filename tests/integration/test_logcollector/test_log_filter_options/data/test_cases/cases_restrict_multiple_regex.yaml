@@ -31,7 +31,7 @@
     log_sample: "Nov 10 12:19:04 localhost sshd: log matches regex2"
     matches: regex2
 
-- name: No match - Two Restrict tags 
+- name: No match - Two Restrict tags
   description: Test two Restrict, log does not match
   configuration_parameters:
     REGEX_1: .+regex1
