@@ -88,6 +88,13 @@ def callback_integrity_message(line):
             return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))
 
 
+def callback_detect_file_integrity_event(line):
+    event = callback_detect_integrity_control_event(line)
+    if event and event['component'] == 'fim_file':
+        return event
+    return None
+
+
 def callback_detect_registry_integrity_event(line):
     event = callback_detect_integrity_control_event(line)
     if event and event['component'] == 'fim_registry_key':
