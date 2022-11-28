@@ -1,0 +1,43 @@
+- name: Log match - Two ignore tags - Match first tag
+  description: Test two Ignore tags, with matching log first tag
+  configuration_parameters:
+    REGEX_1: .+regex1
+    REGEX_2: .+regex2
+  metadata:
+    regex1: .+regex1
+    regex2: .+regex2
+    log_sample: "Nov 10 12:19:04 localhost sshd: log matches regex1"
+    matches: regex1
+
+- name: Log match - Two ignore tags - Match both tags
+  description: Test two Ignore tags, with matching log both tags
+  configuration_parameters:
+    REGEX_1: .+regex1
+    REGEX_2: .+regex2
+  metadata:
+    regex1: .+regex1
+    regex2: .+regex2
+    log_sample: "Nov 10 12:19:04 localhost sshd: log matches regex1 regex2"
+    matches: regex1 regex2
+
+- name: Log match - Two ignore tags - Match second tag
+  description: Test two Ignore tags, with matching log second tag
+  configuration_parameters:
+    REGEX_1: .+regex1
+    REGEX_2: .+regex2
+  metadata:
+    regex1: .+regex1
+    regex2: .+regex2
+    log_sample: "Nov 10 12:19:04 localhost sshd: log matches regex2"
+    matches: regex2
+
+- name: No match - Two ignore tags
+  description: Test two Ignore tags, with no matches
+  configuration_parameters:
+    REGEX_1: .+regex1
+    REGEX_2: .+regex2
+  metadata:
+    regex1: .+regex1
+    regex2: .+regex2
+    log_sample: "Nov 10 12:19:04 localhost sshd: log does not matches"
+    matches: no match
