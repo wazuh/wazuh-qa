@@ -58,7 +58,7 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import global_parameters, DATA
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations

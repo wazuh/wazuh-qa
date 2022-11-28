@@ -57,7 +57,7 @@ tags:
 import os
 
 import pytest
-from test_fim.test_files.test_report_changes.common import generate_string
+from test_fim.common import generate_string
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, calculate_registry_diff_paths, registry_value_cud, KEY_WOW64_32KEY, \
     KEY_WOW64_64KEY, generate_params

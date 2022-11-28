@@ -58,16 +58,18 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, REGULAR, create_file,
-                               callback_detect_registry_integrity_event, callback_detect_file_integrity_event)
+from wazuh_testing import global_parameters , DATA, LOG_FILE_PATH, REGULAR
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import create_file
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.wazuh_variables import DATA
+from wazuh_testing.modules.fim.utils import generate_params
 from wazuh_testing.modules.fim import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
                                        YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
                                        SYNCHRONIZATION_ENABLED, SYNCHRONIZATION_REGISTRY_ENABLED)
+from wazuh_testing.modules.fim.event_monitor import (callback_detect_registry_integrity_event,
+                                                     callback_detect_file_integrity_event)
+
 # Marks
 
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
