@@ -180,7 +180,6 @@ CB_FIM_EVENT = r'.*Sending FIM event: (.+)$'
 CB_REALTIME_MONITORED_FOLDERS = r'.*Folders monitored with real-time engine: (\d+)'
 CB_REALTIME_WHODATA_ENGINE_STARTED = 'File integrity monitoring real-time Whodata engine started'
 CB_INVALID_CONFIG_VALUE = r".*Invalid value for element '(.*)': (.*)."
-
 CB_INTEGRITY_CONTROL_MESSAGE = r".*Sending integrity control message: (.+)$"
 CB_MAXIMUM_FILE_SIZE = r".*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*"
 CB_AGENT_CONNECT = r".* Connected to the server .*"

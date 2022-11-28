@@ -106,6 +106,26 @@ def create_registry(key, subkey, arch):
             logger.warning(f"Registry could not be created: {e}")
 
 
+def modify_registry_value(key_h, value_name, type, value):
+    """
+    Modify the content of a registry. If the value doesn't not exists, it will be created.
+
+    Args:
+        key_h (pyHKEY): the key handle of the registry.
+        value_name (str): the value to be set.
+        type (int): type of the value.
+        value (str): the content that will be written to the registry value.
+    """
+    if sys.platform == 'win32':
+        try:
+            logger.info(f"Modifying value '{value_name}' of type {fim.registry_value_type[type]} and value '{value}'")
+            win32api.RegSetValueEx(key_h, value_name, 0, type, value)
+        except OSError as e:
+            logger.warning(f"Could not modify registry value content: {e}")
+        except pywintypes.error as e:
+            logger.warning(f"Could not modify registry value content: {e}")
+
+
 def delete_registry(key, subkey, arch):
     """Delete a registry key.
 
