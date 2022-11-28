@@ -32,7 +32,7 @@ def make_logcollector_callback(pattern, prefix=LOG_COLLECTOR_PREFIX, escape=Fals
 
 
 def check_logcollector_event(file_monitor=None, callback='', error_message=None, update_position=True,
-                             timeout=T_60, prefix=LOG_COLLECTOR_PREFIX, accum_results=1, file_to_monitor=LOG_FILE_PATH,
+                             timeout=T_30, prefix=LOG_COLLECTOR_PREFIX, accum_results=1, file_to_monitor=LOG_FILE_PATH,
                              escape=False):
     """Check if a logcollector event occurs
 
