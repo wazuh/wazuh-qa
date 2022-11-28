@@ -108,6 +108,5 @@ def test_defaults(
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(
             timeout=global_parameters.default_timeout,
-            callback=event_monitor.callback_detect_aws_wmodule_err,
-            error_message="Some errors were found related to AWS module",
+            callback=event_monitor.callback_detect_all_aws_err,
         ).result()
