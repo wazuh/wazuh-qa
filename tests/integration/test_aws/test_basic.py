@@ -2,7 +2,7 @@ import os
 
 import pytest
 from wazuh_testing import global_parameters
-from wazuh_testing.modules.aws import callbacks
+from wazuh_testing.modules.aws import event_monitor
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import (
     get_test_cases_data,
@@ -93,14 +93,14 @@ def test_defaults(
     # Check AWS module started
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
-        callback=callbacks.callback_detect_aws_module_start,
+        callback=event_monitor.callback_detect_aws_module_start,
         error_message="The AWS module didn't start, maybe it crash",
     ).result()
 
     # Check command was called correctly
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
-        callback=callbacks.callback_detect_aws_module_called(parameters),
+        callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message="The AWS module wasn't called with the correct parameters",
     ).result()
 
@@ -108,6 +108,6 @@ def test_defaults(
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(
             timeout=global_parameters.default_timeout,
-            callback=callbacks.callback_detect_aws_wmodule_err,
+            callback=event_monitor.callback_detect_aws_wmodule_err,
             error_message="Some errors were found related to AWS module",
         ).result()

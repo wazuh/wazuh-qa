@@ -7,7 +7,7 @@ from typing import Tuple
 import boto3
 from botocore import exceptions
 from botocore.exceptions import ClientError
-from .data_generators import get_data_generator
+from .data_generator import get_data_generator
 
 session = boto3.Session(profile_name="qa")
 s3 = session.resource('s3')
