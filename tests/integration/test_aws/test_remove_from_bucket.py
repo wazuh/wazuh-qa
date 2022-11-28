@@ -98,7 +98,7 @@ def test_remove_from_bucket(
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
-        error_message="The AWS module didn't start, maybe it crash",
+        error_message="The AWS module didn't start as expected",
     ).result()
 
     # Check command was called correctly

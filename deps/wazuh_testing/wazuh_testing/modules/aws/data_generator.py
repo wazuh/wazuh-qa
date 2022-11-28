@@ -16,11 +16,11 @@ class DataGenerator:
 
 
 class CloudTrailDataGenerator(DataGenerator):
-    BASE_PATH = f'{cons.AWS_LOGS}/{cons.ACCOUNT_ID}/{cons.CLOUD_TRAIL}/{cons.US_EAST_1_REGION}/'
-    BASE_FILE_NAME = f'{cons.ACCOUNT_ID}_{cons.CLOUD_TRAIL}_{cons.US_EAST_1_REGION}_'
+    BASE_PATH = f'{cons.AWS_LOGS}/{cons.RANDOM_ACCOUNT_ID}/{cons.CLOUD_TRAIL}/{cons.US_EAST_1_REGION}/'
+    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.CLOUD_TRAIL}_{cons.US_EAST_1_REGION}_'
 
     def get_filename(self, prefix=None, **kwargs) -> str:
-        """Return the filename in the cloud watch format
+        """Return the filename in the cloudtrail format
         <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/CloudTrail/<region>/<year>/<month>/<day>
         """
         now = datetime.now()
@@ -46,7 +46,7 @@ class CloudTrailDataGenerator(DataGenerator):
                     'sourceIPAddress': 'ec2.amazonaws.com',
                     'userAgent': 'ec2.amazonaws.com',
                     'requestParameters': {
-                        'roleArn': f'arn:aws:iam::{cons.ACCOUNT_ID}:role/demo-415-v2-InstanceRole-1FB0FMP2EXOKN',
+                        'roleArn': f'arn:aws:iam::{cons.RANDOM_ACCOUNT_ID}:role/demo-415-v2-InstanceRole-1FB0FMP2EXOKN',
                         'roleSessionName': 'i-0e9ddef5daf05c7df'
                     },
                     'responseElements': {
@@ -61,15 +61,15 @@ class CloudTrailDataGenerator(DataGenerator):
                     'readOnly': True,
                     'resources': [
                         {
-                            'accountId': cons.ACCOUNT_ID,
+                            'accountId': cons.RANDOM_ACCOUNT_ID,
                             'type': 'AWS::IAM::Role',
-                            'ARN': f'arn:aws:iam::{cons.ACCOUNT_ID}:role/demo-415-v2-InstanceRole-1FB0FMP2EXOKN'
+                            'ARN': f'arn:aws:iam::{cons.RANDOM_ACCOUNT_ID}:role/demo-415-v2-InstanceRole-1FB0FMP2EXOKN'
                         }
                     ],
                     'eventType': 'AwsApiCall',
                     'managementEvent': True,
                     'eventCategory': 'Management',
-                    'recipientAccountId': cons.ACCOUNT_ID,
+                    'recipientAccountId': cons.RANDOM_ACCOUNT_ID,
                     'sharedEventID': str(uuid4())
                 }
             ]

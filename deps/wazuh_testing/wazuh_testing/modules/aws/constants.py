@@ -6,7 +6,7 @@ AWS_WODLE_PATH = Path(WAZUH_PATH, 'wodles', 'aws')
 S3_CLOUDTRAIL_DB_PATH = Path(AWS_WODLE_PATH, 's3_cloudtrail.db')
 
 AWS_LOGS = 'AWSLogs'
-ACCOUNT_ID = '819751203818' # Random account id
+RANDOM_ACCOUNT_ID = '819751203818'
 CLOUD_TRAIL = 'CloudTrail'
 
 EVENT_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
