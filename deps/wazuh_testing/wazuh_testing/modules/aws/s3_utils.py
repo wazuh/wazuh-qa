@@ -13,12 +13,12 @@ session = boto3.Session(profile_name="qa")
 s3 = session.resource('s3')
 
 
-def upload_file(bucket_type: str, bucket_name: str) -> Tuple[bool, str]:
+def upload_file(bucket_type: str, bucket_name: str) -> str:
     """Upload a file to an S3 bucket
 
     :param bucket_type: Bucket type to generate the data
     :param bucket_name: Bucket to upload
-    :return: True and the name of the file if was uploaded, else False and ''
+    :return: the name of the file if was uploaded, else ''
     """
     dg = get_data_generator(bucket_type)
     filename = dg.get_filename()
@@ -28,11 +28,11 @@ def upload_file(bucket_type: str, bucket_name: str) -> Tuple[bool, str]:
 
     # Upload the file
     try:
-        response = obj.put(Body=json.dumps(data).encode())
+        obj.put(Body=json.dumps(data).encode())
     except ClientError as e:
         logging.error(e)
-        return False, ''
-    return True, filename
+        filename = ''
+    return filename
 
 def delete_file(filename: str, bucket_name: str) -> None:
     """Delete the given a file from bucket a bucket
