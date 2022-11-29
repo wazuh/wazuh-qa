@@ -1138,6 +1138,7 @@ def callback_start_synchronization(line):
         return line
     return None
 
+
 def callback_detect_synchronization(line):
     if 'Executing FIM sync' in line:
         return line

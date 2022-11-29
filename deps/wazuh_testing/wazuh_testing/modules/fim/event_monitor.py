@@ -68,6 +68,12 @@ def callback_detect_scan_start(line):
         logger.warning(f"Couldn't load a log line into json object. Reason {e}")
 
 
+def callback_detect_synchronization(line):
+    if 'Executing FIM sync' in line:
+        return line
+    return None
+
+
 def callback_connection_message(line):
     match = re.match(fim.CB_AGENT_CONNECT, line)
     if match:
@@ -134,7 +140,6 @@ def callback_num_inotify_watches(line):
 
     if match:
         return match.group(1)
-
 
 
 def callback_sync_start_time(line):

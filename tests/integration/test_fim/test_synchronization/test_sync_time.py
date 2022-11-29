@@ -70,6 +70,8 @@ from wazuh_testing.modules.fim import event_monitor as evm
 # Marks
 pytestmark = [AGENT, SERVER, TIER1]
 
+local_internal_options = fim.FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
+
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
@@ -94,7 +96,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 # Tests
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 @pytest.mark.parametrize('files_number', [configuration_metadata[0]['files']])
-def test_sync_time(configuration, metadata, set_wazuh_configuration_fim, create_files_in_folder,
+def test_sync_time(configuration, metadata, set_wazuh_configuration, configure_local_internal_options_function,
                    restart_syscheck_function, wait_for_fim_start_function):
     '''
     description: Check when the 'wazuh-syscheckd' daemon is performing a synchronization, a normal synchronization
@@ -118,9 +120,12 @@ def test_sync_time(configuration, metadata, set_wazuh_configuration_fim, create_
         - metadata:
             type: dict
             brief: Test case data.
-        - set_wazuh_configuration_fim:
+        - set_wazuh_configuration:
             type: fixture
-            brief: Set ossec.conf and local_internal_options configuration.
+            brief: Set ossec.conf configuration.
+        - configure_local_internal_options_function:
+            type: fixture
+            brief: Set local_internal_options.conf file.
         - create_files_in_folder:
             type: fixture
             brief: create files in monitored folder, and delete them after the test.

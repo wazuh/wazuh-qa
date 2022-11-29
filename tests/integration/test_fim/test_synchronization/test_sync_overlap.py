@@ -67,7 +67,7 @@ from wazuh_testing.tools import LOG_FILE_PATH, configuration
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules import TIER1, AGENT, SERVER
 from wazuh_testing.modules import fim
-from wazuh_testing.fim import callback_detect_synchronization
+from wazuh_testing.modules.fim.event_monitor import callback_detect_synchronization
 
 # Marks
 pytestmark = [AGENT, SERVER, TIER1]
@@ -91,13 +91,13 @@ configurations = configuration.load_configuration_template(configurations_path, 
 
 # Variables
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
+local_internal_options = fim.FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 
 # Tests
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 @pytest.mark.parametrize('files_number', [configuration_metadata[0]['files']])
-def test_sync_overlap(configuration, metadata, set_wazuh_configuration_fim, create_files_in_folder,
-                      restart_syscheck_function, wait_for_fim_start_function):
+def test_sync_overlap(configuration, metadata, set_wazuh_configuration, configure_local_internal_options_function,
+                      create_files_in_folder, restart_syscheck_function, wait_for_fim_start_function):
     '''
     description: Check if the 'wazuh-syscheckd' daemon is performing a synchronization at the interval specified in the
                  configuration, using the 'interval' tag, if a new synchronization is fired, and the last sync message
@@ -124,9 +124,12 @@ def test_sync_overlap(configuration, metadata, set_wazuh_configuration_fim, crea
         - metadata:
             type: dict
             brief: Test case data.
-        - set_wazuh_configuration_fim:
+        - set_wazuh_configuration:
             type: fixture
-            brief: Set ossec.conf and local_internal_options configuration.
+            brief: Set ossec.conf configuration.
+        - configure_local_internal_options_function:
+            type: fixture
+            brief: Set local_internal_options.conf file.
         - create_files_in_folder:
             type: fixture
             brief: create files in monitored folder, and delete them after the test.

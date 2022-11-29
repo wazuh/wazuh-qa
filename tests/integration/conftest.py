@@ -1059,6 +1059,7 @@ def truncate_monitored_files():
         if os.path.isfile(os.path.join(PREFIX, log_file)):
             truncate_file(log_file)
 
+
 @pytest.fixture(scope='function')
 def stop_modules_function_after_execution():
     """Stop wazuh modules daemon after finishing a test"""

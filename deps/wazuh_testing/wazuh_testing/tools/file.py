@@ -287,7 +287,7 @@ def modify_all_files_in_folder(folder_path, data):
     for file in os.listdir(folder_path):
         write_file(os.path.join(folder_path, file), data)
 
-        
+
 def delete_all_files_in_folder(folder_path):
     """ Remove al files inside a folder
     Args:

@@ -79,33 +79,6 @@ def install_audit(get_configuration):
         process = subprocess.run(["service", "auditd", "start"], check=True)
 
 
-@pytest.fixture(scope='session')
-def configure_local_internal_options_fim():
-    """Fixture to configure the local internal options file."""
-
-    # Backup the old local internal options
-    backup_local_internal_options = get_wazuh_local_internal_options()
-
-    # Set the new local internal options configuration
-    set_wazuh_local_internal_options(create_local_internal_options(FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS))
-
-    yield
-
-    # Backup the old local internal options cofiguration
-    set_wazuh_local_internal_options(backup_local_internal_options)
-
-
-@pytest.fixture(scope='function')
-def set_wazuh_configuration_fim(configuration, set_wazuh_configuration, configure_local_internal_options_fim):
-    """Set wazuh configuration
-
-    Args:
-        configuration (dict): Configuration template data to write in the ossec.conf.
-        set_wazuh_configuration (fixture): Set the wazuh configuration according to the configuration data.
-        configure_local_internal_options_fim (fixture): Set the local_internal_options.conf file.
-    """
-    yield
-
 @pytest.fixture()
 def wait_fim_start_function(configuration):
     """ Wait for realtime start, whodata start or end of initial FIM scan.
