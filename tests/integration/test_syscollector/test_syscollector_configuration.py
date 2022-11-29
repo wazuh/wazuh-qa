@@ -80,7 +80,7 @@ from datetime import datetime
 
 import pytest
 from wazuh_testing import ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON, DB_PATH, LOG_FILE_PATH, SYSCOLLECTOR_DB_PATH, \
-                          T_10, T_30
+                          T_10, T_60
 from wazuh_testing.db_interface import global_db
 from wazuh_testing.modules import TIER0, SERVER, AGENT, LINUX, MACOS, WINDOWS
 from wazuh_testing.tools import get_service
@@ -266,7 +266,7 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
             pytest.fail(f"It seems that a scan was triggered. This check has a match in the log: {check_f.__name__}")
 
 
-@pytest.mark.xfail(reason='Reported in wazuh/wazuh#15412')
+@pytest.mark.xfail(sys.platform == "win32", reason='Reported in wazuh/wazuh#15412')
 @pytest.mark.parametrize('configuration, metadata', zip(t3_configurations, t3_config_metadata), ids=t3_case_ids)
 def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_configuration,
                                              configure_local_internal_options_module, truncate_log_file,
@@ -435,7 +435,8 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
         - The `case_test_scanning.yaml` file provides the test cases.
     '''
     file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
-    evm.check_has_started(file_monitor=file_monitor, timeout=T_30)
+    # 60s + 2 seconds of margin because it includes the case when the agent starts for the first time
+    evm.check_has_started(file_monitor=file_monitor, timeout=T_60 + 2)
     # Check general scan has started
     evm.check_scan_started(file_monitor=file_monitor, timeout=T_10)
 
