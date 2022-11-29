@@ -266,6 +266,7 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
             pytest.fail(f"It seems that a scan was triggered. This check has a match in the log: {check_f.__name__}")
 
 
+@pytest.mark.xfail(reason='Reported in wazuh/wazuh#15412')
 @pytest.mark.parametrize('configuration, metadata', zip(t3_configurations, t3_config_metadata), ids=t3_case_ids)
 def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_configuration,
                                              configure_local_internal_options_module, truncate_log_file,
