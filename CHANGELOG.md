@@ -117,6 +117,10 @@ Release report: TBD
 
 - Remove all FIM Integration skipped tests ([#2927](https://github.com/wazuh/wazuh-qa/issues/2927)) \- (Framework + Tests)
 - VDT ITs: Remove Debian Stretch test support. ([#3172](https://github.com/wazuh/wazuh-qa/pull/3172)) \- (Tests)
+## [4.3.10] - 16-11-2022
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/89530f11c9e592cd2e551432209b0080f08ff8e5 \
+Release report: https://github.com/wazuh/wazuh/issues/15372
 
 ## [4.3.9] - 13-10-2022
 
@@ -141,7 +145,7 @@ Release report: https://github.com/wazuh/wazuh/issues/14827
 Wazuh commit: https://github.com/wazuh/wazuh/commit/e2b514bef3d148acd4bcae1a1c7fa8783b82ca3a \
 Release report: https://github.com/wazuh/wazuh/issues/14562
 
-## Added
+### Added
 - Added IT test to verify Active Response works with overwritten rules. ([#2984](https://github.com/wazuh/wazuh-qa/pull/2984)) \- (Framework + Tests)
 - Add Integratord IT - new test_integratord suite ([#3125](https://github.com/wazuh/wazuh-qa/pull/3125)) \- (Framework + Tests)
 - Add system test to check synchronization status in the cluster ([#3180](https://github.com/wazuh/wazuh-qa/pull/3180)) \- (Framework + Tests)
