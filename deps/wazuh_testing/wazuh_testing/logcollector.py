@@ -531,7 +531,7 @@ def callback_invalid_format_value(line, option, location):
     if option == 'json':
         msg = fr"DEBUG: Line '{line}' read from '{location}' is not a JSON object."
     elif option == 'audit':
-        msg = fr"ERROR: Discarding audit message because of invalid syntax."
+        msg = "WARNING: Discarding audit message because of invalid syntax."
     elif option == 'nmapg':
         msg = fr"ERROR: Bad formated nmap grepable file."
     elif option == 'djb-multilog':
