@@ -113,7 +113,7 @@ configurations = configuration.load_configuration_template(configurations_path, 
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuration,
                                  configure_local_internal_options_function, restart_syscheck_function,
-                                 create_monitored_folders, wait_fim_start_function):
+                                 create_monitored_folders, wait_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon reports the file changes (or truncates if required)
                  in the generated events using the 'nodiff' tag and vice versa. For this purpose, the test

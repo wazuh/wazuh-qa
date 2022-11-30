@@ -56,14 +56,16 @@ tags:
 '''
 import os
 import pytest
-from wazuh_testing import DATA, WAZUH_SERVICES_START
+from wazuh_testing import LOG_FILE_PATH, DATA, WAZUH_SERVICES_START
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.modules.fim.utils import (find_value_in_event_list, get_sync_msgs, generate_params, create_registry,
                                              modify_registry_value)
 from wazuh_testing.modules.fim import (FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS, SCHEDULED_MODE, WINDOWS_REGISTRY,
                                        SYNC_INTERVAL, SYNC_INTERVAL_VALUE, YAML_CONF_REGISTRY_RESPONSE, REG_SZ,
                                        WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, registry_parser, KEY_WOW64_64KEY)
+from wazuh_testing.modules.fim.event_monitor import detect_initial_scan
 
 # Marks
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
@@ -150,9 +152,9 @@ def test_registry_sync_after_restart(key_name, value_name, configure_local_inter
 
     modify_registry_value(key_handle, value_name, REG_SZ, 'This is a test with syscheckd down.')
     control_service(WAZUH_SERVICES_START)
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    detect_initial_scan(wazuh_log_monitor)
+    events = get_sync_msgs(timeout=SYNC_INTERVAL_VALUE)
 
-    events = get_sync_msgs(SYNC_INTERVAL_VALUE)
-
-    assert find_value_in_event_list(
-            os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, key_path), value_name,
-            events) is not None, f"No sync event was found for {value_path}"
+    assert find_value_in_event_list(os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, key_path), value_name,
+                                    events) is not None, f"No sync event was found for {value_path}"

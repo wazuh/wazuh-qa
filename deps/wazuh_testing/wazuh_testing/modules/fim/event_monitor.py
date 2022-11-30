@@ -143,14 +143,14 @@ def callback_num_inotify_watches(line):
 
 
 def callback_sync_start_time(line):
-    if fim.callback_detect_synchronization(line):
+    if callback_detect_synchronization(line):
         match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*", line)
         if match:
             return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S')
 
 
 def callback_state_event_time(line):
-    if fim.callback_detect_integrity_event(line):
+    if callback_detect_integrity_control_event(line):
         match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*", line)
         if match:
             return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S')
@@ -167,7 +167,9 @@ def callback_real_time_whodata_started(line):
 
 def callback_detect_registry_integrity_clear_event(line):
     event = callback_detect_integrity_control_event(line)
-    if event and event['component'] == 'fim_registry' and event['type'] == 'integrity_clear':
+    if event and event['component'] == 'fim_registry_key' and event['type'] == 'integrity_clear':
+        return True
+    if event and event['component'] == 'fim_registry_value' and event['type'] == 'integrity_clear':
         return True
     return None
 

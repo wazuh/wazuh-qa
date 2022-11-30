@@ -16,9 +16,7 @@ from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.file import truncate_file, delete_path_recursively, create_file
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, SYNC_INTERVAL_VALUE, KEY_WOW64_64KEY,
-                                       FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS, MONITORED_DIR_1)
-from wazuh_testing.modules.fim import (registry_parser, KEY_WOW64_64KEY, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
-                                       SYNC_INTERVAL_VALUE, FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS, registry_parser)
+                                       MONITORED_DIR_1, registry_parser)
 from wazuh_testing.modules.fim import event_monitor as evm
 from wazuh_testing.modules.fim.utils import create_registry, delete_registry
 
@@ -80,7 +78,7 @@ def install_audit(get_configuration):
 
 
 @pytest.fixture()
-def wait_fim_start_function(configuration):
+def wait_fim_start(configuration):
     """ Wait for realtime start, whodata start or end of initial FIM scan.
 
     Args:
