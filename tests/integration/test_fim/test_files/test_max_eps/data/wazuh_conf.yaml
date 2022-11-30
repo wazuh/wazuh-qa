@@ -9,17 +9,17 @@
             value: 'no'
         - directories:
             value: TEST_DIRECTORIES
-          attributes:
-            - FIM_MODE
+            attributes:
+              - FIM_MODE
         - max_eps:
             value: MAX_EPS
         - synchronization:
-          elements:
-            - enabled:
-                value: 'no'
+            elements:
+              - enabled:
+                  value: 'no'
     - section: sca
       elements:
-         - enabled:
+        - enabled:
             value: 'no'
     - section: rootcheck
       elements:

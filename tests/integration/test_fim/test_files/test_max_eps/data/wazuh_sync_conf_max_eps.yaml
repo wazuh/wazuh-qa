@@ -10,12 +10,12 @@
             value: 'no'
         - directories:
             value: TEST_DIRECTORIES
-          attributes:
-            - FIM_MODE
+            attributes:
+              - FIM_MODE
         - synchronization:
-          elements:
-            - max_eps:
-                value: MAX_EPS
+            elements:
+              - max_eps:
+                  value: MAX_EPS
     - section: sca
       elements:
         - enabled:

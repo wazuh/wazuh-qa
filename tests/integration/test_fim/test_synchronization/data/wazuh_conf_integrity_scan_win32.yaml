@@ -1,4 +1,3 @@
-
 - tags:
     -
   apply_to_modules:
@@ -12,12 +11,12 @@
             value: 40
         - directories:
             value: TEST_DIRECTORIES
-          attributes:
-            - FIM_MODE
+            attributes:
+              - FIM_MODE
     - windows_registry:
         value: TEST_REGS
         attributes:
-        - arch: "both"
+          - arch: both
     - section: sca
       elements:
         - enabled:
