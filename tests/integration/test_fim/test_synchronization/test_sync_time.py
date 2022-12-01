@@ -64,13 +64,13 @@ from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, configuration
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules import TIER1, AGENT, SERVER
-from wazuh_testing.modules import fim
+from wazuh_testing.modules.fim import MONITORED_DIR_1, FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.modules.fim import event_monitor as evm
 
 # Marks
 pytestmark = [AGENT, SERVER, TIER1]
 
-local_internal_options = fim.FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
+local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -85,7 +85,7 @@ configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_sync_time
 configuration_parameters, configuration_metadata, test_case_ids = configuration.get_test_cases_data(test_cases_path)
 # This assigns the monitored_dir during runtime depending on the OS, cannot be added to yaml
 for count, value in enumerate(configuration_parameters):
-    configuration_parameters[count]['MONITORED_DIR'] = fim.MONITORED_DIR_1
+    configuration_parameters[count]['MONITORED_DIR'] = MONITORED_DIR_1
 configurations = configuration.load_configuration_template(configurations_path, configuration_parameters,
                                                            configuration_metadata)
 
@@ -158,12 +158,12 @@ def test_sync_time(configuration, metadata, set_wazuh_configuration, configure_l
     # Wait for new sync and get start time
     sync_time = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                         callback=evm.callback_sync_start_time,
-                                        error_message=fim.ERR_MSG_FIM_SYNC_NOT_DETECTED, update_position=True).result()
+                                        error_message=evm.ERR_MSG_FIM_SYNC_NOT_DETECTED, update_position=True).result()
 
     # Get the time of all the sync state events for the created files
     results = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                       callback=evm.callback_state_event_time, accum_results=3,
-                                      error_message=fim.ERR_MSG_FIM_SYNC_NOT_DETECTED, update_position=True).result()
+                                      error_message=evm.ERR_MSG_FIM_SYNC_NOT_DETECTED, update_position=True).result()
 
     # Calculate timedelta between start of sync and last message.
     # Add 1 second to take into account the first second from the scan

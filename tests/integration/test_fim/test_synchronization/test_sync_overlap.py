@@ -66,8 +66,11 @@ from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, configuration
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules import TIER1, AGENT, SERVER
-from wazuh_testing.modules import fim
-from wazuh_testing.modules.fim.event_monitor import callback_detect_synchronization
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS, MONITORED_DIR_1
+from wazuh_testing.modules.fim.event_monitor import (callback_detect_synchronization, CB_INVALID_CONFIG_VALUE,
+                                                     ERR_MSG_INVALID_CONFIG_VALUE, ERR_MSG_FIM_SYNC_NOT_DETECTED,
+                                                     CB_SYNC_SKIPPED, ERR_MSG_SYNC_SKIPPED_EVENT,
+                                                     CB_SYNC_INTERVAL_RESET, ERR_MSG_SYNC_INTERVAL_RESET_EVENT)
 
 # Marks
 pytestmark = [AGENT, SERVER, TIER1]
@@ -85,13 +88,13 @@ configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_sync_over
 configuration_parameters, configuration_metadata, test_case_ids = configuration.get_test_cases_data(test_cases_path)
 # This assigns the monitored dir during runtime depending on the OS, cannot be added to yaml
 for count, value in enumerate(configuration_parameters):
-    configuration_parameters[count]['MONITORED_DIR'] = fim.MONITORED_DIR_1
+    configuration_parameters[count]['MONITORED_DIR'] = MONITORED_DIR_1
 configurations = configuration.load_configuration_template(configurations_path, configuration_parameters,
                                                            configuration_metadata)
 
 # Variables
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-local_internal_options = fim.FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
+local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 
 
 # Tests
@@ -162,21 +165,21 @@ def test_sync_overlap(configuration, metadata, set_wazuh_configuration, configur
     # If config is invalid, check that invalid config value message appers
     if metadata['response_timeout'] == 'invalid' or metadata['max_interval'] == 'invalid':
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                callback=generate_monitoring_callback(fim.CB_INVALID_CONFIG_VALUE),
-                                error_message=fim.ERR_MSG_INVALID_CONFIG_VALUE,
+                                callback=generate_monitoring_callback(CB_INVALID_CONFIG_VALUE),
+                                error_message=ERR_MSG_INVALID_CONFIG_VALUE,
                                 update_position=True).result()
 
     # Wait for new sync
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_synchronization,
-                            error_message=fim.ERR_MSG_FIM_SYNC_NOT_DETECTED, update_position=True).result()
+                            error_message=ERR_MSG_FIM_SYNC_NOT_DETECTED, update_position=True).result()
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     # Check if response_timeout has elapsed, and sync is still running, the sync interval is doubled
     interval = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*5,
-                                       callback=generate_monitoring_callback(fim.CB_SYNC_SKIPPED),
+                                       callback=generate_monitoring_callback(CB_SYNC_SKIPPED),
                                        accum_results=metadata['doubled_times'],
-                                       error_message=fim.ERR_MSG_SYNC_SKIPPED_EVENT, update_position=True).result()
+                                       error_message=ERR_MSG_SYNC_SKIPPED_EVENT, update_position=True).result()
 
     if metadata['doubled_times'] > 1:
         new_interval = interval[-1]
@@ -197,8 +200,8 @@ def test_sync_overlap(configuration, metadata, set_wazuh_configuration, configur
     # Check when sync ends sync_interval is returned to normal after response_timeout since last message.
     if not metadata['lower']:
         result = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*10,
-                                         callback=generate_monitoring_callback(fim.CB_SYNC_INTERVAL_RESET),
-                                         error_message=fim.ERR_MSG_SYNC_INTERVAL_RESET_EVENT,
+                                         callback=generate_monitoring_callback(CB_SYNC_INTERVAL_RESET),
+                                         error_message=ERR_MSG_SYNC_INTERVAL_RESET_EVENT,
                                          update_position=True).result()
 
         assert int(result) == int(metadata['interval']), f"Invalid value for interval: {result}, it should be reset to\
