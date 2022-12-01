@@ -356,6 +356,7 @@ def set_check_options(options):
         options_set = options_set.intersection(options)
     return options_set
 
+
 def registry_value_create(root_key, registry_sub_key, log_monitor, arch=fim.KEY_WOW64_64KEY, value_list=['test_value'],
                           min_timeout=1, options=None, wait_for_scan=False, scan_delay=10, triggers_event=True,
                           encoding=None, callback=callback_value_event, validators_after_create=None,
@@ -484,6 +485,7 @@ def registry_value_update(root_key, registry_sub_key, log_monitor, arch=fim.KEY_
         if triggers_event:
             logger.info("'modified' {} detected as expected.\n".format("events" if len(value_list) > 1 else "event"))
 
+
 def registry_value_delete(root_key, registry_sub_key, log_monitor, arch=fim.KEY_WOW64_64KEY, value_list=['test_value'],
                           wait_for_scan=False, scan_delay=10, min_timeout=1, options=None, triggers_event=True,
                           encoding=None, callback=callback_value_event, validators_after_delete=None,
@@ -511,7 +513,7 @@ def registry_value_delete(root_key, registry_sub_key, log_monitor, arch=fim.KEY_
         when a new registry value is deleted. Each function must accept a param to receive the event
         to be validated. Default `None`
     """
-    if sys.platform == 'win32':            
+    if sys.platform == 'win32':
         # Transform registry list
         if root_key not in fim.registry_parser:
             raise ValueError("root_key not valid")
@@ -820,6 +822,7 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
             monitor.start(timeout=timeout, callback=callback_detect_end_scan,
                           update_position=False,
                           error_message=f"End of scheduled scan not detected after {timeout} seconds")
+
 
 def wait_for_scheduled_scan(wait_for_scan=False, interval: timedelta = timedelta(seconds=20),
                             monitor: FileMonitor = None, timeout=global_parameters.default_timeout):

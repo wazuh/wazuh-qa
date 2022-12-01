@@ -201,6 +201,7 @@ def callback_value_event(line):
 
     return event
 
+
 def callback_detect_registry_integrity_event(line):
     event = callback_detect_integrity_control_event(line)
     if event and event['component'] == 'fim_registry_key':

@@ -293,167 +293,167 @@ class EventChecker:
 
 
 class RegistryEventChecker:
-        """Utility to allow fetch events and validate them."""
+    """Utility to allow fetch events and validate them."""
 
-        def __init__(self, log_monitor, registry_key, registry_dict=None, options=None, custom_validator=None,
-                     encoding=None, callback=callback_detect_event, is_value=False):
-            self.log_monitor = log_monitor
-            self.registry_key = registry_key
-            global registry_ignore_path
-            registry_ignore_path = registry_key
-            self.registry_dict = registry_dict
-            self.custom_validator = custom_validator
-            self.options = options
-            self.encoding = encoding
-            self.events = None
-            self.callback = callback
-            self.is_value = is_value
+    def __init__(self, log_monitor, registry_key, registry_dict=None, options=None, custom_validator=None,
+                 encoding=None, callback=callback_detect_event, is_value=False):
+        self.log_monitor = log_monitor
+        self.registry_key = registry_key
+        global registry_ignore_path
+        registry_ignore_path = registry_key
+        self.registry_dict = registry_dict
+        self.custom_validator = custom_validator
+        self.options = options
+        self.encoding = encoding
+        self.events = None
+        self.callback = callback
+        self.is_value = is_value
 
-        def __del__(self):
-            global registry_ignore_path
-            registry_ignore_path = None
+    def __del__(self):
+        global registry_ignore_path
+        registry_ignore_path = None
 
-        def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0):
-            """Call 'fetch_events', 'fetch_key_events' and 'check_events', depending on the type of event expected.
+    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0):
+        """Call 'fetch_events', 'fetch_key_events' and 'check_events', depending on the type of event expected.
+
+        Args:
+            event_type (str): Expected type of the raised event {'added', 'modified', 'deleted'}.
+            min_timeout (int, optional): seconds to wait until an event is raised when trying to fetch. Defaults `1`
+            triggers_event (boolean, optional): True if the event should be raised. False otherwise. Defaults `True`
+            extra_timeout (int, optional): Additional time to wait after the min_timeout
+        """
+        assert event_type in ['added', 'modified', 'deleted'], f'Incorrect event type: {event_type}'
+
+        num_elems = len(self.registry_dict)
+
+        error_msg = "TimeoutError was raised because "
+        error_msg += str(num_elems) if num_elems > 1 else "a single"
+        error_msg += " '" + str(event_type) + "' "
+        error_msg += "events were " if num_elems > 1 else "event was "
+        error_msg += "expected for " + str(self._get_elem_list())
+        error_msg += " but were not detected." if num_elems > 1 else " but was not detected."
+
+        key_error_msg = f"TimeoutError was raised because 1 event was expected for {self.registry_key} "
+        key_error_msg += 'but was not detected.'
+
+        if event_type == 'modified' or self.is_value:
+            self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
+            self.check_events(event_type)
+        elif event_type == 'added':
+            self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
+            self.check_events(event_type)
+        elif event_type == 'deleted':
+            self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
+            self.check_events(event_type)
+
+    def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message=''):
+        timeout_per_registry_estimation = 0.01
+        try:
+            result = self.log_monitor.start(timeout=max((len(self.registry_dict)) * timeout_per_registry_estimation,
+                                                        min_timeout),
+                                            callback=self.callback, accum_results=len(self.registry_dict),
+                                            timeout_extra=extra_timeout, encoding=self.encoding,
+                                            error_message=error_message).result()
+
+            assert triggers_event, 'No events should be detected.'
+            return result if isinstance(result, list) else [result]
+        except TimeoutError:
+            if triggers_event:
+                raise
+            logger.info("TimeoutError was expected and correctly caught.")
+
+    def check_events(self, event_type, mode=None):
+        """Check and validate all events in the 'events' list.
+
+        Args:
+            event_type (str): Expected type of the raised event {'added', 'modified', 'deleted'}.
+            mode (str): expected mode of the raised event.
+        """
+
+        def validate_checkers_per_event(events, options, mode):
+            """Check if each event is properly formatted according to some checks.
 
             Args:
-                event_type (str): Expected type of the raised event {'added', 'modified', 'deleted'}.
-                min_timeout (int, optional): seconds to wait until an event is raised when trying to fetch. Defaults `1`
-                triggers_event (boolean, optional): True if the event should be raised. False otherwise. Defaults `True`
-                extra_timeout (int, optional): Additional time to wait after the min_timeout
+                events (list): event list to be checked.
+                options (set): set of XML CHECK_* options. Default `{CHECK_ALL}`
+                mode (str): represents the FIM mode expected for the event to validate.
             """
-            assert event_type in ['added', 'modified', 'deleted'], f'Incorrect event type: {event_type}'
-
-            num_elems = len(self.registry_dict)
-
-            error_msg = "TimeoutError was raised because "
-            error_msg += str(num_elems) if num_elems > 1 else "a single"
-            error_msg += " '" + str(event_type) + "' "
-            error_msg += "events were " if num_elems > 1 else "event was "
-            error_msg += "expected for " + str(self._get_elem_list())
-            error_msg += " but were not detected." if num_elems > 1 else " but was not detected."
-
-            key_error_msg = f"TimeoutError was raised because 1 event was expected for {self.registry_key} "
-            key_error_msg += 'but was not detected.'
-
-            if event_type == 'modified' or self.is_value:
-                self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
-                self.check_events(event_type)
-            elif event_type == 'added':
-                self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
-                self.check_events(event_type)
-            elif event_type == 'deleted':
-                self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
-                self.check_events(event_type)
-
-        def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message=''):
-            timeout_per_registry_estimation = 0.01
-            try:
-                result = self.log_monitor.start(timeout=max((len(self.registry_dict)) * timeout_per_registry_estimation,
-                                                            min_timeout),
-                                                callback=self.callback, accum_results=len(self.registry_dict),
-                                                timeout_extra=extra_timeout, encoding=self.encoding,
-                                                error_message=error_message).result()
-
-                assert triggers_event, 'No events should be detected.'
-                return result if isinstance(result, list) else [result]
-            except TimeoutError:
-                if triggers_event:
-                    raise
-                logger.info("TimeoutError was expected and correctly caught.")
-
-        def check_events(self, event_type, mode=None):
-            """Check and validate all events in the 'events' list.
-
-            Args:
-                event_type (str): Expected type of the raised event {'added', 'modified', 'deleted'}.
-                mode (str): expected mode of the raised event.
-            """
-
-            def validate_checkers_per_event(events, options, mode):
-                """Check if each event is properly formatted according to some checks.
-
-                Args:
-                    events (list): event list to be checked.
-                    options (set): set of XML CHECK_* options. Default `{CHECK_ALL}`
-                    mode (str): represents the FIM mode expected for the event to validate.
-                """
-                for ev in events:
-                    if self.is_value:
-                        validate_registry_value_event(ev, options, mode)
-                    else:
-                        validate_registry_key_event(ev, options, mode)
-
-            def check_events_type(events, ev_type, reg_list=['testkey0']):
-                event_types = Counter(filter_events(events, ".[].data.type"))
-
-                assert (event_types[ev_type] == len(reg_list)
-                        ), f'Non expected number of events. {event_types[ev_type]} != {len(reg_list)}'
-
-            def check_events_key_path(events, registry_key, reg_list=['testkey0'], mode=None):
-                mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
-                key_path = filter_events(events, ".[].data.path")
-
-                for reg in reg_list:
-                    expected_path = os.path.join(registry_key, reg)
-
-                    if self.encoding is not None:
-                        for index, item in enumerate(key_path):
-                            key_path[index] = item.encode(encoding=self.encoding)
-
-                    error_msg = f"Expected key path was '{expected_path}' but event key path is '{key_path}'"
-                    assert (expected_path in key_path), error_msg
-
-            def check_events_registry_value(events, key, value_list=['testvalue0'], mode=None):
-                mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
-                key_path = filter_events(events, ".[].data.path")
-                value_name = filter_events(events, ".[].data.value_name")
-
-                for value in value_list:
-                    error_msg = f"Expected value name was '{value}' but event value name is '{value_name}'"
-                    assert (value in value_name), error_msg
-
-                    error_msg = f"Expected key path was '{key}' but event key path is '{key_path}'"
-                    assert (key in key_path), error_msg
-
-            def filter_events(events, mask):
-                """Returns a list of elements matching a specified mask in the events list using jq module."""
-                if sys.platform in ("win32", 'sunos5', 'darwin'):
-                    stdout = subprocess.check_output(["jq", "-r", mask], input=json.dumps(events).encode())
-
-                    return stdout.decode("utf8").strip().split(os.linesep)
-                else:
-                    return jq(mask).transform(events, multiple_output=True)
-
-            if self.events is not None:
-                validate_checkers_per_event(self.events, self.options, mode)
-
+            for ev in events:
                 if self.is_value:
-                    check_events_type(self.events, event_type, self.registry_dict)
-                    check_events_registry_value(self.events, self.registry_key, value_list=self.registry_dict,
-                                                mode=mode)
+                    validate_registry_value_event(ev, options, mode)
                 else:
-                    check_events_type(self.events, event_type, self.registry_dict)
-                    check_events_key_path(self.events, self.registry_key, reg_list=self.registry_dict, mode=mode)
+                    validate_registry_key_event(ev, options, mode)
 
-                if self.custom_validator is not None:
-                    self.custom_validator.validate_after_cud(self.events)
+        def check_events_type(events, ev_type, reg_list=['testkey0']):
+            event_types = Counter(filter_events(events, ".[].data.type"))
 
-                    if event_type == "added":
-                        self.custom_validator.validate_after_create(self.events)
-                    elif event_type == "modified":
-                        self.custom_validator.validate_after_update(self.events)
-                    elif event_type == "deleted":
-                        self.custom_validator.validate_after_delete(self.events)
+            assert (event_types[ev_type] == len(reg_list)
+                    ), f'Non expected number of events. {event_types[ev_type]} != {len(reg_list)}'
 
-        def _get_elem_list(self):
-            result_list = []
+        def check_events_key_path(events, registry_key, reg_list=['testkey0'], mode=None):
+            mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
+            key_path = filter_events(events, ".[].data.path")
 
-            for elem_name in self.registry_dict:
-                if elem_name in self.registry_key:
-                    continue
+            for reg in reg_list:
+                expected_path = os.path.join(registry_key, reg)
 
-                expected_elem_path = os.path.join(self.registry_key, elem_name)
-                result_list.append(expected_elem_path)
+                if self.encoding is not None:
+                    for index, item in enumerate(key_path):
+                        key_path[index] = item.encode(encoding=self.encoding)
 
-            return result_list
+                error_msg = f"Expected key path was '{expected_path}' but event key path is '{key_path}'"
+                assert (expected_path in key_path), error_msg
+
+        def check_events_registry_value(events, key, value_list=['testvalue0'], mode=None):
+            mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
+            key_path = filter_events(events, ".[].data.path")
+            value_name = filter_events(events, ".[].data.value_name")
+
+            for value in value_list:
+                error_msg = f"Expected value name was '{value}' but event value name is '{value_name}'"
+                assert (value in value_name), error_msg
+
+                error_msg = f"Expected key path was '{key}' but event key path is '{key_path}'"
+                assert (key in key_path), error_msg
+
+        def filter_events(events, mask):
+            """Returns a list of elements matching a specified mask in the events list using jq module."""
+            if sys.platform in ("win32", 'sunos5', 'darwin'):
+                stdout = subprocess.check_output(["jq", "-r", mask], input=json.dumps(events).encode())
+
+                return stdout.decode("utf8").strip().split(os.linesep)
+            else:
+                return jq(mask).transform(events, multiple_output=True)
+
+        if self.events is not None:
+            validate_checkers_per_event(self.events, self.options, mode)
+
+            if self.is_value:
+                check_events_type(self.events, event_type, self.registry_dict)
+                check_events_registry_value(self.events, self.registry_key, value_list=self.registry_dict,
+                                            mode=mode)
+            else:
+                check_events_type(self.events, event_type, self.registry_dict)
+                check_events_key_path(self.events, self.registry_key, reg_list=self.registry_dict, mode=mode)
+
+            if self.custom_validator is not None:
+                self.custom_validator.validate_after_cud(self.events)
+
+                if event_type == "added":
+                    self.custom_validator.validate_after_create(self.events)
+                elif event_type == "modified":
+                    self.custom_validator.validate_after_update(self.events)
+                elif event_type == "deleted":
+                    self.custom_validator.validate_after_delete(self.events)
+
+    def _get_elem_list(self):
+        result_list = []
+
+        for elem_name in self.registry_dict:
+            if elem_name in self.registry_key:
+                continue
+
+            expected_elem_path = os.path.join(self.registry_key, elem_name)
+            result_list.append(expected_elem_path)
+
+        return result_list

@@ -66,7 +66,7 @@ from wazuh_testing.modules.fim import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, M
                                        TEST_DIRECTORIES, TEST_REGISTRIES, SYNCHRONIZATION_ENABLED,
                                        SYNCHRONIZATION_REGISTRY_ENABLED)
 from wazuh_testing.modules.fim.event_monitor import CB_INTEGRITY_CONTROL_MESSAGE
-from wazuh_testing.modules.fim.utils import  generate_params
+from wazuh_testing.modules.fim.utils import generate_params
 
 
 # Marks
