@@ -70,7 +70,8 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.fim_module import (ERR_MSG_DATABASE_FULL_ALERT_EVENT, CB_FILE_LIMIT_CAPACITY,
-    ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL, ERR_MSG_NO_EVENTS_EXPECTED, ERR_MSG_DELETED_EVENT_NOT_RECIEVED)
+                                      ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL,
+                                      ERR_MSG_NO_EVENTS_EXPECTED, ERR_MSG_DELETED_EVENT_NOT_RECIEVED)
 from wazuh_testing.fim_module.event_monitor import callback_detect_event
 # Marks
 
@@ -78,6 +79,7 @@ pytestmark = [pytest.mark.tier(level=1)]
 
 # Variables
 base_file_name = "test_file"
+DATABASE_FULL_ALERT_EVENT_TIMEOUT = 20
 test_directories = [os.path.join(PREFIX, 'testdir1')]
 
 directory_str = ','.join(test_directories)
@@ -175,8 +177,8 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
         - realtime
         - who_data
     '''
-    #Check that database is full and assert database usage percentage is 100%
-    database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    # Check that database is full and assert database usage percentage is 100%
+    database_state = wazuh_log_monitor.start(timeout=DATABASE_FULL_ALERT_EVENT_TIMEOUT,
                                              callback=generate_monitoring_callback(CB_FILE_LIMIT_CAPACITY),
                                              error_message=ERR_MSG_DATABASE_FULL_ALERT_EVENT).result()
 
@@ -197,7 +199,7 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
     # Delete the first file that was created (It is included in DB)
     delete_file(folder, f'{file_name}{0}')
 
-    #Get that the file deleted generetes an event and assert the event data path.
+    # Get that the file deleted generetes an event and assert the event data path.
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                     callback=callback_detect_event,
                                     error_message=ERR_MSG_DELETED_EVENT_NOT_RECIEVED).result()
