@@ -67,26 +67,25 @@ import sys
 
 import pytest
 
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, create_file, REGULAR,
-                               delete_file, wait_for_scheduled_scan)
+from wazuh_testing import LOG_FILE_PATH, REGULAR, global_parameters
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import create_file, delete_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.modules.fim import (ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_WRONG_CAPACITY_LOG_DB_LIMIT,
-                                       ERR_MSG_WRONG_NUMBER_OF_ENTRIES, ERR_MSG_WRONG_INODE_PATH_COUNT,
-                                       ERR_MSG_FIM_INODE_ENTRIES, CB_FILE_LIMIT_CAPACITY, SCHEDULED_MODE)
-from wazuh_testing.modules.fim.event_monitor import callback_entries_path_count
 from wazuh_testing.modules import TIER1
+from wazuh_testing.modules.fim import SCHEDULED_MODE, FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing.modules.fim.event_monitor import (callback_entries_path_count, CB_FILE_LIMIT_CAPACITY,
+                                                     ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_FIM_INODE_ENTRIES,
+                                                     ERR_MSG_WRONG_CAPACITY_LOG_DB_LIMIT,
+                                                     ERR_MSG_WRONG_NUMBER_OF_ENTRIES, ERR_MSG_WRONG_INODE_PATH_COUNT)
+from wazuh_testing.modules.fim.utils import generate_params, wait_for_scheduled_scan
 
 # Marks
-
 pytestmark = [TIER1]
 
 # Variables
+local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 test_directories = [os.path.join(PREFIX, 'testdir1')]
-
 directory_str = ','.join(test_directories)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')

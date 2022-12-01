@@ -57,19 +57,20 @@ import os
 import time
 import pytest
 
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, create_registry, generate_params, create_file, modify_registry_value,
-                               REGULAR, callback_detect_event, callback_real_time_whodata_started,
-                               KEY_WOW64_64KEY, registry_parser, REG_SZ, callback_detect_synchronization)
+from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import create_file
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, ERR_MSG_FIM_EVENT_NOT_RECIEVED, MONITORED_KEY,
-                                       ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED, ERR_MSG_INTEGRITY_CHECK_EVENT)
 from wazuh_testing.modules import TIER2, WINDOWS
+from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, KEY_WOW64_64KEY, registry_parser, 
+                                       REG_SZ, MONITORED_KEY)
+from wazuh_testing.modules.fim.event_monitor import(callback_detect_event, callback_real_time_whodata_started,
+                                                    callback_detect_synchronization, ERR_MSG_FIM_EVENT_NOT_RECIEVED,
+                                                    ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED, 
+                                                    ERR_MSG_INTEGRITY_CHECK_EVENT)
+from wazuh_testing.modules.fim.utils import create_registry, generate_params, modify_registry_value
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-
-
 # Marks
 pytestmark = [WINDOWS, TIER2]
 

@@ -65,19 +65,20 @@ import os
 import sys
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR
+from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import create_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.modules.fim import (CB_FILE_LIMIT_CAPACITY, ERR_MSG_DATABASE_FULL_ALERT_EVENT,
-                                       ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL, ERR_MSG_FIM_INODE_ENTRIES,
-                                       ERR_MSG_WRONG_INODE_PATH_COUNT, ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
-from wazuh_testing.modules.fim.event_monitor import callback_entries_path_count
+from wazuh_testing.modules.fim.event_monitor import (callback_entries_path_count, CB_FILE_LIMIT_CAPACITY,
+                                                     ERR_MSG_DATABASE_FULL_ALERT_EVENT, ERR_MSG_FIM_INODE_ENTRIES,
+                                                     ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL,
+                                                     ERR_MSG_WRONG_INODE_PATH_COUNT, ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
+from wazuh_testing.modules.fim.utils import generate_params
+
 
 # Marks
-
 pytestmark = [pytest.mark.tier(level=1)]
 
 # Variables

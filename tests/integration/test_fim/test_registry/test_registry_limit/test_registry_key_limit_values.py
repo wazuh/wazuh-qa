@@ -56,18 +56,19 @@ tags:
 '''
 import os
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY,
-                               REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry)
-from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2, MONITORED_KEY_3,
-                                       CB_REGISTRY_LIMIT_VALUE, ERR_MSG_REGISTRY_LIMIT_VALUES,
-                                       CB_COUNT_REGISTRY_ENTRIES, ERR_MSG_FIM_REGISTRY_ENTRIES,
-                                       ERR_MSG_WRONG_NUMBER_OF_ENTRIES, ERR_MSG_WRONG_REGISTRY_LIMIT_VALUE,
-                                       ERR_MSG_FIM_REGISTRY_ENTRIES, CB_COUNT_REGISTRY_ENTRIES)
+from wazuh_testing import LOG_FILE_PATH, global_parameters
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules import WINDOWS, TIER1
+from wazuh_testing.modules.fim import (registry_parser, KEY_WOW64_64KEY, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
+                                       MONITORED_KEY_2, MONITORED_KEY_3, REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx,
+                                       RegCloseKey)
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing.modules.fim.event_monitor import (CB_REGISTRY_LIMIT_VALUE, ERR_MSG_REGISTRY_LIMIT_VALUES,
+                                                     CB_COUNT_REGISTRY_ENTRIES, ERR_MSG_FIM_REGISTRY_ENTRIES,
+                                                     ERR_MSG_WRONG_NUMBER_OF_ENTRIES, ERR_MSG_FIM_REGISTRY_ENTRIES,
+                                                     ERR_MSG_WRONG_REGISTRY_LIMIT_VALUE, CB_COUNT_REGISTRY_ENTRIES)
+from wazuh_testing.modules.fim.utils import generate_params, create_registry, modify_registry_value
 
 
 # Marks

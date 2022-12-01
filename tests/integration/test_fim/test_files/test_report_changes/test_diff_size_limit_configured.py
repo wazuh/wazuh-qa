@@ -74,13 +74,12 @@ from wazuh_testing import global_parameters, DATA, LOG_FILE_PATH
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.modules.fim import (TEST_DIR_1, DIFF_LIMIT_VALUE,
-                                       DIFF_SIZE_LIMIT, DISK_QUOTA_ENABLED, DISK_QUOTA_LIMIT,
-                                       FILE_SIZE_ENABLED, FILE_SIZE_LIMIT, CB_MAXIMUM_FILE_SIZE,
-                                       REPORT_CHANGES, TEST_DIRECTORIES, ERR_MSG_MAXIMUM_FILE_SIZE,
-                                       ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE)
-from wazuh_testing.modules.fim.utils import generate_params
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing.modules.fim import (TEST_DIR_1, REPORT_CHANGES, TEST_DIRECTORIES, DIFF_LIMIT_VALUE, FILE_SIZE_LIMIT,
+                                       DIFF_SIZE_LIMIT, DISK_QUOTA_ENABLED, DISK_QUOTA_LIMIT, FILE_SIZE_ENABLED)
+from wazuh_testing.modules.fim.event_monitor import (CB_MAXIMUM_FILE_SIZE, ERR_MSG_MAXIMUM_FILE_SIZE,
+                                                     ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE)
+from wazuh_testing.modules.fim.utils import generate_params
 
 
 # Marks

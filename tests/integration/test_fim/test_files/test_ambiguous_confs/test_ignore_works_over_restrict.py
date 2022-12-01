@@ -66,7 +66,7 @@ import sys
 import pytest
 from wazuh_testing import logger
 from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, create_file, REGULAR, generate_params
-from wazuh_testing.modules.fim import CB_IGNORING_DUE_TO_SREGEX, CB_IGNORING_DUE_TO_PATTERN
+from wazuh_testing.modules.fim.event_monitor import CB_IGNORING_DUE_TO_SREGEX, CB_IGNORING_DUE_TO_PATTERN
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback

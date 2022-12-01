@@ -65,16 +65,17 @@ import pytest
 import time
 
 from collections import Counter
-from wazuh_testing import logger
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_event_message
+from wazuh_testing import logger, LOG_FILE_PATH
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.modules.fim import (TEST_DIR_1, ERR_MSG_MULTIPLE_FILES_CREATION, REALTIME_MODE, WHODATA_MODE,
-                                       CB_PATH_MONITORED_REALTIME, ERR_MSG_MONITORING_PATH, CB_PATH_MONITORED_WHODATA,
-                                       CB_PATH_MONITORED_WHODATA_WINDOWS)
-from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools.file import write_file
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing.modules.fim.event_monitor import (TEST_DIR_1, ERR_MSG_MULTIPLE_FILES_CREATION, REALTIME_MODE,
+                                                     WHODATA_MODE, CB_PATH_MONITORED_REALTIME, ERR_MSG_MONITORING_PATH,
+                                                     CB_PATH_MONITORED_WHODATA, CB_PATH_MONITORED_WHODATA_WINDOWS,
+                                                     callback_integrity_message)
+from wazuh_testing.modules.fim.utils import generate_params
 
 
 # Marks
@@ -174,7 +175,7 @@ def test_max_eps(configure_local_internal_options_module, get_configuration, con
     n_results = max_eps * 2
     result = wazuh_log_monitor.start(timeout=TIMEOUT,
                                      accum_results=n_results,
-                                     callback=callback_event_message,
+                                     callback=callback_integrity_message,
                                      error_message=f'Received less results than expected ({n_results})').result()
 
     counter = Counter([date_time for date_time, _ in result])

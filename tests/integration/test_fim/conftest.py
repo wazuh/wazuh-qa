@@ -10,8 +10,6 @@ import pytest
 from distro import id
 from wazuh_testing import (global_parameters, LOG_FILE_PATH, REGULAR, WAZUH_SERVICES_START, WAZUH_SERVICES_STOP,
                            WAZUH_LOG_MONITOR)
-from wazuh_testing.tools.configuration import (get_wazuh_local_internal_options, set_wazuh_local_internal_options,
-                                               create_local_internal_options)
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.file import truncate_file, delete_path_recursively, create_file

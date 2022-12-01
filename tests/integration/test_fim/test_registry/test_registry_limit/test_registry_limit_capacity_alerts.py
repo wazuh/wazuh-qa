@@ -57,19 +57,20 @@ tags:
 import os
 from sys import platform
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, wait_for_scheduled_scan, \
-    delete_registry_value, registry_parser, KEY_WOW64_64KEY, callback_detect_end_scan, REG_SZ, KEY_ALL_ACCESS, \
-    RegOpenKeyEx, RegCloseKey
+from wazuh_testing import global_parameters, LOG_FILE_PATH
+from wazuh_testing.modules.fim import (registry_parser, KEY_WOW64_64KEY,  REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx,
+                                       RegCloseKey, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_REGISTRY_LIMIT_CAPACITY,
-                                       ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_FIM_REGISTRY_ENTRIES,
-                                       CB_REGISTRY_DB_BACK_TO_NORMAL, ERR_MSG_DB_BACK_TO_NORMAL,
-                                       CB_COUNT_REGISTRY_VALUE_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES,
-                                       ERR_MSG_SCHEDULED_SCAN_ENDED)
+from wazuh_testing.modules.fim.event_monitor import (callback_detect_end_scan, CB_REGISTRY_LIMIT_CAPACITY,
+                                                     ERR_MSG_DATABASE_PERCENTAGE_FULL_ALERT, ERR_MSG_DB_BACK_TO_NORMAL,
+                                                     ERR_MSG_FIM_REGISTRY_ENTRIES, CB_REGISTRY_DB_BACK_TO_NORMAL,
+                                                     CB_COUNT_REGISTRY_VALUE_ENTRIES, ERR_MSG_WRONG_NUMBER_OF_ENTRIES,
+                                                     ERR_MSG_SCHEDULED_SCAN_ENDED)
 from wazuh_testing.modules import WINDOWS, TIER1
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules.fim.utils import (generate_params, modify_registry_value, wait_for_scheduled_scan,
+                                             delete_registry_value)
 if platform == 'win32':
     import pywintypes
 

@@ -64,16 +64,17 @@ import time
 
 from collections import Counter
 from wazuh_testing import logger
-from wazuh_testing.tools import PREFIX
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params
+from wazuh_testing.tools import PREFIX, LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.modules import DATA, TIER1, AGENT, WINDOWS, LINUX
-from wazuh_testing.modules.fim import (TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_MAX_EPS_SYNC,
-                                       ERR_MSG_INTEGRITY_CONTROL_MSG, SCHEDULED_MODE, ERR_MSG_MULTIPLE_FILES_CREATION)
+from wazuh_testing.modules.fim import TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_MAX_EPS_SYNC, SCHEDULED_MODE
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.modules.fim.event_monitor import callback_integrity_message
+from wazuh_testing.modules.fim.event_monitor import (callback_integrity_message, ERR_MSG_INTEGRITY_CONTROL_MSG,
+                                                     ERR_MSG_MULTIPLE_FILES_CREATION)
 from wazuh_testing.tools.file import delete_path_recursively, write_file
+from wazuh_testing.modules.fim.utils import generate_params
+
 
 # Marks
 pytestmark = [TIER1, AGENT, WINDOWS, LINUX]

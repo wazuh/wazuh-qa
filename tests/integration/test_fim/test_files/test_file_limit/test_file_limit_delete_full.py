@@ -64,18 +64,18 @@ import os
 from time import sleep
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, delete_file, generate_params, create_file, REGULAR
+from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import create_file, delete_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.modules.fim import (ERR_MSG_DATABASE_FULL_ALERT_EVENT, CB_FILE_LIMIT_CAPACITY,
-                                       ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL, ERR_MSG_NO_EVENTS_EXPECTED,
-                                       ERR_MSG_DELETED_EVENT_NOT_RECIEVED)
-from wazuh_testing.modules.fim.event_monitor import callback_detect_event
-# Marks
+from wazuh_testing.modules.fim.event_monitor import (callback_detect_event, ERR_MSG_DATABASE_FULL_ALERT_EVENT,
+                                                     CB_FILE_LIMIT_CAPACITY, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL,
+                                                     ERR_MSG_NO_EVENTS_EXPECTED, ERR_MSG_DELETED_EVENT_NOT_RECIEVED)
+from wazuh_testing.modules.fim.utils import generate_params
 
+# Marks
 pytestmark = [pytest.mark.tier(level=1)]
 
 # Variables

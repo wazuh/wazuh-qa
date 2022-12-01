@@ -55,19 +55,20 @@ tags:
 '''
 import os
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, modify_registry_value, registry_parser, KEY_WOW64_64KEY,\
-     REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx, RegCloseKey, create_registry
-from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, CB_REGISTRY_LIMIT_CAPACITY,
-                                       ERR_MSG_DATABASE_FULL_ALERT, ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT,
-                                       CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE, CB_COUNT_REGISTRY_VALUE_ENTRIES,
-                                       ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL,
-                                       ERR_MSG_WRONG_NUMBER_OF_ENTRIES)
-from wazuh_testing.modules import WINDOWS, TIER1
+from wazuh_testing import LOG_FILE_PATH, global_parameters
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-
+from wazuh_testing.modules import WINDOWS, TIER1
+from wazuh_testing.modules.fim import (registry_parser, KEY_WOW64_64KEY, REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx,
+                                       RegCloseKey, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY)
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing.modules.fim.event_monitor import (CB_REGISTRY_LIMIT_CAPACITY, CB_COUNT_REGISTRY_VALUE_ENTRIES,
+                                                     CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE,
+                                                     ERR_MSG_DATABASE_FULL_ALERT, ERR_MSG_WRONG_NUMBER_OF_ENTRIES,
+                                                     ERR_MSG_DATABASE_FULL_COULD_NOT_INSERT,
+                                                     ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES,
+                                                     ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL)
+from wazuh_testing.modules.fim.utils import generate_params, modify_registry_value, create_registry
 
 # Marks
 pytestmark = [WINDOWS, TIER1]

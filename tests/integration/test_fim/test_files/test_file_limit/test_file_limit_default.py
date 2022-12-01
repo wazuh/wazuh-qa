@@ -64,13 +64,14 @@ import os
 import sys
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params
+from wazuh_testing import global_parameters, LOG_FILE_PATH
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.modules.fim import ERR_MSG_FILE_LIMIT_VALUES, CB_FILE_LIMIT_VALUE, ERR_MSG_WRONG_FILE_LIMIT_VALUE
+from wazuh_testing.modules.fim.event_monitor import (ERR_MSG_FILE_LIMIT_VALUES, CB_FILE_LIMIT_VALUE,
+                                                     ERR_MSG_WRONG_FILE_LIMIT_VALUE)
+from wazuh_testing.modules.fim.utils import generate_params
 
 # Marks
 
@@ -78,7 +79,6 @@ pytestmark = [pytest.mark.tier(level=1)]
 
 # Variables
 test_directories = [os.path.join(PREFIX, 'testdir1')]
-
 directory_str = ','.join(test_directories)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
