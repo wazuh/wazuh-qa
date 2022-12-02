@@ -82,7 +82,7 @@ for count, value in enumerate(t1_configuration_parameters):
 t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
                                                 t1_configuration_metadata)
 
-# --------------------------------TEST_IGNORE_REGEX_TYPE_VALUES--------------------------------------
+# --------------------------------TEST_RESTRICT_REGEX_TYPE_VALUES--------------------------------------
 t2_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_restrict_regex_type_values.yaml')
 t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_restrict_regex_type_values.yaml')
 
