@@ -22,7 +22,6 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, TEMPLATE_DIR, MODULE)
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, TEST_CASES_DIR, MODULE)
 local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0'}
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # ---------------------------------------------------- TEST_PATH -------------------------------------------------------
 configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_path_suffix.yml')
@@ -37,7 +36,7 @@ configurations = load_configuration_template(
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_path_suffix(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_s3_cloudtrail_db,
-    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
 ):
     """
     description: Only logs within a path_suffix are processed.
@@ -84,6 +83,9 @@ def test_path_suffix(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
+        - wazuh_log_monitor:
+            type: fixture
+            brief: Return a `ossec.log` monitor
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check the expected number of events were forwarded to analysisd
@@ -115,14 +117,14 @@ def test_path_suffix(
 
     # Check AWS module started
     wazuh_log_monitor.start(
-        timeout=T_10,
+        timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
         error_message="The AWS module didn't start as expected",
     ).result()
 
     # Check command was called correctly
     wazuh_log_monitor.start(
-        timeout=T_20,
+        timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message="The AWS module wasn't called with the correct parameters",
     ).result()
@@ -141,7 +143,7 @@ def test_path_suffix(
             ).result()
 
         wazuh_log_monitor.start(
-            timeout=T_10,
+            timeout=global_parameters.default_timeout,
             callback=event_monitor.make_aws_callback(pattern),
             error_message="The AWS module didn't show correct message about empty path_suffix"
         ).result()

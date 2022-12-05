@@ -18,8 +18,6 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template', 'basic_test_module')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases', 'basic_test_module')
 local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0'}
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
 
 # ---------------------------------------------------- TEST_DEFAULTS ---------------------------------------------------
 # Configuration and cases data
@@ -35,7 +33,7 @@ configurations = load_configuration_template(configurations_path, configuration_
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_defaults(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_s3_cloudtrail_db,
-    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
 ):
     """
     description: The module is invoked with the expected parameters and no error occurs.
@@ -75,6 +73,9 @@ def test_defaults(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
+        - wazuh_log_monitor:
+            type: fixture
+            brief: Return a `ossec.log` monitor
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the log that no errors occurs.

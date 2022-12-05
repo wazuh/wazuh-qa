@@ -22,7 +22,6 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, TEMPLATE_DIR, MODULE)
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, TEST_CASES_DIR, MODULE)
 local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0'}
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # ---------------------------------------------------- TEST_REMOVE_FROM_BUCKET -----------------------------------------
 # Configuration and cases data
@@ -37,7 +36,8 @@ configurations = load_configuration_template(configurations_path, configuration_
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_remove_from_bucket(
     configuration, metadata, upload_file_to_s3, load_wazuh_basic_configuration, set_wazuh_configuration,
-    clean_s3_cloudtrail_db, configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function
+    clean_s3_cloudtrail_db, configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function,
+    wazuh_log_monitor
 ):
     """
     description: The uploaded file was removed after the execution.
@@ -77,6 +77,9 @@ def test_remove_from_bucket(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
+        - wazuh_log_monitor:
+            type: fixture
+            brief: Return a `ossec.log` monitor
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the bucket that the uploaded log was removed.

@@ -23,7 +23,6 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, TEMPLATE_DIR, MODULE)
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, TEST_CASES_DIR, MODULE)
 local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0'}
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # ---------------------------------------------------- TEST_WITHOUT_ONLY_LOGS_AFTER ------------------------------------
 t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_without_only_logs_after.yml')
@@ -39,7 +38,8 @@ t1_configurations = load_configuration_template(
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 def test_without_only_logs_after(
     configuration, metadata, upload_and_delete_file_to_s3, load_wazuh_basic_configuration, set_wazuh_configuration,
-    clean_s3_cloudtrail_db, configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function
+    clean_s3_cloudtrail_db, configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function,
+    wazuh_log_monitor
 ):
     """
     description: Only the log uploaded during execution is processed.
@@ -88,6 +88,9 @@ def test_without_only_logs_after(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
+        - wazuh_log_monitor:
+            type: fixture
+            brief: Return a `ossec.log` monitor
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the bucket that the uploaded log was removed.
@@ -147,7 +150,7 @@ t2_configurations = load_configuration_template(
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
 def test_with_only_logs_after(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_s3_cloudtrail_db,
-    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
 ):
     """
     description: All logs with a timestamp greater than the only_logs_after value are processed.
@@ -193,6 +196,9 @@ def test_with_only_logs_after(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
+        - wazuh_log_monitor:
+            type: fixture
+            brief: Return a `ossec.log` monitor
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the bucket that the uploaded log was removed.
