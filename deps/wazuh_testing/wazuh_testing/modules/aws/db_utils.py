@@ -35,3 +35,18 @@ def get_multiple_s3_db_row(table_name: str) -> Iterator[S3CloudTrailRow]:
 
     for row in cursor.execute(SELECT_QUERY_TEMPLATE.format(table_name=table_name)):
         yield S3CloudTrailRow(*row)
+
+def table_exists(table_name: str) -> bool:
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    query = """
+        SELECT
+            name
+        FROM
+            sqlite_schema
+        WHERE
+            type ='table' AND
+            name NOT LIKE 'sqlite_%';
+    """
+
+    return table_name in cursor.execute(query).fetchone()
