@@ -18,7 +18,6 @@ file_monitor = FileMonitor(LOG_FILE_PATH)
 # Callbacks messages
 CB_DETECT_FIM_EVENT = r".*Sending FIM event: (.+)$"
 CB_REALTIME_MONITORED_FOLDERS = r'.*Folders monitored with real-time engine: (\d+)'
-CB_REALTIME_WHODATA_ENGINE_STARTED = 'File integrity monitoring real-time Whodata engine started'
 CB_INVALID_CONFIG_VALUE = r".*Invalid value for element '(.*)': (.*)."
 CB_INTEGRITY_CONTROL_MESSAGE = r".*Sending integrity control message: (.+)$"
 CB_MAXIMUM_FILE_SIZE = r".*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*"
@@ -44,8 +43,6 @@ CB_SYNC_SKIPPED = r".*Sync still in progress. Skipped next sync and increased in
 CB_SYNC_INTERVAL_RESET = r".*Previous sync was successful. Sync interval is reset to: '(\d+)s'"
 CB_IGNORING_DUE_TO_SREGEX = r".*?Ignoring path '(.*)' due to sregex '(.*)'.*"
 CB_IGNORING_DUE_TO_PATTERN = r".*?Ignoring path '(.*)' due to pattern '(.*)'.*"
-CB_INTEGRITY_CONTROL_MESSAGE = r'.*Sending integrity control message: (.+)$'
-CB_REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
 CB_MAXIMUM_FILE_SIZE = r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*'
 CB_AGENT_CONNECT = r'.* Connected to the server .*'
 CB_FOLDERS_MONITORED_REALTIME = r'.*Folders monitored with real-time engine: (\d+)'
@@ -131,11 +128,9 @@ def callback_detect_end_scan(line):
     Args:
         line (String): string line to be checked by callback in FileMonitor.
     """
-    msg = CB_DETECT_FIM_EVENT
-    match = re.match(msg, line)
+    match = re.match(CB_DETECT_FIM_EVENT, line)
     if not match:
         return None
-
     try:
         if json.loads(match.group(1))['type'] == 'scan_end':
             return True
@@ -180,7 +175,7 @@ def callback_detect_integrity_control_event(line):
 
 
 def callback_integrity_message(line):
-    if callback_detect_integrity_control_event(line):
+    if callback_detect_event(line):
         match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*({.*?})$", line)
         if match:
             return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))

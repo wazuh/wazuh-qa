@@ -74,7 +74,8 @@ else:
     registry_parser = {}
     registry_class_name = {}
     registry_value_type = {}
-
+    RegOpenKeyEx = 0
+    RegCloseKey = 0
     KEY_WOW64_32KEY = 0
     KEY_WOW64_64KEY = 0
     REG_NONE = 0
@@ -204,6 +205,5 @@ else:
     FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS = {
         'syscheck.debug': '2',
         'agent.debug': '2',
-        'monitord.rotate_log': '0',
-        'analysisd.debug': '2'
+        'monitord.rotate_log': '0'
     }
