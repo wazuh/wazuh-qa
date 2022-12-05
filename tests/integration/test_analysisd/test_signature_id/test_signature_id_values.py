@@ -51,32 +51,40 @@ from wazuh_testing.tools.file import copy, delete_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.modules.analysisd.event_monitor import (CB_SID_NOT_FOUND, CB_EMPTY_IF_SID_RULE_IGNORED,
-                                                           ERR_MSG_SID_NOT_FOUND, ERR_MSG_EMPTY_IF_SID)
+                                                           CB_INVALID_IF_SID_RULE_IGNORED, ERR_MSG_SID_NOT_FOUND,
+                                                           ERR_MSG_EMPTY_IF_SID, ERR_MSG_INVALID_IF_SID)
 
 
 pytestmark = [pytest.mark.server]
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+RULES_SAMPLE_PATH = os.path.join(TEST_DATA_PATH, 'rules_samples')
 CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_null_signature_id.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_signature_id_values.yaml')
 t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_null_signature_id.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_invalid_signature_id.yaml')
 
 # test_null_signature_id configurations
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 t1_configurations = load_configuration_template(configurations_path, t1_configuration_parameters,
                                                 t1_configuration_metadata)
 
+# test_empty_signature_id configurations
+t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
+t2_configurations = load_configuration_template(configurations_path, t2_configuration_parameters,
+                                                t2_configuration_metadata)
+
 
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 def test_null_signature_id(configuration, metadata, set_wazuh_configuration, truncate_monitored_files):
     '''
-    description: Check that when a rule has an invalid signature ID value assigned to the if_sid option,
-                 the rule is ignored.
+    description: Check that when a rule has an invalid signature ID value, that references a nonexisten rule,
+                 assigned to the if_sid option, the rule is ignored.
 
     test_phases:
         - Copy custom rule file into manager
@@ -108,12 +116,12 @@ def test_null_signature_id(configuration, metadata, set_wazuh_configuration, tru
         - Check ".*wazuh-testrule.*Empty 'if_sid' value. Rule '(\\d*)' will be ignored.*"
 
     input_description:
-        - The `configuration_null_signature_id.yaml` file provides the module configuration for
+        - The `configuration_signature_id_values.yaml` file provides the module configuration for
           this test.
-        - The `cases_null_signature_id.yaml` file provides the test cases.
+        - The `cases_signature_id_values.yaml` file provides the test cases.
     '''
 
-    rules_file_path = os.path.join(TEST_DATA_PATH, metadata['rules_file'])
+    rules_file_path = os.path.join(RULES_SAMPLE_PATH, metadata['rules_file'])
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     # Copy rules to manager folder
@@ -124,11 +132,73 @@ def test_null_signature_id(configuration, metadata, set_wazuh_configuration, tru
     control_service(action='restart')
 
     # Check logs
-    if not metadata['empty_sid']:
-        wazuh_log_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_SID_NOT_FOUND),
-                                error_message=ERR_MSG_SID_NOT_FOUND)
+    wazuh_log_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_SID_NOT_FOUND),
+                            error_message=ERR_MSG_SID_NOT_FOUND)
     wazuh_log_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_EMPTY_IF_SID_RULE_IGNORED),
                             error_message=ERR_MSG_EMPTY_IF_SID)
+
+    # Delete rules file to clean enviroment
+    delete_file(os.path.join(CUSTOM_RULES_PATH, metadata['rules_file']))
+
+
+@pytest.mark.tier(level=1)
+@pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
+def test_invalid_signature_id(configuration, metadata, set_wazuh_configuration, truncate_monitored_files):
+    '''
+    description: Check that when a rule has an empty or invalid signature ID value (invalid format) assigned to the
+                 if_sid option, the rule is ignored.
+
+    test_phases:
+        - Copy custom rule file into manager
+        - Restart manager
+        - Check logs
+        - Check analysisd is running
+
+    wazuh_min_version: 4.4.0
+
+    tier: 1
+
+    parameters:
+        - configuration:
+            type: dict
+            brief: Configuration loaded from `configuration_template`.
+        - metadata:
+            type: dict
+            brief: Test case metadata.
+        - set_wazuh_configuration:
+            type: fixture
+            brief: Set wazuh configuration.
+        - truncate_monitored_files:
+            type: fixture
+            brief: Truncate all the log files and json alerts files before and after the test execution.
+
+    assertions:
+        - Check that wazuh starts
+        - Check ".*wazuh-testrule.*Empty 'if_sid' value. Rule '(\\d*)' will be ignored.*"
+
+    input_description:
+        - The `configuration_signature_id_values.yaml` file provides the module configuration for
+          this test.
+        - The `cases_empty_signature_id.yaml` file provides the test cases.
+    '''
+
+    rules_file_path = os.path.join(RULES_SAMPLE_PATH, metadata['rules_file'])
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+
+    # Copy rules to manager folder
+    copy(rules_file_path, CUSTOM_RULES_PATH)
+    chown(os.path.join(CUSTOM_RULES_PATH, metadata['rules_file']), WAZUH_UNIX_USER, WAZUH_UNIX_GROUP)
+
+    # Restart wazuh for changes to take effect
+    control_service(action='restart')
+
+    # Check logs
+    if metadata['is_empty']:
+        callback = fr".*Invalid 'if_sid' value: ''. Rule '(\d*)' will be ignored.*"
+    else:
+        callback = CB_INVALID_IF_SID_RULE_IGNORED
+    wazuh_log_monitor.start(timeout=T_10, callback=generate_monitoring_callback(callback),
+                            error_message=ERR_MSG_INVALID_IF_SID)
 
     # Delete rules file to clean enviroment
     delete_file(os.path.join(CUSTOM_RULES_PATH, metadata['rules_file']))

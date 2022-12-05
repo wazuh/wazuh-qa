@@ -9,10 +9,12 @@ from wazuh_testing.tools.monitoring import FileMonitor
 # Callback events
 CB_SID_NOT_FOUND = r".*Signature ID '(\d*)' was not found and will be ignored in the 'if_sid'.* of rule '(\d*)'"
 CB_EMPTY_IF_SID_RULE_IGNORED = fr"{TESTRULE_PREFIX}Empty 'if_sid' value. Rule '(\d*)' will be ignored.*"
+CB_INVALID_IF_SID_RULE_IGNORED = fr"{TESTRULE_PREFIX}Invalid 'if_sid' value: '(.*)'. Rule '(\d*)' will be ignored.*"
 
 # Error Messages
 ERR_MSG_SID_NOT_FOUND = "Did not receive the expected 'Signature ID  not found...' event"
 ERR_MSG_EMPTY_IF_SID = "Did not receive the expected 'Empty 'if_sid' value. Rule '(\\d*)' will be ignored' event"
+ERR_MSG_INVALID_IF_SID = "Did not receive the expected 'Invalid 'if_sid' value. Rule '(\\d*)' will be ignored' event"
 
 
 def make_analysisd_callback(pattern, prefix=ANALYSISD_PREFIX):

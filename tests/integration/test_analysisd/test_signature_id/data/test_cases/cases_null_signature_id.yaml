@@ -3,4 +3,3 @@
   configuration_parameters:
   metadata:
     rules_file: null_signature_id_rules.xml
-    empty_sid: false

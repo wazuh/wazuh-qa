@@ -1,0 +1,11 @@
+
+<group name="syscollector,">
+
+    <rule id="969696" level="3" >
+        <description>Initial rule that works as parent of rule with invalid if_sid</description>
+    </rule>
+    <rule id="969697" level="3" >
+        <if_sid>969696, 969698</if_sid>
+        <description>Custom Rule with valid and invalid if_sid</description>
+    </rule>
+</group>

@@ -1,0 +1,13 @@
+- name: Empty Signature ID - wazuh restarts - rule ignored
+  description: Check that if_sid is empty, a rule will be ignored
+  configuration_parameters:
+  metadata:
+    rules_file: empty_signature_id_rules.xml
+    is_empty: true
+
+- name: Invalid Signature ID - wazuh restarts - rule ignored
+  description: Check that if_sid is invalid, a rule will be ignored
+  configuration_parameters:
+  metadata:
+    rules_file: invalid_signature_id_rules.xml
+    is_empty: false
