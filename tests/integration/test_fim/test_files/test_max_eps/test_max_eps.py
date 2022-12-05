@@ -70,11 +70,11 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools.file import write_file
+from wazuh_testing.modules.fim import TEST_DIR_1, REALTIME_MODE, WHODATA_MODE
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.modules.fim.event_monitor import (TEST_DIR_1, ERR_MSG_MULTIPLE_FILES_CREATION, REALTIME_MODE,
-                                                     WHODATA_MODE, CB_PATH_MONITORED_REALTIME, ERR_MSG_MONITORING_PATH,
-                                                     CB_PATH_MONITORED_WHODATA, CB_PATH_MONITORED_WHODATA_WINDOWS,
-                                                     callback_integrity_message)
+from wazuh_testing.modules.fim.event_monitor import (ERR_MSG_MULTIPLE_FILES_CREATION, callback_integrity_message,
+                                                     CB_PATH_MONITORED_REALTIME, ERR_MSG_MONITORING_PATH,
+                                                     CB_PATH_MONITORED_WHODATA, CB_PATH_MONITORED_WHODATA_WINDOWS)
 from wazuh_testing.modules.fim.utils import generate_params
 
 
@@ -111,7 +111,7 @@ def create_multiple_files(get_configuration):
     max_eps = get_configuration['metadata']['max_eps']
     mode = get_configuration['metadata']['fim_mode']
     try:
-        for i in range(int(max_eps) * 2):
+        for i in range(int(max_eps) * 3):
             file_name = f'file{i}_to_max_eps_{max_eps}_{mode}_mode{time.time()}'
             path = os.path.join(test_directories[0], file_name)
             write_file(path)
@@ -172,7 +172,7 @@ def test_max_eps(configure_local_internal_options_module, get_configuration, con
                                      error_message=ERR_MSG_MONITORING_PATH).result()
     create_multiple_files(get_configuration)
     # Create files to read max_eps files with added events
-    n_results = max_eps * 2
+    n_results = max_eps * 3
     result = wazuh_log_monitor.start(timeout=TIMEOUT,
                                      accum_results=n_results,
                                      callback=callback_integrity_message,

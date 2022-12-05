@@ -57,15 +57,15 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params,
-                               calculate_registry_diff_paths, registry_value_create, registry_value_update,
-                               registry_value_delete, create_values_content)
-from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
-                                       SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
-                                       ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
+from wazuh_testing import LOG_FILE_PATH, global_parameters
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
+                                       SIZE_LIMIT_CONFIGURED_VALUE, KEY_WOW64_32KEY, KEY_WOW64_64KEY)
+from wazuh_testing.modules.fim.event_monitor import ERR_MSG_CONTENT_CHANGES_EMPTY, ERR_MSG_CONTENT_CHANGES_NOT_EMPTY
+from wazuh_testing.modules.fim.utils import (generate_params, calculate_registry_diff_paths, registry_value_create,
+                                             registry_value_update, registry_value_delete, create_values_content)
+
 
 # Marks
 

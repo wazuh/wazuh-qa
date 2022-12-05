@@ -4,9 +4,12 @@
 
 import os
 
-from wazuh_testing.fim import create_registry, registry_parser, check_time_travel, modify_registry, delete_registry, \
-    callback_detect_event, validate_registry_key_event, KEY_WOW64_32KEY, modify_registry_value, delete_registry_value, \
-    validate_registry_value_event, callback_value_event, REG_SZ, RegCloseKey
+from wazuh_testing.modules.fim import registry_parser, KEY_WOW64_32KEY, REG_SZ, RegCloseKey
+from wazuh_testing.modules.fim.classes import validate_registry_key_event, validate_registry_value_event
+from wazuh_testing.modules.fim.event_monitor import callback_detect_event, callback_value_event
+from wazuh_testing.modules.fim.utils import (create_registry, check_time_travel, modify_registry, delete_registry,
+       modify_registry_value, delete_registry_value)
+    
 
 
 def multiple_keys_and_entries_keys(num_entries, subkeys, log_monitor, root_key, timeout=10):
