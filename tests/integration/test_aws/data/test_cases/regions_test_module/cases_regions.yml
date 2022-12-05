@@ -1,0 +1,38 @@
+- name: cloudtrail_region_with_data
+  description: CloudTrail regions configurations
+  configuration_parameters:
+    BUCKET_TYPE: cloudtrail
+    BUCKET_NAME: wazuh-cloudtrail-integration-tests
+    REGIONS: us-east-1
+  metadata:
+    bucket_type: cloudtrail
+    bucket_name: wazuh-cloudtrail-integration-tests
+    only_logs_after: 2022-NOV-20
+    regions: us-east-1
+    expected_results: 2
+
+- name: cloudtrail_regions_with_data
+  description: CloudTrail regions configurations
+  configuration_parameters:
+    BUCKET_TYPE: cloudtrail
+    BUCKET_NAME: wazuh-cloudtrail-integration-tests
+    REGIONS: us-east-1,us-east-2
+  metadata:
+    bucket_type: cloudtrail
+    bucket_name: wazuh-cloudtrail-integration-tests
+    only_logs_after: 2022-NOV-20
+    regions: us-east-1,us-east-2
+    expected_results: 4
+
+- name: cloudtrail_inexistent_region
+  description: CloudTrail regions configurations
+  configuration_parameters:
+    BUCKET_TYPE: cloudtrail
+    BUCKET_NAME: wazuh-cloudtrail-integration-tests
+    REGIONS: us-fake-1
+  metadata:
+    bucket_type: cloudtrail
+    bucket_name: wazuh-cloudtrail-integration-tests
+    only_logs_after: 2022-NOV-20
+    regions: us-fake-1
+    expected_results: 0

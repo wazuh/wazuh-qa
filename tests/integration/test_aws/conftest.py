@@ -1,7 +1,14 @@
 import pytest
 from wazuh_testing import logger
-from wazuh_testing.modules.aws.s3_utils import delete_file, upload_file
 from wazuh_testing.modules.aws.db_utils import delete_s3_db
+from wazuh_testing.modules.aws.s3_utils import delete_file, upload_file
+from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.tools.monitoring import FileMonitor
+
+
+@pytest.fixture(scope="function")
+def wazuh_log_monitor() -> FileMonitor:
+    return FileMonitor(LOG_FILE_PATH)
 
 # S3 fixtures
 
