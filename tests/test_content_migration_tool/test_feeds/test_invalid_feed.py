@@ -2,7 +2,7 @@ import os
 import pytest
 from wazuh_testing.tools import configuration
 from content_migration_tool import ContentMigrationTool
-
+from cmt_utils import sanitize_configuration
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configuration_path = os.path.join(test_data_path, 'configuration')
@@ -16,9 +16,7 @@ t1_cases_path = os.path.join(test_cases_path, 'cases_invalid_feed.yaml')
 t1_config, t1_metadata, t1_case_ids = configuration.get_test_cases_data(t1_cases_path)
 
 # Sanitize the configuration to avoid creating a new function in the framework
-for tc_config in t1_config:
-    for key in tc_config:
-        tc_config[key.lower()] = tc_config.pop(key)
+t1_config = sanitize_configuration(t1_config)
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t1_config, t1_metadata), ids=t1_case_ids)
