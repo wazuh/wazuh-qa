@@ -1,0 +1,15 @@
+- name: cloudtrail_discard_regex
+  description: CloudTrail discard regex configurations
+  configuration_parameters:
+    BUCKET_TYPE: cloudtrail
+    BUCKET_NAME: wazuh-cloudtrail-integration-tests
+    DISCARD_FIELD: eventSource
+    DISCARD_REGEX: ".*ec2.amazonaws.com.*"
+  metadata:
+    bucket_type: cloudtrail
+    bucket_name: wazuh-cloudtrail-integration-tests
+    only_logs_after: 2022-NOV-20
+    discard_field: eventSource
+    discard_regex: ".*ec2.amazonaws.com.*"
+    found_logs: 4
+    skipped_logs: 1

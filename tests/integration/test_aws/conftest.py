@@ -1,14 +1,38 @@
+from typing import Generator
+
 import pytest
-from wazuh_testing import logger
+from wazuh_testing import UDP, logger
 from wazuh_testing.modules.aws.db_utils import delete_s3_db
 from wazuh_testing.modules.aws.s3_utils import delete_file, upload_file
-from wazuh_testing.tools import LOG_FILE_PATH
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools import ANALYSISD_QUEUE_SOCKET_PATH, LOG_FILE_PATH
+from wazuh_testing.tools.file import bind_unix_socket
+from wazuh_testing.tools.monitoring import FileMonitor, ManInTheMiddle, QueueMonitor
+from wazuh_testing.tools.services import control_service
 
 
 @pytest.fixture(scope="function")
 def wazuh_log_monitor() -> FileMonitor:
     return FileMonitor(LOG_FILE_PATH)
+
+
+@pytest.fixture(scope="function")
+def analysisd_monitor() -> Generator:
+    def intercept_socket_data(data):
+        return data
+
+    control_service('stop', daemon='wazuh-analysisd')
+    bind_unix_socket(ANALYSISD_QUEUE_SOCKET_PATH, UDP)
+
+    mitm = ManInTheMiddle(
+        address=ANALYSISD_QUEUE_SOCKET_PATH, family='AF_UNIX', connection_protocol=UDP, func=intercept_socket_data
+    )
+    mitm.start()
+
+    yield QueueMonitor(mitm.queue)
+
+    mitm.shutdown()
+    control_service('start', daemon='wazuh-analysisd')
+
 
 # S3 fixtures
 

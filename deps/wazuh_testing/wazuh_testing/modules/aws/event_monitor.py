@@ -2,6 +2,8 @@ import re
 
 PARSER_ERROR = r'.*wm_aws_read\(\): ERROR:.*'
 MODULE_ERROR = r'.*wm_aws_run_s3\(\): ERROR: .*'
+AWS_EVENT_HEADER = b"1:Wazuh-AWS:"
+
 
 def make_aws_callback(pattern, prefix=''):
     """Create a callback function from a text pattern.
@@ -55,4 +57,8 @@ def callback_detect_aws_wmodule_err(line):
 
 def callback_detect_event_processed(line):
     if re.match(r'.*Found new log: .*', line):
+        return line
+
+def callback_event_sent_to_analysisd(line):
+    if line.startswith(AWS_EVENT_HEADER):
         return line
