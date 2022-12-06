@@ -1,0 +1,25 @@
+- name: Fix Failing SCA check - Pass
+  description: Validate Failing check changes to Pass after remediation
+  configuration_parameters:
+    ENABLED: 'yes'
+    INTERVAL: 5
+    POLICY_FILE: cis_centos8_validate_remediation.yaml
+  metadata:
+    policy_file: cis_centos8_validate_remediation.yaml
+    check_id: 1
+    perms: 0222
+    initial_result: failed
+    final_result: passed
+
+- name: Fix Failing SCA check - Pass
+  description: Validate Failing check changes to Pass after remediation
+  configuration_parameters:
+    ENABLED: 'yes'
+    INTERVAL: 5
+    POLICY_FILE: cis_centos8_validate_remediation.yaml
+  metadata:
+    policy_file: cis_centos8_validate_remediation.yaml
+    check_id: 2
+    perms: 0222
+    initial_result: passed
+    final_result: failed
