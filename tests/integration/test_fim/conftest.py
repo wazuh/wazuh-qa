@@ -114,6 +114,7 @@ def create_monitored_folders_function(test_folders):
         if os.path.exists(folder):
             delete_path_recursively(folder)
         os.mkdir(folder)
+        os.chmod(folder, 0o0777)
     yield
     for folder in test_folders:
         delete_path_recursively(folder)
