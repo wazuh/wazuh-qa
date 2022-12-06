@@ -1,0 +1,63 @@
+- name: EMPTY_FEED
+  description: Verify that the tool discards the input when it is empty
+  configuration_parameters:
+    VENDOR: debian
+    DESCRIPTION: debian
+    REMOTES:
+    - url: localhost:8888/invalid_feeds/empty_feed.json
+      request: file
+      compressed: raw
+      dataFormat: json
+      downloadPath: downloads/debian/empty_feed.json
+      lastSnapshotFilePath: snapshots/debian/empty_feed
+      tableNameSpecifier: debian
+  metadata:
+    error: "unexpected end of input"
+
+- name: NOT_SUPPORTED_FORMAT_FEED
+  description: Verify that the tool discards the input when it has an unsupported format
+  configuration_parameters:
+    VENDOR: debian
+    DESCRIPTION: debian
+    REMOTES:
+    - url: localhost:8888/invalid_feeds/invalid_format_feed.txt
+      request: file
+      compressed: raw
+      dataFormat: json
+      downloadPath: downloads/debian/invalid_format_feed.json
+      lastSnapshotFilePath: snapshots/debian/invalid_format_feed
+      tableNameSpecifier: debian
+  metadata:
+    error: "invalid literal"
+
+- name: INVALID_JSON_FEED
+  description: Verify that the tool discards the input when it has a format error
+  configuration_parameters:
+    VENDOR: debian
+    DESCRIPTION: debian
+    REMOTES:
+    - url: localhost:8888/invalid_feeds/invalid_json_feed.json
+      request: file
+      compressed: raw
+      dataFormat: json
+      downloadPath: downloads/debian/invalid_json_feed.json
+      lastSnapshotFilePath: snapshots/debian/invalid_json_feed
+      tableNameSpecifier: debian
+  metadata:
+    error: "unexpected string literal"
+
+- name: INVALID_XML_FEED
+  description: Verify that the tool discards the input when it has a format error
+  configuration_parameters:
+    VENDOR: debian
+    DESCRIPTION: debian
+    REMOTES:
+    - url: localhost:8888/invalid_feeds/invalid_xml_feed.xml
+      request: file
+      compressed: raw
+      dataFormat: xml
+      downloadPath: downloads/debian/invalid_xml_feed.xml
+      lastSnapshotFilePath: snapshots/debian/invalid_xml_feed
+      tableNameSpecifier: debian
+  metadata:
+    error: "wrong index for variant"

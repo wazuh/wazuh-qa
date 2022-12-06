@@ -256,7 +256,7 @@
 				},
 				"platforms": {
 					"title": "Platforms",
-					"description": "List of specific platforms if the vulnerability is only relevant in the context of these platforms (optional). Platforms may include execution environments, operating systems, virtualization technolgies, hardware models, or computing architectures. Lack of this field or an empty array implies that the other fields are applicable for all relevant platforms.",
+					"description": "List of specific platforms if the vulnerability is only relevant in the content of these platforms (optional). Platforms may include execution environments, operating systems, virtualization technolgies, hardware models, or computing architectures. Lack of this field or an empty array implies that the other fields are applicable for all relevant platforms.",
 					"type": "array",
 					"minItems": 1,
 					"uniqueItems": true,

@@ -1,0 +1,4 @@
+- config:
+    vendor: VENDOR
+    description: DESCRIPTION
+    remotes: REMOTES
