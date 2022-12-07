@@ -117,6 +117,7 @@ def check_fim_event(file_monitor=None, callback='', error_message=None, update_p
     file_monitor.start(timeout=timeout, update_position=update_position, accum_results=accum_results,
                        callback=generate_monitoring_callback(callback), error_message=error_message)
 
+
 def detect_initial_scan(file_monitor):
     """Detect initial scan when restarting Wazuh.
 

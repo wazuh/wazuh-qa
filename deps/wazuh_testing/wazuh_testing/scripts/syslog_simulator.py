@@ -3,6 +3,7 @@ import argparse
 import sys
 import logging
 import time
+from ipaddress import ip_address, IPv4Address
 
 
 TCP = 'tcp'
@@ -68,7 +69,7 @@ def get_parameters():
     return arg_parser.parse_args()
 
 
-def send_messages(message, num_messages, eps, numbered_messages=-1, address='locahost', port=514, protocol=TCP):
+def send_messages(message, num_messages, eps, numbered_messages=-1, address='localhost', port=514, protocol=TCP):
     sent_messages = 0
     custom_message = f"{message}\n" if message[-1] != '\n' not in message else message
     protocol_limit = TCP_LIMIT if protocol == TCP else UDP_LIMIT
@@ -76,8 +77,14 @@ def send_messages(message, num_messages, eps, numbered_messages=-1, address='loc
 
     LOGGER.info(f"Sending {num_messages} to {address}:{port} via {protocol.upper()} ({speed}/s)")
 
+    if 'localhost' in address or type(ip_address(address)) is IPv4Address:
+        af_inet = socket.AF_INET
+    else:
+        af_inet = socket.AF_INET6
+
     # Create socket
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM if protocol == TCP else socket.SOCK_DGRAM)
+    sock = socket.socket(af_inet, socket.SOCK_STREAM if protocol == TCP else socket.SOCK_DGRAM)
+
     if protocol == TCP:
         sock.connect((address, port))
 

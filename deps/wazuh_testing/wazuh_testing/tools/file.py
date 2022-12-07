@@ -228,7 +228,7 @@ def delete_file(file_path):
     """Delete a regular file.
 
     Args:
-        file_path (str): File path to the file to be deleted.
+        file_path (str): File path of the file to be deleted.
     """
     if os.path.exists(file_path):
         os.remove(file_path)
@@ -257,7 +257,6 @@ def on_write_error(function, path, exc_info):
         # Add write permissions so file can be edited and execute function.
         os.chmod(path, 0o0777)
         function(path)
-        
     # If error is not Write access error, raise the error
     else:
         raise

@@ -1,0 +1,48 @@
+{
+    "known_issues": [
+        {
+            "package_name": "python",
+            "package_version": "3.9.9",
+            "package_affected_version": ">0",
+            "vuln_description": "Lib/zipfile.py in Python allows remote attackers to cause a denial of service (resource consumption) via a ZIP bomb.\r\nhttps://bugs.python.org/issue36260",
+            "safety_id": "45621"
+        }
+    ],
+    "to_fix": [
+        {
+            "package_name": "python",
+            "package_version": "3.9.9",
+            "package_affected_version": "<3.10.6",
+            "vuln_description": "** DISPUTED ** Python 3.x through 3.10 has an open redirection vulnerability in lib/http/server.py due to no protection against multiple (/) at the beginning of URI path which may leads to information disclosure. NOTE: this is disputed by a third party because the http.server.html documentation page states \"Warning: http.server is not recommended for production. It only implements basic security checks.\"",
+            "safety_id": "50732"
+        },
+        {
+            "package_name": "python",
+            "package_version": "3.9.9",
+            "package_affected_version": "<3.10.6",
+            "vuln_description": "Python 3.10.6 and 3.11.0b4 include a fix for CVE-2015-20107: The mailcap module does not add escape characters into commands discovered in the system mailcap file. This may allow attackers to inject shell commands into applications that call mailcap.findmatch with untrusted input (if they lack validation of user-provided filenames or arguments).\r\nhttps://github.com/python/cpython/issues/68966",
+            "safety_id": "48131"
+        },
+        {
+            "package_name": "python",
+            "package_version": "3.9.9",
+            "package_affected_version": ">0",
+            "vuln_description": "In difflib module, table header in output of difflib.HtmlDiff.make_table is not escaped and can be rendered as code in the browser, leading potentially to XSS.\r\nhttps://bugs.python.org/issue35603\r\nhttps://github.com/python/cpython/commit/44e36e80456dabaeb59c6e2a93e0c1322bfeb179",
+            "safety_id": "45612"
+        },
+        {
+            "package_name": "python",
+            "package_version": "3.9.9",
+            "package_affected_version": ">=3.9.0a0,<3.9.11",
+            "vuln_description": "In Python before 3.10.3 on Windows, local users can gain privileges because the search path is inadequately secured. The installer may allow a local attacker to add user-writable directories to the system search path. To exploit, an administrator must have installed Python for all users and enabled PATH entries. A non-administrative user can trigger a repair that incorrectly adds user-writable paths into PATH, enabling search-path hijacking of other users and system services. This affects Python (CPython) through 3.7.12, 3.8.x through 3.8.12, 3.9.x through 3.9.10, and 3.10.x through 3.10.2.",
+            "safety_id": "45817"
+        },
+        {
+            "package_name": "python",
+            "package_version": "3.9.9",
+            "package_affected_version": ">=3.9.0a0,<3.9.14",
+            "vuln_description": "A flaw was found in python. In algorithms with quadratic time complexity using non-binary bases, when using int(\"text\"), a system could take 50ms to parse an int string with 100,000 digits and 5s for 1,000,000 digits (float, decimal, int.from_bytes(), and int() for binary bases 2, 4, 8, 16, and 32 are not affected). The highest threat from this vulnerability is to system availability.",
+            "safety_id": "50958"
+        }
+    ]
+}
