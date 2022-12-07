@@ -534,6 +534,8 @@ def callback_invalid_format_value(line, option, location):
         msg = "WARNING: Discarding audit message because of invalid syntax."
     elif option == 'nmapg':
         msg = fr"ERROR: Bad formated nmap grepable file."
+    elif option == 'audit':
+        msg = fr"WARNING: Discarding audit message because of invalid syntax."
     elif option == 'djb-multilog':
         msg = fr"DEBUG: Invalid DJB log: '{line}'"
 
