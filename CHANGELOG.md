@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Added
 
+- Change audit's invalid format event warning logcollector log([#3656](https://github.com/wazuh/wazuh-qa/pull/3656)) \- (Framework + Tests)
 - Add new test to check if syslog message are parsed correctrly in the `archives.json` file ([#3609](https://github.com/wazuh/wazuh-qa/pull/3609)) \- (Framework + Tests)
 - Add new logging tests for analysisd EPS limitation ([#3509](https://github.com/wazuh/wazuh-qa/pull/3509)) \- (Framework + Tests)
 - New testing suite for checking analysisd EPS limitation ([#2947](https://github.com/wazuh/wazuh-qa/pull/3181)) \- (Framework + Tests)
