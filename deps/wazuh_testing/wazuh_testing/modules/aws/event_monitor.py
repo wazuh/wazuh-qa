@@ -1,5 +1,7 @@
 import re
 
+from .cli_utils import analyze_command_output
+
 PARSER_ERROR = r'.*wm_aws_read\(\): ERROR:.*'
 MODULE_ERROR = r'.*wm_aws_run_s3\(\): ERROR: .*'
 AWS_EVENT_HEADER = b"1:Wazuh-AWS:"
@@ -62,3 +64,21 @@ def callback_detect_event_processed(line):
 def callback_event_sent_to_analysisd(line):
     if line.startswith(AWS_EVENT_HEADER):
         return line
+
+def check_processed_logs_from_output(command_output: str, expected_results: int=1):
+    analyze_command_output(
+        command_output=command_output,
+        callback=callback_detect_event_processed,
+        expected_results=expected_results,
+        error_message="The AWS module didn't process the expected number of events"
+    )
+
+def check_non_processed_logs_from_output(command_output: str, expected_results: int=1):
+    pattern = r".*DEBUG: \+\+\+ No logs to process in bucket: "
+
+    analyze_command_output(
+        command_output,
+        callback=make_aws_callback(pattern),
+        expected_results=expected_results,
+        error_message="Some logs may where processed"
+    )

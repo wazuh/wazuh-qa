@@ -4,13 +4,17 @@ from datetime import datetime
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.modules.aws import event_monitor
-from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.modules.aws.cli_utils import call_aws_module
+from wazuh_testing.modules.aws.db_utils import (
+    get_multiple_s3_db_row,
+    get_s3_db_row,
+    s3_db_exists,
+)
+from wazuh_testing.modules.aws.s3_utils import upload_file
 from wazuh_testing.tools.configuration import (
     get_test_cases_data,
     load_configuration_template,
 )
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.modules.aws.db_utils import s3_db_exists, get_s3_db_row, get_multiple_s3_db_row
 
 pytestmark = [pytest.mark.server]
 
@@ -247,3 +251,102 @@ def test_with_only_logs_after(
         assert (
             datetime.strptime(only_logs_after, "%Y-%b-%d") < datetime.strptime(str(row.created_date), "%Y%m%d")
         )
+
+# ---------------------------------------------------- TEST_MULTIPLE_CALLS ---------------------------------------------
+t3_cases_path = os.path.join(TEST_CASES_PATH, 'cases_multiple_calls.yml')
+
+_, t3_configuration_metadata, t3_case_ids = get_test_cases_data(t3_cases_path)
+
+@pytest.mark.tier(level=1)
+@pytest.mark.parametrize("metadata", t3_configuration_metadata, ids=t3_case_ids)
+def test_multiple_calls(metadata, clean_s3_cloudtrail_db, restart_wazuh_function, delete_file_from_s3):
+    """
+    description: Call the AWS module multiple times with different only_logs_after values
+    test_phases:
+        - setup:
+            - Delete the s3_cloudtrail.db
+
+        - test:
+            - Call the module without only_logs_after and check that no logs were processed
+            - Upload a log file for the day of the test execution and call the module with the same parameters as before,
+              check that the uploaded logs were processed
+            - Call the module with the same parameters and check that no logs were processed, there were no duplicates
+            - Call the module with only_logs_after set in the past and check that the expected number of logs were
+              processed
+            - Call the module with the same parameters in and check there were no duplicates
+            - Call the module with only_logs_after set with an older date check that old logs were processed without
+              duplicates
+            - Call the module with only_logs_after set with an early date than setted previously and check that no logs
+              were processed, there were no duplicates
+
+        - tierdown:
+            - Delete the s3_cloudtrail.db
+            - Delete the uploaded files
+    wazuh_min_version: 4.5.0
+    parameters:
+        - metadata:
+            type: dict
+            brief: Get metadata from the module.
+        - clean_s3_cloudtrail_db:
+            type: fixture
+            brief: Delete the DB file before and after the test execution
+        - restart_wazuh_daemon:
+            type: fixture
+            brief: Restart the wazuh service.
+        - delete_file_from_s3:
+            type: fixture
+            brief: Delete the a file after the test execution
+    input_description:
+        - The `cases_multiple_calls` file provides the test cases.
+    """
+    ONLY_LOGS_AFTER_PARAM = "--only_logs_after"
+
+    bucket_type = metadata["bucket_type"]
+    bucket_name = metadata["bucket_name"]
+
+    base_parameters = [
+        "--bucket", bucket_name,
+        "--type", bucket_type,
+        "--regions", "us-east-1",
+        "--aws_profile", "qa",
+        "--debug", "2"
+    ]
+
+    # Call the module without only_logs_after and check that no logs were processed
+    event_monitor.check_non_processed_logs_from_output(command_output=call_aws_module(*base_parameters))
+
+    # Upload a log file for the day of the test execution and call the module with the same parameters as before,
+    # check that the uploaded logs were processed
+
+    metadata["filename"] = upload_file(bucket_type, bucket_name)
+
+    event_monitor.check_processed_logs_from_output(command_output=call_aws_module(*base_parameters))
+
+    # Call the module with the same parameters and check that no logs were processed, there were no duplicates
+
+    event_monitor.check_non_processed_logs_from_output(command_output=call_aws_module(*base_parameters))
+
+    # Call the module with only_logs_after set in the past and check that the expected number of logs were
+    # processed
+    event_monitor.check_processed_logs_from_output(
+        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, "2022-NOV-25")
+    )
+
+    # Call the module with the same parameters in and check there were no duplicates
+    event_monitor.check_non_processed_logs_from_output(
+        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, "2022-NOV-25")
+    )
+
+    # Call the module with only_logs_after set with an older date check that old logs were processed without
+    # duplicates
+    event_monitor.check_processed_logs_from_output(
+        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, "2022-NOV-20"),
+        expected_results=2
+    )
+
+    # Call the module with only_logs_after set with an early date than setted previously and check that no logs
+    # were processed, there were no duplicates
+    event_monitor.check_non_processed_logs_from_output(
+        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, "2022-NOV-22"),
+        expected_results=3
+    )

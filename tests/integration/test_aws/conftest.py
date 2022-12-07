@@ -72,6 +72,23 @@ def upload_and_delete_file_to_s3(metadata: dict):
     delete_file(filename=filename, bucket_name=bucket_name)
     logger.debug('Deleted file: %s from bucket %s', filename, bucket_name)
 
+@pytest.fixture(scope='function')
+def delete_file_from_s3(metadata: dict):
+    """Delete a file from S3 bucket after the test ends.
+
+    Parameters
+    ----------
+    metadata : dict
+        Metadata to get the parameters
+    """
+    yield
+
+    bucket_name = metadata['bucket_name']
+    filename = metadata['filename']
+
+    delete_file(filename=filename, bucket_name=bucket_name)
+    logger.debug('Deleted file: %s from bucket %s', filename, bucket_name)
+
 # DB fixtures
 
 @pytest.fixture(scope='function')
