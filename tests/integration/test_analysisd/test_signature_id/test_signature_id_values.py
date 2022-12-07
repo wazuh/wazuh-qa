@@ -42,12 +42,12 @@ references:
 '''
 import os
 import pytest
-from shutil import chown
+from shutil import chown, copy
 
 from wazuh_testing import LOG_FILE_PATH, T_10
 from wazuh_testing.tools import CUSTOM_RULES_PATH, WAZUH_UNIX_USER, WAZUH_UNIX_GROUP
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
-from wazuh_testing.tools.file import copy, delete_file
+from wazuh_testing.tools.file import delete_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.modules.analysisd.event_monitor import (CB_SID_NOT_FOUND, CB_EMPTY_IF_SID_RULE_IGNORED,
@@ -81,7 +81,8 @@ t2_configurations = load_configuration_template(configurations_path, t2_configur
 
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
-def test_null_signature_id(configuration, metadata, set_wazuh_configuration, truncate_monitored_files):
+def test_null_signature_id(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
+                           restart_wazuh_module):
     '''
     description: Check that when a rule has an invalid signature ID value, that references a nonexisten rule,
                  assigned to the if_sid option, the rule is ignored.
@@ -143,7 +144,8 @@ def test_null_signature_id(configuration, metadata, set_wazuh_configuration, tru
 
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
-def test_invalid_signature_id(configuration, metadata, set_wazuh_configuration, truncate_monitored_files):
+def test_invalid_signature_id(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
+                              restart_wazuh_module):
     '''
     description: Check that when a rule has an empty or invalid signature ID value (invalid format) assigned to the
                  if_sid option, the rule is ignored.
