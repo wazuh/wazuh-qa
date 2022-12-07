@@ -45,13 +45,18 @@ tags:
 import os
 import time
 import pytest
+import socket
+import re
 
 import wazuh_testing.tools.configuration as conf
 
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, ALERT_FILE_PATH
 from wazuh_testing.tools.file import remove_file, copy
-from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
+from wazuh_testing.tools.configuration import (
+    get_test_cases_data,
+    load_configuration_template,
+)
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 
 
@@ -59,64 +64,74 @@ from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_call
 pytestmark = [pytest.mark.server, pytest.mark.tier(level=2)]
 
 # Local Internal
-local_internal_options = {'integrator.debug': '2'}
+local_internal_options = {'remoted.debug': '2'}
 
 # Reference paths
+TEST_NAME = 'multi_agents_reconnection'
 DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 CONFIG_TEMPS_PATH = os.path.join(DATA_PATH, 'config_templates')
 TESTS_CASES_PATH = os.path.join(DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-configs_path = os.path.join(CONFIG_TEMPS_PATH,
-                            'config_multi_agents_reconnection.yaml')
-cases_path = os.path.join(TESTS_CASES_PATH,
-                          'cases_multi_agents_reconnection.yaml')
+configs_path = os.path.join(CONFIG_TEMPS_PATH, 'config_{TEST_NAME}.yml')
+cases_path = os.path.join(TESTS_CASES_PATH, 'cases_{TEST_NAME}.yml')
 
 # Configurations
-configs_params, metadata, case_ids = get_test_cases_data(cases_path)
-configurations = load_configuration_template(configs_path, configs_params,
-                                             metadata)
+# configs_params, metadata, case_ids = get_test_cases_data(cases_path)
+# configurations = load_configuration_template(configs_path, configs_params,
+#                                              metadata)
 
 # Variables
-TEMP_FILE_PATH = os.path.join(WAZUH_PATH, 'logs/alerts/alerts.json.tmp')
-
+# TEMP_FILE_PATH = os.path.join(WAZUH_PATH, 'logs/alerts/alerts.json.tmp')
+AGENT_CONFIG_PATH = os.path.join(DATA_PATH, 'ossec.conf')
 
 # AGENTS OSSEC.CONF
-def set_agents_configuration(configuration):
+
+
+@pytest.fixture
+def set_agents_configuration():
     '''Set wazuh configuration
 
     Args:
         configuration (dict): Configuration template data to write in the ossec.conf
     '''
     # Save current configuration
-    with open('path/al/ossec.conf') as f:
+    with open(AGENT_CONFIG_PATH) as f:
         backup_config = f.read()
-    sections = [
-        {
-            'section': 'integration',
-            'elements': [{'name': {'value': 'virustotal'}}, {'rule_id': {'value': '554'}}]
-        },
-    ]
     # Configuration for testing
-    test_config = conf.set_section_wazuh_conf(configuration.get('sections'))
-
+    test_config = set_ip_to_agent_config(backup_config)
     # Set new configuration
-    conf.write_wazuh_conf(test_config)
-
-    # Set current configuration
-    global_parameters.current_configuration = configuration
-
+    write_file(AGENT_CONFIG_PATH, test_config)
     yield
-
     # Restore previous configuration
-    conf.write_wazuh_conf(backup_config)
+    write_file(AGENT_CONFIG_PATH, backup_config)
+
+
+def write_file(file: str, data: str):
+    with open(file, 'w') as f:
+        f.writelines(data)
+
+
+def set_ip_to_agent_config(config: str):
+    reg = '(?<=%s).*?(?=%s)' % ('<address>', '</address>')
+    r = re.compile(reg, re.DOTALL)
+    return r.sub(get_ip_address(), config)
+
+
+def get_ip_address():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(('8.8.8.8', 80))
+    return s.getsockname()[0]
 
 
 # Tests
-@pytest.mark.parametrize('configuration, metadata', zip(configurations, metadata), ids=case_ids)
-def test_integratord_change_json_inode(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
-                                       configure_local_internal_options_module, restart_wazuh_daemon_function,
-                                       wait_for_start_module):
+# @pytest.mark.parametrize('configuration, metadata', zip(configurations, metadata), ids=case_ids)
+def test_integratord_change_json_inode(
+    set_agents_configuration,
+    # configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
+    #                                    configure_local_internal_options_module, restart_wazuh_daemon_function,
+    #                                    wait_for_start_module
+):
     '''
     description: Check that if when reading the alerts.json file, the inode for the file changes, integratord will
                  reload the file and continue reading from it.
@@ -178,4 +193,4 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     # check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
     #                         callback=generate_monitoring_callback(integrator.CB_PROCESSING_ALERT),
     #                         error_message=integrator.ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED)
-    pass
+    print(get_ip_address())
