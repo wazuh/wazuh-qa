@@ -7,12 +7,9 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
 type: integration
 
-brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these
-       files are modified. Specifically, these tests will check if FIM reports (or truncates if required)
-       the changes made in monitored files when it matches the 'nodiff' tag and vice versa when
-       the 'report_changes' option is enabled.
-       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks configured
-       files for changes to the checksums, permissions, and ownership.
+brief: File Integrity Monitoring (FIM) system watches selected files in whodata mode, if the policies for those
+       files change during runtime, the monitoring mode changes to realtime. This tests check that when the
+       policies change, monitoring continues correctly in realtime and events are detected.
 
 components:
     - fim
@@ -35,8 +32,6 @@ os_version:
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
-    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#diff
-    - https://documentation.wazuh.com/current/user-manual/reference/ossec-conf/syscheck.html#nodiff
 
 pytest_args:
     - fim_mode:
@@ -93,19 +88,14 @@ configurations = configuration.load_configuration_template(configurations_path, 
 
 
 # tests
-@pytest.mark.parametrize('test_folders', [test_folders], ids='')
+@pytest.mark.parametrize('test_folders', [test_folders], ids='', scope='module')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
-def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration, 
-                                 configure_local_internal_options_function, restart_syscheck_function,
-                                 create_monitored_folders_function, wait_fim_start_function):
+def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration, create_monitored_folders_module,
+                               configure_local_internal_options_function, restart_syscheck_function,
+                               wait_fim_start_function):
     '''
-    description: Check if the 'wazuh-syscheckd' daemon reports the file changes (or truncates if required)
-                 in the generated events using the 'nodiff' tag and vice versa. For this purpose, the test
-                 will monitor a directory and make file operations inside it. Then, it will check if a
-                 'diff' file is created for the modified testing file. Finally, if the testing file matches
-                 the 'nodiff' tag, the test will verify that the FIM event generated contains in its
-                 'content_changes' field a message indicating that 'diff' is truncated because
-                 the 'nodiff' option is used.
+    description: Check if the 'wazuh-syscheckd' is monitoring a in whodata mode in Windows, and the Audit Policies are
+                 changed, the monitoring changes to realtime and works on the monitored files.
 
     wazuh_min_version: 4.5.0
 
@@ -118,9 +108,15 @@ def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration,
         - metadata:
             type: dict
             brief: Test case data.
-        - set_wazuh_configuration_fim:
+        - create_monitored_folders_module:
             type: fixture
-            brief: Set ossec.conf and local_internal_options configuration.
+            brief: Create the folders that will be monitored, delete them after test.
+        - set_wazuh_configuration:
+            type: fixture
+            brief: Set ossec.conf configuration.
+        - configure_local_internal_options_function:
+            type: fixture
+            brief: Set local_internal_options configuration.
         - restart_syscheck_function:
             type: fixture
             brief: restart syscheckd daemon, and truncate the ossec.log.
@@ -129,18 +125,20 @@ def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration,
             brief: check that the starting fim scan is detected.
 
     assertions:
-        - Verify that for each modified file a 'diff' file is generated.
-        - Verify that FIM events include the 'content_changes' field.
-        - Verify that FIM events truncate the modifications made in a monitored file
-          when it matches the 'nodiff' tag.
-        - Verify that FIM events include the modifications made in a monitored file
-          when it does not match the 'nodiff' tag.
+        - Verify the SACL for the monitored files is configured
+        - Verify Whodata monitoring has started
+        - Verify that the event 4719 event is detected and changes monitoring to real-time
+        - Verify the monitoring mode changes to real-time
+        - Verify monitoring in real-time works correctly for the monitored files.
 
-    input_description: A test case (ossec_conf_report) is contained in external YAML file (wazuh_conf.yaml)
-                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, these
-                       are combined with the testing directory to be monitored defined in the module.
+    input_description:
+        - The file 'cases_whodata_policy_change.yaml' provides the test cases and specific configuration.
+        - The file 'configuration_whodata_policy_change.yaml' provides the configuration template to be used.
 
     expected_output:
+        - fr".*win_whodata.*The SACL of '({file})' will be configured"
+        - r'.*win_whodata.*(Event 4719).*Switching directories to realtime'
+        - fr".*set_whodata_mode_changes.*The '({file})' directory starts to be monitored in real-time mode."
         - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
 
     tags:
@@ -152,19 +150,20 @@ def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration,
     evm.detect_windows_sacl_configured(wazuh_log_monitor, '.*')
     # Check Whodata engine has started
     evm.detect_whodata_start(wazuh_log_monitor)
-    
+
     # Change policies
     if metadata['check_event']:
+        # Wait to allow thread_checker to be executed twice so Event 4719 detection starts.
         time.sleep(6)
     command = f"auditpol /restore /file:{os.path.join(TEST_DATA_PATH,metadata['disabling_file'])}"
     output = run_local_command_returning_output(command)
-    
+
     # Check it changes to realtime
     if metadata['check_event']:
         evm.check_fim_event(timeout=20, callback=fim.CB_RECIEVED_EVENT_4719)
     evm.detect_windows_whodata_mode_change(wazuh_log_monitor, '.*')
 
-    # Create/Update/Delete file and check events   
+    # Create/Update/Delete file and check events
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, time_travel=False,
                      event_mode=fim.REALTIME_MODE, min_timeout=global_parameters.default_timeout*4,
