@@ -71,9 +71,9 @@ def test_validate_remediation_results(configuration, metadata, prepare_cis_polic
                  the folder will be changed and wait for a new scan, and validate the results changed as expected.
 
     test_phases:
-        - Copy cis_sca ruleset file into agent.
+        - Copy cis_sca ruleset file into agent
         - Create a folder that will be checked by the SCA rules
-        - Restart wazuh.
+        - Restart wazuh
         - Validate the result for a given SCA check are as expected
         - Change the folder's permissions
         - Validate the result for a given SCA check change as expected
@@ -125,7 +125,7 @@ def test_validate_remediation_results(configuration, metadata, prepare_cis_polic
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    # Get check results
+    # Get the results for the checks obtained in the initial SCA scan
     results = evm.get_sca_scan_rule_id_results(file_monitor=wazuh_log_monitor, results_num=2)
 
     # Assert the tested check has initial expected results (failed/passed)
@@ -135,7 +135,7 @@ def test_validate_remediation_results(configuration, metadata, prepare_cis_polic
     # Modify the folder's permissions
     os.chmod(test_folder, metadata['perms'])
 
-    # Get check results
+    # Get the results for the checks obtained in the SCA scan
     results = evm.get_sca_scan_rule_id_results(file_monitor=wazuh_log_monitor, results_num=2)
 
     # Assert the tested check result changed as expected (passed to failed, and vice-versa)
