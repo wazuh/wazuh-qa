@@ -385,7 +385,7 @@ def callback_log_stream_exited_error():
     Returns:
         callable: callback to detect this event.
     """
-    log_format_message = "ERROR: \(\d+\): macOS 'log stream' process exited"
+    log_format_message = r"ERROR: \(\d+\): macOS 'log stream' process exited"
     return monitoring.make_callback(pattern=log_format_message, prefix=prefix)
 
 
@@ -691,7 +691,7 @@ def create_file_structure(get_files_list):
             if age:
                 fileinfo = os.stat(os.path.join(file_folder_path, filename))
                 os.utime(os.path.join(file_folder_path, filename), (fileinfo.st_atime - age,
-                                                                      fileinfo.st_mtime - age))
+                                                                    fileinfo.st_mtime - age))
             elif size:
                 add_log_data(log_path=os.path.join(file_folder_path, filename),
                              log_line_message=content, size_kib=size_kib)
@@ -718,7 +718,7 @@ def delete_file_structure(get_files_list):
         for _ in range(5):
             try:
                 shutil.rmtree(folder['folder_path'], onerror=remove_readonly)
-            except:
+            except Exception:
                 continue
             break
 
@@ -832,12 +832,12 @@ def format_macos_message_pattern(process_name, message, type='log', subsystem=No
     """
     macos_message = None
     if process_name == 'logger' or type == 'trace':
-        macos_message = f"{process_name}\[\d+\]: {message}"
+        macos_message = rf"{process_name}\[\d+\]: {message}"
     else:
         if type == 'log':
-            macos_message = f"{process_name}\[\d+\]: \[{subsystem}:{category}\] {message}"
+            macos_message = rf"{process_name}\[\d+\]: \[{subsystem}:{category}\] {message}"
         elif type == 'activity':
-            macos_message = f"{process_name}\[\d+\]: Created Activity ID.* Description: {message}"
+            macos_message = rf"{process_name}\[\d+\]: Created Activity ID.* Description: {message}"
 
     assert macos_message is not None, 'Wrong type or process name selected for macos message pattern format.'
 
@@ -873,7 +873,7 @@ def compose_macos_log_command(type='', level='', predicate='', is_sierra=False):
         level = level.replace(' ', '')
         settings_str += '--level ' + level + ' '
 
-    if(predicate):
+    if (predicate):
         settings_str += '--predicate ' + predicate
 
     return settings_str
