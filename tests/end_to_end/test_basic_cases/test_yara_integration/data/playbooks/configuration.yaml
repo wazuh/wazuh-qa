@@ -51,20 +51,20 @@
         - name: Download Yara
           become: true
           get_url:
-            url: "https://github.com/VirusTotal/yara/archive/v{{ yara_version | default('4.2.3') }}.tar.gz"
-            dest: "/tmp/v{{ yara_version | default('4.2.3')}}.tar.gz"
+            url: https://github.com/VirusTotal/yara/archive/v{{ yara_version | default('4.2.3') }}.tar.gz
+            dest: /tmp/v{{ yara_version | default('4.2.3')}}.tar.gz
 
         - name: Uncompress Yara file
           become: true
           unarchive:
-            src: "/tmp/v{{ yara_version | default('4.2.3')}}.tar.gz"
+            src: /tmp/v{{ yara_version | default('4.2.3')}}.tar.gz
             dest: /tmp
-            remote_src: yes
+            remote_src: true
 
         - name: Compile and install Yara
           become: true
-          shell: "cd /tmp/yara-{{ yara_version | default('4.2.3')}} && ./bootstrap.sh && ./configure && make &&
-                  make install"
+          shell: cd /tmp/yara-{{ yara_version | default('4.2.3')}} && ./bootstrap.sh && ./configure && make &&
+                  make install
       when: yara_check.rc != 0
 
     - name: Check if jq is installed
