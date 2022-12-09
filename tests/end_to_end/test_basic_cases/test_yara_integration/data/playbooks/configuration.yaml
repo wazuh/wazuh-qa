@@ -61,9 +61,10 @@
             dest: /tmp
             remote_src: yes
 
-        - name: Compile Yara
+        - name: Compile and install Yara
           become: true
-          shell: "cd /tmp/yara-{{ yara_version | default('4.2.3')}} && ./bootstrap.sh"
+          shell: "cd /tmp/yara-{{ yara_version | default('4.2.3')}} && ./bootstrap.sh && ./configure && make &&
+                  make install"
       when: yara_check.rc != 0
 
     - name: Check if jq is installed
