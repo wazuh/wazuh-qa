@@ -28,8 +28,6 @@ def test_invalid_inputs(configuration, metadata, build_cmt_config_file):
     if output is not None:
         pytest.fail(f"The binary execution is expected to fail but it does not:\n {output}")
 
-    # REFACTOR: search error in log
-
     assert expected_error in err_output, 'The expected error was not found in the output.\n' \
                                          f"Expected:\n{expected_error}\n" \
                                          f"Got:\n{err_output}"

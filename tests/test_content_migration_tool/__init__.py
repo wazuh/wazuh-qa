@@ -132,11 +132,15 @@ def query_publisher_db(query):
 
 
 def truncate_log_file():
+    """Truncate the tool log file.
+    """
     with open(LOG_FILE_PATH, 'w'):
         pass
 
 
 def clean_files():
+    """Remove all files generated for all existing vendors.
+    """
     for vendor in VENDORS:
         # Delete all generated files
         folder = os.path.join(SNAPSHOTS_DIR, vendor)
@@ -152,6 +156,8 @@ def clean_files():
 
 
 def drop_tables():
+    """Remove the tables created during the migration process.
+    """
     tables = query_publisher_db('SHOW tables;')
     for table in tables:
         # `table` is a tuple with 1 element, so this one is selected
