@@ -76,16 +76,12 @@ references:
 '''
 import os
 import sys
-from datetime import datetime
 
 import pytest
-from wazuh_testing import ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON, DB_PATH, LOG_FILE_PATH, SYSCOLLECTOR_DB_PATH, \
-                          T_10, T_60
-from wazuh_testing.db_interface import global_db
+from wazuh_testing import ANALYSISD_DAEMON, DB_DAEMON, MODULES_DAEMON, LOG_FILE_PATH, T_10, T_60
 from wazuh_testing.modules import TIER0, SERVER, AGENT, LINUX, MACOS, WINDOWS
 from wazuh_testing.tools import get_service
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
-from wazuh_testing.tools.file import remove_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.syscollector import event_monitor as evm
 
@@ -137,24 +133,6 @@ t5_config_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_syscollector.y
 t5_cases_path = os.path.join(TEST_CASES_PATH, 'case_test_scanning.yaml')
 t5_config_parameters, t5_config_metadata, t5_case_ids = get_test_cases_data(t5_cases_path)
 t5_configurations = load_configuration_template(t5_config_path, t5_config_parameters, t5_config_metadata)
-
-
-# Fixtures
-@pytest.fixture(scope='function')
-def remove_agent_syscollector_info(agent_id='000'):
-    """Removes the previous scan information.
-
-    Args:
-        agent_id (str): ID of the agent whose information will be removed.
-    """
-    if get_service() == 'wazuh-agent':
-        # Remove local DB
-        remove_file(SYSCOLLECTOR_DB_PATH)
-    else:
-        # Remove from global db
-        global_db.delete_agent(agent_id)
-        # Remove agent id DB file
-        remove_file(os.path.join(DB_PATH, f"{agent_id}.db"))
 
 
 # Tests

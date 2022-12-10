@@ -9,29 +9,31 @@ import shutil
 import subprocess
 import sys
 import uuid
-import pytest
 from datetime import datetime
+
+import pytest
+import wazuh_testing.tools.configuration as conf
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
-
-import wazuh_testing.tools.configuration as conf
-from wazuh_testing import global_parameters, logger, ALERTS_JSON_PATH, ARCHIVES_LOG_PATH, ARCHIVES_JSON_PATH
-from wazuh_testing.logcollector import create_file_structure, delete_file_structure
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
-from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import truncate_file, recursive_directory_creation, remove_file, copy, write_file
-from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
-from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
-from wazuh_testing.tools.time import TimeMachine
-from wazuh_testing import mocking
+from wazuh_testing import ALERTS_JSON_PATH, ARCHIVES_JSON_PATH, ARCHIVES_LOG_PATH, DB_PATH, SYSCOLLECTOR_DB_PATH, \
+                          global_parameters, logger, mocking
+from wazuh_testing.db_interface import global_db
 from wazuh_testing.db_interface.agent_db import update_os_info
 from wazuh_testing.db_interface.global_db import get_system, modify_system
-from wazuh_testing.tools.run_simulator import syslog_simulator
-from wazuh_testing.tools.configuration import get_minimal_configuration
+from wazuh_testing.logcollector import (create_file_structure,
+                                        delete_file_structure)
+from wazuh_testing.tools import ALERT_FILE_PATH, LOG_FILE_PATH, WAZUH_CONF, WAZUH_LOCAL_INTERNAL_OPTIONS, get_service
+from wazuh_testing.tools.configuration import get_minimal_configuration, get_wazuh_conf, write_wazuh_conf
+from wazuh_testing.tools.file import copy, recursive_directory_creation, remove_file, truncate_file, write_file
+from wazuh_testing.tools.monitoring import FileMonitor, QueueMonitor, SocketController, close_sockets
+from wazuh_testing.tools.services import check_daemon_status, control_service, delete_dbs
+from wazuh_testing.tools.time import TimeMachine
 
 
 if sys.platform == 'win32':
-    from wazuh_testing.fim import KEY_WOW64_64KEY, KEY_WOW64_32KEY, delete_registry, registry_parser, create_registry
+    from wazuh_testing.fim import (KEY_WOW64_32KEY, KEY_WOW64_64KEY,
+                                   create_registry, delete_registry,
+                                   registry_parser)
 
 PLATFORMS = set("darwin linux win32 sunos5".split())
 HOST_TYPES = set("server agent".split())
@@ -1242,3 +1244,20 @@ def truncate_event_logs():
 
     for log_file in log_files:
         truncate_file(log_file)
+
+
+@pytest.fixture
+def remove_agent_syscollector_info(agent_id='000'):
+    """Removes the previous scan information.
+
+    Args:
+        agent_id (str): ID of the agent whose information will be removed.
+    """
+    if get_service() == 'wazuh-agent':
+        # Remove local DB
+        remove_file(SYSCOLLECTOR_DB_PATH)
+    else:
+        # Remove from global db
+        global_db.delete_agent(agent_id)
+        # Remove agent id DB file
+        remove_file(os.path.join(DB_PATH, f"{agent_id}.db"))
