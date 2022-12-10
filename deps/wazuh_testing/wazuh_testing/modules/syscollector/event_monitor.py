@@ -24,7 +24,7 @@ def check_syscollector_event(file_monitor=None, callback='', error_message=None,
     """
     file_monitor = FileMonitor(file_to_monitor) if file_monitor is None else file_monitor
     error_message = f"Could not find this event in {file_to_monitor}: {callback}" if error_message is None else \
-        error_message
+                    error_message
 
     result = file_monitor.start(timeout=timeout, update_position=update_position, accum_results=accum_results,
                                 callback=make_callback(callback, prefix), error_message=error_message).result()
