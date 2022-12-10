@@ -1,0 +1,144 @@
+- name: ALAS1_FEED
+  description: Verify the tool's behavior is the expected when ingesting ALAS 1 feed
+  configuration_parameters:
+    configurations:
+    - VENDOR: alas
+      DESCRIPTION: ALAS 1
+      REMOTES:
+      - url: http://localhost:8888/alas/mirror.list
+        precondition: alas1
+        request: file
+        compressed: gzip
+        uncompressedPath: uncompressed/alas/alas1_feed.xml
+        dataFormat: xml
+        downloadPath: downloads/alas/alas1_feed.xml.gz
+        lastSnapshotFilePath: snapshots/alas/alas1_feed
+        tableNameSpecifier: alas1
+  metadata:
+    output_file: snapshots/alas/alas1_feed.json
+
+- name: ALAS2_FEED
+  description: Verify the tool's behavior is the expected when ingesting ALAS 2 feed
+  configuration_parameters:
+    configurations:
+    - VENDOR: alas
+      DESCRIPTION: ALAS 2
+      REMOTES:
+      - url: http://localhost:8888/alas/alas2_feed.xml.gz
+        request: file
+        precondition: alas2
+        compressed: gzip
+        uncompressedPath: uncompressed/alas/alas2_feed.xml
+        dataFormat: xml
+        downloadPath: downloads/alas/alas2_feed.xml.gz
+        lastSnapshotFilePath: snapshots/alas/alas2_feed
+        tableNameSpecifier: alas2
+  metadata:
+    output_file: snapshots/alas/alas2_feed.json
+
+- name: ALAS2022_FEED
+  description: Verify the tool's behavior is the expected when ingesting ALAS 2022 feed
+  configuration_parameters:
+    configurations:
+    - VENDOR: alas
+      DESCRIPTION: ALAS 2022
+      REMOTES:
+      - url: http://localhost:8888/alas/alas2022_feed.xml.gz
+        request: file
+        precondition: alas2022
+        compressed: gzip
+        uncompressedPath: uncompressed/alas/alas2022_feed.xml
+        dataFormat: xml
+        downloadPath: downloads/alas/alas2022_feed.xml.gz
+        lastSnapshotFilePath: snapshots/alas/alas2022_feed
+        tableNameSpecifier: alas2022
+  metadata:
+    output_file: snapshots/alas/alas2022_feed.json
+
+- name: ARCH_LINUX_FEED
+  description: Verify the tool's behavior is the expected when ingesting Arch Linux feed
+  configuration_parameters:
+    configurations:
+    - VENDOR: arch
+      DESCRIPTION: Arch Linux
+      REMOTES:
+      - url: http://localhost:8888/arch/arch_well_formatted.json
+        downloadPath: downloads/arch/arch_well_formatted.json
+        request: file
+        dataFormat: json
+        compressed: raw
+        lastSnapshotFilePath: snapshots/arch/arch_well_formatted
+        tableNameSpecifier: arch
+  metadata:
+    output_file: snapshots/arch/arch_well_formatted.json
+
+- name: DEBIAN_FEED
+  description: Verify the tool's behavior is the expected when ingesting Debian feed
+  configuration_parameters:
+    configurations:
+    - VENDOR: debian
+      DESCRIPTION: Debian security tracker
+      REMOTES:
+      - url: http://localhost:8888/debian/debian_feed.json
+        request: file
+        compressed: raw
+        dataFormat: json
+        downloadPath: downloads/debian/debian_feed.json
+        lastSnapshotFilePath: snapshots/debian/debian_feed
+        tableNameSpecifier: debian
+  metadata:
+    output_file: snapshots/debian/debian_feed.json
+
+- name: NVD2022_FEED
+  description: Verify the tool's behavior is the expected when ingesting NVD feed
+  configuration_parameters:
+    configurations:
+    - VENDOR: nvd
+      DESCRIPTION: National Vulnerability Database
+      REMOTES:
+      - url: http://localhost:8888/nvd/nvd2022_feed.json.gz
+        downloadPath: downloads/nvd/nvd2022_feed.json.gz
+        request: file
+        dataFormat: json
+        compressed: gzip
+        uncompressedPath: uncompressed/nvd/nvd2022_feed.json
+        lastSnapshotFilePath: snapshots/nvd/nvd2022_feed
+        tableNameSpecifier: nvd_2022
+  metadata:
+    output_file: snapshots/nvd/nvd2022_feed.json
+
+- name: REDHAT_FEED
+  description: Verify the tool's behavior is the expected when ingesting RedHat feed
+  configuration_parameters:
+    configurations:
+    - VENDOR: redhat
+      DESCRIPTION: RedHat OVAL
+      REMOTES:
+      - url: http://localhost:8888/redhat/redhat5_oval_feed.xml.bz2
+        downloadPath: downloads/redhat/redhat5_oval_feed.xml.bz2
+        request: file
+        dataFormat: xml
+        compressed: bzip2
+        uncompressedPath: uncompressed/redhat/redhat5_oval_feed.xml
+        lastSnapshotFilePath: snapshots/redhat/redhat5_oval_feed
+        tableNameSpecifier: redhat_5
+  metadata:
+    output_file: snapshots/redhat/redhat5_oval_feed.json
+
+- name: SUSE_FEED
+  description: Verify the tool's behavior is the expected when ingesting SUSE feed
+  configuration_parameters:
+    configurations:
+    - VENDOR: suse
+      DESCRIPTION: SUSE Linux Enterprise
+      REMOTES:
+      - url: http://localhost:8888/suse/suse_oval_feed.xml.gz
+        downloadPath: downloads/suse/suse_oval_feed.xml.gz
+        request: file
+        dataFormat: xml
+        compressed: gzip
+        lastSnapshotFilePath: snapshots/suse/suse_oval_feed
+        uncompressedPath: uncompressed/suse/suse_oval_feed.xml
+        tableNameSpecifier: suse_desktop_11
+  metadata:
+    output_file: snapshots/suse/suse_oval_feed.json

@@ -1,0 +1,43 @@
+{
+  "389-ds-base": {
+    "CVE-2015-1854": {
+      "description": "389 Directory Server before 1.3.3.10 allows attackers to bypass intended access restrictions and modify directory entries via a crafted ldapmodrdn call.",
+      "debianbug": 783923,
+      "scope": "local",
+      "releases": {
+        "bookworm": {
+          "status": "resolved",
+          "repositories": {
+            "bookworm": "2.0.15-1.1"
+          },
+          "fixed_version": "1.3.3.10-1",
+          "urgency": "not yet assigned"
+        },
+        "bullseye": {
+          "status": "resolved",
+          "repositories": {
+            "bullseye": "1.4.4.11-2"
+          },
+          "fixed_version": "1.3.3.10-1",
+          "urgency": "not yet assigned"
+        },
+        "buster": {
+          "status": "resolved",
+          "repositories": {
+            "buster": "1.4.0.21-1"
+          },
+          "fixed_version": "1.3.3.10-1",
+          "urgency": "not yet assigned"
+        },
+        "sid": {
+          "status": "resolved",
+          "repositories": {
+            "sid": "2.0.15-1.1"
+          },
+          "fixed_version": "1.3.3.10-1",
+          "urgency": "not yet assigned"
+        }
+      }
+    }
+  }
+}

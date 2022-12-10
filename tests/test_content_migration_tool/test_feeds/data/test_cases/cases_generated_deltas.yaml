@@ -1,0 +1,124 @@
+- name: VULNERABILITY_ADDED
+  description: Verify the tool generates the deltas correctly when a new vulnerability is added.
+  configuration_parameters:
+    configurations:
+    - VENDOR: arch
+      DESCRIPTION: Arch Linux
+      REMOTES:
+      - url: http://localhost:8888/arch/arch_well_formatted.json
+        downloadPath: downloads/arch/arch_well_formatted.json
+        request: file
+        dataFormat: json
+        compressed: raw
+        lastSnapshotFilePath: snapshots/arch/arch
+        tableNameSpecifier: arch
+    - VENDOR: arch
+      DESCRIPTION: Arch Linux
+      REMOTES:
+      - url: http://localhost:8888/arch/arch_new_cve.json
+        downloadPath: downloads/arch/arch_new_cve.json
+        request: file
+        dataFormat: json
+        compressed: raw
+        lastSnapshotFilePath: snapshots/arch/arch
+        tableNameSpecifier: arch
+  metadata:
+    output_folder: snapshots/arch/
+    table_name: arch
+    operation: insert
+    expected_cves:
+      - CVE-2022-0546
+      - CVE-2022-0545
+      - CVE-2022-0544
+
+- name: VULNERABILITY_UPDATED
+  description: Verify the tool generates the deltas correctly when a new vulnerability is added.
+  configuration_parameters:
+    configurations:
+    - VENDOR: arch
+      DESCRIPTION: Arch Linux
+      REMOTES:
+      - url: http://localhost:8888/arch/arch_well_formatted.json
+        downloadPath: downloads/arch/arch_well_formatted.json
+        request: file
+        dataFormat: json
+        compressed: raw
+        lastSnapshotFilePath: snapshots/arch/arch
+        tableNameSpecifier: arch
+    - VENDOR: arch
+      DESCRIPTION: Arch Linux
+      REMOTES:
+      - url: http://localhost:8888/arch/arch_updated_cve.json
+        downloadPath: downloads/arch/arch_updated_cve.json
+        request: file
+        dataFormat: json
+        compressed: raw
+        lastSnapshotFilePath: snapshots/arch/arch
+        tableNameSpecifier: arch
+  metadata:
+    output_folder: snapshots/arch/
+    table_name: arch
+    operation: update
+    expected_cves:
+      - CVE-2022-29217
+
+- name: VULNERABILITY_REMOVED
+  description: Verify the tool generates the deltas correctly when a new vulnerability is added.
+  configuration_parameters:
+    configurations:
+    - VENDOR: arch
+      DESCRIPTION: Arch Linux
+      REMOTES:
+      - url: http://localhost:8888/arch/arch_new_cve.json
+        downloadPath: downloads/arch/arch_new_cve.json
+        request: file
+        dataFormat: json
+        compressed: raw
+        lastSnapshotFilePath: snapshots/arch/arch
+        tableNameSpecifier: arch
+    - VENDOR: arch
+      DESCRIPTION: Arch Linux
+      REMOTES:
+      - url: http://localhost:8888/arch/arch_well_formatted.json
+        downloadPath: downloads/arch/arch_well_formatted.json
+        request: file
+        dataFormat: json
+        compressed: raw
+        lastSnapshotFilePath: snapshots/arch/arch
+        tableNameSpecifier: arch
+  metadata:
+    output_folder: snapshots/arch/
+    table_name: arch
+    operation: delete
+    expected_cves:
+      - CVE-2022-29217
+
+- name: NO_UPDATE_IN_FEED
+  description: Verify the tool generates the deltas correctly when a new vulnerability is added.
+  configuration_parameters:
+    configurations:
+    - VENDOR: arch
+      DESCRIPTION: Arch Linux
+      REMOTES:
+      - url: http://localhost:8888/arch/arch.json
+        downloadPath: downloads/arch/arch.json
+        request: file
+        dataFormat: json
+        compressed: raw
+        lastSnapshotFilePath: snapshots/arch/arch
+        tableNameSpecifier: arch
+    - VENDOR: arch
+      DESCRIPTION: Arch Linux
+      REMOTES:
+      - url: http://localhost:8888/arch/arch.json
+        downloadPath: downloads/arch/arch.json
+        request: file
+        dataFormat: json
+        compressed: raw
+        lastSnapshotFilePath: snapshots/arch/arch
+        tableNameSpecifier: arch
+  metadata:
+    output_folder: snapshots/arch/
+    table_name: arch
+    operation: null
+    expected_cves: null
