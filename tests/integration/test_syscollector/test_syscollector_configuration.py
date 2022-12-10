@@ -132,6 +132,7 @@ t4_configurations = load_configuration_template(t4_config_path, t4_config_parame
 t5_config_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_syscollector.yaml')
 t5_cases_path = os.path.join(TEST_CASES_PATH, 'case_test_scanning.yaml')
 t5_config_parameters, t5_config_metadata, t5_case_ids = get_test_cases_data(t5_cases_path)
+t5_config_metadata = t5_config_parameters
 t5_configurations = load_configuration_template(t5_config_path, t5_config_parameters, t5_config_metadata)
 
 
@@ -362,6 +363,7 @@ def test_syscollector_default_values(configuration, metadata, set_wazuh_configur
     '''
     file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
     evm.check_config(file_monitor=file_monitor, timeout=T_10)
+    evm.check_module_startup_finished(file_monitor=file_monitor, timeout=T_10)
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t5_configurations, t5_config_metadata), ids=t5_case_ids)

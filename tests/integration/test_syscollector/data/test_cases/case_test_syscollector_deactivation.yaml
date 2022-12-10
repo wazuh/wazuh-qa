@@ -1,4 +1,4 @@
-- name: module_deactivated
+- name: check_syscollector_deactivation
   description: Verify that the module does not start when it's disabled
   configuration_parameters:
     DISABLED: 'yes'

@@ -1,4 +1,4 @@
-- name: check_scanning
+- name: check_syscollector_scan
   description: Verify that the scan starts on startup and collects information but no sync is performed
   configuration_parameters:
     DISABLED: 'no'
@@ -13,5 +13,4 @@
     PROCESSES_SCAN: 'yes'
     HOTFIXES_SCAN: 'yes'
     MAX_EPS: 10
-  metadata:
-    field: ''
+  metadata: null
