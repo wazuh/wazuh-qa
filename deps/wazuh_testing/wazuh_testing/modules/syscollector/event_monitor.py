@@ -50,7 +50,7 @@ def check_module_startup_finished(file_monitor=None, timeout=T_5, prefix=SYSCOLL
     return result
 
 
-def check_scan_started(file_monitor=None, timeout=T_5, prefix=sysc.SYSCOLLECTOR_PREFIX):
+def check_scan_started(file_monitor=None, timeout=T_5, prefix=SYSCOLLECTOR_PREFIX):
     """Check if the syscollector scan has started
 
     Args:
