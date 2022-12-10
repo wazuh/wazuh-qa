@@ -160,7 +160,7 @@ def remove_agent_syscollector_info(agent_id='000'):
 # Tests
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_config_metadata), ids=t1_case_ids)
 def test_syscollector_deactivation(configuration, metadata, set_wazuh_configuration,
-                                   configure_local_internal_options_module, truncate_log_file,
+                                   configure_local_internal_options_module, truncate_monitored_files,
                                    daemons_handler_function):
     '''
     description: Check that the module is disabled.
@@ -188,7 +188,7 @@ def test_syscollector_deactivation(configuration, metadata, set_wazuh_configurat
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - truncate_log_file:
+        - truncate_monitored_files:
             type: fixture
             brief: Truncate the log file before and after the test execution.
         - daemons_handler_function:
@@ -203,12 +203,12 @@ def test_syscollector_deactivation(configuration, metadata, set_wazuh_configurat
         - The `case_test_syscollector_deactivation.yaml` file provides the test cases.
     '''
     file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
-    evm.check_disabled(file_monitor=file_monitor, timeout=T_10)
+    evm.check_syscollector_is_disabled(file_monitor=file_monitor, timeout=T_10)
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_config_metadata), ids=t2_case_ids)
 def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_configuration,
-                                         configure_local_internal_options_module, truncate_log_file,
+                                         configure_local_internal_options_module, truncate_monitored_files,
                                          daemons_handler_function):
     '''
     description: Check that each scan is disabled.
@@ -236,7 +236,7 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - truncate_log_file:
+        - truncate_monitored_files:
             type: fixture
             brief: Truncate the log file before and after the test execution.
         - daemons_handler_function:
@@ -269,7 +269,7 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
 @pytest.mark.xfail(sys.platform == "win32", reason='Reported in wazuh/wazuh#15412')
 @pytest.mark.parametrize('configuration, metadata', zip(t3_configurations, t3_config_metadata), ids=t3_case_ids)
 def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_configuration,
-                                             configure_local_internal_options_module, truncate_log_file,
+                                             configure_local_internal_options_module, truncate_monitored_files,
                                              daemons_handler_function):
     '''
     description: Check the behaviour of the module while setting invalid configurations.
@@ -297,7 +297,7 @@ def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - truncate_log_file:
+        - truncate_monitored_files:
             type: fixture
             brief: Truncate the log file before and after the test execution.
         - daemons_handler_function:
@@ -326,21 +326,21 @@ def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_
         if field in non_critical_fields:
             # Check that the module has started if the field is not critical
             file_monitor = FileMonitor(LOG_FILE_PATH)
-            evm.check_has_started(file_monitor=file_monitor, timeout=T_10)
+            evm.check_module_is_starting(file_monitor=file_monitor, timeout=T_10)
             return True
     else:
         evm.check_attr_error(file_monitor=file_monitor, attr=attribute, timeout=T_10)
 
     # Check that the module does not start
     with pytest.raises(TimeoutError):
-        evm.check_has_started(file_monitor=file_monitor, timeout=T_10)
+        evm.check_module_is_starting(file_monitor=file_monitor, timeout=T_10)
         pytest.fail(f"The module has started anyway. This behaviour is not the expected.")
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t4_configurations, t4_config_metadata), ids=t4_case_ids)
 @pytest.mark.xfail(reason='Reported in wazuh/wazuh#15413')
 def test_syscollector_default_values(configuration, metadata, set_wazuh_configuration,
-                                     configure_local_internal_options_module, truncate_log_file,
+                                     configure_local_internal_options_module, truncate_monitored_files,
                                      daemons_handler_function):
     '''
     description: Check that the module sets the default values when the configuration block is empty.
@@ -368,7 +368,7 @@ def test_syscollector_default_values(configuration, metadata, set_wazuh_configur
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - truncate_log_file:
+        - truncate_monitored_files:
             type: fixture
             brief: Truncate the log file before and after the test execution.
         - daemons_handler_function:
@@ -388,7 +388,7 @@ def test_syscollector_default_values(configuration, metadata, set_wazuh_configur
 
 @pytest.mark.parametrize('configuration, metadata', zip(t5_configurations, t5_config_metadata), ids=t5_case_ids)
 def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
-                              configure_local_internal_options_module, truncate_log_file,
+                              configure_local_internal_options_module, truncate_monitored_files,
                               remove_agent_syscollector_info, daemons_handler_function):
     '''
     description: Check that the module sets the default values when the configuration block is empty.
@@ -416,7 +416,7 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - truncate_log_file:
+        - truncate_monitored_files:
             type: fixture
             brief: Truncate the log file before and after the test execution.
         - remove_agent_syscollector_info:
@@ -436,7 +436,7 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
     '''
     file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
     # 60s + 2 seconds of margin because it includes the case when the agent starts for the first time
-    evm.check_has_started(file_monitor=file_monitor, timeout=T_60 + 2)
+    evm.check_module_is_starting(file_monitor=file_monitor, timeout=T_60 + 2)
     # Check general scan has started
     evm.check_scan_started(file_monitor=file_monitor, timeout=T_10)
 
