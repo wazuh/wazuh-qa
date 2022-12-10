@@ -1,5 +1,6 @@
 from wazuh_testing import T_5, T_10
-from wazuh_testing.modules import syscollector as sysc, make_callback
+from wazuh_testing.modules import syscollector as sysc
+from wazuh_testing.event_monitor import make_callback
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
