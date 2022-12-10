@@ -419,15 +419,15 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
     evm.check_scan_started(file_monitor=file_monitor, timeout=T_10)
 
     # Check that each scan was accomplished
-    scan_checks = [evm.check_hardware_scan_finished, evm.check_os_scan_finished, evm.check_network_scan_finished,
-                   evm.check_packages_scan_finished, evm.check_ports_scan_finished, evm.check_processes_scan_finished]
+    checks_to_run = [evm.check_hardware_scan_finished, evm.check_os_scan_finished, evm.check_network_scan_finished,
+                     evm.check_packages_scan_finished, evm.check_ports_scan_finished, evm.check_processes_scan_finished]
     if sys.platform == 'win32':
         scan_checks.append(evm.check_hotfixes_scan_finished)
 
-    for check in scan_checks:
+    for check_runner in checks_to_run:
         # Run check
         file_monitor = FileMonitor(LOG_FILE_PATH)
-        check(file_monitor=file_monitor, timeout=T_10)
+        check_runner(file_monitor=file_monitor, timeout=T_10)
 
     # Check general scan has finished
     evm.check_scan_finished(file_monitor=file_monitor, timeout=T_10)
