@@ -397,25 +397,6 @@
     field: max_eps
     attribute: null
 
-- name: empty_value_max_eps
-  description: Verify that the module starts and no error is displayed
-  configuration_parameters:
-    DISABLED: 'no'
-    INVERVAL_SCAN: 1h
-    START_ON_START: 'yes'
-    HARDWARE_SCAN: 'yes'
-    OS_SCAN: 'yes'
-    NETWORK_SCAN: 'yes'
-    PACKAGES_SCAN: 'yes'
-    PORTS_SCAN: 'yes'
-    ALL_PORTS: 'no'
-    PROCESSES_SCAN: 'yes'
-    HOTFIXES_SCAN: 'yes'
-    MAX_EPS: ''
-  metadata:
-    field: max_eps
-    attribute: null
-
 - name: empty_value_hotfixes
   description: Verify that the module doesn't start and an error is displayed
   configuration_parameters:
