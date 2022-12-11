@@ -13,4 +13,5 @@
     PROCESSES_SCAN: 'yes'
     HOTFIXES_SCAN: 'yes'
     MAX_EPS: 10
-  metadata: null
+  metadata:
+    dummy_metadata: ''
