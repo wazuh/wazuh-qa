@@ -1032,7 +1032,10 @@ def set_wazuh_configuration(configuration):
 @pytest.fixture
 def truncate_monitored_files():
     """Truncate all the log files and json alerts files before and after the test execution"""
-    log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
+    if get_service() == 'wazuh-manager':
+        log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
+    else:
+        log_files = [LOG_FILE_PATH]
 
     for log_file in log_files:
         truncate_file(log_file)

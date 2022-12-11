@@ -22,8 +22,9 @@ def check_syscollector_event(file_monitor=None, callback='', error_message=None,
                               If `accum_results > 1`, it will be a list.
     """
 
-    result = check_event(file_monitor, callback, error_message, update_position, timeout, prefix, accum_results,
-                         file_to_monitor)
+    result = check_event(file_monitor=file_monitor, callback=callback, error_message=error_message,
+                         update_position=update_position, timeout=timeout, prefix=prefix, accum_results=accum_results,
+                         file_to_monitor=file_to_monitor)
 
     return result
 
