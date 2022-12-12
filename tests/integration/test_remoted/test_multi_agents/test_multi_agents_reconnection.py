@@ -6,12 +6,14 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
 type: integration
 
-brief: 
+brief: This test module aims to validate multiple agents can reconnect at the same without any problem,
+the expected functionality is to all the agents are reconnected correctly and there is no WARNING being
+raised.
 
 components:
     - remoted
 
-suite: 
+suite: test_multi_agents_reconnection
 
 targets:
     - manager
@@ -28,7 +30,6 @@ os_version:
 
 references:
     - https://documentation.wazuh.com/current/user-manual/
-    - https://documentation.wazuh.com/current/user-manual/
 
 pytest_args:
     - tier:
@@ -37,19 +38,23 @@ pytest_args:
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 
 tags:
-    - 
+    - remoted
 '''
+# Standard library imports.
 import pytest
 from pathlib import Path
 
+# Wazuh Testing framework imports.
 from wazuh_testing.modules.remoted import CB_KEY_ALREADY_IN_USE
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.file import write_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.wazuh_manager import wait_agents_active_by_name
-from wazuh_testing.tools.virtualization import AgentDockerizer
+from wazuh_testing.tools.virtualization import AgentsDockerizer
 
+# Local module improts.
 from . import TESTS_CASES_PATH, CONFIGS_PATH
 
 
@@ -72,22 +77,19 @@ local_internal_options = {'remoted.debug': '2'}
 
 # Tests
 @pytest.mark.parametrize('metadata, configuration', zip(metadata, configuration), ids=case_ids)
-def test_remoted_multi_agents(dockerized_agents: AgentDockerizer, metadata: dict,
+def test_remoted_multi_agents(dockerized_agents: AgentsDockerizer, metadata: dict,
                               configuration: dict, truncate_monitored_files: None,
-                              configure_local_internal_options_module: None,
-                              ):
-    '''
-    description: 
-        This test validates the agents reconnect correctly without any race condition
-        being raised.
+                              configure_local_internal_options_module: None):
+    ''' 
+    description: This test validates the agents reconnect correctly without any 
+                 race condition occurring.
 
     test_phases:
-        - Insert an alert alerts.json file.
-        - Replace the alerts.json file while it being read.
-        - Check remoted detects the file's inode has changed.
-        - Wait for remoted to start reading from the file again.
-        - Insert an alert
-        - Check virustotal response is added in ossec.log
+        - Build and start the dockerized wazuh-agents.
+        - Check the wazuh-agents are connected correctly.
+        - Restart wazuh-manager or the wazuh-agents.
+        - Check the wazuh-agents are re-connected correctly.
+        - Check the warning is not raised.
 
     wazuh_min_version: 4.4.0
 
@@ -95,7 +97,7 @@ def test_remoted_multi_agents(dockerized_agents: AgentDockerizer, metadata: dict
 
     parameters:
         - dockerized_agents:
-            type: AgentDockerizer
+            type: AgentsDockerizer
             brief: Running agents inside docker containers.
         - configuration:
             type: dict
@@ -112,9 +114,6 @@ def test_remoted_multi_agents(dockerized_agents: AgentDockerizer, metadata: dict
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart wazuh's daemon before starting a test.
-        - wait_for_start_module:
-            type: fixture
-            brief: Detect the start of the remoted module in the ossec.log
 
     assertions:
         - Verify all the agents are active after a reconnection
@@ -125,7 +124,6 @@ def test_remoted_multi_agents(dockerized_agents: AgentDockerizer, metadata: dict
 
     expected_output:
         - Should not match r".*Agent key already in use: agent ID '(\d+)'*."
-
     '''
     callback = generate_monitoring_callback(CB_KEY_ALREADY_IN_USE)
     hostnames = dockerized_agents.execute('hostname')
@@ -134,8 +132,14 @@ def test_remoted_multi_agents(dockerized_agents: AgentDockerizer, metadata: dict
 
     # Wait untill the agents are active
     wait_agents_active_by_name(hostnames)
-    # Insert a file inside the default group shared folder to restart the agents.
-    write_file(Path(shared_folder, 'test.txt'))
+
+    if metadata.get('restart') == 'agents':
+        # Write a file in the default group shared folder to restart the agents.
+        write_file(Path(shared_folder, 'test.txt'))
+    elif metadata.get('restart') == 'manager':
+        # Restart wazuh-manager service
+        control_service('restart')
+
     # Verify the agents reconnect and the 'Key already in use' warning is not raised.
     assert wait_agents_active_by_name(hostnames), 'Not all agents reconnected.'
     with pytest.raises(TimeoutError):

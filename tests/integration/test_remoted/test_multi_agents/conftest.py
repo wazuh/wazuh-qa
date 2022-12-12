@@ -1,28 +1,44 @@
+# Standard library imports.
 import pytest
 import re
 from pathlib import Path
 
-from wazuh_testing.tools.file import remove_file, copy, write_file, read_file
+# Wazuh Testing framework imports.
+from wazuh_testing.tools.configuration import set_section_wazuh_conf
+from wazuh_testing.tools.file import read_file
 from wazuh_testing.tools.utils import get_current_ip
-from wazuh_testing.tools.virtualization import AgentDockerizer
+from wazuh_testing.tools.virtualization import AgentsDockerizer
 
 
-AGENT_CONFIG_PATH = Path(Path(Path(__file__).parent, 'data', 'ossec.conf'))
+AGENT_CONFIG_PATH = Path(Path(Path(__file__).parent, 'data', 'conf_template'))
 
 
-@pytest.fixture
-def dockerized_agents(agents_config: str, metadata: dict) -> AgentDockerizer:
-    agents = AgentDockerizer(agents_config, metadata.get('agents_amount'))
+@pytest.fixture(scope='function')
+def dockerized_agents(agents_config: str, metadata: dict) -> AgentsDockerizer:
+    '''Build and cleanup dockerized agents
+
+    Args:
+        agents_config (str): Agents ossec.conf.
+        metadata (dict): Test metadata to get the agents_amount from.
+    Yield:
+        AgentsDockerizer: Instance to handle the dockerized agents.
+    '''
+    agents = AgentsDockerizer(agents_config, metadata.get('agents_amount'))
+
     yield agents
+
+    agents.stop()
     agents.destroy()
 
 
-@pytest.fixture
-def agents_config():
+@pytest.fixture(scope='function')
+def agents_config(configuration: dict) -> str:
     '''Set wazuh configuration
 
     Args:
-        configuration (dict): Configuration template data to write in the ossec.conf
+        configuration (dict): Configuration data to set in the ossec.conf.
+    Yield:
+        str: An ossec.conf for the dockerized agents.
     '''
 
     def set_current_ip_to_agent_config(config: str) -> str:
@@ -30,12 +46,12 @@ def agents_config():
         r = re.compile(reg, re.DOTALL)
         return r.sub(get_current_ip(), config)
 
-    # Save current configuration
-    backup_config = read_file(AGENT_CONFIG_PATH)
-    # Set the agents configuration for this execution
-    test_config = set_current_ip_to_agent_config(backup_config)
-    write_file(AGENT_CONFIG_PATH, test_config)
+    # Get template and configuration sections
+    template = read_file(AGENT_CONFIG_PATH)
+    config_sections = configuration.get('sections')
+    # Set the agents configuration
+    agents_config = set_section_wazuh_conf(config_sections, template)
+    agents_config = "".join(agents_config)
+    agents_config = set_current_ip_to_agent_config(agents_config)
 
-    yield test_config
-    # Restore previous configuration
-    write_file(AGENT_CONFIG_PATH, backup_config)
+    yield agents_config
