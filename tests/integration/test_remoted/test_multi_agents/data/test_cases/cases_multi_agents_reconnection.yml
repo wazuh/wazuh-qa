@@ -1,11 +1,3 @@
-- name: Reconnect 50 agents at the same time.
-  description: The 50 agents should reconnect correctly without
-    raising a warning due to a race condition.
-  configuration_parameters: ""
-  metadata:
-    agents_amount: 50
-    restart: agents
-
 - name: Reconnect 100 agents at the same time.
   description: The 100 agents should reconnect correctly without
     raising a warning due to a race condition.
