@@ -8,6 +8,7 @@
 # Foundation.
 
 # Python 3.8 or greater.
+# Dependencies: pip3 install docker-compose
 
 # Standard library imports.
 import logging
