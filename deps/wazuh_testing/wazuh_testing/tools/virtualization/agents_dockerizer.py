@@ -38,7 +38,7 @@ class AgentsDockerizer:
     at once.
 
     Args:
-        agent_conf (str): An ossec.conf to apply to all agents. 
+        agent_conf (str): An ossec.conf to apply to all agents.
         quantity (int, Optional): Amount of agents to build, default 10.
         package_uri (str, Optional): Agent package URL, default agent 4.4.0.
 
@@ -63,13 +63,13 @@ class AgentsDockerizer:
 
         Function that initializes multiple DockerWrapper instances to
         handle all the defined agents. If the agents are already built
-        it returns doing nothing.  
+        it returns doing nothing.
 
         Args:
             None
 
-        Returns: 
-            None  
+        Returns:
+            None
         '''
         if self.agents:
             LOGGER.warning('Agents already built.')
@@ -94,13 +94,13 @@ class AgentsDockerizer:
         Function that reads a Dockerfile template used to set the agent package
         URL, then writes a Dockerfile that will be used to build the agents.
         It allows to build wazuh-agents from any version, by default it uses
-        a 4.4.0 wazuh-agent package.  
+        a 4.4.0 wazuh-agent package.
 
         Args:
-            package_uri (str, Optional): Desired wazuh-agent package URL. 
+            package_uri (str, Optional): Desired wazuh-agent package URL.
 
-        Returns: 
-            None  
+        Returns:
+            None
         '''
         if not package_uri:
             package_uri = 'https://packages-dev.wazuh.com/pre-release/' + \
@@ -116,8 +116,8 @@ class AgentsDockerizer:
         Args:
             None
 
-        Returns: 
-            str, List[str]: Output of the command.  
+        Returns:
+            str, List[str]: Output of the command.
         '''
         command = f'{self.__wazuh_control} start'
         LOGGER.info('Starting all the agents')
@@ -128,8 +128,8 @@ class AgentsDockerizer:
         Args:
             None
 
-        Returns: 
-            str, List[str]: Output of the command.  
+        Returns:
+            str, List[str]: Output of the command.
         '''
         command = f'{self.__wazuh_control} status'
         LOGGER.info('Checking agents status')
@@ -140,8 +140,8 @@ class AgentsDockerizer:
         Args:
             command (str, List[str]): Command to execute in containers.
 
-        Returns: 
-            str, List[str]: Output of the command.  
+        Returns:
+            str, List[str]: Output of the command.
         '''
         LOGGER.info(f'Executing the command {command} in all agents')
         return self.__broadcast_to_docker('execute', f'bash -c "{command}"')
@@ -151,8 +151,8 @@ class AgentsDockerizer:
         Args:
             None
 
-        Returns: 
-            str, List[str]: Output of the command.  
+        Returns:
+            str, List[str]: Output of the command.
         '''
         command = f'{self.__wazuh_control} stop'
         LOGGER.info('Stoping all the agents')
@@ -163,7 +163,7 @@ class AgentsDockerizer:
         Args:
             None
 
-        Returns: 
+        Returns:
             None
         '''
         LOGGER.info('Destroying all the agents')
@@ -176,7 +176,7 @@ class AgentsDockerizer:
         Args:
             None
 
-        Returns: 
+        Returns:
             None
         '''
         return ''.join((random.choice(string.ascii_uppercase)

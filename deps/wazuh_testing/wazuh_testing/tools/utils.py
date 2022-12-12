@@ -177,7 +177,7 @@ def validate_interval_format(interval):
     if interval == '':
         return False
     if interval[-1] not in ['s', 'm', 'h', 'd', 'w', 'y'] or \
-                    not isinstance(int(interval[0:-1]), numbers.Number):
+       not isinstance(int(interval[0:-1]), numbers.Number):
         return False
     return True
 

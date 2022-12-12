@@ -62,6 +62,6 @@ def wait_agents_active_by_name(agents_names: List[str]):
     for name in agents_names:
         name = name.replace("\r", "").replace("\n", "")
         command = f'{WAZUH_PATH}/bin/agent_control -l | grep "{name}"'
-        if not 'Active' in run_local_command_returning_output(command):
+        if 'Active' not in run_local_command_returning_output(command):
             raise AttributeError(f"Agent {name} is not active yet.")
     return True

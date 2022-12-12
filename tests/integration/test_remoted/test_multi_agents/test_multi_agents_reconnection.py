@@ -66,8 +66,8 @@ WAIT_AGENTS_START = 30  # Time to wait the agents to start.
 pytestmark = [pytest.mark.server, pytest.mark.tier(level=2)]
 
 # Paths
-cases_path = Path(TESTS_CASES_PATH, f'cases_{TEST_NAME}.yml')
-config_path = Path(CONFIGS_PATH, f'config_{TEST_NAME}.yml')
+cases_path = Path(TESTS_CASES_PATH, f'cases_{TEST_NAME}.yaml')
+config_path = Path(CONFIGS_PATH, f'config_{TEST_NAME}.yaml')
 
 # Configurations and test cases
 _, metadata, case_ids = get_test_cases_data(cases_path)
@@ -80,8 +80,8 @@ local_internal_options = {'remoted.debug': '2'}
 def test_remoted_multi_agents(dockerized_agents: AgentsDockerizer, metadata: dict,
                               configuration: dict, truncate_monitored_files: None,
                               configure_local_internal_options_module: None):
-    ''' 
-    description: This test validates the agents reconnect correctly without any 
+    '''
+    description: This test validates the agents reconnect correctly without any
                  race condition occurring.
 
     test_phases:
@@ -123,7 +123,7 @@ def test_remoted_multi_agents(dockerized_agents: AgentsDockerizer, metadata: dic
         - The `cases_multi_agents_reconnection.yaml` file provides the test cases.
 
     expected_output:
-        - Should not match r".*Agent key already in use: agent ID '(\d+)'*."
+        - Should not match ".*Agent key already in use: agent ID '<AGENT_ID>'*."
     '''
     callback = generate_monitoring_callback(CB_KEY_ALREADY_IN_USE)
     hostnames = dockerized_agents.execute('hostname')

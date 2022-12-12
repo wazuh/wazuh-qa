@@ -196,7 +196,7 @@ class DockerWrapper(Instance):
             command(str): The command to be executed inside the container.
 
         Returns:
-            str: A str version of the actual command output.  
+            str: A str version of the actual command output.
         '''
         try:
             exit_code, output = self.get_container().exec_run(command)
