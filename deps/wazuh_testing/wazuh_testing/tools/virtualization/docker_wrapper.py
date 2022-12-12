@@ -38,7 +38,7 @@ class DockerWrapper():
                         exists. If None, no static IP will be assigned.
         network_name (string): Name of the docker network.
     '''
-    LOGGER = Logging.get_logger()
+    LOGGER = Logging.get_logger('DockerWrapper')
 
     def __init__(self, docker_client, dockerfile_path, name, remove=False, ports=None,
                  detach=True, stdout=False, stderr=False, ip=None, network_name=None):

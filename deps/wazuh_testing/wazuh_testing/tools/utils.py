@@ -115,6 +115,17 @@ def get_random_ip():
     return fr"{randint(0,255)}.{randint(0,255)}.{randint(0,255)}.{randint(0,255)}"
 
 
+def get_current_ip() -> str:
+    """Retrieves the ip address of this machine.
+
+    Return:
+        String: Machine's IP address.
+    """
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    return s.getsockname()[0]
+
+
 def get_random_string(string_length, digits=True):
     """Create a random string with specified length.
 
@@ -125,7 +136,8 @@ def get_random_string(string_length, digits=True):
     Returns:
         String: Random string.
     """
-    character_set = string.ascii_uppercase + string.digits if digits else string.ascii_uppercase
+    character_set = string.ascii_uppercase + \
+        string.digits if digits else string.ascii_uppercase
 
     return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))
 
@@ -162,11 +174,13 @@ def get_host_name():
 def validate_interval_format(interval):
     """Validate that the interval passed has the format in which the last digit is a letter from those passed and
        the other characters are between 0-9"""
-    if interval=='':
+    if interval == '':
         return False
-    if interval[-1] not in ['s','m', 'h','d','w','y'] or not isinstance(int(interval[0:-1]), numbers.Number):
+    if interval[-1] not in ['s', 'm', 'h', 'd', 'w', 'y'] or \
+                    not isinstance(int(interval[0:-1]), numbers.Number):
         return False
     return True
+
 
 def format_ipv6_long(ipv6_address):
     """Return the long form of the address representation in uppercase.

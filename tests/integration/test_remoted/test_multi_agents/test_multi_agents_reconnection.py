@@ -6,21 +6,18 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
 type: integration
 
-brief: Integratord manages wazuh integrations with other applications such as Yara or Virustotal, by feeding
-the integrated aplications with the alerts located in alerts.json file. This test module aims to validate that
-given a specific alert, the expected response is recieved, depending if it is a valid/invalid json alert, an
-overlong alert (64kb+) or what happens when it cannot read the file because it is missing.
+brief: 
 
 components:
-    - integratord
+    - remoted
 
-suite: integratord_change_inode_alert
+suite: 
 
 targets:
-    - agent
+    - manager
 
 daemons:
-    - wazuh-integratord
+    - wazuh-remoted
 
 os_platform:
     - Linux
@@ -30,8 +27,8 @@ os_version:
     - Ubuntu Focal
 
 references:
-    - https://documentation.wazuh.com/current/user-manual/capabilities/virustotal-scan/integration.html
-    - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-integratord.htm
+    - https://documentation.wazuh.com/current/user-manual/
+    - https://documentation.wazuh.com/current/user-manual/
 
 pytest_args:
     - tier:
@@ -40,127 +37,75 @@ pytest_args:
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 
 tags:
-    - virustotal
+    - 
 '''
-import os
-import time
 import pytest
-import socket
-import re
+from pathlib import Path
 
-import wazuh_testing.tools.configuration as conf
-
-from wazuh_testing import global_parameters
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, ALERT_FILE_PATH
-from wazuh_testing.tools.file import remove_file, copy
-from wazuh_testing.tools.configuration import (
-    get_test_cases_data,
-    load_configuration_template,
-)
+from wazuh_testing.modules.remoted import CB_KEY_ALREADY_IN_USE
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
+from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
+from wazuh_testing.tools.file import write_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.tools.wazuh_manager import wait_agents_active_by_name
+from wazuh_testing.tools.virtualization import AgentDockerizer
 
+from . import TESTS_CASES_PATH, CONFIGS_PATH
+
+
+# Constants
+TEST_NAME = Path(__file__).stem.replace('test_', '')
+WAIT_AGENTS_START = 30  # Time to wait the agents to start.
 
 # Marks
 pytestmark = [pytest.mark.server, pytest.mark.tier(level=2)]
 
-# Local Internal
+# Paths
+cases_path = Path(TESTS_CASES_PATH, f'cases_{TEST_NAME}.yml')
+config_path = Path(CONFIGS_PATH, f'config_{TEST_NAME}.yml')
+
+# Configurations and test cases
+_, metadata, case_ids = get_test_cases_data(cases_path)
+configuration = load_configuration_template(config_path, _, metadata)
 local_internal_options = {'remoted.debug': '2'}
-
-# Reference paths
-TEST_NAME = 'multi_agents_reconnection'
-DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-CONFIG_TEMPS_PATH = os.path.join(DATA_PATH, 'config_templates')
-TESTS_CASES_PATH = os.path.join(DATA_PATH, 'test_cases')
-
-# Configuration and cases data
-configs_path = os.path.join(CONFIG_TEMPS_PATH, 'config_{TEST_NAME}.yml')
-cases_path = os.path.join(TESTS_CASES_PATH, 'cases_{TEST_NAME}.yml')
-
-# Configurations
-# configs_params, metadata, case_ids = get_test_cases_data(cases_path)
-# configurations = load_configuration_template(configs_path, configs_params,
-#                                              metadata)
-
-# Variables
-# TEMP_FILE_PATH = os.path.join(WAZUH_PATH, 'logs/alerts/alerts.json.tmp')
-AGENT_CONFIG_PATH = os.path.join(DATA_PATH, 'ossec.conf')
-
-# AGENTS OSSEC.CONF
-
-
-@pytest.fixture
-def set_agents_configuration():
-    '''Set wazuh configuration
-
-    Args:
-        configuration (dict): Configuration template data to write in the ossec.conf
-    '''
-    # Save current configuration
-    with open(AGENT_CONFIG_PATH) as f:
-        backup_config = f.read()
-    # Configuration for testing
-    test_config = set_ip_to_agent_config(backup_config)
-    # Set new configuration
-    write_file(AGENT_CONFIG_PATH, test_config)
-    yield
-    # Restore previous configuration
-    write_file(AGENT_CONFIG_PATH, backup_config)
-
-
-def write_file(file: str, data: str):
-    with open(file, 'w') as f:
-        f.writelines(data)
-
-
-def set_ip_to_agent_config(config: str):
-    reg = '(?<=%s).*?(?=%s)' % ('<address>', '</address>')
-    r = re.compile(reg, re.DOTALL)
-    return r.sub(get_ip_address(), config)
-
-
-def get_ip_address():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(('8.8.8.8', 80))
-    return s.getsockname()[0]
 
 
 # Tests
-# @pytest.mark.parametrize('configuration, metadata', zip(configurations, metadata), ids=case_ids)
-def test_integratord_change_json_inode(
-    set_agents_configuration,
-    # configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
-    #                                    configure_local_internal_options_module, restart_wazuh_daemon_function,
-    #                                    wait_for_start_module
-):
+@pytest.mark.parametrize('metadata, configuration', zip(metadata, configuration), ids=case_ids)
+def test_remoted_multi_agents(dockerized_agents: AgentDockerizer, metadata: dict,
+                              configuration: dict, truncate_monitored_files: None,
+                              configure_local_internal_options_module: None,
+                              ):
     '''
-    description: Check that if when reading the alerts.json file, the inode for the file changes, integratord will
-                 reload the file and continue reading from it.
+    description: 
+        This test validates the agents reconnect correctly without any race condition
+        being raised.
 
     test_phases:
         - Insert an alert alerts.json file.
         - Replace the alerts.json file while it being read.
-        - Check integratord detects the file's inode has changed.
-        - Wait for integratord to start reading from the file again.
+        - Check remoted detects the file's inode has changed.
+        - Wait for remoted to start reading from the file again.
         - Insert an alert
         - Check virustotal response is added in ossec.log
 
-    wazuh_min_version: 4.3.7
+    wazuh_min_version: 4.4.0
 
     tier: 1
 
     parameters:
+        - dockerized_agents:
+            type: AgentDockerizer
+            brief: Running agents inside docker containers.
         - configuration:
             type: dict
-            brief: Configuration loaded from `configuration_template`.
+            brief: Configuration loaded from `config_path`.
         - metadata:
             type: dict
             brief: Test case metadata.
-        - set_wazuh_configuration:
-            type: fixture
-            brief: Set wazuh configuration.
         - truncate_monitored_files:
             type: fixture
-            brief: Truncate all the log files and json alerts files before and after the test execution.
+            brief: Truncate all the log files before and after the test execution.
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
@@ -169,28 +114,29 @@ def test_integratord_change_json_inode(
             brief: Restart wazuh's daemon before starting a test.
         - wait_for_start_module:
             type: fixture
-            brief: Detect the start of the Integratord module in the ossec.log
+            brief: Detect the start of the remoted module in the ossec.log
 
     assertions:
-        - Verify the expected response with for a given alert is recieved
+        - Verify all the agents are active after a reconnection
 
     input_description:
-        - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
-        - The `cases_integratord_read_json_alerts` file provides the test cases.
+        - The `config_multi_agents_reconnection.yaml` file provides the module configuration for this test.
+        - The `cases_multi_agents_reconnection.yaml` file provides the test cases.
 
     expected_output:
-        - r'.*(wazuh-integratord.*DEBUG: jqueue_next.*Alert file inode changed).*'
+        - Should not match r".*Agent key already in use: agent ID '(\d+)'*."
 
     '''
-    # wazuh_monitor = FileMonitor(LOG_FILE_PATH)
+    callback = generate_monitoring_callback(CB_KEY_ALREADY_IN_USE)
+    hostnames = dockerized_agents.execute('hostname')
+    shared_folder = Path(WAZUH_PATH, 'etc', 'shared', 'default')
+    wazuh_monitor = FileMonitor(LOG_FILE_PATH)
 
-    # # Monitor Inode Changed
-    # check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout * 2,
-    #                         callback=generate_monitoring_callback(integrator.CB_ALERTS_FILE_INODE_CHANGED),
-    #                         error_message=integrator.ERR_MSG_ALERT_INODE_CHANGED_NOT_FOUND)
-
-    # # Read Response in ossec.log
-    # check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
-    #                         callback=generate_monitoring_callback(integrator.CB_PROCESSING_ALERT),
-    #                         error_message=integrator.ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED)
-    print(get_ip_address())
+    # Wait untill the agents are active
+    wait_agents_active_by_name(hostnames)
+    # Insert a file inside the default group shared folder to restart the agents.
+    write_file(Path(shared_folder, 'test.txt'))
+    # Verify the agents reconnect and the 'Key already in use' warning is not raised.
+    assert wait_agents_active_by_name(hostnames), 'Not all agents reconnected.'
+    with pytest.raises(TimeoutError):
+        wazuh_monitor.start(callback=callback).result()
