@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -104,6 +104,9 @@ def test_null_signature_id(configuration, metadata, set_wazuh_configuration, tru
         - truncate_monitored_files:
             type: fixture
             brief: Truncate all the log files and json alerts files before and after the test execution.
+        - restart_wazuh_module:
+            type: fixture
+            brief: Restart wazuh at the start of the module to apply configuration.
 
     assertions:
         - Check that wazuh starts
@@ -130,10 +133,8 @@ def test_null_signature_id(configuration, metadata, set_wazuh_configuration, tru
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=T_5, callback=generate_monitoring_callback(CB_SID_NOT_FOUND),
                                 error_message=ERR_MSG_SID_NOT_FOUND)
-    with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=T_5, callback=generate_monitoring_callback(CB_EMPTY_IF_SID_RULE_IGNORED),
                                 error_message=ERR_MSG_EMPTY_IF_SID)
-    with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=T_5, callback=generate_monitoring_callback(CB_INVALID_IF_SID_RULE_IGNORED),
                                 error_message=ERR_MSG_INVALID_IF_SID)
 

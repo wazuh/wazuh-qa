@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -71,6 +71,7 @@ t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_c
 t1_configurations = load_configuration_template(configurations_path, t1_configuration_parameters,
                                                 t1_configuration_metadata)
 
+
 # Tests
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
@@ -103,6 +104,9 @@ def test_null_signature_id(configuration, metadata, set_wazuh_configuration, tru
         - truncate_monitored_files:
             type: fixture
             brief: Truncate all the log files and json alerts files before and after the test execution.
+        - restart_wazuh_module:
+            type: fixture
+            brief: Restart wazuh at the start of the module to apply configuration.
 
     assertions:
         - Check that wazuh starts
