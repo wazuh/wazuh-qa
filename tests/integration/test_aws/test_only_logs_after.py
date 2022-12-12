@@ -262,7 +262,9 @@ _, t3_configuration_metadata, t3_case_ids = get_test_cases_data(t3_cases_path)
 
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize("metadata", t3_configuration_metadata, ids=t3_case_ids)
-def test_multiple_calls(metadata, clean_s3_cloudtrail_db, restart_wazuh_function, delete_file_from_s3):
+def test_multiple_calls(
+    metadata, clean_s3_cloudtrail_db, load_wazuh_basic_configuration, restart_wazuh_function, delete_file_from_s3
+):
     """
     description: Call the AWS module multiple times with different only_logs_after values
     test_phases:
@@ -293,6 +295,9 @@ def test_multiple_calls(metadata, clean_s3_cloudtrail_db, restart_wazuh_function
         - clean_s3_cloudtrail_db:
             type: fixture
             brief: Delete the DB file before and after the test execution
+        - load_wazuh_basic_configuration:
+            type: fixture
+            brief: Load basic wazuh configuration.
         - restart_wazuh_daemon:
             type: fixture
             brief: Restart the wazuh service.

@@ -32,6 +32,7 @@ def analyze_command_output(
         results = []
 
         for line in command_output.splitlines():
+            logger.debug(line)
             item = callback(line)
 
             if item is not None:
