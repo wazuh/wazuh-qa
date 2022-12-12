@@ -1,4 +1,4 @@
-- name: cloudtrail remove from bucket
+- name: cloudtrail_remove_from_bucket
   description: CloudTrail remove from bucket configurations
   configuration_parameters:
     BUCKET_TYPE: cloudtrail

@@ -1,4 +1,4 @@
-- name: cloudtrail defaults
+- name: cloudtrail_defaults
   description: CloudTrail default configurations
   configuration_parameters:
     BUCKET_TYPE: cloudtrail
