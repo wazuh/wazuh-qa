@@ -10,12 +10,12 @@ import time
 import multiprocessing
 import pytest
 import wazuh_testing.tools.agent_simulator as ag
-from wazuh_testing import UDP, TCP
-from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH, LOG_FILE_PATH, QUEUE_SOCKETS_PATH, WAZUH_PATH
+from wazuh_testing import UDP, TCP, ARCHIVES_LOG_PATH, LOG_FILE_PATH, QUEUE_SOCKETS_PATH, WAZUH_PATH
 from wazuh_testing.tools.file import bind_unix_socket, truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, ManInTheMiddle, QueueMonitor, \
     REMOTED_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
+
 
 REMOTED_GLOBAL_TIMEOUT = 10
 SYNC_FILES_TIMEOUT = 10
@@ -326,8 +326,8 @@ def create_archives_log_monitor():
         FileMonitor: object to monitor the archives.log.
     """
     # Reset archives.log and start a new monitor
-    truncate_file(ARCHIVES_LOG_FILE_PATH)
-    wazuh_archives_log_monitor = FileMonitor(ARCHIVES_LOG_FILE_PATH)
+    truncate_file(ARCHIVES_LOG_PATH)
+    wazuh_archives_log_monitor = FileMonitor(ARCHIVES_LOG_PATH)
 
     return wazuh_archives_log_monitor
 
@@ -653,7 +653,7 @@ def check_push_shared_config(agent, sender, injector=None):
                                 error_message='The start up message has not been found in the logs')
 
         wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-        
+
         sender.send_event(agent.keep_alive_event)
 
         # Check up file (push start) message
