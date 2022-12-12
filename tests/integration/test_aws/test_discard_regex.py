@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from wazuh_testing import T_20, global_parameters
+from wazuh_testing import T_60, global_parameters
 from wazuh_testing.modules.aws import event_monitor
 from wazuh_testing.modules.aws.db_utils import s3_db_exists
 from wazuh_testing.tools.configuration import (
@@ -35,7 +35,6 @@ configurations = load_configuration_template(
 def test_discard_regex(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_s3_cloudtrail_db,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor,
-    analysisd_monitor
 ):
     """
     description: Fetch logs excluding the ones that match with the regex.
@@ -100,6 +99,8 @@ def test_discard_regex(
     found_logs = metadata["found_logs"]
     skipped_logs = metadata["skipped_logs"]
 
+    pattern = fr'.*The "{discard_regex}" regex found a match in the "{discard_field}" field. The event will be skipped.'
+
     parameters = [
         "wodles/aws/aws-s3",
         "--bucket", bucket_name,
@@ -125,17 +126,11 @@ def test_discard_regex(
         error_message="The AWS module wasn't called with the correct parameters",
     ).result()
 
-    analysisd_monitor.start(
-        timeout=T_20,
-        callback=event_monitor.callback_event_sent_to_analysisd,
-        accum_results=found_logs - skipped_logs
-    )
-
     wazuh_log_monitor.start(
-        timeout=global_parameters.default_timeout,
-        callback=event_monitor.callback_detect_event_processed,
-        error_message="The AWS module didn't process the expected number of events",
-        accum_results=found_logs
+        timeout=10,
+        callback=event_monitor.make_aws_callback(pattern),
+        error_message="The AWS module didn't show correct message about discard regex",
+        accum_results=skipped_logs
     ).result()
 
     assert s3_db_exists()

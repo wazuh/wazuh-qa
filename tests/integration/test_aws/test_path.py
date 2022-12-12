@@ -138,8 +138,8 @@ def test_path(
                 callback=event_monitor.callback_detect_event_processed,
             ).result()
 
-        result = wazuh_log_monitor.start(
-            timeout=global_parameters.default_timeout,
+        wazuh_log_monitor.start(
+            timeout=T_10,
             callback=event_monitor.make_aws_callback(pattern),
             error_message="The AWS module didn't show correct message about empty path"
         ).result()

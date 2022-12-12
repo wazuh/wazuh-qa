@@ -8,3 +8,4 @@
     bucket_type: cloudtrail
     bucket_name: wazuh-cloudtrail-integration-tests
     only_logs_after: 2022-NOV-20
+    expected_results: 5

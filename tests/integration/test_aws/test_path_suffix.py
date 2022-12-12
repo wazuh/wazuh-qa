@@ -100,8 +100,8 @@ def test_path_suffix(
     path_suffix = metadata["path_suffix"]
     expected_results = metadata["expected_results"]
     pattern = (
-        fr".*WARNING: Bucket:  -  Invalid type of bucket. "
-        fr"The bucket was set up as '{bucket_type}' type and this bucket does not contain log files from this type.*"
+        fr".*No logs found in 'AWSLogs/{path_suffix}/'. "
+        fr"Check the provided prefix and the location of the logs for the bucket type '{bucket_type}'*"
     )
 
 
@@ -143,7 +143,7 @@ def test_path_suffix(
             ).result()
 
         wazuh_log_monitor.start(
-            timeout=global_parameters.default_timeout,
+            timeout=T_10,
             callback=event_monitor.make_aws_callback(pattern),
             error_message="The AWS module didn't show correct message about empty path_suffix"
         ).result()

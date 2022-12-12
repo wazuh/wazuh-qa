@@ -104,6 +104,7 @@ def test_without_only_logs_after(
     """
     bucket_name = metadata["bucket_name"]
     bucket_type = metadata["bucket_type"]
+    expected_results = metadata["expected_results"]
 
     parameters = [
         "wodles/aws/aws-s3",
@@ -132,6 +133,7 @@ def test_without_only_logs_after(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_event_processed,
         error_message="The AWS module didn't process the expected number of events",
+        accum_results=expected_results
     ).result()
 
     assert s3_db_exists()
@@ -213,6 +215,7 @@ def test_with_only_logs_after(
     bucket_name = metadata["bucket_name"]
     bucket_type = metadata["bucket_type"]
     only_logs_after = metadata["only_logs_after"]
+    expected_results = metadata["expected_results"]
 
     parameters = [
         "wodles/aws/aws-s3",
@@ -240,7 +243,7 @@ def test_with_only_logs_after(
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_event_processed,
-        accum_results=2,
+        accum_results=expected_results,
         error_message="The AWS module didn't process the expected number of events",
     ).result()
 

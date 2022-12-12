@@ -6,3 +6,4 @@
   metadata:
     bucket_type: cloudtrail
     bucket_name: wazuh-cloudtrail-integration-tests
+    expected_results: 1
