@@ -77,7 +77,7 @@ from test_fim.common import make_diff_file_path
 
 # Marks
 
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.tier(level=1)]
 
 
 # Reference paths
