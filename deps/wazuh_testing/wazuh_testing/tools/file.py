@@ -31,6 +31,7 @@ if sys.platform == 'win32':
     import win32api
     import win32con
 
+
 def read_json(file_path):
     """
     Read a JSON file from a given path, return a dictionary with the json data.
