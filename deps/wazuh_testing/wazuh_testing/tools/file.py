@@ -28,7 +28,8 @@ from wazuh_testing import logger, REGULAR, SYMLINK, HARDLINK
 if sys.platform == 'win32':
     import win32security as win32sec
     import ntsecuritycon as ntc
-
+    import win32api
+    import win32con
 
 def read_json(file_path):
     """
