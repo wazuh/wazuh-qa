@@ -28,6 +28,8 @@ from wazuh_testing import logger, REGULAR, SYMLINK, HARDLINK
 if sys.platform == 'win32':
     import win32security as win32sec
     import ntsecuritycon as ntc
+    import win32con
+    import win32api
 
 
 def read_json(file_path):
@@ -851,7 +853,6 @@ def modify_file_win_attributes(path, name):
     """
     if sys.platform != 'win32':
         return
-
     logger.info("- Changing win attributes of " + str(os.path.join(path, name)))
     path_to_file = os.path.join(path, name)
     win32api.SetFileAttributes(path_to_file, win32con.FILE_ATTRIBUTE_HIDDEN)
