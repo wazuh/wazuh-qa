@@ -70,8 +70,8 @@ cases_path = Path(TESTS_CASES_PATH, f'cases_{TEST_NAME}.yaml')
 config_path = Path(CONFIGS_PATH, f'config_{TEST_NAME}.yaml')
 
 # Configurations and test cases
-_, metadata, case_ids = get_test_cases_data(cases_path)
-configuration = load_configuration_template(config_path, _, metadata)
+params, metadata, case_ids = get_test_cases_data(cases_path)
+configuration = load_configuration_template(config_path, params, metadata)
 local_internal_options = {'remoted.debug': '2'}
 
 
@@ -93,11 +93,11 @@ def test_remoted_multi_agents(dockerized_agents: AgentsDockerizer, metadata: dic
 
     wazuh_min_version: 4.4.0
 
-    tier: 1
+    tier: 2
 
     parameters:
         - dockerized_agents:
-            type: AgentsDockerizer
+            type: fixture
             brief: Running agents inside docker containers.
         - configuration:
             type: dict
@@ -111,9 +111,6 @@ def test_remoted_multi_agents(dockerized_agents: AgentsDockerizer, metadata: dic
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - restart_wazuh_daemon_function:
-            type: fixture
-            brief: Restart wazuh's daemon before starting a test.
 
     assertions:
         - Verify all the agents are active after a reconnection
