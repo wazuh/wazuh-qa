@@ -103,6 +103,9 @@ def test_invalid_signature_id(configuration, metadata, set_wazuh_configuration, 
         - truncate_monitored_files:
             type: fixture
             brief: Truncate all the log files and json alerts files before and after the test execution.
+        - restart_wazuh_module:
+            type: fixture
+            brief: Restart wazuh at the start of the module to apply configuration.
 
     assertions:
         - Check that wazuh starts
