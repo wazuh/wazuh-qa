@@ -1,0 +1,16 @@
+- name: custom
+  description: Custom configuration
+  configuration_parameters:
+    CONNECTION: 'secure'
+    PORT: 1514
+    PROTOCOL: 'udp'
+    QUEUE_SIZE: 131071
+    AGENTS_DISCONNECTION_TIME: 300
+    AGENTS_DISCONNECTION_ALERT_TIME: 5
+  metadata:
+    connection: 'secure'
+    port: 1514
+    protocol: 'udp'
+    queue_size: 131071
+    agents_disconnection_time: 300
+    agents_disconnection_alert_time: 5

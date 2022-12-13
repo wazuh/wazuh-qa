@@ -1,0 +1,17 @@
+- sections:
+    - section: remote
+      elements:
+        - connection:
+            value: CONNECTION
+        - port:
+            value: PORT
+        - protocol:
+            value: PROTOCOL
+        - queue_size:
+            value: QUEUE_SIZE
+    - section: global
+      elements:
+        - agents_disconnection_time:
+            value: AGENTS_DISCONNECTION_TIME
+        - agents_disconnection_alert_time:
+            value: AGENTS_DISCONNECTION_ALERT_TIME
