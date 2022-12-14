@@ -8,7 +8,8 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 type: integration
 
 brief: Wazuh gathers information about the agent system (OS, hardware, packages, etc.) periodically in a DB and sends
-       it to the manager, which finally stores this information in a DB.
+       it to the manager, which finally stores this information in a DB. These tests check the different syscollector
+       configurations and the complete scan process.
 
 components:
     - modulesd
@@ -371,7 +372,7 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
                               configure_local_internal_options_module, truncate_monitored_files,
                               remove_agent_syscollector_info, daemons_handler_function):
     '''
-    description: Check that the module sets the default values when the configuration block is empty.
+    description: Check that the Sycollector scan completes when all scans are enabled.
 
     test_phases:
         - Configure syscollector.
@@ -416,22 +417,21 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
     '''
     file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
     # 60s + 2 seconds of margin because it includes the case when the agent starts for the first time
-    evm.check_module_is_starting(file_monitor=file_monitor, timeout=T_60 + 2)
+    evm.check_module_is_starting(file_monitor=file_monitor, timeout=T_60 + 2, update_position=False)
     # Check general scan has started
-    evm.check_scan_started(file_monitor=file_monitor, timeout=T_10)
+    evm.check_scan_started(file_monitor=file_monitor, timeout=T_10, update_position=False)
 
     # Check that each scan was accomplished
     checks_to_run = [evm.check_hardware_scan_finished, evm.check_os_scan_finished, evm.check_network_scan_finished,
                      evm.check_packages_scan_finished, evm.check_ports_scan_finished, evm.check_processes_scan_finished]
     if sys.platform == 'win32':
-        scan_checks.append(evm.check_hotfixes_scan_finished)
+        checks_to_run.append(evm.check_hotfixes_scan_finished)
 
     for check_runner in checks_to_run:
         # Run check
-        file_monitor = FileMonitor(LOG_FILE_PATH)
-        check_runner(file_monitor=file_monitor, timeout=T_10)
+        check_runner(file_monitor=file_monitor, timeout=T_10, update_position=False)
 
     # Check general scan has finished
-    evm.check_scan_finished(file_monitor=file_monitor, timeout=T_10)
+    evm.check_scan_finished(file_monitor=file_monitor, timeout=T_10, update_position=False)
     # Check that the sync has finished
-    evm.check_sync_finished(file_monitor=file_monitor, timeout=T_10)
+    evm.check_sync_finished(file_monitor=file_monitor, timeout=T_10, update_position=False)
