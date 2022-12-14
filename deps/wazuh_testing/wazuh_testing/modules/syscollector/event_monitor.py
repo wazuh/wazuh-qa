@@ -57,7 +57,6 @@ def check_scan_started(file_monitor=None, timeout=T_5, prefix=SYSCOLLECTOR_PREFI
                                       prefix=prefix, update_position=update_position)
 
 
-
 def check_scan_finished(file_monitor=None, timeout=T_5, update_position=True):
     """Check if the syscollector scan has finished"""
     check_syscollector_event(file_monitor=file_monitor, callback=CB_SCAN_FINISHED, timeout=timeout,
