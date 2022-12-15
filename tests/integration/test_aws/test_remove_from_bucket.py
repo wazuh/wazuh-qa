@@ -25,8 +25,8 @@ local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0'
 
 # ---------------------------------------------------- TEST_REMOVE_FROM_BUCKET -----------------------------------------
 # Configuration and cases data
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_remove_from_bucket.yml')
-cases_path = os.path.join(TEST_CASES_PATH, 'cases_remove_from_bucket.yml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_remove_from_bucket.yaml')
+cases_path = os.path.join(TEST_CASES_PATH, 'cases_remove_from_bucket.yaml')
 
 configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
 configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
