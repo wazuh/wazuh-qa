@@ -163,7 +163,7 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
     # If it matches with ignore, it should ignore the log due to ignore config
     if 'ignore' in metadata['matches']:
         evm.check_ignore_restrict_message(message=log, regex=metadata['ignore_regex'], tag='ignore',
-                                           prefix=prefix)
+                                          prefix=prefix)
         if 'restrict' in metadata['matches']:
             evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['restrict_regex'], tag='restrict',
                                                         prefix=prefix)
@@ -180,4 +180,4 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
         evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['ignore_regex'], tag='ignore',
                                                     prefix=prefix)
         evm.check_ignore_restrict_message(message=log, regex=metadata['restrict_regex'], tag='restrict',
-                                           prefix=prefix)
+                                          prefix=prefix)
