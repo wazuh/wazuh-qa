@@ -70,210 +70,25 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Test configurations and cases data
 test_file = os.path.join(PREFIX, 'test')
-# --------------------------------TEST_IGNORE_DEFAULT--------------------------------------------
-t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_ignore_regex_default.yaml')
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_ignore_regex_default.yaml')
-
-t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
-for count, value in enumerate(t1_configuration_parameters):
-    t1_configuration_parameters[count]['LOCATION'] = test_file
-t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
-                                                t1_configuration_metadata)
-
-# --------------------------------TEST_IGNORE_REGEX_TYPE_VALUES--------------------------------------
-t2_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_ignore_regex_type_values.yaml')
-t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_ignore_regex_type_values.yaml')
-
-t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
-for count, value in enumerate(t2_configuration_parameters):
-    t2_configuration_parameters[count]['LOCATION'] = test_file
-t2_configurations = load_configuration_template(t2_configurations_path, t2_configuration_parameters,
-                                                t2_configuration_metadata)
 
 # --------------------------------TEST_IGNORE_MULTIPLE_REGEX-------------------------------------------
-t3_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_ignore_multiple_regex.yaml')
-t3_cases_path = os.path.join(TEST_CASES_PATH, 'cases_ignore_multiple_regex.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_ignore_multiple_regex.yaml')
+cases_path = os.path.join(TEST_CASES_PATH, 'cases_ignore_multiple_regex.yaml')
 
-t3_configuration_parameters, t3_configuration_metadata, t3_case_ids = get_test_cases_data(t3_cases_path)
-for count, value in enumerate(t3_configuration_parameters):
-    t3_configuration_parameters[count]['LOCATION'] = test_file
-t3_configurations = load_configuration_template(t3_configurations_path, t3_configuration_parameters,
-                                                t3_configuration_metadata)
+configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
+for count, value in enumerate(configuration_parameters):
+    configuration_parameters[count]['LOCATION'] = test_file
+configurations = load_configuration_template(configurations_path, configuration_parameters,
+                                             configuration_metadata)
 
 prefix = lc.LOG_COLLECTOR_PREFIX
 local_internal_options = lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS
 
 
 # Tests
-@pytest.mark.tier(level=0)
-@pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
-@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
-def test_ignore_default(configuration, metadata, new_file_path, create_file, truncate_monitored_files,
-                        set_wazuh_configuration, configure_local_internal_options_function, restart_wazuh_function):
-    '''
-    description: Check if logcollector reads or ignores a log according to a regex configured in the ignored tag for a
-                 given log file.
-
-    test_phases:
-        - Set a custom Wazuh configuration.
-        - Restart monitord.
-        - Insert the log message.
-        - Check expected response.
-
-    wazuh_min_version: 4.5.0
-
-    tier: 0
-
-    parameters:
-        - configuration:
-            type: dict
-            brief: Wazuh configuration data. Needed for set_wazuh_configuration fixture.
-        - metadata:
-            type: dict
-            brief: Wazuh configuration metadata
-        - new_file_path:
-            type: str
-            brief: path for the log file to be created and deleted after the test.
-        - create_file:
-            type: fixture
-            brief: Create an empty file for logging
-        - truncate_monitored_files:
-            type: fixture
-            brief: Truncate all the log files and json alerts files before and after the test execution.
-        - set_wazuh_configuration:
-            type: fixture
-            brief: Set the wazuh configuration according to the configuration data.
-        - configure_local_internal_options:
-            type: fixture
-            brief: Configure the local_internal_options file.
-        - restart_wazuh_function:
-            type: fixture
-            brief: Restart wazuh.
-
-    assertions:
-        - Check that logcollector is analyzing the log file.
-        - Check that logs are ignored when they match with configured regex
-
-    input_description:
-        - The `configuration_ignore_regex_default.yaml` file provides the module configuration for this test.
-        - The `cases_ignore_regex_default` file provides the test cases.
-
-    expected_output:
-        - r".*wazuh-logcollector.*Analizing file: '{file}'.*"
-        - r".*wazuh-logcollector.*DEBUG: Reading syslog '{message}'.*"
-        - r".*wazuh-logcollector.*DEBUG: Ignoring the log line '{message}' due to {tag} config: '{regex}'"
-    '''
-    log = metadata['log_sample']
-    command = f"echo {log}>> {test_file}"
-
-    if sys.platform == 'win32':
-        file = re.escape(test_file)
-    else:
-        file = test_file
-
-    # Check log file is being analyzed
-    evm.check_analyzing_file(file=file, prefix=prefix)
-    # Insert log
-    run_local_command_returning_output(command)
-
-    # Check the log is read from the monitored file
-    evm.check_syslog_messages(message=log, prefix=prefix)
-
-    # Check response
-    if metadata['matches'] is not True:
-        evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['regex'], tag='ignore', prefix=prefix)
-
-    else:
-        evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='ignore',
-                                           prefix=prefix)
-
-
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
-@pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
-def test_ignore_regex_type_values(configuration, metadata, new_file_path, create_file, truncate_monitored_files,
-                                  set_wazuh_configuration, configure_local_internal_options_function,
-                                  restart_wazuh_function):
-    '''
-    description: Check if logcollector reads or ignores a log according to a regex configured in the ignored tag for a
-                 given log file, , with each configured value for the ignore 'type' attribute value configured.
-
-    test_phases:
-        - Set a custom Wazuh configuration.
-        - Restart monitord.
-        - Insert the log message.
-        - Check expected response.
-
-    wazuh_min_version: 4.5.0
-
-    tier: 1
-
-    parameters:
-        - configuration:
-            type: dict
-            brief: Wazuh configuration data. Needed for set_wazuh_configuration fixture.
-        - metadata:
-            type: dict
-            brief: Wazuh configuration metadata
-        - new_file_path:
-            type: str
-            brief: path for the log file to be created and deleted after the test.
-        - create_file:
-            type: fixture
-            brief: Create an empty file for logging
-        - truncate_monitored_files:
-            type: fixture
-            brief: Truncate all the log files and json alerts files before and after the test execution.
-        - set_wazuh_configuration:
-            type: fixture
-            brief: Set the wazuh configuration according to the configuration data.
-        - configure_local_internal_options:
-            type: fixture
-            brief: Configure the local_internal_options file.
-        - restart_wazuh_function:
-            type: fixture
-            brief: Restart wazuh.
-
-    assertions:
-        - Check that logcollector is analyzing the log file.
-        - Check that logs are ignored when they match with configured regex
-
-    input_description:
-        - The `configuration_ignore_regex_values.yaml` file provides the module configuration for this test.
-        - The `cases_ignore_regex_values` file provides the test cases.
-
-    expected_output:
-        - r".*wazuh-logcollector.*Analizing file: '{file}'.*"
-        - r".*wazuh-logcollector.*DEBUG: Reading syslog '{message}'.*"
-        - r".*wazuh-logcollector.*DEBUG: Ignoring the log line '{message}' due to {tag} config: '{regex}'"
-    '''
-    log = metadata['log_sample']
-    command = f"echo {log}>> {test_file}"
-
-    if sys.platform == 'win32':
-        file = re.escape(test_file)
-    else:
-        file = test_file
-
-    # Check log file is being analized
-    evm.check_analyzing_file(file=file, prefix=prefix)
-    # Insert log
-    run_local_command_returning_output(command)
-
-    # Check the log is read from the monitored file
-    evm.check_syslog_messages(message=log, prefix=prefix)
-
-    # Check response
-    if metadata['matches'] is not True:
-        evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['regex'], tag='ignore', prefix=prefix)
-    else:
-        evm.check_ignore_restrict_messages(message=log, regex=metadata['regex'], tag='ignore',
-                                           prefix=prefix)
-
-
-@pytest.mark.tier(level=1)
-@pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
-@pytest.mark.parametrize('configuration, metadata', zip(t3_configurations, t3_configuration_metadata), ids=t3_case_ids)
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_ignore_multiple_regex(configuration, metadata, new_file_path, create_file, truncate_monitored_files,
                                set_wazuh_configuration, configure_local_internal_options_function,
                                restart_wazuh_function):
@@ -332,10 +147,7 @@ def test_ignore_multiple_regex(configuration, metadata, new_file_path, create_fi
     log = metadata['log_sample']
     command = f"echo {log}>> {test_file}"
 
-    if sys.platform == 'win32':
-        file = re.escape(test_file)
-    else:
-        file = test_file
+    file = re.escape(test_file) if sys.platform == 'win32' else test_file
 
     # Check log file is being analized
     evm.check_analyzing_file(file=file, prefix=prefix)

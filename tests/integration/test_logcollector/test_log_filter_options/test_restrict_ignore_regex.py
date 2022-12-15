@@ -60,6 +60,7 @@ import pytest
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
+from wazuh_testing.tools.services import get_service
 from wazuh_testing.modules.logcollector import event_monitor as evm
 from wazuh_testing.modules import logcollector as lc
 
@@ -148,10 +149,7 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
     log = metadata['log_sample']
     command = f"echo {log}>> {test_file}"
 
-    if sys.platform == 'win32':
-        file = re.escape(test_file)
-    else:
-        file = test_file
+    file = re.escape(test_file) if sys.platform == 'win32' else test_file
 
     # Check log file is being analized
     evm.check_analyzing_file(file=file, prefix=prefix)
