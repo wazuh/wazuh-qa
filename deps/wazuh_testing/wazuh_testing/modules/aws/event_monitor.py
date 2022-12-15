@@ -82,3 +82,13 @@ def check_non_processed_logs_from_output(command_output: str, expected_results: 
         expected_results=expected_results,
         error_message="Some logs may where processed"
     )
+
+def check_marker_from_output(command_output: str, file_key: str,expected_results: int=1):
+    pattern = fr".*DEBUG: \+\+\+ Marker: {file_key}"
+
+    analyze_command_output(
+        command_output,
+        callback=make_aws_callback(pattern),
+        expected_results=expected_results,
+        error_message="The AWS module did't use the correct marker"
+    )

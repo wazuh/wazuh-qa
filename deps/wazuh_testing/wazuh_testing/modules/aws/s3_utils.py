@@ -1,13 +1,14 @@
 """AWS S3 related utils"""
 
 import json
-import logging
 from typing import Tuple
 
 import boto3
 from botocore import exceptions
 from botocore.exceptions import ClientError
 from .data_generator import get_data_generator
+
+from wazuh_testing import logger
 
 session = boto3.Session(profile_name="qa")
 s3 = session.resource('s3')
@@ -30,7 +31,7 @@ def upload_file(bucket_type: str, bucket_name: str) -> str:
     try:
         obj.put(Body=json.dumps(data).encode())
     except ClientError as e:
-        logging.error(e)
+        logger.error(e)
         filename = ''
     return filename
 
@@ -70,3 +71,31 @@ def file_exists(filename: str, bucket_name: str) -> bool:
             exists = False
 
     return exists
+
+
+def get_last_file_key(bucket_type: str, bucket_name: str) -> str:
+    """Return the last file key contained in a default path of a bucket
+
+    Parameters
+    ----------
+    bucket_type : str
+        Bucket type to obtain the data generator
+    bucket_name : str
+        bucket that contains the file
+
+    Returns
+    -------
+    str
+        The last key
+    """
+
+    dg = get_data_generator(bucket_type)
+    bucket = s3.Bucket(bucket_name)
+    last_key = None
+
+    try:
+        *_, last_item = bucket.objects.filter(Prefix=dg.BASE_PATH)
+        last_key = last_item.key
+    except ValueError:
+        last_key = ""
+    return last_key

@@ -10,7 +10,7 @@ from wazuh_testing.modules.aws.db_utils import (
     get_s3_db_row,
     s3_db_exists,
 )
-from wazuh_testing.modules.aws.s3_utils import upload_file
+from wazuh_testing.modules.aws.s3_utils import upload_file, get_last_file_key
 from wazuh_testing.tools.configuration import (
     get_test_cases_data,
     load_configuration_template,
@@ -323,38 +323,29 @@ def test_multiple_calls(
     # Call the module without only_logs_after and check that no logs were processed
     event_monitor.check_non_processed_logs_from_output(command_output=call_aws_module(*base_parameters))
 
-    # Upload a log file for the day of the test execution and call the module with the same parameters as before,
-    # check that the uploaded logs were processed
-
-    metadata["filename"] = upload_file(bucket_type, bucket_name)
-
-    event_monitor.check_processed_logs_from_output(command_output=call_aws_module(*base_parameters))
-
-    # Call the module with the same parameters and check that no logs were processed, there were no duplicates
-
-    event_monitor.check_non_processed_logs_from_output(command_output=call_aws_module(*base_parameters))
-
     # Call the module with only_logs_after set in the past and check that the expected number of logs were
     # processed
     event_monitor.check_processed_logs_from_output(
-        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, "2022-NOV-25")
+        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, "2022-NOV-20"),
+        expected_results=3
     )
 
     # Call the module with the same parameters in and check there were no duplicates
     event_monitor.check_non_processed_logs_from_output(
-        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, "2022-NOV-25")
-    )
-
-    # Call the module with only_logs_after set with an older date check that old logs were processed without
-    # duplicates
-    event_monitor.check_processed_logs_from_output(
-        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, "2022-NOV-20"),
-        expected_results=2
+        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, "2022-NOV-20")
     )
 
     # Call the module with only_logs_after set with an early date than setted previously and check that no logs
     # were processed, there were no duplicates
     event_monitor.check_non_processed_logs_from_output(
         command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, "2022-NOV-22"),
-        expected_results=3
+    )
+
+    # Upload a log file for the day of the test execution and call the module without only_logs_after and check that
+    # only the uploaded logs were processed and the last marker is specified in the DB.
+    last_marker_key = get_last_file_key(bucket_type, bucket_name)
+    metadata["filename"] = upload_file(bucket_type, bucket_name)
+    event_monitor.check_marker_from_output(
+        command_output=call_aws_module(*base_parameters),
+        file_key=last_marker_key
     )
