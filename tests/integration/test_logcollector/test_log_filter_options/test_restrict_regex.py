@@ -158,7 +158,7 @@ def test_restrict_multiple_regex(configuration, metadata, new_file_path, create_
     run_local_command_returning_output(command)
 
     # Check the log is read from the monitored file
-    evm.check_syslog_messages(message=log, prefix=prefix)
+    evm.check_syslog_message(message=log, prefix=prefix)
 
     # Check response
     if 'regex1' in metadata['matches']:
@@ -168,10 +168,10 @@ def test_restrict_multiple_regex(configuration, metadata, new_file_path, create_
             evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['regex2'], tag='restrict',
                                                         prefix=prefix)
         else:
-            evm.check_ignore_restrict_messages(message=log, regex=metadata['regex2'], tag='restrict', prefix=prefix)
+            evm.check_ignore_restrict_message(message=log, regex=metadata['regex2'], tag='restrict', prefix=prefix)
     elif metadata['matches'] == 'regex2':
         evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['regex2'], tag='restrict',
                                                     prefix=prefix)
-        evm.check_ignore_restrict_messages(message=log, regex=metadata['regex1'], tag='restrict', prefix=prefix)
+        evm.check_ignore_restrict_message(message=log, regex=metadata['regex1'], tag='restrict', prefix=prefix)
     else:
-        evm.check_ignore_restrict_messages(message=log, regex=metadata['regex1'], tag='restrict', prefix=prefix)
+        evm.check_ignore_restrict_message(message=log, regex=metadata['regex1'], tag='restrict', prefix=prefix)

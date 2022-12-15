@@ -157,12 +157,12 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
     # Insert log
     run_local_command_returning_output(command)
     # Check the log is read from the monitored file
-    evm.check_syslog_messages(message=log, prefix=prefix)
+    evm.check_syslog_message(message=log, prefix=prefix)
 
     # Check responses
     # If it matches with ignore, it should ignore the log due to ignore config
     if 'ignore' in metadata['matches']:
-        evm.check_ignore_restrict_messages(message=log, regex=metadata['ignore_regex'], tag='ignore',
+        evm.check_ignore_restrict_message(message=log, regex=metadata['ignore_regex'], tag='ignore',
                                            prefix=prefix)
         if 'restrict' in metadata['matches']:
             evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['restrict_regex'], tag='restrict',
@@ -179,5 +179,5 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
     else:
         evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['ignore_regex'], tag='ignore',
                                                     prefix=prefix)
-        evm.check_ignore_restrict_messages(message=log, regex=metadata['restrict_regex'], tag='restrict',
+        evm.check_ignore_restrict_message(message=log, regex=metadata['restrict_regex'], tag='restrict',
                                            prefix=prefix)

@@ -73,8 +73,9 @@ def check_analyzing_file(file, prefix, error_message=None, file_monitor=None):
                              error_message=error_message, prefix=prefix)
 
 
-def check_syslog_messages(message, prefix, error_message=None, file_monitor=None, timeout=T_30, escape=False):
+def check_syslog_message(message, prefix, error_message=None, file_monitor=None, timeout=T_30, escape=False):
     """Create a callback to detect "DEBUG: Read <number> lines from command <command>" debug line.
+    
     Args:
         message (str): Command to be monitored.
         error_message (str): Error message.
@@ -92,9 +93,10 @@ def check_syslog_messages(message, prefix, error_message=None, file_monitor=None
                              error_message=error_message, prefix=prefix, escape=escape)
 
 
-def check_ignore_restrict_messages(message, regex, tag, prefix, error_message=None, file_monitor=None, timeout=T_10,
+def check_ignore_restrict_message(message, regex, tag, prefix, error_message=None, file_monitor=None, timeout=T_10,
                                    escape=False):
     """Create a callback to detect "DEBUG: Ignoring the log ... due to config" debug line.
+    
     Args:
         message (str): Command to be monitored.
         regex (str): regex pattern configured to ignore or restrict to.
@@ -104,6 +106,8 @@ def check_ignore_restrict_messages(message, regex, tag, prefix, error_message=No
         file_monitor (FileMonitor): Log monitor.
         timeout (int): Timeout to check the log.
         escape (bool): Flag to escape special characters in the pattern.
+    
+    Returns: True if the expected message has been found, False otherwise.
     """
     if error_message is None:
         error_message = f"Did not receive the expected 'Ignoring the log line: {message} due to {tag} config' event"
@@ -115,15 +119,16 @@ def check_ignore_restrict_messages(message, regex, tag, prefix, error_message=No
 
 
 def check_ignore_restrict_message_not_found(message, regex, tag, prefix):
-    '''Check that an unexpected "Ignoring the log line..." event does not appear and a log is not ignored when it
+    """Check that an unexpected "Ignoring the log line..." event does not appear and a log is not ignored when it
        does not match the regex.
+    
     Args:
         message (str): Message to be monitored.
         regex (str): regex pattern configured to ignore or restrict to.
         tag (str): string with the configured tag. Values: 'ignore' or 'restrict'
         prefix (str): Daemon that generates the error log.
-    '''
+    """
     log_found = False
     with pytest.raises(TimeoutError):
-        log_found = check_ignore_restrict_messages(message=message, regex=regex, tag=tag, prefix=prefix)
+        log_found = check_ignore_restrict_message(message=message, regex=regex, tag=tag, prefix=prefix)
     assert log_found is False, ERR_MSG_UNEXPECTED_IGNORE_EVENT
