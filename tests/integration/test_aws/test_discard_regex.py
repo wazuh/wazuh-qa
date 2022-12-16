@@ -30,6 +30,7 @@ configurations = load_configuration_template(
     configurations_path, configuration_parameters, configuration_metadata
 )
 
+
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_discard_regex(

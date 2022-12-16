@@ -10,7 +10,7 @@ from wazuh_testing.modules.aws.db_utils import (
     get_s3_db_row,
     s3_db_exists,
 )
-from wazuh_testing.modules.aws.s3_utils import upload_file, get_last_file_key
+from wazuh_testing.modules.aws.s3_utils import get_last_file_key, upload_file
 from wazuh_testing.tools.configuration import (
     get_test_cases_data,
     load_configuration_template,
@@ -128,7 +128,6 @@ def test_without_only_logs_after(
         error_message="The AWS module wasn't called with the correct parameters",
     ).result()
 
-
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_event_processed,
@@ -143,6 +142,7 @@ def test_without_only_logs_after(
     assert bucket_name in data.bucket_path
     assert metadata["uploaded_file"] == data.log_key
 
+
 # ---------------------------------------------------- TEST_WITH_ONLY_LOGS_AFTER ---------------------------------------
 t2_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_with_only_logs_after.yaml')
 t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_with_only_logs_after.yaml')
@@ -151,6 +151,7 @@ t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_c
 t2_configurations = load_configuration_template(
     t2_configurations_path, t2_configuration_parameters, t2_configuration_metadata
 )
+
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
@@ -239,7 +240,6 @@ def test_with_only_logs_after(
         error_message="The AWS module wasn't called with the correct parameters",
     ).result()
 
-
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_event_processed,
@@ -255,10 +255,12 @@ def test_with_only_logs_after(
             datetime.strptime(only_logs_after, "%Y-%b-%d") < datetime.strptime(str(row.created_date), "%Y%m%d")
         )
 
+
 # ---------------------------------------------------- TEST_MULTIPLE_CALLS ---------------------------------------------
 t3_cases_path = os.path.join(TEST_CASES_PATH, 'cases_multiple_calls.yaml')
 
 _, t3_configuration_metadata, t3_case_ids = get_test_cases_data(t3_cases_path)
+
 
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize("metadata", t3_configuration_metadata, ids=t3_case_ids)
@@ -273,8 +275,8 @@ def test_multiple_calls(
 
         - test:
             - Call the module without only_logs_after and check that no logs were processed
-            - Upload a log file for the day of the test execution and call the module with the same parameters as before,
-              check that the uploaded logs were processed
+            - Upload a log file for the day of the test execution and call the module with the same parameters as
+              before, check that the uploaded logs were processed
             - Call the module with the same parameters and check that no logs were processed, there were no duplicates
             - Call the module with only_logs_after set in the past and check that the expected number of logs were
               processed

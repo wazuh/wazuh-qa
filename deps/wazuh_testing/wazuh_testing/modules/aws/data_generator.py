@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from . import constants as cons
 
+
 class DataGenerator:
     BASE_PATH = ''
     BASE_FILE_NAME = ''
@@ -28,7 +29,6 @@ class CloudTrailDataGenerator(DataGenerator):
         name = f'{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}{cons.JSON_EXT}'
 
         return f'{path}{name}'
-
 
     def get_data_sample(self) -> dict:
         return {
@@ -75,10 +75,12 @@ class CloudTrailDataGenerator(DataGenerator):
             ]
         }
 
+
 # Maps bucket type with correspondent data generator
 buckets_data_mapping = {
     cons.CLOUD_TRAIL_TYPE: CloudTrailDataGenerator
 }
+
 
 def get_data_generator(bucket_type: str) -> DataGenerator:
     """Given the bucket type return the correspondant data generator instance

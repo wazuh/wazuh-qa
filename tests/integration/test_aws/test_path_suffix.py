@@ -1,15 +1,13 @@
 import os
 
 import pytest
-from wazuh_testing import T_10, T_20, global_parameters
+from wazuh_testing import T_10, global_parameters
 from wazuh_testing.modules.aws import event_monitor
 from wazuh_testing.modules.aws.db_utils import get_s3_db_row, s3_db_exists, table_exists
-from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import (
     get_test_cases_data,
     load_configuration_template,
 )
-from wazuh_testing.tools.monitoring import FileMonitor
 
 pytestmark = [pytest.mark.server]
 
@@ -31,6 +29,7 @@ configuration_parameters, configuration_metadata, case_ids = get_test_cases_data
 configurations = load_configuration_template(
     configurations_path, configuration_parameters, configuration_metadata
 )
+
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
@@ -103,7 +102,6 @@ def test_path_suffix(
         fr".*No logs found in 'AWSLogs/{path_suffix}/'. "
         fr"Check the provided prefix and the location of the logs for the bucket type '{bucket_type}'*"
     )
-
 
     parameters = [
         "wodles/aws/aws-s3",

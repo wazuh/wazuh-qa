@@ -1,14 +1,13 @@
 """AWS S3 related utils"""
 
 import json
-from typing import Tuple
 
 import boto3
 from botocore import exceptions
 from botocore.exceptions import ClientError
-from .data_generator import get_data_generator
-
 from wazuh_testing import logger
+
+from .data_generator import get_data_generator
 
 session = boto3.Session(profile_name="qa")
 s3 = session.resource('s3')
@@ -34,6 +33,7 @@ def upload_file(bucket_type: str, bucket_name: str) -> str:
         logger.error(e)
         filename = ''
     return filename
+
 
 def delete_file(filename: str, bucket_name: str) -> None:
     """Delete the given a file from bucket a bucket

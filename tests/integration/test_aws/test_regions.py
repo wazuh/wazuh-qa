@@ -35,6 +35,7 @@ configurations = load_configuration_template(
     configurations_path, configuration_parameters, configuration_metadata
 )
 
+
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_regions(
@@ -104,7 +105,6 @@ def test_regions(
     regions = metadata["regions"]
     expected_results = metadata["expected_results"]
     pattern = fr".*DEBUG: \+\+\+ No logs to process in bucket: {RANDOM_ACCOUNT_ID}/{regions}"
-
 
     parameters = [
         "wodles/aws/aws-s3",

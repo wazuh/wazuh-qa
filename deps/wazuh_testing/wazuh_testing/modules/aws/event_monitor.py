@@ -39,9 +39,11 @@ def callback_detect_aws_module_called(parameters: list):
     regex = re.compile(fr'.*DEBUG: Launching S3 Command: {" ".join(parameters)}\n*')
     return lambda line: regex.match(line)
 
+
 def callback_detect_aws_module_start(line):
     if re.match(r".*INFO: Module AWS started*", line):
         return line
+
 
 def callback_detect_all_aws_err(line):
     if re.match(PARSER_ERROR, line):
@@ -49,23 +51,28 @@ def callback_detect_all_aws_err(line):
     elif re.match(MODULE_ERROR, line):
         return line
 
+
 def callback_detect_aws_read_err(line):
     if re.match(PARSER_ERROR, line):
         return line
+
 
 def callback_detect_aws_wmodule_err(line):
     if re.match(MODULE_ERROR, line):
         return line
 
+
 def callback_detect_event_processed(line):
     if re.match(r'.*Found new log: .*', line):
         return line
+
 
 def callback_event_sent_to_analysisd(line):
     if line.startswith(AWS_EVENT_HEADER):
         return line
 
-def check_processed_logs_from_output(command_output: str, expected_results: int=1):
+
+def check_processed_logs_from_output(command_output: str, expected_results: int = 1):
     analyze_command_output(
         command_output=command_output,
         callback=callback_detect_event_processed,
@@ -73,7 +80,8 @@ def check_processed_logs_from_output(command_output: str, expected_results: int=
         error_message="The AWS module didn't process the expected number of events"
     )
 
-def check_non_processed_logs_from_output(command_output: str, expected_results: int=1):
+
+def check_non_processed_logs_from_output(command_output: str, expected_results: int = 1):
     pattern = r".*DEBUG: \+\+\+ No logs to process in bucket: "
 
     analyze_command_output(
@@ -83,7 +91,8 @@ def check_non_processed_logs_from_output(command_output: str, expected_results: 
         error_message="Some logs may where processed"
     )
 
-def check_marker_from_output(command_output: str, file_key: str,expected_results: int=1):
+
+def check_marker_from_output(command_output: str, file_key: str, expected_results: int = 1):
     pattern = fr".*DEBUG: \+\+\+ Marker: {file_key}"
 
     analyze_command_output(

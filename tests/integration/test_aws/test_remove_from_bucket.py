@@ -3,13 +3,11 @@ import os
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.modules.aws import event_monitor
-from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.modules.aws.s3_utils import file_exists
 from wazuh_testing.tools.configuration import (
     get_test_cases_data,
     load_configuration_template,
 )
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.modules.aws.s3_utils import file_exists
 
 pytestmark = [pytest.mark.server]
 
