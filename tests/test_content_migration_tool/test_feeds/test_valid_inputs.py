@@ -126,7 +126,10 @@ def test_generated_deltas(configuration, metadata, build_cmt_config_file, clean_
         # Idx = 0: Select `cve_id` field
         stored_cve_ids = [cve[0] for cve in query_result]
         for cve in elements:
-            assert cve['cve_id'] not in stored_cve_ids
+            if cve['cve_id'] in expected_cves:
+                continue
+            assert cve['cve_id'] not in stored_cve_ids, 'Some CVEs continue stored in the DB.\n' \
+                                                        f"Expected CVEs: {expected_cves}\nResult: {stored_cve_ids}"
     else:
         assert delta_file_content == 'null', 'A delta was generated, but it should not have been generated.\n' \
                                              f"Current content: {delta_file_content}"
