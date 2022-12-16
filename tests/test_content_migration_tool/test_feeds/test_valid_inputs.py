@@ -1,13 +1,14 @@
 import glob
-import json
 import os
 
 import pytest
-from test_content_migration_tool import OUTPUT_DIR, run_content_migration_tool, sanitize_configuration, \
-                                        validate_json_against_schema, query_publisher_db, check_process_completion, \
-                                        truncate_log_file
+from wazuh_testing.cmt import CB_PROCESS_COMPLETED, LOG_FILE_PATH, OUTPUT_DIR
+from wazuh_testing.cmt.utils import run_content_migration_tool, sanitize_configuration, validate_against_cve5_schema, \
+                                    validate_against_delta_schema, query_publisher_db
+from wazuh_testing.event_monitor import check_event
 from wazuh_testing.tools import configuration
-from wazuh_testing.tools.file import read_json_file
+from wazuh_testing.tools.file import read_json_file, truncate_file
+
 
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 CONFIGURATION_PATH = os.path.join(TEST_DATA_PATH, 'configuration')
@@ -17,7 +18,6 @@ FEEDS_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'da
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_output_format.yaml')
 t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_generated_deltas.yaml')
-delta_schema_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', 'delta_schema.json')
 
 # Get test cases data
 t1_config, t1_metadata, t1_cases_id = configuration.get_test_cases_data(t1_cases_path)
@@ -33,34 +33,6 @@ feed_with_vuln_added = os.path.join(FEEDS_PATH, 'arch', 'arch_new_cve.json')
 feed_with_vuln_modified = os.path.join(FEEDS_PATH, 'arch', 'arch_updated_cve.json')
 
 
-def validate_against_delta_schema(_elements):
-    """Wrapper function
-    """
-    _result = True
-    _errors = []
-    for cve in _elements:
-        _result, _error = validate_json_against_schema(cve, delta_schema_path)
-        if _result is False:
-            _errors.append(_error)
-
-    return _errors
-
-
-def validate_against_cve5_schema(_elements):
-    """Wrapper function
-    """
-    _result = True
-    _errors = []
-
-    for cves in _elements:
-        data = json.loads(cves['data_blob'])
-        _result, _error = validate_json_against_schema(data)
-        if _result is False:
-            _errors.append(_error)
-
-    return _errors
-
-
 @pytest.mark.parametrize('configuration,metadata', zip(t1_config, t1_metadata), ids=t1_cases_id)
 def test_output_format(configuration, metadata, build_cmt_config_file, clean_results):
     if 'debian' in metadata['output_file']:
@@ -70,6 +42,7 @@ def test_output_format(configuration, metadata, build_cmt_config_file, clean_res
     elif 'nvd' in metadata['output_file']:
         pytest.xfail('Expected to fail due to the the abscent of a valid test feed.')
 
+    # Select the unique config file in the list
     config_file = build_cmt_config_file[0]
     json_output = '/'.join([OUTPUT_DIR, metadata['output_file']])
 
@@ -78,7 +51,7 @@ def test_output_format(configuration, metadata, build_cmt_config_file, clean_res
         pytest.fail(f"The execution of the binary have failed unexpectedly:\n{err_output}")
 
     # Wait until the procces finish
-    check_process_completion()
+    check_event(callback=CB_PROCESS_COMPLETED, file_to_monitor=LOG_FILE_PATH)
 
     json_document = read_json_file(json_output)
     elements = json_document['elements']
@@ -103,12 +76,12 @@ def test_generated_deltas(configuration, metadata, build_cmt_config_file, clean_
 
     # Run the tool for each configuration file in the test case (to get the desired state)
     for config in config_files:
-        truncate_log_file()
+        truncate_file(LOG_FILE_PATH)
         output, err_output = run_content_migration_tool(f"-i {config}")
         if err_output is not None or output == '':
             pytest.fail(f"The execution of the binary have failed unexpectedly:\n{err_output}")
         # Wait until the procces finish
-        check_process_completion()
+        check_event(callback=CB_PROCESS_COMPLETED, file_to_monitor=LOG_FILE_PATH)
 
     all_files = glob.glob(os.path.join(delta_filepath, '*'))
     # Select the newest delta file generated (where the results are) from the list of all files

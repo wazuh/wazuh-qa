@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from test_content_migration_tool import sanitize_configuration, run_content_migration_tool
+from wazuh_testing.cmt.utils import sanitize_configuration, run_content_migration_tool
 from wazuh_testing.tools import configuration
 
 

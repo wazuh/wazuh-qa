@@ -2,16 +2,26 @@
 
 This test suite aims to put to the test the Content Migration Tool with an end-to-end approach.
 
-# Requirements to run the tests
+## Prerequisites
 
-## Install the following packages/tools:
-- Python 3.10
-- Pip
-- Content Migration tool (Follow [this guide](https://github.com/wazuh/wazuh-content#readme))
+- Install Python 3
+- Install Pip
+- Install Content Migration tool (Follow [this guide](https://github.com/wazuh/wazuh-content#readme))
 
-## Install the dependencies
+## Install the dependencies and QA Framework
 
-Install the Python dependencies by running: `python3 -m pip install -r tests/test_content_migration_tool/requirements.txt`
+Install the Python dependencies by running:
+
+```
+python3 -m pip install -U pip
+python3 -m pip install -r requirements.txt --ignore-installed
+```
+
+Install the QA framework:
+
+```
+python3 -m pip install deps/wazuh_testing/.
+```
 
 ## Install the server
 
