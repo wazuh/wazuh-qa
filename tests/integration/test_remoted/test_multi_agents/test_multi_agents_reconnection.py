@@ -60,7 +60,6 @@ from . import TESTS_CASES_PATH, CONFIGS_PATH
 
 # Constants
 TEST_NAME = Path(__file__).stem.replace('test_', '')
-WAIT_AGENTS_START = 30  # Time to wait the agents to start.
 
 # Marks
 pytestmark = [pytest.mark.server, pytest.mark.tier(level=2)]
