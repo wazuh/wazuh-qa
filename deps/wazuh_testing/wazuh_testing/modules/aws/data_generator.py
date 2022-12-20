@@ -2,8 +2,8 @@
 import csv
 import json
 from datetime import datetime
-from io import StringIO
 from os.path import join
+from io import StringIO
 from uuid import uuid4
 
 from wazuh_testing.tools.utils import get_random_ip, get_random_port, get_random_string
