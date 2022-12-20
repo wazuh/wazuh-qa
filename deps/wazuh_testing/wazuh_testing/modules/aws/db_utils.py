@@ -1,5 +1,6 @@
 import sqlite3
 from collections import namedtuple
+from pathlib import Path
 from typing import Iterator
 
 from .constants import S3_CLOUDTRAIL_DB_PATH
@@ -9,6 +10,12 @@ SELECT_QUERY_TEMPLATE = "SELECT * FROM {table_name}"
 S3CloudTrailRow = namedtuple(
     'S3CloudTrailRow', 'bucket_path aws_account_id aws_region log_key processed_date created_date'
 )
+
+
+def get_db_connection(path: Path) -> sqlite3.Connection:
+    return sqlite3.connect(path)
+
+# cloudtrail.db utils
 
 
 def s3_db_exists() -> bool:
@@ -22,12 +29,8 @@ def delete_s3_db() -> None:
         S3_CLOUDTRAIL_DB_PATH.unlink()
 
 
-def get_db_connection() -> sqlite3.Connection:
-    return sqlite3.connect(S3_CLOUDTRAIL_DB_PATH)
-
-
 def get_s3_db_row(table_name: str) -> S3CloudTrailRow:
-    connection = get_db_connection()
+    connection = get_db_connection(S3_CLOUDTRAIL_DB_PATH)
     cursor = connection.cursor()
     result = cursor.execute(SELECT_QUERY_TEMPLATE.format(table_name=table_name)).fetchone()
 
@@ -35,7 +38,7 @@ def get_s3_db_row(table_name: str) -> S3CloudTrailRow:
 
 
 def get_multiple_s3_db_row(table_name: str) -> Iterator[S3CloudTrailRow]:
-    connection = get_db_connection()
+    connection = get_db_connection(S3_CLOUDTRAIL_DB_PATH)
     cursor = connection.cursor()
 
     for row in cursor.execute(SELECT_QUERY_TEMPLATE.format(table_name=table_name)):
@@ -43,7 +46,7 @@ def get_multiple_s3_db_row(table_name: str) -> Iterator[S3CloudTrailRow]:
 
 
 def table_exists(table_name: str) -> bool:
-    connection = get_db_connection()
+    connection = get_db_connection(S3_CLOUDTRAIL_DB_PATH)
     cursor = connection.cursor()
     query = """
         SELECT
