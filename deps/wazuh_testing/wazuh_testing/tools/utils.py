@@ -115,6 +115,15 @@ def get_random_ip():
     return fr"{randint(0,255)}.{randint(0,255)}.{randint(0,255)}.{randint(0,255)}"
 
 
+def get_random_port():
+    """Create a port number.
+
+    Return:
+        String: Random port number.
+    """
+    return f"{randint(0, 10000)}"
+
+
 def get_random_string(string_length, digits=True):
     """Create a random string with specified length.
 
