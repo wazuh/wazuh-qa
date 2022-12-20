@@ -23,13 +23,13 @@ t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_c
 expected_default_conf_response = {
     'remote': {
         'data': {'affected_items': [{'remote': [{'connection': 'secure', 'ipv6': 'no', 'protocol': ['TCP'],
-        'port': '1514', 'queue_size': '131072'}]}], 'total_affected_items': 1, 'total_failed_items': 0,
-        'failed_items': []}, 'message': 'Active configuration was successfully read', 'error': 0
+                 'port': '1514', 'queue_size': '131072'}]}], 'total_affected_items': 1, 'total_failed_items': 0,
+                 'failed_items': []}, 'message': 'Active configuration was successfully read', 'error': 0
     },
-    'global':{
+    'global': {
         'data': {'affected_items': [{'global': {'remoted': {'agents_disconnection_alert_time': 0,
-        'agents_disconnection_time': 600}}}], 'total_affected_items': 1, 'total_failed_items': 0,
-        'failed_items': []}, 'message': 'Active configuration was successfully read', 'error': 0
+                 'agents_disconnection_time': 600}}}], 'total_affected_items': 1, 'total_failed_items': 0,
+                 'failed_items': []}, 'message': 'Active configuration was successfully read', 'error': 0
     }
 }
 
@@ -43,13 +43,19 @@ t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_c
 expected_default_internal_conf_response = {
     'request': {
         'data': {'affected_items': [{'internal': {'remoted': {'recv_counter_flush': 128, 'comp_average_printout': 19999,
-         'verify_msg_id': 0, 'recv_timeout': 1, 'pass_empty_keyfile': 1, 'sender_pool': 8, 'request_pool': 8,
-         'request_rto_sec': 1, 'request_rto_msec': 0, 'max_attempts': 4, 'request_timeout': 10, 'response_timeout': 60,
-         'shared_reload': 10, 'rlimit_nofile': 16384, 'merge_shared': 1, 'guess_agent_group': 0, 'receive_chunk': 4096,
-         'send_chunk': 4096, 'buffer_relax': 1, 'send_buffer_size': 131072, 'send_timeout_to_retry': 1,
-         'tcp_keepidle': 30, 'tcp_keepintvl': 10, 'tcp_keepcnt': 3}}}], 'total_affected_items': 1,
-         'total_failed_items': 0, 'failed_items': []}, 'message': 'Active configuration was successfully read',
-         'error': 0
+                                                              'verify_msg_id': 0, 'recv_timeout': 1,
+                                                              'pass_empty_keyfile': 1, 'sender_pool': 8,
+                                                              'request_pool': 8, 'request_rto_sec': 1,
+                                                              'request_rto_msec': 0, 'max_attempts': 4,
+                                                              'request_timeout': 10, 'response_timeout': 60,
+                                                              'shared_reload': 10, 'rlimit_nofile': 16384,
+                                                              'merge_shared': 1, 'guess_agent_group': 0,
+                                                              'receive_chunk': 4096, 'send_chunk': 4096,
+                                                              'buffer_relax': 1, 'send_buffer_size': 131072,
+                                                              'send_timeout_to_retry': 1, 'tcp_keepidle': 30,
+                                                              'tcp_keepintvl': 10, 'tcp_keepcnt': 3}}}],
+                 'total_affected_items': 1, 'total_failed_items': 0, 'failed_items': []},
+        'message': 'Active configuration was successfully read', 'error': 0
     }
 }
 
@@ -66,13 +72,13 @@ t3_configurations = load_configuration_template(t3_configurations_path, t3_confi
 expected_custom_conf_response = {
     'remote': {
         'data': {'affected_items': [{'remote': [{'connection': 'secure', 'ipv6': 'no', 'protocol': ['UDP'],
-        'port': '1514', 'queue_size': '131071'}]}], 'total_affected_items': 1, 'total_failed_items': 0,
-        'failed_items': []}, 'message': 'Active configuration was successfully read', 'error': 0
+                 'port': '1514', 'queue_size': '131071'}]}], 'total_affected_items': 1, 'total_failed_items': 0,
+                 'failed_items': []}, 'message': 'Active configuration was successfully read', 'error': 0
     },
-    'global':{
+    'global': {
         'data': {'affected_items': [{'global': {'remoted': {'agents_disconnection_alert_time': 5,
-        'agents_disconnection_time': 300}}}], 'total_affected_items': 1, 'total_failed_items': 0,
-        'failed_items': []}, 'message': 'Active configuration was successfully read', 'error': 0
+                 'agents_disconnection_time': 300}}}], 'total_affected_items': 1, 'total_failed_items': 0,
+                 'failed_items': []}, 'message': 'Active configuration was successfully read', 'error': 0
     }
 }
 
@@ -89,13 +95,20 @@ t4_configuration_parameters, t4_configuration_metadata, t4_case_ids = get_test_c
 expected_custom_internal_conf_response = {
     'request': {
         'data': {'affected_items': [{'internal': {'remoted': {'recv_counter_flush': 128, 'comp_average_printout': 19999,
-                 'verify_msg_id': 0, 'recv_timeout': 1, 'pass_empty_keyfile': 1, 'sender_pool': 8, 'request_pool': 8,
-                 'request_rto_sec': 1, 'request_rto_msec': 0, 'max_attempts': 4, 'request_timeout': 30,
-                 'response_timeout': 60, 'shared_reload': 20, 'rlimit_nofile': 16384, 'merge_shared': 1,
-                 'guess_agent_group': 0, 'receive_chunk': 4096, 'send_chunk': 4096, 'buffer_relax': 1,
-                 'send_buffer_size': 131072, 'send_timeout_to_retry': 1, 'tcp_keepidle': 30, 'tcp_keepintvl': 10,
-                 'tcp_keepcnt': 3}}}], 'total_affected_items': 1, 'total_failed_items': 0, 'failed_items': []},
-                 'message': 'Active configuration was successfully read', 'error': 0
+                                                              'verify_msg_id': 0, 'recv_timeout': 1,
+                                                              'pass_empty_keyfile': 1, 'sender_pool': 8,
+                                                              'request_pool': 8, 'request_rto_sec': 1,
+                                                              'request_rto_msec': 0, 'max_attempts': 4,
+                                                              'request_timeout': 30, 'response_timeout': 60,
+                                                              'shared_reload': 20, 'rlimit_nofile': 16384,
+                                                              'merge_shared': 1, 'guess_agent_group': 0,
+                                                              'receive_chunk': 4096, 'send_chunk': 4096,
+                                                              'buffer_relax': 1, 'send_buffer_size': 131072,
+                                                              'send_timeout_to_retry': 1, 'tcp_keepidle': 30,
+                                                              'tcp_keepintvl': 10, 'tcp_keepcnt': 3}}}],
+                                                              'total_affected_items': 1, 'total_failed_items': 0,
+                                                              'failed_items': []},
+        'message': 'Active configuration was successfully read', 'error': 0
     }
 }
 
