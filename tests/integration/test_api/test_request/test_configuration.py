@@ -115,6 +115,7 @@ def test_default_configuration(metadata, get_api_details):
     assert response.json() == expected_default_conf_response[endpoint]
 
 
+@pytest.mark.xfail(reason="It will be blocked by wazuh/wazuh#15694, when it is resolved, we can enable the test")
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('metadata', t2_configuration_metadata, ids=t2_case_ids)
 def test_default_internal_configuration(metadata, get_api_details):
@@ -140,6 +141,7 @@ def test_custom_configuration(configuration, metadata, load_wazuh_basic_configur
         assert response.json() == expected_custom_conf_response[endpoint]
 
 
+@pytest.mark.xfail(reason="It will be blocked by wazuh/wazuh#15694, when it is resolved, we can enable the test")
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('metadata', t4_configuration_metadata, ids=t4_case_ids)
 def test_custom_internal_configuration(metadata, configure_local_internal_options_function, get_api_details,
