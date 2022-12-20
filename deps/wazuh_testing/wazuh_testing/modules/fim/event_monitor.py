@@ -97,6 +97,60 @@ def callback_disk_quota_limit_reached(line):
         return match.group(2)
 
 
+def callback_detect_file_added_event(line):
+    """ Callback that detects if a line in a log is a file added event.
+    Args:
+        line (String): string line to be checked by callback in FileMonitor.
+    """
+    msg = fim.CB_DETECT_FIM_EVENT
+    match = re.match(msg, line)
+    if not match:
+        return None
+
+    try:
+        json_event = json.loads(match.group(1))
+        if json_event['data']['type'] == 'added':
+            return json_event
+    except (json.JSONDecodeError, AttributeError, KeyError) as e:
+        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+
+
+def callback_detect_file_modified_event(line):
+    """ Callback that detects if a line in a log is a file modified event.
+    Args:
+        line (String): string line to be checked by callback in FileMonitor.
+    """
+    msg = fim.CB_DETECT_FIM_EVENT
+    match = re.match(msg, line)
+    if not match:
+        return None
+
+    try:
+        json_event = json.loads(match.group(1))
+        if json_event['data']['type'] == 'modified':
+            return json_event
+    except (json.JSONDecodeError, AttributeError, KeyError) as e:
+        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+
+
+def callback_detect_file_deleted_event(line):
+    """ Callback that detects if a line in a log is a file deleted event.
+    Args:
+        line (String): string line to be checked by callback in FileMonitor.
+    """
+    msg = fim.CB_DETECT_FIM_EVENT
+    match = re.match(msg, line)
+    if not match:
+        return None
+
+    try:
+        json_event = json.loads(match.group(1))
+        if json_event['data']['type'] == 'deleted':
+            return json_event
+    except (json.JSONDecodeError, AttributeError, KeyError) as e:
+        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+
+
 # Event checkers
 def check_fim_event(file_monitor=None, callback='', error_message=None, update_position=True,
                               timeout=T_30, accum_results=1, file_to_monitor=LOG_FILE_PATH):
