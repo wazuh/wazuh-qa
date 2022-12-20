@@ -129,7 +129,7 @@ def check_invalid_if_sid(file_monitor, is_empty):
 
     Args:
         file_monitor (FileMonitor): Log monitor.
-        is_empty (Boolean): True if is_sid tag has nothing inside/ is empty. 
+        is_empty (Boolean): True if is_sid tag has nothing inside/ is empty.
     """
     if is_empty:
         callback = CB_INVALID_EMPTY_IF_SID_RULE_IGNORED
