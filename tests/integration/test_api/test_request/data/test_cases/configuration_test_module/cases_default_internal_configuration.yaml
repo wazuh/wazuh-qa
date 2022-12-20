@@ -1,4 +1,4 @@
-- name: remoted_enpoint
+- name: remoted_endpoint
   description: remoted internal configuration endpoint
   configuration_parameters:
     ENDPOINT: 'request'
