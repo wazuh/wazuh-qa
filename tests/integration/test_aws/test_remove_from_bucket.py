@@ -60,12 +60,18 @@ def test_remove_from_bucket(
         - metadata:
             type: dict
             brief: Get metadata from the module.
+        - upload_file_to_s3:
+            type: fixture
+            brief: Upload a file to S3 bucket for the day of the execution
         - load_wazuh_basic_configuration:
             type: fixture
             brief: Load basic wazuh configuration.
         - set_wazuh_configuration:
             type: fixture
             brief: Apply changes to the ossec.conf configuration.
+        - clean_s3_cloudtrail_db:
+            type: fixture
+            brief: Delete the DB file before and after the test execution
         - configure_local_internal_options_function:
             type: fixture
             brief: Apply changes to the local_internal_options.conf configuration.
