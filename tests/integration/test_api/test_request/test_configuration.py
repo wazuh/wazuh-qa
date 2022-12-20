@@ -106,8 +106,7 @@ expected_custom_internal_conf_response = {
                                                               'buffer_relax': 1, 'send_buffer_size': 131072,
                                                               'send_timeout_to_retry': 1, 'tcp_keepidle': 30,
                                                               'tcp_keepintvl': 10, 'tcp_keepcnt': 3}}}],
-                                                              'total_affected_items': 1, 'total_failed_items': 0,
-                                                              'failed_items': []},
+                 'total_affected_items': 1, 'total_failed_items': 0, 'failed_items': []},
         'message': 'Active configuration was successfully read', 'error': 0
     }
 }
