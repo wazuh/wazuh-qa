@@ -291,7 +291,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     check_time_travel(time_travel, monitor=log_monitor)
     event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
-                                 custom_validator=custom_validator, encoding=encoding, 
+                                 custom_validator=custom_validator, encoding=encoding,
                                  callback=callback_detect_file_modified_event)
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event,
                                   event_mode=event_mode)
@@ -310,7 +310,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
 
     check_time_travel(time_travel, monitor=log_monitor)
     event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
-                                 custom_validator=custom_validator, encoding=encoding, 
+                                 custom_validator=custom_validator, encoding=encoding,
                                  callback=callback_detect_file_deleted_event)
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event,
                                   event_mode=event_mode)

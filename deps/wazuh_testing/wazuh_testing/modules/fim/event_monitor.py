@@ -153,7 +153,7 @@ def callback_detect_file_deleted_event(line):
 
 # Event checkers
 def check_fim_event(file_monitor=None, callback='', error_message=None, update_position=True,
-                              timeout=T_30, accum_results=1, file_to_monitor=LOG_FILE_PATH):
+                    timeout=T_30, accum_results=1, file_to_monitor=LOG_FILE_PATH):
     """Check if a vulnerability event occurs
 
     Args:
@@ -213,16 +213,28 @@ def detect_whodata_start(file_monitor):
 
 
 def detect_windows_sacl_configured(file_monitor, file):
-    
+    """Detects when windows permision checks have been configured for a given file.
+
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+        file: The path of the file that will be monitored
+    """
+
     callback = fr".*win_whodata.*The SACL of '({file})' will be configured"
-    
+
     file_monitor.start(timeout=60, callback=generate_monitoring_callback(callback),
                        error_message=fim.ERR_MSG_SACL_CONFIGURED_EVENT)
 
 
 def detect_windows_whodata_mode_change(file_monitor, file):
-    
+    """Detects whe monitoring for a file changes from whodata to real-time.
+
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+        file: The path of the file that will be monitored
+    """
+
     callback = fr".*set_whodata_mode_changes.*The '({file})' directory starts to be monitored in real-time mode."
-    
+
     file_monitor.start(timeout=60, callback=generate_monitoring_callback(callback),
                        error_message=fim.ERR_MSG_WHDATA_REALTIME_MODE_CHANGE_EVENT)
