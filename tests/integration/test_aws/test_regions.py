@@ -99,42 +99,42 @@ def test_regions(
         - The `configuration_regions` file provides the module configuration for this test.
         - The `cases_regions` file provides the test cases.
     """
-    bucket_name = metadata["bucket_name"]
-    bucket_type = metadata["bucket_type"]
-    only_logs_after = metadata["only_logs_after"]
-    regions = metadata["regions"]
-    expected_results = metadata["expected_results"]
+    bucket_name = metadata['bucket_name']
+    bucket_type = metadata['bucket_type']
+    only_logs_after = metadata['only_logs_after']
+    regions = metadata['regions']
+    expected_results = metadata['expected_results']
     pattern = fr".*DEBUG: \+\+\+ No logs to process in bucket: {RANDOM_ACCOUNT_ID}/{regions}"
 
     parameters = [
-        "wodles/aws/aws-s3",
-        "--bucket", bucket_name,
-        "--aws_profile", "qa",
-        "--only_logs_after", only_logs_after,
-        "--regions", regions,
-        "--type", bucket_type,
-        "--debug", "2"
+        'wodles/aws/aws-s3',
+        '--bucket', bucket_name,
+        '--aws_profile', 'qa',
+        '--only_logs_after', only_logs_after,
+        '--regions', regions,
+        '--type', bucket_type,
+        '--debug', '2'
     ]
 
     # Check AWS module started
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
-        error_message="The AWS module didn't start as expected",
+        error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
-        error_message="The AWS module wasn't called with the correct parameters",
+        error_message='The AWS module was not called with the correct parameters',
     ).result()
 
     if expected_results:
         wazuh_log_monitor.start(
             timeout=global_parameters.default_timeout,
             callback=event_monitor.callback_detect_event_processed,
-            error_message="The AWS module didn't process the expected number of events",
+            error_message='The AWS module did not process the expected number of events',
             accum_results=expected_results
         ).result()
     else:
@@ -147,7 +147,7 @@ def test_regions(
         wazuh_log_monitor.start(
             timeout=global_parameters.default_timeout,
             callback=event_monitor.make_aws_callback(pattern),
-            error_message="The AWS module didn't show correct message non-existent region"
+            error_message='The AWS module did not show correct message non-existent region'
         ).result()
 
     assert s3_db_exists()

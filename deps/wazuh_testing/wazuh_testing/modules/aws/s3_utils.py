@@ -9,7 +9,7 @@ from wazuh_testing import logger
 
 from .data_generator import get_data_generator
 
-session = boto3.Session(profile_name="qa")
+session = boto3.Session(profile_name='qa')
 s3 = session.resource('s3')
 
 
@@ -97,5 +97,5 @@ def get_last_file_key(bucket_type: str, bucket_name: str) -> str:
         *_, last_item = bucket.objects.filter(Prefix=dg.BASE_PATH)
         last_key = last_item.key
     except ValueError:
-        last_key = ""
+        last_key = ''
     return last_key

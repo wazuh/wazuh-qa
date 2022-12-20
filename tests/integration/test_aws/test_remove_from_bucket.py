@@ -85,28 +85,28 @@ def test_remove_from_bucket(
         - The `configuration_defaults` file provides the module configuration for this test.
         - The `cases_defaults` file provides the test cases.
     """
-    bucket_name = metadata["bucket_name"]
+    bucket_name = metadata['bucket_name']
     parameters = [
-        "wodles/aws/aws-s3",
-        "--bucket", bucket_name,
-        "--remove",
-        "--aws_profile", "qa",
-        "--type", metadata["bucket_type"],
-        "--debug", "2"
+        'wodles/aws/aws-s3',
+        '--bucket', bucket_name,
+        '--remove',
+        '--aws_profile', 'qa',
+        '--type', metadata['bucket_type'],
+        '--debug', '2'
     ]
 
     # Check AWS module started
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
-        error_message="The AWS module didn't start as expected",
+        error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
-        error_message="The AWS module wasn't called with the correct parameters",
+        error_message='The AWS module was not called with the correct parameters',
     ).result()
 
-    assert not file_exists(filename=metadata["uploaded_file"], bucket_name=bucket_name)
+    assert not file_exists(filename=metadata['uploaded_file'], bucket_name=bucket_name)

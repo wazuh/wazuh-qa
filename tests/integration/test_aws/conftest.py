@@ -10,12 +10,12 @@ from wazuh_testing.tools.monitoring import FileMonitor, ManInTheMiddle, QueueMon
 from wazuh_testing.tools.services import control_service
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def wazuh_log_monitor() -> FileMonitor:
     return FileMonitor(LOG_FILE_PATH)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def analysisd_monitor() -> Generator:
     def intercept_socket_data(data):
         return data
@@ -49,7 +49,7 @@ def upload_file_to_s3(metadata: dict) -> None:
     filename = upload_file(bucket_type=metadata['bucket_type'], bucket_name=bucket_name)
     if filename != '':
         logger.debug('Uploaded file: %s to bucket "%s"', filename, bucket_name)
-        metadata["uploaded_file"] = filename
+        metadata['uploaded_file'] = filename
 
 
 @pytest.fixture(scope='function')
@@ -65,7 +65,7 @@ def upload_and_delete_file_to_s3(metadata: dict):
     filename = upload_file(bucket_type=metadata['bucket_type'], bucket_name=metadata['bucket_name'])
     if filename != '':
         logger.debug('Uploaded file: %s to bucket "%s"', filename, bucket_name)
-        metadata["uploaded_file"] = filename
+        metadata['uploaded_file'] = filename
 
     yield
 

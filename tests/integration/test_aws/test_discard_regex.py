@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from wazuh_testing import T_60, global_parameters
+from wazuh_testing import global_parameters
 from wazuh_testing.modules.aws import event_monitor
 from wazuh_testing.modules.aws.db_utils import s3_db_exists
 from wazuh_testing.tools.configuration import (
@@ -92,45 +92,45 @@ def test_discard_regex(
         - The `configuration_discard_regex` file provides the module configuration for this test.
         - The `cases_discard_regex` file provides the test cases.
     """
-    bucket_name = metadata["bucket_name"]
-    bucket_type = metadata["bucket_type"]
-    only_logs_after = metadata["only_logs_after"]
-    discard_field = metadata["discard_field"]
-    discard_regex = metadata["discard_regex"]
-    found_logs = metadata["found_logs"]
-    skipped_logs = metadata["skipped_logs"]
+    bucket_name = metadata['bucket_name']
+    bucket_type = metadata['bucket_type']
+    only_logs_after = metadata['only_logs_after']
+    discard_field = metadata['discard_field']
+    discard_regex = metadata['discard_regex']
+    found_logs = metadata['found_logs']
+    skipped_logs = metadata['skipped_logs']
 
     pattern = fr'.*The "{discard_regex}" regex found a match in the "{discard_field}" field. The event will be skipped.'
 
     parameters = [
-        "wodles/aws/aws-s3",
-        "--bucket", bucket_name,
-        "--aws_profile", "qa",
-        "--only_logs_after", only_logs_after,
-        "--discard-field", discard_field,
-        "--discard-regex", discard_regex,
-        "--type", bucket_type,
-        "--debug", "2"
+        'wodles/aws/aws-s3',
+        '--bucket', bucket_name,
+        '--aws_profile', 'qa',
+        '--only_logs_after', only_logs_after,
+        '--discard-field', discard_field,
+        '--discard-regex', discard_regex,
+        '--type', bucket_type,
+        '--debug', '2'
     ]
 
     # Check AWS module started
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
-        error_message="The AWS module didn't start as expected",
+        error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
-        error_message="The AWS module wasn't called with the correct parameters",
+        error_message='The AWS module was not called with the correct parameters',
     ).result()
 
     wazuh_log_monitor.start(
         timeout=10,
         callback=event_monitor.make_aws_callback(pattern),
-        error_message="The AWS module didn't show correct message about discard regex",
+        error_message='The AWS module did not show correct message about discard regex',
         accum_results=skipped_logs
     ).result()
 

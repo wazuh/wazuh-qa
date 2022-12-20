@@ -102,36 +102,36 @@ def test_without_only_logs_after(
         - The `configuration_defaults` file provides the module configuration for this test.
         - The `cases_defaults` file provides the test cases.
     """
-    bucket_name = metadata["bucket_name"]
-    bucket_type = metadata["bucket_type"]
-    expected_results = metadata["expected_results"]
+    bucket_name = metadata['bucket_name']
+    bucket_type = metadata['bucket_type']
+    expected_results = metadata['expected_results']
 
     parameters = [
-        "wodles/aws/aws-s3",
-        "--bucket", bucket_name,
-        "--aws_profile", "qa",
-        "--type", bucket_type,
-        "--debug", "2"
+        'wodles/aws/aws-s3',
+        '--bucket', bucket_name,
+        '--aws_profile', 'qa',
+        '--type', bucket_type,
+        '--debug', '2'
     ]
 
     # Check AWS module started
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
-        error_message="The AWS module didn't start as expected",
+        error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
-        error_message="The AWS module wasn't called with the correct parameters",
+        error_message='The AWS module was not called with the correct parameters',
     ).result()
 
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_event_processed,
-        error_message="The AWS module didn't process the expected number of events",
+        error_message='The AWS module did not process the expected number of events',
         accum_results=expected_results
     ).result()
 
@@ -140,7 +140,7 @@ def test_without_only_logs_after(
     data = get_s3_db_row(table_name=bucket_type)
 
     assert bucket_name in data.bucket_path
-    assert metadata["uploaded_file"] == data.log_key
+    assert metadata['uploaded_file'] == data.log_key
 
 
 # ---------------------------------------------------- TEST_WITH_ONLY_LOGS_AFTER ---------------------------------------
@@ -213,38 +213,38 @@ def test_with_only_logs_after(
         - The `configuration_defaults` file provides the module configuration for this test.
         - The `cases_defaults` file provides the test cases.
     """
-    bucket_name = metadata["bucket_name"]
-    bucket_type = metadata["bucket_type"]
-    only_logs_after = metadata["only_logs_after"]
-    expected_results = metadata["expected_results"]
+    bucket_name = metadata['bucket_name']
+    bucket_type = metadata['bucket_type']
+    only_logs_after = metadata['only_logs_after']
+    expected_results = metadata['expected_results']
 
     parameters = [
-        "wodles/aws/aws-s3",
-        "--bucket", bucket_name,
-        "--aws_profile", "qa",
-        "--only_logs_after", only_logs_after,
-        "--type", bucket_type,
-        "--debug", "2"
+        'wodles/aws/aws-s3',
+        '--bucket', bucket_name,
+        '--aws_profile', 'qa',
+        '--only_logs_after', only_logs_after,
+        '--type', bucket_type,
+        '--debug', '2'
     ]
     # Check AWS module started
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
-        error_message="The AWS module didn't start as expected",
+        error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
-        error_message="The AWS module wasn't called with the correct parameters",
+        error_message='The AWS module was not called with the correct parameters',
     ).result()
 
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_event_processed,
         accum_results=expected_results,
-        error_message="The AWS module didn't process the expected number of events",
+        error_message='The AWS module did not process the expected number of events',
     ).result()
 
     assert s3_db_exists()
@@ -252,7 +252,7 @@ def test_with_only_logs_after(
     for row in get_multiple_s3_db_row(table_name=bucket_type):
         assert bucket_name in row.bucket_path
         assert (
-            datetime.strptime(only_logs_after, "%Y-%b-%d") < datetime.strptime(str(row.created_date), "%Y%m%d")
+            datetime.strptime(only_logs_after, '%Y-%b-%d') < datetime.strptime(str(row.created_date), '%Y%m%d')
         )
 
 
@@ -263,7 +263,7 @@ _, t3_configuration_metadata, t3_case_ids = get_test_cases_data(t3_cases_path)
 
 
 @pytest.mark.tier(level=1)
-@pytest.mark.parametrize("metadata", t3_configuration_metadata, ids=t3_case_ids)
+@pytest.mark.parametrize('metadata', t3_configuration_metadata, ids=t3_case_ids)
 def test_multiple_calls(
     metadata, clean_s3_cloudtrail_db, load_wazuh_basic_configuration, restart_wazuh_function, delete_file_from_s3
 ):
@@ -309,17 +309,17 @@ def test_multiple_calls(
     input_description:
         - The `cases_multiple_calls` file provides the test cases.
     """
-    ONLY_LOGS_AFTER_PARAM = "--only_logs_after"
+    ONLY_LOGS_AFTER_PARAM = '--only_logs_after'
 
-    bucket_type = metadata["bucket_type"]
-    bucket_name = metadata["bucket_name"]
+    bucket_type = metadata['bucket_type']
+    bucket_name = metadata['bucket_name']
 
     base_parameters = [
-        "--bucket", bucket_name,
-        "--type", bucket_type,
-        "--regions", "us-east-1",
-        "--aws_profile", "qa",
-        "--debug", "2"
+        '--bucket', bucket_name,
+        '--type', bucket_type,
+        '--regions', 'us-east-1',
+        '--aws_profile', 'qa',
+        '--debug', '2'
     ]
 
     # Call the module without only_logs_after and check that no logs were processed
@@ -328,25 +328,25 @@ def test_multiple_calls(
     # Call the module with only_logs_after set in the past and check that the expected number of logs were
     # processed
     event_monitor.check_processed_logs_from_output(
-        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, "2022-NOV-20"),
+        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, '2022-NOV-20'),
         expected_results=3
     )
 
     # Call the module with the same parameters in and check there were no duplicates
     event_monitor.check_non_processed_logs_from_output(
-        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, "2022-NOV-20")
+        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, '2022-NOV-20')
     )
 
     # Call the module with only_logs_after set with an early date than setted previously and check that no logs
     # were processed, there were no duplicates
     event_monitor.check_non_processed_logs_from_output(
-        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, "2022-NOV-22"),
+        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, '2022-NOV-22'),
     )
 
     # Upload a log file for the day of the test execution and call the module without only_logs_after and check that
     # only the uploaded logs were processed and the last marker is specified in the DB.
     last_marker_key = get_last_file_key(bucket_type, bucket_name)
-    metadata["filename"] = upload_file(bucket_type, bucket_name)
+    metadata['filename'] = upload_file(bucket_type, bucket_name)
     event_monitor.check_marker_from_output(
         command_output=call_aws_module(*base_parameters),
         file_key=last_marker_key

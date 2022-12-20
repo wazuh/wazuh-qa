@@ -25,8 +25,8 @@ class CloudTrailDataGenerator(DataGenerator):
         <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/CloudTrail/<region>/<year>/<month>/<day>
         """
         now = datetime.now()
-        path = f'{self.BASE_PATH}{now.strftime(cons.PATH_DATE_FORMAT)}/'
-        name = f'{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}{cons.JSON_EXT}'
+        path = f"{self.BASE_PATH}{now.strftime(cons.PATH_DATE_FORMAT)}/"
+        name = f"{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}{cons.JSON_EXT}"
 
         return f'{path}{name}'
 
@@ -46,7 +46,7 @@ class CloudTrailDataGenerator(DataGenerator):
                     'sourceIPAddress': 'ec2.amazonaws.com',
                     'userAgent': 'ec2.amazonaws.com',
                     'requestParameters': {
-                        'roleArn': f'arn:aws:iam::{cons.RANDOM_ACCOUNT_ID}:role/demo-415-v2-InstanceRole-1FB0FMP2EXOKN',
+                        'roleArn': f"arn:aws:iam::{cons.RANDOM_ACCOUNT_ID}:role/demo-415-v2-InstanceRole-1FB0FMP2EXOKN",
                         'roleSessionName': 'i-0e9ddef5daf05c7df'
                     },
                     'responseElements': {
@@ -63,7 +63,7 @@ class CloudTrailDataGenerator(DataGenerator):
                         {
                             'accountId': cons.RANDOM_ACCOUNT_ID,
                             'type': 'AWS::IAM::Role',
-                            'ARN': f'arn:aws:iam::{cons.RANDOM_ACCOUNT_ID}:role/demo-415-v2-InstanceRole-1FB0FMP2EXOKN'
+                            'ARN': f"arn:aws:iam::{cons.RANDOM_ACCOUNT_ID}:role/demo-415-v2-InstanceRole-1FB0FMP2EXOKN"
                         }
                     ],
                     'eventType': 'AwsApiCall',

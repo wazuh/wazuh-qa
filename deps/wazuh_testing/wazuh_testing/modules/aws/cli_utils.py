@@ -49,7 +49,7 @@ def analyze_command_output(
     if results_len != expected_results:
         if error_message:
             logger.error(error_message)
-            logger.error("Results found: %s", results_len)
-            logger.error("Results expected: %s", expected_results)
+            logger.error('Results found: %s', results_len)
+            logger.error('Results expected: %s', expected_results)
             raise OutputAnalysisError(error_message)
         raise OutputAnalysisError()

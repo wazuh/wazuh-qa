@@ -18,4 +18,4 @@ US_EAST_1_REGION = 'us-east-1'
 JSON_EXT = '.json'
 
 # Bucket types
-CLOUD_TRAIL_TYPE = "cloudtrail"
+CLOUD_TRAIL_TYPE = 'cloudtrail'

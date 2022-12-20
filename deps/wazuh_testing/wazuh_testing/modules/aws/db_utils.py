@@ -5,7 +5,7 @@ from typing import Iterator
 
 from .constants import S3_CLOUDTRAIL_DB_PATH
 
-SELECT_QUERY_TEMPLATE = "SELECT * FROM {table_name}"
+SELECT_QUERY_TEMPLATE = 'SELECT * FROM {table_name}'
 
 S3CloudTrailRow = namedtuple(
     'S3CloudTrailRow', 'bucket_path aws_account_id aws_region log_key processed_date created_date'
