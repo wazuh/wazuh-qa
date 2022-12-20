@@ -1,13 +1,13 @@
 - name: remote_endpoint
   description: remote endpoint
   configuration_parameters:
-    ENDPOINT: 'remote'
+    ENDPOINT: remote
   metadata:
-    endpoint: 'remote'
+    endpoint: remote
 
 - name: global_endpoint
   description: global endpoint
   configuration_parameters:
-    ENDPOINT: 'global'
+    ENDPOINT: global
   metadata:
-    endpoint: 'global'
+    endpoint: global

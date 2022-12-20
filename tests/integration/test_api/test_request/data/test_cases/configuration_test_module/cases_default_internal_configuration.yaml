@@ -1,6 +1,6 @@
 - name: remoted_endpoint
   description: remoted internal configuration endpoint
   configuration_parameters:
-    ENDPOINT: 'request'
+    ENDPOINT: request
   metadata:
-    endpoint: 'request'
+    endpoint: request
