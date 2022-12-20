@@ -3,13 +3,14 @@ import re
 from wazuh_testing import T_10, T_60
 from wazuh_testing.modules.analysisd import ANALYSISD_PREFIX, MAILD_PREFIX, TESTRULE_PREFIX
 from wazuh_testing import LOG_FILE_PATH, ANALYSISD_STATE
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 
 
 # Callback events
 CB_SID_NOT_FOUND = r".*Signature ID '(\d*)' was not found and will be ignored in the 'if_sid'.* of rule '(\d*)'"
 CB_EMPTY_IF_SID_RULE_IGNORED = fr"{TESTRULE_PREFIX}Empty 'if_sid' value. Rule '(\d*)' will be ignored.*"
 CB_INVALID_IF_SID_RULE_IGNORED = fr"{TESTRULE_PREFIX}Invalid 'if_sid' value: '(.*)'. Rule '(\d*)' will be ignored.*"
+CB_INVALID_EMPTY_IF_SID_RULE_IGNORED = fr"{TESTRULE_PREFIX}Invalid 'if_sid' value: ''. Rule '(\d*)' will be ignored.*"
 
 # Error Messages
 ERR_MSG_SID_NOT_FOUND = "Did not receive the expected 'Signature ID  not found...' event"
@@ -121,3 +122,18 @@ def check_stop_dropping_events_and_credits_available_log(log_level='WARNING', ti
     """
     check_analysisd_event(callback=fr'.*{log_level}: Queues back to normal and EPS credits, no dropping events.*',
                           timeout=timeout)
+
+
+def check_invalid_if_sid(file_monitor, is_empty):
+    """Check if an invalid if_sid rule value is ignored when detected
+
+    Args:
+        file_monitor (FileMonitor): Log monitor.
+        is_empty (Boolean): True if is_sid tag has nothing inside/ is empty. 
+    """
+    if is_empty:
+        callback = CB_INVALID_EMPTY_IF_SID_RULE_IGNORED
+    else:
+        callback = CB_INVALID_IF_SID_RULE_IGNORED
+    file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(callback),
+                       error_message=ERR_MSG_INVALID_IF_SID)
