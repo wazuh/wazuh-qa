@@ -1,4 +1,5 @@
 import re
+from typing import Callable
 
 from .cli_utils import analyze_command_output
 
@@ -23,18 +24,14 @@ def make_aws_callback(pattern, prefix=''):
     return lambda line: regex.match(line)
 
 
-def callback_detect_aws_module_called(parameters: list):
+def callback_detect_aws_module_called(parameters: list) -> Callable:
     """Detects if aws module was called with correct parameters
 
-    Parameters
-    ----------
-    parameters : list
-        values to check
+    Args:
+        parameters (list): values to check
 
-    Returns
-    -------
-    function
-        callback to match the line
+    Returns:
+        Callable: callback to match the line
     """
     regex = re.compile(fr'.*DEBUG: Launching S3 Command: {" ".join(parameters)}\n*')
     return lambda line: regex.match(line)

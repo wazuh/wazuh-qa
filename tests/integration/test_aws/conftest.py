@@ -12,6 +12,7 @@ from wazuh_testing.tools.services import control_service
 
 @pytest.fixture(scope='function')
 def wazuh_log_monitor() -> FileMonitor:
+    """Returns a file monitor for `WAZUH_PATH/logs/ossec.log`"""
     return FileMonitor(LOG_FILE_PATH)
 
 
@@ -40,10 +41,8 @@ def analysisd_monitor() -> Generator:
 def upload_file_to_s3(metadata: dict) -> None:
     """Upload a file to S3 bucket
 
-    Parameters
-    ----------
-    metadata : dict
-        Metadata to get the parameters
+    Args:
+        metadata (dict): Metadata to get the parameters
     """
     bucket_name = metadata['bucket_name']
     filename = upload_file(bucket_type=metadata['bucket_type'], bucket_name=bucket_name)
@@ -56,10 +55,8 @@ def upload_file_to_s3(metadata: dict) -> None:
 def upload_and_delete_file_to_s3(metadata: dict):
     """Upload a file to S3 bucket and delete after the test ends.
 
-    Parameters
-    ----------
-    metadata : dict
-        Metadata to get the parameters
+    Args:
+        metadata (dict): Metadata to get the parameters
     """
     bucket_name = metadata['bucket_name']
     filename = upload_file(bucket_type=metadata['bucket_type'], bucket_name=metadata['bucket_name'])
@@ -77,10 +74,8 @@ def upload_and_delete_file_to_s3(metadata: dict):
 def delete_file_from_s3(metadata: dict):
     """Delete a file from S3 bucket after the test ends.
 
-    Parameters
-    ----------
-    metadata : dict
-        Metadata to get the parameters
+    Args:
+        metadata (dict): Metadata to get the parameters
     """
     yield
 

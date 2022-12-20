@@ -10,9 +10,19 @@ class DataGenerator:
     BASE_FILE_NAME = ''
 
     def get_filename(self, *args, **kwargs) -> str:
+        """Returns the filename according to the integration format
+
+        Returns:
+            str: syntetic filename
+        """
         raise NotImplementedError()
 
     def get_data_sample(self, *args, **kwargs) -> dict:
+        """Returns a sample of data according to the integration format
+
+        Returns:
+            dict: syntetic data
+        """
         raise NotImplementedError()
 
 
