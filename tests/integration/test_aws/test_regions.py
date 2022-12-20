@@ -58,7 +58,7 @@ def test_regions(
             - Check the expected number of events were forwarded to analysisd, only logs stored in the bucket
               for the specified region
             - Check the database was created and updated accordingly
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
             - Delete the uploaded file

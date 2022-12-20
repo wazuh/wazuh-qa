@@ -49,7 +49,7 @@ def test_remove_from_bucket(
         - test:
             - Check in the ossec.log that a line has appeared calling the module with correct parameters.
             - Check that the uploaded log was removed by the module after the execution.
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
     wazuh_min_version: 4.5.0

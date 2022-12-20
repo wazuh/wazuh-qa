@@ -76,7 +76,7 @@ class CloudTrailDataGenerator(DataGenerator):
         }
 
 
-# Maps bucket type with correspondent data generator
+# Maps bucket type with corresponding data generator
 buckets_data_mapping = {
     cons.CLOUD_TRAIL_TYPE: CloudTrailDataGenerator
 }

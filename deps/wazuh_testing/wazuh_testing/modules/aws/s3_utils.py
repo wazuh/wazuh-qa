@@ -36,7 +36,7 @@ def upload_file(bucket_type: str, bucket_name: str) -> str:
 
 
 def delete_file(filename: str, bucket_name: str) -> None:
-    """Delete the given a file from bucket a bucket
+    """Delete a given file from the bucket.
 
     Parameters
     ----------

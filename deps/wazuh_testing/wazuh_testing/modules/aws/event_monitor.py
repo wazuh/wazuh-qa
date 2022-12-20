@@ -46,9 +46,7 @@ def callback_detect_aws_module_start(line):
 
 
 def callback_detect_all_aws_err(line):
-    if re.match(PARSER_ERROR, line):
-        return line
-    elif re.match(MODULE_ERROR, line):
+    if re.match(PARSER_ERROR, line) or re.match(MODULE_ERROR, line):
         return line
 
 
@@ -88,7 +86,7 @@ def check_non_processed_logs_from_output(command_output: str, expected_results: 
         command_output,
         callback=make_aws_callback(pattern),
         expected_results=expected_results,
-        error_message="Some logs may where processed"
+        error_message="Some logs may were processed"
     )
 
 

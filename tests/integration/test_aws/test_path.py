@@ -52,7 +52,7 @@ def test_path(
               warning the user
             - Check the command was called with the correct parameters
             - Check the database was created and updated accordingly
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
             - Delete the uploaded file

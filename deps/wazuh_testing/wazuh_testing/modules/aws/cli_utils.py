@@ -30,7 +30,7 @@ def _default_callback(line: str) -> str:
 def analyze_command_output(
     command_output: str, callback: Callable = _default_callback, expected_results: int = 1, error_message: str = ''
 ):
-    """Analyze the given command output searching for a patter"""
+    """Analyze the given command output searching for a pattern"""
 
     results = []
 

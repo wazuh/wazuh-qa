@@ -47,7 +47,7 @@ def test_defaults(
         - test:
             - Check in the ossec.log that a line has appeared calling the module with correct parameters.
             - Check in the ossec.log that no errors occurs.
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
     wazuh_min_version: 4.5.0

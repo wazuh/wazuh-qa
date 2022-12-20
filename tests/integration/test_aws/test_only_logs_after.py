@@ -59,7 +59,7 @@ def test_without_only_logs_after(
             - Check the expected number of events were sent to analysisd. Only the logs whose timestamp is greater than
               the date specified in the configuration should be processed.
             - Check the database was created and updated accordingly
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
             - Delete the uploaded file
@@ -173,7 +173,7 @@ def test_with_only_logs_after(
             - Check the expected number of events were sent to analysisd. Only the logs whose timestamp is greater than
               the date specified in the configuration should be processed.
             - Check the database was created and updated accordingly
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
             - Delete the uploaded file
@@ -286,7 +286,7 @@ def test_multiple_calls(
             - Call the module with only_logs_after set with an early date than setted previously and check that no logs
               were processed, there were no duplicates
 
-        - tierdown:
+        - teardown:
             - Delete the s3_cloudtrail.db
             - Delete the uploaded files
     wazuh_min_version: 4.5.0
