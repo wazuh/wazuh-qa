@@ -128,7 +128,7 @@ def test_discard_regex(
     ).result()
 
     wazuh_log_monitor.start(
-        timeout=10,
+        timeout=20,
         callback=event_monitor.make_aws_callback(pattern),
         error_message='The AWS module did not show correct message about discard regex',
         accum_results=skipped_logs
