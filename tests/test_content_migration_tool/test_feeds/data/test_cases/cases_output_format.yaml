@@ -15,6 +15,7 @@
         lastSnapshotFilePath: snapshots/alas/alas1_feed
         tableNameSpecifier: alas1
   metadata:
+    decompressor: yes
     output_file: snapshots/alas/alas1_feed.json
     alas_version: 1
 
@@ -35,6 +36,7 @@
         lastSnapshotFilePath: snapshots/alas/alas2_feed
         tableNameSpecifier: alas2
   metadata:
+    decompressor: yes
     output_file: snapshots/alas/alas2_feed.json
     alas_version: 2
 
@@ -55,6 +57,7 @@
         lastSnapshotFilePath: snapshots/alas/alas2022_feed
         tableNameSpecifier: alas2022
   metadata:
+    decompressor: yes
     output_file: snapshots/alas/alas2022_feed.json
     alas_version: 2022
 
@@ -73,6 +76,7 @@
         lastSnapshotFilePath: snapshots/arch/arch_well_formatted
         tableNameSpecifier: arch
   metadata:
+    decompressor: no
     output_file: snapshots/arch/arch_well_formatted.json
 
 - name: DEBIAN_FEED
@@ -90,6 +94,7 @@
         lastSnapshotFilePath: snapshots/debian/debian_feed
         tableNameSpecifier: debian
   metadata:
+    decompressor: no
     output_file: snapshots/debian/debian_feed.json
 
 - name: NVD2022_FEED
@@ -108,6 +113,7 @@
         lastSnapshotFilePath: snapshots/nvd/nvd2022_feed
         tableNameSpecifier: nvd_2022
   metadata:
+    decompressor: yes
     output_file: snapshots/nvd/nvd2022_feed.json
 
 - name: REDHAT_FEED
@@ -126,6 +132,7 @@
         lastSnapshotFilePath: snapshots/redhat/redhat5_oval_feed
         tableNameSpecifier: redhat_5
   metadata:
+    decompressor: yes
     output_file: snapshots/redhat/redhat5_oval_feed.json
 
 - name: SUSE_FEED
@@ -144,4 +151,5 @@
         uncompressedPath: uncompressed/suse/suse_oval_feed.xml
         tableNameSpecifier: suse_desktop_11
   metadata:
+    decompressor: yes
     output_file: snapshots/suse/suse_oval_feed.json

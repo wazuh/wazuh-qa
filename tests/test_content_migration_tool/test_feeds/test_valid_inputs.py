@@ -2,7 +2,11 @@ import glob
 import os
 
 import pytest
-from wazuh_testing.cmt import CB_PROCESS_COMPLETED, LOG_FILE_PATH, OUTPUT_DIR
+from wazuh_testing.cmt import LOG_FILE_PATH, OUTPUT_DIR, CB_PROCESS_STARTED, CB_PROCESS_COMPLETED, \
+                              CB_FETCHING_STAGE_INITIALIZED, CB_FETCHING_STAGE_FINISHED, \
+                              CB_DECOMPRESSION_STAGE_INITIALIZED, CB_PARSER_STAGE_INITIALIZED, \
+                              CB_NORMALIZER_STAGE_INITIALIZED, CB_DIFF_STAGE_INITIALIZED, \
+                              CB_PUBLISHER_STAGE_INITIALIZED, CB_DIFF_STAGE_FINISHED, CB_PROCESS_COMPLETED
 from wazuh_testing.cmt.utils import run_content_migration_tool, sanitize_configuration, validate_against_cve5_schema, \
                                     validate_against_delta_schema, query_publisher_db
 from wazuh_testing.event_monitor import check_event
@@ -40,6 +44,8 @@ def test_output_format(configuration, metadata, build_cmt_config_file, prepare_a
         pytest.xfail('Expected to fail due to high memory consumption: wazuh/wazuh-content#334')
     elif 'nvd' in metadata['output_file']:
         pytest.xfail('Expected to fail due to the the abscent of a valid test feed.')
+    elif 'redhat' in metadata['output_file'] or 'suse' in metadata['output_file']:
+        pytest.xfail('Expected to fail because there is not log to detect the Normalizer initialization.')
 
     # Select the unique config file in the list
     config_file = build_cmt_config_file[0]
@@ -49,8 +55,15 @@ def test_output_format(configuration, metadata, build_cmt_config_file, prepare_a
     if err_output is not None or output == '':
         pytest.fail(f"The execution of the binary have failed unexpectedly:\n{err_output}")
 
-    # Wait until the procces finish
-    check_event(callback=CB_PROCESS_COMPLETED, file_to_monitor=LOG_FILE_PATH)
+    events = [CB_PROCESS_STARTED, CB_FETCHING_STAGE_INITIALIZED, CB_FETCHING_STAGE_FINISHED,
+              CB_DECOMPRESSION_STAGE_INITIALIZED, CB_PARSER_STAGE_INITIALIZED, CB_NORMALIZER_STAGE_INITIALIZED,
+              CB_DIFF_STAGE_INITIALIZED, CB_DIFF_STAGE_FINISHED + metadata['output_file'],
+              CB_PUBLISHER_STAGE_INITIALIZED, CB_PROCESS_COMPLETED]
+    # Check that each stage starts and finishes correctly
+    for event in events:
+        if metadata['decompressor'] is False:
+            continue
+        check_event(callback=event, file_to_monitor=LOG_FILE_PATH)
 
     json_document = read_json_file(json_output)
     elements = json_document['elements']

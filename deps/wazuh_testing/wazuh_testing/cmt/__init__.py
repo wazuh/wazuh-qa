@@ -17,5 +17,14 @@ DOWNLOADS_DIR = f"{WORKING_DIR}/incoming/downloads/"
 LOG_FILE_PATH = f"{WORKING_DIR}/logs/content_migration.log"
 
 # Callback messages
-CB_PROCESS_COMPLETED = '.+Migration process completed successfully'
+CB_PROCESS_STARTED = '.+\[info\]\[Orchestrator - start\]: Starting process'
+CB_FETCHING_STAGE_INITIALIZED = '.+\[info\].+handleRequest\]: Starting fetch of .+'
+CB_FETCHING_STAGE_FINISHED = '.+\[info\].+fetch\]: Download done successfully'
+CB_DECOMPRESSION_STAGE_INITIALIZED = '.+\[info\].+handleRequest\]: Starting decompression of .+'
+CB_PARSER_STAGE_INITIALIZED = '.+\[info\].+Parser - handleRequest\]: Starting parse of .+'
+CB_NORMALIZER_STAGE_INITIALIZED = '.+\[info\]\[Normalizer.+ - handleRequest]: Start process'
+CB_DIFF_STAGE_INITIALIZED = '.+\[info\]\[DiffEngine.+ - handleRequest\]: Starting process'
+CB_DIFF_STAGE_FINISHED = '.+\[info\]\[DiffEngine.+ - diffData\]: Created last snapshot: /var/wazuh/incoming/'
+CB_PUBLISHER_STAGE_INITIALIZED = '.+\[info\]\[DiffPublisher - handleRequest\]: Starting process. Configuration:'
+CB_PROCESS_COMPLETED = '.+Migration process completed successfully!'
 REPORT_ERROR_MESSAGE = 'Remote exited with error'
