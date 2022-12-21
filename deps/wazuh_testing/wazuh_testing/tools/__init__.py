@@ -137,8 +137,8 @@ QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 CLUSTER_SOCKET_PATH = os.path.join(WAZUH_PATH, 'queue', 'cluster')
 
 
-ANALYSISD_ANALISIS_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'analysis')
-ANALYSISD_QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
+ENGINE_API_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'engine-api')
+ENGINE_QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
 AUTHD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'auth')
 EXECD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'com')
 LOGCOLLECTOR_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'logcollector')
@@ -159,9 +159,9 @@ WAZUH_SOCKETS = {
     'wazuh-apid': [],
     'wazuh-agentlessd': [],
     'wazuh-csyslogd': [],
-    'wazuh-analysisd': [
-                        ANALYSISD_ANALISIS_SOCKET_PATH,
-                        ANALYSISD_QUEUE_SOCKET_PATH
+    'wazuh-engine': [
+                        ENGINE_API_SOCKET_PATH,
+                        ENGINE_QUEUE_SOCKET_PATH
                        ],
     'wazuh-authd': [AUTHD_SOCKET_PATH],
     'wazuh-execd': [EXECD_SOCKET_PATH],

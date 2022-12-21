@@ -1,8 +1,41 @@
+'''
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
+
+           Created by Wazuh, Inc. <info@wazuh.com>.
+
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+type: integration
+
+brief: These tests will check that the events are correctly handled by the engine module.
+
+components:
+    - engine
+
+suite: test_events
+
+targets:
+    - manager
+
+daemons:
+    - wazuh-engine
+
+os_platform:
+    - linux
+
+os_version:
+    - Ubuntu Focal
+
+references:
+    - https://github.com/wazuh/wazuh/issues/11334
+
+tags:
+    - engine
+    - events
+'''
 import os
 import pytest
-import socket
-import struct
-import shutil
+
 
 from wazuh_testing.tools.configuration import get_test_cases_data
 from wazuh_testing.modules.engine import event_monitor as evm
@@ -14,70 +47,51 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_engine_logs.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_engine_events.yaml')
 
 # Engine events configurations
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 
-# vars
-events = t1_configuration_metadata[0]['events']
-expected_outputs = t1_configuration_metadata[0]['engine_outputs']
-
-
-@pytest.fixture(scope='module')
-def create_kvdb():
-    if not os.path.isdir(engine.KVDB_PATH):
-        print('INFO: Creating the KVDB database')
-        command = f"{engine.ENGINE_BUILD_PATH}/main kvdb -p {engine.OUTPUT_FOLDER} -n win-security-categorization " \
-                  f"-i {engine.KVDB_WIN_INPUT} -t json"
-        print(f"INFO: Running {command}")
-
-        engine.run_local_command_printing_output(command)
-    else:
-        print(f"INFO: The KVDB already exists in {engine.KVDB_PATH}")
-
-    yield
-
-    print('INFO: Removing KVDB files')
-    shutil.rmtree('/tmp/win-security-categorization/', ignore_errors=False, onerror=None)
-
-@pytest.fixture(scope='module')
-def start_engine():
-    socket_data = 'tcp:localhost:5054'
-    environment = 'demo-environment'
-    command = f"{engine.ENGINE_BUILD_PATH}/main run -f {engine.ASSETS_PATH} -e {socket_data} -t 1 -k " \
-              f"{engine.OUTPUT_FOLDER} --environment {environment}"
-    print(f"INFO: Running {command}")
-
-    engine.run_engine(command)
-
-    yield
-
-    # kill the engine subprocess
-    engine.kill_engine()
-
-@pytest.fixture(scope='function')
-def send_events_to_the_engine(event):
-    # engine.send_event_to_engine(event)
-
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    client_socket.connect(('127.0.0.1', 5054))
-
-    # msg format -> queue:location_str:msg
-    msg_formatted = engine.QUEUE + ':' + engine.LOCATION + ':' + event
-    msg_tam = len(msg_formatted)
-    msg_tam_little_endian = struct.pack('<I', msg_tam)
-
-    # the engine's tcpEndpoint expects the following format:
-    # header(len(msg) in little endian) + queue:location_str:msg
-    encoded_msg = msg_tam_little_endian + msg_formatted.encode()
-    client_socket.send(encoded_msg)
-    print(f"INFO: Sending encoded event: {encoded_msg}")
 
 @pytest.mark.tier(level=0)
-@pytest.mark.parametrize('event, expected_output', zip(events, expected_outputs))
-def test_engine_events(create_kvdb, start_engine, send_events_to_the_engine, expected_output):
-    print(f"expected_output: {type(expected_output)}")
-    print(f"waiting for {expected_output[2:len(expected_output)-1]}")
-    evm.check_engine_json_event(event=expected_output[2:len(expected_output)-1])
+@pytest.mark.parametrize('events_data', t1_configuration_metadata, ids=t1_case_ids)
+def test_engine_events(events_data, truncate_engine_files, restart_engine_function):
+    '''
+    description: Check that every event sent is correctly
+
+    test_phases:
+        - Clean the log and alert files
+        - Restart the wazuh-engine.
+        - Send each case's log
+        - Verify that each case's log has been received
+
+    wazuh_min_version: 5.0.0
+
+    tier: 0
+
+    parameters:
+        - events_data:
+            type: dict
+            brief: events' metadata.
+        - truncate_engine_files:
+            type: fixture
+            brief: Clean the alerts/logs before and after running the tests.
+        - restart_engine_function:
+            type: fixture
+            brief: Restart the wazuh-engine daemon.
+
+    assertions:
+        - Verify that after sending events we are allow to catch them within the engine alerts.
+
+    input_description:
+        - The `test_disabled.yaml` file provides the module configuration for this test.
+
+    expected_output:
+        - r'(.*)wazuh-modulesd:vulnerability-detector(.*) Module disabled. Exiting...'
+    '''
+    # Send the messages
+    engine.send_events_to_engine_dgram(events_data['events'])
+
+    # Verify that sent messages appear within the alerts
+    for expected_output in events_data['engine_outputs']:
+        evm.check_engine_event_output(event=expected_output)

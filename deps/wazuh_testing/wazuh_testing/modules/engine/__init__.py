@@ -1,79 +1,40 @@
-import sys
-import time
+# Copyright (C) 2015-2022, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import socket
-import struct
-import subprocess
+
+from wazuh_testing.tools import ENGINE_QUEUE_SOCKET_PATH
 
 
 # engine timeouts
-T_1 = 1
+T_1 = 0.5
 
 # engine vars
-ENGINE_OUTPUT_PATH = '/tmp/filepath.txt'
+ENGINE_ALERTS_PATH = '/var/ossec/logs/alerts/alerts-ECS.json'  # the engine uses this file during the dev phase
+ENGINE_LOG_PATH = '/tmp/engine.log'
 ENGINE_PREFIX = '.*'
+MODULE_NAME = 'wazuh-engine'
 QUEUE = '1'
 LOCATION = 'location'
-ENGINE_BUILD_PATH = '/home/vagrant/wazuh/src/engine/build'
-TEST_PATH = '/home/vagrant/wazuh/src/engine/test'
-ASSETS_PATH = f"{TEST_PATH}/assets/"
-KVDB_WIN_INPUT = f"{TEST_PATH}/kvdb_input_files/windows/win-security-categorization.json"
-KVDB_PATH = '/tmp/win-security-categorization/'
-OUTPUT_FOLDER = '/tmp/'
-
-# subprocess reference
-subprocess_engine = None
 
 
-def run_engine(command):
-    """Run the engine subprocess and do not wait for it.
+def send_events_to_engine_dgram(events):
+    """Send events to the engine events' socket.
+
+    The messages must follow the following format: queue:location_str:msg
+
+    The socket's protocol is unixgram, so we just need to send the events after formatting and encoding them.
+
     Args:
-        command (string): Command to run.
-    Returns:
-        str: Command output.
+        events (list): Events that will be sent to the socket.
     """
-    global subprocess_engine
-    print('INFO: Starting the engine subprocess.')
+    # Create a unixgram socket instance
+    events_socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
 
-    if sys.platform == 'win32':
-        run = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-        # pid = subprocess.Popen([sys.executable, "longtask.py"], creationflags=DETACHED_PROCESS).pid
-    else:
-        subprocess_engine = subprocess.Popen(['/bin/bash', '-c', command], stdout=subprocess.PIPE, close_fds=True)
+    for event in events:
+        # Build the message with the expected format: {queue:location_str:msg}
+        msg_formatted = (QUEUE + ':' + LOCATION + ':' + event).encode('utf8')
 
-    # wait till the engine is up
-    time.sleep(1)
-
-
-def kill_engine():
-    """Kill the engine subprocess."""
-    print(f"INFO: Terminating the engine subprocess {subprocess_engine}")
-    subprocess_engine.kill()
-
-def run_local_command_printing_output(command):
-    if sys.platform == 'win32':
-        run = subprocess.Popen(command, shell=True)
-    else:
-        run = subprocess.Popen(['/bin/bash', '-c', command])
-
-    # Wait for the process to finish
-    run.communicate()
-
-    result_code = run.returncode
-
-    if result_code != 0:
-        raise Exception(f"The command {command} returned {result_code} as result code.")
-
-def send_event_to_engine(event):
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    client_socket.connect(('127.0.0.1', 5054))
-
-    # msg format -> queue:location_str:msg
-    msg_formatted = QUEUE + ':' + LOCATION + ':' + event
-    msg_tam = len(msg_formatted)
-    msg_tam_little_endian = struct.pack('<I', msg_tam)
-
-    # the engine's tcpEndpoint expects: header(msg size(little endian)) + event with the expected format
-    encoded_msg = msg_tam_little_endian + msg_formatted.encode()
-    client_socket.send(encoded_msg)
-    print(f"INFO: Sending encoded event: {encoded_msg}")
+        # Send the encoded message to the engine's events socket
+        events_socket.sendto(msg_formatted, ENGINE_QUEUE_SOCKET_PATH)
