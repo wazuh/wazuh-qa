@@ -323,7 +323,9 @@ def test_multiple_calls(
     ]
 
     # Call the module without only_logs_after and check that no logs were processed
-    event_monitor.check_non_processed_logs_from_output(command_output=call_aws_module(*base_parameters))
+    event_monitor.check_non_processed_logs_from_output(
+        command_output=call_aws_module(*base_parameters), bucket_type=bucket_type
+    )
 
     # Call the module with only_logs_after set in the past and check that the expected number of logs were
     # processed
@@ -334,13 +336,15 @@ def test_multiple_calls(
 
     # Call the module with the same parameters in and check there were no duplicates
     event_monitor.check_non_processed_logs_from_output(
-        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, '2022-NOV-20')
+        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, '2022-NOV-20'),
+        bucket_type=bucket_type
     )
 
     # Call the module with only_logs_after set with an early date than setted previously and check that no logs
     # were processed, there were no duplicates
     event_monitor.check_non_processed_logs_from_output(
         command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, '2022-NOV-22'),
+        bucket_type=bucket_type
     )
 
     # Upload a log file for the day of the test execution and call the module without only_logs_after and check that
