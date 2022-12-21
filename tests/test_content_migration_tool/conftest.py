@@ -1,16 +1,17 @@
 import http.server
 import os
-import shutil
 import socketserver
 import threading
 from functools import partial
 from time import sleep
 
 import pytest
-from wazuh_testing.tools.file import remove_file, write_json_file, truncate_file
+from wazuh_testing.tools.file import remove_file, write_json_file, truncate_file, recursive_directory_creation, copy, \
+                                     delete_path_recursively
 from wazuh_testing.tools.logging import Logging
 from wazuh_testing.cmt import LOG_FILE_PATH
 from wazuh_testing.cmt.utils import clean_cmt_output_files, drop_cmt_tables
+
 
 logger = Logging('cmt')
 
@@ -105,12 +106,14 @@ def prepare_alas_feed(request, metadata):
     alas_data_path = os.path.join(request.module.FEEDS_PATH, 'alas')
     repodata_path = os.path.join(alas_data_path, 'repodata')
     dest_path = os.path.join(repodata_path, 'updateinfo.xml.gz')
+    recursive_directory_creation(repodata_path)
 
     if 'alas' in metadata['output_file']:
         src_path = os.path.join(alas_data_path, f"alas{metadata['alas_version']}_feed.xml.gz")
-        shutil.copyfile(src_path, dest_path)
+        copy(src_path, dest_path)
 
     yield
 
     if 'alas' in metadata['output_file']:
         remove_file(dest_path)
+        delete_path_recursively(repodata_path)
