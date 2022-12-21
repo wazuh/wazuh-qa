@@ -19,12 +19,6 @@
             value: EMAIL_NOTIFICATIOIN
         - jsonout_output:
             value: JSONOUT_OUTPUT
-    - section: active-response
-      elements:
-        - command:
-            value: COMMAND_NAME
-        - location:
-            value: LOCATION
     - section: alerts
       elements:
         - email_alert_level:
@@ -37,5 +31,13 @@
             value: COMMAND_NAME
         - executable:
             value: EXECUTABLE
+    - section: rule_test
+      elements:
+        - enabled:
+            value: ENABLED
+    - section: active-response
+      elements:
+        - command:
+            value: COMMAND_NAME
         - location:
             value: LOCATION
