@@ -70,7 +70,7 @@ expected_default_conf_response = {
     'analysis/rule_test': {
         'data': {'affected_items': [{'rule_test': {'enabled': 'yes', 'threads': 1, 'max_sessions': 64,
                                                    'session_timeout': 900}}], 'total_affected_items': 1,
-                                                   'total_failed_items': 0, 'failed_items': []},
+                 'total_failed_items': 0, 'failed_items': []},
         'message': 'Active configuration was successfully read', 'error': 0
     },
     'analysis/global': {
@@ -80,7 +80,7 @@ expected_default_conf_response = {
                                                 'alerts_log': 'yes', 'stats': 8, 'memory_size': 8192,
                                                 'white_list': ['127.0.0.1', '10.0.2.3', 'localhost.localdomain'],
                                                 'rotate_interval': 0, 'max_output_size': 0, 'eps': {'maximum': 0,
-                                                'timeframe': 10}}}],
+                                                                                                    'timeframe': 10}}}],
                  'total_affected_items': 1, 'total_failed_items': 0, 'failed_items': []},
         'message': 'Active configuration was successfully read', 'error': 0
     }
@@ -175,7 +175,7 @@ expected_custom_conf_response = {
     'analysis/rule_test': {
         'data': {'affected_items': [{'rule_test': {'enabled': 'no', 'threads': 1, 'max_sessions': 64,
                                                    'session_timeout': 900}}], 'total_affected_items': 1,
-                                                   'total_failed_items': 0, 'failed_items': []},
+                 'total_failed_items': 0, 'failed_items': []},
         'message': 'Active configuration was successfully read', 'error': 0
     },
     'analysis/global': {
@@ -185,7 +185,7 @@ expected_custom_conf_response = {
                                                 'alerts_log': 'yes', 'stats': 8, 'memory_size': 8192,
                                                 'white_list': ['127.0.0.1', '10.0.2.3', 'localhost.localdomain'],
                                                 'rotate_interval': 0, 'max_output_size': 0, 'eps': {'maximum': 0,
-                                                'timeframe': 10}}}],
+                                                                                                    'timeframe': 10}}}],
                  'total_affected_items': 1, 'total_failed_items': 0, 'failed_items': []},
         'message': 'Active configuration was successfully read', 'error': 0
     }
