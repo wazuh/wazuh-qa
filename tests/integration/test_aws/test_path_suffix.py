@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from wazuh_testing import T_10, global_parameters
+from wazuh_testing import T_10, T_20, global_parameters
 from wazuh_testing.modules.aws import event_monitor
 from wazuh_testing.modules.aws.db_utils import get_s3_db_row, s3_db_exists, table_exists
 from wazuh_testing.tools.configuration import (
@@ -129,7 +129,7 @@ def test_path_suffix(
 
     if expected_results:
         wazuh_log_monitor.start(
-            timeout=global_parameters.default_timeout,
+            timeout=T_20,
             callback=event_monitor.callback_detect_event_processed,
             error_message='The AWS module did not process the expected number of events',
         ).result()
