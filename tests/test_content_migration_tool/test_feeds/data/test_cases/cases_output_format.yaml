@@ -16,6 +16,7 @@
         tableNameSpecifier: alas1
   metadata:
     output_file: snapshots/alas/alas1_feed.json
+    alas_version: 1
 
 - name: ALAS2_FEED
   description: Verify the tool's behavior is the expected when ingesting ALAS 2 feed
@@ -24,7 +25,7 @@
     - VENDOR: alas
       DESCRIPTION: ALAS 2
       REMOTES:
-      - url: http://localhost:8888/alas/alas2_feed.xml.gz
+      - url: http://localhost:8888/alas/mirror.list
         request: file
         precondition: alas2
         compressed: gzip
@@ -35,6 +36,7 @@
         tableNameSpecifier: alas2
   metadata:
     output_file: snapshots/alas/alas2_feed.json
+    alas_version: 2
 
 - name: ALAS2022_FEED
   description: Verify the tool's behavior is the expected when ingesting ALAS 2022 feed
@@ -43,7 +45,7 @@
     - VENDOR: alas
       DESCRIPTION: ALAS 2022
       REMOTES:
-      - url: http://localhost:8888/alas/alas2022_feed.xml.gz
+      - url: http://localhost:8888/alas/releasemd.xml
         request: file
         precondition: alas2022
         compressed: gzip
@@ -54,6 +56,7 @@
         tableNameSpecifier: alas2022
   metadata:
     output_file: snapshots/alas/alas2022_feed.json
+    alas_version: 2022
 
 - name: ARCH_LINUX_FEED
   description: Verify the tool's behavior is the expected when ingesting Arch Linux feed

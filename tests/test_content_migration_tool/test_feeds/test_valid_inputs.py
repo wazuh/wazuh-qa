@@ -34,11 +34,10 @@ feed_with_vuln_modified = os.path.join(FEEDS_PATH, 'arch', 'arch_updated_cve.jso
 
 
 @pytest.mark.parametrize('configuration,metadata', zip(t1_config, t1_metadata), ids=t1_cases_id)
-def test_output_format(configuration, metadata, build_cmt_config_file, clean_results):
+def test_output_format(configuration, metadata, build_cmt_config_file, prepare_alas_feed, clean_results):
+    # Mark as expected to fail if
     if 'debian' in metadata['output_file']:
         pytest.xfail('Expected to fail due to high memory consumption: wazuh/wazuh-content#334')
-    elif 'alas' in metadata['output_file']:
-        pytest.xfail('Expected to fail due to the complexity to mock the feed.')
     elif 'nvd' in metadata['output_file']:
         pytest.xfail('Expected to fail due to the the abscent of a valid test feed.')
 

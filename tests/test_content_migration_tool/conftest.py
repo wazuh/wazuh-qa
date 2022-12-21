@@ -1,5 +1,6 @@
 import http.server
 import os
+import shutil
 import socketserver
 import threading
 from functools import partial
@@ -80,3 +81,36 @@ def clean_results():
     yield
 
     clean()
+
+
+@pytest.fixture
+def prepare_alas_feed(request, metadata):
+    '''The process of fetching feeds is different for ALAS.
+    In the case of ALAS 1 and ALAS 2:
+        - A plain file (mirror.list) is downloaded from the URL specified in the config file, that file contains a URL
+        - The "/repodata/updateinfo.xml.gz" string is appended to the above-mentioned URL
+        - The "updateinfo.xml.gz" is the file that contains the desired feed
+    In the case of ALAS 2022:
+        - An XML file, containing the release version of ALAS, is downloaded from the URL specified in the config file
+        - The 'releasemd.xml' string in the previous URL is replaced by 'mirrors/<OBTAINED_VERSION>/x86_64/mirror.list'
+        - The file 'mirror.list' is downloaded and it contains the URL from which the feed will be downloaded
+        - The '/repodata/updateinfo.xml.gz' string is appended to the last URL
+        - The "updateinfo.xml.gz" is the file that contains the desired feed
+
+    This fixture copies the desired feed to the destination folder and then removes it.
+
+    Args:
+        metadata (dict): Test case metadata.
+    '''
+    alas_data_path = os.path.join(request.module.FEEDS_PATH, 'alas')
+    repodata_path = os.path.join(alas_data_path, 'repodata')
+    dest_path = os.path.join(repodata_path, 'updateinfo.xml.gz')
+
+    if 'alas' in metadata['output_file']:
+        src_path = os.path.join(alas_data_path, f"alas{metadata['alas_version']}_feed.xml.gz")
+        shutil.copyfile(src_path, dest_path)
+
+    yield
+
+    if 'alas' in metadata['output_file']:
+        remove_file(dest_path)
