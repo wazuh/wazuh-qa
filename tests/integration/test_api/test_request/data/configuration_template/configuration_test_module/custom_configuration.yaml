@@ -15,3 +15,27 @@
             value: AGENTS_DISCONNECTION_TIME
         - agents_disconnection_alert_time:
             value: AGENTS_DISCONNECTION_ALERT_TIME
+        - email_notification:
+            value: EMAIL_NOTIFICATIOIN
+        - jsonout_output:
+            value: JSONOUT_OUTPUT
+    - section: active-response
+      elements:
+        - command:
+            value: COMMAND_NAME
+        - location:
+            value: LOCATION
+    - section: alerts
+      elements:
+        - email_alert_level:
+            value: EMAIL_ALERT_LEVEL
+        - log_alert_level:
+            value: LOG_ALERT_LEVEL
+    - section: command
+      elements:
+        - name:
+            value: COMMAND_NAME
+        - executable:
+            value: EXECUTABLE
+        - location:
+            value: LOCATION

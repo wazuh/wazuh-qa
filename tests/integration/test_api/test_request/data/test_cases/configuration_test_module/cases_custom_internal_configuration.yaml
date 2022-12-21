@@ -4,3 +4,10 @@
     ENDPOINT: request
   metadata:
     endpoint: request
+
+- name: analysisd_endpoint
+  description: analysisd internal configuration endpoint
+  configuration_parameters:
+    ENDPOINT: analysis
+  metadata:
+    endpoint: analysis

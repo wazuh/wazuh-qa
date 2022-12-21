@@ -7,6 +7,14 @@
     QUEUE_SIZE: 131071
     AGENTS_DISCONNECTION_TIME: 300
     AGENTS_DISCONNECTION_ALERT_TIME: 5
+    COMMAND_NAME: restart-wazuh
+    LOCATION: all
+    EMAIL_ALERT_LEVEL: 6
+    LOG_ALERT_LEVEL: 5
+    EXECUTABLE: restart-wazuh
+    ENABLED: 'no'
+    EMAIL_NOTIFICATIOIN: 'yes'
+    JSONOUT_OUTPUT: 'yes'
   metadata:
     connection: secure
     port: 1514
@@ -14,3 +22,11 @@
     queue_size: 131071
     agents_disconnection_time: 300
     agents_disconnection_alert_time: 5
+    command_name: restart-wazuh
+    location: all
+    email_alert_level: 6
+    log_alert_level: 5
+    executable: restart-wazuh
+    enabled: 'no'
+    email_notification: 'yes'
+    jsonout_output: 'yes'

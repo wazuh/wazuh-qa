@@ -239,7 +239,7 @@ def test_default_configuration(metadata, get_api_details):
 
     api_details = get_api_details()
     endpoint = metadata['endpoint']
-    url = f"{api_details['base_url']}/manager/configuration/request/{endpoint}"
+    url = f"{api_details['base_url']}/manager/configuration/{endpoint}"
     response = requests.get(url, headers=api_details['auth_headers'], verify=False)
 
     assert response.json() == expected_default_conf_response[endpoint]
@@ -265,7 +265,7 @@ def test_custom_configuration(configuration, metadata, load_wazuh_basic_configur
 
     api_details = get_api_details()
     for endpoint in expected_custom_conf_response:
-        url = f"{api_details['base_url']}/manager/configuration/request/{endpoint}"
+        url = f"{api_details['base_url']}/manager/configuration/{endpoint}"
         response = requests.get(url, headers=api_details['auth_headers'], verify=False)
 
         assert response.json() == expected_custom_conf_response[endpoint]

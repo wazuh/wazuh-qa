@@ -1,13 +1,69 @@
 - name: remote_endpoint
   description: remote endpoint
   configuration_parameters:
-    ENDPOINT: remote
+    ENDPOINT: request/remote
   metadata:
-    endpoint: remote
+    endpoint: request/remote
 
-- name: global_endpoint
-  description: global endpoint
+- name: remoted_global_endpoint
+  description: remoted global endpoint
   configuration_parameters:
-    ENDPOINT: global
+    ENDPOINT: request/global
   metadata:
-    endpoint: global
+    endpoint: request/global
+
+- name: active_response_endpoint
+  description: active_response endpoint
+  configuration_parameters:
+    ENDPOINT: analysis/active_response
+  metadata:
+    endpoint: analysis/active_response
+
+- name: alerts_endpoint
+  description: alerts endpoint
+  configuration_parameters:
+    ENDPOINT: analysis/alerts
+  metadata:
+    endpoint: analysis/alerts
+
+#- name: decoders_endpoint
+#  description: decoders endpoint
+#  configuration_parameters:
+#    ENDPOINT: analysis/decoders
+#  metadata:
+#    endpoint: analysis/decoders
+#
+#- name: rules_endpoint
+#  description: rules endpoint
+#  configuration_parameters:
+#    ENDPOINT: analysis/rules
+#  metadata:
+#    endpoint: analysis/rules
+
+- name: command_endpoint
+  description: command endpoint
+  configuration_parameters:
+    ENDPOINT: analysis/command
+  metadata:
+    endpoint: analysis/command
+
+#- name: labels_endpoint
+#  description: labels endpoint
+#  configuration_parameters:
+#    ENDPOINT: analysis/labels
+#  metadata:
+#    endpoint: analysis/labels
+
+- name: rule_test_endpoint
+  description: rule_test endpoint
+  configuration_parameters:
+    ENDPOINT: analysis/rule_test
+  metadata:
+    endpoint: analysis/rule_test
+
+- name: analysisd_global_endpoint
+  description: analysisd global endpoint
+  configuration_parameters:
+    ENDPOINT: analysis/global
+  metadata:
+    endpoint: analysis/global
