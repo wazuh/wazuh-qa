@@ -188,7 +188,7 @@ def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuratio
         else:
             assert '<Diff truncated because nodiff option>' not in event['data'].get('content_changes'), \
                 f'content_changes is truncated'
+
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, time_travel=False,
-                     min_timeout=global_parameters.default_timeout*4, triggers_event=True,
-                     validators_after_update=[report_changes_validator, no_diff_validator])
+    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, min_timeout=global_parameters.default_timeout*4,
+                     triggers_event=True, validators_after_update=[report_changes_validator, no_diff_validator])
