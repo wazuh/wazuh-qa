@@ -163,7 +163,6 @@ def clean_cmt_output_files():
     remove_files_in_folder(downloads_folders)
 
 
-
 def drop_cmt_tables():
     """Remove the tables created by CMT.
     """
