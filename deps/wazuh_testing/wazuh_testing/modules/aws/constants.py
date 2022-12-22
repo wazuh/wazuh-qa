@@ -10,6 +10,7 @@ RANDOM_ACCOUNT_ID = '819751203818'
 CLOUDTRAIL = 'CloudTrail'
 VPC_FLOW_LOGS = "vpcflowlogs"
 FLOW_LOG_ID = "fl-0754d951c16f517fa"
+CONFIG = 'Config'
 
 EVENT_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 PATH_DATE_FORMAT = '%Y/%m/%d'
@@ -23,3 +24,4 @@ LOG_EXT = '.log'
 # Bucket types
 CLOUD_TRAIL_TYPE = 'cloudtrail'
 VPC_FLOW_TYPE = 'vpcflow'
+CONFIG_TYPE = 'config'

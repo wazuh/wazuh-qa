@@ -155,10 +155,69 @@ class VPCDataGenerator(DataGenerator):
         return buffer.getvalue()
 
 
+class ConfigDataGenerator(DataGenerator):
+    BASE_PATH = f'{cons.AWS_LOGS}/{cons.RANDOM_ACCOUNT_ID}/{cons.CONFIG}/{cons.US_EAST_1_REGION}/'
+    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.CONFIG}_{cons.US_EAST_1_REGION}_ConfigHistory_AWS_'
+
+    def get_filename(self, prefix=None, **kwargs) -> str:
+        """Return the filename in the cloudtrail format
+        <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/Config/<region>/<year>/<month>/<day>
+        """
+        now = datetime.now()
+        path = f"{self.BASE_PATH}{now.strftime(cons.PATH_DATE_FORMAT)}/"
+        name = f"{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}{cons.JSON_EXT}"
+
+        return f'{path}{name}'
+
+    def get_data_sample(self) -> str:
+        return json.dumps({
+            'fileVersion': '1.0',
+            'configurationItems': [
+                {
+                    'relatedEvents': [],
+                    'relationships': [
+                        {
+                            'resourceId': f"vol-{get_random_string(17)}",
+                            'resourceType': 'AWS::EC2::Volume',
+                            'name': 'Is associated with '
+                        }
+                    ],
+                    'configuration': {
+                        'complianceType': 'NON_COMPLIANT',
+                        'targetResourceId': f"vol-{get_random_string(17)}",
+                        'targetResourceType': 'AWS::EC2::Volume',
+                        'configRuleList': [
+                            {
+                                'configRuleArn': (
+                                    f"arn:aws:config:us-east-1:{cons.RANDOM_ACCOUNT_ID}:config-rule/"
+                                    'config-rule-b1eqqf'),
+                                'configRuleId': 'config-rule-b1eqqf',
+                                'configRuleName': 'encrypted-volumes',
+                                'complianceType': 'NON_COMPLIANT'
+                            }
+                        ]
+                    },
+                    'supplementaryConfiguration': {},
+                    'tags': {},
+                    'configurationItemVersion': '1.3',
+                    'configurationItemCaptureTime': '2020-06-01T02:12:37.713Z',
+                    'configurationStateId': 1590977557713,
+                    'awsAccountId': cons.RANDOM_ACCOUNT_ID,
+                    'configurationItemStatus': 'ResourceDiscovered',
+                    'resourceType': 'AWS::Config::ResourceCompliance',
+                    'resourceId': f"AWS::EC2::Volume/vol-{get_random_string(17)}",
+                    'awsRegion': 'us-east-1',
+                    'configurationStateMd5Hash': ''
+                }
+            ]
+        })
+
+
 # Maps bucket type with corresponding data generator
 buckets_data_mapping = {
     cons.CLOUD_TRAIL_TYPE: CloudTrailDataGenerator,
-    cons.VPC_FLOW_TYPE: VPCDataGenerator
+    cons.VPC_FLOW_TYPE: VPCDataGenerator,
+    cons.CONFIG_TYPE: ConfigDataGenerator
 }
 
 
