@@ -116,6 +116,7 @@ daemons_handler_configuration = {'daemons': ['wazuh-remoted']}
 
 
 @pytest.mark.tier(level=0)
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', t1_configuration_metadata, ids=t1_case_ids)
 def test_default_configuration(metadata, get_api_details):
 
@@ -129,6 +130,7 @@ def test_default_configuration(metadata, get_api_details):
 
 @pytest.mark.xfail(reason="It will be blocked by wazuh/wazuh#15694, when it is resolved, we can enable the test")
 @pytest.mark.tier(level=0)
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', t2_configuration_metadata, ids=t2_case_ids)
 def test_default_internal_configuration(metadata, get_api_details):
 
@@ -141,6 +143,7 @@ def test_default_internal_configuration(metadata, get_api_details):
 
 
 @pytest.mark.tier(level=0)
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('configuration, metadata', zip(t3_configurations, t3_configuration_metadata), ids=t3_case_ids)
 def test_custom_configuration(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
                               get_api_details, restart_wazuh_daemon_function):
@@ -155,6 +158,7 @@ def test_custom_configuration(configuration, metadata, load_wazuh_basic_configur
 
 @pytest.mark.xfail(reason="It will be blocked by wazuh/wazuh#15694, when it is resolved, we can enable the test")
 @pytest.mark.tier(level=0)
+@pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', t4_configuration_metadata, ids=t4_case_ids)
 def test_custom_internal_configuration(metadata, configure_local_internal_options_function, get_api_details,
                                        restart_wazuh_daemon_function):
