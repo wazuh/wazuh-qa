@@ -45,7 +45,8 @@ def test_output_format(configuration, metadata, build_cmt_config_file, prepare_a
     elif 'nvd' in metadata['output_file']:
         pytest.xfail('Expected to fail due to the the abscent of a valid test feed.')
     elif 'redhat' in metadata['output_file'] or 'suse' in metadata['output_file']:
-        pytest.xfail('Expected to fail because there is not log to detect the Normalizer initialization.')
+        pytest.xfail('Expected to fail because the log to detect the Normalizer initialization is' \
+                     'different: wazuh/wazuh-contebt#483. After the task is merged we need to change the callback.')
 
     # Select the unique config file in the list
     config_file = build_cmt_config_file[0]
