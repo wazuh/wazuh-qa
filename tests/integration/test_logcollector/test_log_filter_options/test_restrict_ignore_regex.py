@@ -98,10 +98,18 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
                  value configured.
 
     test_phases:
-        - Set a custom Wazuh configuration.
-        - Restart monitord.
-        - Insert the log message.
-        - Check expected response.
+        - Setup:
+           - Create file to monitor logs
+           - Truncate ossec.log file
+           - Set ossec.conf and local_internal_options.conf
+           - Restart the wazuh daemon
+        - Test:
+           - Insert the log message.
+           - Check expected response.
+        - Teardown:
+           - Delete the monitored file
+           - Restore ossec.conf and local_internal_options.conf
+           - Stop Wazuh
 
     wazuh_min_version: 4.5.0
 

@@ -96,10 +96,18 @@ def test_ignore_multiple_regex(configuration, metadata, new_file_path, create_fi
     description: Check if logcollector behavior when two ignore tags are added.
 
     test_phases:
-        - Set a custom Wazuh configuration.
-        - Restart monitord.
-        - Insert the log message.
-        - Check expected response.
+        - Setup:
+           - Create file to monitor logs
+           - Truncate ossec.log file
+           - Set ossec.conf and local_internal_options.conf
+           - Restart the wazuh daemon
+        - Test:
+           - Insert the log message.
+           - Check expected response.
+        - Teardown:
+           - Delete the monitored file
+           - Restore ossec.conf and local_internal_options.conf
+           - Stop Wazuh
 
     wazuh_min_version: 4.5.0
 
