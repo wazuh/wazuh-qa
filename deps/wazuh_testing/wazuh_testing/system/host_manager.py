@@ -29,7 +29,7 @@ class HostManager:
         self.inventory_manager = InventoryManager(loader=data_loader, sources=inventory_path)
         self.variable_manager = VariableManager(loader=data_loader, inventory=self.inventory_manager)
 
-    def get_host(self, host):
+    def get_testinfra_host(self, host):
         """Get the testinfra host.
 
         Args:
@@ -51,7 +51,7 @@ class HostManager:
         """Get all hosts from inventory that belong to a group.
 
         Args:
-            group (str): Group name
+            pattern (str): Pattern of the groups names
         Returns:
             list: List of hosts
         """
@@ -79,8 +79,8 @@ class HostManager:
         Returns:
             str: OS of the host
         """
-        testinfra_host = self.get_host(host)
-        return testinfra_host.ansible("setup")
+        testinfra_host = self.get_testinfra_host(host)
+        return testinfra_host.ansible('setup')
 
     def collect_host_os(self, host):
         """Get the OS of the specified host.
@@ -127,7 +127,7 @@ class HostManager:
         Returns:
             bool: True if the host is reachable, False otherwise
         """
-        testinfra_host = self.get_host(host)
+        testinfra_host = self.get_testinfra_host(host)
         ansible_command = 'ping' if not windows else 'win_ping'
 
         return testinfra_host.ansible(ansible_command, check=False)['ping'] == 'pong'
@@ -148,11 +148,11 @@ class HostManager:
         Raises:
             Exception: If the command execution fails
         """
-        testinfra_host = self.get_host(host)
+        testinfra_host = self.get_testinfra_host(host)
         ansible_command = 'copy' if not windows else 'win_copy'
         remote_source = 'yes' if remote_src else 'no'
 
-        command_parameters = f"src={src_path} dest={dest_path} remote_src={remote_src}"
+        command_parameters = f"src={src_path} dest={dest_path} remote_src={remote_source}"
         result = testinfra_host.ansible(ansible_command, command_parameters, check=False, become=become)
 
         if result.get('msg', None) and not ignore_errors:
@@ -173,7 +173,7 @@ class HostManager:
         Raises:
             Exception: If the file cannot be read
         """
-        testinfra_host = self.get_host(host)
+        testinfra_host = self.get_testinfra_host(host)
         result = testinfra_host.ansible("slurp", f"src={path}", check=False, become=become)
 
         if result.get('msg', None) and not ignore_errors:
@@ -189,6 +189,7 @@ class HostManager:
         Args:
             host (str): Hostname
             dest_path (str): Destination path
+            src_path (str, optional): Source path. Defaults to None.
             filesystem (dict): File structure
             become (bool, optional): Use sudo. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
@@ -199,7 +200,7 @@ class HostManager:
         Raises:
             Exception: If the command execution fails
         """
-        testinfra_host = self.get_host(host)
+        testinfra_host = self.get_testinfra_host(host)
 
         ansible_command = 'synchronize'
 
@@ -236,7 +237,7 @@ class HostManager:
         Raises:
             Exception: If the file cannot be truncated
         """
-        testinfra_host = self.get_host(host)
+        testinfra_host = self.get_testinfra_host(host)
         result = None
 
         if recreate:
@@ -266,7 +267,7 @@ class HostManager:
             Exception: If the file cannot be removed
         """
 
-        testinfra_host = self.get_host(host)
+        testinfra_host = self.get_testinfra_host(host)
         ansible_command = 'file' if not windows else 'win_file'
         result = testinfra_host.ansible(ansible_command, f"path={file_path} state=absent", check=False, become=become)
 
@@ -309,6 +310,7 @@ class HostManager:
             host (str): Hostname
             path (str): path for the file to create and modify
             content (str, bytes): content to write into the file
+            directory (bool, optional): Create a directory instead of a file. Defaults to False.
             owner (str): owner of the file
             group (str): group of the file
             mode (str): mode of the file
@@ -320,7 +322,7 @@ class HostManager:
         Raises:
             Exception: If the file cannot be created
         """
-        testinfra_host = self.get_host(host)
+        testinfra_host = self.get_testinfra_host(host)
         tmp_file = tempfile.NamedTemporaryFile()
         with open(tmp_file.name, 'w+') as tmp:
             tmp.write(content)
@@ -342,7 +344,7 @@ class HostManager:
     def control_service(self, host, service, state, become=False, windows=False, ignore_errors=False):
         """Control a service on a host.
 
-            Args:
+        Args:
                 host (str): Hostname
                 service (str): Service name
                 state (str): Service state
@@ -354,7 +356,7 @@ class HostManager:
             Raises:
                 Exception: If the service cannot be controlled
         """
-        testinfra_host = self.get_host(host)
+        testinfra_host = self.get_testinfra_host(host)
         ansible_command = 'service' if not windows else 'win_service'
 
         result = testinfra_host.ansible(ansible_command, f"name={service} state={state}", check=False, become=become)
@@ -378,7 +380,7 @@ class HostManager:
         Raises:
             Exception: If the command cannot be run
         """
-        testinfra_host = self.get_host(host)
+        testinfra_host = self.get_testinfra_host(host)
         ansible_command = 'command' if not windows else 'win_command'
 
         result = testinfra_host.ansible(ansible_command, f"{cmd}", check=False, become=become)
@@ -404,7 +406,7 @@ class HostManager:
         Raises:
             Exception: If the command cannot be run
         """
-        testinfra_host = self.get_host(host)
+        testinfra_host = self.get_testinfra_host(host)
         rc = None
         stdout = None
 
@@ -437,7 +439,7 @@ class HostManager:
         Raises:
             Exception: If the command cannot be run
         """
-        test_infra_host = self.get_host(host)
+        test_infra_host = self.get_testinfra_host(host)
         ansible_command = 'find' if not windows else 'win_find'
         ansible_pattern_arguments = 'pattern' if not windows else 'patterns'
 
@@ -464,7 +466,7 @@ class HostManager:
         Raises:
             Exception: If the command cannot be run.
         """
-        testinfra_host = self.get_host(host)
+        testinfra_host = self.get_testinfra_host(host)
         ansible_command = 'stat' if not windows else 'ansible.windows.win_stat'
 
         result = testinfra_host.ansible(ansible_command, f"path={path}", check=False, become=become)
