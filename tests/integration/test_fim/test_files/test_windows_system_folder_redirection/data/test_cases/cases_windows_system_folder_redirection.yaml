@@ -1,0 +1,9 @@
+- name: report_changes_found_scheduled
+  description: When a file is monitored with report_changes, the diff file and changes are reported (Scheduled mode)
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    folder: \%WINDIR%/Sysnative
+    fim_mode: scheduled
