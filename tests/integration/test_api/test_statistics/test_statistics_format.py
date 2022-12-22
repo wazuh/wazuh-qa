@@ -3,6 +3,7 @@ import os
 import pytest
 import requests
 
+from wazuh_testing.api import make_api_call
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.tools.file import read_json_file
 
@@ -31,9 +32,9 @@ def test_enabled(configuration, metadata, load_wazuh_basic_configuration, set_wa
                  get_api_details, restart_wazuh_daemon_function):
 
     endpoint = metadata['endpoint']
+    complete_endpoint = f'/manager/daemons/stats?daemons_list={endpoint}'
     api_details = get_api_details()
-    url = f"{api_details['base_url']}/manager/daemons/stats?daemons_list={endpoint}"
-    response = requests.get(url, headers=api_details['auth_headers'], verify=False)
+    response = make_api_call(endpoint=complete_endpoint, headers=api_details['auth_headers'])
     stats_schema = read_json_file(os.path.join(CONFIGURATIONS_PATH, f'{endpoint}_template.json'))
 
     jsonschema.validate(instance=response.json(), schema=stats_schema)
