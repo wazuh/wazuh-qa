@@ -75,11 +75,10 @@ def test_enabled(configuration, metadata, load_wazuh_basic_configuration, set_wa
         - The `configuration_enabled` file provides the module configuration for this test.
         - The `cases_enabled` file provides the test cases.
     """
-    endpoint = metadata['endpoint']
-    complete_endpoint = f'/manager/daemons/stats?daemons_list={endpoint}'
+    endpoint = f"/manager/daemons/stats?daemons_list={metadata['endpoint']}"
     api_details = get_api_details()
-    response = make_api_call(endpoint=complete_endpoint, headers=api_details['auth_headers'])
-    stats_schema = read_json_file(os.path.join(CONFIGURATIONS_PATH, f'{endpoint}_template.json'))
+    response = make_api_call(endpoint=endpoint, headers=api_details['auth_headers'])
+    stats_schema = read_json_file(os.path.join(CONFIGURATIONS_PATH, f"{metadata['endpoint']}_template.json"))
 
     # Check if the API statistics response data meets the expected schema. Raise an exception if not.
     jsonschema.validate(instance=response.json(), schema=stats_schema)
