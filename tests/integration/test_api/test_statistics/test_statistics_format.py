@@ -31,7 +31,7 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 def test_enabled(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
                  get_api_details, restart_wazuh_daemon_function):
     """
-    description: Check if the stadidistics returned by the API have the expected format.
+    description: Check if the statistics returned by the API have the expected format.
 
     test_phases:
         - setup:
