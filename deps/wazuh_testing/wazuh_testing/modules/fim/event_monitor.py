@@ -10,6 +10,7 @@ from wazuh_testing import logger
 from wazuh_testing.tools.monitoring import generate_monitoring_callback
 from wazuh_testing.modules import fim
 
+CB_FIM_PATH_CONVERTED = r".*fim_adjust_path.*Convert '(.*) to '(.*)' to process the FIM events."
 
 # Callbacks
 def callback_detect_event(line):
@@ -95,6 +96,48 @@ def callback_disk_quota_limit_reached(line):
 
     if match:
         return match.group(2)
+
+
+def callback_detect_file_added_event(line):
+    """ Callback that detects if a line in a log is a file added event.
+    Args:
+        line (String): string line to be checked by callback in FileMonitor.
+    """
+    json_event = callback_detect_event(line)
+
+    if json_event is not None:
+        if json_event['data']['type'] == 'added':
+            return json_event
+
+    return None
+
+
+def callback_detect_file_modified_event(line):
+    """ Callback that detects if a line in a log is a file modified event.
+    Args:
+        line (String): string line to be checked by callback in FileMonitor.
+    """
+    json_event = callback_detect_event(line)
+
+    if json_event is not None:
+        if json_event['data']['type'] == 'modified':
+            return json_event
+
+    return None
+
+
+def callback_detect_file_deleted_event(line):
+    """ Callback that detects if a line in a log is a file deleted event.
+    Args:
+        line (String): string line to be checked by callback in FileMonitor.
+    """
+    json_event = callback_detect_event(line)
+
+    if json_event is not None:
+        if json_event['data']['type'] == 'deleted':
+            return json_event
+
+    return None
 
 
 # Event checkers
