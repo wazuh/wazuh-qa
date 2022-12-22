@@ -80,7 +80,7 @@ def table_exists(table_name: str) -> bool:
         SELECT
             name
         FROM
-            sqlite_schema
+            sqlite_master
         WHERE
             type ='table' AND
             name NOT LIKE 'sqlite_%';
