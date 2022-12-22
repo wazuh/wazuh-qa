@@ -10,8 +10,8 @@ pytestmark = [pytest.mark.server]
 
 # Generic vars
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template', 'configuration_test_module')
-TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases', 'configuration_test_module')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # --------------------------------------------- TEST_DEFAULT_CONFIGURATION ---------------------------------------------
 # Configuration and cases data
@@ -61,7 +61,7 @@ expected_default_internal_conf_response = {
 
 # --------------------------------------------- TEST_CUSTOM_CONFIGURATION ----------------------------------------------
 # Configuration and cases data
-t3_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'custom_configuration.yaml')
+t3_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_custom.yaml')
 t3_cases_path = os.path.join(TEST_CASES_PATH, 'cases_custom_configuration.yaml')
 
 # Enabled test configurations (t3)
