@@ -64,7 +64,7 @@ expected_default_conf_response = {
                  'total_affected_items': 1, 'total_failed_items': 0, 'failed_items': []},
         'message': 'Active configuration was successfully read', 'error': 0
     },
-    #'agent/labels':{
+    #'analysis/labels':{
     #
     #},
     'analysis/rule_test': {
