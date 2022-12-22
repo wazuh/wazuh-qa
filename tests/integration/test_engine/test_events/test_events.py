@@ -81,13 +81,13 @@ def test_engine_events(events_data, truncate_engine_files, restart_engine_functi
             brief: Restart the wazuh-engine daemon.
 
     assertions:
-        - Verify that after sending events we are allow to catch them within the engine alerts.
+        - Verify that after sending events we are allowed to catch them within the engine alerts.
 
     input_description:
-        - The `test_disabled.yaml` file provides the module configuration for this test.
+        - The `cases_engine_events.yaml` file provides the module configuration for this test.
 
     expected_output:
-        - r'(.*)wazuh-modulesd:vulnerability-detector(.*) Module disabled. Exiting...'
+        - Every item within the metadata.engine_outputs object
     '''
     # Send the messages
     engine.send_events_to_engine_dgram(events_data['events'])
