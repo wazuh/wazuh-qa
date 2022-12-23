@@ -155,6 +155,9 @@ def test_regions(
     if expected_results:
         regions_list = regions.split(",")
         for row in get_multiple_s3_db_row(table_name=bucket_type):
-            assert row.aws_region in regions_list
+            if hasattr(row, "aws_region"):
+                assert row.aws_region in regions_list
+            else:
+                assert row.log_key.split("/")[3] in regions_list
     else:
         assert not table_exists(table_name=bucket_type)
