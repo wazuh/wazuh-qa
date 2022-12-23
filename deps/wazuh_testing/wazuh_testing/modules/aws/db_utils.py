@@ -3,7 +3,7 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterator, Type
 
-from .constants import S3_CLOUDTRAIL_DB_PATH, CLOUD_TRAIL_TYPE, VPC_FLOW_TYPE
+from .constants import S3_CLOUDTRAIL_DB_PATH, CLOUD_TRAIL_TYPE, VPC_FLOW_TYPE, ALB_TYPE
 
 SELECT_QUERY_TEMPLATE = 'SELECT * FROM {table_name}'
 
@@ -15,9 +15,14 @@ S3VPCFlowRow = namedtuple(
     'S3VPCFlowRow', 'bucket_path aws_account_id aws_region flowlog_id log_key processed_date created_date'
 )
 
+S3ALBRow = namedtuple(
+    'S3ALBRow', 'bucket_path aws_account_id log_key processed_date created_date'
+)
+
 s3_rows_map = {
     CLOUD_TRAIL_TYPE: S3CloudTrailRow,
-    VPC_FLOW_TYPE: S3VPCFlowRow
+    VPC_FLOW_TYPE: S3VPCFlowRow,
+    ALB_TYPE: S3ALBRow
 }
 
 
