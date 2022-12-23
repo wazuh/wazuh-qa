@@ -24,3 +24,12 @@
   metadata:
     bucket_type: config
     bucket_name: wazuh-config-integration-tests
+
+- name: alb_defaults
+  description: ALB default configurations
+  configuration_parameters:
+    BUCKET_TYPE: alb
+    BUCKET_NAME: wazuh-alb-integration-tests
+  metadata:
+    bucket_type: alb
+    bucket_name: wazuh-alb-integration-tests
