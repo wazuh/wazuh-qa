@@ -18,7 +18,7 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases', 'agent_statistics_f
 
 # ----------------------------------------------- TEST_STATISTICS_FORMAT -----------------------------------------------
 # Configuration and cases data
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_statistics_format.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_agent_statistics_format.yaml')
 
 # Statistics format test configurations (t1)
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
