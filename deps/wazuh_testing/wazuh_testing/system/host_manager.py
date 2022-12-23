@@ -90,7 +90,7 @@ class HostManager:
         Returns:
             str: OS of the host
         """
-        ansible_facts = self.get_host_ansible_facts(host)
+        ansible_facts = self.collect_host_ansible_facts(host)
         return (ansible_facts['ansible_facts']['ansible_distribution'],
                 ansible_facts['ansible_facts']['ansible_distribution_major_version'],
                 ansible_facts['ansible_facts']['ansible_distribution_version'])
@@ -103,7 +103,7 @@ class HostManager:
         Returns:
             dict: IPs of the host (ipv4 and ipv6)
         """
-        ansible_facts = self.get_host_ansible_facts(host)
+        ansible_facts = self.collect_host_ansible_facts(host)
         return {'ipv4': ansible_facts['ansible_facts']['ansible_all_ipv4_addresses'],
                 'ipv6': ansible_facts['ansible_facts']['ansible_all_ipv6_addresses']}
 
@@ -115,7 +115,7 @@ class HostManager:
         Returns:
             dict: Interfaces of the host
         """
-        ansible_facts = self.get_host_ansible_facts(host)
+        ansible_facts = self.collect_host_ansible_facts(host)
         return ansible_facts['ansible_facts']['ansible_interfaces']
 
     def check_connection(self, host, windows=False):
@@ -185,7 +185,10 @@ class HostManager:
                                     ignore_errors=False):
         """Create a file structure on the specified host.
         Not supported on Windows.
-
+        Example:
+            Filesystem format example:
+                {'directory_name': 'testing', 'files': [{'filename': 'file1', 'content': 'example'},
+                                                        {'filename': 'file2', 'content': 'example2'}]}
         Args:
             host (str): Hostname
             dest_path (str): Destination path
