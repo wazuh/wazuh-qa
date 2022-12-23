@@ -27,3 +27,13 @@
     bucket_type: config
     bucket_name: wazuh-config-integration-tests
     expected_results: 1
+
+- name: alb_without_only_logs_after
+  description: ALB only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: alb
+    BUCKET_NAME: wazuh-alb-integration-tests
+  metadata:
+    bucket_type: alb
+    bucket_name: wazuh-alb-integration-tests
+    expected_results: 1
