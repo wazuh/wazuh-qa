@@ -11,13 +11,13 @@ pytestmark = [pytest.mark.server]
 
 # Generic vars
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
-TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template', 'manager_statistics_format_test_module')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases', 'manager_statistics_format_test_module')
 
 # ----------------------------------------------- TEST_STATISTICS_FORMAT -----------------------------------------------
 # Configuration and cases data
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_statistics_format.yaml')
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_statistics_format.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_manager_statistics_format.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_manager_statistics_format.yaml')
 
 # Statistics format test configurations (t1)
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
