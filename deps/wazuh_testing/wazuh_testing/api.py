@@ -180,8 +180,8 @@ def wait_until_api_ready(protocol=API_PROTOCOL, host=API_HOST, port=API_PORT, us
     get_token_login_api(protocol, host, port, user, password, login_endpoint, timeout, attempts, 1)
 
 
-def make_api_call(port=55000, method='GET', endpoint='/', headers=None, request_json=None, params=None, verify=False,
-                  token=None):
+def make_api_call(manager_address=API_HOST, port=55000, method='GET', endpoint='/', headers=None, request_json=None,
+                  params=None, verify=False, token=None):
     """Make an API call
 
     Args:
@@ -206,16 +206,16 @@ def make_api_call(port=55000, method='GET', endpoint='/', headers=None, request_
 
     response = None
     if method == 'POST':
-        response = requests.post(f'https://localhost:{port}{endpoint}', headers=headers, json=request_json,
+        response = requests.post(f'https://{manager_address}:{port}{endpoint}', headers=headers, json=request_json,
                                  params=params, verify=verify)
     elif method == 'DELETE':
-        response = requests.delete(f'https://localhost:{port}{endpoint}', headers=headers, json=request_json,
+        response = requests.delete(f'https://{manager_address}:{port}{endpoint}', headers=headers, json=request_json,
                                    params=params, verify=verify)
     elif method == 'PUT':
-        response = requests.put(f'https://localhost:{port}{endpoint}', headers=headers, json=request_json,
+        response = requests.put(f'https://{manager_address}:{port}{endpoint}', headers=headers, json=request_json,
                                 params=params, verify=verify)
     else:
-        response = requests.get(f'https://localhost:{port}{endpoint}', headers=headers, json=request_json,
+        response = requests.get(f'https://{manager_address}:{port}{endpoint}', headers=headers, json=request_json,
                                 params=params, verify=verify)
     return response
 
