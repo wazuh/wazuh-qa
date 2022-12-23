@@ -28,8 +28,8 @@ t1_configurations = load_configuration_template(configurations_path, t1_configur
 @pytest.mark.tier(level=0)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
-def test_statistics_format(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
-                           get_api_details, restart_wazuh_daemon_function):
+def test_manager_statistics_format(configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
+                                   get_api_details, restart_wazuh_daemon_function):
     """
     description: Check if the statistics returned by the API have the expected format.
 
@@ -68,12 +68,11 @@ def test_statistics_format(configuration, metadata, load_wazuh_basic_configurati
             brief: Restart the wazuh service and truncate wazuh logs.
 
     assertions:
-        - Check in the log that the EPS limitation has been activated.
-        - Check that wazuh-analysisd daemon does not crash.
+        - Check if the statistics returned by the API have the expected format.
 
     input_description:
-        - The `configuration_enabled` file provides the module configuration for this test.
-        - The `cases_enabled` file provides the test cases.
+        - The `configuration_manager_statistics_format` file provides the module configuration for this test.
+        - The `cases_manager_statistics_format` file provides the test cases.
     """
     endpoint = f"/manager/daemons/stats?daemons_list={metadata['endpoint']}"
     api_details = get_api_details()
