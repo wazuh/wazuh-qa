@@ -223,11 +223,74 @@ class ConfigDataGenerator(DataGenerator):
         })
 
 
+class ALBDataGenerator(DataGenerator):
+    BASE_PATH = f'{cons.AWS_LOGS}/{cons.RANDOM_ACCOUNT_ID}/{cons.ELASTICLOADBALANCING}/{cons.US_EAST_1_REGION}/'
+    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTICLOADBALANCING}_{cons.US_EAST_1_REGION}_'
+
+    def get_filename(self, prefix=None, **kwargs) -> str:
+        """Return the filename in the cloudtrail format
+        <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
+        """
+        now = datetime.now()
+        path = f'{self.BASE_PATH}{now.strftime(cons.PATH_DATE_FORMAT)}/'
+        name = (
+            f'{self.BASE_FILE_NAME}_app.ALB-qatests_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}_'
+            f'{get_random_ip()}_pczeay_{cons.LOG_EXT}'
+        )
+
+        return f'{path}{name}'
+
+    def get_data_sample(self) -> str:
+        now = datetime.now()
+        data = []
+
+        for _ in range(5):
+            data.append(
+                [
+                    "http",  # type
+                    now.strftime(cons.ALB_DATE_FORMAT),  # time
+                    'app/ALB-qatests',  # elb
+                    f"{get_random_ip()}:{get_random_port()}",  # client:port
+                    f"{get_random_ip()}:{get_random_port()}",  # target:port
+                    0.001,  # request_processing_time
+                    0.001,  # target_processing_time
+                    0.000,  # response_processing_time
+                    403,  # elb_status_code
+                    403,  # target_status_code
+                    136,  # received_bytes
+                    5173,  # sent_bytes
+                    f"GET http://{get_random_ip()}:80/ HTTP/1.1",  # request
+                    'Mozilla/5.0 (compatible; Nimbostratus-Bot/v1.3.2; http://cloudsystemnetworks.com)',  # user_agent
+                    '-',  # ssl_cipher
+                    '-',  # ssl_protocol
+                    # target_group_arn
+                    f"arn:aws:elasticloadbalancing:{cons.US_EAST_1_REGION}:{cons.RANDOM_ACCOUNT_ID}:targetgroup/EC2/",
+                    f"Root=1-5fbc4c52-{get_random_string(24)}",  # trace_id
+                    "-",  # domain_name
+                    "-",  # chosen_cert_arn
+                    0,  # matched_rule_priority
+                    now.strftime(cons.ALB_DATE_FORMAT),  # request_creation_time
+                    "forward",  # actions_executed
+                    "-",  # redirect_url
+                    "-",  # error_reason
+                    f"{get_random_ip()}:{get_random_port()} {get_random_ip()}:{get_random_port()}",  # target:port_list
+                    "403",  # target_status_code_list
+                    "-",  # classification
+                    "-"  # classification_reason
+                ]
+            )
+        buffer = StringIO()
+        csv.writer(buffer, delimiter=" ").writerows(data)
+
+        return buffer.getvalue()
+
+
 # Maps bucket type with corresponding data generator
 buckets_data_mapping = {
     cons.CLOUD_TRAIL_TYPE: CloudTrailDataGenerator,
     cons.VPC_FLOW_TYPE: VPCDataGenerator,
-    cons.CONFIG_TYPE: ConfigDataGenerator
+    cons.CONFIG_TYPE: ConfigDataGenerator,
+    cons.ALB_TYPE: ALBDataGenerator
 }
 
 
