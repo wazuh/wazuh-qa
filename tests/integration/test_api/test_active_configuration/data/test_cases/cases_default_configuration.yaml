@@ -1,14 +1,12 @@
 - name: remote_endpoint
   description: remote endpoint
-  configuration_parameters:
-    ENDPOINT: request/remote
+  configuration_parameters: null
   metadata:
     endpoint: request/remote
 
-- name: remoted_global_endpoint
-  description: remoted global endpoint
-  configuration_parameters:
-    ENDPOINT: request/global
+- name: global_endpoint
+  description: global endpoint
+  configuration_parameters: null
   metadata:
     endpoint: request/global
 

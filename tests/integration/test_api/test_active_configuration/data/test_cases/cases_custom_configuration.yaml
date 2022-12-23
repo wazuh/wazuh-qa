@@ -30,3 +30,6 @@
     enabled: 'no'
     email_notification: 'yes'
     jsonout_output: 'yes'
+    endpoints:
+      - remote
+      - global
