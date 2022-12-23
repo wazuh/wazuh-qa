@@ -20,18 +20,18 @@ t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_default_configuration.yaml'
 # Default configuration test configurations (t1)
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 
-expected_default_conf_response = {
-    'remote': {
-        'data': {'affected_items': [{'remote': [{'connection': 'secure', 'ipv6': 'no', 'protocol': ['TCP'],
-                 'port': '1514', 'queue_size': '131072'}]}], 'total_affected_items': 1, 'total_failed_items': 0,
-                 'failed_items': []}, 'message': 'Active configuration was successfully read', 'error': 0
-    },
-    'global': {
-        'data': {'affected_items': [{'global': {'remoted': {'agents_disconnection_alert_time': 0,
-                 'agents_disconnection_time': 600}}}], 'total_affected_items': 1, 'total_failed_items': 0,
-                 'failed_items': []}, 'message': 'Active configuration was successfully read', 'error': 0
-    }
-}
+#expected_default_conf_response = {
+#    'remote': {
+#        'data': {'affected_items': [{'remote': [{'connection': 'secure', 'ipv6': 'no', 'protocol': ['TCP'],
+#                 'port': '1514', 'queue_size': '131072'}]}], 'total_affected_items': 1, 'total_failed_items': 0,
+#                 'failed_items': []}, 'message': 'Active configuration was successfully read', 'error': 0
+#    },
+#    'global': {
+#        'data': {'affected_items': [{'global': {'remoted': {'agents_disconnection_alert_time': 0,
+#                 'agents_disconnection_time': 600}}}], 'total_affected_items': 1, 'total_failed_items': 0,
+#                 'failed_items': []}, 'message': 'Active configuration was successfully read', 'error': 0
+#    }
+#}
 
 # ---------------------------------------- TEST_DEFAULT_INTERNAL_CONFIGURATION -----------------------------------------
 # Configuration and cases data
@@ -125,7 +125,7 @@ def test_default_configuration(metadata, get_api_details):
     url = f"{api_details['base_url']}/manager/configuration/request/{endpoint}"
     response = requests.get(url, headers=api_details['auth_headers'], verify=False)
 
-    assert response.json() == expected_default_conf_response[endpoint]
+    assert response.json() == metadata['expected_response']
 
 
 @pytest.mark.xfail(reason="It will be blocked by wazuh/wazuh#15694, when it is resolved, we can enable the test")
