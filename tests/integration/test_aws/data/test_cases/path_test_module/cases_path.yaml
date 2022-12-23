@@ -63,6 +63,19 @@
     path: test_prefix
     expected_results: 1
 
+- name: alb_path_with_data
+  description: ALB path configurations
+  configuration_parameters:
+    BUCKET_TYPE: alb
+    BUCKET_NAME: wazuh-alb-integration-tests
+    PATH: test_prefix
+  metadata:
+    bucket_type: alb
+    bucket_name: wazuh-alb-integration-tests
+    only_logs_after: 2022-NOV-20
+    path: test_prefix
+    expected_results: 1
+
 - name: vpc_path_without_data
   description: VPC path configurations
   configuration_parameters:
@@ -89,6 +102,19 @@
     path: empty_prefix
     expected_results: 0
 
+- name: alb_path_without_data
+  description: ALB path configurations
+  configuration_parameters:
+    BUCKET_TYPE: alb
+    BUCKET_NAME: wazuh-alb-integration-tests
+    PATH: empty_prefix
+  metadata:
+    bucket_type: alb
+    bucket_name: wazuh-alb-integration-tests
+    only_logs_after: 2022-NOV-20
+    path: empty_prefix
+    expected_results: 0
+
 - name: vpc_inexistent_path
   description: CloudTrail path configurations
   configuration_parameters:
@@ -111,6 +137,19 @@
   metadata:
     bucket_type: config
     bucket_name: wazuh-config-integration-tests
+    only_logs_after: 2022-NOV-20
+    path: inexistent_prefix
+    expected_results: 0
+
+- name: alb_inexistent_path
+  description: ALB path configurations
+  configuration_parameters:
+    BUCKET_TYPE: alb
+    BUCKET_NAME: wazuh-alb-integration-tests
+    PATH: inexistent_prefix
+  metadata:
+    bucket_type: alb
+    bucket_name: wazuh-alb-integration-tests
     only_logs_after: 2022-NOV-20
     path: inexistent_prefix
     expected_results: 0
