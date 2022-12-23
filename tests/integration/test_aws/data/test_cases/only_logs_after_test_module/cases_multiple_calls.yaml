@@ -18,3 +18,10 @@
   metadata:
     bucket_type: config
     bucket_name: wazuh-config-integration-tests
+
+- name: alb_only_logs_after_multiple_calls
+  description: ALB only_logs_after multiple calls configurations
+  configuration_parameters:
+  metadata:
+    bucket_type: alb
+    bucket_name: wazuh-alb-integration-tests
