@@ -47,3 +47,13 @@
     bucket_type: clb
     bucket_name: wazuh-clb-integration-tests
     expected_results: 1
+
+- name: nlb_without_only_logs_after
+  description: NLB only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: nlb
+    BUCKET_NAME: wazuh-nlb-integration-tests
+  metadata:
+    bucket_type: nlb
+    bucket_name: wazuh-nlb-integration-tests
+    expected_results: 1

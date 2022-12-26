@@ -57,3 +57,15 @@
     bucket_name: wazuh-clb-integration-tests
     only_logs_after: 2022-NOV-20
     expected_results: 5
+
+- name: nlb_with_only_logs_after
+  description: NLB only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: nlb
+    BUCKET_NAME: wazuh-nlb-integration-tests
+    ONLY_LOGS_AFTER: 2022-NOV-20
+  metadata:
+    bucket_type: nlb
+    bucket_name: wazuh-nlb-integration-tests
+    only_logs_after: 2022-NOV-20
+    expected_results: 5

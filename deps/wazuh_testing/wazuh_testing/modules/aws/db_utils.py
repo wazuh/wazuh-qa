@@ -3,7 +3,7 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterator, Type
 
-from .constants import S3_CLOUDTRAIL_DB_PATH, CLOUD_TRAIL_TYPE, VPC_FLOW_TYPE, ALB_TYPE, CLB_TYPE
+from .constants import S3_CLOUDTRAIL_DB_PATH, CLOUD_TRAIL_TYPE, VPC_FLOW_TYPE, ALB_TYPE, CLB_TYPE, NLB_TYPE
 
 SELECT_QUERY_TEMPLATE = 'SELECT * FROM {table_name}'
 
@@ -23,7 +23,8 @@ s3_rows_map = {
     CLOUD_TRAIL_TYPE: S3CloudTrailRow,
     VPC_FLOW_TYPE: S3VPCFlowRow,
     ALB_TYPE: S3ALBRow,
-    CLB_TYPE: S3ALBRow
+    CLB_TYPE: S3ALBRow,
+    NLB_TYPE: S3ALBRow
 }
 
 
