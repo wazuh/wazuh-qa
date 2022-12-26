@@ -153,3 +153,42 @@
     only_logs_after: 2022-NOV-20
     regions: us-fake-1
     expected_results: 0
+
+- name: clb_region_with_data
+  description: CLB regions configurations
+  configuration_parameters:
+    BUCKET_TYPE: clb
+    BUCKET_NAME: wazuh-clb-integration-tests
+    REGIONS: us-east-1
+  metadata:
+    bucket_type: clb
+    bucket_name: wazuh-clb-integration-tests
+    only_logs_after: 2022-NOV-20
+    regions: us-east-1
+    expected_results: 3
+
+- name: clb_regions_with_data
+  description: CLB regions configurations
+  configuration_parameters:
+    BUCKET_TYPE: clb
+    BUCKET_NAME: wazuh-clb-integration-tests
+    REGIONS: us-east-1,us-east-2
+  metadata:
+    bucket_type: clb
+    bucket_name: wazuh-clb-integration-tests
+    only_logs_after: 2022-NOV-20
+    regions: us-east-1,us-east-2
+    expected_results: 5
+
+- name: clb_inexistent_region
+  description: CLB regions configurations
+  configuration_parameters:
+    BUCKET_TYPE: clb
+    BUCKET_NAME: wazuh-clb-integration-tests
+    REGIONS: us-fake-1
+  metadata:
+    bucket_type: clb
+    bucket_name: wazuh-clb-integration-tests
+    only_logs_after: 2022-NOV-20
+    regions: us-fake-1
+    expected_results: 0
