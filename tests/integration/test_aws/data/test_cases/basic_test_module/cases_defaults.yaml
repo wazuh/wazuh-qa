@@ -33,3 +33,12 @@
   metadata:
     bucket_type: alb
     bucket_name: wazuh-alb-integration-tests
+
+- name: clb_defaults
+  description: CLB default configurations
+  configuration_parameters:
+    BUCKET_TYPE: clb
+    BUCKET_NAME: wazuh-clb-integration-tests
+  metadata:
+    bucket_type: clb
+    bucket_name: wazuh-clb-integration-tests
