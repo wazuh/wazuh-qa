@@ -228,7 +228,7 @@ class ALBDataGenerator(DataGenerator):
     BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTICLOADBALANCING}_{cons.US_EAST_1_REGION}_'
 
     def get_filename(self, prefix=None, **kwargs) -> str:
-        """Return the filename in the cloudtrail format
+        """Return the filename in the ALB format
         <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
         """
         now = datetime.now()
@@ -285,12 +285,59 @@ class ALBDataGenerator(DataGenerator):
         return buffer.getvalue()
 
 
+class CLBDataGenerator(DataGenerator):
+    BASE_PATH = f'{cons.AWS_LOGS}/{cons.RANDOM_ACCOUNT_ID}/{cons.ELASTICLOADBALANCING}/{cons.US_EAST_1_REGION}/'
+    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTICLOADBALANCING}_{cons.US_EAST_1_REGION}_'
+
+    def get_filename(self, prefix=None, **kwargs) -> str:
+        """Return the filename in the CLB format
+        <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
+        """
+        now = datetime.now()
+        path = f'{self.BASE_PATH}{now.strftime(cons.PATH_DATE_FORMAT)}/'
+        name = (
+            f'{self.BASE_FILE_NAME}qatests-APIClassi_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}_'
+            f'{get_random_ip()}{cons.LOG_EXT}'
+        )
+
+        return f'{path}{name}'
+
+    def get_data_sample(self) -> str:
+        now = datetime.now()
+        data = []
+        for _ in range(5):
+            data.append(
+                [
+                    now.strftime(cons.ALB_DATE_FORMAT),  # time
+                    'qatests-APIClassi',  # elb
+                    f"{get_random_ip()}:{get_random_port()}",  # client:port
+                    f"{get_random_ip()}:{get_random_port()}",  # backend:port
+                    0.000628,  # request_processing_time
+                    0.001,  # backend_processing_time
+                    0.000015,  # response_processing_time
+                    403,  # elb_status_code
+                    403,  # backend_status_code
+                    1071,  # received_bytes
+                    2250,  # sent_bytes
+                    '- - -',  # request
+                    'Mozilla/5.0 (compatible; Nimbostratus-Bot/v1.3.2; http://cloudsystemnetworks.com)',  # user_agent
+                    '-',  # ssl_cipher
+                    '-',  # ssl_protocol
+                ]
+            )
+        buffer = StringIO()
+        csv.writer(buffer, delimiter=" ").writerows(data)
+
+        return buffer.getvalue()
+
+
 # Maps bucket type with corresponding data generator
 buckets_data_mapping = {
     cons.CLOUD_TRAIL_TYPE: CloudTrailDataGenerator,
     cons.VPC_FLOW_TYPE: VPCDataGenerator,
     cons.CONFIG_TYPE: ConfigDataGenerator,
-    cons.ALB_TYPE: ALBDataGenerator
+    cons.ALB_TYPE: ALBDataGenerator,
+    cons.CLB_TYPE: CLBDataGenerator
 }
 
 
