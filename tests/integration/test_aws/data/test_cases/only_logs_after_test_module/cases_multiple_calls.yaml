@@ -32,3 +32,10 @@
   metadata:
     bucket_type: clb
     bucket_name: wazuh-clb-integration-tests
+
+- name: nlb_only_logs_after_multiple_calls
+  description: NLB only_logs_after multiple calls configurations
+  configuration_parameters:
+  metadata:
+    bucket_type: nlb
+    bucket_name: wazuh-nlb-integration-tests
