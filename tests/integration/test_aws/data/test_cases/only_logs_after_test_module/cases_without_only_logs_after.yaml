@@ -37,3 +37,13 @@
     bucket_type: alb
     bucket_name: wazuh-alb-integration-tests
     expected_results: 1
+
+- name: clb_without_only_logs_after
+  description: CLB only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: clb
+    BUCKET_NAME: wazuh-clb-integration-tests
+  metadata:
+    bucket_type: clb
+    bucket_name: wazuh-clb-integration-tests
+    expected_results: 1

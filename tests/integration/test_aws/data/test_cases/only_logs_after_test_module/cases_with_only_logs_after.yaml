@@ -45,3 +45,15 @@
     bucket_name: wazuh-alb-integration-tests
     only_logs_after: 2022-NOV-20
     expected_results: 5
+
+- name: clb_with_only_logs_after
+  description: CLB only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: clb
+    BUCKET_NAME: wazuh-clb-integration-tests
+    ONLY_LOGS_AFTER: 2022-NOV-20
+  metadata:
+    bucket_type: clb
+    bucket_name: wazuh-clb-integration-tests
+    only_logs_after: 2022-NOV-20
+    expected_results: 5
