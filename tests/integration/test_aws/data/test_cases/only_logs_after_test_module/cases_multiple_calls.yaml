@@ -25,3 +25,10 @@
   metadata:
     bucket_type: alb
     bucket_name: wazuh-alb-integration-tests
+
+- name: clb_only_logs_after_multiple_calls
+  description: CLB only_logs_after multiple calls configurations
+  configuration_parameters:
+  metadata:
+    bucket_type: clb
+    bucket_name: wazuh-clb-integration-tests
