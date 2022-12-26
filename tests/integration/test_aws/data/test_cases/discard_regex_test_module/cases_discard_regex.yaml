@@ -84,12 +84,12 @@
     BUCKET_TYPE: nlb
     BUCKET_NAME: wazuh-nlb-integration-tests
     DISCARD_FIELD: listener
-    DISCARD_REGEX: '0CMK2UAG108C7AXK'
+    DISCARD_REGEX: 0CMK2UAG108C7AXK
   metadata:
     bucket_type: nlb
     bucket_name: wazuh-nlb-integration-tests
     only_logs_after: 2022-NOV-20
     discard_field: listener
-    discard_regex: '0CMK2UAG108C7AXK'
+    discard_regex: 0CMK2UAG108C7AXK
     found_logs: 5
     skipped_logs: 1
