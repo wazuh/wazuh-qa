@@ -331,13 +331,66 @@ class CLBDataGenerator(DataGenerator):
         return buffer.getvalue()
 
 
+class NLBDataGenerator(DataGenerator):
+    BASE_PATH = f'{cons.AWS_LOGS}/{cons.RANDOM_ACCOUNT_ID}/{cons.ELASTICLOADBALANCING}/{cons.US_EAST_1_REGION}/'
+    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTICLOADBALANCING}_{cons.US_EAST_1_REGION}_'
+
+    def get_filename(self, prefix=None, **kwargs) -> str:
+        """Return the filename in the CLB format
+        <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
+        """
+        now = datetime.now()
+        path = f'{self.BASE_PATH}{now.strftime(cons.PATH_DATE_FORMAT)}/'
+        name = (
+            f'{self.BASE_FILE_NAME}net.qatests_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}_'
+            f'{get_random_ip()}{cons.LOG_EXT}'
+        )
+
+        return f'{path}{name}'
+
+    def get_data_sample(self) -> str:
+        now = datetime.now()
+        data = []
+        for _ in range(5):
+            data.append(
+                [
+                    'tls',  # type
+                    '2.0',  # version
+                    now.strftime(cons.ALB_DATE_FORMAT),  # time
+                    'net/qatests',  # elb
+                    get_random_string(16),  # listener
+                    f"{get_random_ip()}:{get_random_port()}",  # client:port
+                    f"{get_random_ip()}:{get_random_port()}",  # destination:port
+                    17553,  # connection_time
+                    0.001,  # tls_handshake_time
+                    1071,  # received_bytes
+                    2250,  # sent_bytes
+                    '-',  # incoming_tls_alert
+                    '-',  # chosen_cert_arn
+                    '-',  # chosen_cert_serial
+                    '-',  # tls_cipher
+                    '-',  # tls_protocol_version
+                    '-',  # tls_named_group
+                    '-',  # domain_name
+                    '-',  # alpn_fe_protocol
+                    '-',  # alpn_be_protocol
+                    '-',  # alpn_client_preference_list
+                ]
+            )
+        buffer = StringIO()
+        csv.writer(buffer, delimiter=" ").writerows(data)
+
+        return buffer.getvalue()
+
+
 # Maps bucket type with corresponding data generator
 buckets_data_mapping = {
     cons.CLOUD_TRAIL_TYPE: CloudTrailDataGenerator,
     cons.VPC_FLOW_TYPE: VPCDataGenerator,
     cons.CONFIG_TYPE: ConfigDataGenerator,
     cons.ALB_TYPE: ALBDataGenerator,
-    cons.CLB_TYPE: CLBDataGenerator
+    cons.CLB_TYPE: CLBDataGenerator,
+    cons.NLB_TYPE: NLBDataGenerator
 }
 
 

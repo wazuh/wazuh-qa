@@ -42,3 +42,12 @@
   metadata:
     bucket_type: clb
     bucket_name: wazuh-clb-integration-tests
+
+- name: nlb_remove_from_bucket
+  description: NLB remove from bucket configurations
+  configuration_parameters:
+    BUCKET_TYPE: nlb
+    BUCKET_NAME: wazuh-nlb-integration-tests
+  metadata:
+    bucket_type: nlb
+    bucket_name: wazuh-nlb-integration-tests

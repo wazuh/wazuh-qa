@@ -91,8 +91,8 @@ def test_remove_from_bucket(
         - The `configuration_defaults` file provides the module configuration for this test.
         - The `cases_defaults` file provides the test cases.
     """
-    if metadata['name'] in ['alb_remove_from_bucket', 'clb_remove_from_bucket']:
-        pytest.skip(reason='ALB and CLB integration is removing older logs from other region')
+    if metadata['name'] in ['alb_remove_from_bucket', 'clb_remove_from_bucket', 'nlb_remove_from_bucket']:
+        pytest.skip(reason='ALB, CLB and NLB integrations are removing older logs from other region')
 
     bucket_name = metadata['bucket_name']
     parameters = [
