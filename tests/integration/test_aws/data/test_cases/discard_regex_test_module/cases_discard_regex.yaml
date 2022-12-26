@@ -61,3 +61,19 @@
     discard_regex: '401'
     found_logs: 5
     skipped_logs: 1
+
+- name: clb_discard_regex
+  description: CLB discard regex configurations
+  configuration_parameters:
+    BUCKET_TYPE: clb
+    BUCKET_NAME: wazuh-clb-integration-tests
+    DISCARD_FIELD: elb_status_code
+    DISCARD_REGEX: '401'
+  metadata:
+    bucket_type: clb
+    bucket_name: wazuh-clb-integration-tests
+    only_logs_after: 2022-NOV-20
+    discard_field: elb_status_code
+    discard_regex: '401'
+    found_logs: 5
+    skipped_logs: 1
