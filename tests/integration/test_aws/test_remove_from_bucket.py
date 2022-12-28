@@ -62,7 +62,7 @@ def test_remove_from_bucket(
             brief: Get metadata from the module.
         - upload_file_to_s3:
             type: fixture
-            brief: Upload a file to S3 bucket for the day of the execution
+            brief: Upload a file to S3 bucket for the day of the execution.
         - load_wazuh_basic_configuration:
             type: fixture
             brief: Load basic wazuh configuration.
@@ -71,7 +71,7 @@ def test_remove_from_bucket(
             brief: Apply changes to the ossec.conf configuration.
         - clean_s3_cloudtrail_db:
             type: fixture
-            brief: Delete the DB file before and after the test execution
+            brief: Delete the DB file before and after the test execution.
         - configure_local_internal_options_function:
             type: fixture
             brief: Apply changes to the local_internal_options.conf configuration.
@@ -83,7 +83,7 @@ def test_remove_from_bucket(
             brief: Restart the wazuh service.
         - wazuh_log_monitor:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Return a `ossec.log` monitor.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the bucket that the uploaded log was removed.

@@ -14,14 +14,14 @@ s3 = session.resource('s3')
 
 
 def upload_file(bucket_type: str, bucket_name: str) -> str:
-    """Upload a file to an S3 bucket
+    """Upload a file to an S3 bucket.
 
     Args:
-        bucket_type (str): Bucket type to generate the data
-        bucket_name (str): Bucket to upload
+        bucket_type (str): Bucket type to generate the data.
+        bucket_name (str): Bucket to upload.
 
     Returns:
-        str: the name of the file if was uploaded, else ''
+        str: The name of the file if was uploaded, else ''.
     """
     dg = get_data_generator(bucket_type)
     filename = dg.get_filename()
@@ -42,20 +42,20 @@ def delete_file(filename: str, bucket_name: str) -> None:
     """Delete a given file from the bucket.
 
     Args:
-        filename (str): Full filename to delete
-        bucket_name (str): bucket that contains the file
+        filename (str): Full filename to delete.
+        bucket_name (str): Bucket that contains the file.
     """
     s3.Object(bucket_name, filename).delete()
 
 
 def file_exists(filename: str, bucket_name: str) -> bool:
-    """Check if a file exists in a bucket
+    """Check if a file exists in a bucket.
 
     Args:
-        filename (str): Full filename to check
-        bucket_name (str): bucket that contains the file
+        filename (str): Full filename to check.
+        bucket_name (str): Bucket that contains the file.
     Returns:
-        bool: True if exists else False
+        bool: True if exists else False.
     """
     exists = True
     try:
@@ -68,14 +68,14 @@ def file_exists(filename: str, bucket_name: str) -> bool:
 
 
 def get_last_file_key(bucket_type: str, bucket_name: str) -> str:
-    """Return the last file key contained in a default path of a bucket
+    """Return the last file key contained in a default path of a bucket.
 
     Args:
-        bucket_type (str): Bucket type to obtain the data generator
-        bucket_name (str): Bucket that contains the file
+        bucket_type (str): Bucket type to obtain the data generator.
+        bucket_name (str): Bucket that contains the file.
 
     Returns:
-        str: The last key in the bucket
+        str: The last key in the bucket.
     """
 
     dg = get_data_generator(bucket_type)

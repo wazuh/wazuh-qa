@@ -19,28 +19,28 @@ def get_db_connection(path: Path) -> sqlite3.Connection:
 
 
 def s3_db_exists() -> bool:
-    """Check if `s3_cloudtrail.db` exists
+    """Check if `s3_cloudtrail.db` exists.
 
     Returns:
-        bool: True if exists else False
+        bool: True if exists else False.
     """
     return S3_CLOUDTRAIL_DB_PATH.exists()
 
 
 def delete_s3_db() -> None:
-    """Delete `s3_cloudtrail.db` file"""
+    """Delete `s3_cloudtrail.db` file."""
     if s3_db_exists():
         S3_CLOUDTRAIL_DB_PATH.unlink()
 
 
 def get_s3_db_row(table_name: str) -> S3CloudTrailRow:
-    """Return one row from the given table name
+    """Return one row from the given table name.
 
     Args:
-        table_name (str): table name to search into
+        table_name (str): Table name to search into.
 
     Returns:
-        S3CloudTrailRow: the first row of the table
+        S3CloudTrailRow: The first row of the table.
     """
     connection = get_db_connection(S3_CLOUDTRAIL_DB_PATH)
     cursor = connection.cursor()
@@ -50,13 +50,13 @@ def get_s3_db_row(table_name: str) -> S3CloudTrailRow:
 
 
 def get_multiple_s3_db_row(table_name: str) -> Iterator[S3CloudTrailRow]:
-    """Return all rows from the given table name
+    """Return all rows from the given table name.
 
     Args:
-        table_name (str): table name to search into
+        table_name (str): Table name to search into.
 
     Yields:
-        Iterator[S3CloudTrailRow]: all the rows in the table
+        Iterator[S3CloudTrailRow]: All the rows in the table.
     """
     connection = get_db_connection(S3_CLOUDTRAIL_DB_PATH)
     cursor = connection.cursor()
@@ -66,13 +66,13 @@ def get_multiple_s3_db_row(table_name: str) -> Iterator[S3CloudTrailRow]:
 
 
 def table_exists(table_name: str) -> bool:
-    """Check if the given table name exists
+    """Check if the given table name exists.
 
     Args:
-        table_name (str): table name to search for
+        table_name (str): Table name to search for.
 
     Returns:
-        bool: True if exists else False
+        bool: True if exists else False.
     """
     connection = get_db_connection(S3_CLOUDTRAIL_DB_PATH)
     cursor = connection.cursor()

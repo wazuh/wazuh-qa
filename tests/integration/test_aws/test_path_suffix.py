@@ -49,13 +49,13 @@ def test_path_suffix(
         - test:
             - Check in the ossec.log that a line has appeared calling the module with correct parameters.
             - If a path_suffix that does not exist was specified, make sure that a message is displayed in the ossec.log
-              warning the user
-            - Check the command was called with the correct parameters
-            - Check the database was created and updated accordingly
+              warning the user.
+            - Check the command was called with the correct parameters.
+            - Check the database was created and updated accordingly.
         - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
-            - Delete the uploaded file
+            - Delete the uploaded file.
     wazuh_min_version: 4.5.0
     parameters:
         - configuration:
@@ -84,11 +84,11 @@ def test_path_suffix(
             brief: Restart the wazuh service.
         - wazuh_log_monitor:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Return a `ossec.log` monitor.
     assertions:
         - Check in the log that the module was called with correct parameters.
-        - Check the expected number of events were forwarded to analysisd
-        - Check the database was created and updated accordingly, using the correct path for each entry
+        - Check the expected number of events were forwarded to analysisd.
+        - Check the database was created and updated accordingly, using the correct path for each entry.
     input_description:
         - The `configuration_path_suffix` file provides the module configuration for this test.
         - The `cases_path_suffix` file provides the test cases.

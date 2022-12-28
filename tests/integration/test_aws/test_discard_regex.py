@@ -49,8 +49,8 @@ def test_discard_regex(
         - test:
             - Check in the ossec.log that a line has appeared calling the module with correct parameters.
             - Check the expected number of events were forwarded to analysisd, only logs stored in the bucket and skips
-              the ones that match with regex
-            - Check the database was created and updated accordingly
+              the ones that match with regex.
+            - Check the database was created and updated accordingly.
         - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
@@ -71,7 +71,7 @@ def test_discard_regex(
             brief: Apply changes to the ossec.conf configuration.
         - clean_s3_cloudtrail_db:
             type: fixture
-            brief: Delete the DB file before and after the test execution
+            brief: Delete the DB file before and after the test execution.
         - configure_local_internal_options_function:
             type: fixture
             brief: Apply changes to the local_internal_options.conf configuration.
@@ -83,11 +83,11 @@ def test_discard_regex(
             brief: Restart the wazuh service.
         - wazuh_log_monitor:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Return a `ossec.log` monitor.
     assertions:
         - Check in the log that the module was called with correct parameters.
-        - Check the expected number of events were forwarded to analysisd
-        - Check the database was created and updated accordingly
+        - Check the expected number of events were forwarded to analysisd.
+        - Check the database was created and updated accordingly.
     input_description:
         - The `configuration_discard_regex` file provides the module configuration for this test.
         - The `cases_discard_regex` file provides the test cases.

@@ -13,10 +13,10 @@ def make_aws_callback(pattern, prefix=''):
 
     Args:
         pattern (str): String to match on the log.
-        prefix (str): regular expression used as prefix before the pattern.
+        prefix (str): Regular expression used as prefix before the pattern.
 
     Returns:
-        lambda: function that returns if there's a match in the file
+        lambda: Function that returns if there's a match in the file.
     """
     pattern = r'\s+'.join(pattern.split())
     regex = re.compile(r'{}{}'.format(prefix, pattern))
@@ -25,13 +25,13 @@ def make_aws_callback(pattern, prefix=''):
 
 
 def callback_detect_aws_module_called(parameters: list) -> Callable:
-    """Detects if aws module was called with correct parameters
+    """Detects if aws module was called with correct parameters.
 
     Args:
-        parameters (list): values to check
+        parameters (list): Values to check.
 
     Returns:
-        Callable: callback to match the line
+        Callable: Callback to match the line.
     """
     regex = re.compile(fr'.*DEBUG: Launching S3 Command: {" ".join(parameters)}\n*')
     return lambda line: regex.match(line)

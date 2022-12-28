@@ -54,14 +54,14 @@ def test_regions(
         - test:
             - Check in the ossec.log that a line has appeared calling the module with correct parameters.
             - If a region that does not exist was specified, make sure that a message is displayed in the ossec.log
-              warning the user
+              warning the user.
             - Check the expected number of events were forwarded to analysisd, only logs stored in the bucket
-              for the specified region
-            - Check the database was created and updated accordingly
+              for the specified region.
+            - Check the database was created and updated accordingly.
         - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
-            - Delete the uploaded file
+            - Delete the uploaded file.
     wazuh_min_version: 4.5.0
     parameters:
         - configuration:
@@ -78,7 +78,7 @@ def test_regions(
             brief: Apply changes to the ossec.conf configuration.
         - clean_s3_cloudtrail_db:
             type: fixture
-            brief: Delete the DB file before and after the test execution
+            brief: Delete the DB file before and after the test execution.
         - configure_local_internal_options_function:
             type: fixture
             brief: Apply changes to the local_internal_options.conf configuration.
@@ -90,11 +90,11 @@ def test_regions(
             brief: Restart the wazuh service.
         - wazuh_log_monitor:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Return a `ossec.log` monitor.
     assertions:
         - Check in the log that the module was called with correct parameters.
-        - Check the expected number of events were forwarded to analysisd
-        - Check the database was created and updated accordingly, using the correct path for each entry
+        - Check the expected number of events were forwarded to analysisd.
+        - Check the database was created and updated accordingly, using the correct path for each entry.
     input_description:
         - The `configuration_regions` file provides the module configuration for this test.
         - The `cases_regions` file provides the test cases.

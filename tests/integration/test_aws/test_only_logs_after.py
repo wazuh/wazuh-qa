@@ -58,11 +58,11 @@ def test_without_only_logs_after(
             - Check in the ossec.log that a line has appeared calling the module with correct parameters.
             - Check the expected number of events were sent to analysisd. Only the logs whose timestamp is greater than
               the date specified in the configuration should be processed.
-            - Check the database was created and updated accordingly
+            - Check the database was created and updated accordingly.
         - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
-            - Delete the uploaded file
+            - Delete the uploaded file.
     wazuh_min_version: 4.5.0
     parameters:
         - configuration:
@@ -73,7 +73,7 @@ def test_without_only_logs_after(
             brief: Get metadata from the module.
         - upload_and_delete_file_to_s3:
             type: fixture
-            brief: Upload a file for the day of the execution and delete after the test
+            brief: Upload a file for the day of the execution and delete after the test.
         - load_wazuh_basic_configuration:
             type: fixture
             brief: Load basic wazuh configuration.
@@ -82,7 +82,7 @@ def test_without_only_logs_after(
             brief: Apply changes to the ossec.conf configuration.
         - clean_s3_cloudtrail_db:
             type: fixture
-            brief: Delete the DB file before and after the test execution
+            brief: Delete the DB file before and after the test execution.
         - configure_local_internal_options_function:
             type: fixture
             brief: Apply changes to the local_internal_options.conf configuration.
@@ -94,7 +94,7 @@ def test_without_only_logs_after(
             brief: Restart the wazuh service.
         - wazuh_log_monitor:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Return a `ossec.log` monitor.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the bucket that the uploaded log was removed.
@@ -176,7 +176,7 @@ def test_with_only_logs_after(
         - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
-            - Delete the uploaded file
+            - Delete the uploaded file.
     wazuh_min_version: 4.5.0
     parameters:
         - configuration:
@@ -193,7 +193,7 @@ def test_with_only_logs_after(
             brief: Apply changes to the ossec.conf configuration.
         - clean_s3_cloudtrail_db:
             type: fixture
-            brief: Delete the DB file before and after the test execution
+            brief: Delete the DB file before and after the test execution.
         - configure_local_internal_options_function:
             type: fixture
             brief: Apply changes to the local_internal_options.conf configuration.
@@ -205,7 +205,7 @@ def test_with_only_logs_after(
             brief: Restart the wazuh service.
         - wazuh_log_monitor:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Return a `ossec.log` monitor.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the bucket that the uploaded log was removed.
@@ -268,27 +268,27 @@ def test_multiple_calls(
     metadata, clean_s3_cloudtrail_db, load_wazuh_basic_configuration, restart_wazuh_function, delete_file_from_s3
 ):
     """
-    description: Call the AWS module multiple times with different only_logs_after values
+    description: Call the AWS module multiple times with different only_logs_after values.
     test_phases:
         - setup:
-            - Delete the s3_cloudtrail.db
+            - Delete the `s3_cloudtrail.db`.
 
         - test:
-            - Call the module without only_logs_after and check that no logs were processed
+            - Call the module without only_logs_after and check that no logs were processed.
             - Upload a log file for the day of the test execution and call the module with the same parameters as
-              before, check that the uploaded logs were processed
-            - Call the module with the same parameters and check that no logs were processed, there were no duplicates
+              before, check that the uploaded logs were processed.
+            - Call the module with the same parameters and check that no logs were processed, there were no duplicates.
             - Call the module with only_logs_after set in the past and check that the expected number of logs were
-              processed
-            - Call the module with the same parameters in and check there were no duplicates
+              processed.
+            - Call the module with the same parameters in and check there were no duplicates.
             - Call the module with only_logs_after set with an older date check that old logs were processed without
-              duplicates
+              duplicates.
             - Call the module with only_logs_after set with an early date than setted previously and check that no logs
-              were processed, there were no duplicates
+              were processed, there were no duplicates.
 
         - teardown:
-            - Delete the s3_cloudtrail.db
-            - Delete the uploaded files
+            - Delete the `s3_cloudtrail.db`.
+            - Delete the uploaded files.
     wazuh_min_version: 4.5.0
     parameters:
         - metadata:
@@ -296,7 +296,7 @@ def test_multiple_calls(
             brief: Get metadata from the module.
         - clean_s3_cloudtrail_db:
             type: fixture
-            brief: Delete the DB file before and after the test execution
+            brief: Delete the DB file before and after the test execution.
         - load_wazuh_basic_configuration:
             type: fixture
             brief: Load basic wazuh configuration.
@@ -305,7 +305,7 @@ def test_multiple_calls(
             brief: Restart the wazuh service.
         - delete_file_from_s3:
             type: fixture
-            brief: Delete the a file after the test execution
+            brief: Delete the a file after the test execution.
     input_description:
         - The `cases_multiple_calls` file provides the test cases.
     """

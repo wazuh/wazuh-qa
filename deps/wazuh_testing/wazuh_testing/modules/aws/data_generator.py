@@ -1,6 +1,7 @@
 """Utils to generate sample data to AWS"""
 from datetime import datetime
 from uuid import uuid4
+from typing import Optional
 
 from . import constants as cons
 
@@ -10,18 +11,18 @@ class DataGenerator:
     BASE_FILE_NAME = ''
 
     def get_filename(self, *args, **kwargs) -> str:
-        """Returns the filename according to the integration format
+        """Returns the filename according to the integration format.
 
         Returns:
-            str: syntetic filename
+            str: Syntetic filename.
         """
         raise NotImplementedError()
 
     def get_data_sample(self, *args, **kwargs) -> dict:
-        """Returns a sample of data according to the integration format
+        """Returns a sample of data according to the integration format.
 
         Returns:
-            dict: syntetic data
+            dict: Syntetic data.
         """
         raise NotImplementedError()
 
@@ -30,9 +31,14 @@ class CloudTrailDataGenerator(DataGenerator):
     BASE_PATH = f'{cons.AWS_LOGS}/{cons.RANDOM_ACCOUNT_ID}/{cons.CLOUD_TRAIL}/{cons.US_EAST_1_REGION}/'
     BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.CLOUD_TRAIL}_{cons.US_EAST_1_REGION}_'
 
-    def get_filename(self, prefix=None, **kwargs) -> str:
-        """Return the filename in the cloudtrail format
-        <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/CloudTrail/<region>/<year>/<month>/<day>
+    def get_filename(self, *args, **kwargs) -> str:
+        """Return the filename in the cloudtrail format.
+
+        Example:
+            <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/CloudTrail/<region>/<year>/<month>/<day>
+
+        Returns:
+            str: Syntetic filename.
         """
         now = datetime.now()
         path = f"{self.BASE_PATH}{now.strftime(cons.PATH_DATE_FORMAT)}/"
@@ -41,6 +47,11 @@ class CloudTrailDataGenerator(DataGenerator):
         return f'{path}{name}'
 
     def get_data_sample(self) -> dict:
+        """Returns a sample of data according to the cloudtrail format.
+
+        Returns:
+            dict: Syntetic data.
+        """
         return {
             'Records': [
                 {
@@ -93,6 +104,12 @@ buckets_data_mapping = {
 
 
 def get_data_generator(bucket_type: str) -> DataGenerator:
-    """Given the bucket type return the correspondant data generator instance
+    """Given the bucket type return the correspondant data generator instance.
+
+    Args:
+        bucket_type (str): Bucket type to match the data generator.
+
+    Returns:
+        DataGenerator: Data generator for the given bucket.
     """
     return buckets_data_mapping[bucket_type]()

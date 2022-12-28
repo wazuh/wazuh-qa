@@ -14,10 +14,10 @@ class OutputAnalysisError(Exception):
 
 
 def call_aws_module(*parameters) -> str:
-    """Given some parameters call the AWS module and return the output
+    """Given some parameters call the AWS module and return the output.
 
     Returns:
-        str: The command output
+        str: The command output.
     """
     command = [AWS_MODULE_PATH, *parameters]
     logger.debug("Calling AWS module with: '%s'", command)
@@ -34,16 +34,16 @@ def _default_callback(line: str) -> str:
 def analyze_command_output(
     command_output: str, callback: Callable = _default_callback, expected_results: int = 1, error_message: str = ''
 ):
-    """Analyze the given command output searching for a pattern
+    """Analyze the given command output searching for a pattern.
 
     Args:
-        command_output (str): the output to analyze
-        callback (Callable, optional): a callback to process each line. Defaults to _default_callback.
-        expected_results (int, optional): number of expected results. Defaults to 1.
-        error_message (str, optional): message to show with the exception. Defaults to ''.
+        command_output (str): The output to analyze.
+        callback (Callable, optional): A callback to process each line. Defaults to _default_callback.
+        expected_results (int, optional): Number of expected results. Defaults to 1.
+        error_message (str, optional): Message to show with the exception. Defaults to ''.
 
     Raises:
-        OutputAnalysisError: when the expected results are not correct
+        OutputAnalysisError: When the expected results are not correct.
     """
 
     results = []
