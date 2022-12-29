@@ -39,3 +39,10 @@
   metadata:
     bucket_type: nlb
     bucket_name: wazuh-nlb-integration-tests
+
+- name: kms_only_logs_after_multiple_calls
+  description: KMS only_logs_after multiple calls configurations
+  configuration_parameters:
+  metadata:
+    bucket_type: custom
+    bucket_name: wazuh-kms-integration-tests
