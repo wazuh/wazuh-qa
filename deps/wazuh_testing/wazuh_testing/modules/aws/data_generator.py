@@ -413,6 +413,90 @@ class NLBDataGenerator(DataGenerator):
         return buffer.getvalue()
 
 
+class KMSDataGenerator(DataGenerator):
+    BASE_PATH = ''
+    BASE_FILE_NAME = f'firehose_kms-1-'
+
+    def get_filename(self) -> str:
+        """Return the filename in the KMS format.
+
+        Example:
+            <prefix>/<year>/<month>/<day>
+
+        Returns:
+            str: Syntetic filename.
+        """
+        now = datetime.now()
+        path = f"{self.BASE_PATH}{now.strftime(cons.PATH_DATE_FORMAT)}/"
+        name = f"{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}_{str(uuid4())}{cons.JSON_EXT}"
+
+        return f'{path}{name}'
+
+    def get_data_sample(self) -> str:
+        """Returns a sample of data according to the KMS format.
+
+        Returns:
+            str: Syntetic data.
+        """
+        return json.dumps(
+            {
+                'version': '0',
+                'id': str(uuid4()),
+                'detail-type': 'AWS API Call via CloudTrail',
+                'source': 'aws.kms',
+                'account': cons.RANDOM_ACCOUNT_ID,
+                'time': '2018-11-07T17:27:01Z',
+                'region': cons.US_EAST_1_REGION,
+                'resources': [],
+                'detail': {
+                    'eventVersion': '1.05',
+                    'userIdentity': {
+                        'type': 'IAMUser',
+                        'principalId': get_random_string(20),
+                        'arn': f"arn:aws:iam::{cons.RANDOM_ACCOUNT_ID}:user/fake.user",
+                        'accountId': cons.RANDOM_ACCOUNT_ID,
+                        'accessKeyId': get_random_string(20),
+                        'userName': 'fake.user',
+                        'sessionContext': {
+                            'attributes': {
+                                'mfaAuthenticated': 'false',
+                                'creationDate': '2018-11-07T07:53:47Z'
+                            }
+                        },
+                        'invokedBy': 'secretsmanager.amazonaws.com'
+                    },
+                    'eventTime': '2018-11-07T17:27:01Z',
+                    'eventSource': 'kms.amazonaws.com',
+                    'eventName': 'GenerateDataKey',
+                    'awsRegion': cons.RANDOM_ACCOUNT_ID,
+                    'sourceIPAddress': 'secretsmanager.amazonaws.com',
+                    'userAgent': 'secretsmanager.amazonaws.com',
+                    'requestParameters': {
+                        'keySpec': 'AES_256',
+                        'encryptionContext': {
+                            'SecretARN': f"arn:aws:secretsmanager:us-east-1:{cons.RANDOM_ACCOUNT_ID}:secret:test-aws",
+                            'SecretVersionId': str(uuid4())
+                        },
+                        'keyId': 'alias/aws/secretsmanager'
+                    },
+                    'responseElements': None,
+                    'requestID': str(uuid4()),
+                    'eventID': str(uuid4()),
+                    'readOnly': True,
+                    'resources': [
+                        {
+                            'ARN': f"arn:aws:kms:us-east-1:{cons.RANDOM_ACCOUNT_ID}:key/{str(uuid4())}",
+                            'accountId': cons.RANDOM_ACCOUNT_ID,
+                            'type': 'AWS::KMS::Key'
+                        }
+                    ],
+                    'eventType': 'AwsApiCall',
+                    'vpcEndpointId': f"vpce-{get_random_string(17)}"
+                }
+            }
+        )
+
+
 # Maps bucket type with corresponding data generator
 buckets_data_mapping = {
     cons.CLOUD_TRAIL_TYPE: CloudTrailDataGenerator,
@@ -420,17 +504,22 @@ buckets_data_mapping = {
     cons.CONFIG_TYPE: ConfigDataGenerator,
     cons.ALB_TYPE: ALBDataGenerator,
     cons.CLB_TYPE: CLBDataGenerator,
-    cons.NLB_TYPE: NLBDataGenerator
+    cons.NLB_TYPE: NLBDataGenerator,
+    cons.KMS_TYPE: KMSDataGenerator
 }
 
 
-def get_data_generator(bucket_type: str) -> DataGenerator:
+def get_data_generator(bucket_type: str, bucket_name: str) -> DataGenerator:
     """Given the bucket type return the correspondant data generator instance.
 
     Args:
         bucket_type (str): Bucket type to match the data generator.
+        bucket_name (str): Bucket name to match in case of custom types.
 
     Returns:
         DataGenerator: Data generator for the given bucket.
     """
+    if bucket_type == cons.CUSTOM_TYPE:
+        bucket_type = bucket_name.split('-')[1]
+
     return buckets_data_mapping[bucket_type]()
