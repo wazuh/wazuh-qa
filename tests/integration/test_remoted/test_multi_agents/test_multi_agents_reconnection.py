@@ -40,11 +40,9 @@ pytest_args:
 tags:
     - remoted
 '''
-# Standard library imports.
 import pytest
 from pathlib import Path
 
-# Wazuh Testing framework imports.
 from wazuh_testing.modules.remoted import CB_KEY_ALREADY_IN_USE
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
@@ -54,12 +52,12 @@ from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.wazuh_manager import wait_agents_active_by_name
 from wazuh_testing.tools.virtualization import AgentsDockerizer
 
-# Local module improts.
-from . import TESTS_CASES_PATH, CONFIGS_PATH
 
-
-# Constants
+# Constants & base paths
 TEST_NAME = Path(__file__).stem.replace('test_', '')
+DATA_PATH = Path(Path(__file__).parent, 'data')
+TESTS_CASES_PATH = Path(DATA_PATH, 'test_cases')
+CONFIGS_PATH = Path(DATA_PATH, 'config_templates')
 
 # Marks
 pytestmark = [pytest.mark.server, pytest.mark.tier(level=2)]
@@ -126,7 +124,7 @@ def test_remoted_multi_agents(dockerized_agents: AgentsDockerizer, metadata: dic
     shared_folder = Path(WAZUH_PATH, 'etc', 'shared', 'default')
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
 
-    # Wait untill the agents are active
+    # Wait until the agents are active
     wait_agents_active_by_name(hostnames)
 
     if metadata.get('restart') == 'agents':

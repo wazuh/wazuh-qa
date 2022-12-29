@@ -3,7 +3,7 @@ import subprocess
 import requests
 from typing import List
 
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH, AGENT_CONTROL_BINARY
 from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.tools.utils import retry
 from wazuh_testing.wazuh_db import query_wdb
@@ -38,8 +38,8 @@ def remove_agents(agents_id, remove_type='wazuhdb'):
                 'older_than': '0s'
             }
             url = f"{api_details['base_url']}/agents"
-            response = requests.delete(
-                url, headers=api_details['auth_headers'], params=payload, verify=False)
+            response = requests.delete(url,headers=api_details['auth_headers'], 
+                                       params=payload, verify=False)
             response_data = response.json()
             if response.status_code != 200:
                 raise RuntimeError(f"Error deleting an agent: {response_data}")
@@ -61,7 +61,7 @@ def wait_agents_active_by_name(agents_names: List[str]):
     """
     for name in agents_names:
         name = name.replace("\r", "").replace("\n", "")
-        command = f'{WAZUH_PATH}/bin/agent_control -l | grep "{name}"'
+        command = f"{AGENT_CONTROL_BINARY} -l | grep \"{name}\""
         if 'Active' not in run_local_command_returning_output(command):
             raise AttributeError(f"Agent {name} is not active yet.")
     return True
