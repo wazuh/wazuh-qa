@@ -27,7 +27,7 @@ class DockerWrapper(Instance):
         stdout (bool): Value to set stdout attribute.
         stderr (bool): Value to set stderr attribute.
         ip (string): String with the IP address of the container. The docker network MUST
-                        exists. If None, no static IP will be assigned.
+                     exists. If None, no static IP will be assigned.
         network_name (string): Name of the docker network.
 
     Attributes:
@@ -37,13 +37,13 @@ class DockerWrapper(Instance):
         remove (bool): Remove the container after it has finished.
         detach (bool): Run container in background.
         ports (dict): Ports to bind inside the container.
-                        The keys of the dictionary are the ports to bind inside the
-                        container and the values of the dictionary are the corresponding
-                        ports to open on the host.
+                      The keys of the dictionary are the ports to bind inside the
+                      container and the values of the dictionary are the corresponding
+                      ports to open on the host.
         stdout (bool): Return stdout logs when detach is False.
         stderr (bool): Return stderr logs when detach is False.
         ip (string): String with the IP address of the container. The docker network MUST
-                        exists. If None, no static IP will be assigned.
+                     exists. If None, no static IP will be assigned.
         network_name (string): Name of the docker network.
     """
 
@@ -93,7 +93,7 @@ class DockerWrapper(Instance):
             return
         try:
             self.docker_client.networks.get(self.network_name).connect(
-                container, ipv4_address=self.ip)
+                                            container, ipv4_address=self.ip)
         except docker.errors.APIError:
             exception_message = f"Invalid address {self.ip} It does not belong to any of this network's " \
                                  "subnets. Please check if you have already set this docker network " \
