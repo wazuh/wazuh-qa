@@ -220,9 +220,9 @@ def detect_windows_sacl_configured(file_monitor, file):
         file: The path of the file that will be monitored
     """
 
-    callback = fr".*win_whodata.*The SACL of '({file})' will be configured"
+    pattern = fr".*win_whodata.*The SACL of '({file})' will be configured"
 
-    file_monitor.start(timeout=60, callback=generate_monitoring_callback(callback),
+    file_monitor.start(timeout=60, callback=generate_monitoring_callback(pattern),
                        error_message=fim.ERR_MSG_SACL_CONFIGURED_EVENT)
 
 
@@ -234,7 +234,7 @@ def detect_windows_whodata_mode_change(file_monitor, file):
         file: The path of the file that will be monitored
     """
 
-    callback = fr".*set_whodata_mode_changes.*The '({file})' directory starts to be monitored in real-time mode."
+    pattern = fr".*set_whodata_mode_changes.*The '({file})' directory starts to be monitored in real-time mode."
 
-    file_monitor.start(timeout=60, callback=generate_monitoring_callback(callback),
+    file_monitor.start(timeout=60, callback=generate_monitoring_callback(pattern),
                        error_message=fim.ERR_MSG_WHDATA_REALTIME_MODE_CHANGE_EVENT)
