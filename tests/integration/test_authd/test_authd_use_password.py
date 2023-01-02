@@ -43,6 +43,7 @@ import time
 import pytest
 
 from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools.file import read_file, write_file, delete_file
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
 
@@ -112,6 +113,7 @@ def reset_password(test_case, get_configuration):
     Write the password file.
     """
     metadata = get_configuration['metadata']
+    authd_pass_backup = read_file(authd_default_password_path)
     set_password = None
     try:
         if metadata['use_password'] == 'yes':
@@ -125,6 +127,8 @@ def reset_password(test_case, get_configuration):
 
     # in case of random pass, remove /etc/authd.pass
     if set_password == 'random' or set_password == 'undefined':
+        print("\n---Se borra la pass---\n")
+        delete_file(authd_default_password_path)
         try:
             os.remove(authd_default_password_path)
         except FileNotFoundError:
@@ -135,11 +139,12 @@ def reset_password(test_case, get_configuration):
     elif set_password == 'defined':
         # Write authd.pass
         try:
-            with open(authd_default_password_path, 'w') as pass_file:
-                pass_file.write(DEFAULT_TEST_PASSWORD)
-                pass_file.close()
+            write_file(authd_default_password_path, DEFAULT_TEST_PASSWORD)
         except IOError as exception:
             raise
+    yield
+
+    write_file(authd_default_password_path, authd_pass_backup)
 
 
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)

@@ -118,6 +118,7 @@ def restart_wazuh_daemon_function(daemon=None):
     """
     Restart a Wazuh daemon
     """
+    os.system("ls /var/ossec/etc/")
     truncate_file(LOG_FILE_PATH)
     control_service("restart", daemon=daemon)
 
