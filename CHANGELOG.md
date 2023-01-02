@@ -9,7 +9,11 @@ Release report: TBD
 
 ### Added
 
+<<<<<<< HEAD
 - Add new test to check multiple agents reconnect without race condition in remoted blocking ([#3383](https://github.com/wazuh/wazuh-qa/pull/3662)) \- (Framework + Tests)
+=======
+- Fix Yara and VirusTotal E2E basic usage tests ([#3660](https://github.com/wazuh/wazuh-qa/pull/3660))
+>>>>>>> 4.4
 - Add new test to check if syslog message are parsed correctrly in the `archives.json` file ([#3609](https://github.com/wazuh/wazuh-qa/pull/3609)) \- (Framework + Tests)
 - Add new logging tests for analysisd EPS limitation ([#3509](https://github.com/wazuh/wazuh-qa/pull/3509)) \- (Framework + Tests)
 - New testing suite for checking analysisd EPS limitation ([#2947](https://github.com/wazuh/wazuh-qa/pull/3181)) \- (Framework + Tests)
@@ -81,6 +85,9 @@ Release report: TBD
 - Fix the unstable FIM tests that need refactoring ([#2458](https://github.com/wazuh/wazuh-qa/pull/2458)) \- (Framework + Tests)
 - Fix version validation in qa-ctl config generator ([#2454](https://github.com/wazuh/wazuh-qa/pull/2454)) \- (Framework)
 - Fix invalid reference for test_api_endpoints_performance.py xfail items ([#3378](https://github.com/wazuh/wazuh-qa/pull/3378)) \- (Tests)
+- Fix undeclared API token variable in multigroups system tests ([#3674](https://github.com/wazuh/wazuh-qa/pull/3674)) \- (Framework + Tests)
+- Fix error in requirements.txt ([#3689](https://github.com/wazuh/wazuh-qa/pull/3689)) \- (Framework)
+- Fix sleep time in `test_agent_default_group_added`. ([#3692](https://github.com/wazuh/wazuh-qa/pull/3692)) \- (Tests)
 
 ### Removed
 
