@@ -117,7 +117,7 @@ def get_random_ip():
 
 def get_current_ip() -> str:
     """Retrieves the IP address of this machine.
-    
+
     To get the actual IP it connects to the primary google's DNS server
     grab the interface used for that connection and returns its IP.
 
@@ -139,8 +139,7 @@ def get_random_string(string_length, digits=True):
     Returns:
         String: Random string.
     """
-    character_set = string.ascii_uppercase + string.digits if digits \
-                    else string.ascii_uppercase
+    character_set = string.ascii_uppercase + string.digits if digits else string.ascii_uppercase
 
     return ''.join(SystemRandom().choice(character_set) for _ in range(string_length))
 

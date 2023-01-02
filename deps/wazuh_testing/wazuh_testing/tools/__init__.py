@@ -72,7 +72,7 @@ else:
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
     ANALYSISD_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'wazuh-analysisd')
     ACTIVE_RESPONSE_BINARY_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
-    AGENT_CONTROL_BINARY =  os.path.join(WAZUH_PATH, 'bin', 'agent_control')
+    AGENT_CONTROL_BINARY = os.path.join(WAZUH_PATH, 'bin', 'agent_control')
     WAZUH_CONTROL_BINARY = os.path.join(WAZUH_PATH, 'bin', 'wazuh-control')
 
     if sys.platform == 'sunos5':
