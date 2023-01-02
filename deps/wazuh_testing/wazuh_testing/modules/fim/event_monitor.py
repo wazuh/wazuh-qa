@@ -166,7 +166,7 @@ def check_fim_event(file_monitor=None, callback='', error_message=None, update_p
     """
     file_monitor = FileMonitor(file_to_monitor) if file_monitor is None else file_monitor
     error_message = f"Could not find this event in {file_to_monitor}: {callback}" if error_message is None else \
-        error_message
+                    error_message
 
     file_monitor.start(timeout=timeout, update_position=update_position, accum_results=accum_results,
                        callback=generate_monitoring_callback(callback), error_message=error_message)
