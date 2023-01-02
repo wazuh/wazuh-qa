@@ -1,6 +1,7 @@
 import os
 import subprocess
 import requests
+
 from typing import List
 
 from wazuh_testing.tools import WAZUH_PATH, AGENT_CONTROL_BINARY
@@ -38,7 +39,7 @@ def remove_agents(agents_id, remove_type='wazuhdb'):
                 'older_than': '0s'
             }
             url = f"{api_details['base_url']}/agents"
-            response = requests.delete(url,headers=api_details['auth_headers'], 
+            response = requests.delete(url, headers=api_details['auth_headers'],
                                        params=payload, verify=False)
             response_data = response.json()
             if response.status_code != 200:
@@ -56,11 +57,12 @@ def wait_agents_active_by_name(agents_names: List[str]):
     Args:
         agents_names (list[str]): The list with agents names to check.
     Raises:
-        AttributeError: If any agent is not active. Combined with the retry
-            decorator makes a wait loop until all the agents are active.
+        AttributeError: Combined with the retry decorator makes a wait
+                        loop until all the agents are active. After 10
+                        failing attempts, the error is actually raised.
     """
     for name in agents_names:
-        name = name.replace("\r", "").replace("\n", "")
+        name = name.replace('\r', '').replace('\n', '')
         command = f"{AGENT_CONTROL_BINARY} -l | grep \"{name}\""
         if 'Active' not in run_local_command_returning_output(command):
             raise AttributeError(f"Agent {name} is not active yet.")

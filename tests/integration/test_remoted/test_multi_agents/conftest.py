@@ -1,5 +1,6 @@
 import pytest
 import re
+
 from pathlib import Path
 
 from wazuh_testing.tools.configuration import set_section_wazuh_conf
@@ -13,7 +14,7 @@ AGENT_CONFIG_PATH = Path(Path(Path(__file__).parent, 'data', 'conf_template'))
 
 @pytest.fixture()
 def dockerized_agents(agents_config: str, metadata: dict) -> AgentsDockerizer:
-    """Build and cleanup dockerized agents
+    """Build and cleanup dockerized agents.
 
     Args:
         agents_config (str): Agents ossec.conf.
@@ -31,7 +32,8 @@ def dockerized_agents(agents_config: str, metadata: dict) -> AgentsDockerizer:
 
 @pytest.fixture()
 def agents_config(configuration: dict) -> str:
-    """Set wazuh configuration
+    """Retrieves an ossec.conf ready to be used by the agents to connect
+    to the actual server.
 
     Args:
         configuration (dict): Configuration data to set in the ossec.conf.
@@ -40,17 +42,18 @@ def agents_config(configuration: dict) -> str:
     """
 
     def set_current_ip_to_agent_config(config: str) -> str:
-        # Set the current IP by matching the addess tags.
+        # Regex to match a substring inside the address tags.
         reg = '(?<=%s).*?(?=%s)' % ('<address>', '</address>')
         r = re.compile(reg, re.DOTALL)
+        # Replace the matching substring with the actual IP.
         return r.sub(get_current_ip(), config)
 
-    # Get template and configuration sections
+    # Get template and configuration sections.
     template = read_file(AGENT_CONFIG_PATH)
     config_sections = configuration.get('sections')
-    # Set the agents configuration
+    # Configure the agents ossec.conf with the correct values.
     agents_config = set_section_wazuh_conf(config_sections, template)
-    agents_config = "".join(agents_config)
+    agents_config = ''.join(agents_config)
     agents_config = set_current_ip_to_agent_config(agents_config)
 
     yield agents_config

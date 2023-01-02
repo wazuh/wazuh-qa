@@ -41,6 +41,7 @@ tags:
     - remoted
 '''
 import pytest
+
 from pathlib import Path
 
 from wazuh_testing.modules.remoted import CB_KEY_ALREADY_IN_USE
@@ -63,8 +64,8 @@ CONFIGS_PATH = Path(DATA_PATH, 'config_templates')
 pytestmark = [pytest.mark.server, pytest.mark.tier(level=2)]
 
 # Paths
-cases_path = Path(TESTS_CASES_PATH, f'cases_{TEST_NAME}.yaml')
-config_path = Path(CONFIGS_PATH, f'config_{TEST_NAME}.yaml')
+cases_path = Path(TESTS_CASES_PATH, f"cases_{TEST_NAME}.yaml")
+config_path = Path(CONFIGS_PATH, f"config_{TEST_NAME}.yaml")
 
 # Configurations and test cases
 params, metadata, case_ids = get_test_cases_data(cases_path)

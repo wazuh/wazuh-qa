@@ -98,10 +98,10 @@ class AgentsDockerizer:
         if not package_uri:
             package_uri = 'https://packages-dev.wazuh.com/pre-release/' + \
                           'apt/pool/main/w/wazuh-agent/wazuh-agent_4.4.0-1_amd64.deb'
-
+        # Get the agents Dockerfile template and set the package url.
         template = read_file(Path(self.dockerfile_path, 'template'))
         dockerfile = template.replace('|AGENT_URL|', package_uri)
-
+        # Save the Dockerfile that is now ready to use.
         write_file(Path(self.dockerfile_path, 'Dockerfile'), dockerfile)
 
     def start(self):
@@ -191,7 +191,7 @@ class AgentsDockerizer:
             list[Any]: Output of the function executed on each DockerWrapper instance.
         """
         if not self.agents:
-            raise QAValueError('No agents built', LOGGER.error, QACTL_LOGGER)
+            raise QAValueError('No agents built.', LOGGER.error, QACTL_LOGGER)
 
         with ThreadPoolExecutor(self.quantity) as executor:
             futures = [executor.submit(getattr(a, func), *args, **kwargs)

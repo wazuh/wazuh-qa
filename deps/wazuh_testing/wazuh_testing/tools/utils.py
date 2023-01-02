@@ -116,7 +116,10 @@ def get_random_ip():
 
 
 def get_current_ip() -> str:
-    """Retrieves the ip address of this machine.
+    """Retrieves the IP address of this machine.
+    
+    To get the actual IP it connects to the primary google's DNS server
+    grab the interface used for that connection and returns its IP.
 
     Return:
         String: Machine's IP address.
