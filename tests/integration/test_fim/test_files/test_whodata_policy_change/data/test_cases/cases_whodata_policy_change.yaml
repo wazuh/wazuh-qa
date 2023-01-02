@@ -1,5 +1,5 @@
 - name: audit_policy_change_event_checker
-  description: Check when folders monitored w/ whodata mode, if audit policies change, fim changes to realtime mode
+  description: Check when folders monitored in whodata mode, if audit policies change, fim changes to realtime mode
   configuration_parameters:
     AUDIT_INTERVAL: 2
   metadata:
