@@ -228,7 +228,7 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
 
 def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
                      triggers_event=True, encoding=None, validators_after_create=None, validators_after_update=None,
-                     validators_after_delete=None, validators_after_cud=None, event_mode=None):
+                     validators_after_delete=None, validators_after_cud=None, event_mode=None, escaped=False):
     """Check if creation, update and delete events are detected by syscheck.
 
     This function provides multiple tools to validate events with custom validators.
@@ -272,7 +272,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         create_file(REGULAR, folder, name, content=content)
 
     event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event,
-                                  event_mode=event_mode)
+                                  event_mode=event_mode, escaped=escaped)
     if triggers_event:
         logger.info("'added' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
@@ -283,7 +283,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
                                  custom_validator=custom_validator, encoding=encoding,
                                  callback=callback_detect_file_modified_event)
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event,
-                                  event_mode=event_mode)
+                                  event_mode=event_mode, escaped=escaped)
     if triggers_event:
         logger.info("'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
@@ -294,7 +294,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
                                  custom_validator=custom_validator, encoding=encoding,
                                  callback=callback_detect_file_deleted_event)
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event,
-                                  event_mode=event_mode)
+                                  event_mode=event_mode, escaped=escaped)
     if triggers_event:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
