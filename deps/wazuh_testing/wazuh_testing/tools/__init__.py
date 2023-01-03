@@ -58,6 +58,7 @@ else:
     WAZUH_SECURITY_CONF = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'security.yaml')
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
+    DEFAUL_AUTHD_PASS_PATH = os.path.join(WAZUH_PATH, 'etc', 'authd.pass')
     API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
     API_JSON_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.json')
     API_LOG_FOLDER = os.path.join(WAZUH_PATH, 'logs', 'api')
