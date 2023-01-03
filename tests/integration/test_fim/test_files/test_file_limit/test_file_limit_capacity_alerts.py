@@ -186,7 +186,7 @@ def test_file_limit_capacity_alert(percentage, configure_local_internal_options_
     # Delete files to empty DB and return it to normal levels
     else:  # Database back to normal
         for i in range(91):
-            delete_file(testdir1, f'test{i}')
+            delete_file(os.path.join(testdir1, f'test{i}'))
 
     wait_for_scheduled_scan(True, interval=scan_delay, monitor=wazuh_log_monitor)
 

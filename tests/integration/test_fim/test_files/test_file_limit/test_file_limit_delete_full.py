@@ -67,7 +67,7 @@ import pytest
 from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.file import create_file, delete_path_recursively
+from wazuh_testing.tools.file import create_file, delete_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim.event_monitor import (callback_detect_event, ERR_MSG_DATABASE_FULL_ALERT_EVENT,
@@ -192,7 +192,7 @@ def test_file_limit_delete_full(folder, file_name, configure_local_internal_opti
     create_file(REGULAR, testdir1, file_name)
     sleep(sleep_time)
     # Delete the file created - Should not generate events
-    delete_path_recursively(os.path.join(folder, file_name))
+    delete_file(os.path.join(folder, file_name))
 
     # Check no Creation or Deleted event has been  generated
     with pytest.raises(TimeoutError):
@@ -201,7 +201,7 @@ def test_file_limit_delete_full(folder, file_name, configure_local_internal_opti
         assert event is None, ERR_MSG_NO_EVENTS_EXPECTED
 
     # Delete the first file that was created (It is included in DB)
-    delete_path_recursively(os.path.join(folder, f'{file_name}{0}'))
+    delete_file(os.path.join(folder, f'{file_name}{0}'))
 
     # Get that the file deleted generetes an event and assert the event data path.
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
