@@ -25,8 +25,14 @@ os_platform:
     - Linux
 
 os_version:
-    - Centos 8
+    - Amazon Linux 1
+    - Amazon Linux 2
+    - CentOS 7
+    - CentOS 8
+    - Debian Buster
+    - Red Hat 8
     - Ubuntu Focal
+    - Ubuntu Bionic
 
 references:
     - https://documentation.wazuh.com/current/user-manual/
