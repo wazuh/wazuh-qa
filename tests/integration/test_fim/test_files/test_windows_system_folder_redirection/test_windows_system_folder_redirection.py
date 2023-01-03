@@ -70,14 +70,14 @@ import os
 import pytest
 from wazuh_testing import global_parameters, LOG_FILE_PATH, T_10
 from wazuh_testing.tools import PREFIX, configuration
-from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.modules.fim import CB_FIM_PATH_CONVERTED, ERR_MSG_FIM_PATH_CONVERTED_EVENT
+from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing.modules.fim.event_monitor import check_fim_event, CB_FIM_PATH_CONVERTED
 from wazuh_testing.modules.fim.utils import regular_file_cud
 
 # Marks
 
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 
 # Reference paths
@@ -89,15 +89,13 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_windows_system_folder_redirection.yaml')
 configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_windows_system_folder_redirection.yaml')
 
-
-# variables
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-
 # Test configurations
 configuration_parameters, configuration_metadata, test_case_ids = configuration.get_test_cases_data(test_cases_path)
 configurations = configuration.load_configuration_template(configurations_path, configuration_parameters,
                                                            configuration_metadata)
+
+# variables
+wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
 # tests
@@ -134,9 +132,6 @@ def test_windows_folder_redirection(configuration, metadata, set_wazuh_configura
         - restart_syscheck_function:
             type: fixture
             brief: restart syscheckd daemon, and truncate the ossec.log.
-        - create_monitored_folders
-            type: fixture
-            brief: Create folders to be monitored, delete after test.
         - wait_for_fim_start_function:
             type: fixture
             brief: check that the starting fim scan is detected.
@@ -161,12 +156,11 @@ def test_windows_folder_redirection(configuration, metadata, set_wazuh_configura
         - scheduled
     '''
     file_list = [f"regular_file"]
-    folder = os.path.join(PREFIX, metadata['folder'])
+    folder = os.path.join(PREFIX, 'windows', metadata['folder'])
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     
-    wazuh_log_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_FIM_PATH_CONVERTED),
-                            error_message=ERR_MSG_FIM_PATH_CONVERTED_EVENT)
-    
+    if metadata['redirected']:
+        check_fim_event(callback=CB_FIM_PATH_CONVERTED, timeout=T_10)
     
     regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, time_travel=False,
-                     min_timeout=global_parameters.default_timeout*4, triggers_event=True)
+                     min_timeout=300, triggers_event=True, escaped=True)

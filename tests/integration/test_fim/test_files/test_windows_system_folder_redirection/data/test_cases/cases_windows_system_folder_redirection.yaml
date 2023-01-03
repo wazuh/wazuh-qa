@@ -1,9 +1,116 @@
-- name: report_changes_found_scheduled
+- name: monitor /Windows/System32 - scheduled
   description: When a file is monitored with report_changes, the diff file and changes are reported (Scheduled mode)
   configuration_parameters:
     INTERVAL: 3
     REALTIME: 'no'
     WHODATA: 'no'
-  metadata:
-    folder: \%WINDIR%/Sysnative
+    TEST_DIRECTORIES: '%WINDIR%\System32'
     fim_mode: scheduled
+  metadata:
+    folder: system32
+    fim_mode: scheduled
+    redirected: false
+
+- name: monitor /Windows/System32 - realtime
+  description: When a file is monitored with report_changes, the diff file and changes are reported (Scheduled mode)
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+    TEST_DIRECTORIES: '%WINDIR%\System32'
+    fim_mode: realtime
+  metadata:
+    folder: system32
+    fim_mode: realtime
+    redirected: false
+
+- name: monitor /Windows/System32 - whodata
+  description: When a file is monitored with report_changes, the diff file and changes are reported (Scheduled mode)
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+    TEST_DIRECTORIES: '%WINDIR%\System32'
+    fim_mode: whodata
+  metadata:
+    folder: system32
+    fim_mode: whodata
+    redirected: false
+
+- name: monitor /Windows/Sysnative - scheduled
+  description: When a file is monitored with report_changes, the diff file and changes are reported (Scheduled mode)
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+    TEST_DIRECTORIES: '%WINDIR%\Sysnative'
+    fim_mode: scheduled
+  metadata:
+    folder: system32
+    fim_mode: scheduled
+    redirected: true
+
+- name: monitor /Windows/Sysnative - realtime
+  description: When a file is monitored with report_changes, the diff file and changes are reported (Scheduled mode)
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+    TEST_DIRECTORIES: '%WINDIR%\Sysnative'
+    fim_mode: realtime
+  metadata:
+    folder: system32
+    fim_mode: realtime
+    redirected: true
+
+- name: monitor /Windows/Sysnative - whodata
+  description: When a file is monitored with report_changes, the diff file and changes are reported (Scheduled mode)
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+    TEST_DIRECTORIES: '%WINDIR%\Sysnative'
+    fim_mode: whodata
+  metadata:
+    folder: system32
+    fim_mode: whodata
+    redirected: true
+
+- name: monitor SyWOW64 - scheduled
+  description: When a file is monitored with report_changes, the diff file and changes are reported (Scheduled mode)
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+    TEST_DIRECTORIES: '%WINDIR%\SysWOW64'
+    fim_mode: scheduled
+  metadata:
+    folder: syswow64
+    fim_mode: scheduled
+    redirected: false
+
+- name: monitor SysWOW64 - realtime
+  description: When a file is monitored with report_changes, the diff file and changes are reported (Scheduled mode)
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+    TEST_DIRECTORIES: '%WINDIR%\SysWOW64'
+    fim_mode: realtime
+  metadata:
+    folder: syswow64
+    fim_mode: realtime
+    redirected: false
+
+- name: monitor SysWOW64 - whodata
+  description: When a file is monitored with report_changes, the diff file and changes are reported (Scheduled mode)
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+    TEST_DIRECTORIES: '%WINDIR%\SysWOW64'
+    fim_mode: whodata
+  metadata:
+    folder: syswow64
+    fim_mode: whodata
+    redirected: false

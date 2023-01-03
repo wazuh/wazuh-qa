@@ -10,6 +10,9 @@
             attributes:
               - realtime: REALTIME
               - whodata: WHODATA
+              - recursion_level: 0
+        - windows_audit_interval:
+            value: 500
 
     - section: sca
       elements:
