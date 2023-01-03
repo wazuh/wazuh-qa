@@ -38,11 +38,11 @@ tags:
     - enrollment
 '''
 import os
+import ssl
 import time
 import pytest
 
 from wazuh_testing.tools import WAZUH_PATH
-from wazuh_testing.tools.file import write_file, delete_file
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import read_yaml
 
@@ -92,36 +92,54 @@ def read_random_pass():
     """
     osseclog_path = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
     passw = None
-    with open(osseclog_path, 'r') as log_file:
-        lines = log_file.readlines()
-        for line in lines:
-            if "Random password" in line:
-                passw = line.split()[-1]
-
+    try:
+        with open(osseclog_path, 'r') as log_file:
+            lines = log_file.readlines()
+            for line in lines:
+                if "Random password" in line:
+                    passw = line.split()[-1]
+            log_file.close()
+    except IOError as exception:
+        raise
     return passw
 
 # Fixtures
 
 
-@pytest.fixture()
+@pytest.fixture(scope='function')
 def reset_password(test_case, get_configuration):
     """
     Write the password file.
     """
     metadata = get_configuration['metadata']
     set_password = None
-
-    if metadata.get('use_password') == 'yes':
-        set_password = 'random' if test_case.get('random_pass') else 'defined'
-    else:
-        set_password = 'undefined'
+    try:
+        if metadata['use_password'] == 'yes':
+            set_password = 'defined'
+            if test_case['random_pass'] == 'yes':
+                set_password = 'random'
+        else:
+            set_password = 'undefined'
+    except KeyError:
+        pass
 
     # in case of random pass, remove /etc/authd.pass
     if set_password == 'random' or set_password == 'undefined':
-        delete_file(authd_default_password_path)
-    else:
-        # in case of defined pass, set predefined pass in /etc/authd.pass
-        write_file(authd_default_password_path, DEFAULT_TEST_PASSWORD)
+        try:
+            os.remove(authd_default_password_path)
+        except FileNotFoundError:
+            pass
+        except IOError:
+            raise
+    # in case of defined pass, set predefined pass in  /etc/authd.pass
+    elif set_password == 'defined':
+        # Write authd.pass
+        try:
+            with open(authd_default_password_path, 'w') as pass_file:
+                pass_file.write(DEFAULT_TEST_PASSWORD)
+                pass_file.close()
+        except IOError as exception:
+            raise
 
 
 @pytest.fixture(scope='module', params=configurations, ids=configuration_ids)
@@ -136,10 +154,10 @@ def get_configuration(request):
 
 @pytest.mark.parametrize('test_case', [case for case in test_authd_use_password_tests],
                          ids=[test_case['name'] for test_case in test_authd_use_password_tests])
-def test_authd_use_password(get_configuration, configure_environment, configure_sockets_environment,
-                            clean_client_keys_file_function, reset_password, restart_wazuh_daemon_function,
-                            wait_for_authd_startup_function, connect_to_sockets_function,
-                            test_case, tear_down):
+def test_authd_force_options(get_configuration, configure_environment, configure_sockets_environment,
+                             clean_client_keys_file_function, reset_password, restart_wazuh_daemon_function,
+                             wait_for_authd_startup_function, connect_to_sockets_function,
+                             test_case, tear_down):
     '''
     description:
         Checks that every input message in authd port generates the adequate output.
@@ -218,12 +236,12 @@ def test_authd_use_password(get_configuration, configure_environment, configure_
         # Creating output message
         if metadata['use_password'] == 'yes':
             if 'random_pass' in test_case and 'insert_random_pass_in_query' in stage:
-                print('USA RANDOM', response, read_random_pass())
                 expected = SUCCESS_MESSAGE.format(stage['user'])
             elif 'pass' in stage and stage['pass'] == DEFAULT_TEST_PASSWORD:
                 expected = SUCCESS_MESSAGE.format(stage['user'])
             else:
                 expected = INVALID_PASSWORD_MESSAGE
+        # use_password = 'no'
         else:
             if 'pass' in stage or 'insert_random_pass_in_query' in stage:
                 expected = INVALID_REQUEST_MESSAGE

@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2022, Wazuh Inc.
+copyright: Copyright (C) 2015-2023, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -7,13 +7,13 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
 type: integration
 
-brief: These tests will check if a set of wrong configuration option values in the block force
-       are warned in the logs file.
+brief: These tests will check invalid values in the authd.pass (for now just checks 'empty')
+       raises the expected error logs.
 
 components:
     - authd
 
-suite: force_options
+suite: use_password
 
 targets:
     - manager
@@ -88,46 +88,48 @@ def set_authd_pass(metadata: dict):
 
 # Test
 @pytest.mark.parametrize('metadata, configuration', zip(metadata, configuration), ids=case_ids)
-def test_authd_force_options_invalid_config(metadata: dict, configuration: dict, truncate_monitored_files: None,
-                                            configure_local_internal_options_module: None, set_authd_pass: None,
-                                            set_wazuh_configuration: None):
+def test_authd_use_password_invalid(metadata: dict, configuration: dict, truncate_monitored_files: None,
+                                    configure_local_internal_options_module: None, set_authd_pass: None,
+                                    set_wazuh_configuration: None, tear_down: None):
     '''
     description:
-        Checks that every input with a wrong configuration option value
-        matches the adequate output log. None force registration
-        or response message is made.
+        Checks that every invalid input reproduces the expected results and
+        raises the correct logs.
 
     wazuh_min_version:
         4.5.0
 
-    tier: 0
+    tier: 1
 
     parameters:
-        - get_current_test_case:
+        - configuration:
+            type: dict
+            brief: Configuration loaded from `configuration_template`.
+        - metadata:
+            type: dict
+            brief: Test case metadata.
+        - set_wazuh_configuration:
             type: fixture
-            brief: gets the current test case from the tests' list
+            brief: Set wazuh configuration.
+        - truncate_monitored_files:
+            type: fixture
+            brief: Truncate all the log files and json alerts files before and after the test execution.
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - override_authd_force_conf:
+        - set_authd_pass:
             type: fixture
-            brief: Modified the authd configuration options.
-        - file_monitoring:
-            type: fixture
-            brief: Handle the monitoring of a specified file.
-        - tear_down:
-            type: fixture
-            brief: Roll back the daemon and client.keys state after the test ends.
+            brief: Configures the `authd.pass` file as needed.
 
     assertions:
-        - The received output must match with expected due to wrong configuration options.
+        - The raised error must match with the expected.
 
     input_description:
-        Different test cases are contained in an external YAML file (invalid_config folder) which includes
+        Different test cases are contained in an external YAML file which includes
         different possible wrong settings.
 
     expected_output:
-        - Invalid configuration values error.
+        - Invalid password error.
     '''
     # The expected error log must be defined.
     if not metadata.get('error'):
