@@ -145,7 +145,8 @@ class EventChecker:
         self.events = None
         self.callback = callback
 
-    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0, event_mode=None, escaped=False):
+    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0, event_mode=None,
+                        escaped=False):
         """Call both 'fetch_events' and 'check_events'.
 
         Args:

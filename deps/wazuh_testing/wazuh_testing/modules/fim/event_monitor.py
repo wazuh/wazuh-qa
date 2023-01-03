@@ -144,7 +144,7 @@ def callback_detect_file_deleted_event(line):
 
 # Event checkers
 def check_fim_event(file_monitor=None, callback='', error_message=None, update_position=True,
-                          timeout=T_60, accum_results=1, file_to_monitor=LOG_FILE_PATH):
+                    timeout=T_60, accum_results=1, file_to_monitor=LOG_FILE_PATH):
     """Check if a analysisd event occurs
 
     Args:
