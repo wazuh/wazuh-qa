@@ -120,6 +120,9 @@ def test_authd_use_password_invalid(metadata: dict, configuration: dict, truncat
         - set_authd_pass:
             type: fixture
             brief: Configures the `authd.pass` file as needed.
+        - tear_down:
+            type: fixture
+            brief: Roll back the daemon and client.keys state after the test ends.
 
     assertions:
         - The raised error must match with the expected.
