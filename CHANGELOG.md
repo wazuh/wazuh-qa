@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Added
 
+- Add tests with for new FIM registry monitoring wildcards support. ([#3318](https://github.com/wazuh/wazuh-qa/pull/????)) \- (tests)
 - Add tests with new options to avoid FIM synchronization overlapping. ([#3318](https://github.com/wazuh/wazuh-qa/pull/3318)) \- (Framework + tests)
 - Add 'Force reconnect' feature to agent_simulator tool. ([#3111](https://github.com/wazuh/wazuh-qa/pull/3111)) \- (Tools)
 
