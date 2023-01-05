@@ -53,6 +53,7 @@ import pytest
 from wazuh_testing import LOG_FILE_PATH, T_10
 from wazuh_testing.tools import PREFIX, configuration
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.fim import TEST_DIR_1
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim.event_monitor import check_fim_event, CB_FIM_PATH_CONVERTED
 from wazuh_testing.modules.fim.utils import regular_file_cud
@@ -77,14 +78,17 @@ configurations = configuration.load_configuration_template(configurations_path, 
                                                            configuration_metadata)
 
 # variables
+test_folders = [os.path.join(PREFIX, 'windows', 'System32', TEST_DIR_1),
+               os.path.join(PREFIX, 'windows', 'SysWOW64', TEST_DIR_1)]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
 # tests
+@pytest.mark.parametrize('test_folders', [test_folders], ids='', scope='module')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
-def test_windows_folder_redirection(configuration, metadata, set_wazuh_configuration,
-                                    configure_local_internal_options_function, restart_syscheck_function,
-                                    wait_fim_start_function):
+def test_windows_folder_redirection(configuration, metadata, test_folders, set_wazuh_configuration, 
+                                    create_monitored_folders_module, configure_local_internal_options_function,
+                                    restart_syscheck_function, wait_fim_start_function):
     '''
     description: Check if the 'wazuh-syscheckd' monitors the windows system folders (System32 and SysWOW64) properly,
     and that monitoring for Sysnative folder is redirected to System32 and works properly.
@@ -131,11 +135,11 @@ def test_windows_folder_redirection(configuration, metadata, set_wazuh_configura
         - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)'
     '''
     file_list = [f"regular_file"]
-    folder = os.path.join(PREFIX, 'windows', metadata['folder'])
+    folder = os.path.join(PREFIX, 'windows', metadata['folder'], TEST_DIR_1)
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     if metadata['redirected']:
         check_fim_event(callback=CB_FIM_PATH_CONVERTED, timeout=T_10)
 
     regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, time_travel=False,
-                     min_timeout=90, triggers_event=True, escaped=True)
+                     min_timeout=60, triggers_event=True, escaped=True)

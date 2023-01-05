@@ -4,7 +4,7 @@
     INTERVAL: 3
     REALTIME: 'no'
     WHODATA: 'no'
-    TEST_DIRECTORIES: '%WINDIR%\System32'
+    TEST_DIRECTORIES: '%WINDIR%\System32\testdir1'
     fim_mode: scheduled
   metadata:
     folder: system32
@@ -17,7 +17,7 @@
     INTERVAL: 10000
     REALTIME: 'yes'
     WHODATA: 'no'
-    TEST_DIRECTORIES: '%WINDIR%\System32'
+    TEST_DIRECTORIES: '%WINDIR%\System32\testdir1'
     fim_mode: realtime
   metadata:
     folder: system32
@@ -30,7 +30,7 @@
     INTERVAL: 10000
     REALTIME: 'no'
     WHODATA: 'yes'
-    TEST_DIRECTORIES: '%WINDIR%\System32'
+    TEST_DIRECTORIES: '%WINDIR%\System32\testdir1'
     fim_mode: whodata
   metadata:
     folder: system32
@@ -43,7 +43,7 @@
     INTERVAL: 3
     REALTIME: 'no'
     WHODATA: 'no'
-    TEST_DIRECTORIES: '%WINDIR%\Sysnative'
+    TEST_DIRECTORIES: '%WINDIR%\Sysnative\testdir1'
     fim_mode: scheduled
   metadata:
     folder: system32
@@ -56,7 +56,7 @@
     INTERVAL: 10000
     REALTIME: 'yes'
     WHODATA: 'no'
-    TEST_DIRECTORIES: '%WINDIR%\Sysnative'
+    TEST_DIRECTORIES: '%WINDIR%\Sysnative\testdir1'
     fim_mode: realtime
   metadata:
     folder: system32
@@ -69,7 +69,7 @@
     INTERVAL: 10000
     REALTIME: 'no'
     WHODATA: 'yes'
-    TEST_DIRECTORIES: '%WINDIR%\Sysnative'
+    TEST_DIRECTORIES: '%WINDIR%\Sysnative\testdir1'
     fim_mode: whodata
   metadata:
     folder: system32
@@ -82,7 +82,7 @@
     INTERVAL: 3
     REALTIME: 'no'
     WHODATA: 'no'
-    TEST_DIRECTORIES: '%WINDIR%\SysWOW64'
+    TEST_DIRECTORIES: '%WINDIR%\SysWOW64\testdir1'
     fim_mode: scheduled
   metadata:
     folder: syswow64
@@ -95,7 +95,7 @@
     INTERVAL: 10000
     REALTIME: 'yes'
     WHODATA: 'no'
-    TEST_DIRECTORIES: '%WINDIR%\SysWOW64'
+    TEST_DIRECTORIES: '%WINDIR%\SysWOW64\testdir1'
     fim_mode: realtime
   metadata:
     folder: syswow64
@@ -108,7 +108,7 @@
     INTERVAL: 10000
     REALTIME: 'no'
     WHODATA: 'yes'
-    TEST_DIRECTORIES: '%WINDIR%\SysWOW64'
+    TEST_DIRECTORIES: '%WINDIR%\SysWOW64\testdir1'
     fim_mode: whodata
   metadata:
     folder: syswow64
