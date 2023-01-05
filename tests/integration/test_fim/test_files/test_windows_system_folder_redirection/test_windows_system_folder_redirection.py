@@ -79,14 +79,14 @@ configurations = configuration.load_configuration_template(configurations_path, 
 
 # variables
 test_folders = [os.path.join(PREFIX, 'windows', 'System32', TEST_DIR_1),
-               os.path.join(PREFIX, 'windows', 'SysWOW64', TEST_DIR_1)]
+                os.path.join(PREFIX, 'windows', 'SysWOW64', TEST_DIR_1)]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
 # tests
 @pytest.mark.parametrize('test_folders', [test_folders], ids='', scope='module')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
-def test_windows_folder_redirection(configuration, metadata, test_folders, set_wazuh_configuration, 
+def test_windows_folder_redirection(configuration, metadata, test_folders, set_wazuh_configuration,
                                     create_monitored_folders_module, configure_local_internal_options_function,
                                     restart_syscheck_function, wait_fim_start_function):
     '''
