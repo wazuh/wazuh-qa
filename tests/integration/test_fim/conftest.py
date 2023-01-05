@@ -86,3 +86,19 @@ def create_monitored_folders(test_folders):
     yield
     for folder in test_folders:
         delete_path_recursively(folder)
+
+
+@pytest.fixture(scope='module')
+def create_monitored_folders_module(test_folders):
+    """
+    Create the folders that will be monitored and delete them at the end.
+    Args:
+        test_folders(list): List of folders to create and delete
+    """
+    for folder in test_folders:
+        if os.path.exists(folder):
+            delete_path_recursively(folder)
+        os.mkdir(folder)
+    yield
+    for folder in test_folders:
+        delete_path_recursively(folder)
