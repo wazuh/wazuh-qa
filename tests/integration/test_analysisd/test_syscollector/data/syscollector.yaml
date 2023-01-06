@@ -280,7 +280,7 @@
       alert_expected_values:
         rule.id: '100371'
         data: >-
-          {"type":"dbsync_network_address","netinfo":{"addr":{"iface":"enp0s3","proto":"0","address":"192.168.100.12",
+          {"type":"dbsync_network_address","netinfo":{"addr":{"iface":"enp0s3","proto":"ipv4","address":"192.168.100.12",
           "netmask":"255.255.255.0","broadcast":"192.168.100.255"}},"operation_type":"INSERTED"}
     -
       description: Network address modification
@@ -292,7 +292,7 @@
       alert_expected_values:
         rule.id: '100372'
         data: >-
-          {"type":"dbsync_network_address","netinfo":{"addr":{"iface":"enp0s3","proto":"0","address":"192.168.100.12",
+          {"type":"dbsync_network_address","netinfo":{"addr":{"iface":"enp0s3","proto":"ipv4","address":"192.168.100.12",
           "netmask":"255.255.255.0","broadcast":"192.168.100.254"}},"operation_type":"MODIFIED"}
     -
       description: Network address deletion
@@ -304,7 +304,7 @@
       alert_expected_values:
         rule.id: '100373'
         data: >-
-          {"type":"dbsync_network_address","netinfo":{"addr":{"iface":"enp0s3","proto":"0","address":"192.168.100.12",
+          {"type":"dbsync_network_address","netinfo":{"addr":{"iface":"enp0s3","proto":"ipv4","address":"192.168.100.12",
           "netmask":"255.255.255.0","broadcast":"192.168.100.254"}},"operation_type":"DELETED"}
     -
       description: Hotfix creation
