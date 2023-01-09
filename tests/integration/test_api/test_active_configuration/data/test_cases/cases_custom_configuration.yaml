@@ -31,5 +31,13 @@
     email_notification: 'yes'
     jsonout_output: 'yes'
     endpoints:
-      - remote
-      - global
+      - request/remote
+      - request/global
+      - analysis/active_response
+      - analysis/alerts
+      #- analysis/decoders
+      #- analysis/rules
+      - analysis/command
+      #- analysis/labels
+      - analysis/rule_test
+      - analysis/global

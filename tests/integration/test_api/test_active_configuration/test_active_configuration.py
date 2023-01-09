@@ -55,11 +55,11 @@ local_internal_options = {'remoted.shared_reload': '20', 'remoted.request_timeou
 @pytest.mark.tier(level=0)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', t1_configuration_metadata, ids=t1_case_ids)
-def test_default_configuration(metadata, get_api_details):
+def test_default_configuration(metadata, get_api_details, restart_wazuh_daemon):
 
     api_details = get_api_details()
     endpoint = metadata['endpoint']
-    url = f"/manager/configuration/request/{endpoint}"
+    url = f"/manager/configuration/{endpoint}"
     response = make_api_call(endpoint=url, headers=api_details['auth_headers'])
     expected_response = read_yaml(t1_expected_responses_path)
 
@@ -70,7 +70,7 @@ def test_default_configuration(metadata, get_api_details):
 @pytest.mark.tier(level=0)
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 @pytest.mark.parametrize('metadata', t2_configuration_metadata, ids=t2_case_ids)
-def test_default_internal_configuration(metadata, get_api_details):
+def test_default_internal_configuration(metadata, get_api_details, restart_wazuh_daemon):
 
     endpoint = metadata['endpoint']
     api_details = get_api_details()
@@ -89,7 +89,7 @@ def test_custom_configuration(configuration, metadata, load_wazuh_basic_configur
 
     api_details = get_api_details()
     for endpoint in metadata['endpoints']:
-        url = f"/manager/configuration/request/{endpoint}"
+        url = f"/manager/configuration/{endpoint}"
         response = make_api_call(endpoint=url, headers=api_details['auth_headers'])
         expected_response = read_yaml(t3_expected_responses_path)
 

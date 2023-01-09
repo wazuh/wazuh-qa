@@ -33,3 +33,27 @@ request:
     failed_items: []
   message: Active configuration was successfully read
   error: 0
+
+analysis:
+  data:
+    affected_items:
+    - internal:
+        analysisd:
+          debug: 2
+          default_timeframe: 360
+          stats_maxdiff: 999000
+          stats_mindiff: 1250
+          stats_percent_diff: 150
+          fts_list_size: 32
+          fts_min_size_for_str: 14
+          log_fw: 1
+          decoder_order_size: 256
+          label_cache_maxage: 10
+          show_hidden_labels: 1
+          rlimit_nofile: 458752
+          min_rotate_interval: 600
+    total_affected_items: 1
+    total_failed_items: 0
+    failed_items: []
+  message: Active configuration was successfully read
+  error: 0

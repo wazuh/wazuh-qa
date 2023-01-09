@@ -1,5 +1,5 @@
 ---
-remote:
+request/remote:
   data:
     affected_items:
     - remote:
@@ -15,13 +15,117 @@ remote:
   message: Active configuration was successfully read
   error: 0
 
-global:
+request/global:
   data:
     affected_items:
     - global:
         remoted:
           agents_disconnection_alert_time: 0
           agents_disconnection_time: 600
+    total_affected_items: 1
+    total_failed_items: 0
+    failed_items: []
+  message: Active configuration was successfully read
+  error: 0
+
+analysis/active_response:
+  data:
+    affected_items:
+    - active-response: []
+    total_affected_items: 1
+    total_failed_items: 0
+    failed_items: []
+  message: Active configuration was successfully read
+  error: 0
+
+analysis/alerts:
+  data:
+    affected_items:
+    - alerts:
+        email_alert_level: 12
+        log_alert_level: 3
+    total_affected_items: 1
+    total_failed_items: 0
+    failed_items: []
+  message: Active configuration was successfully read
+  error: 0
+
+#analysis/decoders:
+
+#analysis/rules:
+
+analysis/command:
+  data:
+    affected_items:
+    - command:
+      - name: disable-account
+        executable: disable-account
+        timeout_allowed: 1
+      - name: restart-wazuh
+        executable: restart-wazuh
+        timeout_allowed: 0
+      - name: firewall-drop
+        executable: firewall-drop
+        timeout_allowed: 1
+      - name: host-deny
+        executable: host-deny
+        timeout_allowed: 1
+      - name: route-null
+        executable: route-null
+        timeout_allowed: 1
+      - name: win_route-null
+        executable: route-null.exe
+        timeout_allowed: 1
+      - name: netsh
+        executable: netsh.exe
+        timeout_allowed: 1
+    total_affected_items: 1
+    total_failed_items: 0
+    failed_items: []
+  message: Active configuration was successfully read
+  error: 0
+
+#analysis/labels:
+
+analysis/rule_test:
+  data:
+    affected_items:
+    - rule_test:
+        enabled: 'yes'
+        threads: 1
+        max_sessions: 64
+        session_timeout: 900
+    total_affected_items: 1
+    total_failed_items: 0
+    failed_items: []
+  message: Active configuration was successfully read
+  error: 0
+
+analysis/global:
+  data:
+    affected_items:
+    - global:
+        email_notification: 'no'
+        logall: 'no'
+        logall_json: 'no'
+        integrity_checking: 8
+        rootkit_detection: 8
+        host_information: 8
+        prelude_output: 'no'
+        zeromq_output: 'no'
+        jsonout_output: 'yes'
+        alerts_log: 'yes'
+        stats: 8
+        memory_size: 8192
+        white_list:
+        - 127.0.0.1
+        - 10.0.2.3
+        - localhost.localdomain
+        rotate_interval: 0
+        max_output_size: 0
+        eps:
+          maximum: 0
+          timeframe: 10
     total_affected_items: 1
     total_failed_items: 0
     failed_items: []
