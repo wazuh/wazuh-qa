@@ -604,6 +604,58 @@ class MacieDataGenerator(DataGenerator):
         )
 
 
+class TrustedAdvisorDataGenerator(DataGenerator):
+    BASE_PATH = ''
+    BASE_FILE_NAME = f'firehose_trustedadvisor-1-'
+
+    def get_filename(self) -> str:
+        """Return the filename in the Trusted Advisor format.
+
+        Example:
+            <prefix>/<year>/<month>/<day>
+        Returns:
+            str: Synthetic filename.
+        """
+        now = datetime.utcnow()
+        path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
+        name = f"{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}{cons.JSON_EXT}"
+
+        return join(path, name)
+
+    def get_data_sample(self) -> str:
+        """Returns a sample of data according to the Trusted Advisor format.
+
+        Returns:
+            str: Synthetic data.
+        """
+        return json.dumps(
+            {
+                'version': '0',
+                'id': get_random_string(26),
+                'detail-type': 'Trusted Advisor Check Item Refresh Notification',
+                'source': 'aws.trustedadvisor',
+                'account': cons.RANDOM_ACCOUNT_ID,
+                'time': datetime.utcnow().strftime(cons.FILENAME_DATE_FORMAT),
+                'region': 'us-east-1',
+                'resources': [],
+                'detail': {
+                    'check-name': 'IAM Group',
+                    'check-item-detail': {
+                        'Status': 'Green',
+                        'Current Usage': '1',
+                        'Limit Name': 'Groups',
+                        'Region': '-',
+                        'Service': 'IAM',
+                        'Limit Amount': '300'
+                    },
+                    'status': 'OK',
+                    'resource_id': '',
+                    'uuid': str(uuid4())
+                }
+            }
+        )
+
+
 # Maps bucket type with corresponding data generator
 buckets_data_mapping = {
     cons.CLOUD_TRAIL_TYPE: CloudTrailDataGenerator,
@@ -614,6 +666,7 @@ buckets_data_mapping = {
     cons.NLB_TYPE: NLBDataGenerator,
     cons.KMS_TYPE: KMSDataGenerator,
     cons.MACIE_TYPE: MacieDataGenerator,
+    cons.TRUSTED_ADVISOR_TYPE: TrustedAdvisorDataGenerator,
 }
 
 
