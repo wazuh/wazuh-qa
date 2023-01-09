@@ -623,7 +623,7 @@ class TrustedAdvisorDataGenerator(DataGenerator):
         return join(path, name)
 
     def get_data_sample(self) -> str:
-        """Returns a sample of data according to the Trusted Advisor format.
+        """Return a sample of data according to the Trusted Advisor format.
 
         Returns:
             str: Synthetic data.
