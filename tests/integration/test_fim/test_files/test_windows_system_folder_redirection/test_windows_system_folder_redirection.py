@@ -8,9 +8,9 @@ copyright: Copyright (C) 2015-2023, Wazuh Inc.
 type: integration
 
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these files are
-       modified. Specifically, these tests will check that FIM is able to monitor Windows system folders. FIM can
-       redirect %WINDIR%/Sysnative monitoring toward System32 folder, so the tests also check that when monitoring
-       Sysnative the path is converted to system32 and events are generated there properly.
+       added, modified or deleted. Specifically, these tests will check that FIM is able to monitor Windows system
+       folders. FIM can redirect %WINDIR%/Sysnative monitoring toward System32 folder, so the tests also check that
+       when monitoring Sysnative the path is converted to system32 and events are generated there properly.
 
 components:
     - fim
@@ -36,6 +36,7 @@ references:
 
 pytest_args:
     - fim_mode:
+        scheduled: File monitoring is done after every configured interval elapses.
         realtime: Enable real-time monitoring on Linux (using the 'inotify' system calls) and Windows systems.
         whodata: Implies real-time monitoring but adding the 'who-data' information.
     - tier:
@@ -86,9 +87,9 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 # tests
 @pytest.mark.parametrize('test_folders', [test_folders], ids='', scope='module')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
-def test_windows_folder_redirection(configuration, metadata, test_folders, set_wazuh_configuration,
-                                    create_monitored_folders_module, configure_local_internal_options_function,
-                                    restart_syscheck_function, wait_fim_start_function):
+def test_windows_system_monitoring(configuration, metadata, test_folders, set_wazuh_configuration,
+                                   create_monitored_folders_module, configure_local_internal_options_function,
+                                   restart_syscheck_function, wait_fim_start_function):
     '''
     description: Check if the 'wazuh-syscheckd' monitors the windows system folders (System32 and SysWOW64) properly,
     and that monitoring for Sysnative folder is redirected to System32 and works properly.
@@ -104,9 +105,15 @@ def test_windows_folder_redirection(configuration, metadata, test_folders, set_w
         - metadata:
             type: dict
             brief: Test case data.
+        - test_folders:
+            type: dict
+            brief: List of folders to be created for monitoring.
         - set_wazuh_configuration:
             type: fixture
             brief: Set ossec.conf configuration.
+        - create_monitored_folders_module:
+            type: fixture
+            brief: Create a given list of folders when the module starts. Delete the folders at the end of the module.
         - configure_local_internal_options_function:
             type: fixture
             brief: Set local_internal_options.conf file.
