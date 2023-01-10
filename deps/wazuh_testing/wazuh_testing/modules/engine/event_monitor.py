@@ -21,7 +21,7 @@ def make_engine_callback(pattern, prefix=engine.ENGINE_PREFIX):
         lambda: function that returns if there's a match in the file
 
     Examples:
-        >>> callback_api_connection = make_vuln_callback("Engine API endpoint: ... [{API_SOCKET_PATH}]")
+        >>> callback_api_connection = make_engine_callback("Engine API endpoint: ... [{API_SOCKET_PATH}]")
     """
     pattern = r'\s+'.join(pattern.split())
     regex = re.compile(r'{}{}'.format(prefix, pattern))
@@ -35,17 +35,18 @@ def check_engine_event_output(file_monitor=None, event='', error_message=None, u
     """Check if a vulnerability event occurs
 
     Args:
-        file_monitor (FileMonitor): FileMonitor object to monitor the file content.
+        file_monitor (FileMonitor): FileMonitor object to monitor the file content
         event (str): event to check within the engine alerts
         error_message (str): error message to show in case of expected event does not occur
         update_position (boolean): filter configuration parameter to search in Wazuh log
         timeout (str): timeout to check the engine alerts
         prefix (str): event pattern regex
-        accum_results (int): Accumulation of matches.
+        accum_results (int): Accumulation of matches
+        file_to_monitor (str): File where the events are placed
     """
     file_monitor = FileMonitor(file_to_monitor) if file_monitor is None else file_monitor
     error_message = f"Could not find this event in {file_to_monitor}: {event}" if error_message is None else \
-        error_message
+                    error_message
 
     file_monitor.start(timeout=timeout, update_position=update_position, accum_results=accum_results,
                        callback=make_engine_callback(event, prefix), error_message=error_message)

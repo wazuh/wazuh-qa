@@ -61,7 +61,7 @@
     events:
       - 'Feb  8 04:00:48 198.51.100.2 585917: Feb  8 04:00:47.272: %SEC-6-IPACCESSLOGRP: list 177 denied igmp 198.51.100.197 -> 224.0.0.22, 1 packet'
     engine_outputs:
-      - '{"wazuh":{"queue":49,"origin":"location"},"event":{"original":"Feb  8 04:00:48 198.51.100.2 585917: Feb  8 04:00:47.272: %SEC-6-IPACCESSLOGRP: list 177 denied igmp 198.51.100.197 -> 224.0.0.22, 1 packet","start":"2022-02-08T04:00:48.000Z","kind":"event"},"message":"Feb  8 04:00:47.272: %SEC-6-IPACCESSLOGRP: list 177 denied igmp 198.51.100.197 -> 224.0.0.22, 1 packet","~":" ","process":{"name":"585917"},"host":{"hostname":"198.51.100.2"},"related":{"hosts":\["198.51.100.2"]}}'
+      - '{"wazuh":{"queue":49,"origin":"location"},"event":{"original":"Feb  8 04:00:48 198.51.100.2 585917: Feb  8 04:00:47.272: %SEC-6-IPACCESSLOGRP: list 177 denied igmp 198.51.100.197 -> 224.0.0.22, 1 packet","start":"2023-02-08T04:00:48.000Z","kind":"event"},"host":{"hostname":"198.51.100.2"},"process":{"name":"585917"},"message":"Feb  8 04:00:47.272: %SEC-6-IPACCESSLOGRP: list 177 denied igmp 198.51.100.197 -> 224.0.0.22, 1 packet","related":{"hosts":\["198.51.100.2"]}}'
 
 - name: JSON logs
   description: Verify that the engine accepts JSON sample logs

@@ -55,14 +55,14 @@ t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_c
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('events_data', t1_configuration_metadata, ids=t1_case_ids)
-def test_engine_events(events_data, truncate_engine_files, restart_engine_function):
+def test_receiving_events_socket(events_data, truncate_engine_files, restart_engine_function):
     '''
-    description: Check that every event sent is correctly
+    description: Check that every event sent through the engine's queue socket is correctly received and stored in the expected log files.
 
     test_phases:
         - Clean the log and alert files
-        - Restart the wazuh-engine.
-        - Send each case's log
+        - Restart the wazuh-engine
+        - Send each case's log through the queue socket
         - Verify that each case's log has been received
 
     wazuh_min_version: 5.0.0
@@ -87,10 +87,10 @@ def test_engine_events(events_data, truncate_engine_files, restart_engine_functi
         - The `cases_engine_events.yaml` file provides the module configuration for this test.
 
     expected_output:
-        - Every item within the metadata.engine_outputs object
+        - Every item within the metadata.engine_outputs object should be placed within the expected log files
     '''
     # Send the messages
-    engine.send_events_to_engine_dgram(events_data['events'])
+    engine.send_events_to_engine_dgram(events=events_data['events'])
 
     # Verify that sent messages appear within the alerts
     for expected_output in events_data['engine_outputs']:

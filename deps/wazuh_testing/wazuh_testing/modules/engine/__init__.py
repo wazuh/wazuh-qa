@@ -19,7 +19,7 @@ QUEUE = '1'
 LOCATION = 'location'
 
 
-def send_events_to_engine_dgram(events):
+def send_events_to_engine_dgram(queue=QUEUE, location=LOCATION, events=[]):
     """Send events to the engine events' socket.
 
     The messages must follow the following format: queue:location_str:msg
@@ -27,14 +27,16 @@ def send_events_to_engine_dgram(events):
     The socket's protocol is unixgram, so we just need to send the events after formatting and encoding them.
 
     Args:
-        events (list): Events that will be sent to the socket.
+        queue(str): queue string that is used to create the message that will be sent to the socket
+        location(str): location string that is used to create the message that will be sent to the socket
+        events (list): Events that will be sent to the socket
     """
     # Create a unixgram socket instance
     events_socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
 
     for event in events:
         # Build the message with the expected format: {queue:location_str:msg}
-        msg_formatted = (QUEUE + ':' + LOCATION + ':' + event).encode('utf8')
+        msg_formatted = (queue + ':' + location + ':' + event).encode('utf8')
 
         # Send the encoded message to the engine's events socket
         events_socket.sendto(msg_formatted, ENGINE_QUEUE_SOCKET_PATH)

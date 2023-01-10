@@ -9,7 +9,7 @@ from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.modules import engine
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def restart_engine_function():
     """Start the wazuh-engine daemon before running a test, and stop it when finished."""
     control_service('restart', daemon=engine.MODULE_NAME)
@@ -19,7 +19,7 @@ def restart_engine_function():
     control_service('stop', daemon=engine.MODULE_NAME)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def truncate_engine_files():
     """Truncate all the log files and json alerts files before and after the test execution."""
     log_files = [engine.ENGINE_ALERTS_PATH, engine.ENGINE_LOG_PATH]
