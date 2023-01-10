@@ -1,7 +1,7 @@
 """Utils to generate sample data to AWS"""
 from datetime import datetime
+from os.path import join
 from uuid import uuid4
-from typing import Optional
 
 from . import constants as cons
 
@@ -28,8 +28,8 @@ class DataGenerator:
 
 
 class CloudTrailDataGenerator(DataGenerator):
-    BASE_PATH = f'{cons.AWS_LOGS}/{cons.RANDOM_ACCOUNT_ID}/{cons.CLOUD_TRAIL}/{cons.US_EAST_1_REGION}/'
-    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.CLOUD_TRAIL}_{cons.US_EAST_1_REGION}_'
+    BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.CLOUDTRAIL, cons.US_EAST_1_REGION)
+    BASE_FILE_NAME = f"{cons.RANDOM_ACCOUNT_ID}_{cons.CLOUDTRAIL}_{cons.US_EAST_1_REGION}_"
 
     def get_filename(self, *args, **kwargs) -> str:
         """Return the filename in the cloudtrail format.
@@ -41,10 +41,10 @@ class CloudTrailDataGenerator(DataGenerator):
             str: Syntetic filename.
         """
         now = datetime.now()
-        path = f"{self.BASE_PATH}{now.strftime(cons.PATH_DATE_FORMAT)}/"
+        path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = f"{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}{cons.JSON_EXT}"
 
-        return f'{path}{name}'
+        return join(path, name)
 
     def get_data_sample(self) -> dict:
         """Returns a sample of data according to the cloudtrail format.

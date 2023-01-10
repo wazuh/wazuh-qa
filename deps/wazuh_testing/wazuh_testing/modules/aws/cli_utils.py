@@ -4,9 +4,9 @@ from typing import Callable
 
 from wazuh_testing import logger
 
-from .constants import AWS_WODLE_PATH
+from .constants import AWS_MODULE_PATH
 
-AWS_MODULE_PATH = Path(AWS_WODLE_PATH, "aws-s3")
+AWS_BINARY_PATH = Path(AWS_MODULE_PATH, "aws-s3")
 
 
 class OutputAnalysisError(Exception):
@@ -19,7 +19,7 @@ def call_aws_module(*parameters) -> str:
     Returns:
         str: The command output.
     """
-    command = [AWS_MODULE_PATH, *parameters]
+    command = [AWS_BINARY_PATH, *parameters]
     logger.debug("Calling AWS module with: '%s'", command)
     command_result = subprocess.run(command, capture_output=True)
 
@@ -54,9 +54,6 @@ def analyze_command_output(
 
         if item is not None:
             results.append(item)
-
-        if len(results) == expected_results:
-            break
 
     results_len = len(results)
 
