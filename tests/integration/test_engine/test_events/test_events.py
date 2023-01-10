@@ -89,7 +89,7 @@ def test_receiving_events_socket(events_data, truncate_engine_files, restart_eng
     expected_output:
         - Every item within the metadata.engine_outputs object should be placed within the expected log files
     '''
-    # Send the messages
+    # Send the messages through the queue socket to the engine
     engine.send_events_to_engine_dgram(events=events_data['events'])
 
     # Verify that sent messages appear within the alerts
