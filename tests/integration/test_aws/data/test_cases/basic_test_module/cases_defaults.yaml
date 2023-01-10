@@ -78,3 +78,12 @@
   metadata:
     bucket_type: custom
     bucket_name: wazuh-trusted-advisor-integration-tests
+
+- name: guardduty_defaults
+  description: GuardDuty default configurations
+  configuration_parameters:
+    BUCKET_TYPE: guardduty
+    BUCKET_NAME: wazuh-guardduty-integration-tests
+  metadata:
+    bucket_type: guardduty
+    bucket_name: wazuh-guardduty-integration-tests
