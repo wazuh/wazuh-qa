@@ -80,7 +80,8 @@ class HostManager:
             testinfra.modules.base.Ansible: Host instance from hostspec
         """
         inventory_manager_host = self.inventory_manager.get_host(host)
-        return self.variable_manager.get_vars(host=inventory_manager_host)
+
+        return self.hosts_variables[inventory_manager_host]
 
     def collect_host_ansible_facts(self, host):
         """Get the ansible facts of the specified host.
@@ -103,7 +104,8 @@ class HostManager:
         Returns:
             str: OS of the host
         """
-        ansible_facts = self.get_host_ansible_facts(host)
+        ansible_facts = self.collect_host_ansible_facts(host)
+
         return (ansible_facts['ansible_facts']['ansible_distribution'],
                 ansible_facts['ansible_facts']['ansible_distribution_major_version'],
                 ansible_facts['ansible_facts']['ansible_distribution_version'])
@@ -117,7 +119,8 @@ class HostManager:
         Returns:
             dict: IPs of the host (ipv4 and ipv6)
         """
-        ansible_facts = self.get_host_ansible_facts(host)
+        ansible_facts = self.collect_host_ansible_facts(host)
+
         return {'ipv4': ansible_facts['ansible_facts']['ansible_all_ipv4_addresses'],
                 'ipv6': ansible_facts['ansible_facts']['ansible_all_ipv6_addresses']}
 
@@ -130,7 +133,8 @@ class HostManager:
         Returns:
             dict: Interfaces of the host
         """
-        ansible_facts = self.get_host_ansible_facts(host)
+        ansible_facts = self.collect_host_ansible_facts(host)
+
         return ansible_facts['ansible_facts']['ansible_interfaces']
 
     def check_connection(self, host, windows=False):
