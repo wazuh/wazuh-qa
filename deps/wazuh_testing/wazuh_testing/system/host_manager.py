@@ -15,14 +15,17 @@ class HostManager:
     """Remote host management interface.
 
     It allows to manage remote hosts using ansible inventory and testinfra framework.
+
+    Args:
+        inventory_path (str): Ansible inventory path
+
+    Attributes:
+        inventory_path (str): Ansible inventory path
+        inventory_manager (ansible.inventory.manager.InventoryManager): Ansible inventory manager
+        variable_manager (ansible.vars.manager.VariableManager): Ansible variable manager
     """
 
     def __init__(self, inventory_path):
-        """Constructor of host manager class.
-
-        Args:
-            inventory_path (str): Ansible inventory path
-        """
         self.inventory_path = inventory_path
 
         data_loader = DataLoader()
