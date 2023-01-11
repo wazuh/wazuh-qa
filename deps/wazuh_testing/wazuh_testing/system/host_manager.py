@@ -93,6 +93,7 @@ class HostManager:
             str: OS of the host
         """
         testinfra_host = self.get_host(host)
+
         return testinfra_host.ansible("setup")
 
     def collect_host_os(self, host):
@@ -235,8 +236,8 @@ class HostManager:
 
             for file in filesystem['files']:
                 file_path = f"{directory_path}/{file['filename']}"
-                with open(file_path, 'w') as f:
-                    f.write(file['content'])
+                with open(file_path, 'w') as file_operator:
+                    file_operator.write(file['content'])
 
         result = testinfra_host.ansible(ansible_command, f"src={src_path} dest={dest_path}", check=False, become=become)
 
@@ -363,7 +364,7 @@ class HostManager:
         ansible_parameters += f" owner={owner}" if owner else ''
         ansible_parameters += f" group={group}" if group else ''
         ansible_parameters += f" mode={mode}" if mode else ''
-        ansible_parameters += f" state=directory" if directory else ''
+        ansible_parameters += f' state=directory' if directory else ''
 
         result = testinfra_host.ansible(ansible_command, ansible_parameters, check=False, become=become)
 
