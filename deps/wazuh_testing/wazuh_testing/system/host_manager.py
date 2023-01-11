@@ -68,7 +68,7 @@ class HostManager:
         return self.inventory_manager.get_hosts(pattern=pattern) if pattern else self.inventory_manager.get_hosts()
 
     def get_host_variables(self, host):
-        """Get the Ansible object for communicating with the specified host.
+        """Get the variables of the specified host.
 
         Args:
             host (str): Hostname
