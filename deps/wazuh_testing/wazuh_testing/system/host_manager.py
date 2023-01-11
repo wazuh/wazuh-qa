@@ -65,7 +65,10 @@ class HostManager:
         Returns:
             list: List of hosts
         """
-        return self.inventory_manager.get_hosts(pattern=pattern) if pattern else self.inventory_manager.get_hosts()
+        if pattern:
+            return [str(host) for host in self.inventory_manager.get_hosts(pattern=pattern)]
+        else:
+            return [str(host) for host in self.inventory_manager.get_hosts()]
 
     def get_host_variables(self, host):
         """Get the variables of the specified host.
