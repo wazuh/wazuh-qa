@@ -48,3 +48,4 @@ deepdiff==5.6.0; platform_system == "Linux" or platform_system=='Windows'
 libcst==0.3.23 ; python_version <= '3.6'
 treelib==1.6.1
 prettytable; platform_system == "Linux"
+boto3==1.26.11

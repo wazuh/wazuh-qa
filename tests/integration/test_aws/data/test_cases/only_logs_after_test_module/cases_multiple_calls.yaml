@@ -1,0 +1,6 @@
+- name: cloudtrail_only_logs_after_multiple_calls
+  description: CloudTrail only_logs_after multiple calls configurations
+  configuration_parameters:
+  metadata:
+    bucket_type: cloudtrail
+    bucket_name: wazuh-cloudtrail-integration-tests
