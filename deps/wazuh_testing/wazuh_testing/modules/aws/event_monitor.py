@@ -25,7 +25,7 @@ def make_aws_callback(pattern, prefix=''):
 
 
 def callback_detect_aws_module_called(parameters: list) -> Callable:
-    """Detects if aws module was called with correct parameters.
+    """Detect if aws module was called with correct parameters.
 
     Args:
         parameters (list): Values to check.
