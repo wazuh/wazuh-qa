@@ -175,7 +175,7 @@ class HostManager:
         ansible_command = 'copy' if not windows else 'win_copy'
         remote_source = 'yes' if remote_src else 'no'
 
-        command_parameters = f"src={src_path} dest={dest_path} remote_src={remote_src}"
+        command_parameters = f"src={src_path} dest={dest_path} remote_src={remote_source}"
         result = testinfra_host.ansible(ansible_command, command_parameters, check=False, become=become)
 
         if result.get('msg', None) and not ignore_errors:
