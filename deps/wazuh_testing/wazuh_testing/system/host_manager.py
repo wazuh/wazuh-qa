@@ -42,6 +42,7 @@ class HostManager:
 
         Args:
             host (str): Hostname
+
         Returns:
             testinfra.modules.base.Ansible: Host instance from hostspec
         """
@@ -60,6 +61,7 @@ class HostManager:
 
         Args:
             group (str): Group name
+
         Returns:
             list: List of hosts
         """
@@ -70,6 +72,7 @@ class HostManager:
 
         Args:
             host (str): Hostname
+
         Returns:
             testinfra.modules.base.Ansible: Host instance from hostspec
         """
@@ -81,6 +84,7 @@ class HostManager:
 
         Args:
             host (str): Hostname
+
         Returns:
             str: OS of the host
         """
@@ -92,6 +96,7 @@ class HostManager:
 
         Args:
             host (str): Hostname
+
         Returns:
             str: OS of the host
         """
@@ -105,6 +110,7 @@ class HostManager:
 
         Args:
             host (str): Hostname
+
         Returns:
             dict: IPs of the host (ipv4 and ipv6)
         """
@@ -117,6 +123,7 @@ class HostManager:
 
         Args:
             host (str): Hostname
+
         Returns:
             dict: Interfaces of the host
         """
@@ -129,6 +136,7 @@ class HostManager:
         Args:
             host (str): Hostname
             windows (bool): Use windows command
+
         Returns:
             bool: True if the host is reachable, False otherwise
         """
@@ -148,8 +156,10 @@ class HostManager:
             become (bool): Use sudo
             windows (bool): Use windows command
             ignore_errors (bool): Ignore errors
+
         Returns:
             dict: Result of the command execution
+
         Raises:
             Exception: If the command execution fails
         """
@@ -173,8 +183,10 @@ class HostManager:
             path (str): File path
             become (bool): Use sudo
             ignore_errors (bool): Ignore errors
+
         Returns:
             str: File content
+
         Raises:
             Exception: If the file cannot be read
         """
@@ -236,8 +248,10 @@ class HostManager:
             windows (bool, optional): Windows command. Defaults to False.
             become (bool, optional): Use sudo. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
+
         Returns:
             dict: Command result
+
         Raises:
             Exception: If the file cannot be truncated
         """
@@ -265,8 +279,10 @@ class HostManager:
             windows (bool, optional): Windows command. Defaults to False.
             become (bool, optional): Use sudo. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
+
         Returns:
             dict: Command result
+
         Raises:
             Exception: If the file cannot be removed
         """
@@ -290,8 +306,10 @@ class HostManager:
             become (bool, optional): Use sudo. Defaults to False.
             windows (bool, optional): Windows command. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
+
         Returns:
             dict: Command result
+
         Raises:
             Exception: If the file cannot be modified
         """
@@ -320,8 +338,10 @@ class HostManager:
             become (bool, optional): Use sudo. Defaults to False.
             windows (bool, optional): Windows command. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
+
         Returns:
             dict: Command result
+
         Raises:
             Exception: If the file cannot be created
         """
@@ -354,8 +374,10 @@ class HostManager:
                 become (bool, optional): Use sudo. Defaults to False.
                 windows (bool, optional): Windows command. Defaults to False.
                 ignore_errors (bool, optional): Ignore errors. Defaults to False.
+
             Returns:
                 dict: Command result
+
             Raises:
                 Exception: If the service cannot be controlled
         """
@@ -378,8 +400,10 @@ class HostManager:
             become (bool, optional): Use sudo. Defaults to False.
             windows (bool, optional): Windows command. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
+
         Returns:
             dict: Command result
+
         Raises:
             Exception: If the command cannot be run
         """
@@ -404,8 +428,10 @@ class HostManager:
             become (bool, optional): Use sudo. Defaults to False.
             windows (bool, optional): Windows command. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
+
         Returns:
             dict: Command result
+
         Raises:
             Exception: If the command cannot be run
         """
@@ -437,8 +463,10 @@ class HostManager:
             become (bool, optional): Use sudo. Defaults to False.
             windows (bool, optional): Windows command. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
+
         Returns:
             Files (list): List of found files.
+
         Raises:
             Exception: If the command cannot be run
         """
@@ -464,8 +492,10 @@ class HostManager:
             become (bool, optional): Use sudo. Defaults to False.
             windows (bool, optional): Windows command. Defaults to False.
             ignore_errors (bool, optional): Ignore errors. Defaults to False.
+
         Returns:
             dict: Command result.
+
         Raises:
             Exception: If the command cannot be run.
         """
