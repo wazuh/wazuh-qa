@@ -449,7 +449,7 @@ class HostManager:
 
         ansible_command = 'shell' if not windows else 'win_shell'
 
-        result = testinfra_host.ansible(ansible_command, f"{cmd}", check=False, become=False)
+        result = testinfra_host.ansible(ansible_command, f"{cmd}", check=False, become=become)
 
         rc, stdout = result['rc'], result['stdout']
 
