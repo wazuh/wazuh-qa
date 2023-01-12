@@ -164,7 +164,7 @@ class ConfigDataGenerator(DataGenerator):
         <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/Config/<region>/<year>/<month>/<day>
         """
         now = datetime.now()
-        path = f"{self.BASE_PATH}{now.strftime(cons.PATH_DATE_FORMAT)}/"
+        path = f"{self.BASE_PATH}{now.strftime(cons.PATH_DATE_NO_PADED_FORMAT)}/"
         name = f"{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}{cons.JSON_EXT}"
 
         return f'{path}{name}'
