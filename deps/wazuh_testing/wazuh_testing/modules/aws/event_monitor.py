@@ -63,6 +63,11 @@ def callback_detect_event_processed(line):
         return line
 
 
+def callback_detect_event_processed_or_skipped(pattern):
+    pattern_regex = re.compile(pattern)
+    return lambda line: pattern_regex.match(line) or callback_detect_event_processed(line)
+
+
 def callback_event_sent_to_analysisd(line):
     if line.startswith(AWS_EVENT_HEADER):
         return line
