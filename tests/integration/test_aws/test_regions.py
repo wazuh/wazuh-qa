@@ -38,7 +38,6 @@ configurations = load_configuration_template(
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
-@pytest.mark.xfail(reason="Using regions param in vpcflow, the module freeze when is setted an inexistent region")
 def test_regions(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_s3_cloudtrail_db,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor

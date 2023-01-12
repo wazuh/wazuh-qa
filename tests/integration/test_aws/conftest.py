@@ -80,10 +80,10 @@ def delete_file_from_s3(metadata: dict):
     yield
 
     bucket_name = metadata['bucket_name']
-    filename = metadata['filename']
-
-    delete_file(filename=filename, bucket_name=bucket_name)
-    logger.debug('Deleted file: %s from bucket %s', filename, bucket_name)
+    filename = metadata.get('filename')
+    if filename is not None:
+        delete_file(filename=filename, bucket_name=bucket_name)
+        logger.debug('Deleted file: %s from bucket %s', filename, bucket_name)
 
 # DB fixtures
 
