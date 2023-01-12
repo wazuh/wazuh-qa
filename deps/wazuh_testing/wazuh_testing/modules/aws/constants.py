@@ -14,7 +14,7 @@ CONFIG = 'Config'
 
 EVENT_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 PATH_DATE_FORMAT = '%Y/%m/%d'
-PATH_DATE_NO_PADED_FORMAT = '%Y/%-m/%d'
+PATH_DATE_NO_PADED_FORMAT = '%Y/%-m/%-d'
 FILENAME_DATE_FORMAT = '%Y%m%dT%H%MZ'
 
 US_EAST_1_REGION = 'us-east-1'

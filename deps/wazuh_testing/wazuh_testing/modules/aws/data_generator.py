@@ -156,20 +156,30 @@ class VPCDataGenerator(DataGenerator):
 
 
 class ConfigDataGenerator(DataGenerator):
-    BASE_PATH = f'{cons.AWS_LOGS}/{cons.RANDOM_ACCOUNT_ID}/{cons.CONFIG}/{cons.US_EAST_1_REGION}/'
-    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.CONFIG}_{cons.US_EAST_1_REGION}_ConfigHistory_AWS_'
+    BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.CONFIG, cons.US_EAST_1_REGION)
+    BASE_FILE_NAME = f"{cons.RANDOM_ACCOUNT_ID}_{cons.CONFIG}_{cons.US_EAST_1_REGION}_ConfigHistory_AWS_"
 
     def get_filename(self, prefix=None, **kwargs) -> str:
-        """Return the filename in the cloudtrail format
-        <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/Config/<region>/<year>/<month>/<day>
+        """Return the filename in the Config format.
+
+        Example:
+            <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/Config/<region>/<year>/<month>/<day>
+
+        Returns:
+            str: Syntetic filename.
         """
         now = datetime.now()
-        path = f"{self.BASE_PATH}{now.strftime(cons.PATH_DATE_NO_PADED_FORMAT)}/"
+        path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_NO_PADED_FORMAT))
         name = f"{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}{cons.JSON_EXT}"
 
-        return f'{path}{name}'
+        return join(path, name)
 
     def get_data_sample(self) -> str:
+        """Return a sample of data according to the Config format.
+
+        Returns:
+            str: Syntetic data.
+        """
         return json.dumps({
             'fileVersion': '1.0',
             'configurationItems': [
