@@ -39,7 +39,7 @@
       elements:
         - disabled:
             value: 'yes'
-    - section: rootcheck
+    - section: sca
       elements:
-        - disabled:
-            value: 'yes'
+        - enabled:
+            value: 'no'
