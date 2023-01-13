@@ -119,6 +119,7 @@ def create_multiple_files(get_configuration):
         logger.info(ERR_MSG_MULTIPLE_FILES_CREATION)
 
 
+@pytest.mark.skip("This test is affected by Issue #15844, when it is fixed it should be enabled again.")
 def test_max_eps(configure_local_internal_options_module, get_configuration, configure_environment, restart_wazuh):
     '''
     description: Check if the 'wazuh-syscheckd' daemon applies the limit set in the 'max_eps' tag when
