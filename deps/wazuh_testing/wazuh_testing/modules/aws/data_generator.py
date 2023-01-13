@@ -59,7 +59,7 @@ class CloudTrailDataGenerator(DataGenerator):
         """Return a sample of data according to the cloudtrail format.
 
         Returns:
-            ste: Syntetic data.
+            str: Syntetic data.
         """
         return json.dumps({
             'Records': [
@@ -107,23 +107,33 @@ class CloudTrailDataGenerator(DataGenerator):
 
 
 class VPCDataGenerator(DataGenerator):
-    BASE_PATH = f'{cons.AWS_LOGS}/{cons.RANDOM_ACCOUNT_ID}/{cons.VPC_FLOW_LOGS}/{cons.US_EAST_1_REGION}/'
+    BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.VPC_FLOW_LOGS, cons.US_EAST_1_REGION)
     BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.VPC_FLOW_LOGS}_{cons.US_EAST_1_REGION}_'
 
-    def get_filename(self, prefix=None, **kwargs) -> str:
-        """Return the filename in the cloudtrail format
-        <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/vpcflowlogs/<region>/<year>/<month>/<day>
+    def get_filename(self) -> str:
+        """Return the filename in the VPC format.
+
+        Example:
+            <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/vpcflowlogs/<region>/<year>/<month>/<day>
+
+        Returns:
+            str: Syntetic filename.
         """
         now = datetime.now()
-        path = f'{self.BASE_PATH}{now.strftime(cons.PATH_DATE_FORMAT)}/'
+        path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = (
             f'{self.BASE_FILE_NAME}{cons.FLOW_LOG_ID}_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}'
             f'{cons.LOG_EXT}'
         )
 
-        return f'{path}{name}'
+        return join(path, name)
 
     def get_data_sample(self) -> str:
+        """Return a sample of data according to the VPC format.
+
+        Returns:
+            str: Syntetic data.
+        """
         data = [
             [
                 "version", "account-id", "interface-id", "srcaddr", "dstaddr", "srcport", "dstport", "protocol",
