@@ -35,6 +35,12 @@ def analysisd_monitor() -> Generator:
     control_service('start', daemon='wazuh-analysisd')
 
 
+@pytest.fixture(scope='function')
+def mark_cases_as_skipped(metadata: dict) -> None:
+    if metadata['name'] in ['alb_remove_from_bucket', 'clb_remove_from_bucket', 'nlb_remove_from_bucket']:
+        pytest.skip(reason='ALB, CLB and NLB integrations are removing older logs from other region')
+
+
 # S3 fixtures
 
 @pytest.fixture(scope='function')
