@@ -49,7 +49,8 @@ t4_expected_responses_path = os.path.join(EXPECTED_RESPONSES_PATH, 'expected_res
 # Custom internal configuration test configurations (t4)
 t4_configuration_parameters, t4_configuration_metadata, t4_case_ids = get_test_cases_data(t4_cases_path)
 
-local_internal_options = {'remoted.shared_reload': '20', 'remoted.request_timeout': '30'}
+local_internal_options = {'remoted.shared_reload': '20', 'remoted.request_timeout': '30',
+                          'wazuh_db.commit_time_max': '30', 'wazuh_db.worker_pool_size': '16'}
 
 
 @pytest.mark.tier(level=0)

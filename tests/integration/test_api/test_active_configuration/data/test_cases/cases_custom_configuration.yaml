@@ -41,3 +41,4 @@
       #- analysis/labels
       - analysis/rule_test
       - analysis/global
+      - wazuh-db/wdb

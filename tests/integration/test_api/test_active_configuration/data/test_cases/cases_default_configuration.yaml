@@ -58,3 +58,9 @@
   configuration_parameters: null
   metadata:
     endpoint: analysis/global
+
+- name: wdb_endpoint
+  description: wdb endpoint
+  configuration_parameters: null
+  metadata:
+    endpoint: wazuh-db/wdb

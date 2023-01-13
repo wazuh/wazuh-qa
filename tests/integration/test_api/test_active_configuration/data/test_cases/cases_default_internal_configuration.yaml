@@ -11,3 +11,10 @@
     ENDPOINT: analysis
   metadata:
     endpoint: analysis
+
+- name: wazuh-db_endpoint
+  description: wazuh-db internal configuration endpoint
+  configuration_parameters:
+    ENDPOINT: wazuh-db
+  metadata:
+    endpoint: wazuh-db

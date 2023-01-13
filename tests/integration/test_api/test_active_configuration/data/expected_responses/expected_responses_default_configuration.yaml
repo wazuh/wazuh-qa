@@ -131,3 +131,18 @@ analysis/global:
     failed_items: []
   message: Active configuration was successfully read
   error: 0
+
+wazuh-db/wdb:
+  data:
+    affected_items:
+    - wdb:
+        backup:
+        - database: global
+          enabled: true
+          interval: 86400
+          max_files: 3
+    total_affected_items: 1
+    total_failed_items: 0
+    failed_items: []
+  message: Active configuration was successfully read
+  error: 0
