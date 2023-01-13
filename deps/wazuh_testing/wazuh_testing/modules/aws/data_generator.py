@@ -227,9 +227,14 @@ class ALBDataGenerator(DataGenerator):
     BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTICLOADBALANCING, cons.US_EAST_1_REGION)
     BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTICLOADBALANCING}_{cons.US_EAST_1_REGION}_'
 
-    def get_filename(self, prefix=None, **kwargs) -> str:
-        """Return the filename in the ALB format
-        <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
+    def get_filename(self) -> str:
+        """Return the filename in the ALB format.
+
+        Example:
+            <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
+
+        Returns:
+            str: Syntetic filename.
         """
         now = datetime.now()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
@@ -241,6 +246,11 @@ class ALBDataGenerator(DataGenerator):
         return join(path, name)
 
     def get_data_sample(self) -> str:
+        """Return a sample of data according to the ALB format.
+
+        Returns:
+            str: Syntetic data.
+        """
         now = datetime.now()
         data = []
 
@@ -290,8 +300,13 @@ class CLBDataGenerator(DataGenerator):
     BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTICLOADBALANCING}_{cons.US_EAST_1_REGION}_'
 
     def get_filename(self, prefix=None, **kwargs) -> str:
-        """Return the filename in the CLB format
-        <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
+        """Return the filename in the CLB format.
+
+        Example:
+            <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
+
+        Returns:
+            str: Syntetic filename.
         """
         now = datetime.now()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
@@ -303,6 +318,11 @@ class CLBDataGenerator(DataGenerator):
         return join(path, name)
 
     def get_data_sample(self) -> str:
+        """Return a sample of data according to the CLB format.
+
+        Returns:
+            str: Syntetic data.
+        """
         now = datetime.now()
         data = []
         for _ in range(5):
@@ -336,8 +356,13 @@ class NLBDataGenerator(DataGenerator):
     BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTICLOADBALANCING}_{cons.US_EAST_1_REGION}_'
 
     def get_filename(self, prefix=None, **kwargs) -> str:
-        """Return the filename in the CLB format
-        <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
+        """Return the filename in the NLB format.
+
+        Example:
+            <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
+
+        Returns:
+            str: Syntetic filename.
         """
         now = datetime.now()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
@@ -349,6 +374,11 @@ class NLBDataGenerator(DataGenerator):
         return join(path, name)
 
     def get_data_sample(self) -> str:
+        """Return a sample of data according to the NLB format.
+
+        Returns:
+            str: Syntetic data.
+        """
         now = datetime.now()
         data = []
         for _ in range(5):
