@@ -224,7 +224,7 @@ class ConfigDataGenerator(DataGenerator):
 
 
 class ALBDataGenerator(DataGenerator):
-    BASE_PATH = f'{cons.AWS_LOGS}/{cons.RANDOM_ACCOUNT_ID}/{cons.ELASTICLOADBALANCING}/{cons.US_EAST_1_REGION}/'
+    BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTICLOADBALANCING, cons.US_EAST_1_REGION)
     BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTICLOADBALANCING}_{cons.US_EAST_1_REGION}_'
 
     def get_filename(self, prefix=None, **kwargs) -> str:
@@ -232,13 +232,13 @@ class ALBDataGenerator(DataGenerator):
         <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
         """
         now = datetime.now()
-        path = f'{self.BASE_PATH}{now.strftime(cons.PATH_DATE_FORMAT)}/'
+        path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = (
             f'{self.BASE_FILE_NAME}_app.ALB-qatests_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}_'
             f'{get_random_ip()}_pczeay_{cons.LOG_EXT}'
         )
 
-        return f'{path}{name}'
+        return join(path, name)
 
     def get_data_sample(self) -> str:
         now = datetime.now()
@@ -286,7 +286,7 @@ class ALBDataGenerator(DataGenerator):
 
 
 class CLBDataGenerator(DataGenerator):
-    BASE_PATH = f'{cons.AWS_LOGS}/{cons.RANDOM_ACCOUNT_ID}/{cons.ELASTICLOADBALANCING}/{cons.US_EAST_1_REGION}/'
+    BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTICLOADBALANCING, cons.US_EAST_1_REGION)
     BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTICLOADBALANCING}_{cons.US_EAST_1_REGION}_'
 
     def get_filename(self, prefix=None, **kwargs) -> str:
@@ -294,13 +294,13 @@ class CLBDataGenerator(DataGenerator):
         <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
         """
         now = datetime.now()
-        path = f'{self.BASE_PATH}{now.strftime(cons.PATH_DATE_FORMAT)}/'
+        path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = (
             f'{self.BASE_FILE_NAME}qatests-APIClassi_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}_'
             f'{get_random_ip()}{cons.LOG_EXT}'
         )
 
-        return f'{path}{name}'
+        return join(path, name)
 
     def get_data_sample(self) -> str:
         now = datetime.now()
@@ -332,7 +332,7 @@ class CLBDataGenerator(DataGenerator):
 
 
 class NLBDataGenerator(DataGenerator):
-    BASE_PATH = f'{cons.AWS_LOGS}/{cons.RANDOM_ACCOUNT_ID}/{cons.ELASTICLOADBALANCING}/{cons.US_EAST_1_REGION}/'
+    BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTICLOADBALANCING, cons.US_EAST_1_REGION)
     BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTICLOADBALANCING}_{cons.US_EAST_1_REGION}_'
 
     def get_filename(self, prefix=None, **kwargs) -> str:
@@ -340,13 +340,13 @@ class NLBDataGenerator(DataGenerator):
         <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
         """
         now = datetime.now()
-        path = f'{self.BASE_PATH}{now.strftime(cons.PATH_DATE_FORMAT)}/'
+        path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = (
             f'{self.BASE_FILE_NAME}net.qatests_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}_'
             f'{get_random_ip()}{cons.LOG_EXT}'
         )
 
-        return f'{path}{name}'
+        return join(path, name)
 
     def get_data_sample(self) -> str:
         now = datetime.now()
