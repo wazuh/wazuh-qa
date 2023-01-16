@@ -145,9 +145,9 @@ def test_regions(
             ).result()
 
         wazuh_log_monitor.start(
-            timeout=global_parameters.default_timeout,
+            timeout=T_10,
             callback=event_monitor.make_aws_callback(pattern),
-            error_message='The AWS module did not show correct message non-existent region'
+            error_message='The AWS module did not show correct message about non-existent region'
         ).result()
 
     assert s3_db_exists()
