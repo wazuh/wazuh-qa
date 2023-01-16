@@ -511,10 +511,10 @@ class MacieDataGenerator(DataGenerator):
             str: Synthetic filename.
         """
         now = datetime.utcnow()
-        path = f"{self.BASE_PATH}{now.strftime(cons.PATH_DATE_FORMAT)}/"
+        path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = f"{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}_{str(uuid4())}{cons.JSON_EXT}"
 
-        return f'{path}{name}'
+        return join(path, name)
 
     def get_data_sample(self) -> str:
         """Returns a sample of data according to the Macie format.
