@@ -97,6 +97,27 @@ def wait_fim_start(configuration):
 
 
 @pytest.fixture()
+def wait_syscheck_start(metadata):
+    """ Wait for realtime start, whodata start or end of initial FIM scan.
+
+    Args:
+        metadata (dict): Test additional metadata
+    """
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    mode_key = 'fim_mode' if 'fim_mode2' not in metadata else 'fim_mode2'
+
+    try:
+        if metadata[mode_key] == 'realtime':
+            evm.detect_realtime_start(file_monitor)
+        elif metadata[mode_key] == 'whodata':
+            evm.detect_whodata_start(file_monitor)
+        else:  # scheduled
+            evm.detect_initial_scan(file_monitor)
+    except KeyError:
+        evm.detect_initial_scan(file_monitor)
+
+
+@pytest.fixture()
 def restart_syscheck_function():
     """
     Restart syscheckd daemon.
