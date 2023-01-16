@@ -656,6 +656,164 @@ class TrustedAdvisorDataGenerator(DataGenerator):
         )
 
 
+class GuardDutyDataGenerator(DataGenerator):
+    BASE_PATH = ''
+    BASE_FILE_NAME = f'firehose_guardduty-1-'
+
+    def get_filename(self, *args, **kwargs) -> str:
+        """Return the filename in the Guard Duty format.
+        Example:
+            <prefix>/<year>/<month>/<day>
+        Returns:
+            str: Synthetic filename.
+        """
+        now = datetime.utcnow()
+        path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
+        name = f"{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}{cons.JSON_EXT}"
+
+        return join(path, name)
+
+    def get_data_sample(self) -> str:
+        """Returns a sample of data according to the Guard Duty format.
+        Returns:
+            str: Synthetic data.
+        """
+        return json.dumps(
+            {
+                'version': '0',
+                'id': str(uuid4()),
+                'detail-type': 'GuardDuty Finding',
+                'source': 'aws.guardduty',
+                'account': cons.RANDOM_ACCOUNT_ID,
+                'time': '2021-07-08T03:45:04Z',
+                'region': 'us-east-1',
+                'resources': [],
+                'detail': {
+                    'schemaVersion': '2.0',
+                    'accountId': cons.RANDOM_ACCOUNT_ID,
+                    'region': 'us-east-1',
+                    'partition': 'aws',
+                    'id': 'e8bc77e2d65ffa20de95cc6e7a94e926',
+                    'arn': f"arn:aws:guardduty:us-east-1:{cons.RANDOM_ACCOUNT_ID}:detector/",
+                    'type': 'Recon:EC2/PortProbeUnprotectedPort',
+                    'resource': {
+                        'resourceType': 'Instance',
+                        'instanceDetails': {
+                            'instanceId': f"i-{get_random_string(8)}",
+                            'instanceType': 't2.micro',
+                            'launchTime': '2014-12-30T18:46:13Z',
+                            'platform': None,
+                            'productCodes': [],
+                            'iamInstanceProfile': None,
+                            'networkInterfaces': [
+                                {
+                                    'ipv6Addresses': [],
+                                    'networkInterfaceId': f"eni-{get_random_string(8)}",
+                                    'privateDnsName': 'ip-10-0-0-250.ec2.internal',
+                                    'privateIpAddress': get_random_ip(),
+                                    'privateIpAddresses': [
+                                        {
+                                            'privateDnsName': 'ip-10-0-0-250.ec2.internal',
+                                            'privateIpAddress': get_random_ip()
+                                        }
+                                    ],
+                                    'subnetId': 'subnet-6b1d6203',
+                                    'vpcId': f"vpc-{get_random_string(8)}",
+                                    'securityGroups': [
+                                        {
+                                            'groupName': 'default',
+                                            'groupId': f"sg-{get_random_string(8)}"
+                                        }
+                                    ],
+                                    'publicDnsName': 'ec2-105-71-92-143.compute-1.amazonaws.com',
+                                    'publicIp': get_random_ip()
+                                }
+                            ],
+                            'outpostArn': None,
+                            'tags': [
+                                {
+                                    'key': 'service_name',
+                                    'value': 'vpn'
+                                },
+                                {
+                                    'key': 'Name',
+                                    'value': 'vpn-gateway (r)'
+                                }
+                            ],
+                            'instanceState': 'running',
+                            'availabilityZone': 'us-east-1e',
+                            'imageId': f"ami-{get_random_string(8)}",
+                            'imageDescription': 'None'
+                        }
+                    },
+                    'service': {
+                        'serviceName': 'guardduty',
+                        'detectorId': str(uuid4()),
+                        'action': {
+                            'actionType': 'PORT_PROBE',
+                            'portProbeAction': {
+                                'portProbeDetails': [
+                                    {
+                                        'localPortDetails': {
+                                            'port': 1723,
+                                            'portName': 'Unknown'
+                                        },
+                                        'remoteIpDetails': {
+                                            'ipAddressV4': get_random_ip(),
+                                            'organization': {
+                                                'asn': '211680',
+                                                'asnOrg': 'Sistemas Informaticos, S.A.',
+                                                'isp': 'Sistemas Informaticos, S.A.',
+                                                'org': 'Sistemas Informaticos, S.A.'
+                                            },
+                                            'country': {
+                                                'countryName': 'Portugal'
+                                            },
+                                            'city': {
+                                                'cityName': ''
+                                            },
+                                            'geoLocation': {
+                                                'lat': 38.7057,
+                                                'lon': -9.1359
+                                            }
+                                        }
+                                    }
+                                ],
+                                'blocked': False
+                            }
+                        },
+                        "resourceRole": "TARGET",
+                        "additionalInfo": {
+                            "threatName": "Scanner",
+                            "threatListName": "ProofPoint"
+                        },
+                        "evidence": {
+                            "threatIntelligenceDetails": [
+                                {
+                                    "threatNames": [
+                                        "Scanner"
+                                    ],
+                                    "threatListName": "ProofPoint"
+                                }
+                            ]
+                        },
+                        "eventFirstSeen": "2021-04-20T14:40:04Z",
+                        "eventLastSeen": "2021-07-08T03:15:41Z",
+                        "archived": False,
+                        "count": 5
+                    },
+                    "severity": 2,
+                    "createdAt": "2021-04-20T14:53:32.735Z",
+                    "updatedAt": "2021-07-08T03:31:04.017Z",
+                    "title": "Unprotected port on EC2 instance i-3bf6a5c5 is being probed.",
+                    "description": (
+                        "EC2 instance has an unprotected port which is being probed by a known malicious host."
+                        )
+                }
+            }
+        )
+
+
 # Maps bucket type with corresponding data generator
 buckets_data_mapping = {
     cons.CLOUD_TRAIL_TYPE: CloudTrailDataGenerator,
@@ -667,6 +825,7 @@ buckets_data_mapping = {
     cons.KMS_TYPE: KMSDataGenerator,
     cons.MACIE_TYPE: MacieDataGenerator,
     cons.TRUSTED_ADVISOR_TYPE: TrustedAdvisorDataGenerator,
+    cons.GUARD_DUTY_TYPE: GuardDutyDataGenerator,
 }
 
 
