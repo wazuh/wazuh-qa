@@ -426,3 +426,42 @@
     only_logs_after: 2022-NOV-20
     path: inexistent_prefix
     expected_results: 0
+
+- name: waf_path_with_data
+  description: WAF path configurations
+  configuration_parameters:
+    BUCKET_TYPE: waf
+    BUCKET_NAME: wazuh-waf-integration-tests
+    PATH: test_prefix
+  metadata:
+    bucket_type: waf
+    bucket_name: wazuh-waf-integration-tests
+    only_logs_after: 2022-NOV-20
+    path: test_prefix
+    expected_results: 1
+
+- name: waf_path_without_data
+  description: WAF path configurations
+  configuration_parameters:
+    BUCKET_TYPE: waf
+    BUCKET_NAME: wazuh-waf-integration-tests
+    PATH: empty_prefix
+  metadata:
+    bucket_type: waf
+    bucket_name: wazuh-waf-integration-tests
+    only_logs_after: 2022-NOV-20
+    path: empty_prefix
+    expected_results: 0
+
+- name: waf_inexistent_path
+  description: WAF path configurations
+  configuration_parameters:
+    BUCKET_TYPE: waf
+    BUCKET_NAME: wazuh-waf-integration-tests
+    PATH: inexistent_prefix
+  metadata:
+    bucket_type: waf
+    bucket_name: wazuh-waf-integration-tests
+    only_logs_after: 2022-NOV-20
+    path: inexistent_prefix
+    expected_results: 0
