@@ -54,16 +54,20 @@ tags:
     - fim_registry_limit
 '''
 import os
+import time
 import pytest
 from wazuh_testing import LOG_FILE_PATH, global_parameters
+from wazuh_testing.fim import registry_key_cud
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules import WINDOWS, TIER1
-from wazuh_testing.modules.fim import (registry_parser, KEY_WOW64_64KEY, REG_SZ, KEY_ALL_ACCESS, RegOpenKeyEx,
-                                       RegCloseKey, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY)
+from wazuh_testing.modules.fim import (registry_parser, KEY_WOW64_64KEY, REG_SZ,
+                                       WINDOWS_HKEY_LOCAL_MACHINE)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.modules.fim.event_monitor import functions
-from wazuh_testing.modules.fim.utils import modify_registry_value
+from wazuh_testing.modules.fim.event_monitor import CB_FIM_WILDCARD_EXPANDING, callback_key_event, callback_value_event
+from wazuh_testing.modules.fim.utils import (get_messages, create_values_content, registry_value_create,
+                                             registry_value_update, registry_value_delete, create_registry,
+                                             modify_registry_value, delete_registry)
 
 # Marks
 pytestmark = [WINDOWS, TIER1]
@@ -88,11 +92,10 @@ monitor_timeout = 40
 
 
 
-
 # Tests
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
-def test_registry_value_wildcards(configure_local_internal_options_module, get_configuration, configure_environment,
-                                   restart_syscheckd):
+def test_registry_key_wildcards(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
+                                 configure_local_internal_options_function, restart_wazuh_function, wait_syscheck_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
                  'full database alert' mode for reaching the limit of entries to monitor set in the 'entries' option
@@ -131,19 +134,105 @@ def test_registry_value_wildcards(configure_local_internal_options_module, get_c
                        with the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - r".*Registry database is (\\d+)% full."
-        - r".*Couldn't insert ('.*') entry into DB. The DB is full.*"
-        - r".*Fim registry values entries count: '(\\d+)'"
+        - 
 
     tags:
         - scheduled
     '''
-    reg1_handle = RegOpenKeyEx(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], MONITORED_KEY, 0,
-                               KEY_ALL_ACCESS | KEY_WOW64_64KEY)
-
+    monitored_keys = get_messages(CB_FIM_WILDCARD_EXPANDING)
+    assert monitored_keys != [], "ERROR MESSAGE 1"
+    time.sleep(10)    
+    subkey = monitored_keys[0].replace(f"{WINDOWS_HKEY_LOCAL_MACHINE}\\","")
+    subkey = subkey+'\\test_key'
+    
+    reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
+    wazuh_log_monitor.start(timeout=30, callback=callback_key_event,
+                          update_position=False,
+                          error_message=f"ADDED KEY ADDED EVENT").result()
+    time.sleep(10)
+    modify_registry_value(reg_handle, 'test_value', REG_SZ, 'added')
+    wazuh_log_monitor.start(timeout=30, callback=callback_value_event,
+                          update_position=False,
+                          error_message=f"ADDED VALUE ADDED EVENT").result()
+    time.sleep(10)
+    delete_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
+    wazuh_log_monitor.start(timeout=30, callback=callback_key_event,
+                          update_position=False,
+                          error_message=f"ADDED KEY DELETED EVENT").result()
+    
     # Check Key/Value is being monitored
     # Modify Key/Value
-    modify_registry_value(reg1_handle, 'value_full', REG_SZ, 'added')
-    RegCloseKey(reg1_handle)
+    
+    #time.sleep(10)
+    #RegCloseKey(reg_handle)
     # Check modification is detected
     # Delete Key/Value  
+"""
+
+
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
+def test_registry_value_wildcards(configuration, metadata, set_wazuh_configuration,
+                                 configure_local_internal_options_function, restart_syscheck_function, wait_fim_start):
+    '''
+    description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
+                 'full database alert' mode for reaching the limit of entries to monitor set in the 'entries' option
+                 of the 'registry_limit' tag.
+                 For this purpose, the test will monitor a key in which several testing values will be created
+                 until the entry monitoring limit is reached. Then, it will check if the FIM event 'full' is generated
+                 when a new testing value is added to the monitored key. Finally, the test will verify that,
+                 in the FIM 'entries' event, the number of entries and monitored values match.
+
+    wazuh_min_version: 4.5.0
+
+    tier: 1
+
+    parameters:
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set the local_internal_options for the test.
+        - get_configuration:
+            type: fixture
+            brief: Get configurations from the module.
+        - configure_environment:
+            type: fixture
+            brief: Configure a custom environment for testing.
+        - restart_syscheckd:
+            type: fixture
+            brief: Clear the Wazuh logs file and start a new monitor.
+
+    assertions:
+        - Verify that the FIM database is in 'full database alert' mode
+          when the maximum number of values to monitor has been reached.
+        - Verify that proper FIM events are generated while the database
+          is in 'full database alert' mode.
+
+    input_description: A test case (fim_registry_limit) is contained in external YAML file (wazuh_conf.yaml)
+                       which includes configuration settings for the 'wazuh-syscheckd' daemon. That is combined
+                       with the testing registry key to be monitored defined in this module.
+
+    expected_output:
+        - 
+
+    tags:
+        - scheduled
+    '''
+    monitored_keys = get_messages(CB_FIM_WILDCARD_EXPANDING)
+    assert monitored_keys != [], "ERROR MESSAGE 1"
+    key = metadata['root_key']
+    subkey = monitored_keys[0].replace(f"{key}\\","")
+    subkey = subkey+'\\test_key'
+    
+    values = create_values_content(metadata['value_name'], 10)
+    scan_delay = metadata['interval']
+
+
+     # Create the value inside the key - we do it here because it key or arch is not known before the test launches
+    registry_value_create(key, subkey, wazuh_log_monitor, arch=KEY_WOW64_64KEY, value_list=values, wait_for_scan=True,
+                          scan_delay=scan_delay, min_timeout=global_parameters.default_timeout*5, triggers_event=True)
+    # Modify the value to check if the diff file is generated or not, as expected
+    registry_value_update(key, subkey, wazuh_log_monitor, arch=KEY_WOW64_64KEY, value_list=values, wait_for_scan=True,
+                          scan_delay=scan_delay, min_timeout=global_parameters.default_timeout*5, triggers_event=True)
+    # Delete the value created to clean up enviroment
+    registry_value_delete(key, subkey, wazuh_log_monitor, arch=KEY_WOW64_64KEY, value_list=values, wait_for_scan=True,
+                          scan_delay=scan_delay, min_timeout=global_parameters.default_timeout*5, triggers_event=True)
+"""

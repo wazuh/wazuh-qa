@@ -1,19 +1,15 @@
-# conf 1
-- tags:
-    -
-  apply_to_modules:
-    - test_registry_wildcards
-  sections:
+- sections:
     - section: syscheck
       elements:
         - disabled:
             value: 'no'
         - frequency:
-            value: 5
+            value: FREQUENCY
         - windows_registry:
             value: WINDOWS_REGISTRY
             attributes:
-              - arch: 64bit
+              - arch: both
+
     - section: sca
       elements:
         - enabled:
@@ -22,13 +18,13 @@
       elements:
         - disabled:
             value: 'yes'
-    - section: active-response
-      elements:
-        - disabled:
-            value: 'yes'
     - section: wodle
       attributes:
         - name: syscollector
+      elements:
+        - disabled:
+            value: 'yes'
+    - section: active-response
       elements:
         - disabled:
             value: 'yes'

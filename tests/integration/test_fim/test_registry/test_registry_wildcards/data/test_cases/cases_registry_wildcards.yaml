@@ -1,6 +1,10 @@
 - name: 'disabled'
   description: 'Set enabled to no value'
   configuration_parameters:
-    ENABLED: 'no'
+    FREQUENCY: 5
+    WINDOWS_REGISTRY: HKEY_LOCAL_MACHINE\*\De?
   metadata:
-    enabled: 'no'
+    root_key: HKEY_LOCAL_MACHINE
+    value_name: test_value
+    interval: 10
+    fim_mode: scheduled
