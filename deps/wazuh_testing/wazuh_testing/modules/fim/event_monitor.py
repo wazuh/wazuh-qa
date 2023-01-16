@@ -51,6 +51,7 @@ CB_DISK_QUOTA_LIMIT_CONFIGURED_VALUE = r'.*Maximum disk quota size limit configu
 CB_FILE_EXCEEDS_DISK_QUOTA = r'.*The (.*) of the file size \'(.*)\' exceeds the disk_quota.*'
 CB_FILE_SIZE_LIMIT_REACHED = r'.*File \'(.*)\' is too big for configured maximum size to perform diff operation\.'
 CB_DIFF_FOLDER_DELETED = r'.*Folder \'(.*)\' has been deleted.*'
+CB_FIM_WILDCARD_EXPANDING = r".*Expanding entry '.*' to '(.*)' to monitor FIM events."
 
 # Error message
 ERR_MSG_REALTIME_FOLDERS_EVENT = 'Did not receive expected "Folders monitored with real-time engine" event'
@@ -74,7 +75,7 @@ ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES = 'Did not receive expected "Fim Registry val
 ERR_MSG_REGISTRY_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of registry values to \
                                  be monitored: ..." event'
 ERR_MSG_WRONG_REGISTRY_LIMIT_VALUE = 'Wrong value for db_value_limit registries tag.'
-ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of entries to be monitored: \
+ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of files to be monitored: \
                              ..." event'
 ERR_MSG_WRONG_FILE_LIMIT_VALUE = 'Wrong value for file_limit.'
 ERR_MSG_FILE_LIMIT_DISABLED = 'Did not receive expected "DEBUG: ...: No limit set to maximum number of entries \
@@ -192,6 +193,15 @@ def callback_value_event(line):
     event = callback_detect_event(line)
 
     if event is None or event['data']['attributes']['type'] != 'registry_value':
+        return None
+
+    return event
+
+
+def callback_key_event(line):
+    event = callback_detect_event(line)
+
+    if event is None or event['data']['attributes']['type'] != 'registry_key':
         return None
 
     return event
