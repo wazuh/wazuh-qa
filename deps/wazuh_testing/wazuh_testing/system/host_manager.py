@@ -100,10 +100,10 @@ class HostManager:
         """Get the OS of the specified host.
 
         Args:
-            host (str): Hostname
+            host: Hostname
 
         Returns:
-            str: OS of the host
+            tuple: Hostname, Major version, Distribution version. Example: ('CentOS', '7', '7.6.1810')
         """
         ansible_facts = self.collect_host_ansible_facts(host)
 
@@ -118,7 +118,7 @@ class HostManager:
             host (str): Hostname
 
         Returns:
-            dict: IPs of the host (ipv4 and ipv6)
+            dict: IPs of the host (ipv4 and ipv6). Example: {'ipv4': ['172.31.5.209'], 'ipv6': ['fe80::f::fef4:bb6d']}
         """
         ansible_facts = self.collect_host_ansible_facts(host)
 
@@ -132,7 +132,7 @@ class HostManager:
             host (str): Hostname
 
         Returns:
-            dict: Interfaces of the host
+            list: Interfaces of the host. Example ['lo', 'eth0']
         """
         ansible_facts = self.collect_host_ansible_facts(host)
 
@@ -150,7 +150,6 @@ class HostManager:
         """
         testinfra_host = self.get_host(host)
         ansible_command = 'ping' if not windows else 'win_ping'
-
         return testinfra_host.ansible(ansible_command, check=False)['ping'] == 'pong'
 
     def copy_file(self, host, src_path, dest_path, remote_src=False, become=False, windows=False, ignore_errors=False):
