@@ -12,7 +12,7 @@ brief: File Integrity Monitoring (FIM) system watches selected files in whodata 
        policies change, monitoring continues correctly in realtime and events are detected.
 
 components:
-    - fim
+    - FIM
 
 suite: whodata_policy_change
 
@@ -49,18 +49,17 @@ import time
 
 import pytest
 from wazuh_testing.tools import PREFIX, configuration
-from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.local_actions import run_local_command_returning_output
-from wazuh_testing import global_parameters, LOG_FILE_PATH
+from wazuh_testing import T_5, T_20, global_parameters, LOG_FILE_PATH
 from wazuh_testing.modules import fim
 from wazuh_testing.modules.fim import event_monitor as evm
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim.utils import regular_file_cud
 
+
 # Marks
-
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
-
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -71,13 +70,12 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_whodata_policy_change.yaml')
 configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_whodata_policy_change.yaml')
 
-
-# variables
+# Variables
 test_folders = [os.path.join(PREFIX, fim.TEST_DIR_1)]
 folder = test_folders[0]
 file_list = [f"regular_file"]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
+policies_file = os.path.join(TEST_DATA_PATH, 'policy_enable.csv')
 
 # Test configurations
 configuration_parameters, configuration_metadata, test_case_ids = configuration.get_test_cases_data(test_cases_path)
@@ -87,16 +85,32 @@ configurations = configuration.load_configuration_template(configurations_path, 
                                                            configuration_metadata)
 
 
-# tests
+# Tests
+@pytest.mark.parametrize('policies_file', [policies_file], ids='')
 @pytest.mark.parametrize('test_folders', [test_folders], ids='', scope='module')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration, create_monitored_folders_module,
-                               configure_local_internal_options_function, restart_syscheck_function,
-                               wait_fim_start_function):
+                               configure_local_internal_options_function, policies_file, restore_win_whodata_policies,
+                               restart_syscheck_function, wait_fim_start_function):
     '''
     description: Check if the 'wazuh-syscheckd' is monitoring a in whodata mode in Windows, and the Audit Policies are
                  changed, the monitoring changes to realtime and works on the monitored files.
-
+ 
+    test_phases:
+        - Setup:
+            - Set wazuh configuration.
+            - Create target folder to be monitored
+            - Clean logs files and restart wazuh to apply the configuration.
+        - Test:
+            - Check that SACL has been configured for monitored folders
+            - Change windows audit whodata policies
+            - Check the change has been detected and monitoring changes to realtime mode
+            - Create, Update and Delete files in the monitored folder and check events are generated in realtime
+        - Tierdown:
+            - Restore windows audit policies
+            - Delete the monitored folders
+            - Restore configuration
+            - Stop wazuh
     wazuh_min_version: 4.5.0
 
     tier: 1
@@ -117,6 +131,12 @@ def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration,
         - configure_local_internal_options_function:
             type: fixture
             brief: Set local_internal_options configuration.
+        - policies_file:
+            type: string
+            brief: path for audit policies file to use on restore_win_whodata_policies fixture
+        - restore_win_whodata_policies
+            type: fixture
+            brief: restores windows audit policies using a given csv file after yield
         - restart_syscheck_function:
             type: fixture
             brief: restart syscheckd daemon, and truncate the ossec.log.
@@ -147,28 +167,24 @@ def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration,
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     # Check it is being monitored in whodata
-    evm.detect_windows_sacl_configured(wazuh_log_monitor, '.*')
+    evm.detect_windows_sacl_configured(wazuh_log_monitor)
     # Check Whodata engine has started
     evm.detect_whodata_start(wazuh_log_monitor)
 
     # Change policies
     if metadata['check_event']:
         # Wait to allow thread_checker to be executed twice so Event 4719 detection starts.
-        time.sleep(6)
+        time.sleep(T_5)
     command = f"auditpol /restore /file:{os.path.join(TEST_DATA_PATH,metadata['disabling_file'])}"
     output = run_local_command_returning_output(command)
 
-    # Check it changes to realtime
+    # Check monitoring changes to realtime
     if metadata['check_event']:
-        evm.check_fim_event(timeout=20, callback=fim.CB_RECIEVED_EVENT_4719)
-    evm.detect_windows_whodata_mode_change(wazuh_log_monitor, '.*')
+        evm.check_fim_event(timeout=T_20, callback=fim.CB_RECIEVED_EVENT_4719)
+    evm.detect_windows_whodata_mode_change(wazuh_log_monitor)
 
     # Create/Update/Delete file and check events
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, time_travel=False,
                      event_mode=fim.REALTIME_MODE, min_timeout=global_parameters.default_timeout*4,
                      triggers_event=True)
-
-    # Restore policies
-    command = f"auditpol /restore /file:{os.path.join(TEST_DATA_PATH,metadata['enabling_file'])}"
-    run_local_command_returning_output(command)
