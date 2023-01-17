@@ -141,12 +141,15 @@ def test_valid_signature_id(configuration, metadata, set_wazuh_configuration, tr
     '''
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    
     # Check logs
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=T_5, callback=generate_monitoring_callback(CB_SID_NOT_FOUND),
                                 error_message=ERR_MSG_SID_NOT_FOUND)
+    with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=T_5, callback=generate_monitoring_callback(CB_EMPTY_IF_SID_RULE_IGNORED),
                                 error_message=ERR_MSG_EMPTY_IF_SID)
+    with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=T_5, callback=generate_monitoring_callback(CB_INVALID_IF_SID_RULE_IGNORED),
                                 error_message=ERR_MSG_INVALID_IF_SID)
 
