@@ -6,7 +6,7 @@ import re
 import json
 
 from datetime import datetime
-from wazuh_testing import logger, T_30, LOG_FILE_PATH
+from wazuh_testing import logger, T_30, T_60, LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import generate_monitoring_callback, FileMonitor
 from wazuh_testing.modules import fim
 
@@ -99,56 +99,56 @@ def callback_disk_quota_limit_reached(line):
 
 def callback_detect_file_added_event(line):
     """ Callback that detects if a line in a log is a file added event.
+
     Args:
         line (String): string line to be checked by callback in FileMonitor.
-    """
-    msg = fim.CB_DETECT_FIM_EVENT
-    match = re.match(msg, line)
-    if not match:
-        return None
 
-    try:
-        json_event = json.loads(match.group(1))
+    Returns:
+        returns JSON string from log.
+    """
+    json_event = callback_detect_event(line)
+
+    if json_event is not None:
         if json_event['data']['type'] == 'added':
             return json_event
-    except (json.JSONDecodeError, AttributeError, KeyError) as e:
-        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+
+    return None
 
 
 def callback_detect_file_modified_event(line):
     """ Callback that detects if a line in a log is a file modified event.
+
     Args:
         line (String): string line to be checked by callback in FileMonitor.
-    """
-    msg = fim.CB_DETECT_FIM_EVENT
-    match = re.match(msg, line)
-    if not match:
-        return None
 
-    try:
-        json_event = json.loads(match.group(1))
+    Returns:
+        returns JSON string from log.
+    """
+    json_event = callback_detect_event(line)
+
+    if json_event is not None:
         if json_event['data']['type'] == 'modified':
             return json_event
-    except (json.JSONDecodeError, AttributeError, KeyError) as e:
-        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+
+    return None
 
 
 def callback_detect_file_deleted_event(line):
     """ Callback that detects if a line in a log is a file deleted event.
+
     Args:
         line (String): string line to be checked by callback in FileMonitor.
+     
+    Returns:
+        returns JSON string from log.
     """
-    msg = fim.CB_DETECT_FIM_EVENT
-    match = re.match(msg, line)
-    if not match:
-        return None
+    json_event = callback_detect_event(line)
 
-    try:
-        json_event = json.loads(match.group(1))
+    if json_event is not None:
         if json_event['data']['type'] == 'deleted':
             return json_event
-    except (json.JSONDecodeError, AttributeError, KeyError) as e:
-        logger.warning(f"Couldn't load a log line into json object. Reason {e}")
+
+    return None
 
 
 # Event checkers
@@ -178,7 +178,7 @@ def detect_initial_scan(file_monitor):
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    file_monitor.start(timeout=60, callback=callback_detect_end_scan,
+    file_monitor.start(timeout=T_60, callback=callback_detect_end_scan,
                        error_message=fim.ERR_MSG_SCHEDULED_SCAN_ENDED)
 
 
@@ -188,7 +188,7 @@ def detect_initial_scan_start(file_monitor):
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    file_monitor.start(timeout=60, callback=callback_detect_scan_start,
+    file_monitor.start(timeout=T_60, callback=callback_detect_scan_start,
                        error_message=fim.ERR_MSG_SCHEDULED_SCAN_STARTED)
 
 
@@ -198,7 +198,7 @@ def detect_realtime_start(file_monitor):
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    file_monitor.start(timeout=60, callback=generate_monitoring_callback(fim.CB_FOLDERS_MONITORED_REALTIME),
+    file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(fim.CB_FOLDERS_MONITORED_REALTIME),
                        error_message=fim.ERR_MSG_FOLDERS_MONITORED_REALTIME)
 
 
@@ -208,11 +208,11 @@ def detect_whodata_start(file_monitor):
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    file_monitor.start(timeout=60, callback=generate_monitoring_callback(fim.CB_REALTIME_WHODATA_ENGINE_STARTED),
+    file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(fim.CB_REALTIME_WHODATA_ENGINE_STARTED),
                        error_message=fim.ERR_MSG_WHODATA_ENGINE_EVENT)
 
 
-def detect_windows_sacl_configured(file_monitor, file):
+def detect_windows_sacl_configured(file_monitor, file='.*'):
     """Detects when windows permision checks have been configured for a given file.
 
     Args:
@@ -222,11 +222,11 @@ def detect_windows_sacl_configured(file_monitor, file):
 
     pattern = fr".*win_whodata.*The SACL of '({file})' will be configured"
 
-    file_monitor.start(timeout=60, callback=generate_monitoring_callback(pattern),
+    file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(pattern),
                        error_message=fim.ERR_MSG_SACL_CONFIGURED_EVENT)
 
 
-def detect_windows_whodata_mode_change(file_monitor, file):
+def detect_windows_whodata_mode_change(file_monitor, file='.*'):
     """Detects whe monitoring for a file changes from whodata to real-time.
 
     Args:
@@ -236,5 +236,5 @@ def detect_windows_whodata_mode_change(file_monitor, file):
 
     pattern = fr".*set_whodata_mode_changes.*The '({file})' directory starts to be monitored in real-time mode."
 
-    file_monitor.start(timeout=60, callback=generate_monitoring_callback(pattern),
+    file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(pattern),
                        error_message=fim.ERR_MSG_WHDATA_REALTIME_MODE_CHANGE_EVENT)

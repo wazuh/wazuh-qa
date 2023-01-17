@@ -13,9 +13,7 @@ from wazuh_testing.tools.file import create_file, modify_file, delete_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.modules import fim
-from wazuh_testing.modules.fim.event_monitor import (callback_detect_end_scan, callback_detect_file_added_event,
-                                                     callback_detect_file_modified_event,
-                                                     callback_detect_file_deleted_event)
+from wazuh_testing.modules.fim import event_monitor as ev
 from wazuh_testing.modules.fim.classes import CustomValidator, EventChecker
 
 
@@ -226,8 +224,8 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
         return None, None
 
 
-def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
-                     triggers_event=True, encoding=None, callback=callback_detect_file_added_event,
+def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1, options=None,
+                     triggers_event=True, encoding=None, callback=ev.callback_detect_file_added_event,
                      validators_after_create=None, validators_after_update=None, validators_after_delete=None,
                      validators_after_cud=None, event_mode=None):
     """Check if creation, update and delete events are detected by syscheck.
@@ -239,7 +237,6 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         log_monitor (FileMonitor): File event monitor.
         file_list (list(str) or dict, optional): If it is a list, it will be transformed to a dict with
             empty strings in each value. Default `['testfile0']`
-        time_travel (boolean, optional): Boolean to determine if there will be time travels or not. Default `False`
         min_timeout (int, optional): Minimum timeout. Default `1`
         options (set, optional): Set with all the checkers. Default `None`
         triggers_event (boolean, optional): Boolean to determine if the event should be raised or not. Default `True`
@@ -254,7 +251,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         validators_after_cud (list, optional): List of functions that validates an event triggered when a new file
             is created, modified or deleted. Each function must accept a param to receive
             the event to be validated. Default `None`
-        event_mode (str, optional): Specifie2 unidadess the FIM scan mode to check in the events
+        event_mode (str, optional): Specifies the FIM scan mode to check in the events
     """
 
     # Transform file list
@@ -272,56 +269,34 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
     for name, content in file_list.items():
         create_file(REGULAR, folder, name, content=content)
 
-    check_time_travel(time_travel, monitor=log_monitor)
-
     event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event,
                                   event_mode=event_mode)
     if triggers_event:
         logger.info("'added' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
-        if time_travel:
-            log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
-                              update_position=True,
-                              error_message=f"End of scheduled scan not detected after "
-                              f"{global_parameters.default_timeout} seconds")
-
     # Modify previous text files
     for name, content in file_list.items():
         modify_file(folder, name, is_binary=isinstance(content, bytes))
 
-    check_time_travel(time_travel, monitor=log_monitor)
     event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
                                  custom_validator=custom_validator, encoding=encoding,
-                                 callback=callback_detect_file_modified_event)
+                                 callback=ev.callback_detect_file_modified_event)
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event,
                                   event_mode=event_mode)
     if triggers_event:
         logger.info("'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
-        if time_travel:
-            log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
-                              update_position=True,
-                              error_message=f"End of scheduled scan not detected after "
-                              f"{global_parameters.default_timeout} seconds")
-
     # Delete previous text files
     for name in file_list:
         delete_file(os.path.join(folder, name))
 
-    check_time_travel(time_travel, monitor=log_monitor)
     event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
                                  custom_validator=custom_validator, encoding=encoding,
-                                 callback=callback_detect_file_deleted_event)
+                                 callback=ev.callback_detect_file_deleted_event)
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event,
                                   event_mode=event_mode)
     if triggers_event:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
-
-        if time_travel:
-            log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
-                              update_position=True,
-                              error_message=f"End of scheduled scan not detected after "
-                              f"{global_parameters.default_timeout} seconds")
 
 
 def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=13), monitor: FileMonitor = None,
@@ -355,6 +330,6 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
         logger.info(f"Changing the system clock from {before} to {str(datetime.now())}")
 
         if monitor:
-            monitor.start(timeout=timeout, callback=callback_detect_end_scan,
+            monitor.start(timeout=timeout, callback=ev.callback_detect_end_scan,
                           update_position=False,
                           error_message=f"End of scheduled scan not detected after {timeout} seconds")
