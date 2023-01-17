@@ -124,6 +124,17 @@ def check_stop_dropping_events_and_credits_available_log(log_level='WARNING', ti
                           timeout=timeout)
 
 
+def check_if_sid_not_found(file_monitor):
+    """Check if an invalid if_sid rule value is ignored when detected
+
+    Args:
+        file_monitor (FileMonitor): Log monitor.
+    """
+    
+    file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_SID_NOT_FOUND),
+                       error_message=ERR_MSG_SID_NOT_FOUND)
+
+
 def check_invalid_if_sid(file_monitor, is_empty):
     """Check if an invalid if_sid rule value is ignored when detected
 
@@ -136,3 +147,14 @@ def check_invalid_if_sid(file_monitor, is_empty):
     
     file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(callback),
                        error_message=ERR_MSG_INVALID_IF_SID)
+
+
+def check_empty_if_sid(file_monitor):
+    """Check if an invalid if_sid rule value is ignored when detected
+
+    Args:
+        file_monitor (FileMonitor): Log monitor.
+    """
+    
+    file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_EMPTY_IF_SID_RULE_IGNORED),
+                       error_message=ERR_MSG_EMPTY_IF_SID)

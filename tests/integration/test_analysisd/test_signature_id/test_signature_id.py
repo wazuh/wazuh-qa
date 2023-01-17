@@ -46,10 +46,7 @@ import pytest
 from wazuh_testing import LOG_FILE_PATH, T_5, T_10
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.modules.analysisd.event_monitor import (CB_SID_NOT_FOUND, CB_EMPTY_IF_SID_RULE_IGNORED,
-                                                           CB_INVALID_IF_SID_RULE_IGNORED, ERR_MSG_SID_NOT_FOUND,
-                                                           ERR_MSG_EMPTY_IF_SID, ERR_MSG_INVALID_IF_SID,
-                                                           check_invalid_if_sid)
+from wazuh_testing.modules.analysisd import event_monitor as ev
 
 
 pytestmark = [pytest.mark.server]
@@ -101,9 +98,18 @@ def test_valid_signature_id(configuration, metadata, set_wazuh_configuration, tr
                  not ignored.
 
     test_phases:
-        - Copy custom rule file into manager
-        - Restart manager
-        - Check logs
+        - Setup:
+            - Set wazuh configuration.
+            - Copy custom rules file into manager
+            - Clean logs files and restart wazuh to apply the configuration.
+        - Test:
+            - Check no log for "if_sid not found" is detected
+            - Check no log for "empty if_sid" is detected
+            - Check no log for "invalid if_sid" is detected
+        - Tierdown:
+            - Delete custom rule file
+            - Restore configuration
+            - Stop wazuh
 
     wazuh_min_version: 4.4.0
 
@@ -144,14 +150,11 @@ def test_valid_signature_id(configuration, metadata, set_wazuh_configuration, tr
     
     # Check logs
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=T_5, callback=generate_monitoring_callback(CB_SID_NOT_FOUND),
-                                error_message=ERR_MSG_SID_NOT_FOUND)
+        ev.check_if_sid_not_found(wazuh_log_monitor)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=T_5, callback=generate_monitoring_callback(CB_EMPTY_IF_SID_RULE_IGNORED),
-                                error_message=ERR_MSG_EMPTY_IF_SID)
+        ev.check_empty_if_sid(wazuh_log_monitor)
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=T_5, callback=generate_monitoring_callback(CB_INVALID_IF_SID_RULE_IGNORED),
-                                error_message=ERR_MSG_INVALID_IF_SID)
+        ev.check_invalid_if_sid(wazuh_log_monitor, is_empty=False)
 
 
 @pytest.mark.tier(level=1)
@@ -163,10 +166,17 @@ def test_invalid_signature_id(configuration, metadata, set_wazuh_configuration, 
                  if_sid option, the rule is ignored.
 
     test_phases:
-        - Copy custom rule file into manager
-        - Restart manager
-        - Check logs
-        - Check analysisd is running
+        - Setup:
+            - Set wazuh configuration.
+            - Copy custom rules file into manager
+            - Clean logs files and restart wazuh to apply the configuration.
+        - Test:
+            - Check "invalid if_sid" log is detected
+        - Tierdown:
+            - Delete custom rule file
+            - Restore configuration
+            - Stop wazuh
+
 
     wazuh_min_version: 4.4.0
 
@@ -205,7 +215,7 @@ def test_invalid_signature_id(configuration, metadata, set_wazuh_configuration, 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     # Check logs
-    check_invalid_if_sid(wazuh_log_monitor, metadata['is_empty'])
+    ev.check_invalid_if_sid(wazuh_log_monitor, metadata['is_empty'])
 
 
 # Tests
@@ -218,10 +228,17 @@ def test_null_signature_id(configuration, metadata, set_wazuh_configuration, tru
                  assigned to the if_sid option, the rule is ignored.
 
     test_phases:
-        - Copy custom rule file into manager
-        - Restart manager
-        - Check logs
-        - Check analysisd is running
+        - Setup:
+            - Set wazuh configuration.
+            - Copy custom rules file into manager
+            - Clean logs files and restart wazuh to apply the configuration.
+        - Test:
+            - Check "if_sid not found" log is detected
+            - Check "empty if_sid" log is detected
+        - Tierdown:
+            - Delete custom rule file
+            - Restore configuration
+            - Stop wazuh
 
     wazuh_min_version: 4.4.0
 
@@ -261,7 +278,5 @@ def test_null_signature_id(configuration, metadata, set_wazuh_configuration, tru
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     # Check logs
-    wazuh_log_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_SID_NOT_FOUND),
-                            error_message=ERR_MSG_SID_NOT_FOUND)
-    wazuh_log_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_EMPTY_IF_SID_RULE_IGNORED),
-                            error_message=ERR_MSG_EMPTY_IF_SID)
+    ev.check_if_sid_not_found(wazuh_log_monitor)
+    ev.check_empty_if_sid(wazuh_log_monitor)
