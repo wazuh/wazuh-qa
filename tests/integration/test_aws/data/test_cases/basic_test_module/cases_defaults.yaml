@@ -107,7 +107,7 @@
     bucket_name: wazuh-waf-integration-tests
 
 - name: server_access_defaults
-  description: CloudTrail default configurations
+  description: Server Access default configurations
   configuration_parameters:
     BUCKET_TYPE: server_access
     BUCKET_NAME: wazuh-server-access-integration-tests
