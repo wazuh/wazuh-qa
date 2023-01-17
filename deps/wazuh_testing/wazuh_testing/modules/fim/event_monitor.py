@@ -99,8 +99,12 @@ def callback_disk_quota_limit_reached(line):
 
 def callback_detect_file_added_event(line):
     """ Callback that detects if a line in a log is a file added event.
+    
     Args:
         line (String): string line to be checked by callback in FileMonitor.
+    
+    Returns:
+        returns JSON string from log.
     """
     json_event = callback_detect_event(line)
 
@@ -113,8 +117,12 @@ def callback_detect_file_added_event(line):
 
 def callback_detect_file_modified_event(line):
     """ Callback that detects if a line in a log is a file modified event.
+    
     Args:
         line (String): string line to be checked by callback in FileMonitor.
+    
+    Returns:
+        returns JSON string from log.
     """
     json_event = callback_detect_event(line)
 
@@ -127,8 +135,12 @@ def callback_detect_file_modified_event(line):
 
 def callback_detect_file_deleted_event(line):
     """ Callback that detects if a line in a log is a file deleted event.
+    
     Args:
         line (String): string line to be checked by callback in FileMonitor.
+    
+    Returns:
+        returns JSON string from log.
     """
     json_event = callback_detect_event(line)
 
