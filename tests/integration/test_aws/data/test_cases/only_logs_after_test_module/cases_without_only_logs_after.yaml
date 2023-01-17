@@ -117,3 +117,14 @@
     bucket_type: waf
     bucket_name: wazuh-waf-integration-tests
     expected_results: 1
+
+- name: server_access_without_only_logs_after
+  description: Server Access only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: server_access
+    BUCKET_NAME: wazuh-server-access-integration-tests
+  metadata:
+    bucket_type: server_access
+    bucket_name: wazuh-server-access-integration-tests
+    expected_results: 1
+    table_name: s3_server_access
