@@ -147,12 +147,14 @@ def test_valid_signature_id(configuration, metadata, set_wazuh_configuration, tr
     '''
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    
-    # Check logs
+
+    # Check that no log appears for rules if_sid field pointing to a non existent SID
     with pytest.raises(TimeoutError):
         ev.check_if_sid_not_found(wazuh_log_monitor)
+    # Check that no log appears for rules if_sid field being empty string
     with pytest.raises(TimeoutError):
         ev.check_empty_if_sid(wazuh_log_monitor)
+    # Check that no log appears for rules if_sid field being invalid
     with pytest.raises(TimeoutError):
         ev.check_invalid_if_sid(wazuh_log_monitor, is_empty=False)
 
@@ -214,7 +216,7 @@ def test_invalid_signature_id(configuration, metadata, set_wazuh_configuration, 
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    # Check logs
+    # Check that expected log appears for rules if_sid field being invalid
     ev.check_invalid_if_sid(wazuh_log_monitor, metadata['is_empty'])
 
 
@@ -277,6 +279,7 @@ def test_null_signature_id(configuration, metadata, set_wazuh_configuration, tru
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    # Check logs
+    # Check that expected log appears for rules if_sid field pointing to a non existent SID
     ev.check_if_sid_not_found(wazuh_log_monitor)
+    # Check that expected log appears for rules if_sid field being empty (empty since non-existent SID is ignored)
     ev.check_empty_if_sid(wazuh_log_monitor)
