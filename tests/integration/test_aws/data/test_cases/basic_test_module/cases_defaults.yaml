@@ -105,3 +105,12 @@
   metadata:
     bucket_type: waf
     bucket_name: wazuh-waf-integration-tests
+
+- name: server_access_defaults
+  description: CloudTrail default configurations
+  configuration_parameters:
+    BUCKET_TYPE: server_access
+    BUCKET_NAME: wazuh-server-access-integration-tests
+  metadata:
+    bucket_type: server_access
+    bucket_name: wazuh-server-access-integration-tests
