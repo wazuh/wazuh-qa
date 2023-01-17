@@ -36,6 +36,7 @@ Release report: TBD
 
 ### Changed
 
+- Increase NVE download feed test timeout([#3769](https://github.com/wazuh/wazuh-qa/pull/3769)) \- (Tests)
 - Adapt wazuhdb integration tests for auto-vacuum ([#3613](https://github.com/wazuh/wazuh-qa/issues/3613)) \- (Tests)
 - Update logcollector format test due to audit changes ([#3641](https://github.com/wazuh/wazuh-qa/pull/3641)) \- (Framework)
 - Refactor `test_basic_usage_realtime_unsupported` FIM test to avoid using time travel ([#3623](https://github.com/wazuh/wazuh-qa/pull/3623)) \- (Tests)
