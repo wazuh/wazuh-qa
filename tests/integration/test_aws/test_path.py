@@ -98,6 +98,7 @@ def test_path(
     only_logs_after = metadata['only_logs_after']
     path = metadata['path']
     expected_results = metadata['expected_results']
+    table_name = metadata.get('table_name', bucket_type)
     pattern = fr".*WARNING: Bucket:  -  No files were found in '{bucket_name}/{path}/'. No logs will be processed.\n+"
 
     parameters = [
@@ -146,8 +147,8 @@ def test_path(
     assert s3_db_exists()
 
     if expected_results:
-        data = get_s3_db_row(table_name=bucket_type)
+        data = get_s3_db_row(table_name=table_name)
         assert f"{bucket_name}/{path}/" == data.bucket_path
         assert data.log_key.startswith(f"{path}/")
     else:
-        assert not table_exists_or_has_values(table_name=bucket_type)
+        assert not table_exists_or_has_values(table_name=table_name)
