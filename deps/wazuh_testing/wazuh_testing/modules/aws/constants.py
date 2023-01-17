@@ -13,6 +13,7 @@ VPC_FLOW_LOGS = "vpcflowlogs"
 FLOW_LOG_ID = "fl-0754d951c16f517fa"
 CONFIG = 'Config'
 ELASTIC_LOAD_BALANCING = 'elasticloadbalancing'
+SERVER_ACCESS_TABLE_NAME = 's3_server_access'
 
 EVENT_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 PATH_DATE_FORMAT = '%Y/%m/%d'
