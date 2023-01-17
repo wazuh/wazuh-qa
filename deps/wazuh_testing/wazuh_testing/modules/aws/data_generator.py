@@ -1050,6 +1050,57 @@ class WAFDataGenerator(DataGenerator):
         )
 
 
+class ServerAccessDataGenerator(DataGenerator):
+    BASE_PATH = ''
+    BASE_FILE_NAME = ''
+
+    def get_filename(self) -> str:
+        """Return the filename in the server access format.
+
+        Example:
+            <prefix>/
+
+        Returns:
+            str: Synthetic filename.
+        """
+        now = datetime.now()
+        date_format = '%Y-%m-%d-%H-%M-%S'
+        name = f'{now.strftime(date_format)}-{get_random_string(16).upper()}'
+        return join(self.BASE_PATH, name)
+
+    def get_data_sample(self) -> str:
+        """Return a sample of data according to the server access format.
+
+        Returns:
+            str: Synthetic data.
+        """
+        data = []
+
+        for _ in range(5):
+            data.append(
+                [
+                    str(uuid4()), 'wazuh-server-access-integration-tests',
+                    datetime.now().strftime('[%d/%b/%Y:%H:%M:%S %z]'), get_random_ip(),
+                    f"arn:aws:iam::{cons.RANDOM_ACCOUNT_ID}:user/fake.user", get_random_string(16).upper(),
+                    'REST.GET.WEBSITE', '-', 'GET, /wazuh-server-access-integration-tests?website= HTTP/1.1',
+                    '404', 'NoSuchWebsiteConfiguration', '343', '-', '85', '-', '-',
+                    (
+                        'S3Console/0.4, aws-internal/3 aws-sdk-java/1.11.991'
+                        'Linux/4.9.230-0.1.ac.224.84.332.metal1.x86_64'
+                        'OpenJDK_64-Bit_Server_VM/25.282-b08 java/1.8.0_282 vendor/Oracle_Corporation'
+                        'cfg/retry-mode/legacy'
+                    ),
+                    '-', str(uuid4()), 'SigV4', 'ECDHE-RSA-AES128-GCM-SHA256', 'AuthHeader', 's3.amazonaws.com',
+                    'TLSv1.2'
+
+                ]
+            )
+        buffer = StringIO()
+        csv.writer(buffer, delimiter=" ").writerows(data)
+
+        return buffer.getvalue()
+
+
 # Maps bucket type with corresponding data generator
 buckets_data_mapping = {
     cons.CLOUD_TRAIL_TYPE: CloudTrailDataGenerator,
@@ -1064,6 +1115,7 @@ buckets_data_mapping = {
     cons.GUARD_DUTY_TYPE: GuardDutyDataGenerator,
     cons.NATIVE_GUARD_DUTY_TYPE: NativeGuardDutyDataGenerator,
     cons.WAF_TYPE: WAFDataGenerator,
+    cons.SERVER_ACCESS: ServerAccessDataGenerator
 }
 
 
