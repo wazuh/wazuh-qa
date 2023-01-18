@@ -994,7 +994,7 @@ def file_monitoring(request):
     logger.debug(f"Trucanted {file_to_monitor}")
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def set_wazuh_configuration(configuration):
     """Set wazuh configuration
 
@@ -1019,7 +1019,7 @@ def set_wazuh_configuration(configuration):
     conf.write_wazuh_conf(backup_config)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def configure_local_internal_options_function(request):
     """Fixture to configure the local internal options file.
 
@@ -1044,10 +1044,14 @@ def configure_local_internal_options_function(request):
     conf.set_local_internal_options_dict(backup_local_internal_options)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def truncate_monitored_files():
     """Truncate all the log files and json alerts files before and after the test execution"""
-    log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
+
+    if 'agent' in get_service():
+        log_files = [LOG_FILE_PATH]
+    else:
+        log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
 
     for log_file in log_files:
         if os.path.isfile(os.path.join(PREFIX, log_file)):
@@ -1060,7 +1064,7 @@ def truncate_monitored_files():
             truncate_file(log_file)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def stop_modules_function_after_execution():
     """Stop wazuh modules daemon after finishing a test"""
     yield
