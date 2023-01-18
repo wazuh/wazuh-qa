@@ -94,14 +94,14 @@ def test_windows_system_monitoring(configuration, metadata, test_folders, set_wa
     and that monitoring for Sysnative folder is redirected to System32 and works properly.
 
     test_phases:
-        - Setup:
+        - setup:
             - Set wazuh configuration and local_internal_options.
             - Create custom folder for monitoring
             - Clean logs files and restart wazuh to apply the configuration.
-        - Test:
+        - test:
             - In case of monitoring Sysnative, check it is redirected to System32.
             - Create, Update and Delete files in monitored folders, and check logs appear.
-        - Tierdown:
+        - teardown:
             - Delete custom monitored folder
             - Restore configuration
             - Stop wazuh
