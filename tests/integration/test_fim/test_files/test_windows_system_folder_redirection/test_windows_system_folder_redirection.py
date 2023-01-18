@@ -51,7 +51,7 @@ import os
 
 
 import pytest
-from wazuh_testing import LOG_FILE_PATH, T_10
+from wazuh_testing import LOG_FILE_PATH, T_10, T_60
 from wazuh_testing.tools import PREFIX, configuration
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.fim import TEST_DIR_1
@@ -59,10 +59,9 @@ from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as loca
 from wazuh_testing.modules.fim.event_monitor import check_fim_event, CB_FIM_PATH_CONVERTED
 from wazuh_testing.modules.fim.utils import regular_file_cud
 
+
 # Marks
-
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
-
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -78,13 +77,13 @@ configuration_parameters, configuration_metadata, test_case_ids = configuration.
 configurations = configuration.load_configuration_template(configurations_path, configuration_parameters,
                                                            configuration_metadata)
 
-# variables
+# Variables
 test_folders = [os.path.join(PREFIX, 'windows', 'System32', TEST_DIR_1),
                 os.path.join(PREFIX, 'windows', 'SysWOW64', TEST_DIR_1)]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 
-# tests
+# Tests
 @pytest.mark.parametrize('test_folders', [test_folders], ids='', scope='module')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 def test_windows_system_monitoring(configuration, metadata, test_folders, set_wazuh_configuration,
@@ -122,7 +121,7 @@ def test_windows_system_monitoring(configuration, metadata, test_folders, set_wa
             brief: restart syscheckd daemon, and truncate the ossec.log.
         - wait_for_fim_start_function:
             type: fixture
-            brief: check that the starting fim scan is detected.
+            brief: check that the starting FIM scan is detected.
 
     assertions:
         - Verify that for each modified file a 'diff' file is generated.
@@ -145,8 +144,9 @@ def test_windows_system_monitoring(configuration, metadata, test_folders, set_wa
     folder = os.path.join(PREFIX, 'windows', metadata['folder'], TEST_DIR_1)
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
+    # If monitoring sysnative, check redirection log message
     if metadata['redirected']:
         check_fim_event(callback=CB_FIM_PATH_CONVERTED, timeout=T_10)
-
-    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, time_travel=False,
-                     min_timeout=60, triggers_event=True, escaped=True)
+    
+    # Create, Update and Delete files in monitored folder and check expected events are generated
+    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, min_timeout=T_60, triggers_event=True, escaped=True)

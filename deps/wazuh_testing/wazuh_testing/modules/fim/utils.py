@@ -13,9 +13,7 @@ from wazuh_testing.tools.file import create_file, modify_file, delete_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.modules import fim
-from wazuh_testing.modules.fim.event_monitor import (callback_detect_end_scan, callback_detect_file_added_event,
-                                                     callback_detect_file_modified_event,
-                                                     callback_detect_file_deleted_event)
+from wazuh_testing.modules.fim import event_monitor as ev
 from wazuh_testing.modules.fim.classes import CustomValidator, EventChecker
 
 
@@ -265,7 +263,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
                                        validators_after_delete, validators_after_cud)
     event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
                                  custom_validator=custom_validator, encoding=encoding,
-                                 callback=callback_detect_file_added_event)
+                                 callback=ev.callback_detect_file_added_event)
 
     # Create text files
     for name, content in file_list.items():
@@ -281,7 +279,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         modify_file(folder, name, is_binary=isinstance(content, bytes))
     event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
                                  custom_validator=custom_validator, encoding=encoding,
-                                 callback=callback_detect_file_modified_event)
+                                 callback=ev.callback_detect_file_modified_event)
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event,
                                   event_mode=event_mode, escaped=escaped)
     if triggers_event:
@@ -292,7 +290,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         delete_file(os.path.join(folder, name))
     event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
                                  custom_validator=custom_validator, encoding=encoding,
-                                 callback=callback_detect_file_deleted_event)
+                                 callback=ev.callback_detect_file_deleted_event)
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event,
                                   event_mode=event_mode, escaped=escaped)
     if triggers_event:
@@ -330,6 +328,6 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
         logger.info(f"Changing the system clock from {before} to {str(datetime.now())}")
 
         if monitor:
-            monitor.start(timeout=timeout, callback=callback_detect_end_scan,
+            monitor.start(timeout=timeout, callback=ev.callback_detect_end_scan,
                           update_position=False,
                           error_message=f"End of scheduled scan not detected after {timeout} seconds")
