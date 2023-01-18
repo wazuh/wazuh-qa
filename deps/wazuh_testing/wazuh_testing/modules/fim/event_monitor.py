@@ -138,7 +138,7 @@ def callback_detect_file_deleted_event(line):
 
     Args:
         line (String): string line to be checked by callback in FileMonitor.
-     
+
     Returns:
         returns JSON string from log.
     """

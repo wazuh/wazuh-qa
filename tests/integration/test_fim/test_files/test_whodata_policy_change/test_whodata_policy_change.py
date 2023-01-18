@@ -95,7 +95,7 @@ def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration,
     '''
     description: Check if the 'wazuh-syscheckd' is monitoring a in whodata mode in Windows, and the Audit Policies are
                  changed, the monitoring changes to realtime and works on the monitored files.
- 
+
     test_phases:
         - Setup:
             - Set wazuh configuration.

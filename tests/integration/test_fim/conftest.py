@@ -104,9 +104,10 @@ def create_monitored_folders_module(test_folders):
     for folder in test_folders:
         delete_path_recursively(folder)
 
+
 @pytest.fixture()
 def restore_win_whodata_policies(policies_file):
-    
+
     yield
 
     command = f"auditpol /restore /file:{policies_file}"
