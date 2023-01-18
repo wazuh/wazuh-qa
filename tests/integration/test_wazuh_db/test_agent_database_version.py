@@ -47,5 +47,9 @@ def test_agent_database_version(restart_wazuh_daemon):
     manager_version = query_wdb("agent 0 sql SELECT value FROM metadata WHERE key='db_version'")[0]['value']
     agent_version = query_wdb(f"agent {agents[0].id} sql SELECT value FROM metadata WHERE key='db_version'")[0]['value']
 
-    assert manager_version == expected_database_version
-    assert agent_version == expected_database_version
+    assert manager_version == expected_database_version, 'The manager database version is not the expected one. \n' \
+                                                         f'Expected version: {expected_database_version}\n'\
+                                                         f'Obtained version: {manager_version}'
+    assert agent_version == expected_database_version, 'The agent database version is not the expected one. \n' \
+                                                       f'Expected version: {expected_database_version}\n'\
+                                                       f'Obtained version: {agent_version}'
