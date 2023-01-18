@@ -130,7 +130,6 @@ def check_if_sid_not_found(file_monitor):
     Args:
         file_monitor (FileMonitor): Log monitor.
     """
-
     file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_SID_NOT_FOUND),
                        error_message=ERR_MSG_SID_NOT_FOUND)
 
@@ -142,7 +141,6 @@ def check_invalid_if_sid(file_monitor, is_empty):
         file_monitor (FileMonitor): Log monitor.
         is_empty (Boolean): True if is_sid tag has nothing inside/ is empty.
     """
-
     callback = CB_INVALID_EMPTY_IF_SID_RULE_IGNORED if is_empty else CB_INVALID_IF_SID_RULE_IGNORED
 
     file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(callback),
@@ -155,6 +153,5 @@ def check_empty_if_sid(file_monitor):
     Args:
         file_monitor (FileMonitor): Log monitor.
     """
-
     file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_EMPTY_IF_SID_RULE_IGNORED),
                        error_message=ERR_MSG_EMPTY_IF_SID)

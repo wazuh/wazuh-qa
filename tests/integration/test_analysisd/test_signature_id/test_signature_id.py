@@ -230,14 +230,14 @@ def test_null_signature_id(configuration, metadata, set_wazuh_configuration, tru
                  assigned to the if_sid option, the rule is ignored.
 
     test_phases:
-        - Setup:
+        - setup:
             - Set wazuh configuration.
             - Copy custom rules file into manager
             - Clean logs files and restart wazuh to apply the configuration.
-        - Test:
+        - test:
             - Check "if_sid not found" log is detected
             - Check "empty if_sid" log is detected
-        - Tierdown:
+        - teardown:
             - Delete custom rule file
             - Restore configuration
             - Stop wazuh
