@@ -93,6 +93,19 @@ def test_windows_system_monitoring(configuration, metadata, test_folders, set_wa
     description: Check if the 'wazuh-syscheckd' monitors the windows system folders (System32 and SysWOW64) properly,
     and that monitoring for Sysnative folder is redirected to System32 and works properly.
 
+    test_phases:
+        - Setup:
+            - Set wazuh configuration and local_internal_options.
+            - Create custom folder for monitoring
+            - Clean logs files and restart wazuh to apply the configuration.
+        - Test:
+            - In case of monitoring Sysnative, check it is redirected to System32.
+            - Create, Update and Delete files in monitored folders, and check logs appear.
+        - Tierdown:
+            - Delete custom monitored folder
+            - Restore configuration
+            - Stop wazuh
+
     wazuh_min_version: 4.5.0
 
     tier: 1
@@ -147,6 +160,7 @@ def test_windows_system_monitoring(configuration, metadata, test_folders, set_wa
     # If monitoring sysnative, check redirection log message
     if metadata['redirected']:
         check_fim_event(callback=CB_FIM_PATH_CONVERTED, timeout=T_10)
-    
+
     # Create, Update and Delete files in monitored folder and check expected events are generated
-    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, min_timeout=T_60, triggers_event=True, escaped=True)
+    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, min_timeout=T_60, triggers_event=True,
+                     escaped=True)
