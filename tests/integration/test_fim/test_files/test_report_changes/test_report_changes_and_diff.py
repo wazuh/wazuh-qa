@@ -66,7 +66,6 @@ tags:
 '''
 import os
 
-
 import pytest
 from wazuh_testing.tools import PREFIX, configuration
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -75,10 +74,9 @@ from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as loca
 from wazuh_testing.modules.fim.utils import regular_file_cud
 from test_fim.common import make_diff_file_path
 
+
 # Marks
-
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=1)]
-
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
