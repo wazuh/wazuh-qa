@@ -19,6 +19,8 @@ def test_agent_database_version(restart_wazuh_daemon):
         - setup:
             - Restart wazuh-manager service.
         - test:
+            - Get the version of the manager database through the socket
+            - Get the version of the agent database through the socket
             - Check that the manager database version is the expected one.
             - Check that the agent database version is the expected one.
 
