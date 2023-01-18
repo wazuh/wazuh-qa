@@ -55,23 +55,13 @@ import os
 from time import sleep
 
 from wazuh_testing import DB_PATH, T_5
-from wazuh_testing.modules import TIER0, LINUX, SERVER
 from wazuh_testing.db_interface import get_sqlite_query_result
+from wazuh_testing.modules import TIER0, LINUX, SERVER
 from wazuh_testing.wazuh_db import query_wdb
+from wazuh_testing.tools.agent_simulator import create_agents, connect
 
 # Marks
 pytestmark = [TIER0, LINUX, SERVER]
-
-
-# Configurations
-
-
-
-# Variables
-
-
-
-# Fixtures
 
 
 # Tests
@@ -96,10 +86,16 @@ def test_agent_database_version():
         - wazuh_db
         - wdb_socket
     '''
-    version = get_sqlite_query_result(os.path.join(DB_PATH, '000.db'),
-                                      "SELECT value FROM metadata WHERE key='db_version'")
+    agents = create_agents(1, 'localhost')
+    connect(agents[0])
+
+    manager_version = get_sqlite_query_result(os.path.join(DB_PATH, '000.db'),
+                                              "SELECT value FROM metadata WHERE key='db_version'")
+    agent_version = get_sqlite_query_result(os.path.join(DB_PATH, f'{agents[0].id}.db'),
+                                            "SELECT value FROM metadata WHERE key='db_version'")
     # Wait for wazuh-db to start and create the wdb socket
     sleep(T_5)
-    version2 = query_wdb("agent 0 sql SELECT value FROM metadata WHERE key='db_version'")
+    manager_version2 = query_wdb("agent 0 sql SELECT value FROM metadata WHERE key='db_version'")
+    agent_version2 = query_wdb(f"agent {agents[0].id} sql SELECT value FROM metadata WHERE key='db_version'")
 
-    assert version[0] == version2[0]['value'] == '10'
+    assert manager_version[0] == manager_version2[0]['value'] == '10' == agent_version[0] == agent_version2[0]['value']
