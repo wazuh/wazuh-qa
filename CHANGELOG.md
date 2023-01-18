@@ -38,6 +38,7 @@ Release report: TBD
 
 ### Changed
 
+- Increase NVE download feed test timeout([#3769](https://github.com/wazuh/wazuh-qa/pull/3769)) \- (Tests)
 - Adapt wazuhdb integration tests for auto-vacuum ([#3613](https://github.com/wazuh/wazuh-qa/issues/3613)) \- (Tests)
 - Update logcollector format test due to audit changes ([#3641](https://github.com/wazuh/wazuh-qa/pull/3641)) \- (Framework)
 - Refactor `test_basic_usage_realtime_unsupported` FIM test to avoid using time travel ([#3623](https://github.com/wazuh/wazuh-qa/pull/3623)) \- (Tests)
@@ -72,6 +73,7 @@ Release report: TBD
 - Replace callback_generator function to generate_monitoring_callback ([#2535](https://github.com/wazuh/wazuh-qa/pull/2535)) \- (Framework + Tests)
 - Analysisd: Reduce execution time of tests with tier 0 ([#2546](https://github.com/wazuh/wazuh-qa/pull/2546)) \- (Tests)
 - Adapt logtest ITs given the rules skipping ([#2200](https://github.com/wazuh/wazuh-qa/pull/2200)) \- (Tests)
+- Updated the Authd response when a multigroup is too long ([#3746](https://github.com/wazuh/wazuh-qa/pull/3746)) \- (Tests)
 
 ### Fixed
 
@@ -86,6 +88,7 @@ Release report: TBD
 - Fix undeclared API token variable in multigroups system tests ([#3674](https://github.com/wazuh/wazuh-qa/pull/3674)) \- (Framework + Tests)
 - Fix error in requirements.txt ([#3689](https://github.com/wazuh/wazuh-qa/pull/3689)) \- (Framework)
 - Fix sleep time in `test_agent_default_group_added`. ([#3692](https://github.com/wazuh/wazuh-qa/pull/3692)) \- (Tests)
+- Fix syscollector deltas integration tests. ([#3695](https://github.com/wazuh/wazuh-qa/pull/3695)) \- (Tests)
 
 ### Removed
 
