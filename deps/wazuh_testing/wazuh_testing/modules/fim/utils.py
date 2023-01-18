@@ -241,7 +241,6 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1
         options (set, optional): Set with all the checkers. Default `None`
         triggers_event (boolean, optional): Boolean to determine if the event should be raised or not. Default `True`
         encoding (str, optional): String to determine the encoding of the file name. Default `None`
-        callback (callable, optional): Callback to use with the log monitor. Default `callback_detect_event`
         validators_after_create (list, optional): List of functions that validates an event triggered when a new file
             is created. Each function must accept a param to receive the event to be validated. Default `None`
         validators_after_update (list, optional): List of functions that validates an event triggered when a new file
@@ -263,7 +262,8 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1
     custom_validator = CustomValidator(validators_after_create, validators_after_update,
                                        validators_after_delete, validators_after_cud)
     event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
-                                 custom_validator=custom_validator, encoding=encoding, callback=callback)
+                                 custom_validator=custom_validator, encoding=encoding,
+                                 callback=ev.callback_detect_file_added_event)
 
     # Create text files
     for name, content in file_list.items():
