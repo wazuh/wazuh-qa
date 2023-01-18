@@ -127,7 +127,7 @@ def extra_configuration_after_yield():
 
 
 # Tests
-@pytest.mark.skip('Test skipped for flaky behavior, after it is fixed, it will be unblocked')
+@pytest.mark.skip('Test skipped for flaky behavior, after it is fixed by Issue wazuh/wazuh#3783, it will be unblocked')
 @pytest.mark.parametrize('filename, folder, original_size, modified_size', [
     ('regular_0', testdir, 500, 500),
     ('regular_1', testdir, 30000, 30000),
