@@ -95,7 +95,7 @@ def test_limitation(configuration, metadata, load_wazuh_basic_configuration, set
               processed.
             - Wait until the next analysis period (next timeframe) and check that events are still being
               processed, in this case the queued ones.
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
 
@@ -209,7 +209,7 @@ def test_queueing_events_after_limitation(configuration, metadata, load_wazuh_ba
               the events queue and takes a sample of the usage to check that it is higher than 0%.
             - Wait a few seconds and takes a second sample again, to check that the events queue usage is higher than
               the first sample.
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
 
@@ -309,7 +309,7 @@ def test_dropping_events_when_queue_is_full(configuration, metadata, load_wazuh_
             - Check that the initial queue usage rate is 0%.
             - Calculate when the event analysis blocking phase is expected and the queue is full, then it measures the
               use of the event queue to check that it is 100%, and that the received events are being dropped.
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
 
@@ -415,7 +415,7 @@ def test_event_processing_in_order_single_thread(configuration, metadata, load_w
             - Wait a few seconds, then send another batch of identified events.
             - Wait until all events are processed.
             - Read the event log (archives.log) and check that the events have been processed in the expected order.
-        - tierdown:
+        - teardown:
             - Truncate wazuh event logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
 
@@ -525,7 +525,7 @@ def test_event_processing_in_order_multi_thread(configuration, metadata, load_wa
             - Wait a few seconds, then send another batch of identified events. This is repeated n times.
             - Wait until all events are processed.
             - Read the event log (archives.log) and check that the events have been processed in the expected order.
-        - tierdown:
+        - teardown:
             - Truncate wazuh event logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
 
