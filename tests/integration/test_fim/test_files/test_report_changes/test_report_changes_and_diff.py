@@ -77,7 +77,7 @@ from test_fim.common import make_diff_file_path
 
 # Marks
 
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=1)]
 
 
 # Reference paths
@@ -109,11 +109,11 @@ configurations = configuration.load_configuration_template(configurations_path, 
 
 
 # tests
-@pytest.mark.parametrize('test_folders', [test_directories])
+@pytest.mark.parametrize('test_folders', [test_directories], scope="module", ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuration,
                                  configure_local_internal_options_function, restart_syscheck_function,
-                                 create_monitored_folders, wait_fim_start_function):
+                                 create_monitored_folders_module, wait_fim_start_function):
     '''
     description: Check if the 'wazuh-syscheckd' daemon reports the file changes (or truncates if required)
                  in the generated events using the 'nodiff' tag and vice versa. For this purpose, the test
@@ -143,7 +143,7 @@ def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuratio
         - restart_syscheck_function:
             type: fixture
             brief: restart syscheckd daemon, and truncate the ossec.log.
-        - create_monitored_folders
+        - create_monitored_folders_module
             type: fixture
             brief: Create folders to be monitored, delete after test.
         - wait_for_fim_start_function:

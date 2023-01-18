@@ -249,7 +249,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1
         validators_after_cud (list, optional): List of functions that validates an event triggered when a new file
             is created, modified or deleted. Each function must accept a param to receive
             the event to be validated. Default `None`
-        event_mode (str, optional): Specifie2 unidadess the FIM scan mode to check in the events
+        event_mode (str, optional): Specifies the FIM scan mode to check in the events
     """
 
     # Transform file list
@@ -276,6 +276,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1
     # Modify previous text files
     for name, content in file_list.items():
         modify_file(folder, name, is_binary=isinstance(content, bytes))
+
     event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
                                  custom_validator=custom_validator, encoding=encoding,
                                  callback=ev.callback_detect_file_modified_event)
@@ -287,6 +288,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1
     # Delete previous text files
     for name in file_list:
         delete_file(os.path.join(folder, name))
+
     event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
                                  custom_validator=custom_validator, encoding=encoding,
                                  callback=ev.callback_detect_file_deleted_event)
