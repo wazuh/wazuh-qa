@@ -69,7 +69,7 @@ from time import sleep
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1), pytest.mark.server]
 
 # Configuration
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'configuration')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'configuration_template')
 configurations_path = os.path.join(test_data_path, 'wazuh_configuration.yaml')
 daemons_handler_configuration = {'all_daemons': True}
 

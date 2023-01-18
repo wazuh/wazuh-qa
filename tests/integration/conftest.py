@@ -1017,10 +1017,14 @@ def set_wazuh_configuration(configuration):
     conf.write_wazuh_conf(backup_config)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def truncate_monitored_files():
     """Truncate all the log files and json alerts files before and after the test execution"""
-    log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
+
+    if 'agent' in get_service():
+        log_files = [LOG_FILE_PATH]
+    else:
+        log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
 
     for log_file in log_files:
         truncate_file(log_file)
