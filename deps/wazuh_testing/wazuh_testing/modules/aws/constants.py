@@ -30,6 +30,7 @@ US_EAST_1_REGION = 'us-east-1'
 JSON_EXT = '.json'
 LOG_EXT = '.log'
 JSON_GZ_EXT = '.jsonl.gz'
+CSV_EXT = '.csv'
 
 # Bucket types
 CLOUD_TRAIL_TYPE = 'cloudtrail'
@@ -47,3 +48,4 @@ GUARD_DUTY_TYPE = 'guardduty'
 NATIVE_GUARD_DUTY_TYPE = 'native-guardduty'
 WAF_TYPE = 'waf'
 SERVER_ACCESS = 'server_access'
+CISCO_UMBRELLA_TYPE = 'cisco_umbrella'

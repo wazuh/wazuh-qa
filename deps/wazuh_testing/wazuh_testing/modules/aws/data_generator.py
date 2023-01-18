@@ -1101,6 +1101,51 @@ class ServerAccessDataGenerator(DataGenerator):
         return buffer.getvalue()
 
 
+class UmbrellaDataGenerator(DataGenerator):
+    BASE_PATH = 'dnslogs'
+    BASE_FILE_NAME = ''
+
+    def get_filename(self, prefix=None, **kwargs) -> str:
+        """Return the filename in the umbrella format.
+        Example:
+            <prefix>/<year>-<month>-<day>
+        Returns:
+            str: Synthetic filename.
+        """
+        now = datetime.utcnow()
+        path = join(self.BASE_PATH, now.strftime('%Y-%m-%d'))
+        name = f"{self.BASE_FILE_NAME}{now.strftime('%Y-%m-%d')}-00-00-ioxa{cons.CSV_EXT}"
+
+        return join(path, name)
+
+    def get_data_sample(self) -> str:
+        """Return a sample of data according to the cloudtrail format.
+        Returns:
+            str: Synthetic data.
+        """
+        data = []
+
+        for _ in range(5):
+            data.append(
+                [
+                    datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+                    'ActiveDirectoryUserName',
+                    'ActiveDirectoryUserName,ADSite,Network',
+                    get_random_ip(),
+                    get_random_ip(),
+                    'Allowed',
+                    '1 (A)',
+                    'NOERROR',
+                    'domain-visited.com.',
+                    'Chat,Photo Sharing,Social Networking,Allow List'
+                ]
+            )
+        buffer = StringIO()
+        csv.writer(buffer).writerows(data)
+
+        return buffer.getvalue()
+
+
 # Maps bucket type with corresponding data generator
 buckets_data_mapping = {
     cons.CLOUD_TRAIL_TYPE: CloudTrailDataGenerator,
@@ -1115,7 +1160,8 @@ buckets_data_mapping = {
     cons.GUARD_DUTY_TYPE: GuardDutyDataGenerator,
     cons.NATIVE_GUARD_DUTY_TYPE: NativeGuardDutyDataGenerator,
     cons.WAF_TYPE: WAFDataGenerator,
-    cons.SERVER_ACCESS: ServerAccessDataGenerator
+    cons.SERVER_ACCESS: ServerAccessDataGenerator,
+    cons.CISCO_UMBRELLA_TYPE: UmbrellaDataGenerator
 }
 
 
