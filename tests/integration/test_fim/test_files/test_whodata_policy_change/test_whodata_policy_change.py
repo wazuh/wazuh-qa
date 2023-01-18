@@ -97,16 +97,16 @@ def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration,
                  changed, the monitoring changes to realtime and works on the monitored files.
 
     test_phases:
-        - Setup:
+        - setup:
             - Set wazuh configuration.
             - Create target folder to be monitored
             - Clean logs files and restart wazuh to apply the configuration.
-        - Test:
+        - test:
             - Check that SACL has been configured for monitored folders
             - Change windows audit whodata policies
             - Check the change has been detected and monitoring changes to realtime mode
             - Create, Update and Delete files in the monitored folder and check events are generated in realtime
-        - Tierdown:
+        - teardown:
             - Restore windows audit policies
             - Delete the monitored folders
             - Restore configuration
