@@ -26,12 +26,6 @@
         dest: C:\Program Files (x86)\ossec-agent
         remote_src: true
 
-    - name: Restore local_internal_options.conf without changes
-      win_copy:
-        src: C:\temp\local_internal_options.conf
-        dest: C:\Program Files (x86)\ossec-agent
-        remote_src: true
-
     - name: Restart wazuh-agent
       include_role:
         name: manage_wazuh

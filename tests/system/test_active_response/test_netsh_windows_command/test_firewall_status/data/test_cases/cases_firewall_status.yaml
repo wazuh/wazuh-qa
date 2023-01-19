@@ -1,5 +1,5 @@
 - name: firewall_disabled
-  description: Check that the firewall is disabled.
+  description: Set all firewall network to disabled mode.
   configuration_parameters: null
   metadata:
     extra_vars:
@@ -10,7 +10,7 @@
         - .*"FIREWALL_PUBLIC","status\d":"inactive".*
 
 - name: firewall_enabled
-  description: Check that the firewall is enabled.
+  description: Set all firewall network to enabled mode.
   configuration_parameters: null
   metadata:
     extra_vars:

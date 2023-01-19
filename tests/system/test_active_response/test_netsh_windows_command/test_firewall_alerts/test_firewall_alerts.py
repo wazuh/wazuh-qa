@@ -14,21 +14,12 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 
 # Playbooks
 configuration_playbooks = ['configuration.yaml']
+# truncate_files_playbooks = ['truncate_files.yaml']
 events_playbooks = ['generate_events.yaml']
 teardown_playbooks = ['teardown.yaml']
 
 # Configuration
 configurations, configuration_metadata, cases_ids = config.get_test_cases_data(test_cases_file_path)
-
-
-def check_event(expected_log):
-    """Check for the espected log.
-
-    Args:
-        expected_log (str): Text to find in the alerts.json file
-    """
-    evm.check_event(callback=expected_log, file_to_monitor=alerts_json, timeout=fw.T_5,
-                    error_message=f"Could not find the event '{expected_log}' in alerts.json file")
 
 
 @pytest.mark.parametrize('metadata', configuration_metadata, ids=cases_ids)
@@ -37,9 +28,18 @@ def test_firewall_alerts(configure_environment, metadata, generate_events):
     description: Check that an alert is generated when the firewall is disabled.
 
     test_phases:
-        - Set a custom Wazuh configuration.
-        - Generates RDP attacks
-        - Check in the agent alerts.json file that the firewall is disabled/enabled.
+        - setup:
+            - Load Wazuh light configuration.
+            - Apply ossec.conf configuration changes according to the configuration template and use case.
+            - Truncate wazuh logs.
+            - Restart wazuh-manager service to apply configuration changes.
+            - Change status to the Windows firewall.
+            - Insert log into a monitorized file
+        - test:
+            - Check in the alerts.json that an alerts of firewall disabled are generated when the firewall is disabled.
+            - Check in the alerts.json that no alerts of firewall enabled are generated when the firewall is enabled.
+        - tierdown:
+            - Restore initial configuration, ossec.conf.
 
     wazuh_min_version: 4.5.0
 
@@ -68,8 +68,12 @@ def test_firewall_alerts(configure_environment, metadata, generate_events):
     status = metadata['extra_vars']['firewall_status']
     for expected_log in metadata['extra_vars']['firewall_status_logs']:
         if 'disabled' in status:
-            check_event(expected_log)
+            # When the firewall is inactive the alerts.json contains messages about firewall inactive status.
+            evm.check_event(callback=expected_log, file_to_monitor=alerts_json, timeout=fw.T_5,
+                            error_message=f"Could not find the event '{expected_log}' in alerts.json file")
         else:
+            # When the firewall is active the alerts.json file does not contain any message about firewall status.
             with pytest.raises(TimeoutError):
-                check_event(expected_log)
-                raise AttributeError(f'Unexpected log {expected_log}')
+                evm.check_event(callback=expected_log, file_to_monitor=alerts_json, timeout=fw.T_5,
+                                error_message=f"Could not find the event '{expected_log}' in alerts.json file")
+                raise AttributeError(f"The alert '{expected_log}' was generated unexpectedly")

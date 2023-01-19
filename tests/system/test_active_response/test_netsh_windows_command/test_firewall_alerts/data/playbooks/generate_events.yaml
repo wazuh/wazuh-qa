@@ -1,12 +1,3 @@
-- name: Clean alerts file
-  hosts: manager
-  tasks:
-
-    - name: Truncate alert.json
-      include_role:
-        name: manage_alerts
-        tasks_from: truncate_alert_json.yaml
-
 - name: Generate events
   hosts: windows-agent
   vars:

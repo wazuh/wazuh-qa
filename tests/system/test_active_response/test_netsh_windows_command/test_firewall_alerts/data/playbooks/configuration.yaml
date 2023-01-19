@@ -17,6 +17,11 @@
           </active-response>
         os: linux
 
+    - name: Truncate alert.json
+      include_role:
+        name: manage_alerts
+        tasks_from: truncate_alert_json.yaml
+
     - name: Restart wazuh-manager
       include_role:
         name: manage_wazuh
@@ -33,7 +38,7 @@
         path: C:\temp\
         state: directory
 
-    - name: Copy ossec.conf
+    - name: Make a backup of ossec.conf
       ansible.windows.win_copy:
         src: C:\Program Files (x86)\ossec-agent\ossec.conf
         dest: C:\temp
