@@ -24,7 +24,7 @@
           <command>netsh</command>
           <location>all</location>
           <rules_id>60122</rules_id>
-          <timeout>10</timeout>
+          <timeout>5</timeout>
           </active-response>
         os: linux
 

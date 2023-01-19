@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Added
 
+- Add test to check if active-response netsh generates alerts when firewall is disabled. ([3787](https://github.com/wazuh/wazuh-qa/pull/3787)) \- (Framework + Tests)
 - Add 'Force reconnect' feature to agent_simulator tool. ([#3111](https://github.com/wazuh/wazuh-qa/pull/3111)) \- (Tools)
 
 ### Changed
@@ -20,7 +21,7 @@ Release report: TBD
 
 ### Fixed
 
-- Fix a regex error in the FIM integration tests ([#3061](https://github.com/wazuh/wazuh-qa/issues/3061)) \- (Framework + Tests) 
+- Fix a regex error in the FIM integration tests ([#3061](https://github.com/wazuh/wazuh-qa/issues/3061)) \- (Framework + Tests)
 - Fix an error in the cluster performance tests related to CSV parser ([#2999](https://github.com/wazuh/wazuh-qa/pull/2999)) \- (Framework + Tests)
 
 

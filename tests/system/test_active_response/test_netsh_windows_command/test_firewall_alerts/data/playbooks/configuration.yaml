@@ -13,7 +13,7 @@
           <command>netsh</command>
           <location>local</location>
           <rules_id>5716</rules_id>
-          <timeout>10</timeout>
+          <timeout>5</timeout>
           </active-response>
         os: linux
 

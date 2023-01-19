@@ -3,4 +3,4 @@
     src: "{{ source_path }}"
     dest: /tmp/{{ dest_path }}
     flat: true
-    validate_checksum: no
+    validate_checksum: false

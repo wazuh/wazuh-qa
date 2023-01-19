@@ -7,11 +7,10 @@
       firewall_domain_status: disabled
       firewall_public_status: disabled
       firewall_private_status: disabled
-      firewall_status_logs: [
-        ".*\"FIREWALL_DOMAIN\",\"status\\d\":\"inactive\".*",
-        ".*\"FIREWALL_PRIVATE\",\"status\\d\":\"inactive\".*",
-        ".*\"FIREWALL_PUBLIC\",\"status\\d\":\"inactive\".*"
-      ]
+      firewall_status_logs:
+        - ".*\"FIREWALL_DOMAIN\",\"status\\d\":\"inactive\".*"
+        - ".*\"FIREWALL_PRIVATE\",\"status\\d\":\"inactive\".*"
+        - ".*\"FIREWALL_PUBLIC\",\"status\\d\":\"inactive\".*"
 
 - name: firewall_public_profile_disabled
   description: Check that the firewall public profile is disabled.
@@ -22,11 +21,10 @@
       firewall_domain_status: enabled
       firewall_public_status: disabled
       firewall_private_status: enabled
-      firewall_status_logs: [
-        ".*\"FIREWALL_DOMAIN\",\"status\\d\":\"active\".*",
-        ".*\"FIREWALL_PRIVATE\",\"status\\d\":\"active\".*",
-        ".*\"FIREWALL_PUBLIC\",\"status\\d\":\"inactive\".*"
-      ]
+      firewall_status_logs:
+        - ".*\"FIREWALL_DOMAIN\",\"status\\d\":\"active\".*"
+        - ".*\"FIREWALL_PRIVATE\",\"status\\d\":\"active\".*"
+        - ".*\"FIREWALL_PUBLIC\",\"status\\d\":\"inactive\".*"
 
 - name: firewall_enabled
   description: Check that the firewall is enabled.
@@ -37,8 +35,7 @@
       firewall_domain_status: enabled
       firewall_public_status: enabled
       firewall_private_status: enabled
-      firewall_status_logs: [
-        ".*\"FIREWALL_DOMAIN\",\"status\\d\":\"active\".*",
-        ".*\"FIREWALL_PRIVATE\",\"status\\d\":\"active\".*",
-        ".*\"FIREWALL_PUBLIC\",\"status\\d\":\"active\".*"
-      ]
+      firewall_status_logs:
+        - ".*\"FIREWALL_DOMAIN\",\"status\\d\":\"active\".*"
+        - ".*\"FIREWALL_PRIVATE\",\"status\\d\":\"active\".*"
+        - ".*\"FIREWALL_PUBLIC\",\"status\\d\":\"active\".*"

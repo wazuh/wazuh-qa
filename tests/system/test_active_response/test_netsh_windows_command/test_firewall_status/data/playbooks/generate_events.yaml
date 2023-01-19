@@ -6,9 +6,9 @@
       community.windows.win_firewall:
         state: "{{ firewall_status }}"
         profiles:
-        - Domain
-        - Private
-        - Public
+          - Domain
+          - Private
+          - Public
 
 - name: Generate events
   hosts: manager

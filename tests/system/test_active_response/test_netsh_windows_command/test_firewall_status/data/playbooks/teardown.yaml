@@ -43,6 +43,6 @@
       community.windows.win_firewall:
         state: enabled
         profiles:
-        - Domain
-        - Private
-        - Public
+          - Domain
+          - Private
+          - Public
