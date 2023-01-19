@@ -172,8 +172,8 @@ def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuratio
     file_list = [f"regular_file"]
     is_truncated = metadata['folder'] == 'testdir_nodiff'
     folder = os.path.join(PREFIX, metadata['folder'])
-    escaped = True if sys.platform=='win32' else False
-    
+    escaped = True if sys.platform == 'win32' else False
+
     def report_changes_validator(event):
         """Validate content_changes attribute exists in the event"""
         for file in file_list:
