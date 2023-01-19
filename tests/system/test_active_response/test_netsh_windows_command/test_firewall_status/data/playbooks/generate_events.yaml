@@ -25,7 +25,7 @@
         - name: Waiting for log
           wait_for:
             timeout: 5
-            
+
 - name: Copy log file to a tmp folder
   hosts: windows-agent
   tasks:
