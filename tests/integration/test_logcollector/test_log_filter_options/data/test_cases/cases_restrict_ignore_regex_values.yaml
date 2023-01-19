@@ -1,0 +1,83 @@
+# Test PCRE2
+- name: Matches with restrict tag - Ignore and restrict tags with PCRE2 regex
+  description: Test Restrict + Ignore tags both with PCRE2 regex. Log matches restrict
+  configuration_parameters:
+    RESTRICT_REGEX: .*restrict
+    IGNORE_REGEX: .*ignore
+    RESTRICT_TYPE: PCRE2
+    IGNORE_TYPE: PCRE2
+  metadata:
+    restrict_regex: .*restrict
+    ignore_regex: .*ignore
+    log_sample: "Nov 10 12:19:04 localhost sshd: log matches restrict"
+    matches: restrict
+
+# Test osregex
+- name: Matches with ignore tag - Ignore and restrict tags with osregex regex
+  description: Test Restrict + Ignore tags both with osregex regex. Log matches ignore
+  configuration_parameters:
+    RESTRICT_REGEX: \.restrict
+    IGNORE_REGEX: \.ignore
+    RESTRICT_TYPE: osregex
+    IGNORE_TYPE: osregex
+  metadata:
+    restrict_regex: \\.restrict
+    ignore_regex: \\.ignore
+    log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore"
+    matches: ignore
+
+# Test osmatch
+- name: Log match - Ignore and restrict tags with osmatch regex
+  description: Test Restrict + Ignore tags both with osmatch regex. Log matches both
+  configuration_parameters:
+    RESTRICT_REGEX: restrict$
+    IGNORE_REGEX: ignore
+    RESTRICT_TYPE: osmatch
+    IGNORE_TYPE: osmatch
+  metadata:
+    restrict_regex: restrict\$
+    ignore_regex: ignore
+    log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore restrict"
+    matches: ignore - restrict
+
+# Test pcre2 + osregex
+- name: Matches with restrict tag - Ignore and restrict tags with pcre2 and osregex regex
+  description: Test Restrict + Ignore tags (pcre2+osregex). Log matches restrict
+  configuration_parameters:
+    RESTRICT_REGEX: .*restrict
+    IGNORE_REGEX: \.ignore
+    RESTRICT_TYPE: pcre2
+    IGNORE_TYPE: osregex
+  metadata:
+    restrict_regex: .*restrict
+    ignore_regex: \\.ignore
+    log_sample: "Nov 10 12:19:04 localhost sshd: log matches restrict"
+    matches: restrict
+
+# Test pcre2 + osmatch
+- name: Matches with ignore tag - Ignore and restrict tags with pcre2 and osmatch regex
+  description: Test Restrict + Ignore tags (pcre2+osmatch). Log matches ignore
+  configuration_parameters:
+    RESTRICT_REGEX: .*restrict
+    IGNORE_REGEX: ignore
+    RESTRICT_TYPE: pcre2
+    IGNORE_TYPE: osmatch
+  metadata:
+    restrict_regex: .*restrict
+    ignore_regex: ignore
+    log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore"
+    matches: ignore
+
+# Test osmatch + osregex
+- name: Log match - Ignore and restrict tags with osregex and osmatch regex
+  description: Test Restrict + Ignore tags (osregex+osmatch). Log matches both
+  configuration_parameters:
+    RESTRICT_REGEX: \.restrict
+    IGNORE_REGEX: ignore
+    RESTRICT_TYPE: osregex
+    IGNORE_TYPE: osmatch
+  metadata:
+    restrict_regex: \\.restrict
+    ignore_regex: ignore
+    log_sample: "Nov 10 12:19:04 localhost sshd: log matches ignore restrict"
+    matches: ignore - restrict
