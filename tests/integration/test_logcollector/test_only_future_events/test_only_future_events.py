@@ -143,7 +143,7 @@ def test_only_future_events(configuration, metadata, set_wazuh_configuration,
             - If only_future_events is set to no, check that all written lines have been read.
             - If only_future_events is set to yes, check that all written lines have not been read.
             - If only_future_events is set to yes, write new lines and check that they are read when logcollector is on.
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
 

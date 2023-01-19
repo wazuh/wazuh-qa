@@ -11,6 +11,7 @@ Release report: TBD
 
 - Add new tests analysid handling of invalid/empty rule signature IDs ([#3649]
 (https://github.com/wazuh/wazuh-qa/pull/3649)) \- (Framework + Tests)
+- Add integration test to check agent database version ([#3768](https://github.com/wazuh/wazuh-qa/pull/3768)) \- (Tests)
 - Fix Yara and VirusTotal E2E basic usage tests ([#3660](https://github.com/wazuh/wazuh-qa/pull/3660))
 - Add new test to check if syslog message are parsed correctrly in the `archives.json` file ([#3609](https://github.com/wazuh/wazuh-qa/pull/3609)) \- (Framework + Tests)
 - Add new logging tests for analysisd EPS limitation ([#3509](https://github.com/wazuh/wazuh-qa/pull/3509)) \- (Framework + Tests)
