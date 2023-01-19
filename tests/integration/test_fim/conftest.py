@@ -106,8 +106,8 @@ def restart_syscheck_function():
     control_service("start", daemon="wazuh-syscheckd")
 
 
-@pytest.fixture()
-def create_monitored_folders(test_folders):
+@pytest.fixture(scope="module")
+def create_monitored_folders_module(test_folders):
     """
     Create the folders that will be monitored and delete them at the end.
     Args:
