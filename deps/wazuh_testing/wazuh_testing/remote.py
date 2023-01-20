@@ -499,7 +499,7 @@ def wait_to_remoted_update_groups(wazuh_log_monitor):
     # The log is truncated to ensure that the information has been loaded after the agent has been registered.
     truncate_file(LOG_FILE_PATH)
 
-    callback_pattern = '.*c_files().*End updating shared files sums.'
+    callback_pattern = '.*c_files().*End updating shared files.'
     error_message = 'Could not find the groups reload log'
 
     check_remoted_log_event(wazuh_log_monitor, callback_pattern, error_message, timeout=SYNC_FILES_TIMEOUT)
@@ -684,7 +684,7 @@ def check_push_shared_config(agent, sender, injector=None):
                                                    args=(sender,))
         keep_alive_agent.start()
 
-        log_callback = make_callback(pattern=".*End sending file '.+' to agent '\d+'\.", prefix='.*wazuh-remoted.*')
+        log_callback = make_callback(pattern=r".*End sending file '.+' to agent '\d+'\.", prefix=r'.*wazuh-remoted.*')
         log_monitor = FileMonitor(LOG_FILE_PATH)
         log_monitor.start(timeout=REMOTED_GLOBAL_TIMEOUT, callback=log_callback,
                           error_message="New shared configuration was not sent")
