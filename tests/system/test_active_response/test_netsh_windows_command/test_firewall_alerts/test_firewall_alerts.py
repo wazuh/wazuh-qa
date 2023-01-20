@@ -14,7 +14,6 @@ alerts_json = os.path.join(gettempdir(), 'alerts.json')
 
 # Playbooks
 configuration_playbooks = ['configuration.yaml']
-# truncate_files_playbooks = ['truncate_files.yaml']
 events_playbooks = ['generate_events.yaml']
 teardown_playbooks = ['teardown.yaml']
 
@@ -38,7 +37,7 @@ def test_firewall_alerts(configure_environment, metadata, generate_events):
         - test:
             - Check in the alerts.json that an alerts of firewall disabled are generated when the firewall is disabled.
             - Check in the alerts.json that no alerts of firewall enabled are generated when the firewall is enabled.
-        - tierdown:
+        - teardown:
             - Restore initial configuration, ossec.conf.
 
     wazuh_min_version: 4.5.0
