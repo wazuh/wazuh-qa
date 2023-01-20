@@ -63,7 +63,7 @@ def test_accepted_values(configuration, metadata, load_wazuh_basic_configuration
         - test:
             - Check in the log that the EPS limitation has been activated with the specified parameters.
             - Check that wazuh-analysisd is running (it has not been crashed).
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
 
@@ -129,7 +129,7 @@ def test_invalid_values(configuration, metadata, restart_wazuh_daemon_after_fini
             - Restart wazuh-manager service to apply configuration changes.
             - Check that a configuration error is raised when trying to start wazuh-manager.
             - Check that wazuh-analysisd is not running (due to configuration error).
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
             - Restart the wazuh-manager service to apply initial configuration and start wazuh-analysisd daemon.
@@ -145,7 +145,7 @@ def test_invalid_values(configuration, metadata, restart_wazuh_daemon_after_fini
             brief: Get metadata from the module.
         - restart_wazuh_daemon_after_finishing_function:
             type: fixture
-            brief: Restart the wazuh service in tierdown stage.
+            brief: Restart the wazuh service in teardown stage.
         - load_wazuh_basic_configuration:
             type: fixture
             brief: Load basic wazuh configuration.
@@ -201,7 +201,7 @@ def test_missing_configuration(configuration, metadata, restart_wazuh_daemon_aft
             - Check whether the EPS limitation is activated, deactivated or generates a configuration error due to a
               missing label.
             - Check if wazuh-analysisd is running or not (according to the expected behavior).
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
             - Restart the wazuh-manager service to apply initial configuration and start wazuh-analysisd daemon.
@@ -217,7 +217,7 @@ def test_missing_configuration(configuration, metadata, restart_wazuh_daemon_aft
             brief: Get metadata from the module.
         - restart_wazuh_daemon_after_finishing_function:
             type: fixture
-            brief: Restart the wazuh service in tierdown stage.
+            brief: Restart the wazuh service in teardown stage.
         - load_wazuh_basic_configuration:
             type: fixture
             brief: Load basic wazuh configuration.
