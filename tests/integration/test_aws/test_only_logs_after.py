@@ -572,6 +572,7 @@ def test_bucket_multiple_calls(
 
     bucket_type = metadata['bucket_type']
     bucket_name = metadata['bucket_name']
+    path = metadata.get('path')
 
     base_parameters = [
         '--bucket', bucket_name,
@@ -580,6 +581,9 @@ def test_bucket_multiple_calls(
         '--aws_profile', 'qa',
         '--debug', '2'
     ]
+
+    if path is not None:
+        base_parameters.extend(['--trail_prefix', path])
 
     # Call the module without only_logs_after and check that no logs were processed
     last_marker_key = datetime.utcnow().strftime(cons.PATH_DATE_FORMAT)
