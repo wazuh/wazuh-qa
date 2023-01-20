@@ -110,6 +110,7 @@ def test_bucket_without_only_logs_after(
     bucket_type = metadata['bucket_type']
     expected_results = metadata['expected_results']
     table_name = metadata.get('table_name', bucket_type)
+    path = metadata.get('path')
 
     parameters = [
         'wodles/aws/aws-s3',
@@ -118,6 +119,10 @@ def test_bucket_without_only_logs_after(
         '--type', bucket_type,
         '--debug', '2'
     ]
+
+    if path is not None:
+        parameters.insert(5, path)
+        parameters.insert(5, '--trail_prefix')
 
     # Check AWS module started
     wazuh_log_monitor.start(
@@ -338,6 +343,7 @@ def test_bucket_with_only_logs_after(
     only_logs_after = metadata['only_logs_after']
     expected_results = metadata['expected_results']
     table_name = metadata.get('table_name', bucket_type)
+    path = metadata.get('path')
 
     parameters = [
         'wodles/aws/aws-s3',
@@ -347,6 +353,11 @@ def test_bucket_with_only_logs_after(
         '--type', bucket_type,
         '--debug', '2'
     ]
+
+    if path is not None:
+        parameters.insert(5, path)
+        parameters.insert(5, '--trail_prefix')
+
     # Check AWS module started
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
