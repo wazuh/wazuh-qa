@@ -1,0 +1,21 @@
+- name: firewall_disabled
+  description: Set all firewall network to disabled mode.
+  configuration_parameters: null
+  metadata:
+    extra_vars:
+      firewall_status: disabled
+      firewall_status_logs:
+        - .*"FIREWALL_DOMAIN","status\d":"inactive".*
+        - .*"FIREWALL_PRIVATE","status\d":"inactive".*
+        - .*"FIREWALL_PUBLIC","status\d":"inactive".*
+
+- name: firewall_enabled
+  description: Set all firewall network to enabled mode.
+  configuration_parameters: null
+  metadata:
+    extra_vars:
+      firewall_status: enabled
+      firewall_status_logs:
+        - .*"FIREWALL_DOMAIN","status\d":"active".*
+        - .*"FIREWALL_PRIVATE","status\d":"active".*
+        - .*"FIREWALL_PUBLIC","status\d":"active".*
