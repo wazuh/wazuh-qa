@@ -63,6 +63,32 @@
     path: empty_prefix
     expected_results: 0
 
+- name: cisco_umbrella_path_with_data
+  description: Umbrella path configurations
+  configuration_parameters:
+    BUCKET_TYPE: cisco_umbrella
+    BUCKET_NAME: wazuh-umbrella-integration-tests
+    PATH: test_prefix/dnslogs
+  metadata:
+    bucket_type: cisco_umbrella
+    bucket_name: wazuh-umbrella-integration-tests
+    only_logs_after: 2022-NOV-20
+    path: test_prefix/dnslogs
+    expected_results: 1
+
+- name: cisco_umbrella_path_without_data
+  description: Umbrella path configurations
+  configuration_parameters:
+    BUCKET_TYPE: cisco_umbrella
+    BUCKET_NAME: wazuh-umbrella-integration-tests
+    PATH: empty_prefix
+  metadata:
+    bucket_type: cisco_umbrella
+    bucket_name: wazuh-umbrella-integration-tests
+    only_logs_after: 2022-NOV-20
+    path: empty_prefix
+    expected_results: 0
+
 - name: vpc_inexistent_path
   description: CloudTrail path configurations
   configuration_parameters:
@@ -507,3 +533,16 @@
     path: inexistent_prefix
     expected_results: 0
     table_name: s3_server_access
+
+- name: cisco_umbrella_inexistent_path
+  description: Umbrella path configurations
+  configuration_parameters:
+    BUCKET_TYPE: cisco_umbrella
+    BUCKET_NAME: wazuh-umbrella-integration-tests
+    PATH: inexistent_prefix
+  metadata:
+    bucket_type: cisco_umbrella
+    bucket_name: wazuh-umbrella-integration-tests
+    only_logs_after: 2022-NOV-20
+    path: inexistent_prefix
+    expected_results: 0
