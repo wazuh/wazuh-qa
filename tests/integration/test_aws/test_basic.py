@@ -180,6 +180,8 @@ def test_service_defaults(
         - The `configuration_defaults` file provides the module configuration for this test.
         - The `cases_defaults` file provides the test cases.
     """
+    log_groups = metadata.get('log_group_name')
+
     parameters = [
         'wodles/aws/aws-s3',
         '--service', metadata['service_type'],
@@ -187,6 +189,11 @@ def test_service_defaults(
         '--regions', 'us-east-1',
         '--debug', '2'
     ]
+
+    if log_groups is not None:
+        parameters.insert(7, log_groups)
+        parameters.insert(7, '--aws_log_groups')
+
     # Check AWS module started
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
