@@ -224,9 +224,10 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
         return None, None
 
 
-def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
-                     triggers_event=True, encoding=None, validators_after_create=None, validators_after_update=None,
-                     validators_after_delete=None, validators_after_cud=None, event_mode=None):
+def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1, options=None,
+                     triggers_event=True, encoding=None, callback=ev.callback_detect_file_added_event,
+                     validators_after_create=None, validators_after_update=None, validators_after_delete=None,
+                     validators_after_cud=None, event_mode=None):
     """Check if creation, update and delete events are detected by syscheck.
 
     This function provides multiple tools to validate events with custom validators.
@@ -236,7 +237,6 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         log_monitor (FileMonitor): File event monitor.
         file_list (list(str) or dict, optional): If it is a list, it will be transformed to a dict with
             empty strings in each value. Default `['testfile0']`
-        time_travel (boolean, optional): Boolean to determine if there will be time travels or not. Default `False`
         min_timeout (int, optional): Minimum timeout. Default `1`
         options (set, optional): Set with all the checkers. Default `None`
         triggers_event (boolean, optional): Boolean to determine if the event should be raised or not. Default `True`

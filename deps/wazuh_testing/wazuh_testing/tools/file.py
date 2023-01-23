@@ -26,10 +26,11 @@ from stat import ST_ATIME, ST_MTIME
 from wazuh_testing import logger, REGULAR, SYMLINK, HARDLINK
 
 if sys.platform == 'win32':
+    import win32con
+    import win32api
     import win32security as win32sec
     import ntsecuritycon as ntc
-    import win32api
-    import win32con
+    import pywintypes
 
 
 def read_json(file_path):
@@ -254,7 +255,7 @@ def on_write_error(function, path, exc_info):
     # Check if the error is an access error for Write permissions.
     if not os.access(path, os.W_OK):
         # Add write permissions so file can be edited and execute function.
-        os.chmod(path, stat.S_IWUSR)
+        os.chmod(path, 0o0777)
         function(path)
     # If error is not Write access error, raise the error
     else:

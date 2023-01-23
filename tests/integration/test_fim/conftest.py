@@ -7,13 +7,12 @@ import pytest
 
 from wazuh_testing import (global_parameters, LOG_FILE_PATH, WAZUH_SERVICES_START, WAZUH_SERVICES_STOP,
                            WAZUH_LOG_MONITOR)
-from wazuh_testing.tools.configuration import (get_wazuh_local_internal_options, set_wazuh_local_internal_options,
-                                               create_local_internal_options)
+from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.tools.file import truncate_file, delete_path_recursively
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.modules.fim import (registry_parser, KEY_WOW64_64KEY, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
-                                       SYNC_INTERVAL_VALUE, FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS)
+                                       SYNC_INTERVAL_VALUE)
 from wazuh_testing.modules.fim import event_monitor as evm
 from wazuh_testing.modules.fim.utils import create_registry, delete_registry
 
@@ -72,17 +71,44 @@ def restart_syscheck_function():
     control_service("start", daemon="wazuh-syscheckd")
 
 
-@pytest.fixture(scope="module")
-def create_monitored_folders_module(test_folders):
+@pytest.fixture()
+def create_monitored_folders(test_folders):
     """
     Create the folders that will be monitored and delete them at the end.
+
     Args:
         test_folders(list): List of folders to create and delete
     """
     for folder in test_folders:
-        if os.path.exists(folder):
-            delete_path_recursively(folder)
-        os.mkdir(folder)
+        os.mkdir(folder, mode=0o0777)
+
     yield
+
     for folder in test_folders:
         delete_path_recursively(folder)
+
+
+@pytest.fixture(scope='module')
+def create_monitored_folders_module(test_folders):
+    """
+    Create the folders that will be monitored and delete them at the end.
+
+    Args:
+        test_folders(list): List of folders to create and delete
+    """
+    for folder in test_folders:
+        os.mkdir(folder, mode=0o0777)
+
+    yield
+
+    for folder in test_folders:
+        delete_path_recursively(folder)
+
+
+@pytest.fixture()
+def restore_win_whodata_policies(policies_file):
+
+    yield
+
+    command = f"auditpol /restore /file:{policies_file}"
+    run_local_command_returning_output(command)
