@@ -21,8 +21,8 @@ local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0'
 
 # -------------------------------------------- TEST_BUCKET_DEFAULTS ----------------------------------------------------
 # Configuration and cases data
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_defaults.yaml')
-cases_path = os.path.join(TEST_CASES_PATH, 'cases_defaults.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'bucket_configuration_defaults.yaml')
+cases_path = os.path.join(TEST_CASES_PATH, 'cases_bucket_defaults.yaml')
 
 # Enabled test configurations
 configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
