@@ -206,12 +206,13 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
             # Check that the pre-restore state backup has been generated.
             assert backups.__len__() == backups_amount + 1, f'Found {backups.__len__()} files, \
                                                                expected {backups_amount + 1}'
-            # Combine the backups list content because in 'Ubuntu' the value are not stored in order.
-            combined = '\t'.join(backups)
-            assert "-pre_restore.gz" in combined, f'Did not find the expected "-pre_restore.gz" file"'
+            # Get the index of the element that contains the pre_restore file because in Ubuntu OS it is not always the
+            # last element
+            db_position = [index for index, item in enumerate(backups) if '-pre_restore.gz' in item]
+            assert len(db_position) > 0, f'Did not find the expected "-pre_restore.gz" file'
 
             if 'restore_pre_restore' in case_data:
-                restore_command = f'global backup restore {{"snapshot": "{backups[-1]}",\
+                restore_command = f'global backup restore {{"snapshot": "{backups[db_position[0]]}",\
                                     "save_pre_restore_state": "false"}}'
                 response = query_wdb(restore_command)
                 assert response == expected, f'Error restoring from pre_restore state. Response {response} '
@@ -220,4 +221,4 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
                 # Check that DB is empty does not have test_values after restoring
                 db_response = query_wdb(sql_select_command)
                 assert test_values[0] not in db_response[-1]['key'], f'Found unexpected  \
-                                                                       "key":"{test_values[0]}" value.'
+                                                                    "key":"{test_values[0]}" value.'
