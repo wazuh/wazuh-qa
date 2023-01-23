@@ -255,7 +255,7 @@ def on_write_error(function, path, exc_info):
     # Check if the error is an access error for Write permissions.
     if not os.access(path, os.W_OK):
         # Add write permissions so file can be edited and execute function.
-        os.chmod(path, stat.S_IWUSR)
+        os.chmod(path, 0o0777)
         function(path)
     # If error is not Write access error, raise the error
     else:

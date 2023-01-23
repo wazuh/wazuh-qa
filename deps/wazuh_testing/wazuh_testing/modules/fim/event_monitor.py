@@ -6,8 +6,8 @@ import re
 import json
 
 from datetime import datetime
-from wazuh_testing import logger, T_60, LOG_FILE_PATH
-from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing import logger, T_30, T_60, LOG_FILE_PATH
+from wazuh_testing.tools.monitoring import generate_monitoring_callback, FileMonitor
 from wazuh_testing.modules import fim
 
 # Callback Messages
@@ -169,7 +169,7 @@ def check_fim_event(file_monitor=None, callback='', error_message=None, update_p
     """
     file_monitor = FileMonitor(file_to_monitor) if file_monitor is None else file_monitor
     error_message = f"Could not find this event in {file_to_monitor}: {callback}" if error_message is None else \
-        error_message
+                    error_message
 
     file_monitor.start(timeout=timeout, update_position=update_position, accum_results=accum_results,
                        callback=generate_monitoring_callback(callback), error_message=error_message)
@@ -181,7 +181,7 @@ def detect_initial_scan(file_monitor):
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    file_monitor.start(timeout=60, callback=callback_detect_end_scan,
+    file_monitor.start(timeout=T_60, callback=callback_detect_end_scan,
                        error_message=fim.ERR_MSG_SCHEDULED_SCAN_ENDED)
 
 
@@ -191,7 +191,7 @@ def detect_initial_scan_start(file_monitor):
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    file_monitor.start(timeout=60, callback=callback_detect_scan_start,
+    file_monitor.start(timeout=T_60, callback=callback_detect_scan_start,
                        error_message=fim.ERR_MSG_SCHEDULED_SCAN_STARTED)
 
 
@@ -201,7 +201,7 @@ def detect_realtime_start(file_monitor):
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    file_monitor.start(timeout=60, callback=generate_monitoring_callback(fim.CB_FOLDERS_MONITORED_REALTIME),
+    file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(fim.CB_FOLDERS_MONITORED_REALTIME),
                        error_message=fim.ERR_MSG_FOLDERS_MONITORED_REALTIME)
 
 
@@ -211,5 +211,33 @@ def detect_whodata_start(file_monitor):
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    file_monitor.start(timeout=60, callback=generate_monitoring_callback(fim.CB_REALTIME_WHODATA_ENGINE_STARTED),
+    file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(fim.CB_REALTIME_WHODATA_ENGINE_STARTED),
                        error_message=fim.ERR_MSG_WHODATA_ENGINE_EVENT)
+
+
+def detect_windows_sacl_configured(file_monitor, file='.*'):
+    """Detects when windows permision checks have been configured for a given file.
+
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+        file: The path of the file that will be monitored
+    """
+
+    pattern = fr".*win_whodata.*The SACL of '({file})' will be configured"
+
+    file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(pattern),
+                       error_message=fim.ERR_MSG_SACL_CONFIGURED_EVENT)
+
+
+def detect_windows_whodata_mode_change(file_monitor, file='.*'):
+    """Detects whe monitoring for a file changes from whodata to real-time.
+
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+        file: The path of the file that will be monitored
+    """
+
+    pattern = fr".*set_whodata_mode_changes.*The '({file})' directory starts to be monitored in real-time mode."
+
+    file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(pattern),
+                       error_message=fim.ERR_MSG_WHDATA_REALTIME_MODE_CHANGE_EVENT)
