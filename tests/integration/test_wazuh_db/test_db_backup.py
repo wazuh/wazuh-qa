@@ -76,7 +76,7 @@ wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
 backups_path = os.path.join(WAZUH_PATH, 'backup', 'db')
 receiver_sockets_params = [(wdb_path, 'AF_UNIX', 'TCP')]
 monitored_sockets_params = [('wazuh-db', None, True)]
-receiver_sockets= None  # Set in the fixtures
+receiver_sockets = None  # Set in the fixtures
 
 
 # Variables
@@ -90,7 +90,7 @@ sql_select_command = 'global sql select * from metadata'
 @pytest.fixture(scope='function')
 def add_database_values(request):
     "Add test values to database"
-    response= query_wdb(f'global sql insert into metadata (key,value) VALUES ("{test_values[0]}","{test_values[1]}")')
+    response = query_wdb(f'global sql insert into metadata (key,value) VALUES ("{test_values[0]}","{test_values[1]}")')
     yield
     response = query_wdb(f'global sql delete from metadata where key="{test_values[0]}"')
 
@@ -102,7 +102,7 @@ def add_database_values(request):
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
-@pytest.mark.parametrize('backups_path',[backups_path])
+@pytest.mark.parametrize('backups_path', [backups_path])
 def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_module, remove_backups,
                             add_database_values, test_case, backups_path):
     '''
@@ -162,7 +162,7 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
         assert 'global.db-backup-' in response[0], f'Backup creation failed. Got: {response}.'
 
     # Check that the expected amount of database backups have been created
-    backups= query_wdb(get_backups_command)
+    backups = query_wdb(get_backups_command)
     assert backups.__len__() == backups_amount, f'Found {backups.__len__()} files, expected {backups_amount}.'
 
     # Manage restoring the DB
@@ -185,7 +185,7 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
             restore_command = f'global backup restore {{"snapshot": "{backups[0]}"}}'
 
         if 'snapshot' in case_data:
-            snapshot= case_data['snapshot']
+            snapshot = case_data['snapshot']
             restore_command = f'global backup restore {{"{snapshot}","save_pre_restore_state": {save_pre_restore}}}'
 
         # Restore the DB - Assert command response
@@ -202,9 +202,9 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
         assert test_values[0] in db_response[-1]['key'], f'Expected value key:"{test_values[0]}" was not found.'
 
         if save_pre_restore == 'true':
-            backups= query_wdb(get_backups_command)
+            backups = query_wdb(get_backups_command)
             # Check that the pre-restore state backup has been generated.
-            assert backups.__len__() ==  backups_amount +1, f'Found {backups.__len__()} files, \
+            assert backups.__len__() == backups_amount + 1, f'Found {backups.__len__()} files, \
                                                                expected {backups_amount + 1}'
             # Combine the backups list content because in 'Ubuntu' the value are not stored in order.
             combined = '\t'.join(backups)
