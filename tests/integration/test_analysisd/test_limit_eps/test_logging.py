@@ -54,7 +54,7 @@ def test_dropping_events(configuration, metadata, load_wazuh_basic_configuration
             - Check that "Queues are full and no EPS credits, dropping events" log appears in DEBUG mode.
             - Wait timeframe to release the events queue usage and send an event.
             - Check that "Queues back to normal and EPS credits, no dropping events" log appears in DEBUG mode.
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
 
