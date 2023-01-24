@@ -76,7 +76,7 @@ wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
 backups_path = os.path.join(WAZUH_PATH, 'backup', 'db')
 receiver_sockets_params = [(wdb_path, 'AF_UNIX', 'TCP')]
 monitored_sockets_params = [('wazuh-db', None, True)]
-receiver_sockets= None  # Set in the fixtures
+receiver_sockets = None  # Set in the fixtures
 
 
 # Variables
@@ -90,7 +90,7 @@ sql_select_command = 'global sql select * from metadata'
 @pytest.fixture(scope='function')
 def add_database_values(request):
     "Add test values to database"
-    response= query_wdb(f'global sql insert into metadata (key,value) VALUES ("{test_values[0]}","{test_values[1]}")')
+    response = query_wdb(f'global sql insert into metadata (key,value) VALUES ("{test_values[0]}","{test_values[1]}")')
     yield
     response = query_wdb(f'global sql delete from metadata where key="{test_values[0]}"')
 
@@ -102,12 +102,12 @@ def add_database_values(request):
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
-@pytest.mark.parametrize('backups_path',[backups_path])
-def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_module, remove_backups, 
+@pytest.mark.parametrize('backups_path', [backups_path])
+def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_module, remove_backups,
                             add_database_values, test_case, backups_path):
     '''
     description: Check that every input message using the 'backup' command in wazuh-db socket generates
-                 the proper output to wazuh-db socket. To do this, it performs a series of queries to the socket with 
+                 the proper output to wazuh-db socket. To do this, it performs a series of queries to the socket with
                  parameters from the list of test_cases, and compare the result with the test_case's 'restore_response'
                  field, as well as checking that the files have been created and the state of the data in DB in cases
                  where the 'restore' parameter is used.
@@ -161,8 +161,8 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
         time.sleep(1)
         assert 'global.db-backup-' in response[0], f'Backup creation failed. Got: {response}.'
 
-    # Check that the expected amount of database backups have been created 
-    backups= query_wdb(get_backups_command)
+    # Check that the expected amount of database backups have been created
+    backups = query_wdb(get_backups_command)
     assert backups.__len__() == backups_amount, f'Found {backups.__len__()} files, expected {backups_amount}.'
 
     # Manage restoring the DB
@@ -185,7 +185,7 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
             restore_command = f'global backup restore {{"snapshot": "{backups[0]}"}}'
 
         if 'snapshot' in case_data:
-            snapshot= case_data['snapshot']
+            snapshot = case_data['snapshot']
             restore_command = f'global backup restore {{"{snapshot}","save_pre_restore_state": {save_pre_restore}}}'
 
         # Restore the DB - Assert command response
@@ -202,19 +202,23 @@ def test_wdb_backup_command(configure_sockets_environment, connect_to_sockets_mo
         assert test_values[0] in db_response[-1]['key'], f'Expected value key:"{test_values[0]}" was not found.'
 
         if save_pre_restore == 'true':
-            backups= query_wdb(get_backups_command)
+            backups = query_wdb(get_backups_command)
             # Check that the pre-restore state backup has been generated.
-            assert backups.__len__() ==  backups_amount +1, f'Found {backups.__len__()} files, \
+            assert backups.__len__() == backups_amount + 1, f'Found {backups.__len__()} files, \
                                                                expected {backups_amount + 1}'
-            assert "-pre_restore.gz" in backups[-1], f'Did not find the expected "-pre_restore.gz" file"'
+            # Get the index of the element that contains the pre_restore file because in Ubuntu OS it is not always the
+            # last element
+            db_position = [index for index, item in enumerate(backups) if '-pre_restore.gz' in item]
+            assert len(db_position) > 0, f'Did not find the expected "-pre_restore.gz" file'
 
             if 'restore_pre_restore' in case_data:
-                restore_command = f'global backup restore {{"snapshot": "{backups[-1]}",\
+                restore_command = f'global backup restore {{"snapshot": "{backups[db_position[0]]}",\
                                     "save_pre_restore_state": "false"}}'
                 response = query_wdb(restore_command)
-                assert response == expected, f'Error restoring from pre_restore state. Response {response} does not match the expected {expected}.'
+                assert response == expected, f'Error restoring from pre_restore state. Response {response} '
+                'does not match the expected {expected}.'
 
                 # Check that DB is empty does not have test_values after restoring
                 db_response = query_wdb(sql_select_command)
                 assert test_values[0] not in db_response[-1]['key'], f'Found unexpected  \
-                                                                       "key":"{test_values[0]}" value.'
+                                                                    "key":"{test_values[0]}" value.'

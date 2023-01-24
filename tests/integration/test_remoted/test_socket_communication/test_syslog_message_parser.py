@@ -88,7 +88,7 @@ def test_syslog_message_parser(configuration, metadata, set_wazuh_configuration,
             - Restart wazuh-manager service to apply configuration changes.
         - test:
             - Check that the messages are parsed correctly in the archives.json file.
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
 

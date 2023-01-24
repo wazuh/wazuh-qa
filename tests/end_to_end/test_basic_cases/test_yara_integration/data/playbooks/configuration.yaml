@@ -23,27 +23,49 @@
         chown root:wazuh /var/ossec/active-response/bin/yara.sh
         chmod 0750 /var/ossec/active-response/bin/yara.sh
 
-    - name: Check if epel-release is installed
-      shell: rpm -qa epel-release
-      register: check_epel_release
+    - name: Check if Yara is installed
+      become: true
+      shell: yara -v
+      register: yara_check
+      ignore_errors: true
 
-    - name: Install epel-release
-      package:
-        name:
-          - epel-release
-        state: present
-      when: '"epel" not in check_epel_release.stdout'
+    - name: Install Yara
+      block:
+        - name: Update system's packages
+          become: true
+          package:
+            name: "*"
+            state: latest
 
-    - name: Check if yara is installed
-      shell: rpm -qa yara
-      register: check_yara
+        - name: Install Yara dependencies
+          become: true
+          package:
+            name:
+              - gcc
+              - make
+              - libtool
+              - pcre-devel
+              - openssl-devel
+            state: present
 
-    - name: Install Yara on CentOS
-      package:
-        name:
-          - yara
-        state: present
-      when: '"yara" not in check_yara.stdout'
+        - name: Download Yara
+          become: true
+          get_url:
+            url: https://github.com/VirusTotal/yara/archive/v{{ yara_version | default('4.2.3') }}.tar.gz
+            dest: /tmp/v{{ yara_version | default('4.2.3')}}.tar.gz
+
+        - name: Uncompress Yara file
+          become: true
+          unarchive:
+            src: /tmp/v{{ yara_version | default('4.2.3')}}.tar.gz
+            dest: /tmp
+            remote_src: true
+
+        - name: Compile and install Yara
+          become: true
+          shell: cd /tmp/yara-{{ yara_version | default('4.2.3')}} && ./bootstrap.sh && ./configure && make &&
+                 make install
+      when: yara_check.rc != 0
 
     - name: Check if jq is installed
       shell: rpm -qa jq
@@ -110,7 +132,7 @@
           <command>
           <name>yara</name>
           <executable>yara.sh</executable>
-          <extra_args>-yara_path /usr/bin -yara_rules /tmp/yara/rules/yara_rules.yar</extra_args>
+          <extra_args>-yara_path /usr/local/bin/ -yara_rules /tmp/yara/rules/yara_rules.yar</extra_args>
           <timeout_allowed>no</timeout_allowed>
           </command>
           <active-response>

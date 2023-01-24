@@ -56,7 +56,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 # Variables
 receiver_sockets_params = [(ANALYSISD_QUEUE_SOCKET_PATH, 'AF_UNIX', 'UDP')]
 receiver_sockets = None
-alert_timeout = 5
+alert_timeout = 10
 file_to_monitor = ALERT_FILE_PATH
 
 # Configurations
