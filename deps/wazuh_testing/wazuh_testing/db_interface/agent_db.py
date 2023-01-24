@@ -362,13 +362,14 @@ def insert_vulnerability_in_agent_inventory(agent_id='000', name='', version='',
               f"'{external_references}', '{condition}', '{title}', '{published}', '{updated}')")
 
 
-def get_vulnerability_triaged(agent_id='000'):
+def get_triaged_value_from_inventory(package_name, agent_id='000'):
     """Check the triaged of a vulnerability in the agent database table.
 
     Args:
+        package_name (str): Package name.
         agent_id (str): Agent ID.
     """
-    query = f"agent {agent_id} sql SELECT triaged FROM sys_programs"
+    query = f"agent {agent_id} sql SELECT triaged FROM sys_programs WHERE name='{package_name}'"
 
     result = query_wdb(query)[0]['triaged']
 
