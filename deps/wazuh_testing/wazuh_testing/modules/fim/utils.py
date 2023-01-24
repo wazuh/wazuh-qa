@@ -11,12 +11,12 @@ from typing import Sequence, Union, Generator, Any
 from copy import deepcopy
 from hashlib import sha1
 
-from wazuh_testing import global_parameters, logger, REGULAR, LOG_FILE_PATH, WAZUH_PATH
+from wazuh_testing import global_parameters, logger, REGULAR, LOG_FILE_PATH, WAZUH_PATH, T_30
 from wazuh_testing.tools.file import create_file, modify_file, delete_file, generate_string
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.modules import fim
-from wazuh_testing.modules.fim.event_monitor import (callback_detect_end_scan, callback_detect_event,
+from wazuh_testing.modules.fim.event_monitor import (callback_detect_end_scan,
                                                      callback_value_event, CB_REGISTRY_DBSYNC_NO_DATA,
                                                      callback_key_event,
                                                      callback_detect_registry_integrity_state_event,
@@ -69,7 +69,7 @@ def get_sync_msgs(timeout, new_data=True):
     return events
 
 
-def get_messages(callback):
+def get_messages(callback, timeout=T_30):
     """Look for as many synchronization events as possible.
 
     This function will look for the synchronization messages until a Timeout is raised or 'max_events' is reached.
@@ -85,7 +85,7 @@ def get_messages(callback):
     for _ in range(0, fim.MAX_EVENTS_VALUE):
         event = None
         try:
-            event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, accum_results=1,
+            event = wazuh_log_monitor.start(timeout=timeout, accum_results=1,
                                             callback=generate_monitoring_callback(callback),
                                             error_message=f"Did not receive expected {callback} event").result()
         except TimeoutError:
