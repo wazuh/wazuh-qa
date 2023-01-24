@@ -4,6 +4,13 @@ import pytest
 from wazuh_testing import UDP, logger
 from wazuh_testing.modules.aws.s3_utils import delete_file, upload_file, file_exists
 from wazuh_testing.modules.aws.db_utils import delete_s3_db, delete_services_db
+from wazuh_testing.modules.aws.cloudwatch_utils import (
+    create_log_events,
+    create_log_group,
+    create_log_stream,
+    delete_log_group,
+)
+from wazuh_testing.modules.aws.s3_utils import delete_file, upload_file
 from wazuh_testing.tools import ANALYSISD_QUEUE_SOCKET_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.file import bind_unix_socket
 from wazuh_testing.tools.monitoring import FileMonitor, ManInTheMiddle, QueueMonitor
@@ -91,6 +98,31 @@ def delete_file_from_s3(metadata: dict):
     if filename is not None:
         delete_file(filename=filename, bucket_name=bucket_name)
         logger.debug('Deleted file: %s from bucket %s', filename, bucket_name)
+
+
+# CloudWatch fixtures
+
+@pytest.fixture(scope='function', name='create_log_stream')
+def fixture_create_log_stream(metadata: dict):
+    """Create a log stream with events and delete after the execution.
+
+    Args:
+        metadata (dict): Metadata to get the parameters.
+    """
+    log_group_name = metadata['log_group_name']
+    logger.debug('Creating log group: %s', log_group_name)
+    create_log_group(log_group_name)
+    log_stream = create_log_stream(log_group_name)
+    logger.debug('Created log stream "%s" within log group "%s"', log_stream, log_group_name)
+    create_log_events(log_stream=log_stream, log_group=log_group_name)
+    logger.debug('Created log events')
+    metadata['log_stream'] = log_stream
+
+    yield
+
+    delete_log_group(log_group_name)
+    logger.debug('Deleted log group: %s', log_group_name)
+
 
 # DB fixtures
 
