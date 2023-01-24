@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Added
 
+- Add new test to check vulnerable packages with triaged null([#3587](https://github.com/wazuh/wazuh-qa/pull/3587)) \- (Framework + Tests)
 - Add new tests analysid handling of invalid/empty rule signature IDs ([#3649]
 (https://github.com/wazuh/wazuh-qa/pull/3649)) \- (Framework + Tests)
 - Add integration test to check agent database version ([#3768](https://github.com/wazuh/wazuh-qa/pull/3768)) \- (Tests)
