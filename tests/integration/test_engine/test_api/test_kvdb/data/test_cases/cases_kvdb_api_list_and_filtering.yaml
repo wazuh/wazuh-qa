@@ -1,0 +1,80 @@
+- name: Verify filtering using an existent kvdb
+  description: Verify that listing an existent kvdb works as expected.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: list
+    options:
+      -n: kvdb_test
+    kvdb_names:
+      - kvdb_test
+
+- name: Verify filtering using an empty kvdb
+  description: Verify that listing an empty kvdb works as expected.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: list
+    options:
+      -n: kvdb_empty
+    kvdb_names:
+      - kvdb_empty
+
+- name: Verify listing a non-existent kvdb
+  description: Verify that listing a non-existing kvdb works as expected.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: list
+    options:
+      -n: kvdb_test
+    kvdb_names:
+      - kvdb_empty
+
+- name: Verify listing when there are no kvdbs
+  description: Verify that when using the list subcommand when no kvdb has been created, it works.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: list
+
+- name: Verify listing all the existent kvdbs
+  description: Verify that all the created kvdbs can be listed.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: list
+    kvdb_names:
+      - kvdb_empty
+      - kvdb_test
+
+- name: Verify filtering existent kvdbs
+  description: Verify that list subcommand can filter kvdb searchs
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: list
+    options:
+      -n: kvdb_test
+    kvdb_names:
+      - kvdb_empty
+      - kvdb_test
+
+- name: Verify filtering existent kvdbs
+  description: Verify that list subcommand can filter kvdb searchs
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: list
+    options:
+      -n: kvdb_
+    kvdb_names:
+      - kvdb_empty
+      - kvdb_test

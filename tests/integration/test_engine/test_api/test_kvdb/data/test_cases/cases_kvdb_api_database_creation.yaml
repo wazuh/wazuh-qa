@@ -1,0 +1,51 @@
+- name: Create a KVDB using a json file
+  description: Create a KVDB using a json file as input.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: create
+    options:
+      -n: kvdb_test
+      -p: PATH_TO_KVDB_JSON_FILE
+    kvdb_names:
+      - kvdb_test
+
+- name: Create a KVDB that contains unicode and escaped values using a json file
+  description: Create a KVDB that contains unicode and escaped values within its keys/values using a json file as input.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: create
+    options:
+      -n: kvdb_extended
+      -p: PATH_TO_KVDB_JSON_FILE
+    kvdb_names:
+      - kvdb_extended
+
+- name: Create an empty KVDB using a json file
+  description: Create an empty KVDB using a json file as input.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: create
+    options:
+      -n: kvdb_empty
+      -p: PATH_TO_KVDB_JSON_FILE
+    kvdb_names:
+      - kvdb_empty
+
+- name: Create an empty KVDB by not providing any input file
+  description: Create an empty KVDB by not providing any input file.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: create
+    options:
+      -n: kvdb_empty
+    kvdb_names:
+      - kvdb_empty
+

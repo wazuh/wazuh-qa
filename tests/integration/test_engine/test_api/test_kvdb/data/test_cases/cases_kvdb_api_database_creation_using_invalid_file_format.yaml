@@ -1,0 +1,27 @@
+- name: Create a kvdb using a non-well-formatted JSON file
+  description: Create a kvdb using a JSON file with pairs defined like two columns following the json format.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: create
+    options:
+      -n: kvdb_invalid_format
+      -p: PATH_TO_KVDB_JSON_FILE
+    kvdb_names:
+      - kvdb_invalid_format
+    extension: json
+
+- name: Create a kvdb using a non-supported input format file
+  description: Create a kvdb using a txt file with pairs defined like two columns.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: create
+    options:
+      -n: kvdb_invalid_format
+      -p: PATH_TO_KVDB_TXT_FILE
+    kvdb_names:
+      - kvdb_invalid_format
+    extension: txt
