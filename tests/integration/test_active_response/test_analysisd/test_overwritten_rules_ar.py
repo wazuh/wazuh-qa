@@ -107,16 +107,16 @@ def test_overwritten_rules_ar(configuration, metadata, source_path, destination_
         - An active response is triggered when an event matches with an overwritten rule of depth > 0.
 
     test_phases:
-        - Setup:
+        - setup:
             - Copy custom rule and active response files to Wazuh paths.
             - Create a new file which will be monitored with logcollector.
             - Set wazuh configuration. Add active_response, command and localfile blocks.
             - Clean logs files and restart wazuh to apply the configuration.
-        - Test:
+        - test:
             - Add a custom log in a monitored file to generate an event that triggers a rule that trigger an AR.
             - Check if the active response has been triggered (checking if a file has been created).
             - Check that wazuh-analysisd is running (it has not been crashed).
-        - Tierdown:
+        - teardown:
             - Remove generated file when triggering the active response.
             - Restart initial wazuh configuration.
             - Remove generated and custom copied files.

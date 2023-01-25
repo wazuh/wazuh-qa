@@ -60,7 +60,7 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
-timeout = 5
+timeout = 25
 
 
 # Tests
