@@ -115,7 +115,7 @@ def callback_detect_event_processed_or_skipped(pattern: str) -> Callable:
     return lambda line: pattern_regex.match(line) or callback_detect_event_processed(line)
 
 
-def callback_detect_inspector_event_processed(expected_results: int, service_type: str) -> Callable:
+def callback_detect_service_event_processed(expected_results: int, service_type: str) -> Callable:
     if service_type == 'inspector':
         regex = re.compile(fr"DEBUG: \+\+\+ {expected_results} events collected and processed in")
     else:

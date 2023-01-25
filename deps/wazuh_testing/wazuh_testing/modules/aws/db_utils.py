@@ -68,12 +68,18 @@ s3_rows_map = {
 }
 
 service_rows_map = {
+    'cloudwatch_logs': ServiceCloudWatchRow,
+    'aws_services': ServiceInspectorRow
 
 }
 
 
 def _get_s3_row_type(bucket_type: str) -> Type[S3CloudTrailRow]:
     return s3_rows_map.get(bucket_type, S3CloudTrailRow)
+
+
+def _get_service_row_type(table_name: str) -> Type[ServiceCloudWatchRow]:
+    return service_rows_map.get(table_name, ServiceCloudWatchRow)
 
 
 def get_db_connection(path: Path) -> sqlite3.Connection:
@@ -190,7 +196,7 @@ def delete_services_db() -> None:
         AWS_SERVICES_DB_PATH.unlink()
 
 
-def get_service_db_row(table_name: str) -> ServiceInspectorRow:
+def get_service_db_row(table_name: str) -> ServiceCloudWatchRow:
     """Return one row from the given table name.
 
     Args:
@@ -199,14 +205,15 @@ def get_service_db_row(table_name: str) -> ServiceInspectorRow:
     Returns:
         ServiceInspectorRow: The first row of the table.
     """
+    row_type = _get_service_row_type(table_name)
     connection = get_db_connection(AWS_SERVICES_DB_PATH)
     cursor = connection.cursor()
     result = cursor.execute(SELECT_QUERY_TEMPLATE.format(table_name=table_name)).fetchone()
 
-    return ServiceInspectorRow(*result)
+    return row_type(*result)
 
 
-def get_multiple_service_db_row(table_name: str) -> Iterator[ServiceInspectorRow]:
+def get_multiple_service_db_row(table_name: str) -> Iterator[ServiceCloudWatchRow]:
     """Return all rows from the given table name.
 
     Args:
@@ -215,8 +222,9 @@ def get_multiple_service_db_row(table_name: str) -> Iterator[ServiceInspectorRow
     Yields:
         Iterator[ServiceInspectorRow]: All the rows in the table.
     """
+    row_type = _get_service_row_type(table_name)
     connection = get_db_connection(AWS_SERVICES_DB_PATH)
     cursor = connection.cursor()
 
     for row in cursor.execute(SELECT_QUERY_TEMPLATE.format(table_name=table_name)):
-        yield ServiceInspectorRow(*row)
+        yield row_type(*row)
