@@ -131,6 +131,14 @@ def restart_wazuh_function(daemon=None):
 
 
 @pytest.fixture(scope='module')
+def restart_wazuh_module(daemon=None):
+    """Restart all Wazuh daemons"""
+    control_service("restart", daemon=daemon)
+    yield
+    control_service('stop', daemon=daemon)
+
+
+@pytest.fixture(scope='module')
 def restart_wazuh_daemon_after_finishing(daemon=None):
     """
     Restart a Wazuh daemon
@@ -1017,10 +1025,14 @@ def set_wazuh_configuration(configuration):
     conf.write_wazuh_conf(backup_config)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def truncate_monitored_files():
     """Truncate all the log files and json alerts files before and after the test execution"""
-    log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
+
+    if 'agent' in get_service():
+        log_files = [LOG_FILE_PATH]
+    else:
+        log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
 
     for log_file in log_files:
         truncate_file(log_file)

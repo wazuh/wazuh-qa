@@ -1,5 +1,6 @@
 
 ANALYSISD_PREFIX = r'.*wazuh-analysisd.*'
+TESTRULE_PREFIX = r'.*wazuh-testrule.*'
 MAILD_PREFIX = r'.*wazuh-maild.*'
 QUEUE_EVENTS_SIZE = 16384
 ANALYSISD_ONE_THREAD_CONFIG = {'analysisd.event_threads': '1', 'analysisd.syscheck_threads': '1',
