@@ -32,8 +32,8 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, TEST_CASES_DIR, MODULE)
 local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0'}
 
 # --------------------------------------------- TEST_BUCKET_WITHOUT_ONLY_LOGS_AFTER ------------------------------------
-t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_without_only_logs_after.yaml')
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_without_only_logs_after.yaml')
+t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'bucket_configuration_without_only_logs_after.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_bucket_without_only_logs_after.yaml')
 
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 t1_configurations = load_configuration_template(
@@ -263,8 +263,8 @@ def test_service_without_only_logs_after(
 
 
 # --------------------------------------------- TEST_BUCKET_WITH_ONLY_LOGS_AFTER ---------------------------------------
-t3_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_with_only_logs_after.yaml')
-t3_cases_path = os.path.join(TEST_CASES_PATH, 'cases_with_only_logs_after.yaml')
+t3_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'bucket_configuration_with_only_logs_after.yaml')
+t3_cases_path = os.path.join(TEST_CASES_PATH, 'cases_bucket_with_only_logs_after.yaml')
 
 t3_configuration_parameters, t3_configuration_metadata, t3_case_ids = get_test_cases_data(t3_cases_path)
 t3_configurations = load_configuration_template(

@@ -6,4 +6,4 @@
   metadata:
     service_type: cloudwatchlogs
     log_group_name: wazuh-cloudwatchlogs-integration-tests
-    expected_results: 3
+    expected_results: 1

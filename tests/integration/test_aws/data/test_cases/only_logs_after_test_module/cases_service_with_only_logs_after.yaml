@@ -20,3 +20,4 @@
     log_group_name: wazuh-cloudwatchlogs-integration-tests
     only_logs_after: 2022-NOV-20
     expected_results: 3
+    log_stream: permanent-logs
