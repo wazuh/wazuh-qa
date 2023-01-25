@@ -360,7 +360,7 @@ def test_service_with_only_logs_after(
 
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
-        callback=event_monitor.callback_detect_inspector_event_processed(expected_results),
+        callback=event_monitor.callback_detect_inspector_event_processed(expected_results, service_type),
         error_message='The AWS module did not process the expected number of events',
     ).result()
 

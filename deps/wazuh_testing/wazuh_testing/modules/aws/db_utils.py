@@ -51,6 +51,10 @@ ServiceInspectorRow = namedtuple(
     'ServiceInspectorRow', 'service account_id region timestamp'
 )
 
+ServiceCloudWatchRow = namedtuple(
+    'ServiceCloudWatchRow', 'aws_region aws_log_group aws_log_stream next_token start_time end_time'
+)
+
 s3_rows_map = {
     CLOUD_TRAIL_TYPE: S3CloudTrailRow,
     VPC_FLOW_TYPE: S3VPCFlowRow,
@@ -61,6 +65,10 @@ s3_rows_map = {
     GUARD_DUTY_TYPE: S3GuardDutyRow,
     WAF_TYPE: S3WAFRow,
     SERVER_ACCESS_TABLE_NAME: S3ServerAccessRow
+}
+
+service_rows_map = {
+
 }
 
 
