@@ -55,6 +55,9 @@ tags:
 import pytest
 import requests
 
+# Marks
+pytestmark = [pytest.mark.server]
+
 
 # Tests
 
