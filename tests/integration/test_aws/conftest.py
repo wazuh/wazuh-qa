@@ -9,6 +9,7 @@ from wazuh_testing.modules.aws.cloudwatch_utils import (
     create_log_group,
     create_log_stream,
     delete_log_group,
+    delete_log_stream
 )
 from wazuh_testing.modules.aws.s3_utils import delete_file, upload_file
 from wazuh_testing.tools import ANALYSISD_QUEUE_SOCKET_PATH, LOG_FILE_PATH
@@ -123,6 +124,25 @@ def fixture_create_log_stream(metadata: dict):
     delete_log_group(log_group_name)
     logger.debug('Deleted log group: %s', log_group_name)
 
+
+@pytest.fixture(scope='function')
+def create_log_stream_in_existent_group(metadata: dict):
+    """Create a log stream with events and delete after the execution.
+
+    Args:
+        metadata (dict): Metadata to get the parameters.
+    """
+    log_group_name = metadata['log_group_name']
+    log_stream = create_log_stream(log_group_name)
+    logger.debug('Created log stream "%s" within log group "%s"', log_stream, log_group_name)
+    create_log_events(log_stream=log_stream, log_group=log_group_name)
+    logger.debug('Created log events')
+    metadata['log_stream'] = log_stream
+
+    yield
+
+    delete_log_stream(log_stream=log_stream, log_group=log_group_name)
+    logger.debug('Deleted log stream: %s', log_stream)
 
 # DB fixtures
 
