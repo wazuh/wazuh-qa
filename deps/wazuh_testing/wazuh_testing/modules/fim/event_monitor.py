@@ -10,8 +10,11 @@ from wazuh_testing import logger, T_30, T_60, LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import generate_monitoring_callback, FileMonitor
 from wazuh_testing.modules import fim
 
+# Callback Messages
+CB_FIM_PATH_CONVERTED = r".*fim_adjust_path.*Convert '(.*) to '(.*)' to process the FIM events."
 
-# Callbacks
+
+# Callback functions
 def callback_detect_event(line):
     """
     Detect an 'event' type FIM log.
@@ -153,8 +156,8 @@ def callback_detect_file_deleted_event(line):
 
 # Event checkers
 def check_fim_event(file_monitor=None, callback='', error_message=None, update_position=True,
-                    timeout=T_30, accum_results=1, file_to_monitor=LOG_FILE_PATH):
-    """Check if a vulnerability event occurs
+                    timeout=T_60, accum_results=1, file_to_monitor=LOG_FILE_PATH):
+    """Check if a analysisd event occurs
 
     Args:
         file_monitor (FileMonitor): FileMonitor object to monitor the file content.

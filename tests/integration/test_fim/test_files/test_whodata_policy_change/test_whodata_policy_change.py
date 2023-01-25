@@ -186,4 +186,4 @@ def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration,
     # Create/Update/Delete file and check events
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, event_mode=fim.REALTIME_MODE,
-                     min_timeout=global_parameters.default_timeout*4, triggers_event=True)
+                     escaped=True, min_timeout=global_parameters.default_timeout*4, triggers_event=True)

@@ -202,6 +202,6 @@ def test_tag_nodiff(directory, filename, hidden_content, get_configuration, put_
             assert '<Diff truncated because nodiff option>' not in event['data'].get('content_changes'), \
                 'content_changes is truncated'
 
-    regular_file_cud(directory, wazuh_log_monitor, file_list=files, time_travel=False,
+    regular_file_cud(directory, wazuh_log_monitor, file_list=files,
                      min_timeout=global_parameters.default_timeout*2, triggers_event=True,
                      validators_after_update=[report_changes_validator, no_diff_validator])

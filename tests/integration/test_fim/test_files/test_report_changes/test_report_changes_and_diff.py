@@ -65,6 +65,7 @@ tags:
     - fim_report_changes
 '''
 import os
+import sys
 
 import pytest
 from wazuh_testing.tools import PREFIX, configuration
@@ -170,6 +171,7 @@ def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuratio
     file_list = [f"regular_file"]
     is_truncated = metadata['folder'] == 'testdir_nodiff'
     folder = os.path.join(PREFIX, metadata['folder'])
+    escaped = True if sys.platform == 'win32' else False
 
     def report_changes_validator(event):
         """Validate content_changes attribute exists in the event"""
@@ -189,4 +191,5 @@ def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuratio
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, min_timeout=global_parameters.default_timeout*4,
-                     triggers_event=True, validators_after_update=[report_changes_validator, no_diff_validator])
+                     triggers_event=True, validators_after_update=[report_changes_validator, no_diff_validator],
+                     escaped=escaped)
