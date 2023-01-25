@@ -11,6 +11,8 @@ from wazuh_testing.modules.aws.cloudwatch_utils import (
     delete_log_group,
     delete_log_stream
 )
+from wazuh_testing.modules.aws.db_utils import delete_s3_db, delete_services_db
+from wazuh_testing.modules.aws.constants import PERMANENT_CLOUDWATCH_LOG_GROUP, FAKE_CLOUDWATCH_LOG_GROUP
 from wazuh_testing.modules.aws.s3_utils import delete_file, upload_file
 from wazuh_testing.tools import ANALYSISD_QUEUE_SOCKET_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.file import bind_unix_socket
@@ -110,19 +112,28 @@ def fixture_create_log_stream(metadata: dict):
     Args:
         metadata (dict): Metadata to get the parameters.
     """
-    log_group_name = metadata['log_group_name']
-    logger.debug('Creating log group: %s', log_group_name)
-    create_log_group(log_group_name)
-    log_stream = create_log_stream(log_group_name)
-    logger.debug('Created log stream "%s" within log group "%s"', log_stream, log_group_name)
-    create_log_events(log_stream=log_stream, log_group=log_group_name)
-    logger.debug('Created log events')
-    metadata['log_stream'] = log_stream
+    SKIP_LOG_GROUP_CREATION = [PERMANENT_CLOUDWATCH_LOG_GROUP, FAKE_CLOUDWATCH_LOG_GROUP]
+    log_group_names = [item.strip() for item in metadata['log_group_name'].split(',')]
+    for log_group_name in log_group_names:
+        if log_group_name in SKIP_LOG_GROUP_CREATION:
+            continue
+        logger.debug('Creating log group: %s', log_group_name)
+        create_log_group(log_group_name)
+        log_stream = create_log_stream(log_group_name)
+        logger.debug('Created log stream "%s" within log group "%s"', log_stream, log_group_name)
+        create_log_events(
+            log_stream=log_stream, log_group=log_group_name, event_number=metadata.get('expected_results', 1)
+        )
+        logger.debug('Created log events')
+        metadata['log_stream'] = log_stream
 
     yield
 
-    delete_log_group(log_group_name)
-    logger.debug('Deleted log group: %s', log_group_name)
+    for log_group_name in log_group_names:
+        if log_group_name in SKIP_LOG_GROUP_CREATION:
+            continue
+        delete_log_group(log_group_name)
+        logger.debug('Deleted log group: %s', log_group_name)
 
 
 @pytest.fixture(scope='function')
