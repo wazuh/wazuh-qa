@@ -52,6 +52,10 @@ import pytest
 import requests
 from wazuh_testing.api import get_security_resource_information
 
+# Marks
+
+pytestmark = [pytest.mark.server]
+
 # Variables
 user_id, role_id, policy_id, rule_id = None, None, None, None
 policy_positions = list()
