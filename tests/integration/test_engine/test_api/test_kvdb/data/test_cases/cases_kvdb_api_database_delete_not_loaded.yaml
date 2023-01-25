@@ -1,0 +1,23 @@
+- name: Delete a kvdb that is not loaded
+  description: Delete a kvdb that is not previously in memory.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: delete
+    options:
+      -n: kvdb_test
+    kvdb_names:
+      - kvdb_empty
+
+- name: Delete an empty kvdb that is not loaded
+  description: Delete an empty kvdb that is not previously in memory.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: delete
+    options:
+      -n: kvdb_empty
+    kvdb_names:
+      - kvdb_test

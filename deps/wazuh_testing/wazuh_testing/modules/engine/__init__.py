@@ -153,7 +153,7 @@ def get_kvdb_value(kvdb_path=ENGINE_KVDBS_PATH, db_name=None, key=None, rocksdb_
                                       https://python-rocksdb.readthedocs.io/en/latest/api/database.html#rocksdb.DB.
 
     Returns:
-        A string with the value for the provided key.
+        Bytes with the value for the provided key.
 
     Raises:
         AssertionError: If the provided key does not exist within the db.
@@ -175,7 +175,7 @@ def get_kvdb_value(kvdb_path=ENGINE_KVDBS_PATH, db_name=None, key=None, rocksdb_
     return value_fetched[1][1:-1]
 
 
-def get_kvdb_content(kvdb_path=ENGINE_KVDBS_PATH, db_name=None, rocksdb_instance=None):
+def get_kvdb_content(kvdb_path=ENGINE_KVDBS_PATH, db_name=None, rocksdb_instance=None, engine_format=False):
     """Get the database current content by requesting it via API.
 
     Args:
@@ -183,11 +183,16 @@ def get_kvdb_content(kvdb_path=ENGINE_KVDBS_PATH, db_name=None, rocksdb_instance
         db_name(str): Name of the database to be interacted with.
         rocksdb_instance(rocksdb.DB): Database instance used to interact with the db
                                       https://python-rocksdb.readthedocs.io/en/latest/api/database.html#rocksdb.DB.
+        engine_format(boolean)
 
     Returns:
-        A dictionary with the current database content.
+        The database content in two possible formats:
+            1. Following the engine's format for dumping dbs' content
+                array of pairs, like: [{"key":".*","value":".*"}]
+            2. Just like it comes from rocksdb's API
+                dictionary with keys:values, like a JSON
     """
-    kvdb_content = {}
+    kvdb_content = {} if not engine_format else []
 
     if rocksdb_instance is None:
         db = create_rocksdb_instance(kvdb_path=kvdb_path, db_name=db_name)
@@ -199,8 +204,14 @@ def get_kvdb_content(kvdb_path=ENGINE_KVDBS_PATH, db_name=None, rocksdb_instance
     # Point to the beginning
     db_iterator.seek_to_first()
 
-    for db_key in db_iterator:
-        kvdb_content[db_key] = get_kvdb_value(kvdb_path, db_name, db_key, db)
+    if engine_format:
+        for db_key in db_iterator:
+            # It is decoded because the engine dumps the content like this
+            kvdb_content.append({"key": db_key.decode(),
+                                "value": get_kvdb_value(kvdb_path, db_name, db_key, db).decode('unicode_escape')})
+    else:
+        for db_key in db_iterator:
+            kvdb_content[db_key] = get_kvdb_value(kvdb_path, db_name, db_key, db)
 
     return kvdb_content
 

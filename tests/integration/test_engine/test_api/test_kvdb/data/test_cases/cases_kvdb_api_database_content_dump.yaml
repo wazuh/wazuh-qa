@@ -1,0 +1,36 @@
+- name: Dump the content of a database
+  description: Dump the content of a database loaded on memory.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: dump
+    options:
+      -n: kvdb_test
+    kvdb_names:
+      - kvdb_test
+
+- name: Dump the content of an empty database
+  description: Dump the content of an empty database loaded on memory.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: dump
+    options:
+      -n: kvdb_empty
+    kvdb_names:
+      - kvdb_empty
+
+# - name: Dump the content of a database that contains unicode chars
+#   description: Dump the content of a database which contains unicode chars whithin
+#                its keys and values.
+#   configuration_parameters:
+#     cfg: TODO
+#   metadata:
+#     command: kvdb
+#     subcommand: dump
+#     options:
+#       -n: kvdb_extended
+#     kvdb_names:
+#       - kvdb_extended

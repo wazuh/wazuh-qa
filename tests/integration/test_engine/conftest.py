@@ -54,6 +54,8 @@ def create_predefined_kvdb(kvdb_names):
 def clean_stored_kvdb(kvdb_names):
     """Remove the kvdb stored on memory.
 
+    During the setup, all the dbs will be deleted. But in the tierdown, the created within the testing will be deleted.
+
     Args:
         kvdb_names(list): Names that indentify the predefined kvdbs stored in the engine's module.
     """
@@ -82,6 +84,5 @@ def clean_all_stored_kvdb():
 
     yield
 
-    # print(f"delete_api_call: {delete_api_call}")
     for kvdb_name in already_existing_kvdb_names:
         processes.run_local_command_printing_output(engine.create_api_call('kvdb', 'delete', {'-n': kvdb_name}))

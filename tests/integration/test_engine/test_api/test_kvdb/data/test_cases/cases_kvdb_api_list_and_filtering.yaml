@@ -54,7 +54,7 @@
       - kvdb_test
 
 - name: Verify filtering existent kvdbs
-  description: Verify that list subcommand can filter kvdb searchs
+  description: Verify that list subcommand can filter kvdb searches.
   configuration_parameters:
     cfg: TODO
   metadata:
@@ -67,7 +67,7 @@
       - kvdb_test
 
 - name: Verify filtering existent kvdbs
-  description: Verify that list subcommand can filter kvdb searchs
+  description: Verify that list subcommand can filter kvdb searches.
   configuration_parameters:
     cfg: TODO
   metadata:

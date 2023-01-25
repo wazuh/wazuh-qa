@@ -1,3 +1,28 @@
+'''
+copyright: Copyright (C) 2015-2023, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+type: integration
+brief: These tests will check that the engine's API allows all expected requests, verifying its behavior.
+components:
+    - engine
+suite: test_api
+targets:
+    - manager
+daemons:
+    - wazuh-engine
+os_platform:
+    - linux
+os_version:
+    - Ubuntu Focal
+references:
+    - https://github.com/wazuh/wazuh/issues/11334
+    - https://python-rocksdb.readthedocs.io/en/latest/api/database.html#database-interactions
+tags:
+    - engine
+    - kvdb
+    - rocksdb
+'''
 import os
 import pytest
 
