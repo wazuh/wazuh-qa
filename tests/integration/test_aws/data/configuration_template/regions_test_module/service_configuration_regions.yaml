@@ -11,7 +11,9 @@
             elements:
               - aws_profile:
                   value: qa
+              - aws_log_groups:
+                  value: LOG_GROUP_NAME
               - only_logs_after:
-                  value: 2023-JAN-30
+                  value: 2023-JAN-12
               - regions:
                   value: REGIONS

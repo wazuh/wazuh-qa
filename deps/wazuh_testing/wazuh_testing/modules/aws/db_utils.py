@@ -162,7 +162,7 @@ def get_multiple_s3_db_row(table_name: str) -> Iterator[S3CloudTrailRow]:
         yield row_type(*row)
 
 
-def table_exists_or_has_values(table_name: str) -> bool:
+def table_exists_or_has_values(table_name: str, db_path: Path = S3_CLOUDTRAIL_DB_PATH) -> bool:
     """Check if the given table name exists. If exists check if has values.
 
     Args:
@@ -171,7 +171,7 @@ def table_exists_or_has_values(table_name: str) -> bool:
     Returns:
         bool: True if exists or has values else False.
     """
-    connection = get_db_connection(S3_CLOUDTRAIL_DB_PATH)
+    connection = get_db_connection(db_path)
     cursor = connection.cursor()
     try:
         return bool(cursor.execute(SELECT_QUERY_TEMPLATE.format(table_name=table_name)).fetchall())
