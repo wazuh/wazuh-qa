@@ -30,8 +30,8 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, TEST_CASES_DIR, MODULE)
 local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0'}
 
 # ---------------------------------------------------- TEST_PATH -------------------------------------------------------
-t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_regions.yaml')
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_regions.yaml')
+t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'bucket_configuration_regions.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_bucket_regions.yaml')
 
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 t1_configurations = load_configuration_template(
