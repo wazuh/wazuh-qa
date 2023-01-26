@@ -503,7 +503,7 @@ def test_service_with_only_logs_after(
 
 
 # ---------------------------------------------------- TEST_MULTIPLE_CALLS ---------------------------------------------
-t4_cases_path = os.path.join(TEST_CASES_PATH, 'cases_multiple_calls.yaml')
+t4_cases_path = os.path.join(TEST_CASES_PATH, 'cases_bucket_multiple_calls.yaml')
 
 _, t4_configuration_metadata, t4_case_ids = get_test_cases_data(t4_cases_path)
 
