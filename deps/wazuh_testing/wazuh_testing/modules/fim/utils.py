@@ -69,32 +69,6 @@ def get_sync_msgs(timeout, new_data=True):
     return events
 
 
-def get_messages(callback, timeout=T_30):
-    """Look for as many synchronization events as possible.
-
-    This function will look for the synchronization messages until a Timeout is raised or 'max_events' is reached.
-
-    Args:
-        timeout (int): Timeout that will be used to get the dbsync_no_data message.
-
-    Returns:
-        A list with all the events in json format.
-    """
-    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    events = []
-    for _ in range(0, fim.MAX_EVENTS_VALUE):
-        event = None
-        try:
-            event = wazuh_log_monitor.start(timeout=timeout, accum_results=1,
-                                            callback=generate_monitoring_callback(callback),
-                                            error_message=f"Did not receive expected {callback} event").result()
-        except TimeoutError:
-            break
-        if event is not None:
-            events.append(event)
-    return events
-
-
 def find_value_in_event_list(key_path, value_name, event_list):
     """Function that looks for a key path and value_name in a list of json events.
 
@@ -678,61 +652,6 @@ def generate_params(extra_params: dict = None, apply_to_all: Union[Sequence[Any]
     return params, metadata
 
 
-def registry_key_create(root_key, registry_sub_key, log_monitor, arch=fim.KEY_WOW64_64KEY, key_list=['test_key'],
-                         callback=callback_key_event, min_timeout=1, options=None, triggers_event=True, encoding=None,
-                         validators_after_create=None):
-        """Check if creation, update and delete registry key events are detected by syscheck.
-
-        This function provides multiple tools to validate events with custom validators.
-
-        Args:
-            root_key (str): Root key (HKEY_LOCAL_MACHINE, HKEY_LOCAL_USER, etc).
-            registry_sub_key (str): Path of the subkey that will be created
-            log_monitor (FileMonitor): File event monitor.
-            arch (int): Architecture of the registry key (KEY_WOW64_32KEY or KEY_WOW64_64KEY). Default `KEY_WOW64_64KEY`
-            key_list (list(str) or dict, optional): If it is a list, it will be transformed to a dict with
-                empty strings in each value. Default `['test_key']`
-            min_timeout (int, optional): Minimum timeout. Default `1`
-            options (set, optional): Set with all the checkers. Default `None`
-            triggers_event (boolean, optional): Boolean to determine if the event
-                should be raised or not. Default `True`
-            encoding (str, optional): String to determine the encoding of the registry value name. Default `None`
-            validators_after_create (list, optional): List of functions that validates an event triggered when a new
-                registry value is created. Each function must accept a param to receive the
-                event to be validated. Default `None`
-        """
-        # Transform registry list
-        if root_key not in fim.registry_parser:
-            raise ValueError("Registry_key not valid")
-
-        registry_path = os.path.join(root_key, registry_sub_key)
-
-        key_list = transform_registry_key_list(key_list=key_list, callback=callback)
-        options_set= set_check_options(options)
-        
-        custom_validator = CustomValidator(validators_after_create, None,None,None)
-
-        registry_event_checker = RegistryEventChecker(log_monitor=log_monitor, registry_key=registry_path,
-                                                      registry_dict=key_list, options=options_set,
-                                                      custom_validator=custom_validator, encoding=encoding,
-                                                      callback=callback, is_value=False)
-
-        # Open the desired key
-        create_registry(fim.registry_parser[root_key], registry_sub_key, arch)
-
-        # Create registry subkeys
-        for name, _ in key_list.items():
-            if name in registry_path:
-                continue
-
-            create_registry(fim.registry_parser[root_key], os.path.join(registry_sub_key, name), arch)
-
-        registry_event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=True)
-
-        if triggers_event:
-            logger.info("'added' {} detected as expected.\n".format("events" if len(key_list) > 1 else "event"))
-
-
 def get_fim_mode_param(mode, key='FIM_MODE'):
     """Get the parameters for the FIM mode.
 
@@ -764,7 +683,7 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
         return None, None
 
 
-def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
+def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1, options=None,
                      triggers_event=True, encoding=None, validators_after_create=None, validators_after_update=None,
                      validators_after_delete=None, validators_after_cud=None, event_mode=None):
     """Check if creation, update and delete events are detected by syscheck.
@@ -776,7 +695,6 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=F
         log_monitor (FileMonitor): File event monitor.
         file_list (list(str) or dict, optional): If it is a list, it will be transformed to a dict with
             empty strings in each value. Default `['testfile0']`
-        time_travel (boolean, optional): Boolean to determine if there will be time travels or not. Default `False`
         min_timeout (int, optional): Minimum timeout. Default `1`
         options (set, optional): Set with all the checkers. Default `None`
         triggers_event (boolean, optional): Boolean to determine if the event should be raised or not. Default `True`

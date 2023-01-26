@@ -15,8 +15,6 @@ from wazuh_testing.modules.fim.event_monitor import callback_detect_event
 if sys.platform == 'linux2' or sys.platform == 'linux':
     from jq import jq
 
-_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-
 
 def validate_event(event, checks=None, mode=None):
     """Check if event is properly formatted according to some checks.
@@ -102,7 +100,7 @@ def validate_registry_key_event(event, checks=None, mode=None):
         return result
 
     json_file = 'syscheck_event_windows.json' if sys.platform == "win32" else 'syscheck_event.json'
-    with open(os.path.join(_data_path, json_file), 'r') as f:
+    with open(os.path.join(WAZUH_TESTING_DATA_PATH, json_file), 'r') as f:
         schema = json.load(f)
 
     validate(schema=schema, instance=event)
@@ -167,7 +165,7 @@ def validate_registry_value_event(event, checks=None, mode=None):
         return result
 
     json_file = 'syscheck_event_windows.json' if sys.platform == "win32" else 'syscheck_event.json'
-    with open(os.path.join(_data_path, json_file), 'r') as f:
+    with open(os.path.join(WAZUH_TESTING_DATA_PATH, json_file), 'r') as f:
         schema = json.load(f)
 
     validate(schema=schema, instance=event)

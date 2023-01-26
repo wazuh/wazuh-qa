@@ -8,7 +8,8 @@ import json
 from sys import platform
 from datetime import datetime
 from json import JSONDecodeError
-from wazuh_testing import LOG_FILE_PATH, logger
+from wazuh_testing import LOG_FILE_PATH, logger, T_30, T_60
+from wazuh_testing.modules.fim import MAX_EVENTS_VALUE
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 
 # Variables
@@ -192,19 +193,19 @@ def callback_detect_file_integrity_event(line):
 def callback_value_event(line):
     event = callback_detect_event(line)
 
-    if event is None or event['data']['attributes']['type'] != 'registry_value':
-        return None
+    if event and event['data']['attributes']['type'] == 'registry_value':
+        return event
 
-    return event
+    return None
 
 
 def callback_key_event(line):
     event = callback_detect_event(line)
 
-    if event is None or event['data']['attributes']['type'] != 'registry_key':
-        return None
+    if event and event['data']['attributes']['type'] == 'registry_key':
+        return event
 
-    return event
+    return None
 
 
 def callback_detect_registry_integrity_event(line):
@@ -368,3 +369,47 @@ def detect_whodata_start(file_monitor):
     """
     file_monitor.start(timeout=60, callback=generate_monitoring_callback(CB_REALTIME_WHODATA_ENGINE_STARTED),
                        error_message=ERR_MSG_WHODATA_ENGINE_EVENT)
+
+
+def get_messages(callback, timeout=T_30):
+    """Look for as many synchronization events as possible.
+
+    This function will look for the synchronization messages until a Timeout is raised or 'max_events' is reached.
+
+    Args:
+        timeout (int): Timeout that will be used to get the dbsync_no_data message.
+
+    Returns:
+        A list with all the events in json format.
+    """
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    events = []
+    for _ in range(0, MAX_EVENTS_VALUE):
+        event = None
+        try:
+            event = wazuh_log_monitor.start(timeout=timeout, accum_results=1,
+                                            callback=callback,
+                                            error_message=f"Did not receive expected {callback} event").result()
+        except TimeoutError:
+            break
+        if event is not None:
+            events.append(event)
+    return events
+
+
+def check_registry_crud_event(callback, path,  timeout=T_30, type='added', arch='x32', value_name=None):
+    """Detect realtime engine start when restarting Wazuh.
+
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+    """
+    events = get_messages(callback=callback, timeout=timeout)
+    for event in events:
+        if event['data']['type'] == type and arch in event['data']['arch'] and event['data']['path'] == path:
+            if value_name is not None:
+                if 'value_name' in event and event['data']['value_name'] == value_name:
+                    return event
+            else:
+                return event
+
+    return None
