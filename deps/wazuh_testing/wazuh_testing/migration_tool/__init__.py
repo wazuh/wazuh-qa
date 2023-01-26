@@ -6,7 +6,7 @@ This program is free software; you can redistribute it and/or modify it under th
 import os
 
 
-# Useful varibles
+# Useful variables
 WORKING_DIR = '/var/wazuh'
 OUTPUT_DIR = f"{WORKING_DIR}/incoming"
 CVE5_SCHEMA_PATH = f"{WORKING_DIR}/config/cve5/CVE_JSON_5.0_schema.json"

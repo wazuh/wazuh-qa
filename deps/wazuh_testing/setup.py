@@ -29,7 +29,7 @@ package_data_list = [
     'qa_ctl/provisioning/wazuh_deployment/templates/preloaded_vars.conf.j2',
     'data/qactl_conf_validator_schema.json',
     'data/all_disabled_ossec.conf',
-    'cmt/delta_schema.json'
+    'migration_tool/delta_schema.json'
 ]
 
 scripts_list = [
