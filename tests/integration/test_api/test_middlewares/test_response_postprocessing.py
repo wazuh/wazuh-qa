@@ -58,6 +58,9 @@ import pytest
 import requests
 from wazuh_testing import api
 
+# Marks
+pytestmark = [pytest.mark.server]
+
 
 # Tests
 

@@ -133,6 +133,14 @@ def restart_wazuh_function(daemon=None):
 
 
 @pytest.fixture(scope='module')
+def restart_wazuh_module(daemon=None):
+    """Restart all Wazuh daemons"""
+    control_service("restart", daemon=daemon)
+    yield
+    control_service('stop', daemon=daemon)
+
+
+@pytest.fixture(scope='module')
 def restart_wazuh_daemon_after_finishing(daemon=None):
     """
     Restart a Wazuh daemon
