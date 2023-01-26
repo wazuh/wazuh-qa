@@ -394,7 +394,7 @@ def test_service_with_only_logs_after(
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
 ):
     """
-    description: All logs with a timestamp greater than the only_logs_after value are processed.
+    description: All events with a timestamp greater than the only_logs_after value are processed.
     test_phases:
         - setup:
             - Load Wazuh light configuration.

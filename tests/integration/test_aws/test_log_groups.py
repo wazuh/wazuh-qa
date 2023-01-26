@@ -42,10 +42,11 @@ t1_configurations = load_configuration_template(
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 def test_log_groups(
     configuration, metadata, create_log_stream, load_wazuh_basic_configuration, set_wazuh_configuration,
-    clean_aws_services_db, configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
+    clean_aws_services_db, configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function,
+    wazuh_log_monitor
 ):
     """
-    description: Only the logs for the specified region are processed.
+    description: Only the events for the specified log_group are processed.
     test_phases:
         - setup:
             - Load Wazuh light configuration.

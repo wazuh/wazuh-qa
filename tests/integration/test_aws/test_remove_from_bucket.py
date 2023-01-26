@@ -24,15 +24,17 @@ local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0'
 
 # ---------------------------------------------------- TEST_REMOVE_FROM_BUCKET -----------------------------------------
 # Configuration and cases data
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_remove_from_bucket.yaml')
-cases_path = os.path.join(TEST_CASES_PATH, 'cases_remove_from_bucket.yaml')
+t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_remove_from_bucket.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_remove_from_bucket.yaml')
 
-configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
-configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
+t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
+t1_configurations = load_configuration_template(
+    t1_configurations_path, t1_configuration_parameters, t1_configuration_metadata
+)
 
 
 @pytest.mark.tier(level=0)
-@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
+@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 def test_remove_from_bucket(
     configuration, metadata, mark_cases_as_skipped, upload_and_delete_file_to_s3, load_wazuh_basic_configuration,
     set_wazuh_configuration, clean_s3_cloudtrail_db, configure_local_internal_options_function,
@@ -121,15 +123,17 @@ def test_remove_from_bucket(
 
 # ---------------------------------------------------- TEST_REMOVE_LOG_STREAM ------------------------------------------
 # Configuration and cases data
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_remove_log_stream.yaml')
-cases_path = os.path.join(TEST_CASES_PATH, 'cases_remove_log_streams.yaml')
+t2_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_remove_log_stream.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_remove_log_streams.yaml')
 
-configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
-configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
+t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
+t2_configurations = load_configuration_template(
+    t2_configurations_path, t2_configuration_parameters, t2_configuration_metadata
+)
 
 
 @pytest.mark.tier(level=0)
-@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
+@pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
 def test_remove_log_stream(
     configuration, metadata, create_log_stream, load_wazuh_basic_configuration, set_wazuh_configuration,
     clean_aws_services_db, configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function,
