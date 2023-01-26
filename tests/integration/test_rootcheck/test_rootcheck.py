@@ -6,8 +6,8 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 type: integration
 
 brief: The 'rootcheck' tool allows to define policies in order to check if the agents
-       meet the requirement specified. The rootcheck engine can check if a process is running, if a file is 
-       present and if the content of a file contains a pattern, 
+       meet the requirement specified. The rootcheck engine can check if a process is running, if a file is
+       present and if the content of a file contains a pattern,
        or if a Windows registry key contains a string or is simply present.
 
 components:
