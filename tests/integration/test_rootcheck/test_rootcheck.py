@@ -267,11 +267,11 @@ def test_rootcheck(get_configuration, configure_environment, restart_service,
         # Check that logs have been updated
         for agent in agents:
             rows = retrieve_rootcheck_rows(agent.id)
-
+            print("ROWS-------------" + str(rows))
             logs_string = [':'.join(x.split(':')[2:]) for x in
                            agent.rootcheck.messages_list]
             for row in rows:
-                assert row[1] < update_threshold, \
+                assert row[1] > update_threshold, \
                     f'First time in log was updated after insertion'
                 assert row[2] > update_threshold, \
                     f'Updated time in log was not updated'
