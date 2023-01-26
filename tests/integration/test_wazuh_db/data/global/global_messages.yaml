@@ -43,7 +43,7 @@
     stage: "global insert-agent success"
   -
     input: 'global get-agent-info 1'
-    output: 'ok [{"id":1,"name":"TestName1","ip":"0.0.0.1","register_ip":"0.0.0.1","internal_key":"TopSecret","node_name":"unknown","date_add":1599223378,"group":"TestGroup1","group_sync_status":"synced","sync_status":"synced","connection_status":"never_connected","disconnection_time":0,"group_config_status":"not synced"}]'
+    output: 'ok [{"id":1,"name":"TestName1","ip":"0.0.0.1","register_ip":"0.0.0.1","internal_key":"TopSecret","node_name":"unknown","date_add":1599223378,"group":"TestGroup1","group_sync_status":"synced","sync_status":"synced","connection_status":"never_connected","disconnection_time":0,"group_config_status":"not synced","status_code":0}]'
     stage: "global get-agent-info after insert"
   -
     input: 'global find-agent {"name":"TestName1","ip":"0.0.0.1"}'
@@ -57,7 +57,7 @@
     input: 'global insert-agent {"id":2,"name":"TestName2","date_add":1599223378}'
     output: "ok"
     stage: "global insert-agent minimal fields success"
-  -
+  - 
     input: 'global get-agent-info 2'
     output: 'ok [{"id":2,"name":"TestName2","node_name":"unknown","date_add":1599223378,"group_sync_status":"synced","sync_status":"synced","connection_status":"never_connected","disconnection_time":0,"group_config_status":"not synced"}]'
     stage: "global get-agent-info after minimal fields insert"

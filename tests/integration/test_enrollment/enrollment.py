@@ -8,7 +8,6 @@ copyright:
 
 
 import subprocess
-import os
 import platform
 
 from wazuh_testing.agent import AgentAuthParser
@@ -51,4 +50,4 @@ def launch_agent_auth(configuration):
     if configuration.get('groups'):
         parser.add_groups(configuration.get('groups'))
 
-    out = subprocess.call(parser.get_command(), timeout=AGENT_AUTH_LAUNCH_TIMEOUT)
+    subprocess.call(parser.get_command(), timeout=AGENT_AUTH_LAUNCH_TIMEOUT)
