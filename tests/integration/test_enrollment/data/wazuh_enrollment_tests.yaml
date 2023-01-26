@@ -4,7 +4,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC A:'{host_name}'\n"
+    expected: "OSSEC A:'{host_name}' V:'v4.5.0'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
 -
   name: "Valid agent address"
@@ -14,7 +14,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC A:'{host_name}' IP:'192.168.0.10'\n"
+    expected: "OSSEC A:'{host_name}' V:'v4.5.0' IP:'192.168.0.10'\n"
     response: "OSSEC K:'001 {host_name} 192.168.0.10 TopSecret'\n"
 -
   name: "Valid agent address CIDR"
@@ -24,7 +24,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC A:'{host_name}' IP:'192.168.0.10/24'\n"
+    expected: "OSSEC A:'{host_name}' V:'v4.5.0' IP:'192.168.0.10/24'\n"
     response: "OSSEC K:'001 {host_name} 192.168.0.10/24 TopSecret'\n"
 -
   name: "Invalid Agent address CIDR"
@@ -73,7 +73,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC A:'{host_name}'\n"
+    expected: "OSSEC A:'{host_name}' V:'v4.5.0'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
 -
   name: "Groups"
@@ -83,7 +83,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC A:'{host_name}' G:'group_1'\n"
+    expected: "OSSEC A:'{host_name}' V:'v4.5.0' G:'group_1'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
 -
   name: "Multi Groups"
@@ -93,7 +93,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC A:'{host_name}' G:'group_1,group_2'\n"
+    expected: "OSSEC A:'{host_name}' V:'v4.5.0' G:'group_1,group_2'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
 -
   name: "Invalid enabled"
@@ -113,7 +113,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC A:'test_agent'\n"
+    expected: "OSSEC A:'test_agent' V:'v4.5.0'\n"
     response: "OSSEC K:'001 test_agent any TopSecret'\n"
 -
   name: "Valid agent name config max length"
@@ -123,7 +123,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC A:'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn'\n"
+    expected: "OSSEC A:'nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn' V:'v4.5.0'\n"
     response: "OSSEC K:'001 nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn any TopSecret'\n"
 -
   name: "Invalid agent name config"
@@ -157,7 +157,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC A:'{host_name}' IP:'src'\n"
+    expected: "OSSEC A:'{host_name}' V:'v4.5.0' IP:'src'\n"
     response: "OSSEC K:'001 {host_name} 192.168.0.10 TopSecret'\n"
 -
   name: "Incompatible - Use source IP"
@@ -191,7 +191,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC PASS: pass123 OSSEC A:'{host_name}'\n"
+    expected: "OSSEC PASS: pass123 OSSEC A:'{host_name}' V:'v4.5.0'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
 -
   name: "Password from file - Agent-Auth"
@@ -202,7 +202,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC PASS: pass_from_file OSSEC A:'{host_name}'\n"
+    expected: "OSSEC PASS: pass_from_file OSSEC A:'{host_name}' V:'v4.5.0'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
 -
   name: "Password from file - Agentd"
@@ -215,7 +215,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC PASS: pass_from_file OSSEC A:'{host_name}'\n"
+    expected: "OSSEC PASS: pass_from_file OSSEC A:'{host_name}' V:'v4.5.0'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
 -
   name: "Valid port"
@@ -227,7 +227,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC A:'{host_name}'\n"
+    expected: "OSSEC A:'{host_name}' V:'v4.5.0'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
 -
   name: "Invalid port 65536"
@@ -265,7 +265,7 @@
   pre_existent_keys:
     - "001 test_name any TopSecret"
   message:
-    expected: "OSSEC A:'{host_name}' K:'5f7b611efd8882c0b11d87d284158faefafddf21'\n"
+    expected: "OSSEC A:'{host_name}' V:'v4.5.0' K:'5f7b611efd8882c0b11d87d284158faefafddf21'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
 
 -
@@ -276,7 +276,7 @@
   pre_existent_keys:
     - "001 test_name any TopSecret"
   message:
-    expected: "OSSEC A:'{host_name}' IP:'192.168.0.10' K:'5f7b611efd8882c0b11d87d284158faefafddf21'\n"
+    expected: "OSSEC A:'{host_name}' V:'v4.5.0' IP:'192.168.0.10' K:'5f7b611efd8882c0b11d87d284158faefafddf21'\n"
     response: "OSSEC K:'001 {host_name} 192.168.0.10 TopSecret' K:'5f7b611efd8882c0b11d87d284158faefafddf21'\n"
 -
   name: "Groups with key hash"
@@ -286,7 +286,7 @@
   pre_existent_keys:
     - "001 test_name any TopSecret"
   message:
-    expected: "OSSEC A:'{host_name}' G:'group_1' K:'5f7b611efd8882c0b11d87d284158faefafddf21'\n"
+    expected: "OSSEC A:'{host_name}' V:'v4.5.0' G:'group_1' K:'5f7b611efd8882c0b11d87d284158faefafddf21'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
 -
   name: "Valid agent IPv6 address"
@@ -296,7 +296,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC A:'{host_name}' IP:'02DB:4660:46AF:E523:D05E:A62E:4CA7:8E58'\n"
+    expected: "OSSEC A:'{host_name}' V:'v4.5.0' IP:'02DB:4660:46AF:E523:D05E:A62E:4CA7:8E58'\n"
     response: "OSSEC K:'001 {host_name} 02DB:4660:46AF:E523:D05E:A62E:4CA7:8E58 TopSecret'\n"
 -
   name: "Valid compressed agent IPv6 address"
@@ -306,7 +306,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC A:'{host_name}' IP:'2001:0DB8:0000:000B:0000:0000:0000:001A'\n"
+    expected: "OSSEC A:'{host_name}' V:'v4.5.0' IP:'2001:0DB8:0000:000B:0000:0000:0000:001A'\n"
     response: "OSSEC K:'001 {host_name} 2001:0DB8:0000:000B:0000:0000:0000:001A TopSecret'\n"
 -
   name: "Invalid Agent IPv6 address double colon"
@@ -332,7 +332,7 @@
   pre_existent_keys:
     - ""
   message:
-    expected: "OSSEC A:'{host_name}'\n"
+    expected: "OSSEC A:'{host_name}' V:'v4.5.0'\n"
     response: "OSSEC K:'001 {host_name} any TopSecret'\n"
 -
   name: "Invalid long agent IPv6 address"

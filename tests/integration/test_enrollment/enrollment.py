@@ -51,5 +51,4 @@ def launch_agent_auth(configuration):
     if configuration.get('groups'):
         parser.add_groups(configuration.get('groups'))
 
-    out = subprocess.Popen(parser.get_command(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    out.communicate(timeout=AGENT_AUTH_LAUNCH_TIMEOUT)
+    out = subprocess.call(parser.get_command(), timeout=AGENT_AUTH_LAUNCH_TIMEOUT)
