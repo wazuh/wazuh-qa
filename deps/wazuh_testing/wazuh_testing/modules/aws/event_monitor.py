@@ -195,17 +195,22 @@ def check_marker_from_output(command_output: str, file_key: str, expected_result
     )
 
 
-def check_inspector_processed_logs_from_output(command_output: str, events_sent: int, expected_results: int = 1):
+def check_service_processed_logs_from_output(
+        command_output: str, events_sent: int, service_type: str, expected_results: int = 1
+):
     analyze_command_output(
         command_output=command_output,
-        callback=callback_detect_inspector_event_processed(events_sent),
+        callback=callback_detect_service_event_processed(events_sent, service_type),
         expected_results=expected_results,
         error_message='The AWS module did not process the expected number of events'
     )
 
 
-def check_inspector_non_processed_logs_from_output(command_output: str, expected_results: int = 1):
-    pattern = r'DEBUG: \+\+\+ There are no new events in .*'
+def check_service_non_processed_logs_from_output(command_output: str, service_type: str, expected_results: int = 1):
+    if service_type == 'inspector':
+        pattern = r'DEBUG: \+\+\+ There are no new events in .*'
+    else:
+        pattern = r'DEBUG: \+\+\+ Sent \d+ events to Analysisd'
 
     analyze_command_output(
         command_output,

@@ -155,6 +155,19 @@ def create_log_stream_in_existent_group(metadata: dict):
     delete_log_stream(log_stream=log_stream, log_group=log_group_name)
     logger.debug('Deleted log stream: %s', log_stream)
 
+
+@pytest.fixture(scope='function', name='delete_log_stream')
+def fixture_delete_log_stream_(metadata: dict):
+    """Create a log stream with events and delete after the execution.
+
+    Args:
+        metadata (dict): Metadata to get the parameters.
+    """
+    yield
+    log_stream = metadata['log_stream']
+    delete_log_stream(log_stream=log_stream)
+    logger.debug('Deleted log stream: %s', log_stream)
+
 # DB fixtures
 
 
