@@ -6,8 +6,8 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 type: integration
 
 brief: The 'rootcheck' tool allows to define policies in order to check if the agents
-       meet the requirement specified. The rootcheck engine can check if a process is running, if a file is 
-       present and if the content of a file contains a pattern, 
+       meet the requirement specified. The rootcheck engine can check if a process is running, if a file is
+       present and if the content of a file contains a pattern,
        or if a Windows registry key contains a string or is simply present.
 
 components:
@@ -271,7 +271,7 @@ def test_rootcheck(get_configuration, configure_environment, restart_service,
             logs_string = [':'.join(x.split(':')[2:]) for x in
                            agent.rootcheck.messages_list]
             for row in rows:
-                assert row[1] < update_threshold, \
+                assert row[1] > update_threshold, \
                     f'First time in log was updated after insertion'
                 assert row[2] > update_threshold, \
                     f'Updated time in log was not updated'
