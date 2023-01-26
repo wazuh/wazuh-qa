@@ -34,14 +34,6 @@
     kvdb_names:
       - kvdb_empty
 
-- name: Verify listing when there are no kvdbs
-  description: Verify that when using the list subcommand when no kvdb has been created, it works.
-  configuration_parameters:
-    cfg: TODO
-  metadata:
-    command: kvdb
-    subcommand: list
-
 - name: Verify listing all the existent kvdbs
   description: Verify that all the created kvdbs can be listed.
   configuration_parameters:

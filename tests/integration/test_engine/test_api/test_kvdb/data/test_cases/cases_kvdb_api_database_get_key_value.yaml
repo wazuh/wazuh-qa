@@ -1,0 +1,25 @@
+- name: Get key value from db
+  description: Get the key's value for a certain database in memory.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: get
+    options:
+      -n: kvdb_test
+      -k: ip
+    kvdb_names:
+      - kvdb_test
+
+- name: Get key value from db
+  description: Get the key's value for an extended database in memory.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: get
+    options:
+      -n: kvdb_extended
+      -k: "unicode_chars\u03DA"
+    kvdb_names:
+      - kvdb_extended

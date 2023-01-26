@@ -1,0 +1,80 @@
+- name: Insert a new pairs into an existing db
+  description: Insert a new key-value pair into an existing db.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: insert
+    options:
+      -n: kvdb_test
+      -k: akey
+      -v: avalue
+    kvdb_names:
+      - kvdb_test
+
+- name: Insert a key without value into a db
+  description: Insert a new key-value pair into an existing db.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: insert
+    options:
+      -n: kvdb_test
+      -k: akey
+    kvdb_names:
+      - kvdb_test
+
+- name: Insert a key that contains unicode char without value into a db
+  description: Insert a new key contains unicode char into an existing db.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: insert
+    options:
+      -n: kvdb_extended
+      -k: "akey with unicode \u03BB"
+    kvdb_names:
+      - kvdb_extended
+
+- name: Insert a key that contains escaped chars within its value 
+  description: Insert a new key that contains an escaped char into an existing db.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: insert
+    options:
+      -n: kvdb_extended
+      -k: "\""
+    kvdb_names:
+      - kvdb_extended
+
+- name: Insert a key where the value is a map into a db
+  description: Insert a new key where the value is a map into an existing db.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: insert
+    options:
+      -n: kvdb_extended
+      -k: amap
+      -v: '{"category":["driver"],"type":["end"],"action":"windows-firewall-driver-error"}'
+    kvdb_names:
+      - kvdb_extended
+
+- name: Insert an already existing key into a loaded database
+  description: Insert a key that exists into a database.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: insert
+    options:
+      -n: kvdb_test
+      -k: ip
+      -v: 127.0.0.1
+    kvdb_names:
+      - kvdb_test

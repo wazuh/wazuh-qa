@@ -1,0 +1,25 @@
+- name: Remove a key from an existing database
+  description: Remove an existing key from a database.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: remove
+    options:
+      -n: kvdb_test
+      -k: ip
+    kvdb_names:
+      - kvdb_test
+
+- name: Remove a key from an existing database
+  description: Remove an existing key from an extended database.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: remove
+    options:
+      -n: kvdb_extended
+      -k: "unicode_chars\u03DA"
+    kvdb_names:
+      - kvdb_extended

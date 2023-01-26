@@ -1,0 +1,25 @@
+- name: Get not existing key value from database
+  description: Verify that the engine fails when trying to get a key that does not exist.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: get
+    options:
+      -n: kvdb_test
+      -k: nokey
+    kvdb_names:
+      - kvdb_test
+
+- name: Get not existing key value from extended database
+  description: Verify that the engine fails when trying to get a key that does not exist.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: get
+    options:
+      -n: kvdb_extended
+      -k: qa
+    kvdb_names:
+      - kvdb_extended

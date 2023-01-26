@@ -1,0 +1,25 @@
+- name: Remove a key from a non-existent database
+  description: Remove a non-existent key from a database.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: remove
+    options:
+      -n: kvdb_test
+      -k: nokey
+    kvdb_names:
+      - kvdb_test
+
+- name: Remove a key from a non-existent database
+  description: Remove a non-existent key from an extended database.
+  configuration_parameters:
+    cfg: TODO
+  metadata:
+    command: kvdb
+    subcommand: remove
+    options:
+      -n: kvdb_extended
+      -k: qa
+    kvdb_names:
+      - kvdb_extended

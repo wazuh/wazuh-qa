@@ -37,8 +37,8 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_kvdb_api_database_delete.yaml')
-t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_kvdb_api_database_delete_not_loaded.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_kvdb_api_database_remove_pairs.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_kvdb_api_database_remove_pairs_non_existent_key.yaml')
 
 # Engine KVDB create API configurations (t1)
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
@@ -53,14 +53,15 @@ t2_kvdb_names = engine.get_kvdb_names(t2_configuration_metadata)
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('api_call_data, kvdb_names', zip(t1_api_call_data, t1_kvdb_names), ids=t1_case_ids)
-def test_kvdb_delete_databases(api_call_data, kvdb_names, clean_stored_kvdb, create_predefined_kvdb):
+def test_kvdb_remove_pairs(api_call_data, kvdb_names, clean_stored_kvdb, create_predefined_kvdb):
     '''
-    description: Check that KVDBs can be created as expected using a JSON file as input.
+    description: Check that pairs can be removed in existing databases using the API.
 
     test_phases:
         - Delete the KVDBs that could be in the environment.
         - Create the provided KVDBs.
-        - Verify the created databases' content in memory.
+        - Remove the given pairs.
+        - Verify the databases' content in memory.
 
     wazuh_min_version: 5.0.0
 
@@ -81,37 +82,51 @@ def test_kvdb_delete_databases(api_call_data, kvdb_names, clean_stored_kvdb, cre
             brief: Create the KVDBs provided within the kvdb_names variable.
 
     assertions:
-        - Check that engine's output is the expected.
-        - Check that the kvdb has been deleted from memory.
+        - Check that db is loaded.
+        - Check that the database content is the expected after removing the pair
 
     input_description:
-        - The `cases_kvdb_api_database_creation` file provides the test cases.
+        - The `cases_kvdb_api_database_remove_pairs` file provides the test cases.
 
     expected_output:
-        - r"KVDB '.*' successfully deleted\n"
+        - Database content without the removed pair,
     '''
+    # Verify that db is loaded in memory
+    assert kvdb_names[0] in engine.get_available_kvdbs(), f"The {kvdb_names[0]} database was not created when " \
+                                                          "it should."
+
     # Create api call that uses the call data for that Tcase
     api_call = engine.create_api_call(api_call_data['command'], api_call_data['subcommand'],
                                       api_call_data['options'] if 'options' in api_call_data else {})
 
-    # Verify that the created kvdb has the expected pairs
-    assert processes.run_local_command_returning_output(api_call) == f"KVDB '{kvdb_names[0]}' successfully deleted\n", \
-        'The API call was not received as expected.'
+    # Remove the pairs fromt the db
+    assert processes.run_local_command_returning_output(api_call) == 'ok\n', \
+        f"The following API request failed: {api_call}"
 
-    # Verify that the deleted kvdb is in memory no longer
-    assert kvdb_names[0] not in engine.get_available_kvdbs(), f"The {kvdb_names[0]} database was not deleted."
+    # Get the kvdb data without the key that is removed for the Tcase
+    expected_kvdb_content = engine.read_kvdb_file(TEST_KVDBS_PATH, kvdb_names[0])
+    expected_kvdb_content.pop(api_call_data['options']['-k'], True)
+
+    # Get the database content after removing the pair
+    current_content = {encoded_key.decode('utf-8'): encoded_value.decode('unicode_escape')
+                       for encoded_key, encoded_value in engine.get_kvdb_content(db_name=kvdb_names[0]).items()}
+
+    assert expected_kvdb_content == current_content, f"The database {kvdb_names[0]} has not the expected content " \
+        f"after removing the key {api_call_data['options']['-k']}"
 
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('api_call_data', t1_api_call_data, ids=t1_case_ids)
-def test_kvdb_delete_with_no_dbs(api_call_data, clean_all_stored_kvdb):
+def test_kvdb_remove_from_non_existent_db(api_call_data, clean_all_stored_kvdb):
     '''
-    description: Check that KVDBs can be created as expected using a JSON file as input.
+    description: Check that pairs can't be removed from non-existent databases using the API.
 
     test_phases:
         - Delete the KVDBs that could be in the environment.
-        - Try to delete the dbs without being created.
-        - Verify that dbs were not created.
+        - Create the provided KVDBs.
+        - Insert the new pairs.
+        - Verify engine's output.
+        - Verify the databases' content in memory.
 
     wazuh_min_version: 5.0.0
 
@@ -126,41 +141,40 @@ def test_kvdb_delete_with_no_dbs(api_call_data, clean_all_stored_kvdb):
             brief: Clean all the KVDBs from memory.
 
     assertions:
-        - Check that no databases are in memory.
         - Check that engine's output is the expected.
-        - Check that there are no kvdbs when trying to delete.
+        - Check that the database is not in memory.
 
     input_description:
-        - The `cases_kvdb_api_database_creation` file provides the test cases.
+        - The `cases_kvdb_api_database_remove_pairs` file provides the test cases.
 
     expected_output:
-        - r"Database .* not found or could not be loaded"
+        - r".* not found or could not be loaded."
     '''
     # Create api call that uses the call data for that Tcase
     api_call = engine.create_api_call(api_call_data['command'], api_call_data['subcommand'],
                                       api_call_data['options'] if 'options' in api_call_data else {})
 
-    # Verify that there are no kvdbs in memory
-    assert not engine.get_available_kvdbs(), 'There are databases in memory when it should not.'
+    # Remove the pair from the db
+    assert 'not found or could not be loaded.' in processes.run_local_command_returning_output(api_call), \
+        'The given output is not the expected: "not found or could not be loaded".'
 
-    # Verify that the kvdb can't be deleted as it has not been loaded
-    assert 'not found or could not be loaded' in \
-           processes.run_local_command_returning_output(api_call), 'The API call was not received as expected.'
-
-    # Verify that still no kvdb in memory
-    assert not engine.get_available_kvdbs(), 'Some database has been created when it should not.'
+    # Verify that the database is not in memory.
+    assert api_call_data['options']['-n'] not in engine.get_available_kvdbs(), \
+        f"The {api_call_data['options']['-n']} database was created when it should not."
 
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('api_call_data, kvdb_names', zip(t2_api_call_data, t2_kvdb_names), ids=t2_case_ids)
-def test_kvdb_delete_databases_not_loaded(api_call_data, kvdb_names, clean_stored_kvdb, create_predefined_kvdb):
+def test_kvdb_remove_value_for_non_existent_key(api_call_data, kvdb_names, clean_stored_kvdb, create_predefined_kvdb):
     '''
-    description: Check that KVDBs can be created as expected using a JSON file as input.
+    description: Check that pairs can't be removed from non-existen databases using the API.
 
     test_phases:
         - Delete the KVDBs that could be in the environment.
-        - Verify that the db that gonna be deleted is not in memory.
-        - Delete the dbs.
+        - Create the provided KVDBs.
+        - Remove the pair.
+        - Verify the engine's output.
+        - Verify that database's content is not modified.
 
     wazuh_min_version: 5.0.0
 
@@ -170,31 +184,45 @@ def test_kvdb_delete_databases_not_loaded(api_call_data, kvdb_names, clean_store
         - api_call_data:
             type: dict
             brief: Data from the cases required to build the API calls.
-        - clean_all_stored_kvdb:
+        - kvdb_names:
+            type: str
+            brief: Database name to be created.
+        - clean_stored_kvdb:
             type: fixture
-            brief: Clean all the KVDBs from memory.
+            brief: Clean the provided KVDBs from memory.
         - create_predefined_kvdb:
             type: fixture
             brief: Create the KVDBs provided within the kvdb_names variable.
 
     assertions:
-        - Check that the database to delete is not in memory.
+        - Check that the database is in memory.
         - Check that engine's output is the expected.
+        - Check that the kvdb has been deleted from memory.
 
     input_description:
-        - The `cases_kvdb_api_database_creation` file provides the test cases.
+        - The `cases_kvdb_api_database_remove_pairs_non_existent_key` file provides the test cases.
 
     expected_output:
-        - r"Database .* not found or could not be loaded"
+        - r"KVDB '.*' successfully deleted\n"
     '''
+    # Verify that db is not in memory
+    assert kvdb_names[0] in engine.get_available_kvdbs(), f"The {kvdb_names[0]} database was not created when " \
+                                                          "it should."
+
     # Create api call that uses the call data for that Tcase
     api_call = engine.create_api_call(api_call_data['command'], api_call_data['subcommand'],
                                       api_call_data['options'] if 'options' in api_call_data else {})
 
-    # Verify that the database is not in memory
-    assert api_call_data['options']['-n'] not in engine.get_available_kvdbs(), f"The {api_call_data['options']['-n']}" \
-                                                                               " database was not deleted."
+    api_call_output = processes.run_local_command_returning_output(api_call)
 
-    # Verify that the kvdb can't be deleted as it has not been loaded
-    assert 'not found or could not be loaded' in \
-           processes.run_local_command_returning_output(api_call), 'The API call was not received as expected.'
+    # Try to insert a different value to the already existing key
+    assert api_call_output == 'ok\n', f"The following API request failed: {api_call}"
+
+    # Get the kvdb data that is expected
+    expected_kvdb_content = engine.read_kvdb_file(TEST_KVDBS_PATH, kvdb_names[0])
+
+    # Get the database content after the API call
+    current_content = {encoded_key.decode('utf-8'): encoded_value.decode('unicode_escape')
+                       for encoded_key, encoded_value in engine.get_kvdb_content(db_name=kvdb_names[0]).items()}
+
+    assert expected_kvdb_content == current_content, f"The database {kvdb_names[0]} has not the expected content."

@@ -80,7 +80,7 @@ def get_list_expected_output(kvdb_names, options):
 
 
 @pytest.mark.tier(level=0)
-@pytest.mark.parametrize('api_call_data, kvdb_names', zip(api_call_data, kvdb_names))
+@pytest.mark.parametrize('api_call_data, kvdb_names', zip(api_call_data, kvdb_names), ids=t1_case_ids)
 def test_kvdb_list(api_call_data, kvdb_names, clean_stored_kvdb, create_predefined_kvdb):
     '''
     description: Check that KVDBs can be listed when loaded as expected.
@@ -129,7 +129,7 @@ def test_kvdb_list(api_call_data, kvdb_names, clean_stored_kvdb, create_predefin
 
 
 @pytest.mark.tier(level=0)
-@pytest.mark.parametrize('api_call_data', api_call_data)
+@pytest.mark.parametrize('api_call_data', api_call_data, ids=t1_case_ids)
 def test_kvdb_list_no_loaded_kvdbs(api_call_data, clean_all_stored_kvdb):
     '''
     description: Check that listing KVDBs not loaded on memory generates the expected output.

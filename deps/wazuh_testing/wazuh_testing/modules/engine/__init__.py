@@ -58,7 +58,7 @@ def create_api_call(command='kvdb', subcommand='list', options={}):
     api_call_str = f"{ENGINE_BIN_PATH} {command} {subcommand}"
 
     for option_name in options:
-        api_call_str += f" {option_name} {options[option_name]}"
+        api_call_str += f" {option_name} '{options[option_name]}'"
 
     return api_call_str
 
@@ -172,7 +172,9 @@ def get_kvdb_value(kvdb_path=ENGINE_KVDBS_PATH, db_name=None, key=None, rocksdb_
     assert not value_fetched[0] or not value_fetched[1] is None, f"The key {key} exists but is not in memory."
 
     # The request returns the value like "value", the quotes are discarded
-    return value_fetched[1][1:-1]
+    # If the value is the string 'null' it returns the fetched value without removing the limits
+    return value_fetched[1][1:-1] \
+        if value_fetched[1][0] == '"'.encode()[0] and value_fetched[1][-1] == '"'.encode()[0] else value_fetched[1]
 
 
 def get_kvdb_content(kvdb_path=ENGINE_KVDBS_PATH, db_name=None, rocksdb_instance=None, engine_format=False):
