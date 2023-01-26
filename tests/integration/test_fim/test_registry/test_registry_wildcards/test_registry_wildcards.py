@@ -56,16 +56,16 @@ tags:
 import os
 import time
 import pytest
-from wazuh_testing import LOG_FILE_PATH, global_parameters
-from wazuh_testing.fim import registry_key_cud
+from wazuh_testing import LOG_FILE_PATH, T_10, T_30
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules import WINDOWS, TIER1
 from wazuh_testing.modules.fim import (registry_parser, KEY_WOW64_64KEY, REG_SZ,
                                        WINDOWS_HKEY_LOCAL_MACHINE)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.modules.fim.event_monitor import CB_FIM_WILDCARD_EXPANDING, callback_key_event, callback_value_event
-from wazuh_testing.modules.fim.utils import (get_messages, create_values_content, registry_value_create,
+from wazuh_testing.modules.fim.event_monitor import (CB_FIM_WILDCARD_EXPANDING, callback_key_event, get_messages,
+                                                     callback_value_event, check_registry_crud_event)
+from wazuh_testing.modules.fim.utils import (create_values_content, registry_value_create,
                                              registry_value_update, registry_value_delete, create_registry,
                                              modify_registry_value, delete_registry)
 
@@ -79,23 +79,29 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
 configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_registry_wildcards.yaml')
-cases_path = os.path.join(TEST_CASES_PATH, 'cases_registry_wildcards.yaml')
-
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_registry_key_wildcards.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_registry_value_wildcards.yaml')
 
 # Enabled test configurations (t1)
-configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
-configurations = load_configuration_template(configurations_path, configuration_parameters,
-                                             configuration_metadata)
+t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
+t1_configurations = load_configuration_template(configurations_path, t1_configuration_parameters,
+                                                t1_configuration_metadata)
+
+t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
+t2_configurations = load_configuration_template(configurations_path, t2_configuration_parameters,
+                                                t2_configuration_metadata)
+
 
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-monitor_timeout = 40
-
+key_name = 'test_key'
+value_name = 'test_value'
 
 
 # Tests
-@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
+@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 def test_registry_key_wildcards(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
-                                 configure_local_internal_options_function, restart_wazuh_function, wait_syscheck_start):
+                                configure_local_internal_options_function, restart_wazuh_function,
+                                wait_syscheck_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
                  'full database alert' mode for reaching the limit of entries to monitor set in the 'entries' option
@@ -134,45 +140,40 @@ def test_registry_key_wildcards(configuration, metadata, set_wazuh_configuration
                        with the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - 
+        -
 
     tags:
         - scheduled
     '''
-    monitored_keys = get_messages(CB_FIM_WILDCARD_EXPANDING)
-    assert monitored_keys != [], "ERROR MESSAGE 1"
-    time.sleep(10)    
-    subkey = monitored_keys[0].replace(f"{WINDOWS_HKEY_LOCAL_MACHINE}\\","")
-    subkey = subkey+'\\test_key'
-    
+
+    # Check logs for wildcards expansion and actual monitored keys
+    monitored_keys = get_messages(generate_monitoring_callback(CB_FIM_WILDCARD_EXPANDING), timeout=T_10)
+    assert monitored_keys != [], f"Did not receive expected '{CB_FIM_WILDCARD_EXPANDING}' events"
+
+    subkey = monitored_keys[0].replace(f"{WINDOWS_HKEY_LOCAL_MACHINE}\\", "")
+    subkey = subkey + f"\\{key_name}"
+    path = monitored_keys[0] + f"\\{key_name}"
+
+    # Create a new key inside monitored key and check it is detected
     reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
-    wazuh_log_monitor.start(timeout=30, callback=callback_key_event,
-                          update_position=False,
-                          error_message=f"ADDED KEY ADDED EVENT").result()
-    time.sleep(10)
-    modify_registry_value(reg_handle, 'test_value', REG_SZ, 'added')
-    wazuh_log_monitor.start(timeout=30, callback=callback_value_event,
-                          update_position=False,
-                          error_message=f"ADDED VALUE ADDED EVENT").result()
-    time.sleep(10)
+    event = check_registry_crud_event(callback=callback_key_event, path=path, type='added', timeout=T_10)
+    assert event is not None, 'Did not find the expected "registry_key added" event'
+
+    # Add new value in the key and detect the modification of created monitored key is detected
+    modify_registry_value(reg_handle, value_name, REG_SZ, 'added')
+    event = check_registry_crud_event(callback=callback_key_event, path=path, type='modified', timeout=T_10)
+    assert event is not None, 'Did not find the expected "registry_key modified" event'
+
+    # Delete the created key and check it's deletion is detected
     delete_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
-    wazuh_log_monitor.start(timeout=30, callback=callback_key_event,
-                          update_position=False,
-                          error_message=f"ADDED KEY DELETED EVENT").result()
-    
-    # Check Key/Value is being monitored
-    # Modify Key/Value
-    
-    #time.sleep(10)
-    #RegCloseKey(reg_handle)
-    # Check modification is detected
-    # Delete Key/Value  
-"""
+    event = check_registry_crud_event(callback=callback_key_event, path=path, type='deleted', timeout=T_10)
+    assert event is not None, 'Did not find the expected "registry_key deleted" event'
 
 
-@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
+@pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
 def test_registry_value_wildcards(configuration, metadata, set_wazuh_configuration,
-                                 configure_local_internal_options_function, restart_syscheck_function, wait_fim_start):
+                                  configure_local_internal_options_function, restart_syscheck_function,
+                                  wait_syscheck_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
                  'full database alert' mode for reaching the limit of entries to monitor set in the 'entries' option
@@ -211,28 +212,28 @@ def test_registry_value_wildcards(configuration, metadata, set_wazuh_configurati
                        with the testing registry key to be monitored defined in this module.
 
     expected_output:
-        - 
+        -
 
     tags:
         - scheduled
     '''
-    monitored_keys = get_messages(CB_FIM_WILDCARD_EXPANDING)
-    assert monitored_keys != [], "ERROR MESSAGE 1"
-    key = metadata['root_key']
-    subkey = monitored_keys[0].replace(f"{key}\\","")
-    subkey = subkey+'\\test_key'
-    
-    values = create_values_content(metadata['value_name'], 10)
+    values = create_values_content(value_name, 10)
     scan_delay = metadata['interval']
 
+    monitored_keys = get_messages(generate_monitoring_callback(CB_FIM_WILDCARD_EXPANDING))
+    assert monitored_keys != [], f"Did not receive expected '{CB_FIM_WILDCARD_EXPANDING}' events"
+    subkey = monitored_keys[0].replace(f"{WINDOWS_HKEY_LOCAL_MACHINE}\\", "")
+    subkey = subkey+f"\\{key_name}"
 
-     # Create the value inside the key - we do it here because it key or arch is not known before the test launches
+    # Create custom key
+    reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
+    
+    # Create the value inside the key
     registry_value_create(key, subkey, wazuh_log_monitor, arch=KEY_WOW64_64KEY, value_list=values, wait_for_scan=True,
-                          scan_delay=scan_delay, min_timeout=global_parameters.default_timeout*5, triggers_event=True)
-    # Modify the value to check if the diff file is generated or not, as expected
+                          scan_delay=scan_delay, min_timeout=T_30, triggers_event=True)
+    # Modify the value
     registry_value_update(key, subkey, wazuh_log_monitor, arch=KEY_WOW64_64KEY, value_list=values, wait_for_scan=True,
-                          scan_delay=scan_delay, min_timeout=global_parameters.default_timeout*5, triggers_event=True)
+                          scan_delay=scan_delay, min_timeout=T_30, triggers_event=True)
     # Delete the value created to clean up enviroment
     registry_value_delete(key, subkey, wazuh_log_monitor, arch=KEY_WOW64_64KEY, value_list=values, wait_for_scan=True,
-                          scan_delay=scan_delay, min_timeout=global_parameters.default_timeout*5, triggers_event=True)
-"""
+                          scan_delay=scan_delay, min_timeout=T_30, triggers_event=True)

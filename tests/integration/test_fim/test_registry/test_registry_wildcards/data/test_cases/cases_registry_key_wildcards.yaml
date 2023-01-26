@@ -1,0 +1,23 @@
+- name: Test1 question mark wildcard (Scheduled)
+  description: Test path with single question mark wildcard in scheduled mode
+  configuration_parameters:
+    FREQUENCY: 5
+    WINDOWS_REGISTRY: HKEY_LOCAL_MACHINE\SA?
+  metadata:
+    fim_mode: scheduled
+
+- name: Test2 single asterisk wildcard (Scheduled)
+  description: Test path with single asterisk wildcard in scheduled mode
+  configuration_parameters:
+    FREQUENCY: 5
+    WINDOWS_REGISTRY: HKEY_LOCAL_MACHINE\HARDWARE\DEVICEMAP\*
+  metadata:
+    fim_mode: scheduled
+  
+- name: Test3 asterisk+question mark (Scheduled)
+  description: Test path with multiple asterisks and question mark wildcards combined in scheduled mode
+  configuration_parameters:
+    FREQUENCY: 5
+    WINDOWS_REGISTRY: HKEY_LOCAL_MACHINE\*\*\PointerCla??
+  metadata:
+    fim_mode: scheduled

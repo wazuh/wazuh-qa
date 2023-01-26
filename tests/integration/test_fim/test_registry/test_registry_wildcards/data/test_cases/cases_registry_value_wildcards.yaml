@@ -1,0 +1,9 @@
+- name: Test value
+  description: Test path with single question mark wildcard
+  configuration_parameters:
+    FREQUENCY: 5
+    WINDOWS_REGISTRY: HKEY_LOCAL_MACHINE\SA?
+  metadata:
+    value_name: test_value
+    interval: 10
+    fim_mode: scheduled
