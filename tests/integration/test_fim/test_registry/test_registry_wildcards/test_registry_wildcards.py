@@ -64,7 +64,7 @@ from wazuh_testing.modules.fim import (registry_parser, KEY_WOW64_64KEY, REG_SZ,
                                        WINDOWS_HKEY_LOCAL_MACHINE)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim.event_monitor import (CB_FIM_WILDCARD_EXPANDING, callback_key_event, get_messages,
-                                                     callback_value_event, check_registry_crud_event)
+                                                     check_registry_crud_event)
 from wazuh_testing.modules.fim.utils import (create_values_content, registry_value_create,
                                              registry_value_update, registry_value_delete, create_registry,
                                              modify_registry_value, delete_registry)
@@ -226,14 +226,19 @@ def test_registry_value_wildcards(configuration, metadata, set_wazuh_configurati
     subkey = subkey+f"\\{key_name}"
 
     # Create custom key
-    reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
+    create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
     
     # Create the value inside the key
-    registry_value_create(key, subkey, wazuh_log_monitor, arch=KEY_WOW64_64KEY, value_list=values, wait_for_scan=True,
-                          scan_delay=scan_delay, min_timeout=T_30, triggers_event=True)
+    registry_value_create(WINDOWS_HKEY_LOCAL_MACHINE, subkey, wazuh_log_monitor, arch=KEY_WOW64_64KEY,
+                          value_list=values, wait_for_scan=True, scan_delay=scan_delay, min_timeout=T_30,
+                          triggers_event=True)
     # Modify the value
-    registry_value_update(key, subkey, wazuh_log_monitor, arch=KEY_WOW64_64KEY, value_list=values, wait_for_scan=True,
-                          scan_delay=scan_delay, min_timeout=T_30, triggers_event=True)
+    registry_value_update(WINDOWS_HKEY_LOCAL_MACHINE, subkey, wazuh_log_monitor, arch=KEY_WOW64_64KEY,
+                          value_list=values, wait_for_scan=True, scan_delay=scan_delay, min_timeout=T_30,
+                          triggers_event=True)
     # Delete the value created to clean up enviroment
-    registry_value_delete(key, subkey, wazuh_log_monitor, arch=KEY_WOW64_64KEY, value_list=values, wait_for_scan=True,
-                          scan_delay=scan_delay, min_timeout=T_30, triggers_event=True)
+    registry_value_delete(WINDOWS_HKEY_LOCAL_MACHINE, subkey, wazuh_log_monitor, arch=KEY_WOW64_64KEY,
+                          value_list=values, wait_for_scan=True, scan_delay=scan_delay, min_timeout=T_30,
+                          triggers_event=True)
+    # Delete key to clean enviroment
+    delete_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
