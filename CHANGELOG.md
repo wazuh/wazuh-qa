@@ -17,6 +17,7 @@ Release report: TBD
 
 ### Changed
 
+- Fix 'rootcheck' Tests suite ([#3858](https://github.com/wazuh/wazuh-qa/pull/3858)) \- (Tests)
 - Update report_changes tests ([#3405](https://github.com/wazuh/wazuh-qa/pull/3405)) \- (Tests)
 - Update Authd force_insert tests ([#3379](https://github.com/wazuh/wazuh-qa/pull/3379)) \- (Tests)
 - Update cluster logs in reliability tests ([#2772](https://github.com/wazuh/wazuh-qa/pull/2772)) \- (Tests)
