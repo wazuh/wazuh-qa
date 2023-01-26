@@ -162,3 +162,13 @@ def drop_cmt_tables():
     for table in tables:
         # `table` is a tuple with 1 element, so this one is selected
         query_publisher_db(f"DROP TABLE {table[0]};")
+
+
+def remove_status_file(vendor):
+    """Remove the status file to avoid the migration to be skipped.
+
+    Args:
+        vendor (str): Name of the vendor.
+    """
+    status_file = os.path.join(DOWNLOADS_DIR, vendor, f"{vendor}_status.json")
+    delete_file(status_file)
