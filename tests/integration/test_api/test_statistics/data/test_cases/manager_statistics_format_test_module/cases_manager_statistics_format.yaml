@@ -1,0 +1,20 @@
+- name: remoted_endpoint
+  description: remoted statistics endpoint
+  configuration_parameters:
+    ENDPOINT: wazuh-remoted
+  metadata:
+    endpoint: wazuh-remoted
+
+- name: analysisd_endpoint
+  description: analysisd statistics endpoint
+  configuration_parameters:
+    ENDPOINT: wazuh-analysisd
+  metadata:
+    endpoint: wazuh-analysisd
+
+- name: wazuh-db_endpoint
+  description: wazuh-db statistics endpoint
+  configuration_parameters:
+    ENDPOINT: wazuh-db
+  metadata:
+    endpoint: wazuh-db

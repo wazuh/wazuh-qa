@@ -150,7 +150,7 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
                         manager_host='centos-8', node_name='node01', date_add='1612942494', hostname='centos-8',
                         last_keepalive='253402300799', group='', sync_status='synced', connection_status='active',
                         client_key_secret=None, os_release='', os_patch='', release='', sysname='Linux',
-                        checksum='checksum', os_display_version='', triaged=0, reference='', disconnection_time='0',
+                        checksum='checksum', os_display_version='', triaged='0', reference='', disconnection_time='0',
                         architecture='x64'):
 
     """Mock a new agent creating a new client keys entry, adding it to the global db and creating a new agent id DB.
@@ -187,7 +187,7 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
         sysname (str): System name.
         checksum (str): Checksum.
         os_display_version (str): OS displayed version.
-        triaged (int): Triaged.
+        triaged (str): Triaged.
         reference (str): Reference.
         disconnection_time (str): Last disconnection time.
         architecture (str): Architecture.
