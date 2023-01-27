@@ -13,10 +13,10 @@
             value: TEST_DIRECTORIES
             attributes:
               - FIM_MODE
-    - windows_registry:
-        value: TEST_REGS
-        attributes:
-          - arch: both
+        - windows_registry:
+            value: TEST_REGS
+            attributes:
+              - arch: both
     - section: sca
       elements:
         - enabled:
