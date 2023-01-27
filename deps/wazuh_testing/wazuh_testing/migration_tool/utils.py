@@ -12,7 +12,7 @@ import mysql.connector
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from mysql.connector import errorcode
-from wazuh_testing.migration_tool import BINARY_PATH, CVE5_SCHEMA_PATH,DELTA_SCHEMA_PATH, REPORT_ERROR_MESSAGE, \
+from wazuh_testing.migration_tool import BINARY_PATH, CVE5_SCHEMA_PATH, DELTA_SCHEMA_PATH, REPORT_ERROR_MESSAGE, \
                                          SNAPSHOTS_DIR, DOWNLOADS_DIR
 from wazuh_testing.tools.file import delete_file, read_json_file
 from wazuh_testing.tools.logging import Logging
