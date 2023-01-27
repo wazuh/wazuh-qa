@@ -65,7 +65,7 @@ t2_kvdb_names = engine.get_kvdb_names(t2_configuration_metadata)
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('api_call_data, kvdb_names', zip(t1_api_call_data, t1_kvdb_names), ids=t1_case_ids)
-def test_kvdb_create(api_call_data, kvdb_names, clean_stored_kvdb):
+def test_kvdb_create_databases(api_call_data, kvdb_names, clean_stored_kvdb):
     '''
     description: Check that KVDBs can be created as expected using a JSON file as input.
 
@@ -186,7 +186,7 @@ def test_kvdb_create_already_existing_db(api_call_data, kvdb_names, clean_stored
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('api_call_data, kvdb_names', zip(t2_api_call_data, t2_kvdb_names), ids=t2_case_ids)
-def test_create_using_invalid_file_format(api_call_data, kvdb_names, clean_stored_kvdb):
+def test_create_db_using_invalid_file_format(api_call_data, kvdb_names, clean_stored_kvdb):
     '''
     description: Check that KVDBs can't be created using invalid input files.
 
