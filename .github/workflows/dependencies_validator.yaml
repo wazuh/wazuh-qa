@@ -1,4 +1,4 @@
-name: Check Requirements
+name: Wazuh QA Framework Validator
 
 on:
   pull_request:
@@ -7,12 +7,12 @@ on:
       - deps/wazuh_testing/setup.py
 
 jobs:
-  check-requirements:
+  validate-framework:
     runs-on: ubuntu-20.04
     continue-on-error: true
     strategy:
       matrix:
-        python-version: ['3.6.7', '3.10.9', '3.7.1']
+        python-version: ['3.10.9', '3.7.1']
     steps:
     - name: Check out code
       uses: actions/checkout@v2
