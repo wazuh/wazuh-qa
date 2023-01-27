@@ -7,14 +7,14 @@ import os
 
 
 # Useful variables
-WORKING_DIR = '/var/wazuh'
-OUTPUT_DIR = f"{WORKING_DIR}/incoming"
 CVE5_SCHEMA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'CVE_JSON_5.0_bundled.json')
 DELTA_SCHEMA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'delta_schema.json')
+WORKING_DIR = '/var/wazuh'
 BINARY_PATH = f"{WORKING_DIR}/bin/content_migration"
-SNAPSHOTS_DIR = f"{WORKING_DIR}/incoming/snapshots/"
-DOWNLOADS_DIR = f"{WORKING_DIR}/incoming/downloads/"
 LOG_FILE_PATH = f"{WORKING_DIR}/logs/content_migration.log"
+INCOMING_DIR = f"{WORKING_DIR}/incoming"
+SNAPSHOTS_DIR = f"{INCOMING_DIR}/snapshots"
+DOWNLOADS_DIR = f"{INCOMING_DIR}/downloads"
 
 # Callback messages
 CB_PROCESS_STARTED = r'.+\[info\]\[Orchestrator - start\]: Starting process'
@@ -28,3 +28,4 @@ CB_DIFF_STAGE_FINISHED = r'.+\[info\]\[DiffEngine.+ - diffData\]: Created last s
 CB_PUBLISHER_STAGE_INITIALIZED = r'.+\[info\]\[DiffPublisher - handleRequest\]: Starting process. Configuration:'
 CB_PROCESS_COMPLETED = r'.+Migration process completed successfully!'
 REPORT_ERROR_MESSAGE = r'Remote exited with error'
+CB_MIGRATION_SKIPPED = r'.+\[info\]\[MigrationStatusCheck.+\]: File already migrated. Stopping migration process.'
