@@ -9,7 +9,7 @@ import os
 # Useful variables
 WORKING_DIR = '/var/wazuh'
 OUTPUT_DIR = f"{WORKING_DIR}/incoming"
-CVE5_SCHEMA_PATH = f"{WORKING_DIR}/config/cve5/CVE_JSON_5.0_schema.json"
+CVE5_SCHEMA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'CVE_JSON_5.0_bundled.json')
 DELTA_SCHEMA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'delta_schema.json')
 BINARY_PATH = f"{WORKING_DIR}/bin/content_migration"
 SNAPSHOTS_DIR = f"{WORKING_DIR}/incoming/snapshots/"
