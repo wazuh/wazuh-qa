@@ -77,6 +77,8 @@ def set_authd_pass(metadata: dict):
     # Set the content.
     if metadata.get('password') == 'empty':
         authd_pass_content = ''
+    elif metadata.get('password') == 'only_spaces':
+        authd_pass_content = '     '
     else:
         authd_pass_content = metadata.get('password')
     # Write the content in the authd.pass file.
@@ -88,13 +90,13 @@ def set_authd_pass(metadata: dict):
 
 # Test
 @pytest.mark.parametrize('metadata, configuration', zip(metadata, configuration), ids=case_ids)
-def test_authd_use_password_invalid(metadata: dict, configuration: dict, truncate_monitored_files: None,
-                                    configure_local_internal_options_module: None, set_authd_pass: None,
-                                    set_wazuh_configuration: None, tear_down: None):
+def test_authd_use_password_invalid(metadata, configuration, truncate_monitored_files,
+                                    configure_local_internal_options_module, set_authd_pass,
+                                    set_wazuh_configuration, tear_down):
     '''
     description:
-        Checks that every invalid input reproduces the expected results and
-        raises the correct logs.
+        Checks the correct errors are raised when an invalid password value
+        is configured in the authd.pass file.
 
     wazuh_min_version:
         4.5.0
@@ -125,14 +127,15 @@ def test_authd_use_password_invalid(metadata: dict, configuration: dict, truncat
             brief: Roll back the daemon and client.keys state after the test ends.
 
     assertions:
-        - The raised error must match with the expected.
+        - Error log 'Empty password provided.' is raised in ossec.log.
+        - wazuh-manager.service must not be able to restart.
 
     input_description:
-        Different test cases are contained in an external YAML file which includes
-        different possible wrong settings.
+        ./data/config_templates/config_authd_use_password_invalid.yaml: Wazuh config needed for the tests. 
+        ./data/test_cases/cases_authd_use_password_invalid.yaml: Values to be used and expected error.
 
     expected_output:
-        - Invalid password error.
+        - .*Empty password provided.
     '''
     # The expected error log must be defined.
     if not metadata.get('error'):
