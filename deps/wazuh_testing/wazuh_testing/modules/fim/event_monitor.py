@@ -338,6 +338,21 @@ def callback_detect_file_deleted_event(line):
     return None
 
 
+def callback_restricted(line):
+    """ Callback that detects if a line in a log  if a file is ignored due to configured restrict tag.
+
+    Args:
+        line (String): string line to be checked by callback in FileMonitor.
+
+    Returns:
+        returns the entry that is being ignored.
+    """
+    match = re.match(r".*Ignoring entry '(.*?)' due to restriction '.*?'", line)
+    if match:
+        return match.group(1)
+    return None
+
+
 # Event checkers
 def check_fim_event(file_monitor=None, callback='', error_message=None, update_position=True,
                     timeout=T_60, accum_results=1, file_to_monitor=LOG_FILE_PATH):

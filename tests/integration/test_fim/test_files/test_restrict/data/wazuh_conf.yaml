@@ -9,6 +9,8 @@
     elements:
     - disabled:
         value: 'no'
+    - frequency:
+        value: 2
     - directories:
         value: TEST_DIRECTORIES
         attributes:
@@ -41,6 +43,8 @@
     elements:
     - disabled:
         value: 'no'
+    - frequency:
+        value: 2
     - directories:
         value: TEST_DIRECTORIES
         attributes:
@@ -73,6 +77,8 @@
     elements:
     - disabled:
         value: 'no'
+    - frequency:
+        value: 2
     - directories:
         value: TEST_DIRECTORIES
         attributes:
@@ -105,6 +111,8 @@
     elements:
     - disabled:
         value: 'no'
+    - frequency:
+        value: 2
     - directories:
         value: TEST_DIRECTORIES
         attributes:
@@ -136,6 +144,8 @@
     elements:
     - disabled:
         value: 'no'
+    - frequency:
+        value: 2
     - directories:
         value: TEST_DIRECTORIES
         attributes:
@@ -167,6 +177,8 @@
     elements:
     - disabled:
         value: 'no'
+    - frequency:
+        value: 2
     - directories:
         value: TEST_DIRECTORIES
         attributes:

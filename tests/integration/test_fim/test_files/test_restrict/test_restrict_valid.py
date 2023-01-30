@@ -61,37 +61,32 @@ tags:
 '''
 import os
 import sys
-
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, callback_restricted, create_file, \
-    REGULAR, generate_params, check_time_travel
+from time import sleep
+
+from wazuh_testing import global_parameters, REGULAR, LOG_FILE_PATH
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.file import create_file
+from wazuh_testing.modules.fim.event_monitor import callback_detect_file_added_event, callback_restricted
+from wazuh_testing.modules.fim.utils import generate_params
+
 
 # Marks
-
 pytestmark = pytest.mark.tier(level=1)
 
-# variables
-
+# Variables
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join(PREFIX, 'testdir1'),
-                    os.path.join(PREFIX, 'testdir1', 'subdir'),
-                    os.path.join(PREFIX, 'testdir2'),
-                    os.path.join(PREFIX, 'testdir2', 'subdir')
+                    os.path.join(PREFIX, 'testdir1', 'subdir')
                     ]
-testdir1, testdir1_sub, testdir2, testdir2_sub = test_directories
-
-directory_str = ','.join([os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')])
-
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # configurations
 
-conf_params, conf_metadata = generate_params(extra_params={'TEST_DIRECTORIES': directory_str})
+conf_params, conf_metadata = generate_params(extra_params={'TEST_DIRECTORIES': test_directories[0]})
 
 configurations = load_wazuh_configurations(configurations_path, __name__,
                                            params=conf_params,
@@ -125,9 +120,8 @@ def get_configuration(request):
     ('testing_regex', 'w', "", False,
      {f'valid_regex_incomplete_{"win" if sys.platform == "win32" else "unix"}'}),
 ])
-def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply,
-                  get_configuration, configure_environment, restart_syscheckd,
-                  wait_for_fim_start):
+def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply, get_configuration,
+                  configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects or ignores events in monitored files depending
                  on the value set in the 'restrict' attribute. This attribute limit checks to files that match
@@ -188,21 +182,19 @@ def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply
 
     tags:
         - scheduled
-        - time_travel
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     # Create text files
     create_file(REGULAR, folder, filename, content=content)
 
-    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
     # Go ahead in time to let syscheck perform a new scan
-    check_time_travel(scheduled, monitor=wazuh_log_monitor)
+    if get_configuration['metadata']['fim_mode'] == 'scheduled':
+        sleep(3)
 
     if triggers_event:
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                        callback=callback_detect_event).result()
-        assert event['data']['type'] == 'added', f'Event type not equal'
+                                        callback=callback_detect_file_added_event).result()
         assert event['data']['path'] == os.path.join(folder, filename), f'Event path not equal'
     else:
         while True:
