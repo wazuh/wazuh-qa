@@ -71,6 +71,31 @@ def _get_s3_row_type(bucket_type: str) -> Type[S3CloudTrailRow]:
 def get_db_connection(path: Path) -> sqlite3.Connection:
     return sqlite3.connect(path)
 
+
+def table_exists(table_name: str, db_path: Path = S3_CLOUDTRAIL_DB_PATH) -> bool:
+    """Check if the given table name exists.
+
+    Args:
+        table_name (str): Table name to search for.
+
+    Returns:
+        bool: True if exists else False.
+    """
+    connection = get_db_connection(db_path)
+    cursor = connection.cursor()
+    query = """
+        SELECT
+            name
+        FROM
+            sqlite_master
+        WHERE
+            type ='table' AND
+            name NOT LIKE 'sqlite_%';
+    """
+
+    return table_name in [result[0] for result in cursor.execute(query).fetchall()]
+
+
 # cloudtrail.db utils
 
 
@@ -171,3 +196,19 @@ def get_service_db_row(table_name: str) -> ServiceInspectorRow:
     result = cursor.execute(SELECT_QUERY_TEMPLATE.format(table_name=table_name)).fetchone()
 
     return ServiceInspectorRow(*result)
+
+
+def get_multiple_service_db_row(table_name: str) -> Iterator[ServiceInspectorRow]:
+    """Return all rows from the given table name.
+
+    Args:
+        table_name (str): Table name to search into.
+
+    Yields:
+        Iterator[ServiceInspectorRow]: All the rows in the table.
+    """
+    connection = get_db_connection(AWS_SERVICES_DB_PATH)
+    cursor = connection.cursor()
+
+    for row in cursor.execute(SELECT_QUERY_TEMPLATE.format(table_name=table_name)):
+        yield ServiceInspectorRow(*row)
