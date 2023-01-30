@@ -49,7 +49,7 @@
             attributes:
               - check_all: 'yes'
               - FIM_MODE
-              - restrict: ".restricted$"
+              - restrict: .restricted$
     - section: sca
       elements:
         - enabled:
@@ -83,7 +83,7 @@
             attributes:
               - check_all: 'yes'
               - FIM_MODE
-              - restrict: "^restricted"
+              - restrict: ^restricted
     - section: sca
       elements:
         - enabled:
@@ -117,7 +117,7 @@
             attributes:
               - check_all: 'yes'
               - FIM_MODE
-              - restrict: "filerestricted|other_restricted$"
+              - restrict: filerestricted|other_restricted$
     - section: sca
       elements:
         - enabled:
@@ -150,7 +150,7 @@
             attributes:
               - check_all: 'yes'
               - FIM_MODE
-              - restrict: "^/testdir1/f|^/testdir1/subdir/f"
+              - restrict: ^/testdir1/f|^/testdir1/subdir/f
     - section: sca
       elements:
         - enabled:
@@ -183,7 +183,7 @@
             attributes:
               - check_all: 'yes'
               - FIM_MODE
-              - restrict: "^c:\\testdir1\\f|^c:\\testdir1\\subdir\\f"
+              - restrict: ^c:\\testdir1\\f|^c:\\testdir1\\subdir\\f
     - section: sca
       elements:
         - enabled:
