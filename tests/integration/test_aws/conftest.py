@@ -2,8 +2,8 @@ from typing import Generator
 
 import pytest
 from wazuh_testing import UDP, logger
-from wazuh_testing.modules.aws.db_utils import delete_s3_db
 from wazuh_testing.modules.aws.s3_utils import delete_file, upload_file, file_exists
+from wazuh_testing.modules.aws.db_utils import delete_s3_db, delete_services_db
 from wazuh_testing.tools import ANALYSISD_QUEUE_SOCKET_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.file import bind_unix_socket
 from wazuh_testing.tools.monitoring import FileMonitor, ManInTheMiddle, QueueMonitor
@@ -103,3 +103,13 @@ def clean_s3_cloudtrail_db():
     yield
 
     delete_s3_db()
+
+
+@pytest.fixture(scope='function')
+def clean_aws_services_db():
+    """Delete the DB file before and after the test execution"""
+    delete_services_db()
+
+    yield
+
+    delete_services_db()

@@ -115,6 +115,11 @@ def callback_detect_event_processed_or_skipped(pattern: str) -> Callable:
     return lambda line: pattern_regex.match(line) or callback_detect_event_processed(line)
 
 
+def callback_detect_inspector_event_processed(expected_results: int, region: str) -> Callable:
+    regex = re.compile(fr"DEBUG: \+\+\+ {expected_results} events collected and processed in {region}")
+    return lambda line: regex.match(line)
+
+
 def callback_event_sent_to_analysisd(line):
     """Search for module header message in the given line.
 
