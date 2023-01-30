@@ -380,7 +380,7 @@ _, t4_configuration_metadata, t4_case_ids = get_test_cases_data(t4_cases_path)
 
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('metadata', t4_configuration_metadata, ids=t4_case_ids)
-def test_multiple_calls(
+def test_bucket_multiple_calls(
     metadata, clean_s3_cloudtrail_db, load_wazuh_basic_configuration, restart_wazuh_function, delete_file_from_s3
 ):
     """
@@ -483,4 +483,82 @@ def test_multiple_calls(
     event_monitor.check_marker_from_output(
         command_output=call_aws_module(*base_parameters),
         file_key=last_marker_key
+    )
+
+
+# -------------------------------------------- TEST_SERVICE_MULTIPLE_CALLS ---------------------------------------------
+t5_cases_path = os.path.join(TEST_CASES_PATH, 'cases_service_multiple_calls.yaml')
+
+_, t5_configuration_metadata, t5_case_ids = get_test_cases_data(t5_cases_path)
+
+
+@pytest.mark.tier(level=1)
+@pytest.mark.parametrize('metadata', t5_configuration_metadata, ids=t5_case_ids)
+def test_service_multiple_calls(
+    metadata, clean_aws_services_db, load_wazuh_basic_configuration, restart_wazuh_function
+):
+    """
+    description: Call the AWS module multiple times with different only_logs_after values.
+    test_phases:
+        - setup:
+            - Delete the `aws_services.db`.
+        - test:
+            - Call the module without only_logs_after and check that no logs were processed.
+            - Call the module with only_logs_after set in the past and check that the expected number of logs were
+              processed.
+            - Call the module with the same parameters in and check there were no duplicates.
+            - Call the module with only_logs_after set with an early date than setted previously and check that no logs
+              were processed, there were no duplicates.
+
+        - teardown:
+            - Delete the `aws_services.db`.
+    wazuh_min_version: 4.5.0
+    parameters:
+        - metadata:
+            type: dict
+            brief: Get metadata from the module.
+        - clean_aws_services_db:
+            type: fixture
+            brief: Delete the DB file before and after the test execution.
+        - load_wazuh_basic_configuration:
+            type: fixture
+            brief: Load basic wazuh configuration.
+        - restart_wazuh_daemon:
+            type: fixture
+            brief: Restart the wazuh service.
+    input_description:
+        - The `cases_multiple_calls` file provides the test cases.
+    """
+    ONLY_LOGS_AFTER_PARAM = '--only_logs_after'
+
+    service_type = metadata['service_type']
+
+    base_parameters = [
+        '--service', service_type,
+        '--regions', 'us-east-1',
+        '--aws_profile', 'qa',
+        '--debug', '2'
+    ]
+
+    # Call the module without only_logs_after and check that no logs were processed
+    event_monitor.check_inspector_non_processed_logs_from_output(
+        command_output=call_aws_module(*base_parameters), expected_results=1
+    )
+
+    # Call the module with only_logs_after set in the past and check that the expected number of logs were
+    # processed
+    event_monitor.check_inspector_processed_logs_from_output(
+        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, '2023-JAN-30'),
+        events_sent=4
+    )
+
+    # Call the module with the same parameters in and check there were no duplicates
+    event_monitor.check_inspector_non_processed_logs_from_output(
+        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, '2023-JAN-30'), expected_results=1
+    )
+
+    # Call the module with only_logs_after set with an early date than setted previously and check that no logs
+    # were processed, there were no duplicates
+    event_monitor.check_inspector_non_processed_logs_from_output(
+        command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, '2023-JAN-31'), expected_results=1
     )
