@@ -126,7 +126,7 @@ configurations = load_configuration_template(configurations_path, configuration_
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_service_defaults(
-    configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_s3_cloudtrail_db,
+    configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_aws_services_db,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
 ):
     """
@@ -158,6 +158,9 @@ def test_service_defaults(
         - set_wazuh_configuration:
             type: fixture
             brief: Apply changes to the ossec.conf configuration.
+        - clean_aws_services_db:
+            type: fixture
+            brief: Delete the DB file before and after the test execution.
         - configure_local_internal_options_function:
             type: fixture
             brief: Apply changes to the local_internal_options.conf configuration.
