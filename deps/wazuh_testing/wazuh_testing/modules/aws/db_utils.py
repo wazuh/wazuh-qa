@@ -13,7 +13,8 @@ from .constants import (
     S3_CLOUDTRAIL_DB_PATH,
     VPC_FLOW_TYPE,
     WAF_TYPE,
-    SERVER_ACCESS_TABLE_NAME
+    SERVER_ACCESS_TABLE_NAME,
+    AWS_SERVICES_DB_PATH
 )
 
 SELECT_QUERY_TEMPLATE = 'SELECT * FROM {table_name}'
@@ -44,6 +45,10 @@ S3WAFRow = namedtuple(
 
 S3ServerAccessRow = namedtuple(
     'S3ServerAccessRow', 'bucket_path aws_account_id log_key processed_date created_date'
+)
+
+ServiceInspectorRow = namedtuple(
+    'ServiceInspectorRow', 'service account_id region timestamp'
 )
 
 s3_rows_map = {
@@ -133,3 +138,36 @@ def table_exists_or_has_values(table_name: str) -> bool:
         return bool(cursor.execute(SELECT_QUERY_TEMPLATE.format(table_name=table_name)).fetchall())
     except sqlite3.OperationalError:
         return False
+
+
+# aws_services.db utils
+
+def services_db_exists() -> bool:
+    """Check if `s3_cloudtrail.db` exists.
+
+    Returns:
+        bool: True if exists else False.
+    """
+    return AWS_SERVICES_DB_PATH.exists()
+
+
+def delete_services_db() -> None:
+    """Delete `s3_cloudtrail.db` file."""
+    if services_db_exists():
+        AWS_SERVICES_DB_PATH.unlink()
+
+
+def get_service_db_row(table_name: str) -> ServiceInspectorRow:
+    """Return one row from the given table name.
+
+    Args:
+        table_name (str): Table name to search into.
+
+    Returns:
+        ServiceInspectorRow: The first row of the table.
+    """
+    connection = get_db_connection(AWS_SERVICES_DB_PATH)
+    cursor = connection.cursor()
+    result = cursor.execute(SELECT_QUERY_TEMPLATE.format(table_name=table_name)).fetchone()
+
+    return ServiceInspectorRow(*result)
