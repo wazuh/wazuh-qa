@@ -38,6 +38,66 @@ def callback_detect_aws_module_called(parameters: list) -> Callable:
     return lambda line: regex.match(line)
 
 
+def callback_detect_aws_error_for_missing_type(line: str) -> Optional[str]:
+    """Detect if aws module display an error about missing type.
+
+    Args:
+        line (str): Line to match.
+
+    Returns:
+        Optional[str]: Line if it match.
+    """
+
+    if re.match(
+        r".*ERROR: Undefined type for service.", line
+    ):
+        return line
+
+
+def callback_detect_aws_legacy_module_warning(line: str) -> Optional[str]:
+    """Detect if aws module display a warning about legacy config.
+
+    Args:
+        line (str): Line to match.
+
+    Returns:
+        Optional[str]: Line if it match.
+    """
+
+    if re.match(
+        r".*WARNING: Deprecated config defined; please use current config definition at module 'aws-s3'.", line
+    ):
+        return line
+
+
+def callback_detect_aws_module_warning(line: str) -> Optional[str]:
+    """Detect if aws module display a warning.
+
+    Args:
+        line (str): Line to match.
+
+    Returns:
+        Optional[str]: Line if it match.
+    """
+
+    if re.match(r".*WARNING: No buckets or services definitions found at module 'aws-s3'.", line):
+        return line
+
+
+def callback_detect_aws_module_started(line: str) -> Optional[str]:
+    """Detect if aws module was called.
+
+    Args:
+        line (str): Line to match.
+
+    Returns:
+        Optional[str]: Line if it match.
+    """
+
+    if re.match(r'.*DEBUG: Launching S3 Command: .*', line):
+        return line
+
+
 def callback_detect_aws_module_start(line: str) -> Optional[str]:
     """Search for start message in the given line.
 
@@ -45,7 +105,8 @@ def callback_detect_aws_module_start(line: str) -> Optional[str]:
         line (str): Line to match.
 
     Returns:
-        Optional[str]: line if it match.
+        Optional[str]: Line if it match.
+
     """
     if re.match(r'.*INFO: Module AWS started*', line):
         return line
