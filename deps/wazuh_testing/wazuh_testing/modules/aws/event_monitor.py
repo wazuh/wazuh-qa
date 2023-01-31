@@ -98,7 +98,25 @@ def callback_detect_aws_module_started(line: str) -> Optional[str]:
         return line
 
 
-def callback_detect_aws_module_start(line: str) -> Optional[str]:
+def callback_detect_aws_empty_value(line: str) -> Optional[str]:
+    """Detect if aws module was called.
+
+    Args:
+        line (str): Line to match.
+
+    Returns:
+        Optional[str]: Line if it match.
+    """
+
+    if (
+        re.match(r".*ERROR: Invalid \w+ type ''", line) or
+        re.match(r".*ERROR: Empty content for tag '\w+' at module 'aws-s3'.", line) or
+        re.match(r".*WARNING: Empty content for tag '\w+' at module 'aws-s3'.", line)
+    ):
+        return line
+
+
+def callback_detect_aws_module_start(line):
     """Search for start message in the given line.
 
     Args:
@@ -106,8 +124,8 @@ def callback_detect_aws_module_start(line: str) -> Optional[str]:
 
     Returns:
         Optional[str]: Line if it match.
-
     """
+
     if re.match(r'.*INFO: Module AWS started*', line):
         return line
 

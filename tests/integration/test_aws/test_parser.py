@@ -167,7 +167,7 @@ def test_type_missing_in_bucket(
     ).result()
 
 
-# -------------------------------------------- TEST_TYPE_MISSING_IN_SERVICE ---------------------------------------------
+# -------------------------------------------- TEST_TYPE_MISSING_IN_SERVICE --------------------------------------------
 # Configuration and cases data
 t3_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_type_missing_in_service.yaml')
 t3_cases_path = os.path.join(TEST_CASES_PATH, 'cases_type_missing_in_service.yaml')
@@ -235,4 +235,146 @@ def test_type_missing_in_service(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_error_for_missing_type,
         error_message='The AWS module did not show the expected error message',
+    ).result()
+
+
+# -------------------------------------------- TEST_EMPTY_VALUES_IN_BUCKET ---------------------------------------------
+# Configuration and cases data
+t4_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_empty_values_in_bucket.yaml')
+t4_cases_path = os.path.join(TEST_CASES_PATH, 'cases_empty_values_in_bucket.yaml')
+
+# Enabled test configurations
+t4_configuration_parameters, t4_configuration_metadata, t4_case_ids = get_test_cases_data(t4_cases_path)
+t4_configurations = load_configuration_template(
+    t4_configurations_path, t4_configuration_parameters, t4_configuration_metadata
+)
+
+
+@pytest.mark.tier(level=0)
+@pytest.mark.parametrize('configuration, metadata', zip(t4_configurations, t4_configuration_metadata), ids=t4_case_ids)
+def test_empty_values_in_bucket(
+    configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function_without_exception,
+    wazuh_log_monitor
+):
+    """
+    description: An error occurs and was displayed in `ossec.log`.
+    test_phases:
+        - setup:
+            - Load Wazuh light configuration.
+            - Apply ossec.conf configuration changes according to the configuration template and use case.
+            - Apply custom settings in local_internal_options.conf.
+            - Truncate wazuh logs.
+            - Restart wazuh-manager service to apply configuration changes.
+        - test:
+            - Check in the ossec.log that a line has not appeared calling the module with correct parameters.
+        - teardown:
+            - Truncate wazuh logs.
+            - Restore initial configuration, both ossec.conf and local_internal_options.conf.
+    wazuh_min_version: 4.5.0
+    parameters:
+        - configuration:
+            type: dict
+            brief: Get configurations from the module.
+        - metadata:
+            type: dict
+            brief: Get metadata from the module.
+        - load_wazuh_basic_configuration:
+            type: fixture
+            brief: Load basic wazuh configuration.
+        - set_wazuh_configuration:
+            type: fixture
+            brief: Apply changes to the ossec.conf configuration.
+        - configure_local_internal_options_function:
+            type: fixture
+            brief: Apply changes to the local_internal_options.conf configuration.
+        - truncate_monitored_files:
+            type: fixture
+            brief: Truncate wazuh logs.
+        - restart_wazuh_function_without_exception:
+            type: fixture
+            brief: Restart the wazuh service catching the exception.
+        - wazuh_log_monitor:
+            type: fixture
+            brief: Return a `ossec.log` monitor
+    assertions:
+        - Check in the log that the module was not called.
+    input_description:
+        - The `configuration_configuration_bucker_and_service_missing` file provides the configuration for this test.
+    """
+    wazuh_log_monitor.start(
+        timeout=global_parameters.default_timeout,
+        callback=event_monitor.callback_detect_aws_empty_value,
+        error_message='The AWS module did not show the expected message about empty value',
+    ).result()
+
+
+# -------------------------------------------- TEST_EMPTY_VALUES_IN_SERVICE ---------------------------------------------
+# Configuration and cases data
+t5_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_empty_values_in_service.yaml')
+t5_cases_path = os.path.join(TEST_CASES_PATH, 'cases_empty_values_in_service.yaml')
+
+# Enabled test configurations
+t5_configuration_parameters, t5_configuration_metadata, t5_case_ids = get_test_cases_data(t5_cases_path)
+t5_configurations = load_configuration_template(
+    t5_configurations_path, t5_configuration_parameters, t5_configuration_metadata
+)
+
+
+@pytest.mark.tier(level=0)
+@pytest.mark.parametrize('configuration, metadata', zip(t5_configurations, t5_configuration_metadata), ids=t5_case_ids)
+def test_empty_values_in_service(
+    configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function_without_exception,
+    wazuh_log_monitor
+):
+    """
+    description: An error occurs and was displayed in `ossec.log`.
+    test_phases:
+        - setup:
+            - Load Wazuh light configuration.
+            - Apply ossec.conf configuration changes according to the configuration template and use case.
+            - Apply custom settings in local_internal_options.conf.
+            - Truncate wazuh logs.
+            - Restart wazuh-manager service to apply configuration changes.
+        - test:
+            - Check in the ossec.log that a line has not appeared calling the module with correct parameters.
+        - teardown:
+            - Truncate wazuh logs.
+            - Restore initial configuration, both ossec.conf and local_internal_options.conf.
+    wazuh_min_version: 4.5.0
+    parameters:
+        - configuration:
+            type: dict
+            brief: Get configurations from the module.
+        - metadata:
+            type: dict
+            brief: Get metadata from the module.
+        - load_wazuh_basic_configuration:
+            type: fixture
+            brief: Load basic wazuh configuration.
+        - set_wazuh_configuration:
+            type: fixture
+            brief: Apply changes to the ossec.conf configuration.
+        - configure_local_internal_options_function:
+            type: fixture
+            brief: Apply changes to the local_internal_options.conf configuration.
+        - truncate_monitored_files:
+            type: fixture
+            brief: Truncate wazuh logs.
+        - restart_wazuh_function_without_exception:
+            type: fixture
+            brief: Restart the wazuh service catching the exception.
+        - wazuh_log_monitor:
+            type: fixture
+            brief: Return a `ossec.log` monitor
+    assertions:
+        - Check in the log that the module was not called.
+    input_description:
+        - The `configuration_configuration_bucker_and_service_missing` file provides the configuration for this test.
+    """
+    wazuh_log_monitor.start(
+        timeout=global_parameters.default_timeout,
+        callback=event_monitor.callback_detect_aws_empty_value,
+        error_message='The AWS module did not show the expected message about empty value',
     ).result()
