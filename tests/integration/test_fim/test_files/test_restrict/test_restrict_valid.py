@@ -84,18 +84,12 @@ test_directories = [os.path.join(PREFIX, 'testdir1'),
                     ]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-# configurations
-
+# Configurations
 conf_params, conf_metadata = generate_params(extra_params={'TEST_DIRECTORIES': test_directories[0]})
-
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=conf_params,
-                                           metadata=conf_metadata
-                                           )
+configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
 
 
-# fixtures
-
+# Fixtures
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -113,12 +107,11 @@ def get_configuration(request):
     ("restricted", "w", "Test", False, {'valid_regex'}),
     ("myfilerestricted", "w", "", True, {'valid_regex_3'}),
     ("myother_restricted", "wb", b"", True, {'valid_regex_3'}),
-    ('fileinfolder', 'w', "Sample content", False,
+    ('fileinfolder', 'w', "Sample content", True,
      {f'valid_regex_incomplete_{"win" if sys.platform == "win32" else "unix"}'}),
-    ('fileinfolder1', 'wb', b"Sample content", False,
+    ('fileinfolder1', 'wb', b"Sample content", True, 
      {f'valid_regex_incomplete_{"win" if sys.platform == "win32" else "unix"}'}),
-    ('testing_regex', 'w', "", False,
-     {f'valid_regex_incomplete_{"win" if sys.platform == "win32" else "unix"}'}),
+    ('testing_regex', 'w', "", False, {f'valid_regex_incomplete_{"win" if sys.platform == "win32" else "unix"}'}),
 ])
 def test_restrict(folder, filename, mode, content, triggers_event, tags_to_apply, get_configuration,
                   configure_environment, restart_syscheckd, wait_for_fim_start):
