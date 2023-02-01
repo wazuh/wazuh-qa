@@ -4,8 +4,7 @@
 
 import os
 
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
-
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, CLUSTER_LOGS_PATH
 
 # Agent Variables
 AGENT_STATUS_ACTIVE = 'active'
@@ -42,9 +41,9 @@ def restart_cluster(hosts_list, host_manager):
 def clean_cluster_logs(hosts_list, host_manager):
     # Clean ossec.log and cluster.log
     for host in hosts_list:
-        host_manager.clear_file(host=host, file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
+        host_manager.clear_file_without_recreate(host=host, file_path=LOG_FILE_PATH)
         if "worker" in host or "master" in host:
-            host_manager.clear_file(host=host, file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
+            host_manager.clear_file_without_recreate(host=host, file_path=CLUSTER_LOGS_PATH)
 
 
 def remove_cluster_agents(wazuh_master, agents_list, host_manager):
