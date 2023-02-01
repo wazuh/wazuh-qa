@@ -155,5 +155,5 @@
     only_logs_after: 2022-NOV-20
     discard_field: partition
     discard_regex: aws-test
-    found_logs: 5
+    found_logs: 3
     skipped_logs: 1
