@@ -27,5 +27,12 @@ CB_DIFF_STAGE_INITIALIZED = r'.+\[info\]\[DiffEngine.+ - handleRequest\]: Starti
 CB_DIFF_STAGE_FINISHED = r'.+\[info\]\[DiffEngine.+ - diffData\]: Created last snapshot: /var/wazuh/incoming/'
 CB_PUBLISHER_STAGE_INITIALIZED = r'.+\[info\]\[DiffPublisher - handleRequest\]: Starting process. Configuration:'
 CB_PROCESS_COMPLETED = r'.+Migration process completed successfully!'
-REPORT_ERROR_MESSAGE = r'Remote exited with error'
+CB_STAGES = [
+    CB_PROCESS_STARTED, CB_FETCHING_STAGE_INITIALIZED, CB_FETCHING_STAGE_FINISHED, CB_DECOMPRESSION_STAGE_INITIALIZED,
+    CB_PARSER_STAGE_INITIALIZED, CB_NORMALIZER_STAGE_INITIALIZED, CB_DIFF_STAGE_INITIALIZED, CB_DIFF_STAGE_FINISHED,
+    CB_PUBLISHER_STAGE_INITIALIZED, CB_PROCESS_COMPLETED
+]
 CB_MIGRATION_SKIPPED = r'.+\[info\]\[MigrationStatusCheck.+\]: File already migrated. Stopping migration process.'
+CB_REPORT_ERROR_MESSAGE = r'Remote exited with error'
+CB_INVALID_CONFIG_MESSAGE = r'No valid configuration file was found at'
+ERROR_MESSAGES = [CB_REPORT_ERROR_MESSAGE, CB_INVALID_CONFIG_MESSAGE]
