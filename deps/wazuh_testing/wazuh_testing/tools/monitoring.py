@@ -1029,7 +1029,7 @@ class HostMonitor:
         for file in os.listdir(self._tmp_path):
             tmp_file = os.path.join(self._tmp_path, file)
             if file.endswith(".log.tmp"):
-                copyfile(tmp_file, f"/tmp/{os.path.splitext(file)[0]}.txt")
+                copyfile(tmp_file, os.path.join("/tmp", os.path.splitext(file)[0]))
             os.remove(tmp_file)
 
 

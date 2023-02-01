@@ -4,15 +4,14 @@
 
 import json
 import os
-import pytest
-import pytest
-import sys
 import uuid
 from datetime import datetime
+
+import pytest
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
 from system import clean_cluster_logs, remove_cluster_agents
-
+from wazuh_testing.tools import CLUSTER_LOGS_PATH
 
 results = dict()
 report_files = []
@@ -123,6 +122,16 @@ def pytest_runtest_makereport(item, call):
             except (TypeError, OverflowError):
                 arguments[key] = str(value)
         extra.append(pytest_html.extras.json(arguments, name="Test arguments"))
+
+        if "cluster" in report.markers:
+            host_manager = getattr(item.module, "host_manager")
+
+            for host in host_manager.get_inventory()['managers']['hosts']:
+                log_path = os.path.join("/tmp", f"{host}_cluster.log")
+                if os.path.exists(log_path):
+                    continue
+                with open(log_path, "w") as cluster_log:
+                    cluster_log.write(host_manager.get_file_content(host=host, file_path=CLUSTER_LOGS_PATH))
 
         # Extra files to be added in 'Links' section
         files = get_report_files()
