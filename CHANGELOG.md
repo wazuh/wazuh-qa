@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.6.0] - Development (unreleased)
+
+Wazuh commit: TBD \
+Release report: TBD
+
 ## [4.5.0] - Development (unreleased)
 
 Wazuh commit: TBD \
