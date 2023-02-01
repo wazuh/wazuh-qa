@@ -1,6 +1,6 @@
 """AWS S3 related utils"""
 
-import json
+import gzip
 
 import boto3
 from botocore import exceptions
@@ -27,11 +27,11 @@ def upload_file(bucket_type: str, bucket_name: str) -> str:
     filename = dg.get_filename()
     obj = s3.Object(bucket_name, filename)
 
-    data = dg.get_data_sample()
+    data = dg.get_data_sample().encode() if not dg.compress else gzip.compress(data=dg.get_data_sample().encode())
 
     # Upload the file
     try:
-        obj.put(Body=data.encode())
+        obj.put(Body=data)
     except ClientError as e:
         logger.error(e)
         filename = ''

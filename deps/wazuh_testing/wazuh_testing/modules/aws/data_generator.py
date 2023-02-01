@@ -1,6 +1,7 @@
 """Utils to generate sample data to AWS"""
 import csv
 import json
+import gzip
 from datetime import datetime
 from os.path import join
 from io import StringIO
@@ -20,6 +21,8 @@ class DataGenerator:
     BASE_PATH = ''
     BASE_FILE_NAME = ''
 
+    compress = False
+
     def get_filename(self, *args, **kwargs) -> str:
         """Return the filename according to the integration format.
 
@@ -28,7 +31,7 @@ class DataGenerator:
         """
         raise NotImplementedError()
 
-    def get_data_sample(self, *args, **kwargs) -> dict:
+    def get_data_sample(self, *args, **kwargs) -> str:
         """Return a sample of data according to the integration format.
 
         Returns:
@@ -814,6 +817,147 @@ class GuardDutyDataGenerator(DataGenerator):
         )
 
 
+class NativeGuardDutyDataGenerator(DataGenerator):
+    BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.GUARDDUTY, cons.US_EAST_1_REGION)
+    BASE_FILE_NAME = ''
+
+    compress = True
+
+    def get_filename(self, *args, **kwargs) -> str:
+        """Return the filename in the Native Guard Duty format.
+        Example:
+            <prefix>/AWSLogs/<suffix>/<account_id>/GuardDuty/<region>/<year>/<month>/<day>
+
+        Returns:
+            str: Syntetic filename.
+        """
+        now = datetime.now()
+        path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
+        name = f"{str(uuid4())}{cons.JSON_GZ_EXT}"
+
+        return join(path, name)
+
+    def get_data_sample(self) -> str:
+        """Returns a sample of data according to the Native Guard Duty format.
+        Returns:
+            str: Syntetic data.
+        """
+        random_ip = get_random_ip()
+        return json.dumps(
+            {
+                'schemaVersion': '2.0',
+                'accountId': cons.RANDOM_ACCOUNT_ID,
+                'region': 'us-east-1',
+                'partition': 'aws',
+                'id': '3ac1fd234445e957d526a10c72631c8f',
+                'arn': f"arn:aws:guardduty:us-east-1:{cons.RANDOM_ACCOUNT_ID}:detector/c0bfff53bb19fbee16ed05a0b21d3b/",
+                'type': 'UnauthorizedAccess:EC2/SSHBruteForce',
+                'resource': {
+                    'resourceType': 'Instance',
+                    'instanceDetails': {
+                        'instanceId': f"i-{get_random_string(18)}",
+                        'instanceType': 'c5.large',
+                        'launchTime': '2022-10-19T16:17:42.000Z',
+                        'platform': None,
+                        'productCodes': [],
+                        'iamInstanceProfile': None,
+                        'networkInterfaces': [
+                            {
+                                'ipv6Addresses': [],
+                                'networkInterfaceId': f"eni-{get_random_string(18)}",
+                                'privateDnsName': f"ip-{random_ip.replace('.', '-')}.ec2.internal",
+                                'privateIpAddress': random_ip,
+                                'privateIpAddresses': [
+                                    {
+                                        'privateDnsName': f"ip-{random_ip.replace('.', '-')}.ec2.internal",
+                                        'privateIpAddress': random_ip
+                                    }
+                                ],
+                                'subnetId': f"subnet-{get_random_string(8)}",
+                                'vpcId': 'vpc-f825c385',
+                                'securityGroups': [
+                                    {
+                                        'groupName': 'test-ansible',
+                                        'groupId': f"sg-{get_random_string(16)}"
+                                    }
+                                ],
+                                'publicDnsName': f"ec2-{random_ip.replace('.', '-')}.compute-1.amazonaws.com",
+                                'publicIp': random_ip
+                            }
+                        ],
+                        'outpostArn': None,
+                        'tags': [
+                            {
+                                'key': 'Name',
+                                'value': 'some-test-server-investigating'
+                            }
+                        ],
+                        'instanceState': 'running',
+                        'availabilityZone': 'us-east-1d',
+                        'imageId': 'ami-026b57f3c383c2eec',
+                        'imageDescription': 'Amazon Linux 2 Kernel 5.10 AMI 2.0.20220912.1 x86_64 HVM gp2'
+                    }
+                },
+                'service': {
+                    'serviceName': 'guardduty',
+                    'detectorId': 'c0bfff53bb19fbee16ed05a0b21d3be3',
+                    'action': {
+                        'actionType': 'NETWORK_CONNECTION',
+                        'networkConnectionAction': {
+                            'connectionDirection': 'INBOUND',
+                            'remoteIpDetails': {
+                                'ipAddressV4': random_ip,
+                                'organization': {
+                                    'asn': '3462',
+                                    'asnOrg': 'Data Communication Business Group',
+                                    'isp': 'Chunghwa Telecom',
+                                    'org': 'Chunghwa Telecom'
+                                },
+                                'country': {
+                                    'countryName': 'Taiwan'
+                                },
+                                'city': {
+                                    'cityName': 'Tainan City'
+                                },
+                                'geoLocation': {
+                                    'lat': 22.9917,
+                                    'lon': 120.2148
+                                }
+                            },
+                            'remotePortDetails': {
+                                'port': get_random_port(),
+                                'portName': 'Unknown'
+                            },
+                            'localPortDetails': {
+                                'port': 22,
+                                'portName': 'SSH'
+                            },
+                            'protocol': 'TCP',
+                            'blocked': False,
+                            'localIpDetails': {
+                                'ipAddressV4': random_ip
+                            }
+                        }
+                    },
+                    'resourceRole': 'TARGET',
+                    'additionalInfo': {
+                        'value': '{}',
+                        'type': 'default'
+                    },
+                    'eventFirstSeen': '2022-10-21T11:14:59.000Z',
+                    'eventLastSeen': '2022-10-21T11:19:24.000Z',
+                    'archived': False,
+                    'count': 1
+                },
+                'severity': 2,
+                'createdAt': '2022-10-21T11:21:10.027Z',
+                'updatedAt': '2022-10-21T11:21:10.027Z',
+                'title': f"{get_random_ip()} is performing SSH brute force attacks against i-08cb1e1f2bcce.",
+                'description': f"{get_random_ip()} is performing SSH brute force attacks against i-08cb1ef2bcce.f"
+            }
+        ) + '\n'
+
+
 # Maps bucket type with corresponding data generator
 buckets_data_mapping = {
     cons.CLOUD_TRAIL_TYPE: CloudTrailDataGenerator,
@@ -826,6 +970,7 @@ buckets_data_mapping = {
     cons.MACIE_TYPE: MacieDataGenerator,
     cons.TRUSTED_ADVISOR_TYPE: TrustedAdvisorDataGenerator,
     cons.GUARD_DUTY_TYPE: GuardDutyDataGenerator,
+    cons.NATIVE_GUARD_DUTY_TYPE: NativeGuardDutyDataGenerator
 }
 
 
