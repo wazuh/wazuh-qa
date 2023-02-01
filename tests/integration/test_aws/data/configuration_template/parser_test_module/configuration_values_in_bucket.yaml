@@ -21,3 +21,5 @@
                   value: PATH
               - path_suffix:
                   value: PATH_SUFFIX
+              - remove_from_bucket:
+                  value: REMOVE_FROM_BUCKET

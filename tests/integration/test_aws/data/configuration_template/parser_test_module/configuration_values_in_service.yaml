@@ -17,3 +17,5 @@
                   value: ONLY_LOGS_AFTER
               - regions:
                   value: REGIONS
+              - remove_log_streams:
+                  value: REMOVE_LOG_STREAMS
