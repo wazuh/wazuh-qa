@@ -78,8 +78,9 @@ def test_bucket_and_service_missing(
             brief: Return a `ossec.log` monitor
     assertions:
         - Check in the log that the module was not called.
+
     input_description:
-        - The `configuration_configuration_bucker_and_service_missing` file provides the configuration for this test.
+        - The `configuration_bucket_and_service_missing` file provides the configuration for this test.
     """
 
     wazuh_log_monitor.start(
@@ -156,9 +157,9 @@ def test_type_missing_in_bucket(
             type: fixture
             brief: Return a `ossec.log` monitor
     assertions:
-        - Check in the log that the module was not called.
+         - Check in the log that the module display the message about missing attribute.
     input_description:
-        - The `configuration_configuration_bucker_and_service_missing` file provides the configuration for this test.
+        - The `configuration_type_missing_in_bucket` file provides the configuration for this test.
     """
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
@@ -227,9 +228,10 @@ def test_type_missing_in_service(
             type: fixture
             brief: Return a `ossec.log` monitor
     assertions:
-        - Check in the log that the module was not called.
+         - Check in the log that the module display the message about missing attribute.
+
     input_description:
-        - The `configuration_configuration_bucker_and_service_missing` file provides the configuration for this test.
+        - The `configuration_type_missing_in_service` file provides the configuration for this test.
     """
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
@@ -298,9 +300,9 @@ def test_empty_values_in_bucket(
             type: fixture
             brief: Return a `ossec.log` monitor
     assertions:
-        - Check in the log that the module was not called.
+        - Check in the log that the module display the message about empty value.
     input_description:
-        - The `configuration_configuration_bucker_and_service_missing` file provides the configuration for this test.
+        - The `configuration_values_in_bucket` file provides the configuration for this test.
     """
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
@@ -309,7 +311,7 @@ def test_empty_values_in_bucket(
     ).result()
 
 
-# -------------------------------------------- TEST_EMPTY_VALUES_IN_SERVICE ---------------------------------------------
+# -------------------------------------------- TEST_EMPTY_VALUES_IN_SERVICE --------------------------------------------
 # Configuration and cases data
 t5_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_values_in_service.yaml')
 t5_cases_path = os.path.join(TEST_CASES_PATH, 'cases_empty_values_in_service.yaml')
@@ -369,9 +371,10 @@ def test_empty_values_in_service(
             type: fixture
             brief: Return a `ossec.log` monitor
     assertions:
-        - Check in the log that the module was not called.
+        - Check in the log that the module display the message about empty value.
+
     input_description:
-        - The `configuration_configuration_bucker_and_service_missing` file provides the configuration for this test.
+        - The `configuration_values_in_service` file provides the configuration for this test.
     """
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
@@ -440,9 +443,9 @@ def test_invalid_values_in_bucket(
             type: fixture
             brief: Return a `ossec.log` monitor
     assertions:
-        - Check in the log that the module was not called.
+        - Check in the log that the module display the message about invalid value.
     input_description:
-        - The `configuration_configuration_bucker_and_service_missing` file provides the configuration for this test.
+        - The `configuration_values_in_bucket` file provides the configuration for this test.
     """
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
@@ -511,12 +514,84 @@ def test_invalid_values_in_service(
             type: fixture
             brief: Return a `ossec.log` monitor
     assertions:
-        - Check in the log that the module was not called.
+        - Check in the log that the module display the message about invalid value.
     input_description:
-        - The `configuration_configuration_bucker_and_service_missing` file provides the configuration for this test.
+        - The `configuration_values_in_service` file provides the configuration for this test.
     """
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_invalid_value,
         error_message='The AWS module did not show the expected message about invalid value',
+    ).result()
+
+
+# --------------------------------------- TEST_MULTIPLE_BUCKET_AND_SERVICE_TAGS ----------------------------------------
+# Configuration and cases data
+t8_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_multiple_bucket_and_service_tags.yaml')
+t8_cases_path = os.path.join(TEST_CASES_PATH, 'cases_multiple_bucket_and_service_tags.yaml')
+
+# Enabled test configurations
+t8_configuration_parameters, t8_configuration_metadata, t8_case_ids = get_test_cases_data(t8_cases_path)
+t8_configurations = load_configuration_template(
+    t8_configurations_path, t8_configuration_parameters, t8_configuration_metadata
+)
+
+
+@pytest.mark.tier(level=0)
+@pytest.mark.parametrize('configuration, metadata', zip(t8_configurations, t8_configuration_metadata), ids=t8_case_ids)
+def test_multiple_bucket_and_service_tags(
+    configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function_without_exception,
+    wazuh_log_monitor
+):
+    """
+    description: The command is invoked two times for buckets and two times for services.
+    test_phases:
+        - setup:
+            - Load Wazuh light configuration.
+            - Apply ossec.conf configuration changes according to the configuration template and use case.
+            - Apply custom settings in local_internal_options.conf.
+            - Truncate wazuh logs.
+            - Restart wazuh-manager service to apply configuration changes.
+        - test:
+            - Check in the ossec.log that a line has not appeared calling the module with correct parameters.
+        - teardown:
+            - Truncate wazuh logs.
+            - Restore initial configuration, both ossec.conf and local_internal_options.conf.
+    wazuh_min_version: 4.5.0
+    parameters:
+        - configuration:
+            type: dict
+            brief: Get configurations from the module.
+        - metadata:
+            type: dict
+            brief: Get metadata from the module.
+        - load_wazuh_basic_configuration:
+            type: fixture
+            brief: Load basic wazuh configuration.
+        - set_wazuh_configuration:
+            type: fixture
+            brief: Apply changes to the ossec.conf configuration.
+        - configure_local_internal_options_function:
+            type: fixture
+            brief: Apply changes to the local_internal_options.conf configuration.
+        - truncate_monitored_files:
+            type: fixture
+            brief: Truncate wazuh logs.
+        - restart_wazuh_function_without_exception:
+            type: fixture
+            brief: Restart the wazuh service catching the exception.
+        - wazuh_log_monitor:
+            type: fixture
+            brief: Return a `ossec.log` monitor
+    assertions:
+        - Check in the log that the module was called the right amount of times.
+    input_description:
+        - The `configuration_multiple_bucket_and_service_tags` file provides the configuration for this test.
+    """
+    wazuh_log_monitor.start(
+        timeout=global_parameters.default_timeout,
+        callback=event_monitor.callback_detect_bucket_or_service_call,
+        error_message='The AWS module was not called for bucket or service the right amount of times',
+        accum_results=4
     ).result()

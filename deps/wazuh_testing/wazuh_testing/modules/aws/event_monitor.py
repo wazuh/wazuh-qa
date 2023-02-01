@@ -99,7 +99,7 @@ def callback_detect_aws_module_started(line: str) -> Optional[str]:
 
 
 def callback_detect_aws_empty_value(line: str) -> Optional[str]:
-    """Detect if aws module was called.
+    """Detect if aws module display a message about empty value.
 
     Args:
         line (str): Line to match.
@@ -117,7 +117,7 @@ def callback_detect_aws_empty_value(line: str) -> Optional[str]:
 
 
 def callback_detect_aws_invalid_value(line: str) -> Optional[str]:
-    """Detect if aws module was called.
+    """Detect if aws module display a message about invalid value.
 
     Args:
         line (str): Line to match.
@@ -130,6 +130,23 @@ def callback_detect_aws_invalid_value(line: str) -> Optional[str]:
         re.match(r".*ERROR: Invalid \w+ type '\w+'.*", line) or
         re.match(r'.*ERROR: Invalid content for tag*', line) or
         re.match(r'.*WARNING: Bucket:  -  Error parsing arguments.*', line)
+    ):
+        return line
+
+
+def callback_detect_bucket_or_service_call(line: str) -> Optional[str]:
+    """Detect if bucket or service module was called.
+
+    Args:
+        line (str): Line to match.
+
+    Returns:
+        Optional[str]: Line if it match.
+    """
+
+    if (
+        re.match(r".*INFO: Executing Service Analysis:*", line) or
+        re.match(r'.*INFO: Executing Bucket Analysis:*', line)
     ):
         return line
 
