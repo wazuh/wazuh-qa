@@ -11,6 +11,7 @@ from wazuh_testing.tools.system import HostManager
 
 # Hosts
 testinfra_hosts = ["wazuh-master", "wazuh-worker1", "wazuh-agent2"]
+pytestmark = [pytest.mark.cluster]
 
 
 # Configuration
