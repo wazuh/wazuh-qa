@@ -103,14 +103,13 @@ def callback_detect_event_processed(line) -> Optional[str]:
         return line
 
 
-def callback_detect_event_processed_or_skipped(pattern) -> Callable:
+def callback_detect_event_processed_or_skipped(pattern: str) -> Callable:
     """Search for event processed or skipped message in the given line.
 
     Args:
-        line (str): Line to match.
-
+        pattern (str): Pattern to match in line.
     Returns:
-        Optional[str]: line if it match.
+        Callable: Callback to match the given line.
     """
     pattern_regex = re.compile(pattern)
     return lambda line: pattern_regex.match(line) or callback_detect_event_processed(line)
