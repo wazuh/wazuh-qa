@@ -75,7 +75,7 @@ def test_bucket_and_service_missing(
             brief: Restart the wazuh service catching the exception.
         - wazuh_log_monitor:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Return a `ossec.log` monitor.
     assertions:
         - Check in the log that the module was not called.
 
@@ -155,9 +155,9 @@ def test_type_missing_in_bucket(
             brief: Restart the wazuh service catching the exception.
         - wazuh_log_monitor:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Return a `ossec.log` monitor.
     assertions:
-         - Check in the log that the module display the message about missing attribute.
+        - Check in the log that the module displays the message about missing attributes.
     input_description:
         - The `configuration_type_missing_in_bucket` file provides the configuration for this test.
     """
@@ -226,9 +226,9 @@ def test_type_missing_in_service(
             brief: Restart the wazuh service catching the exception.
         - wazuh_log_monitor:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Return a `ossec.log` monitor.
     assertions:
-         - Check in the log that the module display the message about missing attribute.
+        - Check in the log that the module displays the message about missing attributes.
 
     input_description:
         - The `configuration_type_missing_in_service` file provides the configuration for this test.
@@ -298,9 +298,9 @@ def test_empty_values_in_bucket(
             brief: Restart the wazuh service catching the exception.
         - wazuh_log_monitor:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Return a `ossec.log` monitor.
     assertions:
-        - Check in the log that the module display the message about empty value.
+        - Check in the log that the module displays the message about an empty value.
     input_description:
         - The `configuration_values_in_bucket` file provides the configuration for this test.
     """
@@ -369,9 +369,9 @@ def test_empty_values_in_service(
             brief: Restart the wazuh service catching the exception.
         - wazuh_log_monitor:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Return a `ossec.log` monitor.
     assertions:
-        - Check in the log that the module display the message about empty value.
+        - Check in the log that the module displays the message about an empty value.
 
     input_description:
         - The `configuration_values_in_service` file provides the configuration for this test.
@@ -441,9 +441,9 @@ def test_invalid_values_in_bucket(
             brief: Restart the wazuh service catching the exception.
         - wazuh_log_monitor:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Return a `ossec.log` monitor.
     assertions:
-        - Check in the log that the module display the message about invalid value.
+        - Check in the log that the module displays the message about an invalid value.
     input_description:
         - The `configuration_values_in_bucket` file provides the configuration for this test.
     """
@@ -512,9 +512,9 @@ def test_invalid_values_in_service(
             brief: Restart the wazuh service catching the exception.
         - wazuh_log_monitor:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Return a `ossec.log` monitor.
     assertions:
-        - Check in the log that the module display the message about invalid value.
+        - Check in the log that the module displays the message about an invalid value.
     input_description:
         - The `configuration_values_in_service` file provides the configuration for this test.
     """
@@ -583,7 +583,7 @@ def test_multiple_bucket_and_service_tags(
             brief: Restart the wazuh service catching the exception.
         - wazuh_log_monitor:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Return a `ossec.log` monitor.
     assertions:
         - Check in the log that the module was called the right amount of times.
     input_description:
