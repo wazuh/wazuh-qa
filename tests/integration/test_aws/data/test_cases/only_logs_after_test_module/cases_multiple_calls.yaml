@@ -69,3 +69,11 @@
   metadata:
     bucket_type: guardduty
     bucket_name: wazuh-guardduty-integration-tests
+
+- name: native_guardduty_only_logs_after_multiple_calls
+  description: Native GuardDuty only_logs_after multiple calls configurations
+  configuration_parameters:
+  metadata:
+    bucket_type: guardduty
+    bucket_name: wazuh-native-guardduty-integration-tests
+    skipped_logs: 3

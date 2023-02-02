@@ -663,8 +663,9 @@ class GuardDutyDataGenerator(DataGenerator):
     BASE_PATH = ''
     BASE_FILE_NAME = f'firehose_guardduty-1-'
 
-    def get_filename(self, *args, **kwargs) -> str:
+    def get_filename(self) -> str:
         """Return the filename in the Guard Duty format.
+
         Example:
             <prefix>/<year>/<month>/<day>
         Returns:
@@ -677,7 +678,8 @@ class GuardDutyDataGenerator(DataGenerator):
         return join(path, name)
 
     def get_data_sample(self) -> str:
-        """Returns a sample of data according to the Guard Duty format.
+        """Return a sample of data according to the Guard Duty format.
+
         Returns:
             str: Synthetic data.
         """
@@ -823,13 +825,14 @@ class NativeGuardDutyDataGenerator(DataGenerator):
 
     compress = True
 
-    def get_filename(self, *args, **kwargs) -> str:
+    def get_filename(self) -> str:
         """Return the filename in the Native Guard Duty format.
+
         Example:
             <prefix>/AWSLogs/<suffix>/<account_id>/GuardDuty/<region>/<year>/<month>/<day>
 
         Returns:
-            str: Syntetic filename.
+            str: Synthetic filename.
         """
         now = datetime.now()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
@@ -838,9 +841,10 @@ class NativeGuardDutyDataGenerator(DataGenerator):
         return join(path, name)
 
     def get_data_sample(self) -> str:
-        """Returns a sample of data according to the Native Guard Duty format.
+        """Return a sample of data according to the Native Guard Duty format.
+
         Returns:
-            str: Syntetic data.
+            str: Synthetic data.
         """
         random_ip = get_random_ip()
         return json.dumps(
@@ -979,12 +983,14 @@ def get_data_generator(bucket_type: str, bucket_name: str) -> DataGenerator:
 
     Args:
         bucket_type (str): Bucket type to match the data generator.
-        bucket_name (str): Bucket name to match in case of custom types.
+        bucket_name (str): Bucket name to match in case of custom or guardduty types.
 
     Returns:
         DataGenerator: Data generator for the given bucket.
     """
     if bucket_type == cons.CUSTOM_TYPE:
         bucket_type = bucket_name.split('-')[1]
+    elif bucket_type == cons.GUARD_DUTY_TYPE and 'native' in bucket_name:
+        bucket_type = cons.NATIVE_GUARD_DUTY_TYPE
 
     return buckets_data_mapping[bucket_type]()

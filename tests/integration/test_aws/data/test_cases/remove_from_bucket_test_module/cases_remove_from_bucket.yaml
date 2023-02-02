@@ -87,3 +87,12 @@
   metadata:
     bucket_type: guardduty
     bucket_name: wazuh-guardduty-integration-tests
+
+- name: native_guardduty_remove_from_bucket
+  description: Native GuardDuty remove from bucket configurations
+  configuration_parameters:
+    BUCKET_TYPE: guardduty
+    BUCKET_NAME: wazuh-native-guardduty-integration-tests
+  metadata:
+    bucket_type: guardduty
+    bucket_name: wazuh-native-guardduty-integration-tests
