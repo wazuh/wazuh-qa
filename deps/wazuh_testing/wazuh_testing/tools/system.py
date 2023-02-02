@@ -26,6 +26,19 @@ class HostManager:
             inventory_path (str): Ansible inventory path
         """
         self.inventory_path = inventory_path
+        try:
+            with open(self.inventory_path, "r") as inventory:
+                self.inventory = yaml.safe_load(inventory.read())
+        except (OSError, yaml.YAMLError) as inventory_err:
+            raise ValueError(f"Could not open/load Ansible inventory '{self.inventory_path}': {inventory_err}")
+
+    def get_inventory(self) -> dict:
+        """Get the loaded Ansible inventory.
+
+        Returns:
+            self.inventory: Ansible inventory
+        """
+        return self.inventory
 
     def get_host(self, host: str):
         """Get the Ansible object for communicating with the specified host.

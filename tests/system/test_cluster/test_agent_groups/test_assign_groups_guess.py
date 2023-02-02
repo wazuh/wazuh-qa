@@ -55,6 +55,7 @@ from wazuh_testing.tools import WAZUH_PATH
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
 test_infra_agents = ["wazuh-agent1"]
+pytestmark = [pytest.mark.cluster]
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'enrollment_cluster', 'inventory.yml')
@@ -73,8 +74,8 @@ timeout = 60
 @pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
 @pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
 @pytest.mark.parametrize("host_manager", [host_manager])
-@pytest.mark.parametrize("status_guess_agent_group", ['0','1'])
-@pytest.mark.parametrize("agent_target", ['wazuh-master','wazuh-worker1'])
+@pytest.mark.parametrize("status_guess_agent_group", ['0', '1'])
+@pytest.mark.parametrize("agent_target", ['wazuh-master', 'wazuh-worker1'])
 def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_environment, test_infra_managers,
                                  test_infra_agents, host_manager):
     '''

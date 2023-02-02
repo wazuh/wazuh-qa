@@ -55,6 +55,7 @@ from system.test_cluster.test_agent_groups.common import register_agent
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
 test_infra_agents = ["wazuh-agent1", "wazuh-agent2", "wazuh-agent3"]
 agent_groups = ["Group1", "Group2", "Group3"]
+pytestmark = [pytest.mark.cluster]
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'basic_cluster', 'inventory.yml')
