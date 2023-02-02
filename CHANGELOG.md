@@ -10,7 +10,7 @@ Release report: TBD
 ### Added
 
 - Add Windows System folders FIM monitoring tests ([#3720](https://github.com/wazuh/wazuh-qa/pull/3720)) \- (Tests)
-- Add 'test_whodata_policy_changes' tests ([#3627](https://github.com/wazuh/wazuh-qa/pull/3627)) \- (Framework + Tests) 
+- Add 'test_whodata_policy_changes' tests ([#3627](https://github.com/wazuh/wazuh-qa/pull/3627)) \- (Framework + Tests)
 - Add test to check if active-response netsh generates alerts when firewall is disabled. ([#3787](https://github.com/wazuh/wazuh-qa/pull/3787)) \- (Framework + Tests)
 - Add new tests for logcollector 'ignore' and 'restrict' options ([#3582](https://github.com/wazuh/wazuh-qa/pull/3582)) \- (Tests)
 - Add 'Force reconnect' feature to agent_simulator tool. ([#3111](https://github.com/wazuh/wazuh-qa/pull/3111)) \- (Tools)
@@ -37,6 +37,7 @@ Release report: TBD
 
 ### Added
 
+- Add new test to check missing fields in `cpe_helper.json` file ([#3766](https://github.com/wazuh/wazuh-qa/pull/3766)) \- (Framework + Tests)
 - Add new test to check cpe_helper.json file ([#3731](https://github.com/wazuh/wazuh-qa/pull/3731))
 - Add new tests analysid handling of invalid/empty rule signature IDs ([#3649]
 (https://github.com/wazuh/wazuh-qa/pull/3649)) \- (Framework + Tests)
