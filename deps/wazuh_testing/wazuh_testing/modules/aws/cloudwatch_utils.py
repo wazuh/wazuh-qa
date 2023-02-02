@@ -55,7 +55,7 @@ def delete_log_stream(log_stream: str, log_group: str = PERMANENT_CLOUDWATCH_LOG
 
 
 def create_log_events(log_stream: str, log_group: str = PERMANENT_CLOUDWATCH_LOG_GROUP, event_number: int = 1) -> None:
-    """Create a log event within the given log stram and group.
+    """Create a log event within the given log stream and group.
 
     Args:
         log_stream (str): The log stream to delete.
