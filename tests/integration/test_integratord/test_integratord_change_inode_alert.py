@@ -77,8 +77,11 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
                                        wait_for_start_module):
     '''
     description: Check that when a given alert is inserted into alerts.json, integratord works as expected.
+
     wazuh_min_version: 4.3.5
+
     tier: 1
+
     parameters:
         - configuration:
             type: dict
@@ -101,16 +104,18 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
         - wait_for_start_module:
             type: fixture
             brief: Detect the start of the Integratord module in the ossec.log
+
     assertions:
         - Verify the expected response with for a given alert is recieved
+
     input_description:
         - The `configuration_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
         - The `cases_integratord_read_json_alerts` file provides the test cases.
+
     expected_output:
         - r'.*wazuh-integratord.*DEBUG: sending new alert'
         - r'.*wazuh-integratord.*DEBUG: jqueue_next.*Alert file inode changed.*'
         - r'.*wazuh-integratord.*Processing alert.*'
-
     '''
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
     command = f"echo '{metadata['alert_sample']}' >> {ALERT_FILE_PATH}"

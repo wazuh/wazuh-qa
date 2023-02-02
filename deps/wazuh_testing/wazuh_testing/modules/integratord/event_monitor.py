@@ -60,8 +60,8 @@ def check_integratord_thread_ready(file_monitor=None, timeout=T_20):
         timeout (int): Event timeout.
     """
     check_integratord_event(file_monitor=file_monitor, timeout=timeout,
-                            callback=f"DEBUG: Local requests thread ready",
-                            error_message='Did not recieve the expected "Enabling integration for slack"')
+                            callback='DEBUG: Local requests thread ready',
+                            error_message='Did not receive the expected "Enabling integration for slack"')
 
 
 def check_send_new_alers(file_monitor=None, timeout=T_20, update_position=False):
@@ -73,8 +73,8 @@ def check_send_new_alers(file_monitor=None, timeout=T_20, update_position=False)
         update_position (boolean): filter configuration parameter to search in Wazuh log
     """
     check_integratord_event(file_monitor=file_monitor, timeout=timeout,
-                            callback=f"DEBUG: sending new alert",
-                            error_message='Did not recieve the expected "...sending new alert" event',
+                            callback='DEBUG: sending new alert',
+                            error_message='Did not receive the expected "...sending new alert" event',
                             update_position=update_position)
 
 
@@ -86,8 +86,8 @@ def check_file_inode_changed(file_monitor=None, timeout=T_20):
         timeout (int): Event timeout.
     """
     check_integratord_event(file_monitor=file_monitor, timeout=timeout,
-                            callback=fr".*DEBUG: jqueue_next.*Alert file inode changed.*",
-                            error_message='Did not recieve the expected "...Alert file inode changed..." event')
+                            callback=r".*DEBUG: jqueue_next.*Alert file inode changed.*",
+                            error_message='Did not receive the expected "...Alert file inode changed..." event')
 
 
 def check_process_alert(file_monitor=None, timeout=T_20):
@@ -98,8 +98,8 @@ def check_process_alert(file_monitor=None, timeout=T_20):
         timeout (int): Event timeout.
     """
     check_integratord_event(file_monitor=file_monitor, timeout=timeout,
-                            callback=fr".*Processing alert.*",
-                            error_message='Did not recieve the expected Slack alert in alerts.json')
+                            callback=r".*Processing alert.*",
+                            error_message='Did not receive the expected Slack alert in alerts.json')
 
 
 def check_response(file_monitor=None, timeout=T_20):
@@ -110,8 +110,8 @@ def check_response(file_monitor=None, timeout=T_20):
         timeout (int): Event timeout.
     """
     check_integratord_event(file_monitor=file_monitor, timeout=timeout,
-                            callback=fr".*<Response \[200\]>",
-                            error_message='Did not recieve the expected Slack alert in alerts.json')
+                            callback=r".*<Response \[200\]>",
+                            error_message='Could not send the alert to slack')
 
 
 def check_alert_read(file_monitor=None, timeout=T_20, callback='', error_message=None):
@@ -128,7 +128,7 @@ def check_alert_read(file_monitor=None, timeout=T_20, callback='', error_message
                             error_message=error_message)
 
 
-def check_file_information(file_monitor=None, timeout=T_20):
+def check_file_warning(file_monitor=None, timeout=T_20):
     """Check for information of file in the logs.
 
     Args:
@@ -138,4 +138,4 @@ def check_file_information(file_monitor=None, timeout=T_20):
     check_integratord_event(file_monitor=file_monitor, timeout=timeout,
                             callback=fr".*{INTEGRATORD_PREFIX}.*WARNING.*Could not retrieve information of file.*"\
                                      r'alerts\.json.*No such file.*',
-                            error_message='Did not recieve the expected "...Could not retrieve information/open file"')
+                            error_message='Did not receive the expected "...Could not retrieve information/open file"')
