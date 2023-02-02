@@ -53,7 +53,7 @@ def mark_cases_as_skipped(metadata: dict) -> None:
 
 @pytest.fixture(scope='function')
 def restart_wazuh_function_without_exception(daemon=None):
-    """Restart all Wazuh daemons"""
+    """Restart all Wazuh daemons."""
     try:
         control_service("restart", daemon=daemon)
     except ValueError:

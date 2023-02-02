@@ -39,13 +39,13 @@ def callback_detect_aws_module_called(parameters: list) -> Callable:
 
 
 def callback_detect_aws_error_for_missing_type(line: str) -> Optional[str]:
-    """Detect if aws module display an error about missing type.
+    """Detect if the AWS module displays an error about missing type.
 
     Args:
         line (str): Line to match.
 
     Returns:
-        Optional[str]: Line if it match.
+        Optional[str]: Line if it matches.
     """
 
     if re.match(
@@ -55,13 +55,13 @@ def callback_detect_aws_error_for_missing_type(line: str) -> Optional[str]:
 
 
 def callback_detect_aws_legacy_module_warning(line: str) -> Optional[str]:
-    """Detect if aws module display a warning about legacy config.
+    """Detect if the AWS module displays a warning about legacy config.
 
     Args:
         line (str): Line to match.
 
     Returns:
-        Optional[str]: Line if it match.
+        Optional[str]: Line if it matches.
     """
 
     if re.match(
@@ -71,13 +71,13 @@ def callback_detect_aws_legacy_module_warning(line: str) -> Optional[str]:
 
 
 def callback_detect_aws_module_warning(line: str) -> Optional[str]:
-    """Detect if aws module display a warning.
+    """Detect if the AWS module displays a warning.
 
     Args:
         line (str): Line to match.
 
     Returns:
-        Optional[str]: Line if it match.
+        Optional[str]: Line if it matches.
     """
 
     if re.match(r".*WARNING: No buckets or services definitions found at module 'aws-s3'.", line):
@@ -85,13 +85,13 @@ def callback_detect_aws_module_warning(line: str) -> Optional[str]:
 
 
 def callback_detect_aws_module_started(line: str) -> Optional[str]:
-    """Detect if aws module was called.
+    """Detect if the AWS module was called.
 
     Args:
         line (str): Line to match.
 
     Returns:
-        Optional[str]: Line if it match.
+        Optional[str]: Line if it matches.
     """
 
     if re.match(r'.*DEBUG: Launching S3 Command: .*', line):
@@ -99,13 +99,13 @@ def callback_detect_aws_module_started(line: str) -> Optional[str]:
 
 
 def callback_detect_aws_empty_value(line: str) -> Optional[str]:
-    """Detect if aws module display a message about empty value.
+    """Detect if the AWS module displays a message about an empty value.
 
     Args:
         line (str): Line to match.
 
     Returns:
-        Optional[str]: Line if it match.
+        Optional[str]: Line if it matches.
     """
 
     if (
@@ -117,13 +117,13 @@ def callback_detect_aws_empty_value(line: str) -> Optional[str]:
 
 
 def callback_detect_aws_invalid_value(line: str) -> Optional[str]:
-    """Detect if aws module display a message about invalid value.
+    """Detect if the AWS module displays a message about an invalid value.
 
     Args:
         line (str): Line to match.
 
     Returns:
-        Optional[str]: Line if it match.
+        Optional[str]: Line if it matches.
     """
 
     if (
