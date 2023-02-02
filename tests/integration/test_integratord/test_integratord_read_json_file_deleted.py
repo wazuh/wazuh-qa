@@ -4,30 +4,40 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 type: integration
+
 brief: Integratord manages wazuh integrations with other applications such as Yara or Slack, by feeding
 the integrated aplications with the alerts located in alerts.json file. This test module aims to validate that
 given a specific alert, the expected response is recieved, depending if it is a valid/invalid json alert, an
 overlong alert (64kb+) or what happens when it cannot read the file because it is missing.
+
 components:
     - integratord
+
 suite: integratord_read_json_alerts
+
 targets:
     - agent
+
 daemons:
     - wazuh-integratord
+
 os_platform:
     - Linux
+
 os_version:
     - Centos 8
     - Ubuntu Focal
+
 references:
     - https://documentation.wazuh.com/current/user-manual/manager/manual-integration.html#slack
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-integratord.html
+
 pytest_args:
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
 tags:
     - slack
 '''
@@ -124,7 +134,7 @@ def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_c
 
     # Delete alerts.json file
     remove_file(ALERT_FILE_PATH)
-    evm.check_file_information(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2)
+    evm.check_file_warning(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout*2)
 
     # Create alerts.json file
     run_local_command_returning_output(command)

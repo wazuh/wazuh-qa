@@ -4,30 +4,40 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 type: integration
+
 brief: Integratord manages wazuh integrations with other applications such as Yara or Slack, by feeding
 the integrated aplications with the alerts located in alerts.json file. This test module aims to validate that
 given a specific alert, the expected response is recieved, depending if it is a valid/invalid json alert, an
 overlong alert (64kb+) or what happens when it cannot read the file because it is missing.
+
 components:
     - integratord
+
 suite: integratord_read_json_alerts
+
 targets:
     - agent
+
 daemons:
     - wazuh-integratord
+
 os_platform:
     - Linux
+
 os_version:
     - Centos 8
     - Ubuntu Focal
+
 references:
     - https://documentation.wazuh.com/current/user-manual/manager/manual-integration.html#slack
     - https://documentation.wazuh.com/current/user-manual/reference/daemons/wazuh-integratord.html
+
 pytest_args:
     - tier:
         0: Only level 0 tests are performed, they check basic functionalities and are quick to perform.
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
+
 tags:
     - slack
 '''
@@ -38,7 +48,6 @@ import time
 from wazuh_testing import global_parameters
 from wazuh_testing.tools import LOG_FILE_PATH, ALERT_FILE_PATH
 from wazuh_testing.modules import integratord as integrator
-from wazuh_testing.modules.integratord.event_monitor import check_integratord_event
 from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.modules.integratord import event_monitor as evm
@@ -87,8 +96,11 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
     '''
     description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
     of a valid alert, a slack integration alert is expected in the alerts.json file.
+
     wazuh_min_version: 4.3.7
+
     tier: 1
+
     parameters:
         - configuration:
             type: dict
@@ -111,18 +123,22 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
         - wait_for_start_module:
             type: fixture
             brief: Detect the start of the Integratord module in the ossec.log
+
     assertions:
         - Verify the expected response with for a given alert is recieved
+
     input_description:
         - The `configuration_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
         - The `cases_integratord_read_valid_json_alerts` file provides the test cases.
+
     expected_output:
         - r'.*wazuh-integratord.*alert_id.*\"integration\": \"slack\".*'
     '''
-
     sample = metadata['alert_sample']
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
+
     time.sleep(5)
+
     run_local_command_returning_output(f"echo '{sample}' >> {ALERT_FILE_PATH}")
 
     # Read Response in ossec.log
@@ -139,8 +155,11 @@ def test_integratord_read_invalid_alerts(configuration, metadata, set_wazuh_conf
     description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
     of a valid alert, a slack integration alert is expected in the alerts.json file. If the alert is invalid or
     broken, or overly long a message will appear in the ossec.log file.
+
     wazuh_min_version: 4.3.7
+
     tier: 1
+
     parameters:
         - configuration:
             type: dict
@@ -163,11 +182,14 @@ def test_integratord_read_invalid_alerts(configuration, metadata, set_wazuh_conf
         - wait_for_start_module:
             type: fixture
             brief: Detect the start of the Integratord module in the ossec.log
+
     assertions:
         - Verify the expected response with for a given alert is recieved
+
     input_description:
         - The `configuration_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
         - The `cases_integratord_read_invalid_json_alerts` file provides the test cases.
+
     expected_output:
         - r'.*wazuh-integratord.*WARNING: Invalid JSON alert read.*'
         - r'.*wazuh-integratord.*WARNING: Overlong JSON alert read.*'
@@ -177,14 +199,14 @@ def test_integratord_read_invalid_alerts(configuration, metadata, set_wazuh_conf
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
 
     if metadata['alert_type'] == 'invalid':
-        callback = fr".*WARNING: Invalid JSON alert read.*"
+        callback = r".*WARNING: Invalid JSON alert read.*"
         error_message = 'Did not recieve the expected "...Invalid JSON alert read..." event'
 
     elif metadata['alert_type'] == 'overlong':
-        callback = fr".*WARNING: Overlong JSON alert read.*"
+        callback = r".*WARNING: Overlong JSON alert read.*"
         error_message = 'Did not recieve the expected "...Overlong JSON alert read..." event'
         # Add 90kb of padding to alert to make it go over the allowed value of 64KB.
-        padding = "0"*90000
+        padding = "0" * 90000
         sample = sample.replace("padding_input", "agent_" + padding)
 
     run_local_command_returning_output(f"echo '{sample}' >> {ALERT_FILE_PATH}")
