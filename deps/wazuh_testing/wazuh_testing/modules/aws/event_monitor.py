@@ -156,7 +156,10 @@ def check_non_processed_logs_from_output(command_output: str, bucket_type: str, 
     elif bucket_type == CUSTOM_TYPE:
         pattern = r'.*DEBUG: \+\+ Skipping previously processed file: '
     else:
-        pattern = r'.*DEBUG: \+\+\+ No logs to process in bucket: '
+        if expected_results > 1:
+            pattern = r'.*DEBUG: \+\+ Skipping previously processed file:'
+        else:
+            pattern = r'.*DEBUG: \+\+\+ No logs to process in bucket: '
 
     analyze_command_output(
         command_output,

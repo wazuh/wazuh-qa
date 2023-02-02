@@ -76,4 +76,5 @@
   metadata:
     bucket_type: guardduty
     bucket_name: wazuh-native-guardduty-integration-tests
-    skipped_logs: 3
+    expected_skipped_logs_step_3: 3
+    expected_skipped_logs_step_4: 3
