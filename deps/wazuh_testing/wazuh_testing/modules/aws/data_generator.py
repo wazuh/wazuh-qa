@@ -834,7 +834,7 @@ class NativeGuardDutyDataGenerator(DataGenerator):
         Returns:
             str: Synthetic filename.
         """
-        now = datetime.now()
+        now = datetime.utcnow()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = f"{str(uuid4())}{cons.JSON_GZ_EXT}"
 
@@ -966,8 +966,9 @@ class WAFDataGenerator(DataGenerator):
     BASE_PATH = ''
     BASE_FILE_NAME = "aws-waf-logs-delivery-stream-1-"
 
-    def get_filename(self, *args, **kwargs) -> str:
+    def get_filename(self) -> str:
         """Return the filename in the KMS format.
+
         Example:
             <prefix>/<year>/<month>/<day>
         Returns:
@@ -981,8 +982,9 @@ class WAFDataGenerator(DataGenerator):
 
     def get_data_sample(self) -> str:
         """Return a sample of data according to the cloudtrail format.
+
         Returns:
-            ste: Synthetic data.
+            str: Synthetic data.
         """
         return json.dumps(
             {
