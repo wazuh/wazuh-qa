@@ -1105,8 +1105,9 @@ class UmbrellaDataGenerator(DataGenerator):
     BASE_PATH = 'dnslogs'
     BASE_FILE_NAME = ''
 
-    def get_filename(self, prefix=None, **kwargs) -> str:
+    def get_filename(self) -> str:
         """Return the filename in the umbrella format.
+
         Example:
             <prefix>/<year>-<month>-<day>
         Returns:
@@ -1120,6 +1121,7 @@ class UmbrellaDataGenerator(DataGenerator):
 
     def get_data_sample(self) -> str:
         """Return a sample of data according to the cloudtrail format.
+
         Returns:
             str: Synthetic data.
         """
