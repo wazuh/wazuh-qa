@@ -240,7 +240,7 @@ def test_service_regions(
         - The `cases_regions` file provides the test cases.
     """
     service_type = metadata['service_type']
-    log_group_name = metadata['log_group_name']
+    log_group_name = metadata.get('log_group_name')
     only_logs_after = metadata['only_logs_after']
     regions: str = metadata['regions']
     expected_results = metadata['expected_results']
@@ -254,6 +254,10 @@ def test_service_regions(
         '--regions', regions,
         '--debug', '2'
     ]
+
+    if log_group_name is not None:
+        parameters.insert(9, log_group_name)
+        parameters.insert(9, '--aws_log_groups')
 
     # Check AWS module started
     wazuh_log_monitor.start(
@@ -297,9 +301,9 @@ def test_service_regions(
 
     assert services_db_exists()
 
-    table_name = 'aws_service' if service_type == 'inspector' else 'cloudwatch_logs'
+    table_name = 'aws_services' if service_type == 'inspector' else 'cloudwatch_logs'
     if expected_results:
         for row in get_multiple_service_db_row(table_name=table_name):
-            assert (getattr(row, 'region') or getattr(row, 'aws_region')) in regions_list
+            assert (getattr(row, 'region', None) or getattr(row, 'aws_region')) in regions_list
     else:
-        assert not table_exists_or_has_values(table_name='aws_services', db_path=AWS_SERVICES_DB_PATH)
+        assert not table_exists_or_has_values(table_name=table_name, db_path=AWS_SERVICES_DB_PATH)

@@ -1,9 +1,3 @@
-- name: inspector_only_logs_after_multiple_calls
-  description: Inspector only_logs_after multiple calls configurations
-  configuration_parameters:
-  metadata:
-    service_type: inspector
-
 - name: cloudwatchlogs_only_logs_after_multiple_calls
   description: CloudWatch only_logs_after multiple calls configurations
   configuration_parameters:

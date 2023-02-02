@@ -251,7 +251,7 @@ def test_service_without_only_logs_after(
 
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,
-        callback=event_monitor.callback_detect_cloudwatch_event_processed(expected_results),
+        callback=event_monitor.callback_detect_service_event_processed(expected_results, service_type),
         error_message='The AWS module did not process the expected number of events',
     ).result()
 
@@ -467,8 +467,8 @@ def test_service_with_only_logs_after(
     ]
 
     if log_group_name is not None:
-        parameters.insert(7, log_group_name)
-        parameters.insert(7, '--aws_log_groups')
+        parameters.insert(9, log_group_name)
+        parameters.insert(9, '--aws_log_groups')
 
     # Check AWS module started
     wazuh_log_monitor.start(
@@ -496,7 +496,9 @@ def test_service_with_only_logs_after(
 
     if service_type == 'inspector':
         assert data.service == service_type
-        assert datetime.strptime(data.timestamp, '%Y-%m-%d %H:%M:%S.%f') == datetime.strptime(only_logs_after, '%Y-%b-%d')
+        assert (
+            datetime.strptime(data.timestamp, '%Y-%m-%d %H:%M:%S.%f') == datetime.strptime(only_logs_after, '%Y-%b-%d')
+        )
     else:
         assert log_group_name == data.aws_log_group
         assert metadata['log_stream'] == data.aws_log_stream
@@ -616,8 +618,8 @@ def test_bucket_multiple_calls(
     )
 
 
-# -------------------------------------------- TEST_INSPECTOR_MULTIPLE_CALLS ---------------------------------------------
-t5_cases_path = os.path.join(TEST_CASES_PATH, 'cases_service_multiple_calls.yaml')
+# -------------------------------------------- TEST_INSPECTOR_MULTIPLE_CALLS -------------------------------------------
+t5_cases_path = os.path.join(TEST_CASES_PATH, 'cases_inspector_multiple_calls.yaml')
 
 _, t5_configuration_metadata, t5_case_ids = get_test_cases_data(t5_cases_path)
 
@@ -699,7 +701,7 @@ def test_inspector_multiple_calls(
 
 
 # ----------------------------------------- TEST_CLOUDWATCH_MULTIPLE_CALLS ---------------------------------------------
-t6_cases_path = os.path.join(TEST_CASES_PATH, 'cases_service_multiple_calls.yaml')
+t6_cases_path = os.path.join(TEST_CASES_PATH, 'cases_cloudwatch_multiple_calls.yaml')
 
 _, t6_configuration_metadata, t6_case_ids = get_test_cases_data(t6_cases_path)
 

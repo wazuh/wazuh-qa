@@ -6,7 +6,7 @@
     LOG_GROUP_NAME: ''
   metadata:
     service_type: inspector
-    only_logs_after: 2023-JAN-30
+    only_logs_after: 2023-JAN-12
     regions: us-east-1
     expected_results: 4
 
@@ -18,7 +18,7 @@
     LOG_GROUP_NAME: ''
   metadata:
     service_type: inspector
-    only_logs_after: 2023-JAN-30
+    only_logs_after: 2023-JAN-12
     regions: us-east-1,us-east-2
     expected_results: 4
 
@@ -30,7 +30,7 @@
     LOG_GROUP_NAME: ''
   metadata:
     service_type: inspector
-    only_logs_after: 2023-JAN-30
+    only_logs_after: 2023-JAN-12
     regions: us-fake-1
     expected_results: 0
 
