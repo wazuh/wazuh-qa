@@ -87,3 +87,11 @@
 
 - name: Start Wazuh
   command: /var/ossec/bin/wazuh-control restart
+
+- name: Copy wdb-query.py script
+  copy:
+    src: ../../../../scripts/wdb-query.py
+    dest: /var/ossec/bin/wdb-query.py
+    owner: root
+    group: root
+    mode: '0644'

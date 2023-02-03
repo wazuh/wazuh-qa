@@ -128,3 +128,9 @@ def change_agent_group_with_wdb(agent_id, new_group, host, host_manager):
     group_data = host_manager.run_command(host, f"python3 {WAZUH_PATH}/bin/wdb-query.py global \
                                           'set-agent-groups {query}'")
     return group_data
+
+
+def execute_wdb_query(query, host, host_manager):
+    response = host_manager.run_command(host, f"python3 {WAZUH_PATH}/bin/wdb-query.py {query}")
+
+    return response
