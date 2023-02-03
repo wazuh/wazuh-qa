@@ -46,6 +46,7 @@ import time
 import pytest
 import json
 
+
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import (query_wdb, insert_agent_into_group, clean_agents_from_db,
                                     clean_groups_from_db, clean_belongs)
@@ -65,6 +66,54 @@ wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
 receiver_sockets_params = [(wdb_path, 'AF_UNIX', 'TCP')]
 monitored_sockets_params = [('wazuh-db', None, True)]
 receiver_sockets = None  # Set in the fixtures
+
+
+
+import socket
+import struct
+import json
+import hashlib
+
+
+
+def send_msg(msg):
+
+    ADDR = '/var/ossec/queue/db/wdb'
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    sock.connect(ADDR)
+    msg = struct.pack('<I', len(msg)) + msg.encode()
+
+    # Send msg
+    sock.send(msg)
+
+    # Receive response
+    data = sock.recv(4)
+    data_size = struct.unpack("<I", data[0:4])[0]
+    data = sock.recv(data_size).decode(encoding="utf-8", errors="ignore").split(" ", 1)
+    
+    sock.close()
+    return data
+
+
+def get_global_hash():
+    GET_GROUP_HASH = 'global sql SELECT group_hash FROM agent WHERE id > 0 AND group_hash IS NOT NULL ORDER BY id ' \
+                     'LIMIT {limit} OFFSET {offset}'
+    limit = 1000
+    offset = 0
+    group_hashes = []
+
+    while True:
+        result = send_msg(GET_GROUP_HASH.format(limit=1000, offset=offset))
+        if result[1] == '[]':
+            break
+        offset += limit
+        group_hashes.extend([item['group_hash'] for item in json.loads(result[1])])
+
+    actual_hash = hashlib.sha1("".join(group_hashes).encode()).hexdigest()
+    print(f'Global groups hash: {actual_hash}')
+
+    return actual_hash
+
 
 
 # Fixtures
@@ -123,6 +172,10 @@ def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_mod
     if 'pre_input' in case_data:
         for command in case_data['pre_input']:
             query_wdb(command)
+
+    if '[GLOBAL_HASH]' in output:
+        actual_hash = get_global_hash()
+        output = output.replace('[GLOBAL_HASH]', actual_hash) 
 
     time.sleep(1)
     response = query_wdb(case_data["input"])
