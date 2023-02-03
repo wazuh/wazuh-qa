@@ -1,10 +1,13 @@
 ---
 wazuh-master:
-  - regex: '.*POST /groups" with parameters {} and body {.*s: 200'
+  - regex: '.*POST /groups" with parameters {} and body {.*test_group.*s: 200'
     path: "/var/ossec/logs/api.log"
     timeout: 60
-  - regex: '.*PUT /agents.*group.*" with parameters {} and body {} done in.*200'
+  - regex: '.*PUT /agents.*group/test_group" with parameters {} and body {} done in.*200'
     path: "/var/ossec/logs/api.log"
+    timeout: 60
+  - regex: '.*SendSync.*Receiving SendSync request \(remoted\) from wazuh-worker1.*'
+    path: "/var/ossec/logs/cluster.log"
     timeout: 60
   - regex: '.*Master.*Local agent-groups.*Starting.'
     path: "/var/ossec/logs/cluster.log"
@@ -35,6 +38,9 @@ wazuh-master:
     timeout: 60
 
 wazuh-worker1:
+  - regex: ".*Command received: b'sendsync'"
+    path: "/var/ossec/logs/cluster.log"
+    timeout: 60
   - regex: '.*Agent-groups recv.*Starting.'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
