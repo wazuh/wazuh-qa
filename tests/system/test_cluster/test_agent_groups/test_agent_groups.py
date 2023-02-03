@@ -50,8 +50,14 @@ def test_agent_groups_create_remove_group(clean_environment):
     # Get the token
     master_token = host_manager.get_api_token(master_host)
 
-    # Make sure that the agent is registered and active
-    check_agent_status('active', master_token, modified_agent)
+    # Register agent
+    agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0], worker_host, host_manager)
+    restart_cluster(test_infra_agents, host_manager)
+
+    # Check that the agent is active
+    sleep(time_to_sync)
+    check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_ACTIVE, host_manager, test_infra_managers)
+
     HostMonitor(inventory_path=inventory_path, messages_path=sync_messages_path, tmp_path=tmp_path).run()
 
     # Create group from master
