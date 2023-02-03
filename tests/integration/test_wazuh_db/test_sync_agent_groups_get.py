@@ -127,7 +127,7 @@ def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_mod
     # Check if it requires the global hash.
     if '[GLOBAL_HASH]' in output:
         global_hash = calculate_global_hash()
-        output = output.replace('[GLOBAL_HASH]', global_hash) 
+        output = output.replace('[GLOBAL_HASH]', global_hash)
 
     time.sleep(1)
     response = query_wdb(case_data["input"])
