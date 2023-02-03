@@ -66,11 +66,7 @@ timeout = 10
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
-@pytest.mark.parametrize("host_manager", [host_manager])
-def test_agent_groups_sync_when_add_a_new_cluster_node(clean_environment, test_infra_managers,
-                                                       test_infra_agents, host_manager):
+def test_agent_groups_sync_when_add_a_new_cluster_node(clean_environment):
     '''
     description: Check that having a series of agents assigned with different groups, when an new node is added to
     the cluster, the group data is synchronized to the new node.
@@ -79,15 +75,6 @@ def test_agent_groups_sync_when_add_a_new_cluster_node(clean_environment, test_i
         - clean_enviroment:
             type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
-        - test_infra_managers
-            type: List
-            brief: List of manager hosts in enviroment.
-        - test_infra_managers
-            type: List
-            brief: List of agent hosts in enviroment.
-        - host_manager
-            type: HostManager object
-            brief: Handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agents appear as active in all nodes.
         - Verify that after registering and after starting the agent, the indicated group is synchronized.
@@ -127,10 +114,7 @@ def test_agent_groups_sync_when_add_a_new_cluster_node(clean_environment, test_i
     check_agent_groups(agent3_data[1], agent_groups[2], test_infra_new_nodes, host_manager)
 
 
-@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
-@pytest.mark.parametrize("host_manager", [host_manager])
-def test_agent_groups_sync_worker_new_node(clean_environment, test_infra_managers, test_infra_agents, host_manager):
+def test_agent_groups_sync_worker_new_node(clean_environment):
     '''
     description: Having two agents assigned to different workers and different groups, check that when an new node
     is added to the cluster, the group data is synchronized to the new node.
@@ -139,15 +123,6 @@ def test_agent_groups_sync_worker_new_node(clean_environment, test_infra_manager
         - clean_enviroment:
             type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
-        - test_infra_managers
-            type: List
-            brief: List of manager hosts in enviroment.
-        - test_infra_managers
-            type: List
-            brief: List of agent hosts in enviroment.
-        - host_manager
-            type: HostManager object
-            brief: Handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agents appear as active in all nodes.
         - Verify that after registering and after starting the agent, the indicated group is synchronized.

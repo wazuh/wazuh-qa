@@ -70,12 +70,8 @@ sync_delay = 40
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
-@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("agent_host", test_infra_managers[0:2])
-def test_agent_groups_sync_time(agent_host, clean_environment, test_infra_managers, test_infra_agents,
-                                host_manager):
+def test_agent_groups_sync_time(agent_host, clean_environment):
     '''
     description: Check that after a long time when the manager has been unable to synchronize de databases, because
     new agents are being continually added, database synchronization is forced and the expected information is in
@@ -88,15 +84,6 @@ def test_agent_groups_sync_time(agent_host, clean_environment, test_infra_manage
         - clean_enviroment:
             type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
-        - test_infra_managers
-            type: List
-            brief: List of manager hosts in enviroment.
-        - test_infra_agents
-            type: List
-            brief: List of agent hosts in enviroment.
-        - host_manager
-            type: HostManager object
-            brief: Handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering and after starting the agent, the indicated group is synchronized.
     expected_output:
