@@ -2,15 +2,15 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import json
 import os
 import re
-from time import sleep, time
+from time import sleep
 
 import pytest
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
+from system.test_cluster.test_agent_groups.common import register_agent
+from system import AGENT_STATUS_ACTIVE, check_agent_status, restart_cluster, execute_wdb_query
 
 # Hosts
 test_infra_managers = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
@@ -20,19 +20,18 @@ worker_host = test_infra_managers[1]
 pytestmark = [pytest.mark.cluster]
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-                              'provisioning', 'basic_cluster', 'inventory.yml')
+                              'provisioning', 'enrollment_cluster', 'inventory.yml')
 
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
-add_messages_path = os.path.join(local_path, 'data/synchronization_messages.yml')
+add_messages_path = os.path.join(local_path, 'data/add_messages.yml')
 delete_messages_path = os.path.join(local_path, 'data/delete_messages.yml')
 sync_messages_path = os.path.join(local_path, 'data/synchronization_messages.yml')
 script_path = os.path.join(re.sub(r'^.*?wazuh-qa', '/wazuh-qa', local_path), '../utils/get_wdb_agent.py')
 tmp_path = os.path.join(local_path, 'tmp')
 
+# Variables
 test_group = 'test_group'
-modified_agent = 'wazuh-agent3'
-last_agent = 'wazuh-agent2'
 while_time = 5
 time_to_sync = 21
 time_to_agent_reconnect = 180
