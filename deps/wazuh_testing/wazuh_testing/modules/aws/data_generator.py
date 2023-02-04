@@ -1063,7 +1063,7 @@ class ServerAccessDataGenerator(DataGenerator):
         Returns:
             str: Synthetic filename.
         """
-        now = datetime.now()
+        now = datetime.utcnow()
         date_format = '%Y-%m-%d-%H-%M-%S'
         name = f'{now.strftime(date_format)}-{get_random_string(16).upper()}'
         return join(self.BASE_PATH, name)
@@ -1080,7 +1080,7 @@ class ServerAccessDataGenerator(DataGenerator):
             data.append(
                 [
                     str(uuid4()), 'wazuh-server-access-integration-tests',
-                    datetime.now().strftime('[%d/%b/%Y:%H:%M:%S %z]'), get_random_ip(),
+                    datetime.utcnow().strftime('[%d/%b/%Y:%H:%M:%S %z]'), get_random_ip(),
                     f"arn:aws:iam::{cons.RANDOM_ACCOUNT_ID}:user/fake.user", get_random_string(16).upper(),
                     'REST.GET.WEBSITE', '-', 'GET, /wazuh-server-access-integration-tests?website= HTTP/1.1',
                     '404', 'NoSuchWebsiteConfiguration', '343', '-', '85', '-', '-',
