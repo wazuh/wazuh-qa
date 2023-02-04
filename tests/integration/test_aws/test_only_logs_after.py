@@ -290,7 +290,7 @@ def test_service_with_only_logs_after(
             - Check in the ossec.log that a line has appeared calling the module with correct parameters.
             - Check the expected number of events were sent to analysisd. Only the logs whose timestamp is greater than
               the date specified in the configuration should be processed.
-            - Check the database was created and updated accordingly
+            - Check the database was created and updated accordingly.
         - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
@@ -509,7 +509,6 @@ def test_service_multiple_calls(
             - Call the module with the same parameters in and check there were no duplicates.
             - Call the module with only_logs_after set with an early date than setted previously and check that no logs
               were processed, there were no duplicates.
-
         - teardown:
             - Delete the `aws_services.db`.
     wazuh_min_version: 4.5.0

@@ -168,7 +168,7 @@ def table_exists_or_has_values(table_name: str) -> bool:
 # aws_services.db utils
 
 def services_db_exists() -> bool:
-    """Check if `s3_cloudtrail.db` exists.
+    """Check if `aws_services.db` exists.
 
     Returns:
         bool: True if exists else False.
@@ -177,7 +177,7 @@ def services_db_exists() -> bool:
 
 
 def delete_services_db() -> None:
-    """Delete `s3_cloudtrail.db` file."""
+    """Delete `aws_services.db` file."""
     if services_db_exists():
         AWS_SERVICES_DB_PATH.unlink()
 

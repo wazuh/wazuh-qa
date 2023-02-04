@@ -107,7 +107,7 @@ def clean_s3_cloudtrail_db():
 
 @pytest.fixture(scope='function')
 def clean_aws_services_db():
-    """Delete the DB file before and after the test execution"""
+    """Delete the DB file before and after the test execution."""
     delete_services_db()
 
     yield
