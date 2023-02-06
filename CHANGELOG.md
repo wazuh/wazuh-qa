@@ -44,7 +44,7 @@ Release report: TBD
 
 ### Changed
 
-- Fix `test_agent_groups` ([#3889]([#3769](https://github.com/wazuh/wazuh-qa/pull/3889)) \- (Tests + Framework)
+- Fix `test_agent_groups` ([#3889](https://github.com/wazuh/wazuh-qa/pull/3889)) \- (Tests + Framework)
 - Increase NVE download feed test timeout([#3769](https://github.com/wazuh/wazuh-qa/pull/3769)) \- (Tests)
 - Adapt wazuhdb integration tests for auto-vacuum ([#3613](https://github.com/wazuh/wazuh-qa/issues/3613)) \- (Tests)
 - Update logcollector format test due to audit changes ([#3641](https://github.com/wazuh/wazuh-qa/pull/3641)) \- (Framework)
