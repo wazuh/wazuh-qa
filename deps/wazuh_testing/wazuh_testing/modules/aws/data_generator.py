@@ -11,7 +11,8 @@ from wazuh_testing.tools.utils import get_random_ip, get_random_port, get_random
 from . import constants as cons
 
 
-def get_random_interface_id():
+def get_random_interface_id() -> str:
+    """Return a random interface ID."""
     return f"eni-{get_random_string(17)}"
 
 
@@ -23,7 +24,7 @@ class DataGenerator:
         """Return the filename according to the integration format.
 
         Returns:
-            str: Syntetic filename.
+            str: Synthetic filename.
         """
         raise NotImplementedError()
 
@@ -31,7 +32,7 @@ class DataGenerator:
         """Return a sample of data according to the integration format.
 
         Returns:
-            dict: Syntetic data.
+            dict: Synthetic data.
         """
         raise NotImplementedError()
 
@@ -47,7 +48,7 @@ class CloudTrailDataGenerator(DataGenerator):
             <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/CloudTrail/<region>/<year>/<month>/<day>
 
         Returns:
-            str: Syntetic filename.
+            str: Synthetic filename.
         """
         now = datetime.now()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
@@ -59,7 +60,7 @@ class CloudTrailDataGenerator(DataGenerator):
         """Return a sample of data according to the cloudtrail format.
 
         Returns:
-            str: Syntetic data.
+            str: Synthetic data.
         """
         return json.dumps({
             'Records': [
@@ -117,7 +118,7 @@ class VPCDataGenerator(DataGenerator):
             <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/vpcflowlogs/<region>/<year>/<month>/<day>
 
         Returns:
-            str: Syntetic filename.
+            str: Synthetic filename.
         """
         now = datetime.now()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
@@ -132,7 +133,7 @@ class VPCDataGenerator(DataGenerator):
         """Return a sample of data according to the VPC format.
 
         Returns:
-            str: Syntetic data.
+            str: Synthetic data.
         """
         data = [
             [

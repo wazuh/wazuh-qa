@@ -101,4 +101,4 @@ def table_exists(table_name: str) -> bool:
             name NOT LIKE 'sqlite_%';
     """
 
-    return table_name in cursor.execute(query).fetchone()
+    return table_name in [result[0] for result in cursor.execute(query).fetchall()]

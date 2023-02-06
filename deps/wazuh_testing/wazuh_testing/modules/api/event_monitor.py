@@ -35,9 +35,10 @@ def check_api_event(file_monitor=None, callback='', error_message=None, update_p
         callback (str): log regex to check in the file
         error_message (str): error message to show in case of expected event does not occur
         update_position (boolean): filter configuration parameter to search in the file
-        timeout (str): timeout to check the event in the file
+        timeout (int): timeout to check the event in the file
         prefix (str): log pattern regex
         accum_results (int): Accumulation of matches.
+        file_to_monitor (str): File to be monitored.
     """
     file_monitor = FileMonitor(file_to_monitor) if file_monitor is None else file_monitor
     error_message = f"Could not find this event in {file_to_monitor}: {callback}" if error_message is None else \
