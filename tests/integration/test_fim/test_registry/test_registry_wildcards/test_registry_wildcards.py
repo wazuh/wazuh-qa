@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2022, Wazuh Inc.
+copyright: Copyright (C) 2015-2023, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -7,17 +7,16 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
 type: integration
 
-brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts
-       when these files are modified. Specifically, these tests will check if FIM events are
-       generated while the database is in 'full database alert' mode for reaching the limit
-       of entries to monitor set in the 'registry_limit'-'entries' tag.
-       The FIM capability is managed by the 'wazuh-syscheckd' daemon, which checks
-       configured files for changes to the checksums, permissions, and ownership.
+brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these files are
+       modified. Specifically, these tests will check the use of wildcards '*' or '?' when configuring windows
+       registries to be monitored. When using wildcards, they should be expanded and matching keys should be 
+       configured to be monitored. The tests will verify registry keys and values events are properly generated
+       when they are created, modified and deleted in registries configured through wildcards expansion.
 
 components:
     - fim
 
-suite: registry_file_limit
+suite: registry_wildcards
 
 targets:
     - agent
@@ -51,12 +50,12 @@ pytest_args:
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 
 tags:
-    - fim_registry_limit
+    - fim_registry_wildcards
 '''
 import os
 import time
 import pytest
-from wazuh_testing import LOG_FILE_PATH, T_10, T_30
+from wazuh_testing import LOG_FILE_PATH, T_10
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules import WINDOWS, TIER1
@@ -64,10 +63,8 @@ from wazuh_testing.modules.fim import (registry_parser, KEY_WOW64_64KEY, REG_SZ,
                                        WINDOWS_HKEY_LOCAL_MACHINE)
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim.event_monitor import (CB_FIM_WILDCARD_EXPANDING, callback_key_event, get_messages,
-                                                     check_registry_crud_event)
-from wazuh_testing.modules.fim.utils import (create_values_content, registry_value_create,
-                                             registry_value_update, registry_value_delete, create_registry,
-                                             modify_registry_value, delete_registry)
+                                                     check_registry_crud_event, callback_value_event)
+from wazuh_testing.modules.fim.utils import (create_registry,modify_registry_value, delete_registry, delete_registry_value)
 
 # Marks
 pytestmark = [WINDOWS, TIER1]
@@ -156,18 +153,18 @@ def test_registry_key_wildcards(configuration, metadata, set_wazuh_configuration
 
     # Create a new key inside monitored key and check it is detected
     reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
-    event = check_registry_crud_event(callback=callback_key_event, path=path, type='added', timeout=T_10)
-    assert event is not None, 'Did not find the expected "registry_key added" event'
+    event_added = check_registry_crud_event(callback=callback_key_event, path=path, type='added', timeout=T_10, arch='x64')
+    assert event_added is not None, 'Did not find the expected "registry_key added" event'
 
     # Add new value in the key and detect the modification of created monitored key is detected
     modify_registry_value(reg_handle, value_name, REG_SZ, 'added')
-    event = check_registry_crud_event(callback=callback_key_event, path=path, type='modified', timeout=T_10)
-    assert event is not None, 'Did not find the expected "registry_key modified" event'
+    event_modified = check_registry_crud_event(callback=callback_key_event, path=path, type='modified', timeout=T_10, arch='x64')
+    assert event_modified is not None, 'Did not find the expected "registry_key modified" event'
 
     # Delete the created key and check it's deletion is detected
     delete_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
-    event = check_registry_crud_event(callback=callback_key_event, path=path, type='deleted', timeout=T_10)
-    assert event is not None, 'Did not find the expected "registry_key deleted" event'
+    event_deleted = check_registry_crud_event(callback=callback_key_event, path=path, type='deleted', timeout=T_10, arch='x64')
+    assert event_deleted is not None, 'Did not find the expected "registry_key deleted" event'
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
@@ -217,28 +214,29 @@ def test_registry_value_wildcards(configuration, metadata, set_wazuh_configurati
     tags:
         - scheduled
     '''
-    values = create_values_content(value_name, 10)
-    scan_delay = metadata['interval']
 
     monitored_keys = get_messages(generate_monitoring_callback(CB_FIM_WILDCARD_EXPANDING))
     assert monitored_keys != [], f"Did not receive expected '{CB_FIM_WILDCARD_EXPANDING}' events"
+
     subkey = monitored_keys[0].replace(f"{WINDOWS_HKEY_LOCAL_MACHINE}\\", "")
     subkey = subkey+f"\\{key_name}"
+    path = monitored_keys[0] + f"\\{key_name}"
 
-    # Create custom key
-    create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
-    
-    # Create the value inside the key
-    registry_value_create(WINDOWS_HKEY_LOCAL_MACHINE, subkey, wazuh_log_monitor, arch=KEY_WOW64_64KEY,
-                          value_list=values, wait_for_scan=True, scan_delay=scan_delay, min_timeout=T_30,
-                          triggers_event=True)
-    # Modify the value
-    registry_value_update(WINDOWS_HKEY_LOCAL_MACHINE, subkey, wazuh_log_monitor, arch=KEY_WOW64_64KEY,
-                          value_list=values, wait_for_scan=True, scan_delay=scan_delay, min_timeout=T_30,
-                          triggers_event=True)
-    # Delete the value created to clean up enviroment
-    registry_value_delete(WINDOWS_HKEY_LOCAL_MACHINE, subkey, wazuh_log_monitor, arch=KEY_WOW64_64KEY,
-                          value_list=values, wait_for_scan=True, scan_delay=scan_delay, min_timeout=T_30,
-                          triggers_event=True)
-    # Delete key to clean enviroment
+    # Create custom key and custom value 
+    reg_handle =  create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
+    modify_registry_value(reg_handle, value_name, REG_SZ, 'added')
+    event_added = check_registry_crud_event(callback=callback_value_event, path=path, type='added', timeout=T_10, arch='x64')
+    assert event_added is not None, 'Did not find the expected "registry_value added" event'
+
+    # Add new value in the key and detect the modification of created monitored key is detected
+    modify_registry_value(reg_handle, value_name, REG_SZ, 'modified')
+    event_modified = check_registry_crud_event(callback=callback_value_event, path=path, type='modified', timeout=T_10, arch='x64')
+    assert event_modified is not None, 'Did not find the expected "registry_value modified" event'
+
+    # Delete the created key and check it's deletion is detected
+    delete_registry_value(reg_handle, value_name)
+    event_deleted = check_registry_crud_event(callback=callback_value_event, path=path, type='deleted', timeout=T_10, arch='x64')
+    assert event_deleted is not None, 'Did not find the expected "registry_value deleted" event'
+
+    # Delete key to clean envirmoent
     delete_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
