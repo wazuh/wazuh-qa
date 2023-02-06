@@ -113,7 +113,6 @@ def test_agent_groups_create_remove_group(clean_environment):
     sleep(time_to_sync)
     for host in test_infra_managers:
         created_group = execute_wdb_query(f"global '{queries[0]}'", host, host_manager)
-        print(created_group)
         assert created_group == '[]'
 
     # Check whether the deletion messages are present.
