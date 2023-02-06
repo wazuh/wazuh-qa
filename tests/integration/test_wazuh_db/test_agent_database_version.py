@@ -6,7 +6,7 @@ from wazuh_testing.tools import agent_simulator as ag
 pytestmark = [TIER0, LINUX, SERVER]
 
 # Variables
-expected_database_version = '10'
+expected_database_version = '11'
 
 
 # Tests
@@ -24,7 +24,7 @@ def test_agent_database_version(restart_wazuh_daemon):
             - Check that the manager database version is the expected one.
             - Check that the agent database version is the expected one.
 
-    wazuh_min_version: 4.4.0
+    wazuh_min_version: 4.6.0
 
     parameters:
         - restart_wazuh_daemon:
@@ -35,7 +35,7 @@ def test_agent_database_version(restart_wazuh_daemon):
         - Verify that database version is the expected one.
 
     expected_output:
-        - Database version: 10
+        - Database version: 11
 
     tags:
         - wazuh_db
