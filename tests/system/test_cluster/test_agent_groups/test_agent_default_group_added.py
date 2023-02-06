@@ -65,12 +65,8 @@ timeout = 25
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
-@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("agent_target", test_infra_managers)
-def test_agent_default_group_added(agent_target, clean_environment, test_infra_managers,
-                                   test_infra_agents, host_manager):
+def test_agent_default_group_added(agent_target, clean_environment):
     '''
     description: Check agent enrollment process and default group assignment works as expected in a cluster enviroment.
     An agent pointing to a master/worker node is registered using cli tool, and it gets assigned the default group
@@ -83,15 +79,6 @@ def test_agent_default_group_added(agent_target, clean_environment, test_infra_m
         - clean_enviroment:
             type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
-        - test_infra_managers
-            type: List
-            brief: List of manager hosts in enviroment.
-        - test_infra_managers
-            type: List
-            brief: List of agent hosts in enviroment.
-        - host_manager
-            type: HostManager object
-            brief: Handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering the agent appears as never_connected in all nodes.

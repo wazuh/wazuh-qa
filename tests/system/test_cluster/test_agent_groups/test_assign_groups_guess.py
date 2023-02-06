@@ -71,13 +71,9 @@ timeout = 60
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
-@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("status_guess_agent_group", ['0', '1'])
 @pytest.mark.parametrize("agent_target", ['wazuh-master', 'wazuh-worker1'])
-def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_environment, test_infra_managers,
-                                 test_infra_agents, host_manager):
+def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_environment):
     '''
     description: Check that when an agent registered in the manager and assigned to group is removed, performs a
                  guessing operation and determinates the groups to with the agent was assigned.

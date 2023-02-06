@@ -19,7 +19,10 @@ report_files = []
 
 # Clean cluster logs
 @pytest.fixture(scope='function')
-def clean_environment(test_infra_agents, test_infra_managers, host_manager):
+def clean_environment(request):
+    test_infra_agents = getattr(request.module, 'test_infra_agents')
+    test_infra_managers = getattr(request.module, 'test_infra_managers')
+    host_manager = getattr(request.module, 'host_manager')
 
     clean_cluster_logs(test_infra_agents + test_infra_managers, host_manager)
 

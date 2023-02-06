@@ -63,11 +63,8 @@ id_group = 'group_test'
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
-@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("agent_target", ['wazuh-master', 'wazuh-worker1'])
-def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_managers, test_infra_agents, host_manager):
+def test_assign_agent_to_a_group(agent_target, clean_environment):
     '''
     description: Check that when an agent with status never_connected, pointing to a master/worker node is
                  registered using agent-auth with a group the change is sync with the cluster.
@@ -79,15 +76,6 @@ def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_man
         - clean_enviroment:
             type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
-        - test_infra_managers
-            type: List
-            brief: List of manager hosts in enviroment.
-        - test_infra_agents
-            type: List
-            brief: List of agent hosts in enviroment.
-        - host_manager
-            type: HostManager object
-            brief: Handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering the agent appears as never_connected in all nodes.
