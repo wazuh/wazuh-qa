@@ -2,6 +2,7 @@ import re
 from typing import Callable
 
 from .cli_utils import analyze_command_output
+from .constants import CLOUD_TRAIL_TYPE, VPC_FLOW_TYPE
 
 PARSER_ERROR = r'.*wm_aws_read\(\): ERROR:.*'
 MODULE_ERROR = r'.*wm_aws_run_s3\(\): ERROR: .*'
@@ -62,6 +63,11 @@ def callback_detect_event_processed(line):
         return line
 
 
+def callback_detect_event_processed_or_skipped(pattern):
+    pattern_regex = re.compile(pattern)
+    return lambda line: pattern_regex.match(line) or callback_detect_event_processed(line)
+
+
 def callback_event_sent_to_analysisd(line):
     if line.startswith(AWS_EVENT_HEADER):
         return line
@@ -76,8 +82,14 @@ def check_processed_logs_from_output(command_output: str, expected_results: int 
     )
 
 
-def check_non_processed_logs_from_output(command_output: str, expected_results: int = 1):
-    pattern = r'.*DEBUG: \+\+\+ No logs to process in bucket: '
+def check_non_processed_logs_from_output(command_output: str, bucket_type: str, expected_results: int = 1):
+
+    if bucket_type == CLOUD_TRAIL_TYPE:
+        pattern = r'.*DEBUG: \+\+\+ No logs to process in bucket: '
+    elif bucket_type == VPC_FLOW_TYPE:
+        pattern = r'.*DEBUG: \+\+\+ No logs to process for .*'
+    else:
+        pattern = ''
 
     analyze_command_output(
         command_output,
