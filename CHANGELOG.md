@@ -2,11 +2,6 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.6.0] - Development (unreleased)
-
-Wazuh commit: TBD \
-Release report: TBD
-
 ## [4.5.0] - Development (unreleased)
 
 Wazuh commit: TBD \
@@ -16,7 +11,7 @@ Release report: TBD
 
 - Add tests with new options to avoid FIM synchronization overlapping. ([#3318](https://github.com/wazuh/wazuh-qa/pull/3318)) \- (Framework + tests)
 - Add Windows System folders FIM monitoring tests ([#3720](https://github.com/wazuh/wazuh-qa/pull/3720)) \- (Tests)
-- Add 'test_whodata_policy_changes' tests ([#3627](https://github.com/wazuh/wazuh-qa/pull/3627)) \- (Framework + Tests)
+- Add 'test_whodata_policy_changes' tests ([#3627](https://github.com/wazuh/wazuh-qa/pull/3627)) \- (Framework + Tests) 
 - Add test to check if active-response netsh generates alerts when firewall is disabled. ([#3787](https://github.com/wazuh/wazuh-qa/pull/3787)) \- (Framework + Tests)
 - Add new tests for logcollector 'ignore' and 'restrict' options ([#3582](https://github.com/wazuh/wazuh-qa/pull/3582)) \- (Tests)
 - Add 'Force reconnect' feature to agent_simulator tool. ([#3111](https://github.com/wazuh/wazuh-qa/pull/3111)) \- (Tools)
