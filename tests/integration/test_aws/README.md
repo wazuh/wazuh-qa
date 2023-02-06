@@ -56,7 +56,8 @@ wazuh-qa/deps/wazuh_testing/wazuh_testing/modules/aws
 
 ## Configuration settings
 
-- credentials: Set the credentials at `$HOME/.aws/credentials` with the content:
+- **credentials**
+    Set the credentials at `$HOME/.aws/credentials` (being `HOME` the home directory of the user who runs the tests, more information [here](https://documentation.wazuh.com/current/amazon/services/prerequisites/credentials.html#profiles)) with the content:
 
 ```ini
 [qa]
