@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import global_parameters, T_20
 from wazuh_testing.modules.aws import event_monitor
 from wazuh_testing.modules.aws.db_utils import s3_db_exists
 from wazuh_testing.tools.configuration import (
@@ -128,10 +128,13 @@ def test_discard_regex(
     ).result()
 
     wazuh_log_monitor.start(
-        timeout=10,
-        callback=event_monitor.make_aws_callback(pattern),
-        error_message='The AWS module did not show correct message about discard regex',
-        accum_results=skipped_logs
+        timeout=T_20,
+        callback=event_monitor.callback_detect_event_processed_or_skipped(pattern),
+        error_message=(
+            'The AWS module did not show correct message about discard regex or ',
+            'did not process the expected amout of logs'
+        ),
+        accum_results=found_logs + skipped_logs
     ).result()
 
     assert s3_db_exists()
