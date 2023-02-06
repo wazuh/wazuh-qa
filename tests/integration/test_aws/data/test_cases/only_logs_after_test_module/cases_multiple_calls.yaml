@@ -4,3 +4,10 @@
   metadata:
     bucket_type: cloudtrail
     bucket_name: wazuh-cloudtrail-integration-tests
+
+- name: vpc_only_logs_after_multiple_calls
+  description: VPC only_logs_after multiple calls configurations
+  configuration_parameters:
+  metadata:
+    bucket_type: vpcflow
+    bucket_name: wazuh-vpcflow-integration-tests

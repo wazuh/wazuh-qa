@@ -31,7 +31,7 @@ def upload_file(bucket_type: str, bucket_name: str) -> str:
 
     # Upload the file
     try:
-        obj.put(Body=json.dumps(data).encode())
+        obj.put(Body=data.encode())
     except ClientError as e:
         logger.error(e)
         filename = ''

@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import T_10, T_20, global_parameters
 from wazuh_testing.modules.aws import event_monitor
 from wazuh_testing.modules.aws.constants import RANDOM_ACCOUNT_ID
 from wazuh_testing.modules.aws.db_utils import (
@@ -132,7 +132,7 @@ def test_regions(
 
     if expected_results:
         wazuh_log_monitor.start(
-            timeout=global_parameters.default_timeout,
+            timeout=T_20,
             callback=event_monitor.callback_detect_event_processed,
             error_message='The AWS module did not process the expected number of events',
             accum_results=expected_results

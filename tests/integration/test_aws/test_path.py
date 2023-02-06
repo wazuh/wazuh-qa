@@ -126,7 +126,7 @@ def test_path(
 
     if expected_results:
         wazuh_log_monitor.start(
-            timeout=global_parameters.default_timeout,
+            timeout=T_10,
             callback=event_monitor.callback_detect_event_processed,
             error_message='The AWS module did not process the expected number of events',
         ).result()
