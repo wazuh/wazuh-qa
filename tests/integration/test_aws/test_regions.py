@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from wazuh_testing import T_20, global_parameters
+from wazuh_testing import T_10, T_20, global_parameters
 from wazuh_testing.modules.aws import event_monitor
 from wazuh_testing.modules.aws.constants import RANDOM_ACCOUNT_ID
 from wazuh_testing.modules.aws.db_utils import (

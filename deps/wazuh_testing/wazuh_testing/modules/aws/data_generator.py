@@ -234,9 +234,9 @@ class ALBDataGenerator(DataGenerator):
             <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
 
         Returns:
-            str: Syntetic filename.
+            str: Synthetic filename.
         """
-        now = datetime.now()
+        now = datetime.utcnow()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = (
             f'{self.BASE_FILE_NAME}_app.ALB-qatests_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}_'
@@ -249,9 +249,9 @@ class ALBDataGenerator(DataGenerator):
         """Return a sample of data according to the ALB format.
 
         Returns:
-            str: Syntetic data.
+            str: Synthetic data.
         """
-        now = datetime.now()
+        now = datetime.utcnow()
         data = []
 
         for _ in range(5):
@@ -306,9 +306,9 @@ class CLBDataGenerator(DataGenerator):
             <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
 
         Returns:
-            str: Syntetic filename.
+            str: Synthetic filename.
         """
-        now = datetime.now()
+        now = datetime.utcnow()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = (
             f'{self.BASE_FILE_NAME}qatests-APIClassi_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}_'
@@ -321,9 +321,9 @@ class CLBDataGenerator(DataGenerator):
         """Return a sample of data according to the CLB format.
 
         Returns:
-            str: Syntetic data.
+            str: Synthetic data.
         """
-        now = datetime.now()
+        now = datetime.utcnow()
         data = []
         for _ in range(5):
             data.append(
@@ -362,9 +362,9 @@ class NLBDataGenerator(DataGenerator):
             <prefix>/AWSLogs/<suffix>/<organization_id>/<account_id>/elasticloadbalancing/<region>/<year>/<month>/<day>
 
         Returns:
-            str: Syntetic filename.
+            str: Synthetic filename.
         """
-        now = datetime.now()
+        now = datetime.utcnow()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = (
             f'{self.BASE_FILE_NAME}net.qatests_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}_'
@@ -377,9 +377,9 @@ class NLBDataGenerator(DataGenerator):
         """Return a sample of data according to the NLB format.
 
         Returns:
-            str: Syntetic data.
+            str: Synthetic data.
         """
-        now = datetime.now()
+        now = datetime.utcnow()
         data = []
         for _ in range(5):
             data.append(
