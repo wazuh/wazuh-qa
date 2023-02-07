@@ -26,7 +26,7 @@
   test_case:
   -
     input: '{"version": 1, "origin": {"name": "wazuh-logtest", "module": "wazuh-logtest"}, "command": "log_processing", "parameters": {"location":"master->/var/log/syslog", "log_format": "syslog", "event": "2015-04-16 21:51:02,805 linux-agent sshd[29205]: Invalid user blimey from 18.18.18.18 port 48928", "token": "21218e6b"}}'
-    output: '{"program_name":"sshd","timestamp":"2015-04-16 21:51:02,80"}'
+    output: '{"program_name":"sshd","timestamp":"2015-04-16 21:51:02,805"}'
 -
   name: "Syslog date format for xferlog date format"
   description: "Check valid input"
