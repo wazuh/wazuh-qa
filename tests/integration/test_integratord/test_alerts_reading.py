@@ -55,15 +55,6 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.integratord import event_monitor as evm
 
 
-# Marks
-pytestmark = [pytest.mark.server]
-
-# Reference paths
-TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration')
-TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
-
-
 def replace_webhook_url(ids, configurations):
     '''Replace the Webhook URL in each test case configuration parameters.
 
@@ -72,7 +63,7 @@ def replace_webhook_url(ids, configurations):
         configurations (list): List of test's configuration parameters.
 
     Returns:
-        configurations (list): List of 
+        configurations (list): List of configurations.
     '''
     for i in range(0, len(ids)):
         configurations[i]['WEBHOOK_URL'] = global_parameters.slack_webhook_url
@@ -80,8 +71,16 @@ def replace_webhook_url(ids, configurations):
     return configurations
 
 
+# Marks
+pytestmark = [pytest.mark.server]
+
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
+
 # Configuration and test cases paths
-configurations_template = os.path.join(CONFIGURATIONS_PATH, 'configuration_analysisd_integration.yaml')
+configurations_template = os.path.join(CONFIGURATIONS_PATH, 'configuration_alerts_reading.yaml')
 t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_change_inode_alert.yaml')
 t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_valid_json_alerts.yaml')
 t3_cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_invalid_json_alerts.yaml')
@@ -174,7 +173,7 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     expected_output:
         - r'.+wazuh-integratord.*DEBUG: jqueue_next.*Alert file inode changed.*'
         - r'.+wazuh-integratord.*Processing alert.*'
-        - r'.+wazuh-integratord.*<Response \[200\]>'
+        - r'.+wazuh-integratord.*<Response [200]>'
     '''
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
     command = f"echo '{metadata['alert_sample']}' >> {ALERT_FILE_PATH}"

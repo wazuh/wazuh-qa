@@ -31,5 +31,5 @@
 
     - section: rootcheck
       elements:
-      - disabled:
+        - disabled:
           value: 'yes'
