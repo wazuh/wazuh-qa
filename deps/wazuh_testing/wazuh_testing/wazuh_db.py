@@ -2,6 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import functools
+import hashlib
 import json
 import logging
 import socket
@@ -230,3 +231,18 @@ def remove_agent(agent_id):
     """
     data = query_wdb(f"global delete-agent {agent_id}").split()
     assert data[0] == 'ok', f"Unable to remove agent {agent_id} - {data[1]}"
+
+
+def calculate_global_hash():
+    """Function that calculates and retrieves the actual global groups hash.
+
+    Returns:
+        str: Actual global groups hash.
+    """
+    GET_GROUP_HASH = '''global sql SELECT group_hash FROM agent WHERE
+                     id > 0 AND group_hash IS NOT NULL ORDER BY id'''
+
+    result = query_wdb(GET_GROUP_HASH)
+    group_hashes = [item['group_hash'] for item in result]
+
+    return hashlib.sha1("".join(group_hashes).encode()).hexdigest()

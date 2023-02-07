@@ -41,16 +41,16 @@ tags:
     - wazuh_db
 '''
 import os
-import yaml
 import time
 import pytest
 import json
 
 from wazuh_testing.tools import WAZUH_PATH
-from wazuh_testing.wazuh_db import (query_wdb, insert_agent_into_group, clean_agents_from_db,
-                                    clean_groups_from_db, clean_belongs)
+from wazuh_testing.wazuh_db import query_wdb, insert_agent_into_group, clean_agents_from_db
+from wazuh_testing.wazuh_db import clean_groups_from_db, clean_belongs, calculate_global_hash
 from wazuh_testing.modules import TIER0, SERVER, LINUX
 from wazuh_testing.tools.file import get_list_of_content_yml
+
 
 # Marks
 pytestmark = [LINUX, TIER0, SERVER]
@@ -123,6 +123,11 @@ def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_mod
     if 'pre_input' in case_data:
         for command in case_data['pre_input']:
             query_wdb(command)
+
+    # Check if it requires the global hash.
+    if '[GLOBAL_HASH]' in output:
+        global_hash = calculate_global_hash()
+        output = output.replace('[GLOBAL_HASH]', global_hash)
 
     time.sleep(1)
     response = query_wdb(case_data["input"])
