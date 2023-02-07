@@ -109,7 +109,7 @@ def get_configuration(request):
     ("myother_restricted", "wb", b"", True, {'valid_regex_3'}),
     ('fileinfolder', 'w', "Sample content", True,
      {f'valid_regex_incomplete_{"win" if sys.platform == "win32" else "unix"}'}),
-    ('fileinfolder1', 'wb', b"Sample content", True, 
+    ('fileinfolder1', 'wb', b"Sample content", True,
      {f'valid_regex_incomplete_{"win" if sys.platform == "win32" else "unix"}'}),
     ('testing_regex', 'w', "", False, {f'valid_regex_incomplete_{"win" if sys.platform == "win32" else "unix"}'}),
 ])
