@@ -32,4 +32,4 @@
     - section: rootcheck
       elements:
         - disabled:
-          value: 'yes'
+            value: 'yes'
