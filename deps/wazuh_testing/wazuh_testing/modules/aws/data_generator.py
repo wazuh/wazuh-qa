@@ -424,9 +424,9 @@ class KMSDataGenerator(DataGenerator):
             <prefix>/<year>/<month>/<day>
 
         Returns:
-            str: Syntetic filename.
+            str: Synthetic filename.
         """
-        now = datetime.now()
+        now = datetime.utcnow()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = f"{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}_{str(uuid4())}{cons.JSON_EXT}"
 
@@ -436,7 +436,7 @@ class KMSDataGenerator(DataGenerator):
         """Returns a sample of data according to the KMS format.
 
         Returns:
-            str: Syntetic data.
+            str: Synthetic data.
         """
         return json.dumps(
             {
