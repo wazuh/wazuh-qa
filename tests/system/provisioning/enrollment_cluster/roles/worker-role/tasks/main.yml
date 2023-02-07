@@ -84,6 +84,7 @@
     block: |
       authd.debug=2
       wazuh_clusterd.debug=2
+      remoted.debug=2
 
 - name: Restart Wazuh
   command: /var/ossec/bin/wazuh-control restart

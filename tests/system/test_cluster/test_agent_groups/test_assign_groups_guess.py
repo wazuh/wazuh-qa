@@ -49,6 +49,8 @@ from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups,
                     check_keys_file, delete_group_of_agents, remove_cluster_agents,
                     assign_agent_to_new_group, restart_cluster)
 from wazuh_testing.tools.system import HostManager
+from wazuh_testing.tools.file import replace_regex_in_file
+from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools import WAZUH_PATH
 
 
@@ -59,6 +61,9 @@ pytestmark = [pytest.mark.cluster]
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'enrollment_cluster', 'inventory.yml')
+data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+master_messages_path = os.path.join(data_path, 'guess_group_messages_master.yaml')
+worker_messages_path = os.path.join(data_path, 'guess_group_messages_worker.yaml')
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
@@ -67,7 +72,7 @@ tmp_path = os.path.join(local_path, 'tmp')
 # Variables
 remoted_guess_agent_groups = 'remoted.guess_agent_group='
 # this timeout is temporality, this test will be update
-timeout = 60
+timeout = 20
 
 
 # Tests
@@ -88,15 +93,6 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
         - clean_enviroment:
             type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
-        - test_infra_managers
-            type: List
-            brief: List of manager hosts in enviroment.
-        - test_infra_agents
-            type: List
-            brief: List of agent hosts in enviroment.
-        - host_manager
-            type: HostManager object
-            brief: Handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering the agent appears as never_connected in all nodes.
@@ -154,8 +150,19 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
         # Check if remoted.guess_agent_group is disabled
         if(int(status_guess_agent_group) == 0):
             group_id = 'default'
+        # Run the callback checks for the ossec.log
+        if(agent_target == 'wazuh-master'):
+            messages_path = master_messages_path
+        else:
+            messages_path = worker_messages_path
+
+        replace_regex_in_file(['AGENT_ID', 'GROUP_ID'], [agent_id, group_id], messages_path)
+        HostMonitor(inventory_path=inventory_path,
+                    messages_path=messages_path,
+                    tmp_path=tmp_path).run(update_position=True)
         check_agent_groups(agent_id, group_id, test_infra_managers, host_manager)
 
     finally:
         # Delete group of agent
         delete_group_of_agents(test_infra_managers[0], group_id, host_manager)
+        replace_regex_in_file([agent_id, group_id], ['AGENT_ID', 'GROUP_ID'], messages_path)
