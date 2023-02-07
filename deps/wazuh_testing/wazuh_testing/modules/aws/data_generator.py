@@ -50,7 +50,7 @@ class CloudTrailDataGenerator(DataGenerator):
         Returns:
             str: Synthetic filename.
         """
-        now = datetime.now()
+        now = datetime.utcnow()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = f"{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}{cons.JSON_EXT}"
 
@@ -70,7 +70,7 @@ class CloudTrailDataGenerator(DataGenerator):
                         'type': 'AWSService',
                         'invokedBy': 'ec2.amazonaws.com'
                     },
-                    'eventTime': datetime.now().strftime(cons.EVENT_TIME_FORMAT),
+                    'eventTime': datetime.utcnow().strftime(cons.EVENT_TIME_FORMAT),
                     'eventSource': 'sts.amazonaws.com',
                     'eventName': 'AssumeRole',
                     'awsRegion': cons.US_EAST_1_REGION,
@@ -120,7 +120,7 @@ class VPCDataGenerator(DataGenerator):
         Returns:
             str: Synthetic filename.
         """
-        now = datetime.now()
+        now = datetime.utcnow()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = (
             f'{self.BASE_FILE_NAME}{cons.FLOW_LOG_ID}_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}'
