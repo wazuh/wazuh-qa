@@ -933,7 +933,7 @@ def create_file_structure_function(get_files_list):
 
 
 @pytest.fixture(scope='module')
-def daemons_handler(get_configuration, request):
+def daemons_handler(request):
     """Handler of Wazuh daemons.
 
     It uses `daemons_handler_configuration` of each module in order to configure the behavior of the fixture.
@@ -945,7 +945,6 @@ def daemons_handler(get_configuration, request):
         in order to use this fixture along with invalid configuration. Default `False`
 
     Args:
-        get_configuration (fixture): Gets the current configuration of the test.
         request (fixture): Provide information on the executing test function.
     """
     daemons = []
@@ -1001,6 +1000,9 @@ def daemons_handler(get_configuration, request):
         for daemon in daemons:
             logger.debug(f"Stopping {daemon}")
             control_service('stop', daemon=daemon)
+
+
+daemons_handler_function = pytest.fixture(daemons_handler.__wrapped__, scope='function')
 
 
 @pytest.fixture(scope='function')
