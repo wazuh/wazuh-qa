@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: https://github.com/wazuh/wazuh/commit/89530f11c9e592cd2e551432209b0080f08ff8e5 \
 Release report: https://github.com/wazuh/wazuh/issues/15372
 
+### Changed
+
+- Refactor `wazuh-integratord` integration tests - Backport to 4.3 ([#3915](https://github.com/wazuh/wazuh-qa/pull/3915)) \- (Framework + Tests)
+
 ## [4.3.9] - 13-10-2022
 
 Wazuh commit: https://github.com/wazuh/wazuh-qa/commit/8af0a5083bd69765f4d7878df9d3b785bb239723 \
