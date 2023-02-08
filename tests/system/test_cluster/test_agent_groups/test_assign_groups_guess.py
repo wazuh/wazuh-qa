@@ -148,13 +148,10 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
         time.sleep(timeout)
 
         # Check if remoted.guess_agent_group is disabled
-        if(int(status_guess_agent_group) == 0):
-            group_id = 'default'
+        group_id = 'default' if int(status_guess_agent_group) == 0 else group_id
+
         # Run the callback checks for the ossec.log
-        if(agent_target == 'wazuh-master'):
-            messages_path = master_messages_path
-        else:
-            messages_path = worker_messages_path
+        messages_path = master_messages_path if agent_target == 'wazuh-master' else worker_messages_path
 
         replace_regex_in_file(['AGENT_ID', 'GROUP_ID'], [agent_id, group_id], messages_path)
         HostMonitor(inventory_path=inventory_path,

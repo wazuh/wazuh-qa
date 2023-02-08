@@ -1,9 +1,8 @@
----
-- name: "Check and update debian repositories"
+- name: Check and update debian repositories
   shell:
     cmd: apt-get update --allow-releaseinfo-change
 
-- name: "Installing dependencies using apt"
+- name: Installing dependencies using apt
   apt:
     pkg:
       - git
@@ -17,14 +16,14 @@
       - autoconf
       - libtool
       - libssl-dev
-    force_apt_get: yes
+    force_apt_get: true
     state: present
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 3600
 
-- name: "Clone wazuh repository"
+- name: Clone wazuh repository
   git:
-    repo: "https://github.com/wazuh/wazuh"
+    repo: https://github.com/wazuh/wazuh
     dest: /wazuh
     version: "{{ wazuh_branch }}"
 
@@ -33,20 +32,20 @@
     chdir: /wazuh
     creates: /var/ossec
   environment:
-    USER_LANGUAGE: "en"
-    USER_NO_STOP: "y"
-    USER_INSTALL_TYPE: "server"
-    USER_DIR: "/var/ossec"
-    USER_ENABLE_EMAIL: "n"
-    USER_ENABLE_SYSCHECK: "n"
-    USER_ENABLE_ROOTCHECK: "n"
-    USER_ENABLE_OPENSCAP: "n"
-    USER_WHITE_LIST: "n"
-    USER_ENABLE_SYSLOG: "y"
-    USER_ENABLE_AUTHD: "y"
-    USER_AUTO_START: "y"
-    USER_UPDATE: "n"
-  shell: "./install.sh"
+    USER_LANGUAGE: en
+    USER_NO_STOP: y
+    USER_INSTALL_TYPE: server
+    USER_DIR: /var/ossec
+    USER_ENABLE_EMAIL: n
+    USER_ENABLE_SYSCHECK: n
+    USER_ENABLE_ROOTCHECK: n
+    USER_ENABLE_OPENSCAP: n
+    USER_WHITE_LIST: n
+    USER_ENABLE_SYSLOG: y
+    USER_ENABLE_AUTHD: y
+    USER_AUTO_START: y
+    USER_UPDATE: n
+  shell: ./install.sh
 
 - name: Copy ossec.conf file
   copy:
@@ -59,16 +58,16 @@
 - name: Set cluster key
   lineinfile:
     path: /var/ossec/etc/ossec.conf
-    regexp: '<key>(KEY)</key>'
-    line: "<key>{{ cluster_key }}</key>"
-    backrefs: yes
+    regexp: <key>(KEY)</key>
+    line: <key>{{ cluster_key }}</key>
+    backrefs: true
 
 - name: Set Wazuh Master IP
   lineinfile:
     path: /var/ossec/etc/ossec.conf
-    regexp: '<node>(.*)</node>'
-    line: "<node>{{ master_hostname }}</node>"
-    backrefs: yes
+    regexp: <node>(.*)</node>
+    line: <node>{{ master_hostname }}</node>
+    backrefs: true
 
 - name: Stop Wazuh
   command: /var/ossec/bin/wazuh-control stop
