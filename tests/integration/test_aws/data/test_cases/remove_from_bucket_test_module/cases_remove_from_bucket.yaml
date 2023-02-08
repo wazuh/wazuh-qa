@@ -24,3 +24,30 @@
   metadata:
     bucket_type: config
     bucket_name: wazuh-config-integration-tests
+
+- name: alb_remove_from_bucket
+  description: ALB remove from bucket configurations
+  configuration_parameters:
+    BUCKET_TYPE: alb
+    BUCKET_NAME: wazuh-alb-integration-tests
+  metadata:
+    bucket_type: alb
+    bucket_name: wazuh-alb-integration-tests
+
+- name: clb_remove_from_bucket
+  description: CLB remove from bucket configurations
+  configuration_parameters:
+    BUCKET_TYPE: clb
+    BUCKET_NAME: wazuh-clb-integration-tests
+  metadata:
+    bucket_type: clb
+    bucket_name: wazuh-clb-integration-tests
+
+- name: nlb_remove_from_bucket
+  description: NLB remove from bucket configurations
+  configuration_parameters:
+    BUCKET_TYPE: nlb
+    BUCKET_NAME: wazuh-nlb-integration-tests
+  metadata:
+    bucket_type: nlb
+    bucket_name: wazuh-nlb-integration-tests
