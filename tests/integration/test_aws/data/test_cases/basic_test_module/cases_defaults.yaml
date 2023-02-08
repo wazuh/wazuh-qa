@@ -15,3 +15,12 @@
   metadata:
     bucket_type: vpcflow
     bucket_name: wazuh-vpcflow-integration-tests
+
+- name: config_defaults
+  description: Config default configurations
+  configuration_parameters:
+    BUCKET_TYPE: config
+    BUCKET_NAME: wazuh-config-integration-tests
+  metadata:
+    bucket_type: config
+    bucket_name: wazuh-config-integration-tests
