@@ -5,10 +5,6 @@
             value: syslog
         - location:
             value: LOCATION
-        - ignore:
-            value: REGEX_1
-        - ignore:
-            value: REGEX_2
 
     - section: sca
       elements:

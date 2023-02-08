@@ -7,38 +7,26 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
 type: integration
 
-brief: The 'wazuh-logcollector' daemon monitors configured files and commands for new log messages.
-       Specifically, these tests check the behavior of the restrict and ignore options, that allow
-       users to configure regex patterns that limit if a log will be sent to analysis or will be ignored.
-       The restrict causes any log that does not match the regex to be ignored, conversely, the 'ignore' option
-       causes logs that match the regex to be ignored and not be sent for analysis.
+brief: The 'wazuh-logcollector' daemon monitors configured files and commands for new log messages. Secifically, these
+       tests check the behavior of the location tag when it is configured using wildcards. They check that the file
+       detected and monitored correctly after wildcard expansion. They also check that when no file matching the regex
+       is found, a message is shown in debug mode.
 
 components:
     - logcollector
 
-suite: log_filter_options
+suite: location_wildcards
 
 targets:
     - agent
-    - manager
 
 daemons:
-    - wazuh-logcollector
+    - wazuh-agent
 
 os_platform:
-    - linux
     - windows
 
 os_version:
-    - Arch Linux
-    - Amazon Linux 2
-    - Amazon Linux 1
-    - CentOS 8
-    - CentOS 7
-    - Debian Buster
-    - Red Hat 8
-    - Ubuntu Focal
-    - Ubuntu Bionic
     - Windows 10
     - Windows Server 2019
     - Windows Server 2016
@@ -54,14 +42,15 @@ tags:
 '''
 import os
 import re
-import sys
 import pytest
+from wazuh_testing.modules import TIER1, WINDOWS
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.modules.logcollector import event_monitor as evm
 from wazuh_testing.modules import logcollector as lc
 
+pytestmark = [TIER1, WINDOWS]
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -69,31 +58,30 @@ CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Test configurations and cases data
-test_file = os.path.join(PREFIX, 'test')
+folder_path = os.path.join(PREFIX, 'testfolder', 'subfolder')
+test_file = os.path.join(folder_path, 'test')
 
 # --------------------------------TEST_LOCATION_WILDCARDS-------------------------------------------
 configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_location_wildcards.yaml')
 cases_path = os.path.join(TEST_CASES_PATH, 'cases_location_wildcards.yaml')
 
 configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
-for count, value in enumerate(configuration_parameters):
-    configuration_parameters[count]['LOCATION'] = test_file
 configurations = load_configuration_template(configurations_path, configuration_parameters,
                                              configuration_metadata)
 
 prefix = lc.LOG_COLLECTOR_PREFIX
 local_internal_options = lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS
-
+log_sample = 'Nov 10 12:19:04 localhost sshd: test log'
 
 # Tests
 @pytest.mark.tier(level=1)
-@pytest.mark.parametrize('new_file_path,', [test_file], ids=[''])
+@pytest.mark.parametrize('folder_path, file_list', [(folder_path, ['test'])], ids=[''])
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
-def test_location_wildcards(configuration, metadata, new_file_path, create_file, truncate_monitored_files,
-                               set_wazuh_configuration, configure_local_internal_options_function,
-                               restart_wazuh_function):
+def test_location_wildcards(configuration, metadata, folder_path, file_list, create_files_in_folder,
+                            truncate_monitored_files, set_wazuh_configuration,
+                            configure_local_internal_options_function, restart_wazuh_function):
     '''
-    description: Check if logcollector behavior when two ignore tags are added.
+    description: Check logcollector expands wildcards and monitors target file properly.
 
     test_phases:
         - Setup:
@@ -102,6 +90,7 @@ def test_location_wildcards(configuration, metadata, new_file_path, create_file,
            - Set ossec.conf and local_internal_options.conf
            - Restart the wazuh daemon
         - Test:
+           - Check if the wildcards expanded and matches file
            - Insert the log message.
            - Check expected response.
         - Teardown:
@@ -120,12 +109,15 @@ def test_location_wildcards(configuration, metadata, new_file_path, create_file,
         - metadata:
             type: dict
             brief: Wazuh configuration metadata
-        - new_file_path:
+        - folder_path:
             type: str
-            brief: path for the log file to be created and deleted after the test.
-        - create_file:
+            brief: path for folder to be created and monitored
+        - files_list:
+            type: List
+            brief: list of filenames to be created inside folder_path
+        - create_files_in_folder:
             type: fixture
-            brief: Create an empty file for logging
+            brief: Create a list of files file inside target folder
         - truncate_monitored_files:
             type: fixture
             brief: Truncate all the log files and json alerts files before and after the test execution.
@@ -140,39 +132,35 @@ def test_location_wildcards(configuration, metadata, new_file_path, create_file,
             brief: Restart wazuh.
 
     assertions:
+        - Check that when configuring location with wildcards it expands and matches file
         - Check that logcollector is analyzing the log file.
         - Check that logs are ignored when they match with configured regex
 
     input_description:
-        - The `configuration_ignore_multiple_regex.yaml` file provides the module configuration for this test.
-        - The `cases_ignore_multiple_regex` file provides the test cases.
+        - The `configuration_location_wildcards.yaml` file provides the module configuration for this test.
+        - The `cases_location_wildcards` file provides the test cases.
 
     expected_output:
-        - r".*wazuh-logcollector.*Analizing file: '{file}'.*"
-        - r".*wazuh-logcollector.*DEBUG: Reading syslog '{message}'.*"
-        - r".*wazuh-logcollector.*DEBUG: Ignoring the log line '{message}' due to {tag} config: '{regex}'"
+        - r".*wazuh-agent.*expand_win32_wildcards.*DEBUG: No file/folder that matches {regex}"
+        - r".*wazuh-agent.*check_pattern_expand.*New file that matches the '{file_path}' pattern: '(.*)'"
+        - r".*wazuh-agent.*Analizing file: '{file}'.*"
+        - r".*wazuh-agent.*DEBUG: Reading syslog '{message}'.*"
     '''
-    log = metadata['log_sample']
-    command = f"echo {log}>> {test_file}"
+    command = f"echo {log_sample}>> {test_file}"
+    file = re.escape(test_file)
 
-    file = re.escape(test_file) if sys.platform == 'win32' else test_file
-
-    # Check log file is being analized
-    evm.check_analyzing_file(file=file, prefix=prefix)
-    # Insert log
-    run_local_command_returning_output(command)
-
-    # Check the log is read from the monitored file
-    evm.check_syslog_message(message=log, prefix=prefix)
-"""
-    # Check response
-    if 'regex1' in metadata['matches']:
-        evm.check_ignore_restrict_message(message=log, regex=metadata['regex1'], tag='ignore', prefix=prefix)
-        evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['regex2'], tag='ignore', prefix=prefix)
-    elif metadata['matches'] == 'regex2':
-        evm.check_ignore_restrict_message(message=log, regex=metadata['regex2'], tag='ignore', prefix=prefix)
-        evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['regex1'], tag='ignore', prefix=prefix)
+    if not metadata['matches']:
+        # If it does not match, check that mesage shows no matching file was found
+        evm.check_wildcard_pattern_no_match(re.escape(metadata['location']), prefix)
     else:
-        evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['regex1'], tag='ignore', prefix=prefix)
-        evm.check_ignore_restrict_message_not_found(message=log, regex=metadata['regex2'], tag='ignore', prefix=prefix)
-"""
+        # Check that pattern is expanded to configured file
+        evm.check_wildcard_pattern_expanded(file, prefix)
+
+        # Check log file is being analized
+        evm.check_analyzing_file(file=file, prefix=prefix)
+
+        # Insert log
+        run_local_command_returning_output(command)
+
+        # Check the log is read from the monitored file
+        evm.check_syslog_message(message=log_sample, prefix=prefix)

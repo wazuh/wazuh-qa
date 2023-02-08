@@ -1,43 +1,42 @@
-- name: Log match - Two Restrict tags - Match first tag
+- name: Test single asterisk wildcard
   description: Test two Restrict tags, with matching first tag
   configuration_parameters:
-    REGEX_1: .+regex1
-    REGEX_2: .+regex2
+    LOCATION: c:\testfolder\subfolder\te*
   metadata:
-    regex1: .+regex1
-    regex2: .+regex2
-    log_sample: "Nov 10 12:19:04 localhost sshd: log matches regex1"
-    matches: regex1
+    matches: true
 
-- name: Log match - Two Restrict tags - Match both tags
-  description: Test twoRestrict tags, with log matching both tags
-  configuration_parameters:
-    REGEX_1: .+regex1
-    REGEX_2: .+regex2
-  metadata:
-    regex1: .+regex1
-    regex2: .+regex2
-    log_sample: "Nov 10 12:19:04 localhost sshd: log matches regex1 regex2"
-    matches: regex1 regex2
-
-- name: Log match - Two Restrict tags - Match second tag
+- name: Test single question mark wildcard
   description: Test two Restrict tags, with matching first tag
   configuration_parameters:
-    REGEX_1: .+regex1
-    REGEX_2: .+regex2
+    LOCATION: c:\testfolder\subfolder\tes?
   metadata:
-    regex1: .+regex1
-    regex2: .+regex2
-    log_sample: "Nov 10 12:19:04 localhost sshd: log matches regex2"
-    matches: regex2
+    matches: true
 
-- name: No match - Two Restrict tags
-  description: Test two Restrict, log does not match
+- name: Test partial words with asterisk wildcards
+  description: Test two Restrict tags, with matching first tag
   configuration_parameters:
-    REGEX_1: .+regex1
-    REGEX_2: .+regex2
+    LOCATION: c:\test*\sub*\t*
   metadata:
-    regex1: .+regex1
-    regex2: .+regex2
-    log_sample: "Nov 10 12:19:04 localhost sshd: log does not matches"
-    matches: no match
+    matches: true
+
+- name: Test mixed wildcards
+  description: Test two Restrict tags, with matching first tag
+  configuration_parameters:
+    LOCATION: c:\testf?lder\*\tes?
+  metadata:
+    matches: true
+
+- name: Test mixed wildcards
+  description: Test two Restrict tags, with matching first tag
+  configuration_parameters:
+    LOCATION: c:\*\*\?es?
+  metadata:
+    matches: true
+
+- name: Test invalid wildcards - no match
+  description: Test two Restrict tags, with matching first tag
+  configuration_parameters:
+    LOCATION: c:\testfolder\subfolder\tes?.log
+  metadata:
+    matches: false
+    location: c:\testfolder\subfolder\tes?.log
