@@ -11,7 +11,9 @@ from collections import defaultdict
 
 # Timeouts
 T_5 = 5
+T_10 = 10
 T_20 = 20
+T_30 = 30
 
 # Protocols
 UDP = 'UDP'
