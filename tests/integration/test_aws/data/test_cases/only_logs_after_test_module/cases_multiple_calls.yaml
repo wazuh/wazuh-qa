@@ -18,3 +18,24 @@
   metadata:
     bucket_type: config
     bucket_name: wazuh-config-integration-tests
+
+- name: alb_only_logs_after_multiple_calls
+  description: ALB only_logs_after multiple calls configurations
+  configuration_parameters:
+  metadata:
+    bucket_type: alb
+    bucket_name: wazuh-alb-integration-tests
+
+- name: clb_only_logs_after_multiple_calls
+  description: CLB only_logs_after multiple calls configurations
+  configuration_parameters:
+  metadata:
+    bucket_type: clb
+    bucket_name: wazuh-clb-integration-tests
+
+- name: nlb_only_logs_after_multiple_calls
+  description: NLB only_logs_after multiple calls configurations
+  configuration_parameters:
+  metadata:
+    bucket_type: nlb
+    bucket_name: wazuh-nlb-integration-tests

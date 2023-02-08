@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from wazuh_testing import T_20, global_parameters
+from wazuh_testing import T_10, T_20, global_parameters
 from wazuh_testing.modules.aws import event_monitor
 from wazuh_testing.modules.aws.constants import RANDOM_ACCOUNT_ID
 from wazuh_testing.modules.aws.db_utils import (
@@ -145,9 +145,9 @@ def test_regions(
             ).result()
 
         wazuh_log_monitor.start(
-            timeout=global_parameters.default_timeout,
+            timeout=T_10,
             callback=event_monitor.make_aws_callback(pattern),
-            error_message='The AWS module did not show correct message non-existent region'
+            error_message='The AWS module did not show correct message about non-existent region'
         ).result()
 
     assert s3_db_exists()
@@ -155,6 +155,9 @@ def test_regions(
     if expected_results:
         regions_list = regions.split(",")
         for row in get_multiple_s3_db_row(table_name=bucket_type):
-            assert row.aws_region in regions_list
+            if hasattr(row, "aws_region"):
+                assert row.aws_region in regions_list
+            else:
+                assert row.log_key.split("/")[3] in regions_list
     else:
         assert not table_exists(table_name=bucket_type)
