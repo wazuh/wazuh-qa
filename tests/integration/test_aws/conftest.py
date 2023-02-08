@@ -3,7 +3,7 @@ from typing import Generator
 import pytest
 from wazuh_testing import UDP, logger
 from wazuh_testing.modules.aws.db_utils import delete_s3_db
-from wazuh_testing.modules.aws.s3_utils import delete_file, upload_file
+from wazuh_testing.modules.aws.s3_utils import delete_file, upload_file, file_exists
 from wazuh_testing.tools import ANALYSISD_QUEUE_SOCKET_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.file import bind_unix_socket
 from wazuh_testing.tools.monitoring import FileMonitor, ManInTheMiddle, QueueMonitor
@@ -33,6 +33,12 @@ def analysisd_monitor() -> Generator:
 
     mitm.shutdown()
     control_service('start', daemon='wazuh-analysisd')
+
+
+@pytest.fixture(scope='function')
+def mark_cases_as_skipped(metadata: dict) -> None:
+    if metadata['name'] in ['alb_remove_from_bucket', 'clb_remove_from_bucket', 'nlb_remove_from_bucket']:
+        pytest.skip(reason='ALB, CLB and NLB integrations are removing older logs from other region')
 
 
 # S3 fixtures
@@ -66,8 +72,9 @@ def upload_and_delete_file_to_s3(metadata: dict):
 
     yield
 
-    delete_file(filename=filename, bucket_name=bucket_name)
-    logger.debug('Deleted file: %s from bucket %s', filename, bucket_name)
+    if file_exists(filename=filename, bucket_name=bucket_name):
+        delete_file(filename=filename, bucket_name=bucket_name)
+        logger.debug('Deleted file: %s from bucket %s', filename, bucket_name)
 
 
 @pytest.fixture(scope='function')

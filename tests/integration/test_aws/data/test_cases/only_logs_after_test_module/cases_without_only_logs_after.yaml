@@ -27,3 +27,33 @@
     bucket_type: config
     bucket_name: wazuh-config-integration-tests
     expected_results: 1
+
+- name: alb_without_only_logs_after
+  description: ALB only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: alb
+    BUCKET_NAME: wazuh-alb-integration-tests
+  metadata:
+    bucket_type: alb
+    bucket_name: wazuh-alb-integration-tests
+    expected_results: 1
+
+- name: clb_without_only_logs_after
+  description: CLB only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: clb
+    BUCKET_NAME: wazuh-clb-integration-tests
+  metadata:
+    bucket_type: clb
+    bucket_name: wazuh-clb-integration-tests
+    expected_results: 1
+
+- name: nlb_without_only_logs_after
+  description: NLB only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: nlb
+    BUCKET_NAME: wazuh-nlb-integration-tests
+  metadata:
+    bucket_type: nlb
+    bucket_name: wazuh-nlb-integration-tests
+    expected_results: 1
