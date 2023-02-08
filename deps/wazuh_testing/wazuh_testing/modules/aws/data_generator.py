@@ -41,7 +41,7 @@ class CloudTrailDataGenerator(DataGenerator):
     BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.CLOUDTRAIL, cons.US_EAST_1_REGION)
     BASE_FILE_NAME = f"{cons.RANDOM_ACCOUNT_ID}_{cons.CLOUDTRAIL}_{cons.US_EAST_1_REGION}_"
 
-    def get_filename(self, *args, **kwargs) -> str:
+    def get_filename(self) -> str:
         """Return the filename in the cloudtrail format.
 
         Example:
@@ -159,7 +159,7 @@ class ConfigDataGenerator(DataGenerator):
     BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.CONFIG, cons.US_EAST_1_REGION)
     BASE_FILE_NAME = f"{cons.RANDOM_ACCOUNT_ID}_{cons.CONFIG}_{cons.US_EAST_1_REGION}_ConfigHistory_AWS_"
 
-    def get_filename(self, prefix=None, **kwargs) -> str:
+    def get_filename(self) -> str:
         """Return the filename in the Config format.
 
         Example:
@@ -224,8 +224,8 @@ class ConfigDataGenerator(DataGenerator):
 
 
 class ALBDataGenerator(DataGenerator):
-    BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTICLOADBALANCING, cons.US_EAST_1_REGION)
-    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTICLOADBALANCING}_{cons.US_EAST_1_REGION}_'
+    BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTIC_LOAD_BALANCING, cons.US_EAST_1_REGION)
+    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTIC_LOAD_BALANCING}_{cons.US_EAST_1_REGION}_'
 
     def get_filename(self) -> str:
         """Return the filename in the ALB format.
@@ -296,10 +296,10 @@ class ALBDataGenerator(DataGenerator):
 
 
 class CLBDataGenerator(DataGenerator):
-    BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTICLOADBALANCING, cons.US_EAST_1_REGION)
-    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTICLOADBALANCING}_{cons.US_EAST_1_REGION}_'
+    BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTIC_LOAD_BALANCING, cons.US_EAST_1_REGION)
+    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTIC_LOAD_BALANCING}_{cons.US_EAST_1_REGION}_'
 
-    def get_filename(self, prefix=None, **kwargs) -> str:
+    def get_filename(self) -> str:
         """Return the filename in the CLB format.
 
         Example:
@@ -352,10 +352,10 @@ class CLBDataGenerator(DataGenerator):
 
 
 class NLBDataGenerator(DataGenerator):
-    BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTICLOADBALANCING, cons.US_EAST_1_REGION)
-    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTICLOADBALANCING}_{cons.US_EAST_1_REGION}_'
+    BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTIC_LOAD_BALANCING, cons.US_EAST_1_REGION)
+    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTIC_LOAD_BALANCING}_{cons.US_EAST_1_REGION}_'
 
-    def get_filename(self, prefix=None, **kwargs) -> str:
+    def get_filename(self) -> str:
         """Return the filename in the NLB format.
 
         Example:
