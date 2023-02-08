@@ -84,12 +84,10 @@ def check_processed_logs_from_output(command_output: str, expected_results: int 
 
 def check_non_processed_logs_from_output(command_output: str, bucket_type: str, expected_results: int = 1):
 
-    if bucket_type == CLOUD_TRAIL_TYPE:
-        pattern = r'.*DEBUG: \+\+\+ No logs to process in bucket: '
-    elif bucket_type == VPC_FLOW_TYPE:
+    if bucket_type == VPC_FLOW_TYPE:
         pattern = r'.*DEBUG: \+\+\+ No logs to process for .*'
     else:
-        pattern = ''
+        pattern = r'.*DEBUG: \+\+\+ No logs to process in bucket: '
 
     analyze_command_output(
         command_output,
