@@ -19,7 +19,8 @@ from wazuh_testing import global_parameters, logger, ALERTS_JSON_PATH, ARCHIVES_
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import truncate_file, recursive_directory_creation, remove_file, copy, write_file
+from wazuh_testing.tools.file import (truncate_file, recursive_directory_creation, remove_file, copy, write_file,
+                                      delete_path_recursively)
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import control_service, check_daemon_status, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
@@ -1198,6 +1199,23 @@ def copy_file(source_path, destination_path):
 
     for file in destination_path:
         remove_file(file)
+
+
+@pytest.fixture()
+def create_files_in_folder(folder_path, file_list):
+    """Create a list of files, inside a given path. Deletes it at the end.
+
+    Args:
+        folder_path (str): folder path to create.
+        file_list (List): list of file names to create
+    """
+    recursive_directory_creation(folder_path)
+    for file in file_list:
+        write_file(os.path.join(folder_path, file))
+
+    yield
+
+    delete_path_recursively(folder_path)
 
 
 @pytest.fixture(scope='function')

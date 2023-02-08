@@ -236,7 +236,7 @@ def delete_file(file_path):
 
 def delete_path_recursively(path):
     if os.path.exists(path):
-        shutil.rmtree(path, onerror=on_write_error)
+        shutil.rmtree(path, ignore_errors=True, onerror=on_write_error)
 
 
 def on_write_error(function, path, exc_info):
@@ -447,10 +447,10 @@ def recursive_directory_creation(path):
     if parent != '' and not os.path.exists(parent):
         split = os.path.split(parent)
         recursive_directory_creation(split[0])
-        os.mkdir(parent)
+        os.mkdir(parent, mode=0o0777)
 
     if not os.path.exists(path):
-        os.mkdir(path)
+        os.mkdir(path, mode=0o0777)
 
 
 def move_everything_from_one_directory_to_another(source_directory, destination_directory):
