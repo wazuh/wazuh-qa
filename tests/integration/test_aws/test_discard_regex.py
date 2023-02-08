@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from wazuh_testing import global_parameters, T_20
+from wazuh_testing import T_20, global_parameters
 from wazuh_testing.modules.aws import event_monitor
 from wazuh_testing.modules.aws.db_utils import s3_db_exists
 from wazuh_testing.tools.configuration import (

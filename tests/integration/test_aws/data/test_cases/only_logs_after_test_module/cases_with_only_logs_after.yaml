@@ -21,3 +21,15 @@
     bucket_name: wazuh-vpcflow-integration-tests
     only_logs_after: 2022-NOV-20
     expected_results: 3
+
+- name: config_with_only_logs_after
+  description: Config only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: config
+    BUCKET_NAME: wazuh-config-integration-tests
+    ONLY_LOGS_AFTER: 2022-NOV-20
+  metadata:
+    bucket_type: config
+    bucket_name: wazuh-config-integration-tests
+    only_logs_after: 2022-NOV-20
+    expected_results: 5

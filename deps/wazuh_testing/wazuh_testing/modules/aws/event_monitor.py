@@ -95,7 +95,7 @@ def check_non_processed_logs_from_output(command_output: str, bucket_type: str, 
         command_output,
         callback=make_aws_callback(pattern),
         expected_results=expected_results,
-        error_message='Some logs may were processed'
+        error_message='Some logs may were processed or the results found are more than expected'
     )
 
 
