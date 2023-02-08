@@ -3,13 +3,42 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 '''
+import re
 
+from wazuh_testing import T_60
+from wazuh_testing.modules.analysisd import ANALYSISD_PREFIX
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.monitoring import FileMonitor
 
 
-def check_analysisd_event(file_monitor=None, callback='', error_message=None, update_position=True, timeout=30,
-                          accum_results=1, file_to_monitor=LOG_FILE_PATH):
+def make_analysisd_callback(pattern, prefix=ANALYSISD_PREFIX):
+    """Create a callback function from a text pattern.
+
+    It already contains the analsisd prefix.
+
+    Args:
+
+        pattern (str): String to match on the log.
+
+        prefix (str): regular expression used as a prefix before the pattern.
+
+    Returns:
+
+        lambda: function that returns if there's a match in the file
+
+    Examples:
+
+        >>> callback_bionic_update_started = make_vuln_callback("Starting Ubuntu Bionic database update")
+
+    """
+    pattern = r'\s+'.join(pattern.split())
+    regex = re.compile(r'{}{}'.format(prefix, pattern))
+
+    return lambda line: regex.match(line) is not None
+
+
+def check_analysisd_event(file_monitor=None, callback='', error_message=None, update_position=True, timeout=T_60,
+                          accum_results=1, file_to_monitor=LOG_FILE_PATH, prefix=ANALYSISD_PREFIX):
     """Check if an event occurs
     Args:
         file_monitor (FileMonitor): FileMonitor object to monitor the file content.
@@ -24,4 +53,4 @@ def check_analysisd_event(file_monitor=None, callback='', error_message=None, up
         error_message
 
     file_monitor.start(timeout=timeout, update_position=update_position, accum_results=accum_results,
-                       callback=callback, error_message=error_message)
+                       callback=make_analysisd_callback(callback, prefix), error_message=error_message)
