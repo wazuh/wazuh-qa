@@ -108,3 +108,15 @@
         "Mär 02 17:30:52 linux-agent sshd[29205]: Invalid user blimey from
         18.18.18.18 port 48928", "token": "21218e6b"}}
       output: '{"program_name":"sshd","timestamp":"Mär 02 17:30:5"}'
+
+-
+  name: "Syslog syslog-ng OSE date format"
+  description: "Check valid input"
+  test_case:
+    - input: >-
+        {"version": 1, "origin": {"name": "wazuh-logtest", "module": 
+        "wazuh-logtest"}, "command": "log_processing", "parameters": 
+        {"location":"master->/var/log/syslog", "log_format": "syslog", "event":
+        "2022-12-20T15:02:53.123+00:00 localhost sshd[25474]: Accepted password for
+        rromero from 192.168.1.133 port 49765 ssh2", "token": "21218e6b"}}
+      output: '{"program_name":"sshd","timestamp":"2022-12-20T15:02:53.123+00:00"}'
