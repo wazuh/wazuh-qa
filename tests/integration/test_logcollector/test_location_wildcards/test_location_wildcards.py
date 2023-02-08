@@ -73,6 +73,7 @@ prefix = lc.LOG_COLLECTOR_PREFIX
 local_internal_options = lc.LOGCOLLECTOR_DEFAULT_LOCAL_INTERNAL_OPTIONS
 log_sample = 'Nov 10 12:19:04 localhost sshd: test log'
 
+
 # Tests
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('folder_path, file_list', [(folder_path, ['test'])], ids=[''])
