@@ -1,40 +1,40 @@
 - name: Test single asterisk wildcard
-  description: Test two Restrict tags, with matching first tag
+  description: Test location tag with one asterisk wildcard
   configuration_parameters:
     LOCATION: c:\testfolder\subfolder\te*
   metadata:
     matches: true
 
 - name: Test single question mark wildcard
-  description: Test two Restrict tags, with matching first tag
+  description: Test location tag with one question mark wildcard
   configuration_parameters:
     LOCATION: c:\testfolder\subfolder\tes?
   metadata:
     matches: true
 
 - name: Test partial words with asterisk wildcards
-  description: Test two Restrict tags, with matching first tag
+  description: Test location tag with words completed using asterisk wildcard
   configuration_parameters:
     LOCATION: c:\test*\sub*\t*
   metadata:
     matches: true
 
 - name: Test mixed wildcards
-  description: Test two Restrict tags, with matching first tag
+  description: Test location tag with mixed asterisk and question mark wildcards
   configuration_parameters:
     LOCATION: c:\testf?lder\*\tes?
   metadata:
     matches: true
 
-- name: Test mixed wildcards
-  description: Test two Restrict tags, with matching first tag
+- name: Test mixed wildcards - path asterisk only
+  description: Test location tag were filepath uses asterisk only
   configuration_parameters:
     LOCATION: c:\*\*\?es?
   metadata:
     matches: true
 
 - name: Test invalid wildcards - no match
-  description: Test two Restrict tags, with matching first tag
+  description: Test location tag where wildcards do not match a valid file
   configuration_parameters:
     LOCATION: c:\testfolder\subfolder\tes?.log
   metadata:
