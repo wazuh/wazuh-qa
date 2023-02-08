@@ -6,6 +6,7 @@ from wazuh_testing.modules.logcollector import LOG_COLLECTOR_PREFIX, ERR_MSG_UNE
 from wazuh_testing.tools.monitoring import FileMonitor
 
 
+# Event detectors
 def make_logcollector_callback(pattern, prefix=LOG_COLLECTOR_PREFIX, escape=False):
     """Create a callback function from a text pattern.
 
@@ -132,3 +133,42 @@ def check_ignore_restrict_message_not_found(message, regex, tag, prefix):
     with pytest.raises(TimeoutError):
         log_found = check_ignore_restrict_message(message=message, regex=regex, tag=tag, prefix=prefix)
     assert log_found is False, ERR_MSG_UNEXPECTED_IGNORE_EVENT
+
+
+def check_wildcard_pattern_expanded(file_path, prefix, error_message=None, file_monitor=None, timeout=T_10,
+                                    escape=False):
+    """Create a callback to detect "New file that matches the '{file_path}' pattern: '(.*)'" line.
+
+    Args:
+        file_path (str): file path that is being monitored
+        prefix (str): Daemon that generates the error log.
+        error_message (str): Error message.
+        file_monitor (FileMonitor): Log monitor.
+        timeout (int): Timeout to check the log.
+        escape (bool): Flag to escape special characters in the pattern.
+
+    Returns: True if the expected message has been found, False otherwise.
+    """
+    callback_msg = f".*check_pattern_expand.*New file that matches the '{file_path}' pattern: '(.*)'"
+
+    return check_logcollector_event(file_monitor=file_monitor, timeout=timeout, callback=callback_msg,
+                                    error_message=error_message, prefix=prefix, escape=escape)
+
+
+def check_wildcard_pattern_no_match(regex, prefix, error_message=None, file_monitor=None, timeout=T_10, escape=False):
+    """Create a callback to detect "DEBUG: No file/folder that matches ..." line.
+
+    Args:
+        regex (str): regex pattern configured in location tag for monitoring
+        prefix (str): Daemon that generates the error log.
+        error_message (str): Error message.
+        file_monitor (FileMonitor): Log monitor.
+        timeout (int): Timeout to check the log.
+        escape (bool): Flag to escape special characters in the pattern.
+
+    Returns: True if the expected message has been found, False otherwise.
+    """
+    callback_msg = f".*expand_win32_wildcards.*DEBUG: No file/folder that matches {regex}"
+
+    return check_logcollector_event(file_monitor=file_monitor, timeout=timeout, callback=callback_msg,
+                                    error_message=error_message, prefix=prefix, escape=escape)
