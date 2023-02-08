@@ -1,4 +1,3 @@
----
 - name: Check and update debian repositories
   shell:
     cmd: apt-get update --allow-releaseinfo-change
@@ -18,9 +17,9 @@
       - libtool
       - python3-pytest
       - libssl-dev
-    force_apt_get: yes
+    force_apt_get: true
     state: present
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 3600
 
 - name: Clone wazuh repository

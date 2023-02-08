@@ -52,11 +52,11 @@
 - name: Wazuh Master
   hosts: wazuh-master
   vars:
-    master_hostname: "wazuh-master"
+    master_hostname: wazuh-master
   vars_files:
     - ./vars/configurations.yaml
   roles:
-    - name: "roles/master-role"
+    - name: roles/master-role
 
 - name: Wazuh Worker1
   hosts: wazuh-worker1
@@ -65,7 +65,7 @@
   vars_files:
     - ./vars/configurations.yaml
   roles:
-    - name: "roles/worker-role"
+    - name: roles/worker-role
 
 - name: Wazuh Worker2
   hosts: wazuh-worker2
@@ -74,7 +74,7 @@
   vars_files:
     - ./vars/configurations.yaml
   roles:
-    - name: "roles/worker-role"
+    - name: roles/worker-role
 
 - name: Wazuh Agent1
   hosts: wazuh-agent1
@@ -84,4 +84,4 @@
   vars_files:
     - ./vars/configurations.yaml
   roles:
-    - name: "roles/agent-role"
+    - name: roles/agent-role
