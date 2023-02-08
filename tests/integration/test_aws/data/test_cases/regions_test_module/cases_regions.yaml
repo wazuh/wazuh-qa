@@ -50,6 +50,19 @@
     regions: us-east-1
     expected_results: 3
 
+- name: config_region_with_data
+  description: Config regions configurations
+  configuration_parameters:
+    BUCKET_TYPE: config
+    BUCKET_NAME: wazuh-config-integration-tests
+    REGIONS: us-east-1
+  metadata:
+    bucket_type: config
+    bucket_name: wazuh-config-integration-tests
+    only_logs_after: 2022-NOV-20
+    regions: us-east-1
+    expected_results: 3
+
 - name: vpc_regions_with_data
   description: VPC regions configurations
   configuration_parameters:
@@ -63,6 +76,19 @@
     regions: us-east-1,us-east-2
     expected_results: 5
 
+- name: config_regions_with_data
+  description: Config regions configurations
+  configuration_parameters:
+    BUCKET_TYPE: config
+    BUCKET_NAME: wazuh-config-integration-tests
+    REGIONS: us-east-1,us-east-2
+  metadata:
+    bucket_type: config
+    bucket_name: wazuh-config-integration-tests
+    only_logs_after: 2022-NOV-20
+    regions: us-east-1,us-east-2
+    expected_results: 5
+
 - name: vpc_inexistent_region
   description: VPC regions configurations
   configuration_parameters:
@@ -72,6 +98,19 @@
   metadata:
     bucket_type: vpcflow
     bucket_name: wazuh-vpcflow-integration-tests
+    only_logs_after: 2022-NOV-20
+    regions: us-fake-1
+    expected_results: 0
+
+- name: config_inexistent_region
+  description: Config regions configurations
+  configuration_parameters:
+    BUCKET_TYPE: config
+    BUCKET_NAME: wazuh-config-integration-tests
+    REGIONS: us-fake-1
+  metadata:
+    bucket_type: config
+    bucket_name: wazuh-config-integration-tests
     only_logs_after: 2022-NOV-20
     regions: us-fake-1
     expected_results: 0

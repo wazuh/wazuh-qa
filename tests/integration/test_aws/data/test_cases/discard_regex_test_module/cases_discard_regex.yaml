@@ -29,3 +29,19 @@
     discard_regex: "5319"
     found_logs: 5
     skipped_logs: 1
+
+- name: config_discard_regex
+  description: Config discard regex configurations
+  configuration_parameters:
+    BUCKET_TYPE: config
+    BUCKET_NAME: wazuh-config-integration-tests
+    DISCARD_FIELD: configuration.complianceType
+    DISCARD_REGEX: .*COMPLIANT.*
+  metadata:
+    bucket_type: config
+    bucket_name: wazuh-config-integration-tests
+    only_logs_after: 2022-NOV-20
+    discard_field: configuration.complianceType
+    discard_regex: .*COMPLIANT.*
+    found_logs: 5
+    skipped_logs: 1

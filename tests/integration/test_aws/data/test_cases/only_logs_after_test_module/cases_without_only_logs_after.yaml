@@ -17,3 +17,13 @@
     bucket_type: vpcflow
     bucket_name: wazuh-vpcflow-integration-tests
     expected_results: 1
+
+- name: config_without_only_logs_after
+  description: Config only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: config
+    BUCKET_NAME: wazuh-config-integration-tests
+  metadata:
+    bucket_type: config
+    bucket_name: wazuh-config-integration-tests
+    expected_results: 1

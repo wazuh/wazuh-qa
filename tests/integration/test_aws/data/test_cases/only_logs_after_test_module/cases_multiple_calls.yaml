@@ -11,3 +11,10 @@
   metadata:
     bucket_type: vpcflow
     bucket_name: wazuh-vpcflow-integration-tests
+
+- name: config_only_logs_after_multiple_calls
+  description: Config only_logs_after multiple calls configurations
+  configuration_parameters:
+  metadata:
+    bucket_type: config
+    bucket_name: wazuh-config-integration-tests
