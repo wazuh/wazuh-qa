@@ -115,7 +115,7 @@ def get_random_ip():
     return fr"{randint(0,255)}.{randint(0,255)}.{randint(0,255)}.{randint(0,255)}"
 
 
-def get_random_port():
+def get_random_port() -> str:
     """Create a port number.
 
     Return:
