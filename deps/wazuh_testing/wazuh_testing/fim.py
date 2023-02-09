@@ -1093,38 +1093,6 @@ def callback_detect_integrity_event(line):
     return None
 
 
-def callback_detect_registry_integrity_event(line):
-    event = callback_detect_integrity_event(line)
-    if event and event['component'] == 'fim_registry_key':
-        return event
-    if event and event['component'] == 'fim_registry_value':
-        return event
-    return None
-
-
-def callback_detect_file_integrity_event(line):
-    event = callback_detect_integrity_event(line)
-    if event and event['component'] == 'fim_file':
-        return event
-    return None
-
-
-def callback_detect_registry_integrity_state_event(line):
-    event = callback_detect_registry_integrity_event(line)
-    if event and event['type'] == 'state':
-        return event['data']
-    return None
-
-
-def callback_detect_registry_integrity_clear_event(line):
-    event = callback_detect_integrity_event(line)
-    if event and event['component'] == 'fim_registry_key' and event['type'] == 'integrity_clear':
-        return True
-    if event and event['component'] == 'fim_registry_value' and event['type'] == 'integrity_clear':
-        return True
-    return None
-
-
 def callback_detect_integrity_state(line):
     event = callback_detect_integrity_event(line)
     if event:
@@ -1134,12 +1102,22 @@ def callback_detect_integrity_state(line):
 
 
 def callback_start_synchronization(line):
+    """ Callback that detects if a line contains the FIM sync module has started.
+
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    """
     if 'FIM sync module started' in line:
         return line
     return None
 
 
 def callback_detect_synchronization(line):
+    """ Callback that detects if a line contains a FIM sync has started.
+
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    """
     if 'Executing FIM sync' in line:
         return line
     return None

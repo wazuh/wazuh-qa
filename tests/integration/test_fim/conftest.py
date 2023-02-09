@@ -43,7 +43,7 @@ def create_key(request):
                        error_message='Did not receive expected "integrity clear" event')
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def create_files_in_folder(files_number):
     """Create files in monitored folder and files"""
 
