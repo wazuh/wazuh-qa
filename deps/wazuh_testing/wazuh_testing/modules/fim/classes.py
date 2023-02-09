@@ -418,11 +418,18 @@ class RegistryEventChecker:
             self.check_events(event_type)
 
     def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message=''):
+        """ Gets as much events that match the callback as possible in the given time.
+
+        Args:
+            min_timeout (int, optional): seconds to wait until an event is raised when trying to fetch. Defaults `1`
+            triggers_event (boolean, optional): True if the event should be raised. False otherwise. Defaults `True`
+            extra_timeout (int, optional): Additional time to wait after the min_timeout
+            error_message(str, optional): Message that will be printed by the FileMonitor in case of error.
+        """
         timeout_per_registry_estimation = 0.01
         try:
             result = self.log_monitor.start(timeout=max((len(self.registry_dict)) * timeout_per_registry_estimation,
-                                                        min_timeout),
-                                            callback=self.callback, accum_results=len(self.registry_dict),
+                                            min_timeout), callback=self.callback, accum_results=len(self.registry_dict),
                                             timeout_extra=extra_timeout, encoding=self.encoding,
                                             error_message=error_message).result()
 
@@ -456,12 +463,27 @@ class RegistryEventChecker:
                     validate_registry_event(ev, options, mode , is_key=False)
 
         def check_events_type(events, ev_type, reg_list=['testkey0']):
+            """Checks the event type of each events in a list.
+
+            Args:
+                events (list): event list to be checked.
+                ev_type (str): type of expected event.
+                reg_list (list): list of keys that are being checked.
+            """
             event_types = Counter(filter_events(events, ".[].data.type"))
 
-            assert (event_types[ev_type] == len(reg_list)
-                    ), f'Non expected number of events. {event_types[ev_type]} != {len(reg_list)}'
+            assert (event_types[ev_type] == len(reg_list)), f'Non expected number of \
+                                                              events. {event_types[ev_type]} != {len(reg_list)}'
 
         def check_events_key_path(events, registry_key, reg_list=['testkey0'], mode=None):
+            """Checks the path for a registry_key event in a list.
+
+            Args:
+                events (list): event list to be checked.
+                registry_key (str): path to the key being checked.
+                reg_list (list, optional): list of keys that are being checked.
+                mode(str, optional): defines the type of FIM monitoring mode configured
+            """
             mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
             key_path = filter_events(events, ".[].data.path")
 
@@ -476,6 +498,14 @@ class RegistryEventChecker:
                 assert (expected_path in key_path), error_msg
 
         def check_events_registry_value(events, key, value_list=['testvalue0'], mode=None):
+            """Checks the path for a registry_value event in a list.
+
+            Args:
+                events (list): event list to be checked.
+                key (str): path to the key being checked where the value has been added.
+                value_list (list, optional): list of values that are being checked.
+                mode(str, optional): defines the type of FIM monitoring mode configured
+            """
             mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
             key_path = filter_events(events, ".[].data.path")
             value_name = filter_events(events, ".[].data.value_name")
@@ -488,7 +518,12 @@ class RegistryEventChecker:
                 assert (key in key_path), error_msg
 
         def filter_events(events, mask):
-            """Returns a list of elements matching a specified mask in the events list using jq module."""
+            """Returns a list of elements matching a specified mask in the events list using jq module.
+
+            Args:
+                events (list): event list to be checked.
+                mask(str): mask to be used to check events using jq module
+            """
             if sys.platform in ("win32", 'sunos5', 'darwin'):
                 stdout = subprocess.check_output(["jq", "-r", mask], input=json.dumps(events).encode())
 
@@ -518,6 +553,7 @@ class RegistryEventChecker:
                     self.custom_validator.validate_after_delete(self.events)
 
     def _get_elem_list(self):
+        """returns the elements in the registry_dict variable as a list"""
         result_list = []
 
         for elem_name in self.registry_dict:
