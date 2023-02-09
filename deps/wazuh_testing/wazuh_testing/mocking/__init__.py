@@ -247,7 +247,7 @@ def delete_mocked_agent(agent_id):
     global_db.delete_agent(agent_id)
 
     # Remove agent id DB file if exists
-    remove_file(os.path.join(wazuh_testing.DB_PATH, f"{agent_id}.db"))
+    remove_file(os.path.join(wazuh_testing.QUEUE_DB_PATH, f"{agent_id}.db"))
 
     # Remove entry from client keys
     client_keys.delete_client_keys_entry(agent_id)
