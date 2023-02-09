@@ -69,3 +69,15 @@
     bucket_name: wazuh-nlb-integration-tests
     only_logs_after: 2022-NOV-20
     expected_results: 5
+
+- name: kms_with_only_logs_after
+  description: KMS only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: custom
+    BUCKET_NAME: wazuh-kms-integration-tests
+    ONLY_LOGS_AFTER: 2022-NOV-20
+  metadata:
+    bucket_type: custom
+    bucket_name: wazuh-kms-integration-tests
+    only_logs_after: 2022-NOV-20
+    expected_results: 3
