@@ -501,7 +501,7 @@ class MacieDataGenerator(DataGenerator):
     BASE_PATH = ''
     BASE_FILE_NAME = 'firehose_macie-1-'
 
-    def get_filename(self, *args, **kwargs) -> str:
+    def get_filename(self) -> str:
         """Return the filename in the Macie format
 
         Example:
