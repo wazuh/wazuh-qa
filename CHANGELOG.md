@@ -44,6 +44,7 @@ Release report: TBD
 
 ### Changed
 
+- Improve `test_assign_groups_guess` ([#3901](https://github.com/wazuh/wazuh-qa/pull/3901)) \- (Tests)
 - Update `test_cluster_worker_logs_order` test ([#3896](https://github.com/wazuh/wazuh-qa/pull/3896)) \- (Tests)
 - Fix `test_agent_groups` ([#3889](https://github.com/wazuh/wazuh-qa/pull/3889)) \- (Tests + Framework)
 - Increase NVE download feed test timeout([#3769](https://github.com/wazuh/wazuh-qa/pull/3769)) \- (Tests)
