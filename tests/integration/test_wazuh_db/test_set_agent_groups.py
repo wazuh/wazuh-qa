@@ -132,35 +132,33 @@ def test_set_agent_groups(remove_database, configure_sockets_environment, connec
         - wazuh_db
         - wdb_socket
     '''
-
-    case_data = test_case[0]
-    output = case_data["output"]
-    agent_id = case_data["agent_id"]
+    output = test_case['output']
+    agent_id = test_case['agent_id']
 
     # Insert test Agent
     response = insert_agent_in_db(id=agent_id, connection_status='disconnected', registration_time=str(time.time()))
 
     # Apply preconditions
-    if 'pre_input' in case_data:
-        query_wdb(case_data['pre_input'])
+    if 'pre_input' in test_case:
+        query_wdb(test_case['pre_input'])
 
     # Add tested group
-    response = query_wdb(case_data["input"])
+    response = query_wdb(test_case["input"])
 
     # validate output
     assert response == output, f"Assertion Error - expected {output}, but got {response}"
 
     # Check warnings
-    if 'expected_warning' in case_data:
-        callback = case_data['expected_warning']
+    if 'expected_warning' in test_case:
+        callback = test_case['expected_warning']
         evm.check_event(callback=callback, file_to_monitor=fw.LOG_FILE_PATH, timeout=20).result()
 
     # get agent data and validate agent's groups
     response = query_wdb(f'global get-agent-info {agent_id}')
 
-    assert case_data['expected_group_sync_status'] == response[0]['group_sync_status']
+    assert test_case['expected_group_sync_status'] == response[0]['group_sync_status']
 
-    if case_data["expected_group"] == 'None':
+    if test_case["expected_group"] == 'None':
         assert 'group' not in response[0], "Agent has groups data and it was expecting no group data"
     else:
-        assert case_data["expected_group"] == response[0]['group'], "Did not receive the expected groups in the agent."
+        assert test_case["expected_group"] == response[0]['group'], "Did not receive the expected groups in the agent."
