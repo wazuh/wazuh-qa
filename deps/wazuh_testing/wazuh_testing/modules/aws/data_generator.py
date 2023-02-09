@@ -517,7 +517,7 @@ class MacieDataGenerator(DataGenerator):
         return join(path, name)
 
     def get_data_sample(self) -> str:
-        """Returns a sample of data according to the Macie format.
+        """Return a sample of data according to the Macie format.
 
         Returns:
             str: Synthetic data.
