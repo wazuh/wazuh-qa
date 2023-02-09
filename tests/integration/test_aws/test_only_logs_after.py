@@ -4,6 +4,7 @@ from datetime import datetime
 import pytest
 from wazuh_testing import T_20, global_parameters
 from wazuh_testing.modules.aws import event_monitor
+from wazuh_testing.modules.aws import constants as cons
 from wazuh_testing.modules.aws.cli_utils import call_aws_module
 from wazuh_testing.modules.aws.db_utils import (
     get_multiple_s3_db_row,
@@ -323,9 +324,17 @@ def test_multiple_calls(
     ]
 
     # Call the module without only_logs_after and check that no logs were processed
-    event_monitor.check_non_processed_logs_from_output(
-        command_output=call_aws_module(*base_parameters), bucket_type=bucket_type
-    )
+    last_marker_key = datetime.utcnow().strftime(cons.PATH_DATE_FORMAT)
+    if bucket_type == cons.CUSTOM_TYPE:
+        event_monitor.check_marker_from_output(
+            command_output=call_aws_module(*base_parameters),
+            file_key=last_marker_key
+        )
+    else:
+        event_monitor.check_non_processed_logs_from_output(
+            command_output=call_aws_module(*base_parameters),
+            bucket_type=bucket_type
+        )
 
     # Call the module with only_logs_after set in the past and check that the expected number of logs were
     # processed
@@ -337,19 +346,22 @@ def test_multiple_calls(
     # Call the module with the same parameters in and check there were no duplicates
     event_monitor.check_non_processed_logs_from_output(
         command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, '2022-NOV-20'),
-        bucket_type=bucket_type
+        bucket_type=bucket_type,
+        expected_results=metadata.get('expected_skipped_logs_step_3', 1)
     )
 
     # Call the module with only_logs_after set with an early date than setted previously and check that no logs
     # were processed, there were no duplicates
     event_monitor.check_non_processed_logs_from_output(
         command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, '2022-NOV-22'),
-        bucket_type=bucket_type
+        bucket_type=bucket_type,
+        expected_results=metadata.get('expected_skipped_logs_step_4', 1)
     )
 
     # Upload a log file for the day of the test execution and call the module without only_logs_after and check that
     # only the uploaded logs were processed and the last marker is specified in the DB.
-    last_marker_key = get_last_file_key(bucket_type, bucket_name)
+    if bucket_type != cons.CUSTOM_TYPE:
+        last_marker_key = get_last_file_key(bucket_type, bucket_name)
     metadata['filename'] = upload_file(bucket_type, bucket_name)
     event_monitor.check_marker_from_output(
         command_output=call_aws_module(*base_parameters),

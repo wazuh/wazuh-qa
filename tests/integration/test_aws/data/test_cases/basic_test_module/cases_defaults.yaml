@@ -51,3 +51,12 @@
   metadata:
     bucket_type: nlb
     bucket_name: wazuh-nlb-integration-tests
+
+- name: kms_defaults
+  description: KMS default configurations
+  configuration_parameters:
+    BUCKET_TYPE: custom
+    BUCKET_NAME: wazuh-kms-integration-tests
+  metadata:
+    bucket_type: custom
+    bucket_name: wazuh-kms-integration-tests

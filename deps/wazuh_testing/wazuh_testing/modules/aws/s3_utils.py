@@ -23,7 +23,7 @@ def upload_file(bucket_type: str, bucket_name: str) -> str:
     Returns:
         str: The name of the file if was uploaded, else ''.
     """
-    dg = get_data_generator(bucket_type)
+    dg = get_data_generator(bucket_type, bucket_name)
     filename = dg.get_filename()
     obj = s3.Object(bucket_name, filename)
 
@@ -78,7 +78,7 @@ def get_last_file_key(bucket_type: str, bucket_name: str) -> str:
         str: The last key in the bucket.
     """
 
-    dg = get_data_generator(bucket_type)
+    dg = get_data_generator(bucket_type, bucket_name)
     bucket = s3.Bucket(bucket_name)
     last_key = None
 
