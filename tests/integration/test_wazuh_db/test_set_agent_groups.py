@@ -62,6 +62,7 @@ from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import query_wdb, insert_agent_in_db
 from wazuh_testing.tools.services import delete_dbs
 from wazuh_testing.tools.file import get_list_of_content_yml
+from wazuh_testing.tools.wazuh_manager import create_group, delete_group
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -74,7 +75,7 @@ module_tests = get_list_of_content_yml(messages_file)
 log_monitor_paths = []
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
 receiver_sockets_params = [(wdb_path, 'AF_UNIX', 'TCP')]
-monitored_sockets_params = [('wazuh-db', None, True)]
+monitored_sockets_params = [('wazuh-db', None, True), ('wazuh-modulesd', None, True)]
 receiver_sockets = None  # Set in the fixtures
 
 
@@ -84,6 +85,21 @@ def remove_database(request):
     yield
     delete_dbs()
 
+@pytest.fixture(scope='function')
+def create_groups(test_case):
+    if 'pre_required_group' in test_case:
+        groups = test_case['pre_required_group'].split(',')
+
+        for group in groups:
+            create_group(group)
+
+    yield
+
+    if 'pre_required_group' in test_case:
+        groups = test_case['pre_required_group'].split(',')
+
+        for group in groups:
+            delete_group(group)
 
 # Tests
 @pytest.mark.parametrize('test_case',
@@ -92,7 +108,7 @@ def remove_database(request):
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
-def test_set_agent_groups(remove_database, configure_sockets_environment, connect_to_sockets_module, test_case):
+def test_set_agent_groups(remove_database, restart_wazuh_daemon, test_case, create_groups):
     '''
     description: Check that every input message using the 'set_agent_groups' command in wazuh-db socket generates
                  the proper output to wazuh-db socket. To do this, it performs a query to the socket with a command
@@ -102,18 +118,18 @@ def test_set_agent_groups(remove_database, configure_sockets_environment, connec
     wazuh_min_version: 4.4.0
 
     parameters:
+        - remove_database:
+            type: fixture
+            brief: Delete databases.
         - restart_wazuh:
             type: fixture
-            brief: Reset the 'ossec.log' file and start a new monitor.
-        - configure_sockets_environment:
-            type: fixture
-            brief: Configure environment for sockets and MITM.
-        - connect_to_sockets_module:
-            type: fixture
-            brief: Module scope version of 'connect_to_sockets' fixture.
+            brief: Reset the 'ossec.log' file and restart Wazuh.
         - test_case:
             type: fixture
             brief: List of test_case stages (dicts with input, output and agent_id and expected_groups keys).
+        - create_groups:
+            type: fixture:
+            brief: Create required groups.
 
     assertions:
         - Verify that the socket response matches the expected output.
@@ -156,9 +172,9 @@ def test_set_agent_groups(remove_database, configure_sockets_environment, connec
     # get agent data and validate agent's groups
     response = query_wdb(f'global get-agent-info {agent_id}')
 
-    assert test_case['expected_group_sync_status'] == response[0]['group_sync_status']
-
     if test_case["expected_group"] == 'None':
         assert 'group' not in response[0], "Agent has groups data and it was expecting no group data"
     else:
         assert test_case["expected_group"] == response[0]['group'], "Did not receive the expected groups in the agent."
+
+    assert test_case['expected_group_sync_status'] == response[0]['group_sync_status']

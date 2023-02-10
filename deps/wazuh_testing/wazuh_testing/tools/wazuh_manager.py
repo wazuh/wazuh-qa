@@ -40,3 +40,11 @@ def remove_agents(agents_id, remove_type='wazuhdb'):
 
 def remove_all_agents(remove_type):
     remove_agents(list_agents_ids(), remove_type)
+
+
+def create_group(group):
+    result = subprocess.run([f'{WAZUH_PATH}/bin/agent_groups', '-a', '-q', '-g', f'{group}']).returncode
+
+
+def delete_group(group):
+    result = subprocess.run([f'{WAZUH_PATH}/bin/agent_groups', '-r', '-q', '-g', f'{group}']).returncode
