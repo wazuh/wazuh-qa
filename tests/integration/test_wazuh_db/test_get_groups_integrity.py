@@ -71,8 +71,8 @@ module_tests = get_list_of_content_yml(messages_file)
 
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
 
-# Fixtures
 
+# Fixtures
 @pytest.fixture(scope='function')
 def create_groups(test_case):
     if 'pre_required_group' in test_case:

@@ -50,6 +50,7 @@ from wazuh_testing.wazuh_db import query_wdb, insert_agent_into_group, clean_age
 from wazuh_testing.wazuh_db import clean_groups_from_db, clean_belongs, calculate_global_hash
 from wazuh_testing.modules import TIER0, SERVER, LINUX
 from wazuh_testing.tools.file import get_list_of_content_yml
+from wazuh_testing.tools.services import delete_dbs
 from wazuh_testing.tools.wazuh_manager import create_group, delete_group
 
 
@@ -93,6 +94,12 @@ def pre_insert_agents_into_group(test_case):
     clean_belongs()
 
 
+@pytest.fixture(scope='module')
+def clean_databases():
+    yield
+    delete_dbs()
+
+
 # Tests
 @pytest.mark.parametrize('test_case',
                          [case['test_case'] for module_data in module_tests for case in module_data[0]],
@@ -100,7 +107,7 @@ def pre_insert_agents_into_group(test_case):
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
-def test_sync_agent_groups(restart_wazuh_daemon, test_case, pre_insert_agents_into_group):
+def test_sync_agent_groups(restart_wazuh_daemon, test_case, pre_insert_agents_into_group, clean_databases):
     '''
     description: Check that commands about sync_aget_groups_get works properly.
     wazuh_min_version: 4.4.0
@@ -114,6 +121,9 @@ def test_sync_agent_groups(restart_wazuh_daemon, test_case, pre_insert_agents_in
         - pre_insert_agents_into_group:
             type: fixture
             brief: fixture in charge of insert agents and groups into DB.
+        - clean_databases:
+            type: fixture
+            brief: Delete all databases after test execution.
     assertions:
         - Verify that the socket response matches the expected output.
     input_description:
