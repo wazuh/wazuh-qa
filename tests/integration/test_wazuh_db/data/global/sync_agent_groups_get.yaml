@@ -8,7 +8,7 @@
   test_case:
     pre_required_group: Test_group1,Test_group2
     pre_input:
-        - global sql UPDATE agent SET group_sync_status="synced"
+      - global sql UPDATE agent SET group_sync_status="synced"
     input: global sync-agent-groups-get {"condition":"sync_status"}
     output: "[{'data': []}]"
 

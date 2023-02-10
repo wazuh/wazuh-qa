@@ -58,7 +58,6 @@ import pytest
 
 import wazuh_testing as fw
 from wazuh_testing import event_monitor as evm
-from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import query_wdb, insert_agent_in_db
 from wazuh_testing.tools.services import delete_dbs
 from wazuh_testing.tools.file import get_list_of_content_yml
@@ -79,6 +78,7 @@ def remove_database(request):
     yield
     delete_dbs()
 
+
 @pytest.fixture(scope='function')
 def create_groups(test_case):
     if 'pre_required_group' in test_case:
@@ -94,6 +94,7 @@ def create_groups(test_case):
 
         for group in groups:
             delete_group(group)
+
 
 # Tests
 @pytest.mark.parametrize('test_case',

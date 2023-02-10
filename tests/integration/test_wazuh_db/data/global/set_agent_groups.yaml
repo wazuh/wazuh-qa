@@ -261,8 +261,8 @@
 - name: Valid group name format - Assign a group with a long name
   test_case:
     pre_required_group: "19im4QM7Vn8vr4kE4YeZJ92AMvZS8bkKGrinEPSfAjNnhDgZ2a741ajntTWCaB6oJpOORSP46wLs2g14TqfbAJDmsbOxJG\
-                        3xMcYwFj5hcwpABb75W0CE6EQv9cTDm0SBqZAC6PIJltof7brN0bIodOPSrIL7XyDXnquqSuIaeuqY1uwcvBTlrlvRqFuH2\
-                        wfIpkxEwgxlj2LcLOzE4nrebf1Ot8C0gBmVYZbjBDwUrHBHNpDL7tnScnISannzT8J"
+                         3xMcYwFj5hcwpABb75W0CE6EQv9cTDm0SBqZAC6PIJltof7brN0bIodOPSrIL7XyDXnquqSuIaeuqY1uwcvBTlrlvRqFuH\
+                         2wfIpkxEwgxlj2LcLOzE4nrebf1Ot8C0gBmVYZbjBDwUrHBHNpDL7tnScnISannzT8J"
     input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":026,\"groups\":\
             [\"19im4QM7Vn8vr4kE4YeZJ92AMvZS8bkKGrinEPSfAjNnhDgZ2a741ajntTWCaB6oJpOORSP46wLs2g14TqfbAJDmsbOxJG3xMcYwFj5h\
             cwpABb75W0CE6EQv9cTDm0SBqZAC6PIJltof7brN0bIodOPSrIL7XyDXnquqSuIaeuqY1uwcvBTlrlvRqFuH2wfIpkxEwgxlj2LcLOzE4nr\
