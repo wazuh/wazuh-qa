@@ -24,7 +24,7 @@ if sys.platform == 'win32':
     import win32con
     import win32api
     import pywintypes
-    import win32sec
+    import win32security as win32sec
 
 
 # Variables
