@@ -72,12 +72,6 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 messages_file = os.path.join(os.path.join(test_data_path, 'global'), 'set_agent_groups.yaml')
 module_tests = get_list_of_content_yml(messages_file)
 
-log_monitor_paths = []
-wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
-receiver_sockets_params = [(wdb_path, 'AF_UNIX', 'TCP')]
-monitored_sockets_params = [('wazuh-db', None, True), ('wazuh-modulesd', None, True)]
-receiver_sockets = None  # Set in the fixtures
-
 
 # Fixtures
 @pytest.fixture(scope='module')
@@ -172,9 +166,9 @@ def test_set_agent_groups(remove_database, restart_wazuh_daemon, test_case, crea
     # get agent data and validate agent's groups
     response = query_wdb(f'global get-agent-info {agent_id}')
 
+    assert test_case['expected_group_sync_status'] == response[0]['group_sync_status']
+
     if test_case["expected_group"] == 'None':
         assert 'group' not in response[0], "Agent has groups data and it was expecting no group data"
     else:
         assert test_case["expected_group"] == response[0]['group'], "Did not receive the expected groups in the agent."
-
-    assert test_case['expected_group_sync_status'] == response[0]['group_sync_status']
