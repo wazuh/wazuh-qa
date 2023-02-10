@@ -59,7 +59,6 @@ import pytest
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import query_wdb, insert_agent_in_db, remove_agent
 from wazuh_testing.tools.file import get_list_of_content_yml
-from wazuh_testing.tools.wazuh_manager import create_group, delete_group
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -70,24 +69,6 @@ messages_file = os.path.join(os.path.join(test_data_path, 'global'), 'get_groups
 module_tests = get_list_of_content_yml(messages_file)
 
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
-
-
-# Fixtures
-@pytest.fixture(scope='function')
-def create_groups(test_case):
-    if 'pre_required_group' in test_case:
-        groups = test_case['pre_required_group'].split(',')
-
-        for group in groups:
-            create_group(group)
-
-    yield
-
-    if 'pre_required_group' in test_case:
-        groups = test_case['pre_required_group'].split(',')
-
-        for group in groups:
-            delete_group(group)
 
 
 # Tests

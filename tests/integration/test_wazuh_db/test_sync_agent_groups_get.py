@@ -51,7 +51,6 @@ from wazuh_testing.wazuh_db import clean_groups_from_db, clean_belongs, calculat
 from wazuh_testing.modules import TIER0, SERVER, LINUX
 from wazuh_testing.tools.file import get_list_of_content_yml
 from wazuh_testing.tools.services import delete_dbs
-from wazuh_testing.tools.wazuh_manager import create_group, delete_group
 
 
 # Marks
@@ -73,22 +72,12 @@ receiver_sockets = None  # Set in the fixtures
 
 # Insert agents into DB  and assign them into a group
 @pytest.fixture(scope='function')
-def pre_insert_agents_into_group(test_case):
-    if 'pre_required_group' in test_case:
-        groups = test_case['pre_required_group'].split(',')
-
-        for group in groups:
-            create_group(group)
+def pre_insert_agents_into_group():
 
     insert_agent_into_group(2)
 
     yield
 
-    if 'pre_required_group' in test_case:
-        groups = test_case['pre_required_group'].split(',')
-
-        for group in groups:
-            delete_group(group)
     clean_agents_from_db()
     clean_groups_from_db()
     clean_belongs()
@@ -107,7 +96,8 @@ def clean_databases():
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
-def test_sync_agent_groups(restart_wazuh_daemon, test_case, pre_insert_agents_into_group, clean_databases):
+def test_sync_agent_groups(restart_wazuh_daemon, test_case, create_groups, pre_insert_agents_into_group,
+                           clean_databases):
     '''
     description: Check that commands about sync_aget_groups_get works properly.
     wazuh_min_version: 4.4.0

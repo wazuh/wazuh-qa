@@ -61,7 +61,6 @@ from wazuh_testing import event_monitor as evm
 from wazuh_testing.wazuh_db import query_wdb, insert_agent_in_db
 from wazuh_testing.tools.services import delete_dbs
 from wazuh_testing.tools.file import get_list_of_content_yml
-from wazuh_testing.tools.wazuh_manager import create_group, delete_group
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
@@ -77,23 +76,6 @@ module_tests = get_list_of_content_yml(messages_file)
 def remove_database(request):
     yield
     delete_dbs()
-
-
-@pytest.fixture(scope='function')
-def create_groups(test_case):
-    if 'pre_required_group' in test_case:
-        groups = test_case['pre_required_group'].split(',')
-
-        for group in groups:
-            create_group(group)
-
-    yield
-
-    if 'pre_required_group' in test_case:
-        groups = test_case['pre_required_group'].split(',')
-
-        for group in groups:
-            delete_group(group)
 
 
 # Tests
