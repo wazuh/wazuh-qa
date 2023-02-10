@@ -50,6 +50,7 @@ from wazuh_testing.wazuh_db import query_wdb, insert_agent_into_group, clean_age
 from wazuh_testing.wazuh_db import clean_groups_from_db, clean_belongs, calculate_global_hash
 from wazuh_testing.modules import TIER0, SERVER, LINUX
 from wazuh_testing.tools.file import get_list_of_content_yml
+from wazuh_testing.tools.wazuh_manager import create_group, delete_group
 
 
 # Marks
@@ -71,10 +72,22 @@ receiver_sockets = None  # Set in the fixtures
 
 # Insert agents into DB  and assign them into a group
 @pytest.fixture(scope='function')
-def pre_insert_agents_into_group():
+def pre_insert_agents_into_group(test_case):
+    if 'pre_required_group' in test_case:
+        groups = test_case['pre_required_group'].split(',')
+
+        for group in groups:
+            create_group(group)
+
     insert_agent_into_group(2)
 
     yield
+
+    if 'pre_required_group' in test_case:
+        groups = test_case['pre_required_group'].split(',')
+
+        for group in groups:
+            delete_group(group)
     clean_agents_from_db()
     clean_groups_from_db()
     clean_belongs()
@@ -87,18 +100,14 @@ def pre_insert_agents_into_group():
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
-def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_module,
-                           test_case, pre_insert_agents_into_group):
+def test_sync_agent_groups(restart_wazuh_daemon, test_case, pre_insert_agents_into_group):
     '''
     description: Check that commands about sync_aget_groups_get works properly.
     wazuh_min_version: 4.4.0
     parameters:
-        - configure_sockets_environment:
+        - restart_wazuh_daemon:
             type: fixture
-            brief: Configure environment for sockets and MITM.
-        - connect_to_sockets_module:
-            type: fixture
-            brief: Module scope version of 'connect_to_sockets' fixture.
+            brief: Truncate ossec.log and restart Wazuh.
         - test_case:
             type: fixture
             brief: List of test_case stages (dicts with input, output and agent_id and expected_groups keys).
@@ -116,12 +125,11 @@ def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_mod
         - wdb_socket
     '''
     # Set each case
-    case_data = test_case[0]
-    output = case_data["output"]
+    output = test_case["output"]
 
     # Check if it requires any special configuration
-    if 'pre_input' in case_data:
-        for command in case_data['pre_input']:
+    if 'pre_input' in test_case:
+        for command in test_case['pre_input']:
             query_wdb(command)
 
     # Check if it requires the global hash.
@@ -130,14 +138,14 @@ def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_mod
         output = output.replace('[GLOBAL_HASH]', global_hash)
 
     time.sleep(1)
-    response = query_wdb(case_data["input"])
+    response = query_wdb(test_case["input"])
 
     # Validate response
     assert str(response) == output, "Did not get expected response: {output}, recieved: {response}"
 
     # Validate if the status of the group has change
-    if "new_status" in case_data:
-        agent_id = json.loads(case_data["agent_id"])
+    if "new_status" in test_case:
+        agent_id = json.loads(test_case["agent_id"])
         for id in agent_id:
             response = query_wdb(f'global get-agent-info {id}')
-            assert case_data["new_status"] == response[0]['group_sync_status']
+            assert test_case["new_status"] == response[0]['group_sync_status']
