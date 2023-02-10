@@ -1,6 +1,7 @@
 from wazuh_testing.modules import TIER0, LINUX, SERVER
 from wazuh_testing.wazuh_db import query_wdb
 from wazuh_testing.tools import agent_simulator as ag
+from wazuh_testing.tools.wazuh_manager import remove_all_agents
 
 # Marks
 pytestmark = [TIER0, LINUX, SERVER]
@@ -53,3 +54,4 @@ def test_agent_database_version(restart_wazuh_daemon):
     assert agent_version == expected_database_version, 'The agent database version is not the expected one. \n' \
                                                        f'Expected version: {expected_database_version}\n'\
                                                        f'Obtained version: {agent_version}'
+    remove_all_agents('manage_agents')
