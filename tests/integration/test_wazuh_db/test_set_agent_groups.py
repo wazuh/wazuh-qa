@@ -55,7 +55,9 @@ tags:
 import os
 import time
 import pytest
-import yaml
+
+import wazuh_testing as fw
+from wazuh_testing import event_monitor as evm
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import query_wdb, insert_agent_in_db
 from wazuh_testing.tools.services import delete_dbs
@@ -73,10 +75,10 @@ log_monitor_paths = []
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
 receiver_sockets_params = [(wdb_path, 'AF_UNIX', 'TCP')]
 monitored_sockets_params = [('wazuh-db', None, True)]
-receiver_sockets= None  # Set in the fixtures
+receiver_sockets = None  # Set in the fixtures
 
 
-#Fixtures
+# Fixtures
 @pytest.fixture(scope='module')
 def remove_database(request):
     yield
@@ -92,8 +94,8 @@ def remove_database(request):
                          )
 def test_set_agent_groups(remove_database, configure_sockets_environment, connect_to_sockets_module, test_case):
     '''
-    description: Check that every input message using the 'set_agent_groups' command in wazuh-db socket generates 
-                 the proper output to wazuh-db socket. To do this, it performs a query to the socket with a command 
+    description: Check that every input message using the 'set_agent_groups' command in wazuh-db socket generates
+                 the proper output to wazuh-db socket. To do this, it performs a query to the socket with a command
                  taken from the list of test_cases's 'input' field, and compare the result with the test_case's
                  'output' and 'expected_group' fields.
 
@@ -118,7 +120,7 @@ def test_set_agent_groups(remove_database, configure_sockets_environment, connec
         - Verify that the agent has the expected_group assigned.
 
     input_description:
-        - Test cases are defined in the set_agent_groups.yaml file. This file contains the command to insert the agentes
+        - Test cases are defined in the set_agent_groups.yaml file. This file contains the command to insert the agents
           groups, with different modes and combinations, as well as the expected outputs and results.
 
     expected_output:
@@ -130,27 +132,33 @@ def test_set_agent_groups(remove_database, configure_sockets_environment, connec
         - wazuh_db
         - wdb_socket
     '''
-
-    case_data = test_case[0]
-    output = case_data["output"]
-    agent_id= case_data["agent_id"]
+    output = test_case['output']
+    agent_id = test_case['agent_id']
 
     # Insert test Agent
-    response = insert_agent_in_db(id=agent_id, connection_status="disconnected", registration_time=str(time.time()))
-    
+    response = insert_agent_in_db(id=agent_id, connection_status='disconnected', registration_time=str(time.time()))
+
     # Apply preconditions
-    if 'pre_input' in case_data:
-        query_wdb(case_data['pre_input'])
-    
+    if 'pre_input' in test_case:
+        query_wdb(test_case['pre_input'])
+
     # Add tested group
-    response = query_wdb(case_data["input"])
+    response = query_wdb(test_case["input"])
 
     # validate output
     assert response == output, f"Assertion Error - expected {output}, but got {response}"
 
+    # Check warnings
+    if 'expected_warning' in test_case:
+        callback = test_case['expected_warning']
+        evm.check_event(callback=callback, file_to_monitor=fw.LOG_FILE_PATH, timeout=20).result()
+
     # get agent data and validate agent's groups
     response = query_wdb(f'global get-agent-info {agent_id}')
-    if case_data["expected_group"] == 'None':
+
+    assert test_case['expected_group_sync_status'] == response[0]['group_sync_status']
+
+    if test_case["expected_group"] == 'None':
         assert 'group' not in response[0], "Agent has groups data and it was expecting no group data"
     else:
-        assert case_data["expected_group"] == response[0]['group'], "Did not receive the expected groups in the agent."
+        assert test_case["expected_group"] == response[0]['group'], "Did not receive the expected groups in the agent."
