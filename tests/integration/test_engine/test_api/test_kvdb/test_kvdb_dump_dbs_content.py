@@ -99,7 +99,6 @@ def test_kvdb_dump_db_content(api_call_data, kvdb_names, clean_stored_kvdb, crea
 
 
 @pytest.mark.tier(level=0)
-@pytest.mark.skip('The processes.run_local_command_returning_output method is not returning anything.')
 @pytest.mark.parametrize('api_call_data', t1_api_call_data, ids=t1_case_ids)
 def test_kvdb_dump_non_existent_db(api_call_data, clean_all_stored_kvdb):
     '''
@@ -138,11 +137,10 @@ def test_kvdb_dump_non_existent_db(api_call_data, clean_all_stored_kvdb):
 
     # Verify that the content can't be shown because the db does not exist
     assert processes.run_local_command_returning_output(api_call) == f"Database '{api_call_data['options']['-n']}' " \
-                                                                     "not found or could not be loaded."
+                                                                     "not found or could not be loaded\n"
 
 
 @pytest.mark.tier(level=0)
-@pytest.mark.skip('The processes.run_local_command_returning_output method is not returning anything.')
 @pytest.mark.parametrize('api_call_data, kvdb_names', zip(t2_api_call_data, t2_kvdb_names), ids=t2_case_ids)
 def test_kvdb_dump_non_existent_db_no_loaded_dbs(api_call_data, kvdb_names, clean_stored_kvdb, create_predefined_kvdb):
     '''
@@ -186,4 +184,4 @@ def test_kvdb_dump_non_existent_db_no_loaded_dbs(api_call_data, kvdb_names, clea
 
     # Verify that the content can't be shown because the db does not exist
     assert processes.run_local_command_returning_output(api_call) == f"Database '{api_call_data['options']['-n']}' " \
-                                                                     "not found or could not be loaded."
+                                                                     "not found or could not be loaded\n"
