@@ -58,7 +58,6 @@ import pytest
 
 import wazuh_testing as fw
 from wazuh_testing import event_monitor as evm
-from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import query_wdb, insert_agent_in_db
 from wazuh_testing.tools.services import delete_dbs
 from wazuh_testing.tools.file import get_list_of_content_yml
@@ -70,12 +69,6 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 messages_file = os.path.join(os.path.join(test_data_path, 'global'), 'set_agent_groups.yaml')
 module_tests = get_list_of_content_yml(messages_file)
-
-log_monitor_paths = []
-wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
-receiver_sockets_params = [(wdb_path, 'AF_UNIX', 'TCP')]
-monitored_sockets_params = [('wazuh-db', None, True)]
-receiver_sockets = None  # Set in the fixtures
 
 
 # Fixtures
@@ -92,7 +85,7 @@ def remove_database(request):
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
-def test_set_agent_groups(remove_database, configure_sockets_environment, connect_to_sockets_module, test_case):
+def test_set_agent_groups(remove_database, restart_wazuh_daemon, test_case, create_groups):
     '''
     description: Check that every input message using the 'set_agent_groups' command in wazuh-db socket generates
                  the proper output to wazuh-db socket. To do this, it performs a query to the socket with a command
@@ -102,18 +95,18 @@ def test_set_agent_groups(remove_database, configure_sockets_environment, connec
     wazuh_min_version: 4.4.0
 
     parameters:
+        - remove_database:
+            type: fixture
+            brief: Delete databases.
         - restart_wazuh:
             type: fixture
-            brief: Reset the 'ossec.log' file and start a new monitor.
-        - configure_sockets_environment:
-            type: fixture
-            brief: Configure environment for sockets and MITM.
-        - connect_to_sockets_module:
-            type: fixture
-            brief: Module scope version of 'connect_to_sockets' fixture.
+            brief: Reset the 'ossec.log' file and restart Wazuh.
         - test_case:
             type: fixture
             brief: List of test_case stages (dicts with input, output and agent_id and expected_groups keys).
+        - create_groups:
+            type: fixture:
+            brief: Create required groups.
 
     assertions:
         - Verify that the socket response matches the expected output.
