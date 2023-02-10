@@ -1,0 +1,33 @@
+- sections:
+    - section: localfile
+      elements:
+        - log_format:
+            value: syslog
+        - location:
+            value: LOCATION
+        - ignore:
+            value: REGEX_1
+        - ignore:
+            value: REGEX_2
+
+    - section: sca
+      elements:
+        - enabled:
+            value: 'no'
+
+    - section: rootcheck
+      elements:
+        - disabled:
+            value: 'yes'
+
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'yes'
+
+    - section: wodle
+      attributes:
+        - name: syscollector
+      elements:
+        - disabled:
+            value: 'yes'

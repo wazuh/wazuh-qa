@@ -16,20 +16,15 @@ from wazuh_testing.tools.file import create_file, modify_file, delete_file, gene
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.modules import fim
-from wazuh_testing.modules.fim.event_monitor import (callback_detect_end_scan,
-                                                     callback_value_event, CB_REGISTRY_DBSYNC_NO_DATA,
-                                                     callback_key_event,
-                                                     callback_detect_registry_integrity_state_event,
-                                                     callback_detect_file_added_event,
-                                                     callback_detect_file_modified_event,
-                                                     callback_detect_file_deleted_event)
-from wazuh_testing.modules.fim.classes import CustomValidator, EventChecker, RegistryEventChecker
+from wazuh_testing.modules.fim import event_monitor as ev
+from wazuh_testing.modules.fim.classes import CustomValidator, EventChecker
 
 
 if sys.platform == 'win32':
     import win32con
     import win32api
     import pywintypes
+    import win32sec
 
 
 # Variables
@@ -53,13 +48,13 @@ def get_sync_msgs(timeout, new_data=True):
     events = []
     if new_data:
         wazuh_log_monitor.start(timeout=timeout,
-                                callback=generate_monitoring_callback(CB_REGISTRY_DBSYNC_NO_DATA),
+                                callback=generate_monitoring_callback(ev.CB_REGISTRY_DBSYNC_NO_DATA),
                                 error_message='Did not receive expected '
                                               '"db sync no data" event')
     for _ in range(0, fim.MAX_EVENTS_VALUE):
         try:
             sync_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                 callback=callback_detect_registry_integrity_state_event,
+                                                 callback=ev.callback_detect_registry_integrity_state_event,
                                                  accum_results=1,
                                                  error_message='Did not receive expected '
                                                                'Sending integrity control message"').result()
@@ -302,7 +297,7 @@ def calculate_registry_diff_paths(reg_key, reg_subkey, arch, value_name):
     return (folder_path, diff_file)
 
 
-def transform_registry_list(value_list=['test_value'], value_type=fim.REG_SZ, callback=callback_value_event):
+def transform_registry_list(value_list=['test_value'], value_type=fim.REG_SZ, callback=ev.callback_value_event):
     if sys.platform == 'win32':
         if value_type in [win32con.REG_SZ, win32con.REG_MULTI_SZ]:
             value_default_content = ''
@@ -324,7 +319,7 @@ def transform_registry_list(value_list=['test_value'], value_type=fim.REG_SZ, ca
         return aux_dict
 
 
-def transform_registry_key_list(key_list=['test_value'], callback=callback_key_event):
+def transform_registry_key_list(key_list=['test_value'], callback=ev.callback_key_event):
     if sys.platform == 'win32':
         aux_dict = {}
         if isinstance(key_list, list):
@@ -348,7 +343,7 @@ def set_check_options(options):
 
 def registry_value_create(root_key, registry_sub_key, log_monitor, arch=fim.KEY_WOW64_64KEY, value_list=['test_value'],
                           min_timeout=1, options=None, wait_for_scan=False, scan_delay=10, triggers_event=True,
-                          encoding=None, callback=callback_value_event, validators_after_create=None,
+                          encoding=None, callback=ev.callback_value_event, validators_after_create=None,
                           value_type=fim.REG_SZ):
     """Check if creation of registry value events are detected by syscheck.
 
@@ -415,7 +410,7 @@ def registry_value_create(root_key, registry_sub_key, log_monitor, arch=fim.KEY_
 
 def registry_value_update(root_key, registry_sub_key, log_monitor, arch=fim.KEY_WOW64_64KEY, value_list=['test_value'],
                           wait_for_scan=False, scan_delay=10, min_timeout=1, options=None, triggers_event=True,
-                          encoding=None, callback=callback_value_event, validators_after_update=None,
+                          encoding=None, callback=ev.callback_value_event, validators_after_update=None,
                           value_type=fim.REG_SZ):
     """Check if update registry value events are detected by syscheck.
 
@@ -477,7 +472,7 @@ def registry_value_update(root_key, registry_sub_key, log_monitor, arch=fim.KEY_
 
 def registry_value_delete(root_key, registry_sub_key, log_monitor, arch=fim.KEY_WOW64_64KEY, value_list=['test_value'],
                           wait_for_scan=False, scan_delay=10, min_timeout=1, options=None, triggers_event=True,
-                          encoding=None, callback=callback_value_event, validators_after_delete=None,
+                          encoding=None, callback=ev.callback_value_event, validators_after_delete=None,
                           value_type=fim.REG_SZ):
     """Check if delete registry value events are detected by syscheck.
 
@@ -685,7 +680,7 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
 
 def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1, options=None,
                      triggers_event=True, encoding=None, validators_after_create=None, validators_after_update=None,
-                     validators_after_delete=None, validators_after_cud=None, event_mode=None):
+                     validators_after_delete=None, validators_after_cud=None, event_mode=None, escaped=False):
     """Check if creation, update and delete events are detected by syscheck.
 
     This function provides multiple tools to validate events with custom validators.
@@ -721,14 +716,14 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1
                                        validators_after_delete, validators_after_cud)
     event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
                                  custom_validator=custom_validator, encoding=encoding,
-                                 callback=callback_detect_file_added_event)
+                                 callback=ev.callback_detect_file_added_event)
 
     # Create text files
     for name, content in file_list.items():
         create_file(REGULAR, folder, name, content=content)
 
     event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event,
-                                  event_mode=event_mode)
+                                  event_mode=event_mode, escaped=escaped)
     if triggers_event:
         logger.info("'added' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
@@ -738,9 +733,9 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1
 
     event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
                                  custom_validator=custom_validator, encoding=encoding,
-                                 callback=callback_detect_file_modified_event)
+                                 callback=ev.callback_detect_file_modified_event)
     event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event,
-                                  event_mode=event_mode)
+                                  event_mode=event_mode, escaped=escaped)
     if triggers_event:
         logger.info("'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
@@ -750,9 +745,9 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1
 
     event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
                                  custom_validator=custom_validator, encoding=encoding,
-                                 callback=callback_detect_file_deleted_event)
+                                 callback=ev.callback_detect_file_deleted_event)
     event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event,
-                                  event_mode=event_mode)
+                                  event_mode=event_mode, escaped=escaped)
     if triggers_event:
         logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
@@ -788,7 +783,7 @@ def check_time_travel(time_travel: bool, interval: timedelta = timedelta(hours=1
         logger.info(f"Changing the system clock from {before} to {str(datetime.now())}")
 
         if monitor:
-            monitor.start(timeout=timeout, callback=callback_detect_end_scan,
+            monitor.start(timeout=timeout, callback=ev.callback_detect_end_scan,
                           update_position=False,
                           error_message=f"End of scheduled scan not detected after {timeout} seconds")
 
@@ -822,6 +817,6 @@ def wait_for_scheduled_scan(wait_for_scan=False, interval: timedelta = timedelta
         logger.info(f"waiting for scheduled scan to start for {interval} seconds")
         time.sleep(interval)
         if monitor:
-            monitor.start(timeout=timeout, callback=callback_detect_end_scan,
+            monitor.start(timeout=timeout, callback=ev.callback_detect_end_scan,
                           update_position=False,
                           error_message=f"End of scheduled scan not detected after {timeout} seconds")

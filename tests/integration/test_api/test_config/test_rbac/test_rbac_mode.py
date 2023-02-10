@@ -66,8 +66,6 @@ pytestmark = pytest.mark.server
 
 path = os.path.dirname(os.path.abspath(__file__))
 rbac_sql_path = os.path.join(WAZUH_PATH, 'api', 'configuration', 'security', 'rbac.db')
-con = sqlite3.connect(rbac_sql_path)
-cur = con.cursor()
 
 # Configurations
 
@@ -88,6 +86,8 @@ def get_configuration(request):
 
 def extra_configuration_before_yield():
     # Add a new user in the RBAC database.
+    con = sqlite3.connect(rbac_sql_path)
+    cur = con.cursor()
     with open(os.path.join(test_data_path, 'schema_add_user.sql')) as f:
         sql = f.read()
         cur.executescript(sql)
@@ -95,6 +95,8 @@ def extra_configuration_before_yield():
 
 def extra_configuration_after_yield():
     # Delete the test_user created in the RBAC database.
+    con = sqlite3.connect(rbac_sql_path)
+    cur = con.cursor()
     with open(os.path.join(test_data_path, 'schema_delete_user.sql')) as f:
         sql = f.read()
         cur.executescript(sql)

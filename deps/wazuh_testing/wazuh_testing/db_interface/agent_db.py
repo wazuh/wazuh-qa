@@ -56,7 +56,7 @@ def insert_hotfix(agent_id='000', scan_id=int(time()), scan_time=datetime.dateti
 def insert_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
                    hostname='centos8', architecture='x64', os_name='CentOS Linux', os_version='8.4', os_codename='',
                    os_major='8', os_minor='4', os_patch='', os_build='', os_platform='centos', sysname='Linux',
-                   release='', version='', os_release='', checksum='dummychecksum', os_display_version='', triaged=0,
+                   release='', version='', os_release='', checksum='dummychecksum', os_display_version='', triaged='0',
                    reference=''):
     """Insert the OS information in the agent database.
 
@@ -80,7 +80,7 @@ def insert_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datet
         os_release (str): Release of the OS.
         checksum (str): Checksum of the OS.
         os_display_version (str): Os displayed version
-        triaged (int): Triaged.
+        triaged (str): Triaged.
         reference (str): OS reference.
     """
     query_string = f"agent {agent_id} sql INSERT OR REPLACE INTO sys_osinfo (scan_id, scan_time, hostname, " \
@@ -97,7 +97,7 @@ def insert_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datet
 def insert_package(agent_id='000', scan_id=int(time()), format='rpm', name='custom-package-0',
                    priority='', section='Unspecified', size=99, vendor='wazuh-mocking', version='1.0.0-1.el7',
                    architecture='x64', multiarch='', description='Wazuh mocking packages', source='Wazuh QA tests',
-                   location='', triaged=0, install_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
+                   location='', triaged='0', install_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
                    scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"), checksum='dummychecksum',
                    item_id='dummyitemid'):
     """Insert a package in the agent DB.
@@ -117,7 +117,7 @@ def insert_package(agent_id='000', scan_id=int(time()), format='rpm', name='cust
         description (str): Package description.
         source (str): Package source.
         location (str): Package location.
-        triaged (int): Times that the package has been installed.
+        triaged (str): Times that the package has been installed.
         install_time (str): Installation timestamp.
         scan_time (str): Scan timestamp.
         checksum (str): Package checksum.
@@ -218,7 +218,7 @@ def delete_os_info(agent_id='000'):
 def update_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S"),
                    hostname='centos8', architecture='x64', os_name='CentOS Linux', os_version='8.4', os_codename='',
                    os_major='8', os_minor='4', os_patch='', os_build='', os_platform='centos', sysname='Linux',
-                   release='', version='', os_release='', checksum='dummychecksum', os_display_version='', triaged=0,
+                   release='', version='', os_release='', checksum='dummychecksum', os_display_version='', triaged='0',
                    reference=''):
     """Update the sys_osinfo data from a specific agent.
 
@@ -242,7 +242,7 @@ def update_os_info(agent_id='000', scan_id=int(time()), scan_time=datetime.datet
         os_release (str): Release of the OS.
         checksum (str): Checksum of the OS.
         os_display_version (str): Os displayed version
-        triaged (int): Triaged.
+        triaged (str): Triaged.
         reference (str): OS reference.
     """
     delete_os_info(agent_id)
@@ -355,8 +355,22 @@ def insert_vulnerability_in_agent_inventory(agent_id='000', name='', version='',
         published (str): Vulnerability published.
         updated (str): Vulnerability updated.
     """
-    query_wdb(f"agent {agent_id} sql INSERT OR REPLACE INTO vuln_cves (name, version, architecture, cve, " \
-              f"detection_time, severity, cvss2_score, cvss3_score, reference, type, status, external_references," \
-              f" condition, title, published, updated) VALUES ('{name}', '{version}', '{architecture}', '{cve}', " \
-              f"'{detection_time}', '{severity}', {cvss2_score}, {cvss3_score},'{reference}', '{type}', '{status}',  " \
+    query_wdb(f"agent {agent_id} sql INSERT OR REPLACE INTO vuln_cves (name, version, architecture, cve, "
+              f"detection_time, severity, cvss2_score, cvss3_score, reference, type, status, external_references,"
+              f" condition, title, published, updated) VALUES ('{name}', '{version}', '{architecture}', '{cve}', "
+              f"'{detection_time}', '{severity}', {cvss2_score}, {cvss3_score},'{reference}', '{type}', '{status}', "
               f"'{external_references}', '{condition}', '{title}', '{published}', '{updated}')")
+
+
+def get_triaged_value_from_inventory(package_name, agent_id='000'):
+    """Check the triaged of a vulnerability in the agent database table.
+
+    Args:
+        package_name (str): Package name.
+        agent_id (str): Agent ID.
+    """
+    query = f"agent {agent_id} sql SELECT triaged FROM sys_programs WHERE name='{package_name}'"
+
+    result = query_wdb(query)[0]['triaged']
+
+    return result

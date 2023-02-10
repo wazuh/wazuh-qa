@@ -275,7 +275,8 @@ class EventChecker:
         self.events = None
         self.callback = callback
 
-    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0, event_mode=None):
+    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0, event_mode=None,
+                        escaped=False):
         """Call both 'fetch_events' and 'check_events'.
 
         Args:
@@ -294,7 +295,7 @@ class EventChecker:
         error_msg += " but were not detected." if len(self.file_list) > 1 else " but was not detected."
 
         self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
-        self.check_events(event_type, mode=event_mode)
+        self.check_events(event_type, mode=event_mode, escaped=escaped)
 
     def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message=''):
         """Try to fetch events on a given log monitor. Will return a list with the events detected.
@@ -351,12 +352,13 @@ class EventChecker:
                 raise
             logger.info("TimeoutError was expected and correctly caught.")
 
-    def check_events(self, event_type, mode=None):
+    def check_events(self, event_type, mode=None, escaped=False):
         """Check and validate all events in the 'events' list.
 
         Args:
             event_type (str): Expected type of the raised event {'added', 'modified', 'deleted'}.
             mode (str, optional): Specifies the FIM scan mode to check in the events
+            escaped (Boolean): check if file path has to be escaped.
         """
 
         def validate_checkers_per_event(events, options, mode):
@@ -375,11 +377,13 @@ class EventChecker:
             msg = f"Non expected number of events. {event_types[ev_type]} != {len(file_list)}"
             assert (event_types[ev_type] == len(file_list)), msg
 
-        def check_events_path(events, folder, file_list=['testfile0'], mode=None):
+        def check_events_path(events, folder, file_list=['testfile0'], mode=None, escaped=False):
             mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
             data_path = filter_events(events, ".[].data.path")
             for file_name in file_list:
                 expected_path = os.path.join(folder, file_name)
+                if escaped:
+                    expected_path = expected_path.replace("\\", "\\\\")
                 if self.encoding is not None:
                     for index, item in enumerate(data_path):
                         data_path[index] = item.encode(encoding=self.encoding)
@@ -388,7 +392,7 @@ class EventChecker:
                                 f'Reason: using non-utf-8 encoding in darwin.')
                 else:
                     error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
-                    assert (expected_path in data_path), error_msg
+                    assert (expected_path in str(data_path)), error_msg
 
         def filter_events(events, mask):
             """Returns a list of elements matching a specified mask in the events list using jq module."""
@@ -401,7 +405,7 @@ class EventChecker:
         if self.events is not None:
             validate_checkers_per_event(self.events, self.options, mode)
             check_events_type(self.events, event_type, self.file_list)
-            check_events_path(self.events, self.folder, file_list=self.file_list, mode=mode)
+            check_events_path(self.events, self.folder, file_list=self.file_list, mode=mode, escaped=escaped)
 
             if self.custom_validator is not None:
                 self.custom_validator.validate_after_cud(self.events)

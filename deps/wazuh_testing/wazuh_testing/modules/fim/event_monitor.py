@@ -7,10 +7,9 @@ import json
 
 from sys import platform
 from datetime import datetime
-from json import JSONDecodeError
 from wazuh_testing import LOG_FILE_PATH, logger, T_30, T_60
-from wazuh_testing.modules.fim import MAX_EVENTS_VALUE
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules.fim import MAX_EVENTS_VALUE
 
 # Variables
 file_monitor = FileMonitor(LOG_FILE_PATH)
@@ -21,14 +20,13 @@ CB_DETECT_FIM_EVENT = r".*Sending FIM event: (.+)$"
 CB_REALTIME_MONITORED_FOLDERS = r'.*Folders monitored with real-time engine: (\d+)'
 CB_INVALID_CONFIG_VALUE = r".*Invalid value for element '(.*)': (.*)."
 CB_INTEGRITY_CONTROL_MESSAGE = r".*Sending integrity control message: (.+)$"
-CB_MAXIMUM_FILE_SIZE = r".*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*"
 CB_AGENT_CONNECT = r".* Connected to the server .*"
 CB_INODE_ENTRIES_PATH_COUNT = r".*Fim inode entries: '(\d+)', path count: '(\d+)'"
 CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE = r".*registry_value.*Couldn't insert ('.*') entry into DB. The DB is full.*"
 CB_DATABASE_FULL_COULD_NOT_INSERT_KEY = r".*registry_key.*Couldn't insert ('.*') entry into DB. The DB is full.*"
 CB_COUNT_REGISTRY_ENTRIES = r".*Fim registry entries count: '(\d+)'"
 CB_COUNT_REGISTRY_VALUE_ENTRIES = r".*Fim registry values entries count: '(\d+)'"
-CB_REGISTRY_DBSYNC_NO_DATA = r".*fim_registry_(.*) dbsync no_data (.*)'"
+CB_REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
 CB_REGISTRY_LIMIT_CAPACITY = r".*Registry database is (\d+)% full."
 CB_REGISTRY_DB_BACK_TO_NORMAL = r".*(The registry database status returns to normal)."
 CB_REGISTRY_LIMIT_VALUE = r".*Maximum number of registry values to be monitored: '(\d+)'"
@@ -53,6 +51,12 @@ CB_FILE_EXCEEDS_DISK_QUOTA = r'.*The (.*) of the file size \'(.*)\' exceeds the 
 CB_FILE_SIZE_LIMIT_REACHED = r'.*File \'(.*)\' is too big for configured maximum size to perform diff operation\.'
 CB_DIFF_FOLDER_DELETED = r'.*Folder \'(.*)\' has been deleted.*'
 CB_FIM_WILDCARD_EXPANDING = r".*Expanding entry '.*' to '(.*)' to monitor FIM events."
+CB_FIM_PATH_CONVERTED = r".*fim_adjust_path.*Convert '(.*) to '(.*)' to process the FIM events."
+CB_STARTING_WINDOWS_AUDIT = r'.*state_checker.*(Starting check of Windows Audit Policies and SACLs)'
+CB_SWITCHING_DIRECTORIES_TO_REALTIME = r'.*state_checker.*(Audit policy change detected.\
+                                         Switching directories to realtime)'
+CB_RECIEVED_EVENT_4719 = r'.*win_whodata.*(Event 4719).*Switching directories to realtime'
+
 
 # Error message
 ERR_MSG_REALTIME_FOLDERS_EVENT = 'Did not receive expected "Folders monitored with real-time engine" event'
@@ -105,9 +109,12 @@ ERR_MSG_SCHEDULED_SCAN_ENDED = 'Did not receive expected "File integrity monitor
 ERR_MSG_DISK_QUOTA_LIMIT = 'Did not receive "Maximum disk quota size limit configured to \'... KB\'." event'
 ERR_MSG_FILE_LIMIT_REACHED = 'Did not receive "File ... is too big ... to perform diff operation" event.'
 ERR_MSG_FOLDER_DELETED = 'Did not receive expected "Folder ... has been deleted." event.'
+ERR_MSG_SACL_CONFIGURED_EVENT = 'Did not receive the expected "The SACL of <file> will be configured" event'
+ERR_MSG_WHDATA_REALTIME_MODE_CHANGE_EVENT = 'Expected "directory starts to monitored in real-time" event not received'
 
 
-# Callbacks Functions
+
+# Callback functions
 def callback_detect_event(line):
     """
     Detect an 'event' type FIM log.
@@ -290,8 +297,12 @@ def callback_disk_quota_limit_reached(line):
 
 def callback_detect_file_added_event(line):
     """ Callback that detects if a line in a log is a file added event.
+
     Args:
         line (String): string line to be checked by callback in FileMonitor.
+
+    Returns:
+        returns JSON string from log.
     """
     json_event = callback_detect_event(line)
 
@@ -304,8 +315,12 @@ def callback_detect_file_added_event(line):
 
 def callback_detect_file_modified_event(line):
     """ Callback that detects if a line in a log is a file modified event.
+
     Args:
         line (String): string line to be checked by callback in FileMonitor.
+
+    Returns:
+        returns JSON string from log.
     """
     json_event = callback_detect_event(line)
 
@@ -318,8 +333,12 @@ def callback_detect_file_modified_event(line):
 
 def callback_detect_file_deleted_event(line):
     """ Callback that detects if a line in a log is a file deleted event.
+
     Args:
         line (String): string line to be checked by callback in FileMonitor.
+
+    Returns:
+        returns JSON string from log.
     """
     json_event = callback_detect_event(line)
 
@@ -331,13 +350,33 @@ def callback_detect_file_deleted_event(line):
 
 
 # Event checkers
+def check_fim_event(file_monitor=None, callback='', error_message=None, update_position=True,
+                    timeout=T_60, accum_results=1, file_to_monitor=LOG_FILE_PATH):
+    """Check if a analysisd event occurs
+
+    Args:
+        file_monitor (FileMonitor): FileMonitor object to monitor the file content.
+        callback (str): log regex to check in Wazuh log
+        error_message (str): error message to show in case of expected event does not occur
+        update_position (boolean): filter configuration parameter to search in Wazuh log
+        timeout (str): timeout to check the event in Wazuh log
+        accum_results (int): Accumulation of matches.
+    """
+    file_monitor = FileMonitor(file_to_monitor) if file_monitor is None else file_monitor
+    error_message = f"Could not find this event in {file_to_monitor}: {callback}" if error_message is None else \
+                    error_message
+
+    file_monitor.start(timeout=timeout, update_position=update_position, accum_results=accum_results,
+                       callback=generate_monitoring_callback(callback), error_message=error_message)
+
+
 def detect_initial_scan(file_monitor):
     """Detect initial scan when restarting Wazuh.
 
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    file_monitor.start(timeout=60, callback=callback_detect_end_scan,
+    file_monitor.start(timeout=T_60, callback=callback_detect_end_scan,
                        error_message=ERR_MSG_SCHEDULED_SCAN_ENDED)
 
 
@@ -347,7 +386,7 @@ def detect_initial_scan_start(file_monitor):
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    file_monitor.start(timeout=60, callback=callback_detect_scan_start,
+    file_monitor.start(timeout=T_60, callback=callback_detect_scan_start,
                        error_message=ERR_MSG_SCHEDULED_SCAN_STARTED)
 
 
@@ -357,7 +396,7 @@ def detect_realtime_start(file_monitor):
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    file_monitor.start(timeout=60, callback=generate_monitoring_callback(CB_FOLDERS_MONITORED_REALTIME),
+    file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(CB_FOLDERS_MONITORED_REALTIME),
                        error_message=ERR_MSG_FOLDERS_MONITORED_REALTIME)
 
 
@@ -413,3 +452,31 @@ def check_registry_crud_event(callback, path,  timeout=T_30, type='added', arch=
                 return event
 
     return None
+
+
+def detect_windows_sacl_configured(file_monitor, file='.*'):
+    """Detects when windows permision checks have been configured for a given file.
+
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+        file: The path of the file that will be monitored
+    """
+
+    pattern = fr".*win_whodata.*The SACL of '({file})' will be configured"
+
+    file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(pattern),
+                       error_message=ERR_MSG_SACL_CONFIGURED_EVENT)
+
+
+def detect_windows_whodata_mode_change(file_monitor, file='.*'):
+    """Detects whe monitoring for a file changes from whodata to real-time.
+
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+        file: The path of the file that will be monitored
+    """
+
+    pattern = fr".*set_whodata_mode_changes.*The '({file})' directory starts to be monitored in real-time mode."
+
+    file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(pattern),
+                       error_message=ERR_MSG_WHDATA_REALTIME_MODE_CHANGE_EVENT)

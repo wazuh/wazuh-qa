@@ -1,0 +1,46 @@
+- name: Generate events
+  hosts: windows-agent
+  vars:
+    myfile: C:\temp\test.txt
+    log: "Dec 10 01:02:02 host sshd[1234]: Failed none for root from 192.168.56.11 port 1066 ssh2"
+  tasks:
+
+    - name: Enable or disable firewall for Domain profiles
+      community.windows.win_firewall:
+        state: "{{ firewall_domain_status }}"
+        profiles:
+          - Domain
+
+    - name: Enable or disable firewall for Private profiles
+      community.windows.win_firewall:
+        state: "{{ firewall_private_status }}"
+        profiles:
+          - Private
+
+    - name: Enable or disable firewall for Public profiles
+      community.windows.win_firewall:
+        state: "{{ firewall_public_status }}"
+        profiles:
+          - Public
+
+    - name: Insert log into test.txt file
+      win_shell: |
+        "{{ log }}" | Out-File "{{ myfile }}" -Append -Encoding ASCII
+
+- name: Get alerts file
+  hosts: manager
+  tasks:
+
+    - name: Wait for expected alert
+      block:
+
+        - name: Waiting for alert
+          wait_for:
+            timeout: 20
+
+      always:
+
+        - name: Get alert json
+          include_role:
+            name: manage_alerts
+            tasks_from: get_alert_json.yaml
