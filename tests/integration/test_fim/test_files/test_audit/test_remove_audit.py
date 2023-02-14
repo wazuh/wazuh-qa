@@ -65,32 +65,37 @@ import re
 import subprocess
 
 import pytest
-import wazuh_testing.fim as fim
 from distro import id
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+
+from wazuh_testing.tools import PREFIX, LOG_FILE_PATH
+from wazuh_testing.tools.configuration import load_configuration_template, get_test_cases_data
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.utils import retry
+from wazuh_testing.modules.fim import TEST_DIR_1
+from wazuh_testing.modules.fim.event_monitor import callback_audit_cannot_start
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+
 
 # Marks
-
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
+
+# Configuration and cases data
+test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_remove_audit.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_remove_audit.yaml')
+
+# Test configurations
+configuration_parameters, configuration_metadata, test_case_ids = get_test_cases_data(test_cases_path)
+configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
+
 # Variables
-
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-test_directories = [os.path.join('/', 'testdir1'), os.path.join('/', 'testdir2'), os.path.join('/', 'testdir3')]
-testdir1, testdir2, testdir3 = test_directories
-
-wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
-
-# Configurations
-
-configurations = load_wazuh_configurations(configurations_path, __name__)
-
+test_directories = [os.path.join(PREFIX, TEST_DIR_1)]
 
 # Function
-
 @retry(subprocess.CalledProcessError, attempts=5, delay=10)
 def run_process(command_list):
     """Execute the command_list command
@@ -105,13 +110,6 @@ def run_process(command_list):
 
 
 # Fixtures
-
-@pytest.fixture(scope='module', params=configurations)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
-
-
 @pytest.fixture(scope='module')
 def uninstall_install_audit():
     """Uninstall auditd before test and install after test"""
@@ -141,12 +139,11 @@ def uninstall_install_audit():
 
 
 # Test
-
-@pytest.mark.parametrize('tags_to_apply', [
-    {'config1'}
-])
-def test_move_folders_to_realtime(tags_to_apply, get_configuration, uninstall_install_audit,
-                                  configure_environment, restart_syscheckd):
+@pytest.mark.parametrize('test_folders', [test_directories], scope="module", ids='')
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
+def test_move_folders_to_realtime(configuration, metadata, set_wazuh_configuration, create_monitored_folders,
+                                  configure_local_internal_options_function, uninstall_install_audit,
+                                  restart_syscheck_function):
     '''
     description: Check if FIM switches the monitoring mode of the testing directories from 'who-data'
                  to 'realtime' when the 'auditd' package is not installed. For this purpose, the test
@@ -155,32 +152,52 @@ def test_move_folders_to_realtime(tags_to_apply, get_configuration, uninstall_in
                  are monitored with 'realtime' verifying that the proper FIM events are generated.
                  Finally, the test will install the 'auditd' package again.
 
+
+    test_phases:
+        - setup:
+            - Apply ossec.conf configuration changes according to the configuration template and use case.
+            - Apply custom settings in local_internal_options.conf.
+            - Remove auditd
+            - Truncate wazuh logs.
+            - Restart wazuh-syscheck daemon to apply configuration changes.
+        - test:
+            - Check that whodata cannot start and monitoring of configured folder is changed to realtime mode.
+        - teardown:
+            - Install auditd
+            - Restore initial configuration, both ossec.conf and local_internal_options.conf.
+
     wazuh_min_version: 4.2.0
 
     tier: 1
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if match with a configuration identifier, skip otherwise.
-        - get_configuration:
+        - configuration:
+            type: dict
+            brief: Configuration values for ossec.conf.
+        - metadata:
+            type: dict
+            brief: Test case data.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Get configurations from the module.
+            brief: Set ossec.conf configuration.
+        - create_monitored_folders_module
+            type: fixture
+            brief: Create folders to be monitored, delete after test.
+        - configure_local_internal_options_function:
+            type: fixture
+            brief: Set local_internal_options.conf file.
         - uninstall_install_audit:
             type: fixture
             brief: Uninstall 'auditd' before the test and install it again after the test run.
-        - configure_environment:
+        - restart_syscheck_function:
             type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_syscheckd:
-            type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: restart syscheckd daemon, and truncate the ossec.log.
 
     assertions:
         - Verify that FIM switches the monitoring mode of the testing directories from 'whodata' to 'realtime'
           if the 'authd' package is not installed.
 
-    input_description: A test case (config1) is contained in external YAML file (wazuh_conf.yaml)
+    input_description: A test case is contained in external YAML file (configuration_remove_audit.yaml)
                        which includes configuration settings for the 'wazuh-syscheckd' daemon
                        and, it is combined with the testing directories to be monitored
                        defined in this module.
@@ -192,8 +209,7 @@ def test_move_folders_to_realtime(tags_to_apply, get_configuration, uninstall_in
         - realtime
         - who_data
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
-
-    wazuh_log_monitor.start(timeout=20, callback=fim.callback_audit_cannot_start,
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    wazuh_log_monitor.start(timeout=20, callback=callback_audit_cannot_start,
                             error_message='Did not receive expected "Who-data engine could not start. '
                                           'Switching who-data to real-time" event')
