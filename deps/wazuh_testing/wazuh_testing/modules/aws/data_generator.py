@@ -502,7 +502,7 @@ class MacieDataGenerator(DataGenerator):
     BASE_FILE_NAME = 'firehose_macie-1-'
 
     def get_filename(self) -> str:
-        """Return the filename in the Macie format
+        """Return the filename in the Macie format.
 
         Example:
             <prefix>/<year>/<month>/<day>
