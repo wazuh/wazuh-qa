@@ -62,52 +62,41 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_real_time_whodata_started
-from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing import global_parameters, LOG_FILE_PATH, PREFIX
+from wazuh_testing.fim import callback_real_time_whodata_started
+from wazuh_testing.modules.fim import TEST_DIR_1
+from wazuh_testing.tools import configuration
 from wazuh_testing.tools.monitoring import FileMonitor
 
+
 # Marks
-
-
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2)]
 
 # Variables
-test_directories = [os.path.join(PREFIX, 'testdir1')]
-
-directory_str = ','.join(test_directories)
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf_whodata_thread.yaml')
-testdir1 = test_directories[0]
+directory_str = os.path.join(PREFIX, TEST_DIR_1)
 
 # Configurations
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 
-p, m = generate_params(extra_params={"TEST_DIRECTORIES": testdir1}, modes=['whodata'])
+# Configuration and cases data
+test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_whodata_thread.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_whodata_thread.yaml')
 
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
-
-
-# Fixtures
-
-
-@pytest.fixture(scope='module', params=configurations)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
+# Test configurations
+configuration_parameters, configuration_metadata, test_case_ids = configuration.get_test_cases_data(test_cases_path)
+for count, value in enumerate(configuration_parameters):
+    configuration_parameters[count]['TEST_DIRECTORIES'] = directory_str
+configurations = configuration.load_configuration_template(configurations_path, configuration_parameters,
+                                                           configuration_metadata)
 
 
 # Tests
-
-
-@pytest.mark.parametrize('whodata_enabled, tags_to_apply', [
-    (False, {'whodata_disabled_conf'}),
-    (True, {'whodata_enabled_conf'})
-])
-def test_ambiguous_whodata_thread(whodata_enabled, tags_to_apply, get_configuration, configure_environment,
-                                  restart_syscheckd):
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
+def test_ambiguous_whodata_thread(configuration, metadata, set_wazuh_configuration,
+                                   configure_local_internal_options_function, restart_syscheck_function):
     '''
     description: Check if the 'wazuh-syscheckd' daemon starts the 'whodata' thread when the configuration
                  is ambiguous. For example, when using 'whodata' on the same directory using conflicting
@@ -149,9 +138,9 @@ def test_ambiguous_whodata_thread(whodata_enabled, tags_to_apply, get_configurat
     tags:
         - who_data
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    if whodata_enabled:
+    if metadata['whodata_enabled']:
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_real_time_whodata_started,
                                 error_message='Did not receive expected '
                                               '"File integrity monitoring real-time Whodata engine started" event')

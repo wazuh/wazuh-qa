@@ -1,0 +1,15 @@
+- name: Whodata thread Enabled
+  description: Monitor the System32 folder without redirection in Scheduled mode
+  configuration_parameters:
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    whodata_wnabled: true
+
+- name: Whodata thread disabled
+  description: Monitor the System32 folder without redirection in Scheduled mode
+  configuration_parameters:
+    WHODATA: 'no'
+  metadata:
+    fim_mode: whodata
+    whodata_wnabled: true
