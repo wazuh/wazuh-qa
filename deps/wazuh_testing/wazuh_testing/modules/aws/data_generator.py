@@ -2,8 +2,8 @@
 import csv
 import json
 from datetime import datetime
-from io import StringIO
 from os.path import join
+from io import StringIO
 from uuid import uuid4
 
 from wazuh_testing.tools.utils import get_random_ip, get_random_port, get_random_string
@@ -497,6 +497,113 @@ class KMSDataGenerator(DataGenerator):
         )
 
 
+class MacieDataGenerator(DataGenerator):
+    BASE_PATH = ''
+    BASE_FILE_NAME = 'firehose_macie-1-'
+
+    def get_filename(self) -> str:
+        """Return the filename in the Macie format.
+
+        Example:
+            <prefix>/<year>/<month>/<day>
+
+        Returns:
+            str: Synthetic filename.
+        """
+        now = datetime.utcnow()
+        path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
+        name = f"{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}_{str(uuid4())}{cons.JSON_EXT}"
+
+        return join(path, name)
+
+    def get_data_sample(self) -> str:
+        """Return a sample of data according to the Macie format.
+
+        Returns:
+            str: Synthetic data.
+        """
+
+        return json.dumps(
+            {
+                'version': '0',
+                'id': str(uuid4()),
+                'detail-type': 'Macie Alert',
+                'source': 'aws.macie',
+                'account': cons.RANDOM_ACCOUNT_ID,
+                'time': '2021-01-01T00:20:42Z',
+                'region': 'us-east-1',
+                'resources': [
+                    f"arn:aws:macie:us-east-1:{cons.RANDOM_ACCOUNT_ID}:trigger/{str(uuid4())}/alert",
+                    f"arn:aws:macie:us-east-1:{cons.RANDOM_ACCOUNT_ID}:trigger/{str(uuid4())}"
+                ],
+                'detail': {
+                    'notification-type': 'ALERT_CREATED',
+                    'tags': [
+                        'Open Permissions',
+                        'Basic Alert'
+                    ],
+                    'name': 'S3 Bucket IAM policy grants global read rights',
+                    'severity': 'CRITICAL',
+                    'url': 'https://mt.us-east-1.macie.aws.amazon.com/posts/arn%3Aaws%3Amacie%3Aus-east-1',
+                    'alert-arn': f"arn:aws:macie:us-east-1:{cons.RANDOM_ACCOUNT_ID}:trigger/{str(uuid4())}/alert",
+                    'risk-score': 9,
+                    'created-at': '2021-01-01T00:20:42.364509',
+                    'actor': 'resources.wazuh.com',
+                    'summary': {
+                        'Description': 'S3 Bucket uses IAM policy to grant read rights to Everyone.',
+                        'Bucket': {
+                            'resources.wazuh.com': 1
+                        },
+                        'Record Count': 1,
+                        'ACL': {
+                            'resources.wazuh.com': [
+                                {
+                                    'Owner': {
+                                        'DisplayName': 'wazuh',
+                                        'ID': get_random_string(64),
+                                    },
+                                    'Grants': [
+                                        {
+                                            'Grantee': {
+                                                'Type': 'CanonicalUser',
+                                                'DisplayName': 'wazuh',
+                                                'ID': get_random_string(64),
+                                            },
+                                            'Permission': 'FULL_CONTROL'
+                                        },
+                                        {
+                                            'Grantee': {
+                                                'Type': 'Group',
+                                                'URI': 'http://acs.amazonaws.com/groups/global/AllUsers'
+                                            },
+                                            'Permission': 'READ'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        'Event Count': 1,
+                        'Timestamps': {
+                            '2021-01-01T00:11:49.171020Z': 1
+                        },
+                        'recipientAccountId': {
+                            cons.RANDOM_ACCOUNT_ID: 1
+                        }
+                    },
+                    'trigger': {
+                        'rule-arn': (
+                            f"arn:aws:macie:us-east-1:{cons.RANDOM_ACCOUNT_ID}:trigger/b731d9ffb1fe61508d4a478c92efa666"
+                        ),
+                        'alert-type': 'basic',
+                        'created-at': '2020-12-29 16:36:17.412000+00:00',
+                        'description': 'S3 Bucket uses IAM policy to grant read rights to Everyone.',
+                        'risk': 9
+                    }
+                }
+            }
+        )
+
+
 # Maps bucket type with corresponding data generator
 buckets_data_mapping = {
     cons.CLOUD_TRAIL_TYPE: CloudTrailDataGenerator,
@@ -505,7 +612,8 @@ buckets_data_mapping = {
     cons.ALB_TYPE: ALBDataGenerator,
     cons.CLB_TYPE: CLBDataGenerator,
     cons.NLB_TYPE: NLBDataGenerator,
-    cons.KMS_TYPE: KMSDataGenerator
+    cons.KMS_TYPE: KMSDataGenerator,
+    cons.MACIE_TYPE: MacieDataGenerator,
 }
 
 

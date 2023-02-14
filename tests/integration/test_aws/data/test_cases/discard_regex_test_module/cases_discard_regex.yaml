@@ -109,3 +109,19 @@
     discard_regex: MatchDataKey
     found_logs: 3
     skipped_logs: 1
+
+- name: macie_discard_regex
+  description: Macie discard regex configurations
+  configuration_parameters:
+    BUCKET_TYPE: custom
+    BUCKET_NAME: wazuh-macie-integration-tests
+    DISCARD_FIELD: severity
+    DISCARD_REGEX: LOW
+  metadata:
+    bucket_type: custom
+    bucket_name: wazuh-macie-integration-tests
+    only_logs_after: 2022-NOV-20
+    discard_field: severity
+    discard_regex: LOW
+    found_logs: 3
+    skipped_logs: 1

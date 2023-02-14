@@ -270,3 +270,42 @@
     only_logs_after: 2022-NOV-20
     path: inexistent_prefix
     expected_results: 0
+
+- name: macie_path_with_data
+  description: Macie path configurations
+  configuration_parameters:
+    BUCKET_TYPE: custom
+    BUCKET_NAME: wazuh-macie-integration-tests
+    PATH: test_prefix
+  metadata:
+    bucket_type: custom
+    bucket_name: wazuh-macie-integration-tests
+    only_logs_after: 2022-NOV-20
+    path: test_prefix
+    expected_results: 1
+
+- name: macie_path_without_data
+  description: Macie path configurations
+  configuration_parameters:
+    BUCKET_TYPE: custom
+    BUCKET_NAME: wazuh-macie-integration-tests
+    PATH: empty_prefix
+  metadata:
+    bucket_type: custom
+    bucket_name: wazuh-macie-integration-tests
+    only_logs_after: 2022-NOV-20
+    path: empty_prefix
+    expected_results: 0
+
+- name: macie_inexistent_path
+  description: Macie path configurations
+  configuration_parameters:
+    BUCKET_TYPE: custom
+    BUCKET_NAME: wazuh-macie-integration-tests
+    PATH: inexistent_prefix
+  metadata:
+    bucket_type: custom
+    bucket_name: wazuh-macie-integration-tests
+    only_logs_after: 2022-NOV-20
+    path: inexistent_prefix
+    expected_results: 0
