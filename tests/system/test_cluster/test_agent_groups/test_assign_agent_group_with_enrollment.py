@@ -53,6 +53,7 @@ from wazuh_testing.tools import WAZUH_PATH
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
 test_infra_agents = ["wazuh-agent1"]
+pytestmark = [pytest.mark.cluster]
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'enrollment_cluster', 'inventory.yml')
@@ -72,11 +73,8 @@ enrollment_group = f"""
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
-@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("agent_target", ["wazuh-worker1"])
-def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_managers, test_infra_agents, host_manager):
+def test_assign_agent_to_a_group(agent_target, clean_environment):
     '''
     description: Check race condition when an agent enrollment process with a group connects to the worker,
                  when worker no receive information about the group and when data of groups is receive,
@@ -89,15 +87,6 @@ def test_assign_agent_to_a_group(agent_target, clean_environment, test_infra_man
         - clean_enviroment:
             type: fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
-        - test_infra_managers
-            type: List
-            brief: list of manager hosts in enviroment
-        - test_infra_agents
-            type: List
-            brief: list of agent hosts in enviroment
-        - host_manager
-            type: HostManager object
-            brief: handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering and before receiving agent group info, it has the 'default' group assigned.

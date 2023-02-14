@@ -5,6 +5,7 @@
 import os
 import uuid
 
+import pytest
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
@@ -12,6 +13,7 @@ from wazuh_testing.tools.system import HostManager
 # Hosts
 test_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
 worker_hosts = test_hosts[1:]
+pytestmark = [pytest.mark.cluster]
 
 # Data paths
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')

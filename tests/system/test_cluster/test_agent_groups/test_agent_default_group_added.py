@@ -54,22 +54,19 @@ from system import (AGENT_NO_GROUPS, AGENT_STATUS_ACTIVE, AGENT_STATUS_NEVER_CON
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
 test_infra_agents = ["wazuh-agent1"]
+pytestmark = [pytest.mark.cluster]
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'enrollment_cluster', 'inventory.yml')
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
-timeout = 5
+timeout = 25
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
-@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("agent_target", test_infra_managers)
-def test_agent_default_group_added(agent_target, clean_environment, test_infra_managers,
-                                   test_infra_agents, host_manager):
+def test_agent_default_group_added(agent_target, clean_environment):
     '''
     description: Check agent enrollment process and default group assignment works as expected in a cluster enviroment.
     An agent pointing to a master/worker node is registered using cli tool, and it gets assigned the default group
@@ -82,15 +79,6 @@ def test_agent_default_group_added(agent_target, clean_environment, test_infra_m
         - clean_enviroment:
             type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
-        - test_infra_managers
-            type: List
-            brief: List of manager hosts in enviroment.
-        - test_infra_managers
-            type: List
-            brief: List of agent hosts in enviroment.
-        - host_manager
-            type: HostManager object
-            brief: Handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering the agent appears as never_connected in all nodes.

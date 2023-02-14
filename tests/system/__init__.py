@@ -4,8 +4,7 @@
 
 import os
 
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
-
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, CLUSTER_LOGS_PATH
 
 # Agent Variables
 AGENT_STATUS_ACTIVE = 'active'
@@ -42,9 +41,9 @@ def restart_cluster(hosts_list, host_manager):
 def clean_cluster_logs(hosts_list, host_manager):
     # Clean ossec.log and cluster.log
     for host in hosts_list:
-        host_manager.clear_file(host=host, file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
+        host_manager.clear_file_without_recreate(host=host, file_path=LOG_FILE_PATH)
         if "worker" in host or "master" in host:
-            host_manager.clear_file(host=host, file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
+            host_manager.clear_file_without_recreate(host=host, file_path=CLUSTER_LOGS_PATH)
 
 
 def remove_cluster_agents(wazuh_master, agents_list, host_manager):
@@ -129,3 +128,9 @@ def change_agent_group_with_wdb(agent_id, new_group, host, host_manager):
     group_data = host_manager.run_command(host, f"python3 {WAZUH_PATH}/bin/wdb-query.py global \
                                           'set-agent-groups {query}'")
     return group_data
+
+
+def execute_wdb_query(query, host, host_manager):
+    response = host_manager.run_command(host, f"python3 {WAZUH_PATH}/bin/wdb-query.py {query}")
+
+    return response

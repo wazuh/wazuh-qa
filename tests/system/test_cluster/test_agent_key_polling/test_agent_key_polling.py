@@ -11,6 +11,11 @@ from wazuh_testing.tools.system import HostManager
 
 # Hosts
 testinfra_hosts = ["wazuh-master", "wazuh-worker1", "wazuh-agent2"]
+pytestmark = [pytest.mark.cluster]
+
+inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                              'provisioning', 'basic_cluster', 'inventory.yml')
+host_manager = HostManager(inventory_path)
 
 
 # Configuration
@@ -32,11 +37,12 @@ def configure_environment(host_manager):
                                    after='wazuh-agent2 any ', before='2\n')
     host_manager.clear_file(host='wazuh-agent2', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
     agent2_id = host_manager.run_shell(host='wazuh-master',
-                cmd=f'/var/ossec/bin/manage_agents -l | grep "wazuh-agent2" | grep -o "[0-9][0-9][0-9]"')
+                                       cmd='/var/ossec/bin/manage_agents -l | grep "wazuh-agent2" | '
+                                           'grep -o "[0-9][0-9][0-9]"')
     host_manager.run_shell(host='wazuh-master', cmd=f'/var/ossec/bin/manage_agents -r {agent2_id}')
 
 
-def test_agent_key_polling(inventory_path):
+def test_agent_key_polling():
     """Check that the agent key polling cycle works correctly. To do this, we use the messages and the hosts defined
     in data/messages.yml and the hosts inventory.
 
@@ -46,7 +52,6 @@ def test_agent_key_polling(inventory_path):
         Path to the Ansible hosts inventory
     """
     actual_path = os.path.dirname(os.path.abspath(__file__))
-    host_manager = HostManager(inventory_path=inventory_path)
     configure_environment(host_manager)
 
     host_monitor = HostMonitor(inventory_path=inventory_path,

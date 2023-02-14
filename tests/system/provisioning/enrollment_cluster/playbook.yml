@@ -1,8 +1,7 @@
----
 - name: Create our container (Master)
   hosts: localhost
   vars_files:
-    - ./vars/configurations.yml
+    - ./vars/configurations.yaml
   tasks:
     - name: Create a network
       docker_network:
@@ -17,7 +16,7 @@
 - name: Create our container (Worker1)
   hosts: localhost
   vars_files:
-    - ./vars/configurations.yml
+    - ./vars/configurations.yaml
   tasks:
     - docker_container:
         name: "{{ worker1_hostname }}"
@@ -29,7 +28,7 @@
 - name: Create our container (Worker2)
   hosts: localhost
   vars_files:
-    - ./vars/configurations.yml
+    - ./vars/configurations.yaml
   tasks:
     - docker_container:
         name: "{{ worker2_hostname }}"
@@ -41,7 +40,7 @@
 - name: Create our container (Agent1)
   hosts: localhost
   vars_files:
-    - ./vars/configurations.yml
+    - ./vars/configurations.yaml
   tasks:
     - docker_container:
         name: "{{ agent1_hostname }}"
@@ -53,29 +52,29 @@
 - name: Wazuh Master
   hosts: wazuh-master
   vars:
-    master_hostname: "wazuh-master"
+    master_hostname: wazuh-master
   vars_files:
-    - ./vars/configurations.yml
+    - ./vars/configurations.yaml
   roles:
-    - name: "roles/master-role"
+    - name: roles/master-role
 
 - name: Wazuh Worker1
   hosts: wazuh-worker1
   vars:
     worker_name: wazuh-worker1
   vars_files:
-    - ./vars/configurations.yml
+    - ./vars/configurations.yaml
   roles:
-    - name: "roles/worker-role"
+    - name: roles/worker-role
 
 - name: Wazuh Worker2
   hosts: wazuh-worker2
   vars:
     worker_name: wazuh-worker2
   vars_files:
-    - ./vars/configurations.yml
+    - ./vars/configurations.yaml
   roles:
-    - name: "roles/worker-role"
+    - name: roles/worker-role
 
 - name: Wazuh Agent1
   hosts: wazuh-agent1
@@ -83,6 +82,6 @@
     manager_hostname: wazuh-master
     agent_hostname: "{{ agent1_hostname }}"
   vars_files:
-    - ./vars/configurations.yml
+    - ./vars/configurations.yaml
   roles:
-    - name: "roles/agent-role"
+    - name: roles/agent-role

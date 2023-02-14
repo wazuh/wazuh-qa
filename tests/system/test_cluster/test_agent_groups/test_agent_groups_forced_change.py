@@ -55,6 +55,7 @@ from system.test_cluster.test_agent_groups.common import register_agent
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
 test_infra_agents = ["wazuh-agent1", "wazuh-agent2", "wazuh-agent3"]
 agent_groups = ["Group1", "Group2", "Group3"]
+pytestmark = [pytest.mark.cluster]
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'basic_cluster', 'inventory.yml')
@@ -64,12 +65,8 @@ timeout = 10
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
-@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("agent_host", test_infra_managers[0:2])
-def test_sync_when_forced_to_change_a_group(agent_host, clean_environment, test_infra_managers,
-                                            test_infra_agents, host_manager):
+def test_sync_when_forced_to_change_a_group(agent_host, clean_environment):
     '''
     description: Check that having an agent with a group assigned,
                  when the change is forced with a wdb command, the new group
@@ -82,15 +79,6 @@ def test_sync_when_forced_to_change_a_group(agent_host, clean_environment, test_
         - clean_enviroment:
             type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
-        - test_infra_managers
-            type: List
-            brief: List of manager hosts in enviroment.
-        - test_infra_agents
-            type: List
-            brief: List of agent hosts in enviroment.
-        - host_manager
-            type: HostManager object
-            brief: Handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agents appear as active in all nodes.
         - Verify that after registering and after starting the agent, the indicated group is synchronized.
@@ -129,10 +117,7 @@ def test_sync_when_forced_to_change_a_group(agent_host, clean_environment, test_
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
-@pytest.mark.parametrize("host_manager", [host_manager])
-def test_force_group_change_during_sync(clean_environment, test_infra_managers, test_infra_agents, host_manager):
+def test_force_group_change_during_sync(clean_environment):
     '''
     description: Check that having an agent with a group assigned, when the change is forced with a wdb command,
                  and the agent's group is changed again during the sync timeframe, the agent has the correct group
@@ -142,15 +127,6 @@ def test_force_group_change_during_sync(clean_environment, test_infra_managers, 
         - clean_enviroment:
             type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
-        - test_infra_managers
-            type: List
-            brief: List of manager hosts in enviroment.
-        - test_infra_agents
-            type: List
-            brief: List of agent hosts in enviroment.
-        - host_manager
-            type: HostManager object
-            brief: Handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agents appear as active in all nodes.
         - Verify that after registering and after starting the agent, the indicated group is synchronized.
