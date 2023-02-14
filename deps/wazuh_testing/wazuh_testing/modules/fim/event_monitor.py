@@ -154,6 +154,21 @@ def callback_detect_file_deleted_event(line):
     return None
 
 
+def callback_audit_cannot_start(line):
+    """ Callback that detects if a line shows whodata engine could not start and monitoring switched to realtime.
+
+    Args:
+        line (String): string line to be checked by callback in FileMonitor.
+
+    Returns:
+        Returns True if line matches.
+    """
+    match = re.match(r'.*Who-data engine could not start. Switching who-data to real-time.', line)
+    if match:
+        return True
+    return None
+
+
 # Event checkers
 def check_fim_event(file_monitor=None, callback='', error_message=None, update_position=True,
                     timeout=T_60, accum_results=1, file_to_monitor=LOG_FILE_PATH):
