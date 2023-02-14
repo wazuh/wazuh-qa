@@ -67,3 +67,13 @@
     bucket_type: custom
     bucket_name: wazuh-kms-integration-tests
     expected_results: 1
+
+- name: macie_without_only_logs_after
+  description: Macie only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: custom
+    BUCKET_NAME: wazuh-macie-integration-tests
+  metadata:
+    bucket_type: custom
+    bucket_name: wazuh-macie-integration-tests
+    expected_results: 1
