@@ -19,6 +19,7 @@ Release report: TBD
 
 ### Changed
 
+- Fix FIM test_large_changes test suite ([#3948](https://github.com/wazuh/wazuh-qa/pull/3948)) \- (Tests)
 - Update FIM test to new FIM DBSync process  ([#2728](https://github.com/wazuh/wazuh-qa/pull/2728)) \- (Framework + Tests)
 - Update file_limit and registry_limit tests ([#3280](https://github.com/wazuh/wazuh-qa/pull/3280)) \- (Tests)
 - Change expected timestamp for proftpd analysisd test predecoder test case ([#3900](https://github.com/wazuh/wazuh-qa/pull/3900)) \- (Tests)
