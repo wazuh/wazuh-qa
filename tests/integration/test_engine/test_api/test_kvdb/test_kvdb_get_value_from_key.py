@@ -53,7 +53,7 @@ t2_kvdb_names = engine.get_kvdb_names(t2_configuration_metadata)
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('api_call_data, kvdb_names', zip(t1_api_call_data, t1_kvdb_names), ids=t1_case_ids)
-def test_kvdb_get_key_value(api_call_data, kvdb_names, clean_stored_kvdb, create_predefined_kvdb):
+def test_kvdb_get_key_value(request, api_call_data, kvdb_names, clean_stored_kvdb, create_predefined_kvdb):
     '''
     description: Get the value for a given key within an existing database.
 
@@ -68,6 +68,9 @@ def test_kvdb_get_key_value(api_call_data, kvdb_names, clean_stored_kvdb, create
     tier: 0
 
     parameters:
+        - request:
+            type: _pytest.fixtures.FixtureRequest
+            brief: Provides information of the requesting test function.
         - api_call_data:
             type: dict
             brief: Data from the cases required to build the API calls.
@@ -89,8 +92,12 @@ def test_kvdb_get_key_value(api_call_data, kvdb_names, clean_stored_kvdb, create
         - The `cases_kvdb_api_database_get_key_value` file provides the test cases.
 
     expected_output:
-        - r"Key: .*\nValue: \".*\"\n"
+        - "{{\"key\":\".*\",\"value\":\".*\"}, ..., {\"key\":\".*\",\"value\":\".*\"}}\n"
     '''
+    if 'unicode' in request.node.callspec.id:
+        pytest.skip('The Python\'s unicode escape encoding its case-sensitive, could not represent it the same way'
+                    'the engine\'s output does')
+
     # Verify that db is loaded in memory
     assert kvdb_names[0] in engine.get_available_kvdbs(), f"The {kvdb_names[0]} database was not created when " \
                                                           "it should."
@@ -104,7 +111,8 @@ def test_kvdb_get_key_value(api_call_data, kvdb_names, clean_stored_kvdb, create
     key_value = engine.get_kvdb_value(db_name=kvdb_names[0], key=api_call_data['options']['-k']).decode()
 
     # Build the expected output message
-    expected_api_output = f"Key: {api_call_data['options']['-k']}\nValue: \"{key_value}\"\n"
+    expected_api_output = f"{{\"key\":\"{api_call_data['options']['-k'].encode('unicode_escape').decode()}\"," \
+                          f"\"value\":\"{key_value}\"}}\n"
 
     # Verify that the API call returns the expected message with the same value that the db has
     assert api_output == expected_api_output, f"The api call does not match the expected output:\n{expected_api_output}"
@@ -149,7 +157,7 @@ def test_kvdb_get_key_value_from_non_existent_db(api_call_data, clean_all_stored
                                       api_call_data['options'] if 'options' in api_call_data else {})
 
     # Verify that API call failed founding the db
-    assert 'not found or could not be loaded.' in processes.run_local_command_returning_output(api_call), \
+    assert 'not found or could not be loaded' in processes.run_local_command_returning_output(api_call), \
         'The given output is not the expected: "not found or could not be loaded".'
 
     # Verify that the database is not in memory

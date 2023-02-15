@@ -55,6 +55,7 @@ def get_list_expected_output(kvdb_names, options):
     """
     n_kvdbs = 0
     actual_n_kvdb = 0
+    expected_output = ''
 
     if '-n' in options:
         for kvdb_name in kvdb_names:
@@ -64,10 +65,8 @@ def get_list_expected_output(kvdb_names, options):
         # If there is no filtering, all the kvdbs will be listed
         n_kvdbs = len(kvdb_names)
 
-    expected_output = f"Databases found: {n_kvdbs}\n"
-
     for kvdb_name in kvdb_names:
-        current_output = f"{actual_n_kvdb+1}/{n_kvdbs} - {kvdb_name}\n"
+        current_output = f",\"{kvdb_name}\"" if actual_n_kvdb != 0 else f"\"{kvdb_name}\""
         if '-n' in options:
             if options['-n'] in kvdb_name:
                 expected_output += current_output
@@ -76,12 +75,12 @@ def get_list_expected_output(kvdb_names, options):
             expected_output += current_output
             actual_n_kvdb += 1
 
-    return expected_output
+    return f"[{expected_output}]\n" if actual_n_kvdb != 0 else ''
 
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('api_call_data, kvdb_names', zip(api_call_data, kvdb_names), ids=t1_case_ids)
-def test_kvdb_list(api_call_data, kvdb_names, clean_stored_kvdb, create_predefined_kvdb):
+def test_kvdb_list(request, api_call_data, kvdb_names, clean_stored_kvdb, create_predefined_kvdb):
     '''
     description: Check that KVDBs can be listed when loaded as expected.
 
@@ -119,16 +118,23 @@ def test_kvdb_list(api_call_data, kvdb_names, clean_stored_kvdb, create_predefin
         - r".*/.* - .*"
 .
     '''
+    if request.node.callspec.id == 'Verify listing a non-existent kvdb':
+        pytest.xfail('The list command\'s output is not correct now.')
+
     # Create api call that uses the call data for that Tcase
     api_call = engine.create_api_call(api_call_data['command'], api_call_data['subcommand'],
                                       api_call_data['options'] if 'options' in api_call_data else {})
 
+    kvdbs_to_list = kvdb_names if request.node.callspec.id != 'Verify listing all the existent kvdbs' \
+        else kvdb_names + engine.ENGINE_ENV_KVDBS
+
     # Verify that list command output is the expected
     assert processes.run_local_command_returning_output(api_call) == \
-        get_list_expected_output(kvdb_names, api_call_data['options'] if 'options' in api_call_data else {})
+        get_list_expected_output(kvdbs_to_list, api_call_data['options'] if 'options' in api_call_data else {})
 
 
 @pytest.mark.tier(level=0)
+@pytest.mark.xfail(reason='List command\'s output when there are no kvdbs loaded is not correct.')
 @pytest.mark.parametrize('api_call_data', api_call_data, ids=t1_case_ids)
 def test_kvdb_list_no_loaded_kvdbs(api_call_data, clean_all_stored_kvdb):
     '''

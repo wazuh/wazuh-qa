@@ -21,6 +21,8 @@ QUEUE = '1'
 LOCATION = 'location'
 ENGINE_BIN_PATH = '/home/vagrant/engine/wazuh/src/engine/build/main'
 ENGINE_KVDBS_PATH = '/var/ossec/etc/kvdb'
+# KVDBs that are used by the current environment
+ENGINE_ENV_KVDBS = ['auditd-syscall', 'auditd-types', 'agents_host_data']
 
 
 def send_events_to_engine_dgram(queue=QUEUE, location=LOCATION, events=[]):
@@ -164,7 +166,7 @@ def get_kvdb_value(kvdb_path=ENGINE_KVDBS_PATH, db_name=None, key=None, rocksdb_
     else:
         db = rocksdb_instance
 
-    value_fetched = db.key_may_exist(key=key.encode() if type(key) != bytes else key, fetch=True)
+    value_fetched = db.key_may_exist(key=key.encode('unicode_escape') if type(key) != bytes else key, fetch=True)
 
     # (False, None) if key is not found
     assert value_fetched[0], f"The key {key} does not exist within the {kvdb_path} database."
@@ -233,7 +235,8 @@ def get_available_kvdbs():
         # Iterate thru each file within the specific kvdb folder
         if os.path.isdir(kvdb_folder_path):
             for kvdb_file in os.listdir(kvdb_folder_path):
-                if 'MANIFEST-' in kvdb_file:
+                # MANIFEST-* is a file that allow to identify if a dir is a kvdb
+                if 'MANIFEST-' in kvdb_file and kvdb_folder not in ENGINE_ENV_KVDBS:
                     available_kvdbs += [kvdb_folder]
 
     return available_kvdbs

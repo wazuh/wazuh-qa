@@ -148,7 +148,7 @@ def test_kvdb_insert_into_non_existent_db(api_call_data, clean_all_stored_kvdb):
                                       api_call_data['options'] if 'options' in api_call_data else {})
 
     # Insert the new pairs to the db
-    assert 'not found or could not be loaded.' in processes.run_local_command_returning_output(api_call), \
+    assert 'not found or could not be loaded' in processes.run_local_command_returning_output(api_call), \
         'The given output is not the expected: "not found or could not be loaded".'
 
     # Verify that the db is not in memory

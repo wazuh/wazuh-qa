@@ -11,7 +11,7 @@
     kvdb_names:
       - kvdb_test
 
-- name: Get key value from db
+- name: Get key value that contains unicode char from db
   description: Get the key's value for an extended database in memory.
   configuration_parameters:
     cfg: TODO

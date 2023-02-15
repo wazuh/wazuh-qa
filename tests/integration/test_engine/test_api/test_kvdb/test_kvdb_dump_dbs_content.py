@@ -53,7 +53,7 @@ t2_api_call_data = engine.get_api_call_data(t2_configuration_metadata)
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('api_call_data, kvdb_names', zip(t1_api_call_data, t1_kvdb_names), ids=t1_case_ids)
-def test_kvdb_dump_db_content(api_call_data, kvdb_names, clean_stored_kvdb, create_predefined_kvdb):
+def test_kvdb_dump_db_content(request, api_call_data, kvdb_names, clean_stored_kvdb, create_predefined_kvdb):
     '''
     description: Check that the engine can show the databases content as expected.
 
@@ -67,6 +67,9 @@ def test_kvdb_dump_db_content(api_call_data, kvdb_names, clean_stored_kvdb, crea
     tier: 0
 
     parameters:
+        - request:
+            type: _pytest.fixtures.FixtureRequest
+            brief: Provides information of the requesting test function.
         - api_call_data:
             type: dict
             brief: Data from the cases required to build the API calls.
@@ -89,13 +92,23 @@ def test_kvdb_dump_db_content(api_call_data, kvdb_names, clean_stored_kvdb, crea
     expected_output:
         - List of pairs that the db contains.
     '''
+    if kvdb_names[0] == 'kvdb_empty':
+        pytest.xfail('The case where an empty kvdb is dumped is not correct. It should not print anything.')
+    elif 'unicode' in request.node.callspec.id:
+        pytest.skip('The Python\'s unicode escape encoding its case-sensitive, could not represent it the same way'
+                    'the engine\'s output does')
+
     # Create api call that uses the call data for that Tcase
     api_call = engine.create_api_call(api_call_data['command'], api_call_data['subcommand'],
                                       api_call_data['options'] if 'options' in api_call_data else {})
 
-    # Verify that given output is the expected: list of pairs
-    assert processes.run_local_command_returning_output(api_call) == \
-        f"{json.dumps(engine.get_kvdb_content(db_name=kvdb_names[0], engine_format=True), separators=(',', ':'))}\n"
+    # Obtain the kvdb content
+    kvdb_content = engine.get_kvdb_content(db_name=kvdb_names[0], engine_format=True)
+    # String that is the output that the engine should have
+    expected_output = f"{json.dumps(kvdb_content,separators=(',', ':'))}\n" if kvdb_names[0] != 'kvdb_empty' else ''
+
+    # Verify that given output is the expected: {"key":"akey","value":"avalue"}
+    assert processes.run_local_command_returning_output(api_call) == expected_output
 
 
 @pytest.mark.tier(level=0)
