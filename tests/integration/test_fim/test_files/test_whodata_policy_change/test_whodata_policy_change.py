@@ -91,7 +91,7 @@ configurations = configuration.load_configuration_template(configurations_path, 
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration, create_monitored_folders_module,
                                configure_local_internal_options_function, policies_file, restore_win_whodata_policies,
-                               restart_syscheck_function, wait_fim_start_function):
+                               restart_syscheck_function, wait_syscheck_start):
     '''
     description: Check if the 'wazuh-syscheckd' is monitoring a in whodata mode in Windows, and the Audit Policies are
                  changed, the monitoring changes to realtime and works on the monitored files.
@@ -180,7 +180,7 @@ def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration,
 
     # Check monitoring changes to realtime
     if metadata['check_event']:
-        evm.check_fim_event(timeout=T_20, callback=fim.CB_RECIEVED_EVENT_4719)
+        evm.check_fim_event(timeout=T_20, callback=evm.CB_RECIEVED_EVENT_4719)
     evm.detect_windows_whodata_mode_change(wazuh_log_monitor)
 
     # Create/Update/Delete file and check events
