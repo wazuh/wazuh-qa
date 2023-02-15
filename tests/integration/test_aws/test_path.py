@@ -3,7 +3,7 @@ import os
 import pytest
 from wazuh_testing import T_10, T_20, global_parameters
 from wazuh_testing.modules.aws import event_monitor
-from wazuh_testing.modules.aws.db_utils import get_s3_db_row, s3_db_exists, table_exists
+from wazuh_testing.modules.aws.db_utils import get_s3_db_row, s3_db_exists, table_exists_or_has_values
 from wazuh_testing.tools.configuration import (
     get_test_cases_data,
     load_configuration_template,
@@ -150,4 +150,4 @@ def test_path(
         assert f"{bucket_name}/{path}/" == data.bucket_path
         assert data.log_key.startswith(f"{path}/")
     else:
-        assert not table_exists(table_name=bucket_type)
+        assert not table_exists_or_has_values(table_name=bucket_type)
