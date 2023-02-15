@@ -7,7 +7,7 @@ from wazuh_testing.modules.aws.constants import RANDOM_ACCOUNT_ID
 from wazuh_testing.modules.aws.db_utils import (
     get_multiple_s3_db_row,
     s3_db_exists,
-    table_exists,
+    table_exists_or_has_values,
 )
 from wazuh_testing.tools.configuration import (
     get_test_cases_data,
@@ -160,4 +160,4 @@ def test_regions(
             else:
                 assert row.log_key.split("/")[3] in regions_list
     else:
-        assert not table_exists(table_name=bucket_type)
+        assert not table_exists_or_has_values(table_name=bucket_type)
