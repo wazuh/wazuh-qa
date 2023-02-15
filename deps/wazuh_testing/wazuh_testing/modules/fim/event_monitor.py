@@ -7,9 +7,8 @@ import json
 
 from sys import platform
 from datetime import datetime
-from wazuh_testing import LOG_FILE_PATH, logger, T_30, T_60
+from wazuh_testing import LOG_FILE_PATH, logger, T_60
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.modules import fim
 
 
 # Variables
