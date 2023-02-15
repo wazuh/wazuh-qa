@@ -460,7 +460,7 @@ class RegistryEventChecker:
                 if self.is_value:
                     validate_registry_event(ev, options, mode, is_key=False)
                 else:
-                    validate_registry_event(ev, options, mode , is_key=False)
+                    validate_registry_event(ev, options, mode, is_key=False)
 
         def check_events_type(events, ev_type, reg_list=['testkey0']):
             """Checks the event type of each events in a list.
