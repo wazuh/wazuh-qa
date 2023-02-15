@@ -127,7 +127,7 @@ def extra_configuration_after_yield():
 
 
 # Tests
-@pytest.mark.skip('Test skipped for flaky behavior, after it is fixed by Issue wazuh/wazuh#3783, it will be unblocked')
+# @pytest.mark.skip('Test skipped for flaky behavior, after it is fixed by Issue wazuh/wazuh#3783, it will be unblocked')
 @pytest.mark.parametrize('filename, folder, original_size, modified_size', [
     ('regular_0', testdir, 500, 500),
     ('regular_1', testdir, 30000, 30000),
@@ -207,8 +207,6 @@ def test_large_changes(filename, folder, original_size, modified_size, get_confi
     original_file = os.path.join(folder, filename)
     unzip_diff_file = os.path.join(unzip_diff_dir, filename + '-old')
     diff_file_path = make_diff_file_path(folder, filename)
-
-    fim_mode = get_configuration['metadata']['fim_mode']
 
     # Create the file and and capture the event.
     original_string = generate_string(original_size, '0')

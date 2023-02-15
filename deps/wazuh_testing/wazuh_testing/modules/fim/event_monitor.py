@@ -154,6 +154,25 @@ def callback_detect_file_deleted_event(line):
     return None
 
 
+def callback_detect_file_more_changes(line):
+    """ Callback that detects if a line in a log contains 'More changes' in content_changes.
+
+    Args:
+        line (String): string line to be checked by callback in FileMonitor.
+
+    Returns:
+        returns JSON string from log.
+    """
+    json_event = callback_detect_event(line)
+
+    if json_event is not None and 'content_changes' in json_event:
+        if 'More changes' in json_event['data']['content_changes']:
+            return json_event
+
+    return None
+
+
+
 # Event checkers
 def check_fim_event(file_monitor=None, callback='', error_message=None, update_position=True,
                     timeout=T_60, accum_results=1, file_to_monitor=LOG_FILE_PATH):
