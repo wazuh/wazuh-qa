@@ -92,25 +92,18 @@ def get_multiple_s3_db_row(table_name: str) -> Iterator[S3CloudTrailRow]:
         yield row_type(*row)
 
 
-def table_exists(table_name: str) -> bool:
-    """Check if the given table name exists.
+def table_exists_or_has_values(table_name: str) -> bool:
+    """Check if the given table name exists. If exists check if has values.
 
     Args:
         table_name (str): Table name to search for.
 
     Returns:
-        bool: True if exists else False.
+        bool: True if exists or has values else False.
     """
     connection = get_db_connection(S3_CLOUDTRAIL_DB_PATH)
     cursor = connection.cursor()
-    query = """
-        SELECT
-            name
-        FROM
-            sqlite_master
-        WHERE
-            type ='table' AND
-            name NOT LIKE 'sqlite_%';
-    """
-
-    return table_name in [result[0] for result in cursor.execute(query).fetchall()]
+    try:
+        return bool(cursor.execute(SELECT_QUERY_TEMPLATE.format(table_name=table_name)).fetchall())
+    except sqlite3.OperationalError:
+        return False
