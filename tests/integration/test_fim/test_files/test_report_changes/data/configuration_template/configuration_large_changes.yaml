@@ -10,7 +10,9 @@
             attributes:
               - check_all: 'yes'
               - realtime: REALTIME
+              - whodata: WHODATA
               - report_changes: 'yes'
+              - diff_size_limit: 50KB
 
     - section: sca
       elements:
