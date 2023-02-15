@@ -107,7 +107,7 @@ configurations = load_configuration_template(configurations_path, configuration_
 @pytest.mark.parametrize('test_folders', [test_directories], scope="module", ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 def test_large_changes(configuration, metadata, set_wazuh_configuration, configure_local_internal_options_function,
-                       create_monitored_folders_module, restart_syscheck_function, wait_fim_start_function):
+                       create_monitored_folders_module, restart_syscheck_function, wait_syscheck_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects the character limit in the file changes is reached
                  showing the 'More changes' tag in the 'content_changes' field of the generated events. For this
@@ -142,7 +142,7 @@ def test_large_changes(configuration, metadata, set_wazuh_configuration, configu
         - restart_syscheck_function:
             type: fixture
             brief: restart syscheckd daemon, and truncate the ossec.log.
-        - wait_for_fim_start_function:
+        - wait_syscheck_start:
             type: fixture
             brief: check that the starting FIM scan is detected.
 
