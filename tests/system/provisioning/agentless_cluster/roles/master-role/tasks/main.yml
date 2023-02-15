@@ -27,6 +27,7 @@
     repo: "https://github.com/wazuh/wazuh"
     dest: /wazuh
     version: "{{ wazuh_branch }}"
+  when: wazuh_branch is defined
 
 - name: Install master
   args:
@@ -47,6 +48,18 @@
     USER_AUTO_START: "y"
     USER_UPDATE: "n"
   shell: "./install.sh"
+  when: wazuh_branch is defined
+
+- name: "Get manager package"
+  ansible.builtin.get_url:
+    url: "https://{{package_repository}}.wazuh.com/{{package_path}}/apt/pool/main/w/wazuh-manager/wazuh-manager_{{package_version}}-{{package_revision}}_amd64.deb"
+    dest: /tmp/wazuh-manager.deb
+  when: wazuh_branch is not defined
+
+- name: "Install manager package"
+  ansible.builtin.apt:
+    deb: /tmp/wazuh-manager.deb
+  when: wazuh_branch is not defined
 
 - name: Copy ossec.conf file
   copy:

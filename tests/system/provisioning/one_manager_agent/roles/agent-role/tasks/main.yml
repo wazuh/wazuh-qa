@@ -27,6 +27,7 @@
     repo: "https://github.com/wazuh/wazuh"
     dest: /wazuh
     version: "{{ wazuh_branch }}"
+  when: wazuh_branch is defined
 
 - name: Install agent
   args:
@@ -46,6 +47,18 @@
     USER_ENABLE_AUTHD: "y"
     USER_AUTO_START: "y"
   shell: "./install.sh"
+  when: wazuh_branch is defined
+
+- name: "Get agent package"
+  ansible.builtin.get_url:
+    url: "https://{{package_repository}}.wazuh.com/{{package_path}}/apt/pool/main/w/wazuh-agent/wazuh-agent{{package_version}}-{{package_revision}}_amd64.deb"
+    dest: /tmp/wazuh-manager.deb
+  when: wazuh_branch is not defined
+
+- name: "Install agent package"
+  ansible.builtin.apt:
+    deb: /tmp/wazuh-agent.deb
+  when: wazuh_branch is not defined
 
 - name: Copy ossec.conf file
   copy:
