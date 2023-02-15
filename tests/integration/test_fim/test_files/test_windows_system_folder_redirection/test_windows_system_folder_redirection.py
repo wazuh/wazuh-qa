@@ -88,7 +88,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 def test_windows_system_monitoring(configuration, metadata, test_folders, set_wazuh_configuration,
                                    create_monitored_folders_module, configure_local_internal_options_function,
-                                   restart_syscheck_function, wait_fim_start_function):
+                                   restart_syscheck_function, wait_syscheck_start):
     '''
     description: Check if the 'wazuh-syscheckd' monitors the windows system folders (System32 and SysWOW64) properly,
     and that monitoring for Sysnative folder is redirected to System32 and works properly.
@@ -132,7 +132,7 @@ def test_windows_system_monitoring(configuration, metadata, test_folders, set_wa
         - restart_syscheck_function:
             type: fixture
             brief: restart syscheckd daemon, and truncate the ossec.log.
-        - wait_for_fim_start_function:
+        - wait_syscheck_start:
             type: fixture
             brief: check that the starting FIM scan is detected.
 
