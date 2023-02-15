@@ -72,63 +72,43 @@ import sys
 
 import pytest
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR
-from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
-from wazuh_testing.modules.fim.event_monitor import callback_detect_event
-from wazuh_testing.modules.fim.utils import create_file, generate_params
-from test_fim.common import generate_string, make_diff_file_path
+from wazuh_testing.modules.fim import TEST_DIR_1
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing.modules.fim.event_monitor import (callback_detect_event, get_fim_event, 
+                                                     callback_detect_file_more_changes)
+from wazuh_testing.modules.fim.utils import create_file
+from test_fim.common import generate_string
+
 
 # Marks
-
 pytestmark = pytest.mark.tier(level=1)
 
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
-# variables
-local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
-test_directories = [os.path.join(PREFIX, 'testdir')]
-nodiff_file = os.path.join(PREFIX, 'testdir_nodiff', 'regular_file')
-directory_str = ','.join(test_directories)
+# Configuration and cases data
+test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_large_changes.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_large_changes.yaml')
+
+# Variables
+test_directories = [os.path.join(PREFIX, TEST_DIR_1)]
 testdir = test_directories[0]
-unzip_diff_dir = os.path.join(PREFIX, 'unzip_diff')
 
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-
-# configurations
-
-conf_params, conf_metadata = generate_params(extra_params={'REPORT_CHANGES': {'report_changes': 'yes'},
-                                                           'TEST_DIRECTORIES': directory_str,
-                                                           'NODIFF_FILE': nodiff_file})
-configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
-
-
-# fixtures
-
-@pytest.fixture(scope='module', params=configurations)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
-
-
-# Functions
-
-
-def extra_configuration_before_yield():
-    """Create a folder to store diff files unzipped"""
-    os.makedirs(unzip_diff_dir, exist_ok=True)
-
-
-def extra_configuration_after_yield():
-    """Delete the folder after the test"""
-    shutil.rmtree(unzip_diff_dir, ignore_errors=True)
+# Test configurations
+configuration_parameters, configuration_metadata, test_case_ids = get_test_cases_data(test_cases_path)
+for count, value in enumerate(configuration_parameters):
+    configuration_parameters[count]['TEST_DIRECTORIES'] = testdir
+configurations = load_configuration_template(configurations_path, configuration_parameters,
+                                                           configuration_metadata)
 
 
 # Tests
-# @pytest.mark.skip('Test skipped for flaky behavior, after it is fixed by Issue wazuh/wazuh#3783, it will be unblocked')
-@pytest.mark.parametrize('filename, folder, original_size, modified_size', [
+"""@pytest.mark.parametrize('filename, folder, original_size, modified_size', [
     ('regular_0', testdir, 500, 500),
     ('regular_1', testdir, 30000, 30000),
     ('regular_2', testdir, 70000, 70000),
@@ -136,9 +116,11 @@ def extra_configuration_after_yield():
     ('regular_4', testdir, 10, 70000),
     ('regular_5', testdir, 20000, 10),
     ('regular_6', testdir, 70000, 10),
-])
-def test_large_changes(filename, folder, original_size, modified_size, get_configuration, configure_environment,
-                       configure_local_internal_options_module, restart_syscheckd, wait_for_fim_start):
+])"""
+@pytest.mark.parametrize('test_folders', [test_directories], scope="module", ids='')
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
+def test_large_changes(configuration, metadata, set_wazuh_configuration, configure_local_internal_options_function,
+                        create_monitored_folders_module, restart_syscheck_function, wait_fim_start_function):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects the character limit in the file changes is reached
                  showing the 'More changes' tag in the 'content_changes' field of the generated events. For this
@@ -197,59 +179,34 @@ def test_large_changes(filename, folder, original_size, modified_size, get_confi
     expected_output:
         - r'.*Sending FIM event: (.+)$' ('added' and 'modified' events)
         - The length of the testing file content by running the diff/fc command.
-
-    tags:
-        - diff
-        - scheduled
     '''
-    limit = 59391
-    has_more_changes = False
-    original_file = os.path.join(folder, filename)
-    unzip_diff_file = os.path.join(unzip_diff_dir, filename + '-old')
-    diff_file_path = make_diff_file_path(folder, filename)
-
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    limit = 50000
+    
     # Create the file and and capture the event.
-    original_string = generate_string(original_size, '0')
-    create_file(REGULAR, folder, filename, content=original_string)
+    original_string = generate_string(metadata['original_size'], '0')
+    create_file(REGULAR, testdir, metadata['filename'], content=original_string)
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
-    # Store uncompressed diff file in backup folder
-    with gzip.open(diff_file_path, 'rb') as f_in:
-        with open(unzip_diff_file, 'wb') as f_out:
-            shutil.copyfileobj(f_in, f_out)
-
     # Modify the file with new content
-    modified_string = generate_string(modified_size, '1')
-    create_file(REGULAR, folder, filename, content=modified_string)
+    modified_string = generate_string(metadata['modified_size'], '1')
+    create_file(REGULAR, testdir, metadata['filename'], content=modified_string)
 
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
 
-    # Run the diff/fc command and get the output length
-    try:
-        if sys.platform == 'win32':
-            subprocess.check_output(['fc', '/n', original_file, unzip_diff_file])
-        else:
-            subprocess.check_output(['diff', original_file, unzip_diff_file])
-    except subprocess.CalledProcessError as e:
-        # Inputs are different
-        if e.returncode == 1:
-            if sys.platform == 'win32' and b'*' not in e.output.split(b'\r\n')[1]:
-                has_more_changes = True
-            else:
-                if len(e.output) > limit:
-                    has_more_changes = True
-
     # Assert 'More changes' is shown when the command returns more than 'limit' characters
-    if has_more_changes:
-        assert 'More changes' in event['data']['content_changes'], '"More changes" not found within content_changes.'
+    if metadata['has_more_changes']:
+        event = get_fim_event(timeout=global_parameters.default_timeout, callback=callback_detect_file_more_changes,
+                              error_message='Did not find event with "More changes" within content_changes.')
     else:
+        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
         assert 'More changes' not in event['data']['content_changes'], '"More changes" found within content_changes.'
 
     # Assert old content is shown in content_changes
     assert '0' in event['data']['content_changes'], '"0" is the old value but it is not found within content_changes'
 
     # Assert new content is shown when old content is lower than the limit or platform is Windows
-    if original_size < limit or sys.platform == 'win32':
+    if metadata['original_size'] < limit or sys.platform == 'win32':
         assert '1' in event['data']['content_changes'], '"1" is the new value but it is not found ' \
                                                         'within content_changes'

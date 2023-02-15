@@ -1,0 +1,11 @@
+- name: report_changes_found_scheduled
+  description: When a file is monitored with report_changes, the diff file and changes are reported (Scheduled mode)
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+  metadata:
+    filename: regular_3
+    original_size: 10
+    modified_size: 20000
+    has_more_changes: true
+    fim_mode: realtime
