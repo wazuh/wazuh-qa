@@ -6,7 +6,7 @@ wazuh-master:
 wazuh-worker1:
   - regex: '.*Connection received in local server*'
     path: "/var/ossec/logs/cluster.log"
-    timeout: 60
+    timeout: 100
   - regex: ".*Command received: b'sendsync'"
     path: "/var/ossec/logs/cluster.log"
     timeout: 100
