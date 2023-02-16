@@ -52,7 +52,7 @@
   test_case:
     pre_required_group: Test_group1,Test_group2
     input: global sync-agent-groups-get {"last_id":0}
-    output: err Invalid JSON data, missing required 'condition' field
+    output: "[{'data': []}]"
 
 - name: Test set_synced in True
   test_case:
