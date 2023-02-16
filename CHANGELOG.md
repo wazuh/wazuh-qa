@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Added
 
+- Add new cases for the sync-agent-groups-get endpoint in wazuh_db ([#3959](https://github.com/wazuh/wazuh-qa/pull/3959))
 - Adapt binary performance module to wazuh-cluster script renaming ([#3944](https://github.com/wazuh/wazuh-qa/pull/3944)) \- (Framework)
 - Add an option to store logs in system tests ([#2445](https://github.com/wazuh/wazuh-qa/pull/2445)) \- (Framework + Tests)
 - Add new test to check cpe_helper.json file ([#3731](https://github.com/wazuh/wazuh-qa/pull/3731))
