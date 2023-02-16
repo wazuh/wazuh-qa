@@ -60,8 +60,8 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 messages_path = [os.path.join(local_path, 'data/messages.yml'),
                  os.path.join(local_path, 'data/delete_message.yml'),
                  os.path.join(local_path, 'data/wait_fim_scan.yml'),
-                 os.path.join(local_path, 'data/agent_initializing_synchronization.yml'),
-                 os.path.join(local_path, 'data/manager_initializing_synchronization.yml')
+                 os.path.join(local_path, 'data/agent_initializing_synchronization.yaml'),
+                 os.path.join(local_path, 'data/manager_initializing_synchronization.yaml')
                  ]
 tmp_path = os.path.join(local_path, 'tmp')
 scheduled_mode = 'testdir1'
@@ -101,7 +101,7 @@ def test_synchronization(folder_path, case, host):
 
     expected_output:
         - Different test cases are contained in external YAML file
-          (agent_initializing_synchronization.yml and manager_initializing_synchronization.yml)
+          (agent_initializing_synchronization.yml and manager_initializing_synchronization.yaml)
     tags:
         - fim_basic_usage
         - scheduled

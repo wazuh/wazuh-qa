@@ -112,7 +112,7 @@ configurations = configuration.load_configuration_template(configurations_path, 
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuration,
                                  configure_local_internal_options_function, restart_syscheck_function,
-                                 create_monitored_folders_module, wait_fim_start_function):
+                                 create_monitored_folders_module, wait_syscheck_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon reports the file changes (or truncates if required)
                  in the generated events using the 'nodiff' tag and vice versa. For this purpose, the test
@@ -145,7 +145,7 @@ def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuratio
         - create_monitored_folders_module
             type: fixture
             brief: Create folders to be monitored, delete after test.
-        - wait_for_fim_start_function:
+        - wait_syscheck_start:
             type: fixture
             brief: check that the starting fim scan is detected.
 

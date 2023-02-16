@@ -69,9 +69,9 @@ from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.file import create_file, modify_file_content
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.modules.fim import (CB_FILE_SIZE_LIMIT_REACHED, FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS,
-                                       ERR_MSG_FIM_EVENT_NOT_DETECTED, ERR_MSG_FILE_LIMIT_REACHED)
-from wazuh_testing.modules.fim.event_monitor import callback_detect_event
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing.modules.fim.event_monitor import (callback_detect_event, CB_FILE_SIZE_LIMIT_REACHED,
+                                                     ERR_MSG_FIM_EVENT_NOT_DETECTED, ERR_MSG_FILE_LIMIT_REACHED)
 from wazuh_testing.modules.fim.utils import generate_params
 
 
@@ -80,7 +80,6 @@ from wazuh_testing.modules.fim.utils import generate_params
 pytestmark = [pytest.mark.tier(level=1)]
 
 # Variables
-local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_directories = [os.path.join(PREFIX, 'testdir1')]
 directory_str = ','.join(test_directories)
