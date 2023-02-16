@@ -131,8 +131,8 @@ def test_discard_regex(
         timeout=T_20,
         callback=event_monitor.callback_detect_event_processed_or_skipped(pattern),
         error_message=(
-            'The AWS module did not show correct message about discard regex or ',
-            'did not process the expected amout of logs'
+            'The AWS module did not show the correct message about discard regex or ',
+            'did not process the expected amount of logs'
         ),
         accum_results=found_logs + skipped_logs
     ).result()
