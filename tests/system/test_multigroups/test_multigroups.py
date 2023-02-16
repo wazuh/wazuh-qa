@@ -13,6 +13,8 @@ import pytest
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
 
+
+pytestmark = [pytest.mark.basic_cluster_env]
 # Test variables
 
 test_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']

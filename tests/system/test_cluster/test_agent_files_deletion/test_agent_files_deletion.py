@@ -14,7 +14,7 @@ from wazuh_testing.tools.system import HostManager
 master_host = 'wazuh-master'
 worker_host = 'wazuh-worker2'
 agent_host = 'wazuh-agent3'
-pytestmark = [pytest.mark.cluster]
+pytestmark = [pytest.mark.cluster, pytest.mark.basic_cluster_env]
 local_path = os.path.dirname(os.path.abspath(__file__))
 messages_path = os.path.join(local_path, 'data/messages.yml')
 script_path = os.path.join(re.sub(r'^.*?wazuh-qa', '/wazuh-qa', local_path), '../utils/get_wdb_agent.py')

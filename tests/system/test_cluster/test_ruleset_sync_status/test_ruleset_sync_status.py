@@ -13,7 +13,7 @@ from wazuh_testing.tools.system import HostManager
 # Hosts
 test_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
 worker_hosts = test_hosts[1:]
-pytestmark = [pytest.mark.cluster]
+pytestmark = [pytest.mark.cluster, pytest.mark.agentless_cluster_env]
 
 # Data paths
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')

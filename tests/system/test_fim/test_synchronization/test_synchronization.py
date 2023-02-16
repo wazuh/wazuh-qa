@@ -52,6 +52,9 @@ from wazuh_testing.tools import WAZUH_LOGS_PATH
 from wazuh_testing.fim import create_folder_file, query_db
 
 
+pytestmark = [pytest.mark.one_manager_agent_env]
+
+
 # Hosts
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'one_manager_agent', 'inventory.yml')

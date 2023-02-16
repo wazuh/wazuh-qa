@@ -48,6 +48,7 @@ from wazuh_testing.tools import WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager, clean_environment
 
+pytestmark = [pytest.mark.manager_agent_env]
 # Hosts and variables
 # In order to run this test, first you need to launch the manager_agent enviroment
 testinfra_hosts = ["wazuh-manager", "wazuh-agent1", "wazuh-agent2", "wazuh-agent3"]
@@ -79,22 +80,22 @@ def test_active_response_log_format(wazuh_agent, message_file):
         - message_file:
             type: string
             brief: tells HostManager the location of the yml file with the expected messages and where to look for them
-        
-    input_description: Each agent has a different version with a specific yml file containing the expected messages 
+
+    input_description: Each agent has a different version with a specific yml file containing the expected messages
                        and their location in the agent's logs
-    
+
     expected_output: In case the test passes it will show "Received from {host} the expected message: {message}"
                      in case it failes it will show: "Did not found the expected callback in {host}: {message}"
     """
-    
+
     #clear the agents files that will be monitored.
     enviroment_files = [(wazuh_agent, os.path.join(WAZUH_LOGS_PATH, 'ossec.log')),
                         (wazuh_agent, os.path.join(WAZUH_LOGS_PATH, 'active-responses.log'))]
     clean_environment(host_manager, enviroment_files)
-    
+
     # Add log message to agent monitored source
     host_manager.modify_file_content(host=wazuh_agent, path=log_path, content=log_sample)
-    
+
     # wait for active responses messages to be generated
     time.sleep(sleep_time)
 
@@ -102,5 +103,5 @@ def test_active_response_log_format(wazuh_agent, message_file):
     HostMonitor(inventory_path=inventory_path,
                 messages_path=os.path.join(local_path,message_file),
                 tmp_path=tmp_path).run()
-    
+
     host_manager.modify_file_content(host=wazuh_agent, path=log_path, content="")

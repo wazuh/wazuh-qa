@@ -53,7 +53,7 @@ from system.test_cluster.test_agent_groups.common import register_agent
 
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
-pytestmark = [pytest.mark.cluster]
+pytestmark = [pytest.mark.cluster, pytest.mark.big_cluster_40_agents_env]
 agents_in_cluster = 40
 test_infra_agents = []
 agent_groups = []

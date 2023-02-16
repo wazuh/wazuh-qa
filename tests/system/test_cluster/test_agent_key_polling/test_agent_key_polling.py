@@ -11,7 +11,7 @@ from wazuh_testing.tools.system import HostManager
 
 # Hosts
 testinfra_hosts = ["wazuh-master", "wazuh-worker1", "wazuh-agent2"]
-pytestmark = [pytest.mark.cluster]
+pytestmark = [pytest.mark.cluster, pytest.mark.basic_cluster_env]
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'basic_cluster', 'inventory.yml')
