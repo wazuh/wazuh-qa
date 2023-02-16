@@ -70,15 +70,15 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters, DATA, LOG_FILE_PATH, SYSCHECK_DEBUG, VERBOSE_DEBUG_OUTPUT
+from wazuh_testing import global_parameters, DATA, LOG_FILE_PATH
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.modules.fim import (DIFF_DEFAULT_LIMIT_VALUE, CB_MAXIMUM_FILE_SIZE, REPORT_CHANGES, TEST_DIR_1,
-                                       TEST_DIRECTORIES, ERR_MSG_MAXIMUM_FILE_SIZE,
-                                       ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE)
-from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing.modules.fim import DIFF_DEFAULT_LIMIT_VALUE, REPORT_CHANGES, TEST_DIR_1, TEST_DIRECTORIES
+from wazuh_testing.modules.fim.event_monitor import (CB_MAXIMUM_FILE_SIZE, ERR_MSG_MAXIMUM_FILE_SIZE,
+                                                     ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE)
 from wazuh_testing.modules.fim.utils import generate_params
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 # Marks
 
 pytestmark = [pytest.mark.tier(level=1)]
@@ -97,7 +97,6 @@ parameters, metadata = generate_params(extra_params={REPORT_CHANGES.upper(): {RE
                                                      TEST_DIRECTORIES: test_directory})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-local_internal_options = {SYSCHECK_DEBUG: VERBOSE_DEBUG_OUTPUT}
 
 # Fixtures
 
