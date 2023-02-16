@@ -352,10 +352,11 @@ def test_multiple_calls(
 
     # Call the module with only_logs_after set with an early date than setted previously and check that no logs
     # were processed, there were no duplicates
+    expected_skipped_logs_step_4 = metadata.get('expected_skipped_logs_step_4', 1)
     event_monitor.check_non_processed_logs_from_output(
         command_output=call_aws_module(*base_parameters, ONLY_LOGS_AFTER_PARAM, '2022-NOV-22'),
         bucket_type=bucket_type,
-        expected_results=metadata.get('expected_skipped_logs_step_4', 1)
+        expected_results=expected_skipped_logs_step_4 - 1 if expected_skipped_logs_step_4 > 1 else 1
     )
 
     # Upload a log file for the day of the test execution and call the module without only_logs_after and check that
@@ -363,6 +364,7 @@ def test_multiple_calls(
     if bucket_type != cons.CUSTOM_TYPE:
         last_marker_key = get_last_file_key(bucket_type, bucket_name)
     metadata['filename'] = upload_file(bucket_type, bucket_name)
+
     event_monitor.check_marker_from_output(
         command_output=call_aws_module(*base_parameters),
         file_key=last_marker_key
