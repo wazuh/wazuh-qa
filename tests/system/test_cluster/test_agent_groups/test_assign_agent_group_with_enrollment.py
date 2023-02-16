@@ -45,8 +45,8 @@ import os
 import time
 import pytest
 
-from system import (AGENT_GROUPS_DEFAULT, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, restart_cluster,
-                    check_keys_file, delete_group_of_agents, check_agent_groups_db)
+from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, restart_cluster, check_keys_file, delete_group_of_agents,
+                    check_agent_groups_db)
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools import WAZUH_PATH
 
@@ -61,10 +61,10 @@ host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
 
+
 # Variables
-timeout = 15
+agent_groups_send_full = 60
 id_group = 'group_test'
-path_cluster = '/framework/python/lib/python3.9/site-packages/wazuh-4.4.0-py3.9.egg/wazuh/core/cluster/cluster.json'
 enrollment_group = f"""
     <enrollment>
     <groups>{id_group}</groups>
@@ -76,9 +76,8 @@ enrollment_group = f"""
 @pytest.mark.parametrize("agent_target", ["wazuh-worker1"])
 def test_assign_agent_to_a_group(agent_target, clean_environment):
     '''
-    description: Check race condition when an agent enrollment process with a group connects to the worker,
-                 when worker no receive information about the group and when data of groups is receive,
-                 the group is change.
+    description: Check that when an agent registers in a worker, with a group assigned in the enrollment section,
+                 the agent has that group assigned in the worker's database.
     wazuh_min_version: 4.4.0
     parameters:
         - agent_target:
@@ -89,22 +88,14 @@ def test_assign_agent_to_a_group(agent_target, clean_environment):
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
-        - Verify that after registering and before receiving agent group info, it has the 'default' group assigned.
         - Verify that after registering and after receiving agent group info, it has the 'group_test' group assigned.
     expected_output:
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
-    replace = '\n' + '            "timeout_agent_groups": 40,' '\n' + '            "agent_group_start_delay": 300,\n'
-
-    # Add modify agent_group_start_delay
-    host_manager.add_block_to_file(host=test_infra_managers[0], path=f"{WAZUH_PATH}{path_cluster}",
-                                   after='"timeout_agent_info": 40,', before='"check_worker_lastkeepalive": 60,',
-                                   replace=replace)
-
     # Create new group
     host_manager.run_command(test_infra_managers[0], f"/var/ossec/bin/agent_groups -q -a -g {id_group}")
 
-    worker_ip = host_manager.run_command(agent_target, f'hostname -i')
+    worker_ip = host_manager.run_command(agent_target, 'hostname -i')
 
     # Modify ossec.conf in agent
     host_manager.add_block_to_file(host=test_infra_agents[0], path=f"{WAZUH_PATH}/etc/ossec.conf",
@@ -112,27 +103,17 @@ def test_assign_agent_to_a_group(agent_target, clean_environment):
     host_manager.add_block_to_file(host=test_infra_agents[0], path=f"{WAZUH_PATH}/etc/ossec.conf",
                                    after="<address>", before="</address>", replace=worker_ip)
 
-    restart_cluster([test_infra_managers[0]] + test_infra_agents, host_manager)
-    time.sleep(timeout)
+    restart_cluster(test_infra_agents, host_manager)
+
+    # Wait to Agent-groups send full task to end due to race condition
+    time.sleep(agent_groups_send_full)
 
     # Check that agent has client key file
     assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
 
     try:
-        # Chech that the worker has the default group
+        # Check that agent has expected group assigned
         query = 'sql select id, `group` from agent;'
-        check_agent_groups_db(query, AGENT_GROUPS_DEFAULT, test_infra_managers[1], host_manager)
-
-        replace = '\n' + '            "timeout_agent_groups": 40,' '\n' + '            "agent_group_start_delay": 1,\n'
-
-        # Add modify agent_group_start_delay
-        host_manager.add_block_to_file(host=test_infra_managers[0], path=f"{WAZUH_PATH}{path_cluster}",
-                                       after='"timeout_agent_info": 40,', before='"check_worker_lastkeepalive": 60,',
-                                       replace=replace)
-
-        restart_cluster([test_infra_managers[0]], host_manager)
-        time.sleep(timeout)
-        # Check that agent has group set to default and then override group info
         check_agent_groups_db(query, id_group, test_infra_managers[1], host_manager)
 
     finally:
