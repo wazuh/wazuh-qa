@@ -55,19 +55,22 @@ pytestmark = [pytest.mark.manager_agent_env]
 # In order to run this test, first you need to launch the manager_agent enviroment
 testinfra_hosts = ["wazuh-manager", "wazuh-agent1", "wazuh-agent2", "wazuh-agent3"]
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-                              'system','provisioning', 'manager_agent', 'inventory.yml')
+                              'system', 'provisioning', 'manager_agent', 'inventory.yml')
+
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 messages_files = ['data/messages_415_or_lower.yml', 'data/messages_420_to_424.yml', 'data/messages_425_or_greater.yml']
 tmp_path = os.path.join(local_path, 'tmp')
 log_path = "/var/log/secure"
 ip = ".".join(str(randint(0, 255)) for _ in range(4))
-log_sample= f"Dec  9 22:15:40 localhost sshd[5332]: Failed password for invalid user BALROG from {ip} port 52620 '$token': `132`! ssh2\n\n"
+log_sample = f"""Dec  9 22:15:40 localhost sshd[5332]: Failed password for invalid
+                user BALROG from {ip} port 52620 '$token': `132`! ssh2\n\n"""
 sleep_time = 5
 
 
 @pytest.mark.parametrize('wazuh_agent, message_file', [('wazuh-agent1', messages_files[0]),
-                        ('wazuh-agent2', messages_files[1]),('wazuh-agent3', messages_files[2])])
+                                                       ('wazuh-agent2', messages_files[1]),
+                                                       ('wazuh-agent3', messages_files[2])])
 def test_active_response_log_format(wazuh_agent, message_file):
     """
     description: Check that when an Active Response is activated, the manager sends back the information to the agent
@@ -90,7 +93,7 @@ def test_active_response_log_format(wazuh_agent, message_file):
                      in case it failes it will show: "Did not found the expected callback in {host}: {message}"
     """
 
-    #clear the agents files that will be monitored.
+    # Clear the agents files that will be monitored.
     enviroment_files = [(wazuh_agent, os.path.join(WAZUH_LOGS_PATH, 'ossec.log')),
                         (wazuh_agent, os.path.join(WAZUH_LOGS_PATH, 'active-responses.log'))]
     clean_environment(host_manager, enviroment_files)
@@ -102,8 +105,7 @@ def test_active_response_log_format(wazuh_agent, message_file):
     time.sleep(sleep_time)
 
     # Run the callback checks for the ossec.log and the active-responses.log
-    HostMonitor(inventory_path=inventory_path,
-                messages_path=os.path.join(local_path,message_file),
+    HostMonitor(inventory_path=inventory_path, messages_path=os.path.join(local_path, message_file),
                 tmp_path=tmp_path).run()
 
     host_manager.modify_file_content(host=wazuh_agent, path=log_path, content="")
