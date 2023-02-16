@@ -7,6 +7,7 @@ import os
 import pytest
 from wazuh_testing.tools.system import HostManager
 
+
 pytestmark = [pytest.mark.agentless_cluster_env]
 
 test_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']

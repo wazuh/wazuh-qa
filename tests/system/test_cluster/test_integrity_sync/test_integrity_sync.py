@@ -15,9 +15,11 @@ from wazuh_testing.tools import WAZUH_PATH, PYTHON_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
+
+pytestmark = [pytest.mark.cluster, pytest.mark.agentless_cluster]
+
 # Hosts
 test_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
-pytestmark = [pytest.mark.cluster, pytest.mark.agentless_cluster]
 worker_hosts = test_hosts[1:]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configuration = yaml.safe_load(open(os.path.join(test_data_path, 'cluster_json.yml')))

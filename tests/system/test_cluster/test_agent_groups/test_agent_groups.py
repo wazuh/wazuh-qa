@@ -12,12 +12,14 @@ from wazuh_testing.tools.system import HostManager
 from system.test_cluster.test_agent_groups.common import register_agent
 from system import AGENT_STATUS_ACTIVE, check_agent_status, restart_cluster, execute_wdb_query
 
+
+pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
+
 # Hosts
 test_infra_managers = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
 test_infra_agents = ["wazuh-agent1"]
 master_host = 'wazuh-master'
 worker_host = test_infra_managers[1]
-pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'enrollment_cluster', 'inventory.yml')

@@ -48,7 +48,9 @@ from wazuh_testing.tools import WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager, clean_environment
 
+
 pytestmark = [pytest.mark.manager_agent_env]
+
 # Hosts and variables
 # In order to run this test, first you need to launch the manager_agent enviroment
 testinfra_hosts = ["wazuh-manager", "wazuh-agent1", "wazuh-agent2", "wazuh-agent3"]

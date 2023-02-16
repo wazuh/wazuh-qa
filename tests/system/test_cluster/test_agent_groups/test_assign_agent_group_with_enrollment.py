@@ -50,10 +50,12 @@ from system import (AGENT_GROUPS_DEFAULT, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUN
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools import WAZUH_PATH
 
+
+pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
+
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
 test_infra_agents = ["wazuh-agent1"]
-pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'enrollment_cluster', 'inventory.yml')

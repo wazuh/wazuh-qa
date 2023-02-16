@@ -9,9 +9,11 @@ from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
+
+pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
+
 # Hosts
 testinfra_hosts = ["wazuh-master", "wazuh-worker1", "wazuh-agent1"]
-pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'enrollment_cluster', 'inventory.yml')
