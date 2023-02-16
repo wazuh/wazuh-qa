@@ -1,6 +1,7 @@
 """Utils to generate sample data to AWS"""
 import csv
 import json
+import gzip
 from datetime import datetime
 from os.path import join
 from io import StringIO
@@ -20,6 +21,8 @@ class DataGenerator:
     BASE_PATH = ''
     BASE_FILE_NAME = ''
 
+    compress = False
+
     def get_filename(self, *args, **kwargs) -> str:
         """Return the filename according to the integration format.
 
@@ -28,7 +31,7 @@ class DataGenerator:
         """
         raise NotImplementedError()
 
-    def get_data_sample(self, *args, **kwargs) -> dict:
+    def get_data_sample(self, *args, **kwargs) -> str:
         """Return a sample of data according to the integration format.
 
         Returns:
@@ -656,6 +659,309 @@ class TrustedAdvisorDataGenerator(DataGenerator):
         )
 
 
+class GuardDutyDataGenerator(DataGenerator):
+    BASE_PATH = ''
+    BASE_FILE_NAME = f'firehose_guardduty-1-'
+
+    def get_filename(self) -> str:
+        """Return the filename in the Guard Duty format.
+
+        Example:
+            <prefix>/<year>/<month>/<day>
+        Returns:
+            str: Synthetic filename.
+        """
+        now = datetime.utcnow()
+        path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
+        name = f"{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}{cons.JSON_EXT}"
+
+        return join(path, name)
+
+    def get_data_sample(self) -> str:
+        """Return a sample of data according to the Guard Duty format.
+
+        Returns:
+            str: Synthetic data.
+        """
+        return json.dumps(
+            {
+                'version': '0',
+                'id': str(uuid4()),
+                'detail-type': 'GuardDuty Finding',
+                'source': 'aws.guardduty',
+                'account': cons.RANDOM_ACCOUNT_ID,
+                'time': '2021-07-08T03:45:04Z',
+                'region': 'us-east-1',
+                'resources': [],
+                'detail': {
+                    'schemaVersion': '2.0',
+                    'accountId': cons.RANDOM_ACCOUNT_ID,
+                    'region': 'us-east-1',
+                    'partition': 'aws',
+                    'id': 'e8bc77e2d65ffa20de95cc6e7a94e926',
+                    'arn': f"arn:aws:guardduty:us-east-1:{cons.RANDOM_ACCOUNT_ID}:detector/",
+                    'type': 'Recon:EC2/PortProbeUnprotectedPort',
+                    'resource': {
+                        'resourceType': 'Instance',
+                        'instanceDetails': {
+                            'instanceId': f"i-{get_random_string(8)}",
+                            'instanceType': 't2.micro',
+                            'launchTime': '2014-12-30T18:46:13Z',
+                            'platform': None,
+                            'productCodes': [],
+                            'iamInstanceProfile': None,
+                            'networkInterfaces': [
+                                {
+                                    'ipv6Addresses': [],
+                                    'networkInterfaceId': f"eni-{get_random_string(8)}",
+                                    'privateDnsName': 'ip-10-0-0-250.ec2.internal',
+                                    'privateIpAddress': get_random_ip(),
+                                    'privateIpAddresses': [
+                                        {
+                                            'privateDnsName': 'ip-10-0-0-250.ec2.internal',
+                                            'privateIpAddress': get_random_ip()
+                                        }
+                                    ],
+                                    'subnetId': 'subnet-6b1d6203',
+                                    'vpcId': f"vpc-{get_random_string(8)}",
+                                    'securityGroups': [
+                                        {
+                                            'groupName': 'default',
+                                            'groupId': f"sg-{get_random_string(8)}"
+                                        }
+                                    ],
+                                    'publicDnsName': 'ec2-105-71-92-143.compute-1.amazonaws.com',
+                                    'publicIp': get_random_ip()
+                                }
+                            ],
+                            'outpostArn': None,
+                            'tags': [
+                                {
+                                    'key': 'service_name',
+                                    'value': 'vpn'
+                                },
+                                {
+                                    'key': 'Name',
+                                    'value': 'vpn-gateway (r)'
+                                }
+                            ],
+                            'instanceState': 'running',
+                            'availabilityZone': 'us-east-1e',
+                            'imageId': f"ami-{get_random_string(8)}",
+                            'imageDescription': 'None'
+                        }
+                    },
+                    'service': {
+                        'serviceName': 'guardduty',
+                        'detectorId': str(uuid4()),
+                        'action': {
+                            'actionType': 'PORT_PROBE',
+                            'portProbeAction': {
+                                'portProbeDetails': [
+                                    {
+                                        'localPortDetails': {
+                                            'port': 1723,
+                                            'portName': 'Unknown'
+                                        },
+                                        'remoteIpDetails': {
+                                            'ipAddressV4': get_random_ip(),
+                                            'organization': {
+                                                'asn': '211680',
+                                                'asnOrg': 'Sistemas Informaticos, S.A.',
+                                                'isp': 'Sistemas Informaticos, S.A.',
+                                                'org': 'Sistemas Informaticos, S.A.'
+                                            },
+                                            'country': {
+                                                'countryName': 'Portugal'
+                                            },
+                                            'city': {
+                                                'cityName': ''
+                                            },
+                                            'geoLocation': {
+                                                'lat': 38.7057,
+                                                'lon': -9.1359
+                                            }
+                                        }
+                                    }
+                                ],
+                                'blocked': False
+                            }
+                        },
+                        "resourceRole": "TARGET",
+                        "additionalInfo": {
+                            "threatName": "Scanner",
+                            "threatListName": "ProofPoint"
+                        },
+                        "evidence": {
+                            "threatIntelligenceDetails": [
+                                {
+                                    "threatNames": [
+                                        "Scanner"
+                                    ],
+                                    "threatListName": "ProofPoint"
+                                }
+                            ]
+                        },
+                        "eventFirstSeen": "2021-04-20T14:40:04Z",
+                        "eventLastSeen": "2021-07-08T03:15:41Z",
+                        "archived": False,
+                        "count": 5
+                    },
+                    "severity": 2,
+                    "createdAt": "2021-04-20T14:53:32.735Z",
+                    "updatedAt": "2021-07-08T03:31:04.017Z",
+                    "title": "Unprotected port on EC2 instance i-3bf6a5c5 is being probed.",
+                    "description": (
+                        "EC2 instance has an unprotected port which is being probed by a known malicious host."
+                        )
+                }
+            }
+        )
+
+
+class NativeGuardDutyDataGenerator(DataGenerator):
+    BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.GUARDDUTY, cons.US_EAST_1_REGION)
+    BASE_FILE_NAME = ''
+
+    compress = True
+
+    def get_filename(self) -> str:
+        """Return the filename in the Native Guard Duty format.
+
+        Example:
+            <prefix>/AWSLogs/<suffix>/<account_id>/GuardDuty/<region>/<year>/<month>/<day>
+
+        Returns:
+            str: Synthetic filename.
+        """
+        now = datetime.now()
+        path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
+        name = f"{str(uuid4())}{cons.JSON_GZ_EXT}"
+
+        return join(path, name)
+
+    def get_data_sample(self) -> str:
+        """Return a sample of data according to the Native Guard Duty format.
+
+        Returns:
+            str: Synthetic data.
+        """
+        random_ip = get_random_ip()
+        return json.dumps(
+            {
+                'schemaVersion': '2.0',
+                'accountId': cons.RANDOM_ACCOUNT_ID,
+                'region': 'us-east-1',
+                'partition': 'aws',
+                'id': '3ac1fd234445e957d526a10c72631c8f',
+                'arn': f"arn:aws:guardduty:us-east-1:{cons.RANDOM_ACCOUNT_ID}:detector/c0bfff53bb19fbee16ed05a0b21d3b/",
+                'type': 'UnauthorizedAccess:EC2/SSHBruteForce',
+                'resource': {
+                    'resourceType': 'Instance',
+                    'instanceDetails': {
+                        'instanceId': f"i-{get_random_string(18)}",
+                        'instanceType': 'c5.large',
+                        'launchTime': '2022-10-19T16:17:42.000Z',
+                        'platform': None,
+                        'productCodes': [],
+                        'iamInstanceProfile': None,
+                        'networkInterfaces': [
+                            {
+                                'ipv6Addresses': [],
+                                'networkInterfaceId': f"eni-{get_random_string(18)}",
+                                'privateDnsName': f"ip-{random_ip.replace('.', '-')}.ec2.internal",
+                                'privateIpAddress': random_ip,
+                                'privateIpAddresses': [
+                                    {
+                                        'privateDnsName': f"ip-{random_ip.replace('.', '-')}.ec2.internal",
+                                        'privateIpAddress': random_ip
+                                    }
+                                ],
+                                'subnetId': f"subnet-{get_random_string(8)}",
+                                'vpcId': 'vpc-f825c385',
+                                'securityGroups': [
+                                    {
+                                        'groupName': 'test-ansible',
+                                        'groupId': f"sg-{get_random_string(16)}"
+                                    }
+                                ],
+                                'publicDnsName': f"ec2-{random_ip.replace('.', '-')}.compute-1.amazonaws.com",
+                                'publicIp': random_ip
+                            }
+                        ],
+                        'outpostArn': None,
+                        'tags': [
+                            {
+                                'key': 'Name',
+                                'value': 'some-test-server-investigating'
+                            }
+                        ],
+                        'instanceState': 'running',
+                        'availabilityZone': 'us-east-1d',
+                        'imageId': 'ami-026b57f3c383c2eec',
+                        'imageDescription': 'Amazon Linux 2 Kernel 5.10 AMI 2.0.20220912.1 x86_64 HVM gp2'
+                    }
+                },
+                'service': {
+                    'serviceName': 'guardduty',
+                    'detectorId': 'c0bfff53bb19fbee16ed05a0b21d3be3',
+                    'action': {
+                        'actionType': 'NETWORK_CONNECTION',
+                        'networkConnectionAction': {
+                            'connectionDirection': 'INBOUND',
+                            'remoteIpDetails': {
+                                'ipAddressV4': random_ip,
+                                'organization': {
+                                    'asn': '3462',
+                                    'asnOrg': 'Data Communication Business Group',
+                                    'isp': 'Chunghwa Telecom',
+                                    'org': 'Chunghwa Telecom'
+                                },
+                                'country': {
+                                    'countryName': 'Taiwan'
+                                },
+                                'city': {
+                                    'cityName': 'Tainan City'
+                                },
+                                'geoLocation': {
+                                    'lat': 22.9917,
+                                    'lon': 120.2148
+                                }
+                            },
+                            'remotePortDetails': {
+                                'port': get_random_port(),
+                                'portName': 'Unknown'
+                            },
+                            'localPortDetails': {
+                                'port': 22,
+                                'portName': 'SSH'
+                            },
+                            'protocol': 'TCP',
+                            'blocked': False,
+                            'localIpDetails': {
+                                'ipAddressV4': random_ip
+                            }
+                        }
+                    },
+                    'resourceRole': 'TARGET',
+                    'additionalInfo': {
+                        'value': '{}',
+                        'type': 'default'
+                    },
+                    'eventFirstSeen': '2022-10-21T11:14:59.000Z',
+                    'eventLastSeen': '2022-10-21T11:19:24.000Z',
+                    'archived': False,
+                    'count': 1
+                },
+                'severity': 2,
+                'createdAt': '2022-10-21T11:21:10.027Z',
+                'updatedAt': '2022-10-21T11:21:10.027Z',
+                'title': f"{get_random_ip()} is performing SSH brute force attacks against i-08cb1e1f2bcce.",
+                'description': f"{get_random_ip()} is performing SSH brute force attacks against i-08cb1ef2bcce.f"
+            }
+        ) + '\n'
+
+
 # Maps bucket type with corresponding data generator
 buckets_data_mapping = {
     cons.CLOUD_TRAIL_TYPE: CloudTrailDataGenerator,
@@ -667,6 +973,8 @@ buckets_data_mapping = {
     cons.KMS_TYPE: KMSDataGenerator,
     cons.MACIE_TYPE: MacieDataGenerator,
     cons.TRUSTED_ADVISOR_TYPE: TrustedAdvisorDataGenerator,
+    cons.GUARD_DUTY_TYPE: GuardDutyDataGenerator,
+    cons.NATIVE_GUARD_DUTY_TYPE: NativeGuardDutyDataGenerator
 }
 
 
@@ -675,12 +983,14 @@ def get_data_generator(bucket_type: str, bucket_name: str) -> DataGenerator:
 
     Args:
         bucket_type (str): Bucket type to match the data generator.
-        bucket_name (str): Bucket name to match in case of custom types.
+        bucket_name (str): Bucket name to match in case of custom or guardduty types.
 
     Returns:
         DataGenerator: Data generator for the given bucket.
     """
     if bucket_type == cons.CUSTOM_TYPE:
         bucket_type = bucket_name.split('-')[1]
+    elif bucket_type == cons.GUARD_DUTY_TYPE and 'native' in bucket_name:
+        bucket_type = cons.NATIVE_GUARD_DUTY_TYPE
 
     return buckets_data_mapping[bucket_type]()
