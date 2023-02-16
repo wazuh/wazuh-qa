@@ -95,6 +95,7 @@ configurations = load_configuration_template(configurations_path, configuration_
 # Variables
 test_directories = [os.path.join(PREFIX, TEST_DIR_1)]
 
+
 # Function
 @retry(subprocess.CalledProcessError, attempts=5, delay=10)
 def run_process(command_list):
