@@ -215,7 +215,7 @@ def test_registry_value_wildcards(configuration, metadata, set_wazuh_configurati
         - scheduled
     '''
 
-    monitored_keys = get_messages(generate_monitoring_callback(CB_FIM_WILDCARD_EXPANDING))
+    monitored_keys = get_messages(generate_monitoring_callback(CB_FIM_WILDCARD_EXPANDING), timeout=T_10)
     assert monitored_keys != [], f"Did not receive expected '{CB_FIM_WILDCARD_EXPANDING}' events"
 
     subkey = monitored_keys[0].replace(f"{WINDOWS_HKEY_LOCAL_MACHINE}\\", "")
