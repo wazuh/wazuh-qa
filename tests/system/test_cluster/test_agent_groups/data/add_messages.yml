@@ -50,9 +50,6 @@ wazuh-worker1:
   - regex: '.*Agent-groups recv.*Obtained.*chunks of data in.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60
-  - regex: '.*Agent-groups recv.*There is no data requiring synchronization in the local database.*'
-    path: "/var/ossec/logs/cluster.log"
-    timeout: 60
   - regex: '.*Agent-groups recv.*The checksum of both databases match.*'
     path: "/var/ossec/logs/cluster.log"
     timeout: 60

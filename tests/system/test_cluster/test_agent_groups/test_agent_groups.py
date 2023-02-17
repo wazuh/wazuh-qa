@@ -39,9 +39,17 @@ time_to_sync = 21
 time_to_agent_reconnect = 180
 queries = ['sql select * from "group" where name="test_group"']
 
+@pytest.fixture(scope='module')
+def delete_group():
+    yield
+    master_token = host_manager.get_api_token(master_host)
+    # Remove test_group in case of failure
+    host_manager.make_api_call(host=master_host, method='DELETE', token=master_token,
+                               endpoint=f"/groups?groups_list={test_group}")
+
 
 # Tests
-def test_agent_groups_create_remove_group(clean_environment):
+def test_agent_groups_create_remove_group(clean_environment, delete_group):
     """Check agent agent-groups synchronization works as expected.
 
     This test will wait for the expected agent-groups messages declared in data/synchronization_messages.yml and
