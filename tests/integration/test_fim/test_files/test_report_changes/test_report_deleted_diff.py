@@ -249,6 +249,9 @@ def test_report_when_deleted_directories(path, get_configuration, configure_envi
     diff_dir = create_file_and_check_diff(FILE_NAME, path, fim_mode)
     shutil.rmtree(path, ignore_errors=True)
     wait_for_event(fim_mode)
+    # Wait a second so diff path is deleted
+    if 'scheduled' not in fim_mode:
+        time.sleep(2)
     assert not os.path.exists(diff_dir), f'{diff_dir} exists'
 
 
