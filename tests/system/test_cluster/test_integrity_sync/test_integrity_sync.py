@@ -16,7 +16,7 @@ from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
 
-pytestmark = [pytest.mark.cluster, pytest.mark.agentless_cluster]
+pytestmark = [pytest.mark.cluster, pytest.mark.agentless_cluster_env]
 
 # Hosts
 test_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
