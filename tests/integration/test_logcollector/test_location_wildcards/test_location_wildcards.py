@@ -155,7 +155,7 @@ def test_location_wildcards(configuration, metadata, folder_path, file_list, cre
         evm.check_wildcard_pattern_no_match(re.escape(metadata['location']), prefix)
     else:
         # Check that pattern is expanded to configured file
-        evm.check_wildcard_pattern_expanded(file, prefix)
+        evm.check_wildcard_pattern_expanded(file, re.escape(metadata['location']), prefix)
 
         # Check log file is being analized
         evm.check_analyzing_file(file=file, prefix=prefix)

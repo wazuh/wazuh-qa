@@ -135,12 +135,13 @@ def check_ignore_restrict_message_not_found(message, regex, tag, prefix):
     assert log_found is False, ERR_MSG_UNEXPECTED_IGNORE_EVENT
 
 
-def check_wildcard_pattern_expanded(file_path, prefix, error_message=None, file_monitor=None, timeout=T_10,
-                                    escape=False):
+def check_wildcard_pattern_expanded(file_path, location_regex, prefix, error_message=None, file_monitor=None,
+                                    timeout=T_10, escape=False):
     """Create a callback to detect "New file that matches the '{file_path}' pattern: '(.*)'" line.
 
     Args:
         file_path (str): file path that is being monitored
+        location_regex (str): path configured in location tag
         prefix (str): Daemon that generates the error log.
         error_message (str): Error message.
         file_monitor (FileMonitor): Log monitor.
@@ -149,7 +150,7 @@ def check_wildcard_pattern_expanded(file_path, prefix, error_message=None, file_
 
     Returns: True if the expected message has been found, False otherwise.
     """
-    callback_msg = f".*check_pattern_expand.*New file that matches the '{file_path}' pattern: '(.*)'"
+    callback_msg = f".*New file that matches the '{location_regex}' pattern: '{file_path}'"
 
     return check_logcollector_event(file_monitor=file_monitor, timeout=timeout, callback=callback_msg,
                                     error_message=error_message, prefix=prefix, escape=escape)
