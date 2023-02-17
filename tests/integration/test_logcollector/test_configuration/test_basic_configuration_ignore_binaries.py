@@ -56,6 +56,7 @@ tags:
 import os
 import pytest
 import sys
+import re
 
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 import wazuh_testing.generic_callbacks as gc
@@ -64,7 +65,10 @@ import wazuh_testing.logcollector as logcollector
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import truncate_file
 import wazuh_testing.api as api
-from wazuh_testing.tools.monitoring import LOG_COLLECTOR_DETECTOR_PREFIX, WINDOWS_AGENT_DETECTOR_PREFIX, FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.logcollector import LOG_COLLECTOR_PREFIX, WINDOWS_AGENT_PREFIX
+from wazuh_testing.modules.logcollector.event_monitor import check_wildcard_pattern_no_match
+
 
 import subprocess as sb
 
@@ -83,10 +87,8 @@ if sys.platform == 'win32':
     force_restart_after_restoring = True
     location = r'C:\testing\files*'
     wazuh_configuration = 'ossec.conf'
-    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
 
 else:
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
     location = '/tmp/testing/files*'
     wazuh_configuration = 'etc/ossec.conf'
 
@@ -145,10 +147,8 @@ def check_ignore_binaries_valid(cfg):
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     if sys.platform == 'win32':
-        log_callback = logcollector.callback_invalid_location_pattern(cfg['location'])
-        wazuh_log_monitor.start(timeout=5, callback=log_callback,
-                                error_message=logcollector.GENERIC_CALLBACK_ERROR_INVALID_LOCATION)
-
+        check_wildcard_pattern_no_match(re.escape(cfg['location']), WINDOWS_AGENT_PREFIX, escape=False)
+        
     if wazuh_component == 'wazuh-manager':
         real_configuration = cfg.copy()
         real_configuration.pop('valid_value')
@@ -167,17 +167,17 @@ def check_ignore_binaries_invalid(cfg):
     """
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    log_callback = gc.callback_invalid_value('ignore_binaries', cfg['ignore_binaries'], prefix)
+    log_callback = gc.callback_invalid_value('ignore_binaries', cfg['ignore_binaries'], LOG_COLLECTOR_PREFIX)
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
-    log_callback = gc.callback_error_in_configuration('ERROR', prefix,
+    log_callback = gc.callback_error_in_configuration('ERROR', LOG_COLLECTOR_PREFIX,
                                                       conf_path=f'{wazuh_configuration}')
     wazuh_log_monitor.start(timeout=5, callback=log_callback,
                             error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
     if sys.platform != 'win32':
-        log_callback = gc.callback_error_in_configuration('CRITICAL', prefix,
+        log_callback = gc.callback_error_in_configuration('CRITICAL', LOG_COLLECTOR_PREFIX,
                                                           conf_path=f'{wazuh_configuration}')
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)

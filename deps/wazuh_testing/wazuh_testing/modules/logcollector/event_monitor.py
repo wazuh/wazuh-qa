@@ -168,7 +168,7 @@ def check_wildcard_pattern_no_match(regex, prefix, error_message=None, file_moni
 
     Returns: True if the expected message has been found, False otherwise.
     """
-    callback_msg = f".*expand_win32_wildcards.*DEBUG: No file/folder that matches {regex}"
+    callback_msg = f".*expand_win32_wildcards.*DEBUG: No .* that matches {regex}"
 
     return check_logcollector_event(file_monitor=file_monitor, timeout=timeout, callback=callback_msg,
                                     error_message=error_message, prefix=prefix, escape=escape)
