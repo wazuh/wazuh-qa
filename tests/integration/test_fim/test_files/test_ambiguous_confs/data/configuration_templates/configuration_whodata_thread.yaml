@@ -1,27 +1,30 @@
-- tags:
-    - 
-  apply_to_modules:
-    - test_ambiguous_whodata_thread
-  sections:
+- sections:
     - section: syscheck
       elements:
         - disabled:
             value: 'no'
         - directories:
-            value: TEST_DIRECTORIES
-          attributes:
-            - whodata: WHODATA
+            value: TEST_DIR1
+            attributes:
+              - whodata: WHODATA1
+        - directories:
+            value: TEST_DIR2
+            attributes:
+              - whodata: WHODATA2
+
     - section: sca
       elements:
         - enabled:
             value: 'no'
+
     - section: rootcheck
       elements:
         - disabled:
             value: 'yes'
+
     - section: wodle
       attributes:
-        - name: 'syscollector'
+        - name: syscollector
       elements:
         - disabled:
             value: 'yes'

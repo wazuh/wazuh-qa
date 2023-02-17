@@ -62,22 +62,22 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters, LOG_FILE_PATH, PREFIX
-from wazuh_testing.fim import callback_real_time_whodata_started
-from wazuh_testing.modules.fim import TEST_DIR_1
-from wazuh_testing.tools import configuration
+from wazuh_testing import LOG_FILE_PATH, T_10
+from wazuh_testing.tools import configuration, PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.fim.event_monitor import detect_whodata_start
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=2)]
 
 # Variables
-directory_str = os.path.join(PREFIX, TEST_DIR_1)
+test_directories = os.path.join(PREFIX, 'testidr1')
 
 # Configurations
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_templates')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 
@@ -88,7 +88,8 @@ configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_whodata_t
 # Test configurations
 configuration_parameters, configuration_metadata, test_case_ids = configuration.get_test_cases_data(test_cases_path)
 for count, value in enumerate(configuration_parameters):
-    configuration_parameters[count]['TEST_DIRECTORIES'] = directory_str
+    configuration_parameters[count]['TEST_DIR1'] = test_directories
+    configuration_parameters[count]['TEST_DIR2'] = test_directories
 configurations = configuration.load_configuration_template(configurations_path, configuration_parameters,
                                                            configuration_metadata)
 
@@ -141,11 +142,10 @@ def test_ambiguous_whodata_thread(configuration, metadata, set_wazuh_configurati
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     if metadata['whodata_enabled']:
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_real_time_whodata_started,
-                                error_message='Did not receive expected '
-                                              '"File integrity monitoring real-time Whodata engine started" event')
+        print("PRINT ENABLED")
+        detect_whodata_start(wazuh_log_monitor, timeout=T_10)
     else:
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                    callback=callback_real_time_whodata_started)
+            detect_whodata_start(wazuh_log_monitor, timeout=T_10)
+            print("PRINT DIsABLED")
             raise AttributeError(f'Unexpected event "File integrity monitoring real-time Whodata engine started"')

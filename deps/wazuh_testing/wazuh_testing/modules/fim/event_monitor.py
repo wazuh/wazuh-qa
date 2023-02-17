@@ -423,13 +423,13 @@ def detect_realtime_start(file_monitor):
                        error_message=ERR_MSG_FOLDERS_MONITORED_REALTIME)
 
 
-def detect_whodata_start(file_monitor):
+def detect_whodata_start(file_monitor, timeout=T_60):
     """Detect whodata engine start when restarting Wazuh.
 
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(CB_REALTIME_WHODATA_ENGINE_STARTED),
+    file_monitor.start(timeout=timeout, callback=generate_monitoring_callback(CB_REALTIME_WHODATA_ENGINE_STARTED),
                        error_message=ERR_MSG_WHODATA_ENGINE_EVENT)
 
 
