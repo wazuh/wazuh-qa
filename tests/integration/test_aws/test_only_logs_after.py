@@ -325,7 +325,7 @@ def test_multiple_calls(
 
     # Call the module without only_logs_after and check that no logs were processed
     last_marker_key = datetime.utcnow().strftime(cons.PATH_DATE_FORMAT)
-    if bucket_type == cons.CUSTOM_TYPE:
+    if bucket_type == cons.CUSTOM_TYPE or (bucket_type == cons.GUARD_DUTY_TYPE and 'native' not in bucket_name):
         event_monitor.check_marker_from_output(
             command_output=call_aws_module(*base_parameters),
             file_key=last_marker_key

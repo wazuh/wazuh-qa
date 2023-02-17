@@ -55,6 +55,8 @@
   metadata:
     bucket_type: custom
     bucket_name: wazuh-macie-integration-tests
+    expected_skipped_logs_step_3: 3
+    expected_skipped_logs_step_4: 3
 
 - name: trusted_advisor_only_logs_after_multiple_calls
   description: Trusted Advisor only_logs_after multiple calls configurations
@@ -62,6 +64,8 @@
   metadata:
     bucket_type: custom
     bucket_name: wazuh-trusted-advisor-integration-tests
+    expected_skipped_logs_step_3: 3
+    expected_skipped_logs_step_4: 3
 
 - name: guardduty_only_logs_after_multiple_calls
   description: GuardDuty only_logs_after multiple calls configurations
@@ -69,6 +73,8 @@
   metadata:
     bucket_type: guardduty
     bucket_name: wazuh-guardduty-integration-tests
+    expected_skipped_logs_step_3: 3
+    expected_skipped_logs_step_4: 3
 
 - name: native_guardduty_only_logs_after_multiple_calls
   description: Native GuardDuty only_logs_after multiple calls configurations
