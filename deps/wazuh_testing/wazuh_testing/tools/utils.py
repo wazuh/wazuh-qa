@@ -131,12 +131,9 @@ def get_random_string(string_length, digits=True):
 
 
 def get_version():
-    try:
-        f = open('../../version.json')
-        data = json.load(f)
-        version = data['version']
-    except Exception:
-        version = 'N/A'
+    f = open('../../version.json')
+    data = json.load(f)
+    version = data['version']
     return version
 
 
