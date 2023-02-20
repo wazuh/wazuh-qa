@@ -57,9 +57,7 @@ def get_report_files():
 def pytest_collection_modifyitems(session, config, items):
     selected_tests = []
     deselected_tests = []
-    print(session)
-    print(config)
-    if not global_parameters.allow_platform_deselected_tests:
+    if not global_parameters.avoid_platform_based_deselection:
         for item in items:
             supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
             plat = sys.platform
@@ -341,7 +339,7 @@ def pytest_addoption(parser):
     )
 
     parser.addoption(
-        "--allow-platform-deselected-tests",
+        "--avoid-platform-based-deselection",
         action="store_true",
         default=False,
         help="Avoid tests deselection based on current environment"
@@ -416,7 +414,7 @@ def pytest_configure(config):
         global_parameters.wpk_package_path = global_parameters.wpk_package_path
 
     # Set collect test mode
-    global_parameters.allow_platform_deselected_tests = config.getoption("--allow-platform-deselected-tests")
+    global_parameters.avoid_platform_based_deselection = config.getoption("--avoid_platform_based_deselection")
 
 
 
