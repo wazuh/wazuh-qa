@@ -50,6 +50,9 @@ from system import (create_new_agent_group, check_agent_groups, check_agents_sta
                     AGENT_STATUS_ACTIVE)
 from system.test_cluster.test_agent_groups.common import register_agent
 
+
+pytestmark = [pytest.mark.cluster, pytest.mark.four_manager_disconnected_node_env]
+
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
 test_infra_new_nodes = ["wazuh-worker3"]
