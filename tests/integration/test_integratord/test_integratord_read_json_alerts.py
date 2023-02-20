@@ -70,11 +70,9 @@ t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_invalid_js
 
 # Configurations
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
-t1_configuration_parameters[0]['API_KEY'] = global_parameters.integration_api_key
 t1_configurations = load_configuration_template(configurations_path, t1_configuration_parameters,
                                                 t1_configuration_metadata)
 t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
-t2_configuration_parameters[0]['API_KEY'] = global_parameters.integration_api_key
 t2_configurations = load_configuration_template(configurations_path, t2_configuration_parameters,
                                                 t2_configuration_metadata)
 local_internal_options = {'integrator.debug': '2'}
@@ -84,7 +82,8 @@ local_internal_options = {'integrator.debug': '2'}
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata',
                          zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
-def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
+def test_integratord_read_valid_alerts(configuration, metadata, replace_configuration_api_key,
+                                       set_wazuh_configuration, truncate_monitored_files,
                                        configure_local_internal_options_module, restart_wazuh_daemon_function,
                                        wait_for_start_module):
     '''
@@ -145,7 +144,7 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata',
                          zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
-def test_integratord_read_invalid_alerts(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
+def test_integratord_read_invalid_alerts(configuration, metadata, replace_configuration_api_key, set_wazuh_configuration, truncate_monitored_files,
                                          configure_local_internal_options_module, restart_wazuh_daemon_function,
                                          wait_for_start_module):
     '''

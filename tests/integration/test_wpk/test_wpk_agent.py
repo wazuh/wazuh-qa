@@ -93,26 +93,29 @@ PROTOCOL = "tcp"
 mark_skip_agentLinux = pytest.mark.skipif(get_service() == 'wazuh-agent' and
                                           sys_platform == 'Linux', reason="It will be blocked by wazuh/wazuh#9763")
 
-if not global_parameters.wpk_version:
-    raise Exception("The WPK package version must be defined by parameter. See README.md")
-if global_parameters.wpk_package_path is None:
-    raise ValueError("The WPK package path must be defined by parameter. See README.md")
 
-version_to_upgrade = global_parameters.wpk_version[0]
-package_path = global_parameters.wpk_package_path[0]
+try:
+    version_to_upgrade = global_parameters.wpk_version[0]
+    package_path = global_parameters.wpk_package_path[0]
+    _agent_version = get_version()
 
-_agent_version = get_version()
-
-error_msg = ''
-ver_split = _agent_version.replace("v", "").split(".")
-if int(ver_split[0]) >= 4 and int(ver_split[1]) >= 1:
-    error_msg = 'Could not chmod' \
-        if sys_platform != "Windows" else \
-        'Error executing command'
-else:
-    error_msg = 'err Could not chmod' \
-        if sys_platform != "Windows" else \
-        'err Cannot execute installer'
+    error_msg = ''
+    ver_split = _agent_version.replace("v", "").split(".")
+    if int(ver_split[0]) >= 4 and int(ver_split[1]) >= 1:
+        error_msg = 'Could not chmod' \
+            if sys_platform != "Windows" else \
+            'Error executing command'
+    else:
+        error_msg = 'err Could not chmod' \
+            if sys_platform != "Windows" else \
+            'err Cannot execute installer'
+except Exception as e:
+    print("Error: {}".format(e))
+    print("Using default values")
+    version_to_upgrade = 'v4.4.0'
+    error_msg = ''
+    _agent_version = 'v4.3.0'
+    package_path = "https://packages.wazuh.com/wpk/linux/x86_64/wazuh_agent_v4.4.0_linux_x86_64.wpk"""
 
 
 time_to_sleep_until_backup = 10

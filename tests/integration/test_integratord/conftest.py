@@ -20,3 +20,16 @@ def wait_for_start_module(request):
     check_integratord_event(file_monitor=file_monitor, timeout=20,
                             callback=generate_monitoring_callback(integrator.CB_INTEGRATORD_THREAD_READY),
                             error_message=integrator.ERR_MSG_VIRUST_TOTAL_ENABLED_NOT_FOUND)
+
+
+@pytest.fixture(scope='module')
+def get_integration_api_key():
+    return global_parameters.integration_api_key
+
+
+@pytest.fixture(scope='module')
+def replace_configuration_api_key(configuration, get_integration_api_key):
+    """
+    Replace the API key in the configuration file with the one provided by the environment variable.
+    """
+    return configuration.replace('API_KEY', get_integration_api_key)

@@ -11,7 +11,7 @@ from numpydoc.docscrape import FunctionDoc
 def pytest_addoption(parser):
     # Get command line options
     parser.addoption(
-        "--artifacts_path",
+        "--reliability-artifacts-path",
         action="store",
         type=str,
         help="Path where information of all cluster nodes can be found (logs, stats CSVs, etc)."

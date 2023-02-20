@@ -173,4 +173,5 @@ def pytest_collection_modifyitems(session, config, items):
 
     # Add each test_case metadata as user_properties for its item
     for item in items:
-        item.user_properties.extend([(key, value) for key, value in item.callspec.params['test_case'].items()])
+        if hasattr(item, 'callspec') and 'test_case' in item.callspec.params:
+            item.user_properties.extend([(key, value) for key, value in item.callspec.params['test_case'].items()])

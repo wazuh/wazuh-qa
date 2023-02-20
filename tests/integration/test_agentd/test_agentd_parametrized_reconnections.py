@@ -72,8 +72,12 @@ from wazuh_testing.agent import CLIENT_KEYS_PATH, SERVER_CERT_PATH, SERVER_KEY_P
 
 # Marks
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
+
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+global timeout
+timeout = '5'
+
 
 params = [
     # Different parameters on UDP
@@ -109,6 +113,7 @@ def teardown():
         remoted_server.stop()
 
 
+@pytest.fixture(scope="module", autouse=True)
 def set_debug_mode():
     """Set debug2 for agentd in local internal options file."""
     if platform.system() == 'win32' or platform.system() == 'Windows':
@@ -124,9 +129,6 @@ def set_debug_mode():
                 return
     with open(local_int_conf_path, 'a') as local_file_write:
         local_file_write.write('\n' + debug_line)
-
-
-set_debug_mode()
 
 
 # fixtures
@@ -253,17 +255,15 @@ def wait_unable_to_connect(line):
         return line
     return None
 
-
-def change_timeout(new_value):
+@pytest.fixture(scope="module")
+def change_timeout():
     """Set agent.recv_timeout for agentd in local internal options file.
 
     The above option sets the maximum number of seconds to wait
     for server response from the TCP client socket.
-
-    Args:
-        new_value (int): Number of seconds (between 1 and 600).
     """
-    new_timeout = 'agent.recv_timeout=' + new_value
+    global timeout
+    new_timeout = 'agent.recv_timeout=' + timeout
     if platform.system() == 'win32' or platform.system() == 'Windows':
         local_int_conf_path = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
     else:
@@ -275,9 +275,6 @@ def change_timeout(new_value):
                 return
     with open(local_int_conf_path, 'a') as local_file_write:
         local_file_write.write('\n' + new_timeout)
-
-
-change_timeout('5')
 
 
 def parse_time_from_log_line(log_line):

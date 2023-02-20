@@ -58,36 +58,39 @@ def get_report_files():
 def pytest_collection_modifyitems(session, config, items):
     selected_tests = []
     deselected_tests = []
+    print(session)
+    print(config)
+    if not global_parameters.allow_platform_deselected_tests:
+        for item in items:
+            supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
+            plat = sys.platform
 
-    for item in items:
-        supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
-        plat = sys.platform
-
-        selected = True
-        if supported_platforms and plat not in supported_platforms:
-            selected = False
-
-        host_type = 'agent' if 'agent' in get_service() else 'server'
-        supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
-        if supported_types and host_type not in supported_types:
-            selected = False
-        # Consider only first mark
-        levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
-        if levels and len(levels) > 0:
-            tiers = item.config.getoption("--tier")
-            if tiers is not None and levels[0] not in tiers:
+            selected = True
+            if supported_platforms and plat not in supported_platforms:
                 selected = False
-            elif item.config.getoption("--tier-minimum") > levels[0]:
-                selected = False
-            elif item.config.getoption("--tier-maximum") < levels[0]:
-                selected = False
-        if selected:
-            selected_tests.append(item)
-        else:
-            deselected_tests.append(item)
 
-    config.hook.pytest_deselected(items=deselected_tests)
-    items[:] = selected_tests
+            host_type = 'agent' if 'agent' in get_service() else 'server'
+
+            supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
+            if supported_types and host_type not in supported_types:
+                selected = False
+            # Consider only first mark
+            levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
+            if levels and len(levels) > 0:
+                tiers = item.config.getoption("--tier")
+                if tiers is not None and levels[0] not in tiers:
+                    selected = False
+                elif item.config.getoption("--tier-minimum") > levels[0]:
+                    selected = False
+                elif item.config.getoption("--tier-maximum") < levels[0]:
+                    selected = False
+            if selected:
+                selected_tests.append(item)
+            else:
+                deselected_tests.append(item)
+
+        config.hook.pytest_deselected(items=deselected_tests)
+        items[:] = selected_tests
 
 
 @pytest.fixture(scope='module')
@@ -226,6 +229,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--fim-database-memory",
         action="store_true",
+        default=False,
         help="run tests activating database memory in the syscheck configuration"
     )
     parser.addoption(
@@ -309,6 +313,12 @@ def pytest_addoption(parser):
         help="pass api key required for integratord tests."
     )
 
+    parser.addoption(
+        "--allow-platform-deselected-tests",
+        action="store_true",
+        default=False,
+        help="Avoid tests deselection based on current environment"
+    )
 
 def pytest_configure(config):
     # Register an additional marker
@@ -377,6 +387,10 @@ def pytest_configure(config):
     global_parameters.wpk_package_path = config.getoption("--wpk_package_path")
     if global_parameters.wpk_package_path:
         global_parameters.wpk_package_path = global_parameters.wpk_package_path
+
+    # Set collect test mode
+    global_parameters.allow_platform_deselected_tests = config.getoption("--allow-platform-deselected-tests")
+
 
 
 def pytest_html_results_table_header(cells):
@@ -1240,3 +1254,13 @@ def truncate_event_logs():
 
     for log_file in log_files:
         truncate_file(log_file)
+
+
+def pytest_deselected(items):
+    if not items:
+        return
+    config = items[0].session.config
+    reporter = config.pluginmanager.getplugin("terminalreporter")
+    reporter.ensure_newline()
+    for item in items:
+        reporter.line(f"deselected: {item.nodeid}", yellow=True, bold=True)

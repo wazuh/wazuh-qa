@@ -70,7 +70,6 @@ cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_json_file_del
 
 # Configurations
 configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
-configuration_parameters[0]['API_KEY'] = global_parameters.integration_api_key
 configurations = load_configuration_template(configurations_path, configuration_parameters,
                                              configuration_metadata)
 local_internal_options = {'integrator.debug': '2'}
@@ -80,7 +79,8 @@ local_internal_options = {'integrator.debug': '2'}
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata',
                          zip(configurations, configuration_metadata), ids=case_ids)
-def test_integratord_read_json_file_deleted(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
+def test_integratord_read_json_file_deleted(configuration, metadata, replace_configuration_api_key,
+                                            set_wazuh_configuration, truncate_monitored_files,
                                             configure_local_internal_options_module, restart_wazuh_daemon_function,
                                             wait_for_start_module):
     '''

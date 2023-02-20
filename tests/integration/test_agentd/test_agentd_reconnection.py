@@ -86,20 +86,15 @@ metadata = [
     {'PROTOCOL': 'udp'}
 ]
 
-config_ids = ['tcp', 'udp']
-
-configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
-
 log_monitor_paths = []
-
 receiver_sockets_params = []
-
 monitored_sockets_params = []
 
+config_ids = ['tcp', 'udp']
+configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
+
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
-
 authd_server = AuthdSimulator(params[0]['SERVER_ADDRESS'], key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
-
 remoted_server = None
 
 
@@ -108,7 +103,7 @@ def teardown():
     if remoted_server is not None:
         remoted_server.stop()
 
-
+@pytest.fixture(scope="module", autouse=True)
 def set_debug_mode():
     """Set debug2 for agentd in local internal options file."""
     if platform.system() == 'win32' or platform.system() == 'Windows':
@@ -125,9 +120,6 @@ def set_debug_mode():
                 return
     with open(local_int_conf_path, 'a') as local_file_write:
         local_file_write.write('\n' + debug_line)
-
-
-set_debug_mode()
 
 
 # fixtures
