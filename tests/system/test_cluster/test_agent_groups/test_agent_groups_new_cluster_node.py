@@ -44,7 +44,9 @@ tags:
 '''
 import os
 import pytest
+import time
 
+import wazuh_testing as fw
 from wazuh_testing.tools.system import HostManager
 from system import (create_new_agent_group, check_agent_groups, check_agents_status_in_node, restart_cluster,
                     AGENT_STATUS_ACTIVE)
@@ -96,7 +98,9 @@ def test_agent_groups_sync_when_add_a_new_cluster_node(target_node, clean_enviro
 
     agent_status_list = [f"{agent1_data[1]}  {agent1_data[2]}  {agent1_data[0]}  {AGENT_STATUS_ACTIVE}",
                          f"{agent2_data[1]}  {agent2_data[2]}  {agent2_data[0]}  {AGENT_STATUS_ACTIVE}"]
+
     restart_cluster(test_infra_agents, host_manager)
+    time.sleep(fw.T_5)
 
     # Check that agent status is active in cluster
     for host in test_infra_managers:
