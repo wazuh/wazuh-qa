@@ -100,7 +100,6 @@ def get_configuration(request):
 def extra_configuration_before_yield():
     change_internal_options('agent.debug', '2')
 
-
 def extra_configuration_after_yield():
     if remoted_server is not None:
         remoted_server.stop()
@@ -121,7 +120,7 @@ def add_custom_key():
 @pytest.mark.parametrize('test_case',
                          [test_case['test_case'] for test_case in test_cases],
                          ids=[test_case['name'] for test_case in test_cases])
-def test_agentd_state(configure_environment, test_case: list):
+def test_agentd_state(configure_environment, test_case):
     '''
     description: Check that the statistics file 'wazuh-agentd.state' is created automatically
                  and verify that the content of its fields is correct.

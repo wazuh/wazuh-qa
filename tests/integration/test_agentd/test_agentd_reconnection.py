@@ -100,10 +100,13 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 
 authd_server = AuthdSimulator(params[0]['SERVER_ADDRESS'], key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
 
+global remoted_server
 remoted_server = None
 
 
+@pytest.fixture(scope="function")
 def teardown():
+    yield
     global remoted_server
     if remoted_server is not None:
         remoted_server.stop()
@@ -225,7 +228,7 @@ when misses communication with Remoted and a new enrollment is sent to Authd.
 """
 
 
-def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configure_environment, get_configuration):
+def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configure_environment, get_configuration, teardown):
     '''
     description: Check how the agent behaves when losing communication with
                  the 'wazuh-remoted' daemon and a new enrollment is sent to
@@ -310,7 +313,7 @@ and an enrollment is sent to Authd to start communicating with Remoted
 """
 
 
-def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, configure_environment, get_configuration):
+def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, configure_environment, get_configuration, teardown):
     '''
     description: Check how the agent behaves when losing communication with
                  the 'wazuh-remoted' daemon and a new enrollment is sent to
@@ -398,7 +401,7 @@ and an enrollment is sent to Authd to start communicating with Remoted
 """
 
 
-def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure_environment, get_configuration):
+def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure_environment, get_configuration, teardown):
     '''
     description: Check how the agent behaves when losing communication with
                  the 'wazuh-remoted' daemon and a new enrollment is sent to
@@ -487,7 +490,7 @@ and multiple retries are required until the new key is obtained to start communi
 """
 
 
-def test_agentd_initial_enrollment_retries(configure_authd_server, configure_environment, get_configuration):
+def test_agentd_initial_enrollment_retries(configure_authd_server, configure_environment, get_configuration, teardown):
     '''
     description: Check how the agent behaves when it makes multiple enrollment attempts
                  before getting its key. For this, the agent starts without keys and
@@ -581,7 +584,7 @@ and multiple connection retries are required prior to requesting a new enrollmen
 """
 
 
-def test_agentd_connection_retries_pre_enrollment(configure_authd_server, configure_environment, get_configuration):
+def test_agentd_connection_retries_pre_enrollment(configure_authd_server, configure_environment, get_configuration, teardown):
     '''
     description: Check how the agent behaves when the 'wazuh-remoted' daemon is not available
                  and performs multiple connection attempts to it. For this, the agent starts
