@@ -414,7 +414,7 @@ def pytest_configure(config):
         global_parameters.wpk_package_path = global_parameters.wpk_package_path
 
     # Set collect test mode
-    global_parameters.avoid_platform_based_deselection = config.getoption("--avoid_platform_based_deselection")
+    global_parameters.avoid_platform_based_deselection = config.getoption("--avoid-platform-based-deselection")
 
 
 

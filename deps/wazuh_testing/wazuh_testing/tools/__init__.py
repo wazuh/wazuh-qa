@@ -115,7 +115,7 @@ def get_service():
             ], stderr=subprocess.PIPE).decode('utf-8').strip()
             service = 'wazuh-manager' if service == 'server' else 'wazuh-agent'
         except Exception:
-            service = ''
+            service = 'N/A'
 
     return service
 
