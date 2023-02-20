@@ -1,2 +1,1 @@
----
-include_vars: "configurations.yaml"
+include_vars: configurations.yaml
