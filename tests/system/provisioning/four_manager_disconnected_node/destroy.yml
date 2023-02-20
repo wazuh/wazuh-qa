@@ -25,7 +25,3 @@
       name: wazuh-agent2
       state: absent
       force_kill: yes
-  - docker_container:
-      name: wazuh-agent3
-      state: absent
-      force_kill: yes
