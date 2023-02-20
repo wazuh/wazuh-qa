@@ -48,6 +48,7 @@ Release report: TBD
 
 ### Changed
 
+- Improve `test_agent_groups_new_cluster_node` ([#3971](https://github.com/wazuh/wazuh-qa/pull/3971)) \- (Tests)
 - Fix Solaris agent provision schema ([#3750](https://github.com/wazuh/wazuh-qa/issues/3744)) \- (Framework)
 - Fix wazuh-db integration tests for agent-groups ([#3926](https://github.com/wazuh/wazuh-qa/pull/3926)) \- (Tests + Framework)
 - Fix `test_set_agent_groups` ([#3920](https://github.com/wazuh/wazuh-qa/pull/3920)) \- (Tests)
