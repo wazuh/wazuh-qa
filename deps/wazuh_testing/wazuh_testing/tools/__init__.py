@@ -109,7 +109,7 @@ def get_service():
     else:  # Linux, sunos5, darwin, aix...
         try:
             output = subprocess.check_output([f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"],
-                                              stderr=subprocess.PIPE).decode('utf-8').strip()
+                                             stderr=subprocess.PIPE).decode('utf-8').strip()
             service = 'wazuh-manager' if service == 'server' else 'wazuh-agent'
         except Exception:
             service = 'N/A'
