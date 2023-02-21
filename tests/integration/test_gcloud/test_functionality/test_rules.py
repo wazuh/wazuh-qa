@@ -97,8 +97,8 @@ def truncate_logs():
     """Truncate the 'ossec.log' file."""
     truncate_file(LOG_FILE_PATH)
 
-# fixtures
 
+# fixtures
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""

@@ -255,6 +255,7 @@ def wait_unable_to_connect(line):
         return line
     return None
 
+
 @pytest.fixture(scope="module")
 def change_timeout():
     """Set agent.recv_timeout for agentd in local internal options file.

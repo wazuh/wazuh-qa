@@ -103,6 +103,7 @@ def teardown():
     if remoted_server is not None:
         remoted_server.stop()
 
+
 @pytest.fixture(scope="module", autouse=True)
 def set_debug_mode():
     """Set debug2 for agentd in local internal options file."""

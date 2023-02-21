@@ -508,7 +508,7 @@ def test_wpk_agent(get_configuration, prepare_agent_version, download_wpk,
             remoted_simulator.change_default_listener = True
 
         event = wazuh_log_monitor.start(timeout=timeout_ack_response, error_message='ACK event not received',
-                                                   callback=callback_detect_upgrade_ack_event).result()
+                                        callback=callback_detect_upgrade_ack_event).result()
         result = event['parameters']
 
         if result is not None:

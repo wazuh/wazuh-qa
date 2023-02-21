@@ -144,7 +144,8 @@ def test_integratord_read_valid_alerts(configuration, metadata, replace_configur
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata',
                          zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
-def test_integratord_read_invalid_alerts(configuration, metadata, replace_configuration_api_key, set_wazuh_configuration, truncate_monitored_files,
+def test_integratord_read_invalid_alerts(configuration, metadata, replace_configuration_api_key,
+                                         set_wazuh_configuration, truncate_monitored_files,
                                          configure_local_internal_options_module, restart_wazuh_daemon_function,
                                          wait_for_start_module):
     '''
