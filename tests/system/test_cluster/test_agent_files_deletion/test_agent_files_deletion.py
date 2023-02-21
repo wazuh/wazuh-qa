@@ -11,10 +11,12 @@ from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
+
+pytestmark = [pytest.mark.cluster, pytest.mark.basic_cluster_env]
+
 master_host = 'wazuh-master'
 worker_host = 'wazuh-worker2'
 agent_host = 'wazuh-agent3'
-pytestmark = [pytest.mark.cluster]
 local_path = os.path.dirname(os.path.abspath(__file__))
 messages_path = os.path.join(local_path, 'data/messages.yml')
 script_path = os.path.join(re.sub(r'^.*?wazuh-qa', '/wazuh-qa', local_path), '../utils/get_wdb_agent.py')
