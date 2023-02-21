@@ -100,6 +100,7 @@ def get_configuration(request):
 def extra_configuration_before_yield():
     change_internal_options('agent.debug', '2')
 
+
 def extra_configuration_after_yield():
     if remoted_server is not None:
         remoted_server.stop()

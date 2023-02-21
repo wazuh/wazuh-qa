@@ -102,6 +102,7 @@ receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in t
 authd_server = AuthdSimulator('127.0.0.1', key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
 remoted_server = None
 
+
 @pytest.fixture(scope="function")
 def teardown():
     yield
