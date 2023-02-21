@@ -345,6 +345,7 @@ def pytest_addoption(parser):
         help="Avoid tests deselection based on current environment"
     )
 
+
 def pytest_configure(config):
     # Register an additional marker
     config.addinivalue_line(
@@ -415,7 +416,6 @@ def pytest_configure(config):
 
     # Set collect test mode
     global_parameters.avoid_platform_based_deselection = config.getoption("--avoid-platform-based-deselection")
-
 
 
 def pytest_html_results_table_header(cells):

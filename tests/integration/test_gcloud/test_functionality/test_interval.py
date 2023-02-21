@@ -93,8 +93,8 @@ p, m = generate_params(extra_params=conf_params,
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
-# Preparing
 
+# Preparing
 @pytest.fixture(scope='module', autouse=True)
 def truncate_logs():
     """Truncate the 'ossec.log' file."""

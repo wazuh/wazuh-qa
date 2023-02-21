@@ -99,7 +99,6 @@ def truncate_logs():
 
 
 # fixtures
-
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""

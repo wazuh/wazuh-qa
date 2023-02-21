@@ -110,7 +110,8 @@ def pytest_html_results_table_row(report, cells):
         cells[2] = HTMLStyle.colored_td(report.user_properties[0][1])
         cells[3] = HTMLStyle.colored_td(str(report.user_properties[2][1]))
         cells.append(HTMLStyle.colored_td(str(report.user_properties[3][1])))
-        cells.append(HTMLStyle.colored_td(u'\u2713' if len(report.user_properties) > 4 and report.user_properties[4][1] else ''))
+        cells.append(HTMLStyle.colored_td(u'\u2713' if len(report.user_properties) > 4 and report.user_properties[4][1]
+                                          else ''))
         cells.append(HTMLStyle.colored_td(f'{report.duration:.3f} s'))
 
     except AttributeError:

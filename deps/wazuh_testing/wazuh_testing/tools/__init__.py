@@ -98,9 +98,8 @@ def get_version():
                 return version[:version.rfind('\n')]
 
         else:  # Linux, sunos5, darwin, aix...
-            return subprocess.check_output([
-            f"{WAZUH_PATH}/bin/wazuh-control", "info", "-v"
-            ], stderr=subprocess.PIPE).decode('utf-8').rstrip()
+            return subprocess.check_output([f"{WAZUH_PATH}/bin/wazuh-control", "info", "-v"],
+                                           stderr=subprocess.PIPE).decode('utf-8').rstrip()
     except Exception:
         return 'N/A'
 
@@ -110,9 +109,8 @@ def get_service():
         service = 'wazuh-agent'
     else:  # Linux, sunos5, darwin, aix...
         try:
-            output = subprocess.check_output([
-            f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"
-            ], stderr=subprocess.PIPE).decode('utf-8').strip()
+            output = subprocess.check_output([f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"],
+                                              stderr=subprocess.PIPE).decode('utf-8').strip()
             service = 'wazuh-manager' if service == 'server' else 'wazuh-agent'
         except Exception:
             service = 'N/A'

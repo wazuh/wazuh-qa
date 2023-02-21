@@ -87,8 +87,6 @@ time_until_registration_key_avaible = 40
 time_until_ask_upgrade_result = 30
 max_upgrade_result_status_retries = 30
 
-
-
 version_to_upgrade = global_parameters.wpk_version[0] if global_parameters.wpk_version else 'v4.4.0'
 
 MANAGER_VERSION = get_version()

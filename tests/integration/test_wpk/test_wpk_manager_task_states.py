@@ -424,10 +424,9 @@ def test_wpk_manager_task_states(get_configuration, configure_environment,
 
             # Chech that result of first attempt is Success
             assert new_expected_response[agents_id.index(agent_id)] == \
-                   response['data'][0]['message'], \
-                f'New upgrade response did not match expected! ' \
-                f'Expected {new_expected_response} obtained ' \
-                f'{response["data"][0]["message"]}'
+                   response['data'][0]['message'], f'New upgrade response did not match expected! ' \
+                                                   f'Expected {new_expected_response} obtained ' \
+                                                   f'{response["data"][0]["message"]}'
 
         for injector in injectors:
             injector.stop_receive()
