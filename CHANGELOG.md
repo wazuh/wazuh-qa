@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Added
 
+- Fix pytest test collection errors ([#3969](https://github.com/wazuh/wazuh-qa/pull/3972)) \- (Framework + Tests)
 - Fix test_agent_groups system test ([#3955](https://github.com/wazuh/wazuh-qa/pull/3964)) \- (Tests)
 - Add new group_hash case and update the `without condition` case output in `wazuh_db/sync_agent_groups_get` ([#3959](https://github.com/wazuh/wazuh-qa/pull/3959)) \- (Tests)
 - Add markers for each system test environment ([#3961](https://github.com/wazuh/wazuh-qa/pull/3961)) \- (Framework + Tests)
