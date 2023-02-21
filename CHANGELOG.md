@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: TBD \
 Release report: TBD
 
+### Fixed
+
+- Fix pytest test collection errors ([#3969](https://github.com/wazuh/wazuh-qa/pull/3969)) \- (Framework + Tests)
+
 ## [4.5.2] - TBD
 
 Wazuh commit: TBD \
