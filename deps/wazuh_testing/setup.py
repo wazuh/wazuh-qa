@@ -66,7 +66,7 @@ setup(
     author='Wazuh',
     author_email='hello@wazuh.com',
     license='GPLv2',
-    packages=find_packages(),
+    packages=find_namespace_packages(),
     package_data={'wazuh_testing': package_data_list},
     entry_points={'console_scripts': scripts_list},
     include_package_data=True,
