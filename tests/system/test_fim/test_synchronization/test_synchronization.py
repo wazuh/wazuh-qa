@@ -52,6 +52,8 @@ from wazuh_testing.tools import WAZUH_LOGS_PATH
 from wazuh_testing.fim import create_folder_file, query_db
 
 
+pytestmark = [pytest.mark.one_manager_agent_env]
+
 # Hosts
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'one_manager_agent', 'inventory.yml')
@@ -116,7 +118,7 @@ def test_synchronization(folder_path, case, host):
         HostMonitor(inventory_path=inventory_path,
                     messages_path=messages_path[0],
                     tmp_path=tmp_path).run()
-    except:
+    except Exception:
         host_manager.run_command('wazuh-agent1', f'rm -rf {folder_path}')
 
     clean_environment(host_manager, enviroment_files)
@@ -127,7 +129,7 @@ def test_synchronization(folder_path, case, host):
     if (case == 'add'):
         host_manager.run_command('wazuh-agent1', f'touch {folder_path}/{folder_path}.txt')
 
-    elif(case == 'modify'):
+    elif (case == 'modify'):
         host_manager.modify_file_content(host='wazuh-agent1', path=folder_path, content=folder_path)
 
     else:
