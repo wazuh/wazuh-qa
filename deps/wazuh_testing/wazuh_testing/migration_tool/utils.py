@@ -65,11 +65,12 @@ def get_latest_delta_file(deltas_filepath):
 
 
 def sanitize_configuration(configuration):
-    '''Sanitize the tool configuration.
+    '''Normalize the configuration for it to be correctly processed and compatible.
+
     Args:
         configuration (list): Test case configuration to be sanitized.
     Returns:
-        configuration (list): Configuration sanitized.
+        configuration (list): Configuration normalized.
     '''
     for configurations_obj in configuration:
         configurations_list = configurations_obj['configurations']
