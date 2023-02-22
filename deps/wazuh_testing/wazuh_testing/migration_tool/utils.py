@@ -12,8 +12,8 @@ import mysql.connector
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from mysql.connector import errorcode
-from wazuh_testing.migration_tool import BINARY_PATH, CVE5_SCHEMA_PATH, DELTA_SCHEMA_PATH, ERROR_MESSAGES, \
-                                         SNAPSHOTS_DIR, DOWNLOADS_DIR, LOG_FILE_PATH
+from wazuh_testing.migration_tool import MIGRATION_TOOL_PATH, CVE5_SCHEMA_PATH, DELTA_SCHEMA_PATH, ERROR_MESSAGES, \
+                                         SNAPSHOTS_DIR, DOWNLOADS_DIR, MIGRATION_TOOL_LOG_PATH
 from wazuh_testing.tools.file import delete_file, read_json_file, truncate_file
 from wazuh_testing.tools.logging import Logging
 
@@ -39,8 +39,8 @@ def run_content_migration_tool(args='', config_files=None, truncate_log=True):
         return out, err
 
     for file_path in config_files:
-        truncate_file(LOG_FILE_PATH)
-        command = ' '.join([BINARY_PATH, '-i', file_path, args])
+        truncate_file(MIGRATION_TOOL_LOG_PATH)
+        command = ' '.join([MIGRATION_TOOL_PATH, '-i', file_path, args])
         output, error = run_tool(command)
         output = output.decode()
         err_checker = [True for msg in ERROR_MESSAGES if msg in output]
