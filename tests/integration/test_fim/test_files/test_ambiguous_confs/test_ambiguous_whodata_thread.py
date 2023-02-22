@@ -104,26 +104,38 @@ def test_ambiguous_whodata_thread(configuration, metadata, set_wazuh_configurati
                  values ('yes' and 'no'). For this purpose, the configuration is applied and it checks
                  that the last value detected for 'whodata' in the 'ossec.conf' file is the one used.
 
+    test_phases:
+        - setup:
+            - Set wazuh configuration and local_internal_options.
+            - Create custom folder for monitoring
+            - Clean logs files and restart wazuh to apply the configuration.
+        - test:
+            - Detect if real-time whodata thread has been started
+        - teardown:
+            - Delete custom monitored folder
+            - Restore configuration
+            - Stop wazuh
+
     wazuh_min_version: 4.2.0
 
     tier: 2
 
     parameters:
-        - whodata_enabled:
-            type: bool
-            brief: Who-data status.
-        - tags_to_apply:
-            type: set
-            brief: Run test if match with a configuration identifier, skip otherwise.
-        - get_configuration:
+        - configuration:
+            type: dict
+            brief: Configuration values for ossec.conf.
+        - metadata:
+            type: dict
+            brief: Test case data.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Get configurations from the module.
-        - configure_environment:
+            brief: Set ossec.conf configuration.
+        - configure_local_internal_options_function:
             type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_syscheckd:
+            brief: Set local_internal_options.conf file.
+        - restart_syscheck_function:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
+            brief: restart syscheckd daemon, and truncate the ossec.log.
 
     assertions:
         - Verify that 'whodata' thread is started when the last 'whodata' value detected is set to 'yes'.
