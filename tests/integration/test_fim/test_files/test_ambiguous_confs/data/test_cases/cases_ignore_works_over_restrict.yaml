@@ -1,0 +1,9 @@
+- name: Whodata thread Disabled
+  description: Check Whodata thread is disabled when last directory has it set to 'no'
+  configuration_parameters:
+    TEST_DIR1:
+    TEST_DIR2:
+  metadata:
+    folder_index: 0
+    filename: testfile
+    triggers_event: false
