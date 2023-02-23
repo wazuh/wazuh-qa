@@ -370,7 +370,7 @@ def test_syscollector_default_values(configuration, metadata, set_wazuh_configur
 @pytest.mark.parametrize('configuration, metadata', zip(t5_configurations, t5_config_metadata), ids=t5_case_ids)
 def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
                               configure_local_internal_options_module, truncate_monitored_files,
-                              remove_agent_syscollector_info, daemons_handler_function):
+                              daemons_handler_function):
     '''
     description: Check that the Sycollector scan completes when all scans are enabled.
 
@@ -400,9 +400,6 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
         - truncate_monitored_files:
             type: fixture
             brief: Truncate the log file before and after the test execution.
-        - remove_agent_syscollector_info:
-            type: fixture
-            brief: Removes the previous scan information.
         - daemons_handler_function:
             type: fixture
             brief: Handler of Wazuh daemons for each test case.

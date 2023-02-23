@@ -38,7 +38,7 @@ def check_syscollector_event(file_monitor=None, callback='', error_message=None,
 
 def check_module_is_starting(file_monitor=None, timeout=T_5, update_position=True):
     '''Check if the syscollector module is starting'''
-    check_syscollector_event(file_monitor=file_monitor, callback=syscollector.CB_SCAN_STARTED, timeout=timeout,
+    check_syscollector_event(file_monitor=file_monitor, callback=syscollector.CB_MODULE_STARTING, timeout=timeout,
                              update_position=update_position)
 
 
