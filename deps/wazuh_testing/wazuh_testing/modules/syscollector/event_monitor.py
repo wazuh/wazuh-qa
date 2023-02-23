@@ -3,6 +3,8 @@ copyright: Copyright (C) 2015-2023, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 '''
+import sys
+
 from wazuh_testing import T_5, T_10
 from wazuh_testing.event_monitor import check_event
 from wazuh_testing.modules import syscollector
@@ -109,7 +111,10 @@ def check_config(disabled='no', interval=3600, scan_on_start='yes', hardware='ye
     msg = 'DEBUG:.+"disabled":"{0}","scan-on-start":"{1}","interval":{2},'.format(disabled, scan_on_start, interval)
     msg += '"network":"{0}","os":"{1}","hardware":"{2}","packages":"{3}","ports":"{4}",'.format(network, os, hardware,
                                                                                                 packages, ports)
-    msg += '"ports_all":"{0}","processes":"{1}","sync_max_eps":{2}.+'.format(ports_all, processes, max_eps)
+    msg += '"ports_all":"{0}","processes":"{1}",'.format(ports_all, processes)
+    if sys.platform == 'win32':
+        msg += '"hotfixes":"{0}",'.format(hotfixes)
+    msg += '"sync_max_eps":{0}.+'.format(max_eps)
 
     check_syscollector_event(file_monitor=file_monitor, callback=msg, timeout=timeout, update_position=update_position)
 
