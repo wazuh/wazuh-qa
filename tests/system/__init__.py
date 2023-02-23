@@ -46,16 +46,21 @@ def clean_cluster_logs(hosts_list, host_manager):
             host_manager.clear_file_without_recreate(host=host, file_path=CLUSTER_LOGS_PATH)
 
 
-def remove_cluster_agents(wazuh_master, agents_list, host_manager):
+def remove_cluster_agents(wazuh_master, agents_list, host_manager, agents_id=None):
     # Removes a list of agents from the cluster using manage_agents
-    agent_id = get_agent_id(host_manager)
     for agent in agents_list:
         host_manager.control_service(host=agent, service='wazuh', state="stopped")
         host_manager.clear_file(agent, file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
-    while (agent_id != ''):
-        host_manager.get_host(wazuh_master).ansible("command", f'{WAZUH_PATH}/bin/manage_agents -r {agent_id}',
-                                                    check=False)
-        agent_id = get_agent_id(host_manager)
+    if agents_id is None:
+        id = get_agent_id(host_manager)
+        while id != '':
+            host_manager.get_host(wazuh_master).ansible("command", f'{WAZUH_PATH}/bin/manage_agents -r {id}',
+                                                        check=False)
+            id = get_agent_id(host_manager)
+    else:
+        for id in agents_id:
+            host_manager.get_host(wazuh_master).ansible("command", f'{WAZUH_PATH}/bin/manage_agents -r {id}',
+                                                        check=False)
 
 
 def get_agents_in_cluster(host, host_manager):
