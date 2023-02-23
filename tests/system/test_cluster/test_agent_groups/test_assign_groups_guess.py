@@ -72,20 +72,22 @@ tmp_path = os.path.join(local_path, 'tmp')
 
 # Variables
 remoted_guess_agent_groups = 'remoted.guess_agent_group='
+group_id = 'group_test'
+multigroups_id = 'default,group_test'
 # this timeout is temporality, this test will be update
 timeout = 20
 
 
 # Tests
 @pytest.mark.parametrize("status_guess_agent_group", ['0', '1'])
-@pytest.mark.parametrize("agent_target", ['wazuh-master', 'wazuh-worker1'])
-def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_environment):
+@pytest.mark.parametrize("target_node", ['wazuh-master', 'wazuh-worker1'])
+def test_guess_single_group(target_node, status_guess_agent_group, clean_environment):
     '''
     description: Check that when an agent registered in the manager and assigned to group is removed, performs a
                  guessing operation and determinates the groups to with the agent was assigned.
     wazuh_min_version: 4.4.0
     parameters:
-        - agent_target:
+        - target_node:
             type: String
             brief: Name of the host where the agent will register.
         - status_guess_agent_group
@@ -102,7 +104,6 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
     expected_output:
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
-    group_id = 'group_test'
     # Modify local_internal_options
     replace = '\n' + remoted_guess_agent_groups + f'{status_guess_agent_group}\n'
 
@@ -114,7 +115,7 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
     time.sleep(timeout)
 
     # Register agent with agent-auth
-    agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0], agent_target,
+    agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0], target_node,
                                                                 host_manager)
     # Restart agent
     restart_cluster(test_infra_agents, host_manager)
@@ -138,7 +139,7 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
         remove_cluster_agents(test_infra_managers[0], test_infra_agents, host_manager)
 
         # Register agent with agent-auth
-        agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0], agent_target,
+        agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0], target_node,
                                                                     host_manager)
 
         # Check that agent has client key file
@@ -149,18 +150,112 @@ def test_assign_agent_to_a_group(agent_target, status_guess_agent_group, clean_e
         time.sleep(timeout)
 
         # Check if remoted.guess_agent_group is disabled
-        group_id = 'default' if int(status_guess_agent_group) == 0 else group_id
+        expected_group = 'default' if int(status_guess_agent_group) == 0 else group_id
 
         # Run the callback checks for the ossec.log
-        messages_path = master_messages_path if agent_target == 'wazuh-master' else worker_messages_path
-
-        replace_regex_in_file(['AGENT_ID', 'GROUP_ID'], [agent_id, group_id], messages_path)
+        messages_path = master_messages_path if target_node == 'wazuh-master' else worker_messages_path
+        replace_regex_in_file(['AGENT_ID', 'GROUP_ID'], [agent_id, expected_group], messages_path)
         HostMonitor(inventory_path=inventory_path,
                     messages_path=messages_path,
                     tmp_path=tmp_path).run(update_position=True)
-        check_agent_groups(agent_id, group_id, test_infra_managers, host_manager)
+
+        check_agent_groups(agent_id, expected_group, test_infra_managers, host_manager)
 
     finally:
         # Delete group of agent
         delete_group_of_agents(test_infra_managers[0], group_id, host_manager)
-        replace_regex_in_file([agent_id, group_id], ['AGENT_ID', 'GROUP_ID'], messages_path)
+        replace_regex_in_file([agent_id, expected_group], ['AGENT_ID', 'GROUP_ID'], messages_path)
+
+
+@pytest.mark.parametrize('n_agents', [1, 2])
+@pytest.mark.parametrize("status_guess_agent_group", ['0', '1'])
+@pytest.mark.parametrize("target_node", ['wazuh-master', 'wazuh-worker1'])
+def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clean_environment):
+    '''
+    description: Check that when an agent registered in the manager and assigned to group is removed, performs a
+                 guessing operation and determinates the groups to with the agent was assigned.
+    wazuh_min_version: 4.4.0
+    parameters:
+        - target_node:
+            type: String
+            brief: Name of the host where the agent will register.
+        - status_guess_agent_group
+            type: String
+            brief: Determine if the group guessing mechanism is enabled or disabled.
+        - clean_enviroment:
+            type: Fixture
+            brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
+    assertions:
+        - Verify that after registering the agent key file exists in all nodes.
+        - Verify that after registering the agent appears as never_connected in all nodes.
+        - Verify that after registering it has the 'Null' group assigned.
+        - Verify that after assign group with agent-groups the change is sync with the cluster.
+    expected_output:
+        - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
+    '''
+    # Modify local_internal_options
+    replace = '\n' + remoted_guess_agent_groups + f'{status_guess_agent_group}\n'
+
+    for host in test_infra_managers:
+        host_manager.add_block_to_file(host, path=f"{WAZUH_PATH}/etc/local_internal_options.conf",
+                                       after="upgrades.", before="authd.debug=2", replace=replace)
+    # Restart managers
+    restart_cluster(test_infra_managers, host_manager)
+    time.sleep(timeout)
+
+    # Register agent with agent-auth
+    agent1_ip, agent1_id, agent1_name, ag1_manager_ip = register_agent(test_infra_agents[0], target_node,
+                                                                       host_manager)
+    if n_agents == 2:
+        agent2_ip, agent2_id, agent2_name, ag2_manager_ip = register_agent(test_infra_agents[1], target_node,
+                                                                           host_manager)
+    # Restart agent
+    restart_cluster(test_infra_agents, host_manager)
+
+    # Check that agent has client key file
+    assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
+    if n_agents == 2:
+        assert check_keys_file(test_infra_agents[1], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
+    try:
+        # Create new group and assing agent
+        assign_agent_to_new_group(test_infra_managers[0], group_id, agent1_id, host_manager)
+        if n_agents == 2:
+            assign_agent_to_new_group(test_infra_managers[1], group_id, agent2_id, host_manager)
+        time.sleep(timeout)
+
+        # Check that agent has group set to group_test on Managers
+        check_agent_groups(agent1_id, group_id, test_infra_managers, host_manager)
+        if n_agents == 2:
+            check_agent_groups(agent2_id, group_id, test_infra_managers, host_manager)
+
+        # Remove the agent
+        remove_cluster_agents(test_infra_managers[0], [test_infra_agents[0]], host_manager, [agent1_id])
+
+        # Register agent with agent-auth
+        agent1_ip, agent1_id, agent1_name, ag1_manager_ip = register_agent(test_infra_agents[0], target_node,
+                                                                           host_manager)
+
+        # Check that agent has client key file
+        assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
+
+        # Restart agent
+        restart_cluster([test_infra_agents[0]], host_manager)
+        time.sleep(timeout)
+
+        # Check if remoted.guess_agent_group is disabled
+        expected_group = 'default' if int(status_guess_agent_group) == 0 or n_agents == 1 else multigroups_id
+
+        # Run the callback checks for the ossec.log
+        messages_path = master_messages_path if target_node == 'wazuh-master' else worker_messages_path
+        replace_regex_in_file(['AGENT_ID', 'GROUP_ID'], [agent1_id, expected_group], messages_path)
+        HostMonitor(inventory_path=inventory_path,
+                    messages_path=messages_path,
+                    tmp_path=tmp_path).run(update_position=True)
+
+        for group in expected_group.split(','):
+            check_agent_groups(agent1_id, group, test_infra_managers, host_manager)
+
+    finally:
+        # Delete group of agent
+        delete_group_of_agents(test_infra_managers[0], group_id, host_manager)
+        replace_regex_in_file([agent1_id, expected_group], ['AGENT_ID', 'GROUP_ID'], messages_path)
