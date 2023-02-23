@@ -85,7 +85,9 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
 test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_ignore_works_over_restrict.yaml')
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_ignore_works_over_restrict.yaml')
+config_file = 'configuration_ignore_works_over_restrict_win32.yaml' if sys.platform == 'win32' else \
+              'configuration_ignore_works_over_restrict.yaml'
+configurations_path = os.path.join(CONFIGURATIONS_PATH, config_file)
 
 # Test configurations
 configuration_parameters, configuration_metadata, test_case_ids = get_test_cases_data(test_cases_path)
@@ -94,19 +96,12 @@ for count, value in enumerate(configuration_parameters):
     configuration_parameters[count]['TEST_DIR2'] = test_directories[1]
 configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
 
-"""
-# TODO Tests to move to new framework
-@pytest.mark.parametrize('folder, filename, triggers_event, tags_to_apply', [
-    (testdir1, 'testfile', False, {'valid_no_regex'}),
-    (testdir1, 'testfile2', False, {'valid_regex'}),
-    (testdir1, 'ignore_testfile2', False, {'valid_regex'}),
-])
-"""
 
-@pytest.mark.parametrize('test_folders', [test_directories], scope="module", ids='')
+# Tests
+@pytest.mark.parametrize('test_folders', [test_directories], ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 def test_ignore_works_over_restrict(configuration, metadata, set_wazuh_configuration, test_folders,
-                                        create_monitored_folders_module, configure_local_internal_options_function,
+                                        create_monitored_folders, configure_local_internal_options_function,
                                         restart_syscheck_function, wait_syscheck_start):
     '''
     description: Check if the 'ignore' tag prevails over the 'restrict' one when using both in the same directory.
@@ -162,7 +157,7 @@ def test_ignore_works_over_restrict(configuration, metadata, set_wazuh_configura
         - scheduled
     '''
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    folder = test_directories[metadata['folder']]
+    folder = test_directories[metadata['folder_index']]
     filename = metadata['filename']
     
     # Create file that must be ignored
@@ -175,5 +170,5 @@ def test_ignore_works_over_restrict(configuration, metadata, set_wazuh_configura
                                                error_message=f'Did not receive expected '
                                                              f'"Ignoring ... due to ..." event for file '
                                                              f'{os.path.join(folder, filename)}').result()
-
+    
     assert os.path.join(folder, filename) in matching_log, "Ignored file log is not generated."

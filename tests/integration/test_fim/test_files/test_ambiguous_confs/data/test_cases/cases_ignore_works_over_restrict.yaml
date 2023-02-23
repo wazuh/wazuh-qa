@@ -1,9 +1,98 @@
-- name: Whodata thread Disabled
+- name: Ignore file pattern over restrict regex (Scheduled mode)
   description: Check Whodata thread is disabled when last directory has it set to 'no'
   configuration_parameters:
-    TEST_DIR1:
-    TEST_DIR2:
+    REALTIME: 'no'
+    WHODATA: 'no'
   metadata:
     folder_index: 0
     filename: testfile
-    triggers_event: false
+    is_pattern: true
+    fim_mode: scheduled
+
+- name: Ignore file pattern over restrict regex (Realtime mode)
+  description: Check Whodata thread is disabled when last directory has it set to 'no'
+  configuration_parameters:
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    folder_index: 0
+    filename: testfile
+    is_pattern: true
+    fim_mode: realtime
+
+- name: Ignore file pattern over restrict regex (Whodata mode)
+  description: Check Whodata thread is disabled when last directory has it set to 'no'
+  configuration_parameters:
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    folder_index: 0
+    filename: testfile
+    is_pattern: true
+    fim_mode: whodata
+
+- name: Ignore sregex over restrict regex - different regex (Scheduled mode)
+  description: Check Whodata thread is disabled when last directory has it set to 'no'
+  configuration_parameters:
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    folder_index: 0
+    filename: regex_testfile
+    is_pattern: false
+    fim_mode: scheduled
+
+- name: Ignore sregex over restrict regex - different regex (Realtime mode)
+  description: Check Whodata thread is disabled when last directory has it set to 'no'
+  configuration_parameters:
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    folder_index: 0
+    filename: regex_testfile
+    is_pattern: false
+    fim_mode: realtime
+
+- name: Ignore sregex over restrict regex - different regex (Whodata mode)
+  description: Check Whodata thread is disabled when last directory has it set to 'no'
+  configuration_parameters:
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    folder_index: 0
+    filename: regex_testfile
+    is_pattern: false
+    fim_mode: whodata
+
+- name: Ignore sregex over restrict regex - same regex (Scheduled mode)
+  description: Check Whodata thread is disabled when last directory has it set to 'no'
+  configuration_parameters:
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    folder_index: 1
+    filename: regex_testfile
+    is_pattern: false
+    fim_mode: scheduled
+
+- name: Ignore sregex over restrict regex - same regex (Realtime mode)
+  description: Check Whodata thread is disabled when last directory has it set to 'no'
+  configuration_parameters:
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    folder_index: 1
+    filename: regex_testfile
+    is_pattern: false
+    fim_mode: realtime
+
+- name: Ignore sregex over restrict regex - same regex (Whodata mode)
+  description: Check Whodata thread is disabled when last directory has it set to 'no'
+  configuration_parameters:
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    folder_index: 1
+    filename: regex_testfile
+    is_pattern: false
+    fim_mode: whodata
