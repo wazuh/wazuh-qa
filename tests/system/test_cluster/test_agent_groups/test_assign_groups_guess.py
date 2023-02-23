@@ -57,8 +57,8 @@ from wazuh_testing.tools import WAZUH_PATH
 pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
 
 # Hosts
-test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
-test_infra_agents = ["wazuh-agent1", 'wazuh-agent2']
+test_infra_managers = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
+test_infra_agents = ['wazuh-agent1', 'wazuh-agent2']
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'enrollment_cluster', 'inventory.yml')
@@ -79,8 +79,8 @@ timeout = 20
 
 
 # Tests
-@pytest.mark.parametrize("status_guess_agent_group", ['0', '1'])
-@pytest.mark.parametrize("target_node", ['wazuh-master', 'wazuh-worker1'])
+@pytest.mark.parametrize('status_guess_agent_group', ['0', '1'])
+@pytest.mark.parametrize('target_node', ['wazuh-master', 'wazuh-worker1'])
 def test_guess_single_group(target_node, status_guess_agent_group, clean_environment):
     '''
     description: Check that when an agent registered in the manager and assigned to group is removed, performs a
@@ -105,11 +105,11 @@ def test_guess_single_group(target_node, status_guess_agent_group, clean_environ
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
     # Modify local_internal_options
-    replace = '\n' + remoted_guess_agent_groups + f'{status_guess_agent_group}\n'
+    replace = '\n' + remoted_guess_agent_groups + f"{status_guess_agent_group}\n"
 
     for host in test_infra_managers:
         host_manager.add_block_to_file(host, path=f"{WAZUH_PATH}/etc/local_internal_options.conf",
-                                       after="upgrades.", before="authd.debug=2", replace=replace)
+                                       after='upgrades.', before='authd.debug=2', replace=replace)
     # Restart managers
     restart_cluster(test_infra_managers, host_manager)
     time.sleep(timeout)
@@ -168,14 +168,17 @@ def test_guess_single_group(target_node, status_guess_agent_group, clean_environ
 
 
 @pytest.mark.parametrize('n_agents', [1, 2])
-@pytest.mark.parametrize("status_guess_agent_group", ['0', '1'])
-@pytest.mark.parametrize("target_node", ['wazuh-master', 'wazuh-worker1'])
+@pytest.mark.parametrize('status_guess_agent_group', ['0', '1'])
+@pytest.mark.parametrize('target_node', ['wazuh-master', 'wazuh-worker1'])
 def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clean_environment):
     '''
     description: Check that when an agent registered in the manager and assigned to group is removed, performs a
                  guessing operation and determinates the groups to with the agent was assigned.
     wazuh_min_version: 4.4.0
     parameters:
+        - n_agents:
+            type: Int
+            brief: Number of agents to register.
         - target_node:
             type: String
             brief: Name of the host where the agent will register.
@@ -194,11 +197,11 @@ def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clea
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
     # Modify local_internal_options
-    replace = '\n' + remoted_guess_agent_groups + f'{status_guess_agent_group}\n'
+    replace = '\n' + remoted_guess_agent_groups + f"{status_guess_agent_group}\n"
 
     for host in test_infra_managers:
         host_manager.add_block_to_file(host, path=f"{WAZUH_PATH}/etc/local_internal_options.conf",
-                                       after="upgrades.", before="authd.debug=2", replace=replace)
+                                       after='upgrades.', before='authd.debug=2', replace=replace)
     # Restart managers
     restart_cluster(test_infra_managers, host_manager)
     time.sleep(timeout)
