@@ -141,3 +141,16 @@
     bucket_name: wazuh-waf-integration-tests
     only_logs_after: 2022-NOV-20
     expected_results: 3
+
+- name: server_access_with_only_logs_after
+  description: Server Access only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: server_access
+    BUCKET_NAME: wazuh-server-access-integration-tests
+    ONLY_LOGS_AFTER: 2022-NOV-20
+  metadata:
+    bucket_type: server_access
+    bucket_name: wazuh-server-access-integration-tests
+    only_logs_after: 2022-NOV-20
+    expected_results: 3
+    table_name: s3_server_access

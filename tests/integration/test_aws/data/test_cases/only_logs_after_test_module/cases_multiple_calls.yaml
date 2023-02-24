@@ -91,3 +91,10 @@
   metadata:
     bucket_type: waf
     bucket_name: wazuh-waf-integration-tests
+
+- name: server_access_only_logs_after_multiple_calls
+  description: Server Access only_logs_after multiple calls configurations
+  configuration_parameters:
+  metadata:
+    bucket_type: server_access
+    bucket_name: wazuh-server-access-integration-tests
