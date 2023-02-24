@@ -96,3 +96,12 @@
   metadata:
     bucket_type: guardduty
     bucket_name: wazuh-native-guardduty-integration-tests
+
+- name: waf_remove_from_bucket
+  description: WAF remove from bucket configurations
+  configuration_parameters:
+    BUCKET_TYPE: waf
+    BUCKET_NAME: wazuh-waf-integration-tests
+  metadata:
+    bucket_type: waf
+    bucket_name: wazuh-waf-integration-tests

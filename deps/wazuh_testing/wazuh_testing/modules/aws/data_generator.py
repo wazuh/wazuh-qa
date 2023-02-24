@@ -834,7 +834,7 @@ class NativeGuardDutyDataGenerator(DataGenerator):
         Returns:
             str: Synthetic filename.
         """
-        now = datetime.now()
+        now = datetime.utcnow()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = f"{str(uuid4())}{cons.JSON_GZ_EXT}"
 
@@ -962,6 +962,94 @@ class NativeGuardDutyDataGenerator(DataGenerator):
         ) + '\n'
 
 
+class WAFDataGenerator(DataGenerator):
+    BASE_PATH = ''
+    BASE_FILE_NAME = "aws-waf-logs-delivery-stream-1-"
+
+    def get_filename(self) -> str:
+        """Return the filename in the KMS format.
+
+        Example:
+            <prefix>/<year>/<month>/<day>
+        Returns:
+            str: Synthetic filename.
+        """
+        now = datetime.utcnow()
+        path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
+        name = f"{self.BASE_FILE_NAME}{now.strftime(cons.FILENAME_DATE_FORMAT)}{cons.JSON_EXT}"
+
+        return join(path, name)
+
+    def get_data_sample(self) -> str:
+        """Return a sample of data according to the cloudtrail format.
+
+        Returns:
+            str: Synthetic data.
+        """
+        return json.dumps(
+            {
+                'timestamp': 1576280412771,
+                'formatVersion': 1,
+                'webaclId': (
+                    f"arn:aws:wafv2:ap-southeast-2:{cons.RANDOM_ACCOUNT_ID}:regional/"
+                    'webacl/STMTest/1EXAMPLE-2ARN-3ARN-4ARN-123456EXAMPLE'
+                ),
+                'terminatingRuleId': 'STMTest_SQLi_XSS',
+                'terminatingRuleType': 'REGULAR',
+                'action': 'BLOCK',
+                'terminatingRuleMatchDetails': [
+                    {
+                        'conditionType': 'SQL_INJECTION',
+                        'sensitivityLevel': 'HIGH',
+                        'location': 'HEADER',
+                        'matchedData': [
+                            '10',
+                            'AND',
+                            '1'
+                        ]
+                    }
+                ],
+                'httpSourceName': '-',
+                'httpSourceId': '-',
+                'ruleGroupList': [],
+                'rateBasedRuleList': [],
+                'nonTerminatingMatchingRules': [],
+                'httpRequest': {
+                    'clientIp': get_random_ip(),
+                    'country': 'AU',
+                    'headers': [
+                        {
+                            'name': 'Host',
+                            'value': 'localhost:1989'
+                        },
+                        {
+                            'name': 'User-Agent',
+                            'value': 'curl/7.61.1'
+                        },
+                        {
+                            'name': 'Accept',
+                            'value': '*/*'
+                        },
+                        {
+                            'name': 'x-stm-test',
+                            'value': '10 AND 1=1'
+                        }
+                    ],
+                    'uri': '/myUri',
+                    'args': '',
+                    'httpVersion': 'HTTP/1.1',
+                    'httpMethod': 'GET',
+                    'requestId': 'rid'
+                },
+                'labels': [
+                    {
+                        'name': 'value'
+                    }
+                ]
+            }
+        )
+
+
 # Maps bucket type with corresponding data generator
 buckets_data_mapping = {
     cons.CLOUD_TRAIL_TYPE: CloudTrailDataGenerator,
@@ -974,7 +1062,8 @@ buckets_data_mapping = {
     cons.MACIE_TYPE: MacieDataGenerator,
     cons.TRUSTED_ADVISOR_TYPE: TrustedAdvisorDataGenerator,
     cons.GUARD_DUTY_TYPE: GuardDutyDataGenerator,
-    cons.NATIVE_GUARD_DUTY_TYPE: NativeGuardDutyDataGenerator
+    cons.NATIVE_GUARD_DUTY_TYPE: NativeGuardDutyDataGenerator,
+    cons.WAF_TYPE: WAFDataGenerator,
 }
 
 
