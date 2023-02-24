@@ -409,23 +409,23 @@ def check_fim_event(file_monitor=None, callback='', error_message=None, update_p
                        callback=generate_monitoring_callback(callback), error_message=error_message)
 
 
-def detect_initial_scan(file_monitor):
+def detect_initial_scan(file_monitor, timeout=T_60):
     """Detect initial scan when restarting Wazuh.
 
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    file_monitor.start(timeout=T_60, callback=callback_detect_end_scan,
+    file_monitor.start(timeout=timeout, callback=callback_detect_end_scan,
                        error_message=ERR_MSG_SCHEDULED_SCAN_ENDED)
 
 
-def detect_initial_scan_start(file_monitor):
+def detect_initial_scan_start(file_monitor, timeout=T_60):
     """Detect initial scan start when restarting Wazuh.
 
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    file_monitor.start(timeout=T_60, callback=callback_detect_scan_start,
+    file_monitor.start(timeout=timeout, callback=callback_detect_scan_start,
                        error_message=ERR_MSG_SCHEDULED_SCAN_STARTED)
 
 
