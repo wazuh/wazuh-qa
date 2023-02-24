@@ -189,3 +189,19 @@
     discard_regex: ALLOW
     found_logs: 3
     skipped_logs: 1
+
+- name: server_access_discard_regex
+  description: Server Access discard regex configurations
+  configuration_parameters:
+    BUCKET_TYPE: server_access
+    BUCKET_NAME: wazuh-server-access-integration-tests
+    DISCARD_FIELD: http_status
+    DISCARD_REGEX: '200'
+  metadata:
+    bucket_type: server_access
+    bucket_name: wazuh-server-access-integration-tests
+    only_logs_after: 2022-NOV-20
+    discard_field: http_status
+    discard_regex: '200'
+    found_logs: 3
+    skipped_logs: 1

@@ -465,3 +465,45 @@
     only_logs_after: 2022-NOV-20
     path: inexistent_prefix
     expected_results: 0
+
+- name: server_access_path_with_data
+  description: Server Access path configurations
+  configuration_parameters:
+    BUCKET_TYPE: server_access
+    BUCKET_NAME: wazuh-server-access-integration-tests
+    PATH: test_prefix
+  metadata:
+    bucket_type: server_access
+    bucket_name: wazuh-server-access-integration-tests
+    only_logs_after: 2022-NOV-20
+    path: test_prefix
+    expected_results: 1
+    table_name: s3_server_access
+
+- name: server_access_path_without_data
+  description: Server Access path configurations
+  configuration_parameters:
+    BUCKET_TYPE: server_access
+    BUCKET_NAME: wazuh-server-access-integration-tests
+    PATH: empty_prefix
+  metadata:
+    bucket_type: server_access
+    bucket_name: wazuh-server-access-integration-tests
+    only_logs_after: 2022-NOV-20
+    path: empty_prefix
+    expected_results: 0
+    table_name: s3_server_access
+
+- name: server_access_inexistent_path
+  description: Server Access path configurations
+  configuration_parameters:
+    BUCKET_TYPE: server_access
+    BUCKET_NAME: wazuh-server-access-integration-tests
+    PATH: inexistent_prefix
+  metadata:
+    bucket_type: server_access
+    bucket_name: wazuh-server-access-integration-tests
+    only_logs_after: 2022-NOV-20
+    path: inexistent_prefix
+    expected_results: 0
+    table_name: s3_server_access

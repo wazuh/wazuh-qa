@@ -106,6 +106,7 @@ def test_without_only_logs_after(
     bucket_name = metadata['bucket_name']
     bucket_type = metadata['bucket_type']
     expected_results = metadata['expected_results']
+    table_name = metadata.get('table_name', bucket_type)
 
     parameters = [
         'wodles/aws/aws-s3',
@@ -138,7 +139,7 @@ def test_without_only_logs_after(
 
     assert s3_db_exists()
 
-    data = get_s3_db_row(table_name=bucket_type)
+    data = get_s3_db_row(table_name=table_name)
 
     assert bucket_name in data.bucket_path
     assert metadata['uploaded_file'] == data.log_key
@@ -218,6 +219,7 @@ def test_with_only_logs_after(
     bucket_type = metadata['bucket_type']
     only_logs_after = metadata['only_logs_after']
     expected_results = metadata['expected_results']
+    table_name = metadata.get('table_name', bucket_type)
 
     parameters = [
         'wodles/aws/aws-s3',
@@ -250,7 +252,7 @@ def test_with_only_logs_after(
 
     assert s3_db_exists()
 
-    for row in get_multiple_s3_db_row(table_name=bucket_type):
+    for row in get_multiple_s3_db_row(table_name=table_name):
         assert bucket_name in row.bucket_path
         assert (
             datetime.strptime(only_logs_after, '%Y-%b-%d') < datetime.strptime(str(row.created_date), '%Y%m%d')
