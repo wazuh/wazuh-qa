@@ -71,7 +71,6 @@ tmp_path = os.path.join(local_path, 'tmp')
 
 
 # Variables
-remoted_guess_agent_groups = 'remoted.guess_agent_group='
 group_id = 'group_test'
 multigroups_id = 'default,group_test'
 # this timeout is temporality, this test will be update
