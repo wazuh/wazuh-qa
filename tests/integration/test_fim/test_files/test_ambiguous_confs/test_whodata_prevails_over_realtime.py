@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2022, Wazuh Inc.
+copyright: Copyright (C) 2015-2023, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -89,7 +89,7 @@ for count, value in enumerate(configuration_parameters):
     configuration_parameters[count]['TEST_DIR'] = test_directories[0]
 configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
 
-                   
+
 # Test
 @pytest.mark.parametrize('test_folders', [test_directories], scope="module", ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)

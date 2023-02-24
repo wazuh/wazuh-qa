@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2022, Wazuh Inc.
+copyright: Copyright (C) 2015-2023, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -97,7 +97,7 @@ configurations = configuration.load_configuration_template(configurations_path, 
 # Tests
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 def test_ambiguous_whodata_thread(configuration, metadata, set_wazuh_configuration,
-                                   configure_local_internal_options_function, restart_syscheck_function):
+                                  configure_local_internal_options_function, restart_syscheck_function):
     '''
     description: Check if the 'wazuh-syscheckd' daemon starts the 'whodata' thread when the configuration
                  is ambiguous. For example, when using 'whodata' on the same directory using conflicting
