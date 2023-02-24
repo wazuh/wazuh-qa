@@ -1,0 +1,7 @@
+- name: Queue Size 5 (Small value in range) starts properly
+  description: Verify if value set is inside valid range it is configured and whodata starts correctly.
+  configuration_parameters:
+    TEST_DIRECTORIES: /
+  metadata:
+    files_to_add: 10
+    whodata_events: 5
