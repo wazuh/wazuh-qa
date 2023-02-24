@@ -1,0 +1,28 @@
+- sections:
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - directories:
+            value: TEST_DIRECTORIES
+            attributes:
+              - whodata: 'yes'
+        - windows_audit_interval:
+            value: AUDIT_INTERVAL
+
+    - section: sca
+      elements:
+        - enabled:
+            value: 'no'
+
+    - section: rootcheck
+      elements:
+        - disabled:
+            value: 'yes'
+
+    - section: wodle
+      attributes:
+        - name: syscollector
+      elements:
+        - disabled:
+            value: 'yes'

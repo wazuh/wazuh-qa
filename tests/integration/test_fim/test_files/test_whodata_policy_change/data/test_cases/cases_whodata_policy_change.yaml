@@ -1,0 +1,17 @@
+- name: audit_policy_change_event_checker
+  description: Check when folders monitored in whodata mode, if audit policies change, fim changes to realtime mode
+  configuration_parameters:
+    AUDIT_INTERVAL: 2
+  metadata:
+    check_event: false
+    disabling_file: policy_disable.csv
+    fim_mode: whodata
+
+- name: audit_policy_change_event_4719
+  description: Check when receiving event 4719 for audit policies change, fim changes to realtime mode
+  configuration_parameters:
+    AUDIT_INTERVAL: 5
+  metadata:
+    check_event: true
+    disabling_file: policy_success_removed.csv
+    fim_mode: whodata

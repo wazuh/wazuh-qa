@@ -1,0 +1,39 @@
+- name: Enable/Disable firewall
+  hosts: windows-agent
+  tasks:
+
+    - name: Enable or disable firewall for Domain, Public and Private profiles
+      community.windows.win_firewall:
+        state: "{{ firewall_status }}"
+        profiles:
+          - Domain
+          - Private
+          - Public
+
+- name: Generate events
+  hosts: manager
+  tasks:
+
+    - name: Attempt a RDP brute force attack
+      shell: hydra -l {{ item }} -p invalid_password rdp://{{ hostvars['windows-agent']['ansible_host'] }}
+      loop:
+        - test_user
+
+    - name: Wait for expected log
+      block:
+
+        - name: Waiting for log
+          wait_for:
+            timeout: 5
+
+- name: Copy log file to a tmp folder
+  hosts: windows-agent
+  tasks:
+
+    - name: Get active-responses log
+      include_role:
+        name: manage_logs
+        tasks_from: get_log_file.yaml
+      vars:
+        dest_path: test_firewall_status/
+        source_path: C:\Program Files (x86)\ossec-agent\active-response\active-responses.log

@@ -281,19 +281,21 @@ class HostManager:
         """
         return self.get_host(host).interface(interface).addresses
 
-    def find_file(self, host: str, path: str, pattern: str, recurse: bool = False, use_regex: bool = False):
+    def find_file(self, host: str, path: str, pattern: str = '*', use_regex: bool = False, recurse: bool = False,
+                  file_type: str = 'file'):
         """Search and return information of a file inside a path.
         Args:
             host (str): Hostname
             path (str): Path in which to search for the file that matches the pattern.
             pattern (str): Restrict the files to be returned to those whose basenames match the pattern specified.
-            recurse (bool): If target is a directory, recursively descend into the directory looking for files.
             use_regex (bool): If no, the patterns are file globs (shell), if yes, they are python regexes.
+            recurse (bool): If target is a directory, recursively descend into the directory looking for files.
+            file_type (str): Type of file to select. Choices are 'any', 'directory', 'file', 'link'.
         Returns:
             Files (list): List of found files.
         """
         return self.get_host(host).ansible("find", f"paths={path} patterns={pattern} recurse={recurse} "
-                                                   f"use_regex={use_regex}")
+                                                   f"use_regex={use_regex} file_type={file_type}")
 
     def get_stats(self, host: str, path: str):
         """Retrieve file or file system status.

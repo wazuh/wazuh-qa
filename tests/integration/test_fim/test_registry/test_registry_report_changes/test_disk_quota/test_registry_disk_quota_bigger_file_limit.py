@@ -57,13 +57,12 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params,
-                               calculate_registry_diff_paths, registry_value_create, registry_value_update,
-                               registry_value_delete, registry_parser, create_values_content)
-from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
-                                                    SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
-                                                    ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
+from wazuh_testing import LOG_FILE_PATH, global_parameters
+from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2, KEY_WOW64_32KEY,
+                                       KEY_WOW64_64KEY, SIZE_LIMIT_CONFIGURED_VALUE)
+from wazuh_testing.modules.fim.event_monitor import ERR_MSG_CONTENT_CHANGES_EMPTY, ERR_MSG_CONTENT_CHANGES_NOT_EMPTY
+from wazuh_testing.modules.fim.utils import (generate_params, calculate_registry_diff_paths, registry_value_create,
+                                             registry_value_update, registry_value_delete, create_values_content)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -73,7 +72,7 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # Variables
 
-test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY), 
+test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY),
              os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2)]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -93,8 +92,6 @@ params, metadata = generate_params(modes=["scheduled"], extra_params={
 configurations_path = os.path.join(test_data_path, "wazuh_registry_report_changes_limits_quota.yaml")
 configurations = load_wazuh_configurations(configurations_path, __name__, params=params, metadata=metadata)
 
-
-
 # Fixtures
 
 
@@ -104,15 +101,11 @@ def get_configuration(request):
     return request.param
 
 
-
 @pytest.mark.parametrize("size", [(8192), (32768)])
 @pytest.mark.parametrize("key, subkey, arch, value_name",
-    [
-        (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_64KEY, "some_value"),
-        (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_32KEY, "some_value"),
-        (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2, KEY_WOW64_64KEY, "some_value"),
-    ],
-)
+                         [(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_64KEY, "some_value"),
+                          (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_32KEY, "some_value"),
+                          (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2, KEY_WOW64_64KEY, "some_value"), ],)
 def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuration, configure_environment,
                            restart_syscheckd, wait_for_fim_start):
     """

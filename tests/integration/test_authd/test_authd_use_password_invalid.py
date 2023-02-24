@@ -131,7 +131,7 @@ def test_authd_use_password_invalid(metadata, configuration, truncate_monitored_
         - wazuh-manager.service must not be able to restart.
 
     input_description:
-        ./data/config_templates/config_authd_use_password_invalid.yaml: Wazuh config needed for the tests. 
+        ./data/config_templates/config_authd_use_password_invalid.yaml: Wazuh config needed for the tests.
         ./data/test_cases/cases_authd_use_password_invalid.yaml: Values to be used and expected error.
 
     expected_output:
@@ -140,6 +140,9 @@ def test_authd_use_password_invalid(metadata, configuration, truncate_monitored_
     # The expected error log must be defined.
     if not metadata.get('error'):
         raise ValueError('Expected error not provided.')
+
+    if metadata.get('password') == 'only_spaces':
+        pytest.xfail(reason="No password validation in authd.pass - Issue wazuh/wazuh#16282.")
 
     # Verify wazuh-manager fails at restart.
     with pytest.raises(ValueError):

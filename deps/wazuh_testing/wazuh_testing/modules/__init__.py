@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2022, Wazuh Inc.
+# Copyright (C) 2015-2023, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -8,9 +8,8 @@ to maintain if one of them changes in the future.
 '''
 import pytest
 
-# Services Variables
-WAZUH_SERVICES_STOPPED = 'stopped'
 WAZUH_SERVICE_PREFIX = 'wazuh'
+WAZUH_SERVICES_STOPPED = 'stopped'
 WAZUH_SERVICES_STOP = 'stop'
 WAZUH_SERVICES_START = 'start'
 
@@ -31,3 +30,8 @@ SOLARIS = pytest.mark.sunos5
 
 AGENT = pytest.mark.agent
 SERVER = pytest.mark.server
+
+# Local internal options
+WINDOWS_DEBUG = 'windows.debug'
+SYSCHECK_DEBUG = 'syscheck.debug'
+VERBOSE_DEBUG_OUTPUT = 2

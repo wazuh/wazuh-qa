@@ -1,0 +1,4 @@
+wazuh-manager:
+  - regex: .*Finished FIM sync.
+    path: /var/ossec/logs/ossec.log
+    timeout: 60

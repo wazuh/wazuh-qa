@@ -1,0 +1,42 @@
+- name: Cleanup manager environment
+  hosts: manager
+  become: true
+  tasks:
+
+    - name: Remove the active-response block
+      blockinfile:
+        path: /var/ossec/etc/ossec.conf
+        marker: <!-- {mark} ANSIBLE MANAGED BLOCK -->
+        state: absent
+
+    - name: Restart wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux
+
+- name: Cleanup Windows agent environment
+  hosts: windows-agent
+  tasks:
+
+    - name: Restore ossec.conf without changes
+      win_copy:
+        src: C:\temp\ossec.conf
+        dest: C:\Program Files (x86)\ossec-agent
+        remote_src: true
+
+    - name: Restart wazuh-agent
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: windows
+
+    - name: Enable firewall for Domain, Public and Private profiles
+      community.windows.win_firewall:
+        state: enabled
+        profiles:
+          - Domain
+          - Private
+          - Public

@@ -2,6 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+
 import json
 import os
 import re
@@ -17,7 +18,8 @@ from py.xml import html
 import wazuh_testing.tools.configuration as conf
 from wazuh_testing import global_parameters, logger, ALERTS_JSON_PATH, ARCHIVES_LOG_PATH, ARCHIVES_JSON_PATH
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
-from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
+from wazuh_testing.tools import (PREFIX, LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH,
+                                 WAZUH_LOCAL_INTERNAL_OPTIONS)
 from wazuh_testing.tools.configuration import get_wazuh_conf, set_section_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import truncate_file, recursive_directory_creation, remove_file, copy, write_file
 from wazuh_testing.tools.monitoring import QueueMonitor, FileMonitor, SocketController, close_sockets
@@ -124,6 +126,14 @@ def restart_wazuh_daemon_function(daemon=None):
 
 @pytest.fixture(scope='function')
 def restart_wazuh_function(daemon=None):
+    """Restart all Wazuh daemons"""
+    control_service("restart", daemon=daemon)
+    yield
+    control_service('stop', daemon=daemon)
+
+
+@pytest.fixture(scope='module')
+def restart_wazuh_module(daemon=None):
     """Restart all Wazuh daemons"""
     control_service("restart", daemon=daemon)
     yield
@@ -992,7 +1002,7 @@ def file_monitoring(request):
     logger.debug(f"Trucanted {file_to_monitor}")
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def set_wazuh_configuration(configuration):
     """Set wazuh configuration
 
@@ -1017,21 +1027,27 @@ def set_wazuh_configuration(configuration):
     conf.write_wazuh_conf(backup_config)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def truncate_monitored_files():
     """Truncate all the log files and json alerts files before and after the test execution"""
-    log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
+
+    if 'agent' in get_service():
+        log_files = [LOG_FILE_PATH]
+    else:
+        log_files = [LOG_FILE_PATH, ALERT_FILE_PATH]
 
     for log_file in log_files:
-        truncate_file(log_file)
+        if os.path.isfile(os.path.join(PREFIX, log_file)):
+            truncate_file(log_file)
 
     yield
 
     for log_file in log_files:
-        truncate_file(log_file)
+        if os.path.isfile(os.path.join(PREFIX, log_file)):
+            truncate_file(log_file)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def stop_modules_function_after_execution():
     """Stop wazuh modules daemon after finishing a test"""
     yield

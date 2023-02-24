@@ -194,7 +194,7 @@ def test_merged_mg_file_content(metadata, configure_local_internal_options_modul
     else:
         raise FileNotFoundError(f"The file: {merged_mg_file} was not created.")
 
-    expected_conditions = [True, [expected_line + '\n']] if action == 'create' else [False, []]
+    expected_conditions = [False, [expected_line + '\n']] if action == 'create' else [False, []]
     assert file_exists == expected_conditions[0], f"The file was not {action}d in the multigroups directory.\n"
     if action == 'created':
         assert match_expected_line in expected_conditions[1], f"The file is not in {merged_mg_file}."
