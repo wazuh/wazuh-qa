@@ -12,6 +12,7 @@ from .constants import (
     NLB_TYPE,
     S3_CLOUDTRAIL_DB_PATH,
     VPC_FLOW_TYPE,
+    WAF_TYPE
 )
 
 SELECT_QUERY_TEMPLATE = 'SELECT * FROM {table_name}'
@@ -36,6 +37,10 @@ S3GuardDutyRow = namedtuple(
     'S3GuardDutyRow', 'bucket_path aws_account_id log_key processed_date created_date'
 )
 
+S3WAFRow = namedtuple(
+    'S3WAFRow', 'bucket_path aws_account_id log_key processed_date created_date'
+)
+
 s3_rows_map = {
     CLOUD_TRAIL_TYPE: S3CloudTrailRow,
     VPC_FLOW_TYPE: S3VPCFlowRow,
@@ -43,7 +48,8 @@ s3_rows_map = {
     CLB_TYPE: S3ALBRow,
     NLB_TYPE: S3ALBRow,
     CUSTOM_TYPE: S3CustomRow,
-    GUARD_DUTY_TYPE: S3GuardDutyRow
+    GUARD_DUTY_TYPE: S3GuardDutyRow,
+    WAF_TYPE: S3WAFRow
 }
 
 

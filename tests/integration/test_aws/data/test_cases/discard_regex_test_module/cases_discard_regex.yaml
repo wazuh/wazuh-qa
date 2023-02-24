@@ -173,3 +173,19 @@
     discard_regex: aws-test
     found_logs: 3
     skipped_logs: 1
+
+- name: waf_discard_regex
+  description: WAF discard regex configurations
+  configuration_parameters:
+    BUCKET_TYPE: waf
+    BUCKET_NAME: wazuh-waf-integration-tests
+    DISCARD_FIELD: action
+    DISCARD_REGEX: ALLOW
+  metadata:
+    bucket_type: waf
+    bucket_name: wazuh-waf-integration-tests
+    only_logs_after: 2022-NOV-20
+    discard_field: action
+    discard_regex: ALLOW
+    found_logs: 3
+    skipped_logs: 1

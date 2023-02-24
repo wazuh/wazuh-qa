@@ -84,3 +84,10 @@
     bucket_name: wazuh-native-guardduty-integration-tests
     expected_skipped_logs_step_3: 3
     expected_skipped_logs_step_4: 3
+
+- name: waf_only_logs_after_multiple_calls
+  description: WAF only_logs_after multiple calls configurations
+  configuration_parameters:
+  metadata:
+    bucket_type: waf
+    bucket_name: wazuh-waf-integration-tests
