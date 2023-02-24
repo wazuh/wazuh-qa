@@ -323,6 +323,11 @@ class HostManager:
         return self.get_host(host).ansible("stat", f"path={path}")
 
     def configure_internal_options(self, local_internal_options: dict):
+        """Add internal options in local_internal_options.conf
+
+        Args:
+            local_internal_options (dict): dictionary with hosts and internal options.
+        """
         for target_host in local_internal_options:
             internal_options_data = []
             backup_local_internal_options = self.get_file_content(target_host, WAZUH_LOCAL_INTERNAL_OPTIONS)
