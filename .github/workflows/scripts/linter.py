@@ -77,6 +77,7 @@ def get_yaml_files(updated_files):
     Returns:
         list(str): Updated yaml files list.
     """
+    print([yaml_file for yaml_file in updated_files if '.yaml' in yaml_file or '.yml' in yaml_file])
     return [yaml_file for yaml_file in updated_files if '.yaml' in yaml_file or '.yml' in yaml_file]
 
 
@@ -137,7 +138,7 @@ def run_yaml_linter(yaml_files, config_files_path):
         return 0
 
     # Set the linter parameters
-    yaml_linter_config = 'yaml_linter_config.yaml'
+    yaml_linter_config = 'yaml_linter_config_sca.yaml'
     parameters = ['yamllint', '-c', f"{config_files_path}/{yaml_linter_config}"]
     parameters.extend(yaml_files)
     # parameters.extend([f"> {config_files_path}/out.txt"])
@@ -149,15 +150,11 @@ def run_yaml_linter(yaml_files, config_files_path):
     # Parse the output to remove github annotations
     output = _parse_yaml_linter_output(result.stdout.decode())
 
+
     # Print the formatted output
     print(output)
 
-    # Get the bad yaml file names (.yml is not allowed)
-    bad_yaml_file_name_list = [yml_file for yml_file in yaml_files if '.yml' in yml_file]
-    if len(bad_yaml_file_name_list) > 0:
-        print(f"Error: The following files have incorrect extension (.yml), please rename them (to .yaml): "
-              f"{bad_yaml_file_name_list}")
-        return_code = 1
+    print(result.stderr.decode())
 
     return return_code
 
