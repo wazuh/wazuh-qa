@@ -129,3 +129,15 @@
     bucket_name: wazuh-native-guardduty-integration-tests
     only_logs_after: 2022-NOV-20
     expected_results: 3
+
+- name: waf_with_only_logs_after
+  description: WAF only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: waf
+    BUCKET_NAME: wazuh-waf-integration-tests
+    ONLY_LOGS_AFTER: 2022-NOV-20
+  metadata:
+    bucket_type: waf
+    bucket_name: wazuh-waf-integration-tests
+    only_logs_after: 2022-NOV-20
+    expected_results: 3
