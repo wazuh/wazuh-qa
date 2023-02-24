@@ -51,7 +51,7 @@ from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups,
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.file import replace_regex_in_file
 from wazuh_testing.tools.monitoring import HostMonitor
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 
 
 pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
@@ -78,10 +78,24 @@ multigroups_id = 'default,group_test'
 timeout = 20
 
 
+# Fixtures
+@pytest.fixture()
+def modify_internal_options(status_guess_agent_group):
+    local_internal_options = {test_infra_managers[0]: [{'name': 'remoted.guess_agent_group', 'value':
+                                                        f"{status_guess_agent_group}"}]}
+    backup_local_internal_options = host_manager.get_file_content(test_infra_managers[0], WAZUH_LOCAL_INTERNAL_OPTIONS)
+    host_manager.configure_internal_options(local_internal_options)
+
+    yield
+
+    host_manager.modify_file_content(test_infra_managers[0], WAZUH_LOCAL_INTERNAL_OPTIONS,
+                                     backup_local_internal_options)
+
+
 # Tests
 @pytest.mark.parametrize('status_guess_agent_group', ['0', '1'])
 @pytest.mark.parametrize('target_node', ['wazuh-master', 'wazuh-worker1'])
-def test_guess_single_group(target_node, status_guess_agent_group, clean_environment):
+def test_guess_single_group(target_node, status_guess_agent_group, clean_environment, modify_internal_options):
     '''
     description: Check that when an agent registered in the manager and assigned to group is removed, performs a
                  guessing operation and determinates the groups to with the agent was assigned.
@@ -96,6 +110,9 @@ def test_guess_single_group(target_node, status_guess_agent_group, clean_environ
         - clean_enviroment:
             type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
+        - modify_internal_options:
+            type: Fixture
+            brief: Add internal options in local_internal_options.conf
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering the agent appears as never_connected in all nodes.
@@ -104,14 +121,8 @@ def test_guess_single_group(target_node, status_guess_agent_group, clean_environ
     expected_output:
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
-    # Modify local_internal_options
-    replace = '\n' + remoted_guess_agent_groups + f"{status_guess_agent_group}\n"
-
-    for host in test_infra_managers:
-        host_manager.add_block_to_file(host, path=f"{WAZUH_PATH}/etc/local_internal_options.conf",
-                                       after='upgrades.', before='authd.debug=2', replace=replace)
     # Restart managers
-    restart_cluster(test_infra_managers, host_manager)
+    restart_cluster([test_infra_managers[0]], host_manager)
     time.sleep(timeout)
 
     # Register agent with agent-auth
@@ -170,7 +181,7 @@ def test_guess_single_group(target_node, status_guess_agent_group, clean_environ
 @pytest.mark.parametrize('n_agents', [1, 2])
 @pytest.mark.parametrize('status_guess_agent_group', ['0', '1'])
 @pytest.mark.parametrize('target_node', ['wazuh-master', 'wazuh-worker1'])
-def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clean_environment):
+def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clean_environment, modify_internal_options):
     '''
     description: Check that when an agent registered in the manager and assigned to group is removed, performs a
                  guessing operation and determinates the groups to with the agent was assigned.
@@ -188,6 +199,9 @@ def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clea
         - clean_enviroment:
             type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
+        - modify_internal_options:
+            type: Fixture
+            brief: Add internal options in local_internal_options.conf
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering the agent appears as never_connected in all nodes.
@@ -196,45 +210,37 @@ def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clea
     expected_output:
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
-    # Modify local_internal_options
-    replace = '\n' + remoted_guess_agent_groups + f"{status_guess_agent_group}\n"
-
-    for host in test_infra_managers:
-        host_manager.add_block_to_file(host, path=f"{WAZUH_PATH}/etc/local_internal_options.conf",
-                                       after='upgrades.', before='authd.debug=2', replace=replace)
     # Restart managers
-    restart_cluster(test_infra_managers, host_manager)
+    restart_cluster([test_infra_managers[0]], host_manager)
     time.sleep(timeout)
 
     # Register agent with agent-auth
-    agent1_ip, agent1_id, agent1_name, ag1_manager_ip = register_agent(test_infra_agents[0], target_node,
-                                                                       host_manager)
-    if n_agents == 2:
-        agent2_ip, agent2_id, agent2_name, ag2_manager_ip = register_agent(test_infra_agents[1], target_node,
-                                                                           host_manager)
+    agents_data = []
+    for agent in range(n_agents):
+        agent_data = register_agent(test_infra_agents[agent], target_node, host_manager)
+        agents_data.append(agent_data)
+
     # Restart agent
     restart_cluster(test_infra_agents, host_manager)
 
     # Check that agent has client key file
-    assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
-    if n_agents == 2:
-        assert check_keys_file(test_infra_agents[1], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
+    for agent in range(n_agents):
+        assert check_keys_file(test_infra_agents[agent], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
+
     try:
         # Create new group and assing agent
-        assign_agent_to_new_group(test_infra_managers[0], group_id, agent1_id, host_manager)
-        if n_agents == 2:
-            assign_agent_to_new_group(test_infra_managers[1], group_id, agent2_id, host_manager)
+        for agent in range(n_agents):
+            assign_agent_to_new_group(test_infra_managers[0], group_id, agents_data[agent][1], host_manager)
         time.sleep(timeout)
 
         # Check that agent has group set to group_test on Managers
-        check_agent_groups(agent1_id, group_id, test_infra_managers, host_manager)
-        if n_agents == 2:
-            check_agent_groups(agent2_id, group_id, test_infra_managers, host_manager)
+        for agent in range(n_agents):
+            check_agent_groups(agents_data[agent][1], group_id, test_infra_managers, host_manager)
 
         # Remove the agent
-        remove_cluster_agents(test_infra_managers[0], [test_infra_agents[0]], host_manager, [agent1_id])
+        remove_cluster_agents(test_infra_managers[0], [test_infra_agents[0]], host_manager, [agents_data[0][1]])
 
-        # Register agent with agent-auth
+        # Register agent again with agent-auth
         agent1_ip, agent1_id, agent1_name, ag1_manager_ip = register_agent(test_infra_agents[0], target_node,
                                                                            host_manager)
 
