@@ -115,6 +115,11 @@ def callback_detect_event_processed_or_skipped(pattern: str) -> Callable:
     return lambda line: pattern_regex.match(line) or callback_detect_event_processed(line)
 
 
+def callback_detect_inspector_event_processed(expected_results: int) -> Callable:
+    regex = re.compile(fr"DEBUG: \+\+\+ {expected_results} events collected and processed in")
+    return lambda line: regex.match(line)
+
+
 def callback_event_sent_to_analysisd(line):
     """Search for module header message in the given line.
 
@@ -184,4 +189,24 @@ def check_marker_from_output(command_output: str, file_key: str, expected_result
         callback=make_aws_callback(pattern),
         expected_results=expected_results,
         error_message='The AWS module did not use the correct marker'
+    )
+
+
+def check_inspector_processed_logs_from_output(command_output: str, events_sent: int, expected_results: int = 1):
+    analyze_command_output(
+        command_output=command_output,
+        callback=callback_detect_inspector_event_processed(events_sent),
+        expected_results=expected_results,
+        error_message='The AWS module did not process the expected number of events'
+    )
+
+
+def check_inspector_non_processed_logs_from_output(command_output: str, expected_results: int = 1):
+    pattern = r'DEBUG: \+\+\+ There are no new events in .*'
+
+    analyze_command_output(
+        command_output,
+        callback=make_aws_callback(pattern),
+        expected_results=expected_results,
+        error_message='Some logs may were processed'
     )

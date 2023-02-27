@@ -13,7 +13,8 @@ from .constants import (
     S3_CLOUDTRAIL_DB_PATH,
     VPC_FLOW_TYPE,
     WAF_TYPE,
-    SERVER_ACCESS_TABLE_NAME
+    SERVER_ACCESS_TABLE_NAME,
+    AWS_SERVICES_DB_PATH
 )
 
 SELECT_QUERY_TEMPLATE = 'SELECT * FROM {table_name}'
@@ -46,6 +47,10 @@ S3ServerAccessRow = namedtuple(
     'S3ServerAccessRow', 'bucket_path aws_account_id log_key processed_date created_date'
 )
 
+ServiceInspectorRow = namedtuple(
+    'ServiceInspectorRow', 'service account_id region timestamp'
+)
+
 s3_rows_map = {
     CLOUD_TRAIL_TYPE: S3CloudTrailRow,
     VPC_FLOW_TYPE: S3VPCFlowRow,
@@ -65,6 +70,31 @@ def _get_s3_row_type(bucket_type: str) -> Type[S3CloudTrailRow]:
 
 def get_db_connection(path: Path) -> sqlite3.Connection:
     return sqlite3.connect(path)
+
+
+def table_exists(table_name: str, db_path: Path = S3_CLOUDTRAIL_DB_PATH) -> bool:
+    """Check if the given table name exists.
+
+    Args:
+        table_name (str): Table name to search for.
+
+    Returns:
+        bool: True if exists else False.
+    """
+    connection = get_db_connection(db_path)
+    cursor = connection.cursor()
+    query = """
+        SELECT
+            name
+        FROM
+            sqlite_master
+        WHERE
+            type ='table' AND
+            name NOT LIKE 'sqlite_%';
+    """
+
+    return table_name in [result[0] for result in cursor.execute(query).fetchall()]
+
 
 # cloudtrail.db utils
 
@@ -133,3 +163,52 @@ def table_exists_or_has_values(table_name: str) -> bool:
         return bool(cursor.execute(SELECT_QUERY_TEMPLATE.format(table_name=table_name)).fetchall())
     except sqlite3.OperationalError:
         return False
+
+
+# aws_services.db utils
+
+def services_db_exists() -> bool:
+    """Check if `aws_services.db` exists.
+
+    Returns:
+        bool: True if exists else False.
+    """
+    return AWS_SERVICES_DB_PATH.exists()
+
+
+def delete_services_db() -> None:
+    """Delete `aws_services.db` file."""
+    if services_db_exists():
+        AWS_SERVICES_DB_PATH.unlink()
+
+
+def get_service_db_row(table_name: str) -> ServiceInspectorRow:
+    """Return one row from the given table name.
+
+    Args:
+        table_name (str): Table name to search into.
+
+    Returns:
+        ServiceInspectorRow: The first row of the table.
+    """
+    connection = get_db_connection(AWS_SERVICES_DB_PATH)
+    cursor = connection.cursor()
+    result = cursor.execute(SELECT_QUERY_TEMPLATE.format(table_name=table_name)).fetchone()
+
+    return ServiceInspectorRow(*result)
+
+
+def get_multiple_service_db_row(table_name: str) -> Iterator[ServiceInspectorRow]:
+    """Return all rows from the given table name.
+
+    Args:
+        table_name (str): Table name to search into.
+
+    Yields:
+        Iterator[ServiceInspectorRow]: All the rows in the table.
+    """
+    connection = get_db_connection(AWS_SERVICES_DB_PATH)
+    cursor = connection.cursor()
+
+    for row in cursor.execute(SELECT_QUERY_TEMPLATE.format(table_name=table_name)):
+        yield ServiceInspectorRow(*row)
