@@ -74,16 +74,11 @@ local_internal_options = {'authd.debug': '2'}
 @pytest.fixture()
 def set_authd_pass(metadata: dict):
     """Configure the file 'authd.pass' as needed for the test."""
-    # Set the content.
-    if metadata.get('password') == 'empty':
-        authd_pass_content = ''
-    elif metadata.get('password') == 'only_spaces':
-        authd_pass_content = '     '
-    else:
-        authd_pass_content = metadata.get('password')
     # Write the content in the authd.pass file.
-    write_file(DEFAUL_AUTHD_PASS_PATH, authd_pass_content)
+    write_file(DEFAUL_AUTHD_PASS_PATH, metadata.get('password'))
+
     yield
+
     # Delete the file as by default it doesn't exist.
     delete_file(DEFAUL_AUTHD_PASS_PATH)
 
@@ -96,7 +91,9 @@ def test_authd_use_password_invalid(metadata, configuration, truncate_monitored_
     '''
     description:
         Checks the correct errors are raised when an invalid password value
-        is configured in the authd.pass file.
+        is configured in the authd.pass file. This test expects the error log
+        to come from the cases yaml, this is done this way to handle easily
+        the different error logs that could be raised from different inputs.
 
     wazuh_min_version:
         4.5.0
@@ -136,12 +133,13 @@ def test_authd_use_password_invalid(metadata, configuration, truncate_monitored_
 
     expected_output:
         - .*Empty password provided.
+        - .*Invalid password provided.
     '''
     # The expected error log must be defined.
     if not metadata.get('error'):
         raise ValueError('Expected error not provided.')
 
-    if metadata.get('password') == 'only_spaces':
+    if metadata.get('error') == 'Invalid password provided.':
         pytest.xfail(reason="No password validation in authd.pass - Issue wazuh/wazuh#16282.")
 
     # Verify wazuh-manager fails at restart.
