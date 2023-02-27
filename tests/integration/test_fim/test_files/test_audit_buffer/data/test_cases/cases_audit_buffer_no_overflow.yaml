@@ -1,0 +1,7 @@
+- name: Audit Buffer does not overflow 1
+  description: Verify if value set is inside valid range it is configured and whodata starts correctly.
+  configuration_parameters:
+    TEST_DIRECTORIES: /
+  metadata:
+    files_to_add: 5
+    whodata_events: 5

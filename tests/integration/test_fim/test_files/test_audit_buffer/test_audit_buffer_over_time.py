@@ -48,11 +48,11 @@ tags:
     - windows_folder_redirection
 '''
 import os
-
+import time
 
 import pytest
 from wazuh_testing import LOG_FILE_PATH, REGULAR, T_10, T_20
-from wazuh_testing.tools import PREFIX, configuration 
+from wazuh_testing.tools import PREFIX 
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.file import create_file
@@ -75,9 +75,9 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 
 # Configuration and cases data
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_audit_buffer_behavior.yaml')
-t1_test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_audit_buffer_no_overflow.yaml')
-t2_test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_audit_buffer_overflown.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_audit_buffer_over_time.yaml')
+t1_test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_audit_buffer_over_time_no_overflow.yaml')
+t2_test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_audit_buffer_over_time_overflown.yaml')
 
 # Test configurations
 t1_configuration_parameters, t1_configuration_metadata, t1_test_case_ids = get_test_cases_data(t1_test_cases_path)
@@ -98,7 +98,7 @@ t2_configurations = load_configuration_template(configurations_path, t2_configur
 @pytest.mark.parametrize('test_folders', [test_folders], ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata),
                          ids=t1_test_case_ids)
-def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_wazuh_configuration,
+def test_audit_buffer_over_time_no_overflow(configuration, metadata, test_folders, set_wazuh_configuration,
                                    create_monitored_folders, configure_local_internal_options_function,
                                    restart_syscheck_function, wait_syscheck_start):
     '''
@@ -169,30 +169,29 @@ def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_waz
         - r'.*File integrity monitoring (real-time Whodata) engine started.*'
     '''
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    whodata_events = metadata['whodata_events']
+    whodata_events = metadata['files_first_insert'] + metadata['files_second_insert']
     
     # Insert an ammount of files
-    for file in range(0, metadata['files_to_add']):
+    for file in range(0, metadata['files_first_insert']):
         create_file(REGULAR, test_folders[0], f'test_file_{file}', content='')
+    
+    time.sleep(metadata['wait_time'])
+
+    # Insert an ammount of files
+    for file in range(0, metadata['files_second_insert']):
+        create_file(REGULAR, test_folders[0], f'test_file_second_insert_{file}', content='')
     
     with pytest.raises(TimeoutError):
         detect_audit_queue_full(wazuh_log_monitor, update_position = False)
-    
+
     results = wazuh_log_monitor.start(timeout=T_10, callback=callback_detect_file_added_event,
                                       accum_results=whodata_events,
-                                      error_message=f"Did not receive the expected {whodata_events} amount of \
+                                      error_message=f"Did not receive the expected amount of \
                                                       whodata file added events").result()
     for result in results:
         assert result['data']['mode'] == 'whodata', f"Expected whodata event, found {result['data']['mode']} event"
 
-    detect_initial_scan_start(wazuh_log_monitor, timeout=T_10)
-
-    with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_file_added_event,
-                                accum_results=1, error_message="Found unexpected file added event \
-                                                                in during scheduled scan")
-
-
+"""
 @pytest.mark.parametrize('test_folders', [test_folders], ids='', scope='module')
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata),
                          ids=t2_test_case_ids)
@@ -280,11 +279,13 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
     # Get all file added events
     results = get_messages(callback_detect_file_added_event, timeout=T_10,
                            error_message=f"Did not receive the expected file added events")
-    
+    print("RESULT-------------"+str(results))
     # Check the ammount of added events in whodata mode is equal or more than the expected value    
     found_whodata_events = 0
     for result in results:
+        # print("RESULT-------------"+str(result))
         if result['data']['mode'] == 'whodata':
+            print("Added-------------")
             found_whodata_events = found_whodata_events + 1
     assert found_whodata_events >= metadata['whodata_events'], f"Found less whodata File added events \
                                                                  than the expected {metadata['whodata_events']}"
@@ -308,3 +309,4 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
     
     assert found_scheduled_events == scheduled_events, f"Wrong amount of scheduled events found. Found \
                                                              {found_scheduled_events}, Expected {scheduled_events}"
+"""

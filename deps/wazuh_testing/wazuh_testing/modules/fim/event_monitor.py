@@ -9,6 +9,7 @@ from sys import platform
 from datetime import datetime
 from wazuh_testing import LOG_FILE_PATH, logger, T_60, T_10
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules.fim import MAX_EVENTS_VALUE
 
 
 # Variables
@@ -330,7 +331,7 @@ def callback_detect_file_added_event(line):
     """
     json_event = callback_detect_event(line)
 
-    if json_event is not None:
+    if json_event is not None:        
         if json_event['data']['type'] == 'added':
             return json_event
 
@@ -409,6 +410,33 @@ def check_fim_event(file_monitor=None, callback='', error_message=None, update_p
                        callback=generate_monitoring_callback(callback), error_message=error_message)
 
 
+def get_messages(callback, timeout=T_10, update_position=True, max_events=MAX_EVENTS_VALUE, error_message=None):
+    """Look for as many events of a given type as possible.
+
+    Args:
+        callback (object): callback that returns the events that are being looked for.
+        timeout (int): Timeout that will be used to get the dbsync_no_data message.
+        update_position (bool, optional): True if we pop items from the queue once they are read. False otherwise.
+                Default `True`
+        max_events (int, optional):
+
+    Returns:
+        A list with all the events.    """
+    
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    error_message = error_message if error_message is not None else 'Did not receive expected events'
+    events = []
+    for _ in range(0, max_events):
+        try:
+            event = wazuh_log_monitor.start(timeout=timeout,callback=callback,accum_results=1,
+                                            error_message=error_message,
+                                            update_position=update_position).result()
+        except TimeoutError:
+            break
+        events.append(event)
+    return events
+
+
 def detect_initial_scan(file_monitor, timeout=T_60):
     """Detect initial scan when restarting Wazuh.
 
@@ -476,15 +504,18 @@ def detect_windows_whodata_mode_change(file_monitor, file='.*'):
                        error_message=create_error_message(pattern))
 
 
-def detect_audit_queue_full(file_monitor):
+def detect_audit_queue_full(file_monitor, update_position = True):
     """Detects the configured value for the whodata queue
 
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
+        update_position (bool, optional) : True if we pop items from the queue once they are read. False otherwise.
+                Default `True`
     """
 
     return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_WHODATA_QUEUE_FULL),
-                       error_message=create_error_message(CB_WHODATA_QUEUE_FULL)).result()
+                       error_message=create_error_message(CB_WHODATA_QUEUE_FULL),
+                       update_position=update_position).result()
 
 
 def detect_invalid_conf_value(file_monitor, element):

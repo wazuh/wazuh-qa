@@ -47,3 +47,12 @@
     audit_starts: false
     fail_reason: invalid_value
 
+- name: Queue Size Invalid value (Invalid characters)
+  description: Verify if value set using characters instead of only numbers, whodata fails to start.
+  configuration_parameters:
+    QUEUE_SIZE: 100c
+  metadata:
+    queue_size: 100c
+    valid_range: false
+    audit_starts: false
+    fail_reason: invalid_value
