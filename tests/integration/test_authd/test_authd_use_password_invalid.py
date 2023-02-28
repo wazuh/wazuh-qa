@@ -127,7 +127,7 @@ def test_authd_use_password_invalid(metadata, configuration, truncate_monitored_
         - wazuh-manager.service must not be able to restart.
 
     input_description:
-        ./data/config_templates/config_authd_use_password_invalid.yaml: Wazuh config needed for the tests.
+        ./data/configuration_template/config_authd_use_password_invalid.yaml: Wazuh config needed for the tests.
         ./data/test_cases/cases_authd_use_password_invalid.yaml: Values to be used and expected error.
 
     expected_output:
