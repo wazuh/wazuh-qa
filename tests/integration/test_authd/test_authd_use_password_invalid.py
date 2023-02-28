@@ -42,7 +42,7 @@ tags:
 
 import pytest
 
-from pathlib import Path
+import os
 
 from wazuh_testing.modules.authd import event_monitor as evm
 from wazuh_testing.tools import DEFAUL_AUTHD_PASS_PATH
@@ -51,22 +51,21 @@ from wazuh_testing.tools.configuration import get_test_cases_data, load_configur
 from wazuh_testing.tools.services import control_service
 
 
-# Constants & base paths
-TEST_NAME = Path(__file__).stem.replace('test_', '')
-DATA_PATH = Path(Path(__file__).parent, 'data')
-TESTS_CASES_PATH = Path(DATA_PATH, 'test_cases')
-CONFIGS_PATH = Path(DATA_PATH, 'config_templates')
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Marks
 pytestmark = [pytest.mark.server, pytest.mark.tier(level=1)]
 
-# Paths
-cases_path = Path(TESTS_CASES_PATH, f"cases_{TEST_NAME}.yaml")
-config_path = Path(CONFIGS_PATH, f"config_{TEST_NAME}.yaml")
+# Configuration and cases data
+test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_authd_use_password_invalid.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'config_authd_use_password_invalid.yaml')
 
 # Test configurations
-params, metadata, case_ids = get_test_cases_data(cases_path)
-configuration = load_configuration_template(config_path, params, metadata)
+params, metadata, case_ids = get_test_cases_data(test_cases_path)
+configuration = load_configuration_template(configurations_path, params, metadata)
 local_internal_options = {'authd.debug': '2'}
 
 
