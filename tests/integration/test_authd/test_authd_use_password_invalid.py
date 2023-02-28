@@ -64,7 +64,7 @@ pytestmark = [pytest.mark.server, pytest.mark.tier(level=1)]
 cases_path = Path(TESTS_CASES_PATH, f"cases_{TEST_NAME}.yaml")
 config_path = Path(CONFIGS_PATH, f"config_{TEST_NAME}.yaml")
 
-# Configurations and test cases
+# Test configurations
 params, metadata, case_ids = get_test_cases_data(cases_path)
 configuration = load_configuration_template(config_path, params, metadata)
 local_internal_options = {'authd.debug': '2'}
