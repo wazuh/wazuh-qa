@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2022, Wazuh Inc.
+copyright: Copyright (C) 2015-2023, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -31,43 +31,9 @@ os_platform:
     - macos
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
-    - Arch Linux
-    - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - CentOS 6
-    - CentOS 7
     - CentOS 8
-    - Fedora 31
-    - Fedora 32
-    - Fedora 33
-    - Fedora 34
-    - openSUSE 42
-    - Red Hat 6
-    - Red Hat 7
-    - Red Hat 8
-    - Solaris 10
-    - Solaris 11
-    - SUSE 12
-    - SUSE 13
-    - SUSE 14
-    - SUSE 15
     - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
-    - Ubuntu Focal
-    - macOS Server
-    - macOS Sierra
     - macOS Catalina
-    - Windows XP
-    - Windows 7
-    - Windows 8
-    - Windows 10
-    - Windows Server 2003
-    - Windows Server 2012
     - Windows Server 2016
     - Windows Server 2019
 
@@ -105,31 +71,31 @@ elif sys.platform == 'win32':
 else:
     daemons_handler_configuration = {'daemons': [MODULES_DAEMON], 'ignore_errors': True}
 
-# T1 Parameters
+# T1 Parameters: Check that Syscollector is disabled.
 t1_config_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_syscollector.yaml')
 t1_cases_path = os.path.join(TEST_CASES_PATH, 'case_test_syscollector_deactivation.yaml')
 t1_config_parameters, t1_config_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 t1_configurations = load_configuration_template(t1_config_path, t1_config_parameters, t1_config_metadata)
 
-# T2 Parameters
+# T2 Parameters: Check that each scan is disabled.
 t2_config_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_syscollector_scans_disabled.yaml')
 t2_cases_path = os.path.join(TEST_CASES_PATH, 'case_test_all_scans_disabled.yaml')
 t2_config_parameters, t2_config_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
 t2_configurations = load_configuration_template(t2_config_path, t2_config_parameters, t2_config_metadata)
 
-# T3 Parameters
+# T3 Parameters: Check the behaviour of Syscollector while setting invalid configurations.
 t3_config_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_syscollector.yaml')
 t3_cases_path = os.path.join(TEST_CASES_PATH, 'case_test_invalid_configurations.yaml')
 t3_config_parameters, t3_config_metadata, t3_case_ids = get_test_cases_data(t3_cases_path)
 t3_configurations = load_configuration_template(t3_config_path, t3_config_parameters, t3_config_metadata)
 
-# T4 Parameters
+# T4 Parameters: Check that Syscollector sets the default values when the configuration block is empty.
 t4_config_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_syscollector_no_tags.yaml')
 t4_cases_path = os.path.join(TEST_CASES_PATH, 'case_test_default_values.yaml')
 t4_config_parameters, t4_config_metadata, t4_case_ids = get_test_cases_data(t4_cases_path)
 t4_configurations = load_configuration_template(t4_config_path, t4_config_parameters, t4_config_metadata)
 
-# T5 Parameters
+# T5 Parameters: Check that the scan is completed when all scans are enabled.
 t5_config_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_syscollector.yaml')
 t5_cases_path = os.path.join(TEST_CASES_PATH, 'case_test_scanning.yaml')
 t5_config_parameters, t5_config_metadata, t5_case_ids = get_test_cases_data(t5_cases_path)
@@ -143,13 +109,21 @@ def test_syscollector_deactivation(configuration, metadata, set_wazuh_configurat
                                    configure_local_internal_options_module, truncate_monitored_files,
                                    daemons_handler_function):
     '''
-    description: Check that the module is disabled.
+    description: Check that syscollector is disabled.
 
     test_phases:
-        - Configure syscollector.
-        - Configure modulesd in debug mode.
-        - Truncate the log.
-        - Restart analysisd, wazuh-db and modulesd
+        - setup:
+            - Set Syscollector configuration.
+            - Configure modulesd in debug mode.
+            - Truncate all the log files and json alerts files.
+            - Restart the necessary daemons for each test case.
+        - test:
+            - Check if Syscollector was disabled.
+        - teardown:
+            - Restore Wazuh configuration.
+            - Restore local internal options.
+            - Truncate all the log files and json alerts files.
+            - Stop the necessary daemons.
 
     wazuh_min_version: 4.4.0
 
@@ -170,7 +144,7 @@ def test_syscollector_deactivation(configuration, metadata, set_wazuh_configurat
             brief: Configure the local internal options file.
         - truncate_monitored_files:
             type: fixture
-            brief: Truncate the log file before and after the test execution.
+            brief: Truncate all the log files and json alerts files before and after the test execution.
         - daemons_handler_function:
             type: fixture
             brief: Handler of Wazuh daemons for each test case.
@@ -182,7 +156,7 @@ def test_syscollector_deactivation(configuration, metadata, set_wazuh_configurat
         - The `configuration_syscollector.yaml` file provides the module configuration for this test.
         - The `case_test_syscollector_deactivation.yaml` file provides the test cases.
     '''
-    file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
+    file_monitor = FileMonitor(LOG_FILE_PATH)
     evm.check_syscollector_is_disabled(file_monitor=file_monitor, timeout=T_10)
 
 
@@ -194,10 +168,18 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
     description: Check that each scan is disabled.
 
     test_phases:
-        - Configure syscollector.
-        - Configure modulesd in debug mode.
-        - Truncate the log.
-        - Restart analysisd, wazuh-db and modulesd
+        - setup:
+            - Set Syscollector configuration.
+            - Configure modulesd in debug mode.
+            - Truncate all the log files and json alerts files.
+            - Restart the necessary daemons for each test case.
+        - test:
+            - Check that no scan is triggered.
+        - teardown:
+            - Restore Wazuh configuration.
+            - Restore local internal options.
+            - Truncate all the log files and json alerts files.
+            - Stop the necessary daemons.
 
     wazuh_min_version: 4.4.0
 
@@ -230,20 +212,20 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
         - The `configuration_syscollector_scans_disabled.yaml` file provides the module configuration for this test.
         - The `case_test_all_scans_disabled.yaml` file provides the test cases.
     '''
-    file_monitor = None
     check_functions = [evm.check_hardware_scan_started, evm.check_os_scan_started, evm.check_network_scan_started,
                        evm.check_packages_scan_started, evm.check_ports_scan_started, evm.check_processes_scan_started]
+    # Add the hotfixes check if the platform is Windows.
     if sys.platform == 'win32':
         check_functions.append(evm.check_hotfixes_scan_started)
 
-    # Check that no scan is triggered
-    for check_f in check_functions:
+    # Check that no scan is triggered.
+    for check_function in check_functions:
         # Expected: the function must throw a TimoutError
         with pytest.raises(TimeoutError):
-            # Overwrite the default timeout (because the test configuration)
             file_monitor = FileMonitor(LOG_FILE_PATH)
-            check_f(file_monitor=file_monitor, timeout=T_10)
-            pytest.fail(f"It seems that a scan was triggered. This check has a match in the log: {check_f.__name__}")
+            check_function(file_monitor=file_monitor)
+            pytest.fail('It seems that a scan was triggered.' \
+                        f"This check has a match in the log: {check_function.__name__}")
 
 
 @pytest.mark.xfail(sys.platform == "win32", reason='Reported in wazuh/wazuh#15412')
@@ -252,13 +234,23 @@ def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_
                                              configure_local_internal_options_module, truncate_monitored_files,
                                              daemons_handler_function):
     '''
-    description: Check the behaviour of the module while setting invalid configurations.
+    description: Check the behaviour of Syscollector while setting invalid configurations.
 
     test_phases:
-        - Configure syscollector.
-        - Configure modulesd in debug mode.
-        - Truncate the log.
-        - Restart analysisd, wazuh-db and modulesd
+        - setup:
+            - Set Syscollector configuration.
+            - Configure modulesd in debug mode.
+            - Truncate all the log files and json alerts files.
+            - Restart the necessary daemons for each test case.
+        - test:
+            - Skip test if the field is hotfixes and the platform is not Windows.
+            - Check if the tag/attribute error is present in the logs.
+            - Check if Syscollector starts depending on the criticality of the field.
+        - teardown:
+            - Restore Wazuh configuration.
+            - Restore local internal options.
+            - Truncate all the log files and json alerts files.
+            - Stop the necessary daemons.
 
     wazuh_min_version: 4.4.0
 
@@ -295,26 +287,28 @@ def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_
     field = metadata['field']
     attribute = metadata['attribute']
     non_critical_fields = ('max_eps')
-    file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
+    file_monitor = FileMonitor(LOG_FILE_PATH)
 
+    # Skip test if the field is hotfixes and the platform is not Windows.
+    if field == 'hotfixes' and sys.platform != 'win32':
+        pytest.skip('The hotfixes scan is exclusive of Windows agents.')
+
+    # If the field has no value, it means that the test should search for the attribute error in the logs, not for the
+    # tag error.
     if field is not None:
-        if field == 'hotfixes' and sys.platform != 'win32':
-            return True
-
-        evm.check_tag_error(file_monitor=file_monitor, field=field, timeout=T_10)
-
-        if field in non_critical_fields:
-            # Check that the module has started if the field is not critical
-            file_monitor = FileMonitor(LOG_FILE_PATH)
-            evm.check_module_is_starting(file_monitor=file_monitor, timeout=T_10)
-            return True
+        evm.check_tag_error(file_monitor=file_monitor, field=field)
     else:
-        evm.check_attr_error(file_monitor=file_monitor, attr=attribute, timeout=T_10)
+        evm.check_attr_error(file_monitor=file_monitor, attr=attribute)
 
-    # Check that the module does not start
-    with pytest.raises(TimeoutError):
-        evm.check_module_is_starting(file_monitor=file_monitor, timeout=T_10)
-        pytest.fail(f"The module has started anyway. This behaviour is not the expected.")
+    # Check that the module has started if the field is not critical
+    if field in non_critical_fields:
+        file_monitor = FileMonitor(LOG_FILE_PATH)
+        evm.check_module_is_starting(file_monitor=file_monitor)
+    else:
+        # Check that the module does not start if the field is critical
+        with pytest.raises(TimeoutError):
+            evm.check_module_is_starting(file_monitor=file_monitor)
+            pytest.fail(f"The module has started anyway. This behaviour is not the expected.")
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t4_configurations, t4_config_metadata), ids=t4_case_ids)
@@ -323,7 +317,7 @@ def test_syscollector_default_values(configuration, metadata, set_wazuh_configur
                                      configure_local_internal_options_module, truncate_monitored_files,
                                      daemons_handler_function):
     '''
-    description: Check that the module sets the default values when the configuration block is empty.
+    description: Check that Syscollector sets the default values when the configuration block is empty.
 
     test_phases:
         - Configure syscollector.
@@ -362,9 +356,9 @@ def test_syscollector_default_values(configuration, metadata, set_wazuh_configur
         - The `configuration_syscollector_no_tags.yaml` file provides the module configuration for this test.
         - The `case_test_default_values.yaml` file provides the test cases.
     '''
-    file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
-    evm.check_config(file_monitor=file_monitor, timeout=T_10)
-    evm.check_module_startup_finished(file_monitor=file_monitor, timeout=T_10)
+    file_monitor = FileMonitor(LOG_FILE_PATH)
+    evm.check_config(file_monitor=file_monitor)
+    evm.check_module_startup_finished(file_monitor=file_monitor)
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t5_configurations, t5_config_metadata), ids=t5_case_ids)
@@ -372,7 +366,7 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
                               configure_local_internal_options_module, truncate_monitored_files,
                               daemons_handler_function):
     '''
-    description: Check that the Sycollector scan completes when all scans are enabled.
+    description: Check that the scan is completed when all scans are enabled.
 
     test_phases:
         - Configure syscollector.
@@ -412,7 +406,7 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
         - The `configuration_syscollector.yaml` file provides the module configuration for this test.
         - The `case_test_scanning.yaml` file provides the test cases.
     '''
-    file_monitor = FileMonitor(LOG_FILE_PATH) if sys.platform == 'win32' else None
+    file_monitor = FileMonitor(LOG_FILE_PATH)
     # 60s + 2 seconds of margin because it includes the case when the agent starts for the first time
     evm.check_module_is_starting(file_monitor=file_monitor, timeout=T_60 + 2, update_position=False)
     # Check general scan has started
