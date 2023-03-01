@@ -364,7 +364,7 @@ def callback_audit_cannot_start(line):
         line (String): string line to be checked by callback in FileMonitor.
 
     Returns:
-        Returns True if line matches.
+        boolean: return True if line matches, None otherwise
     """
     match = re.match(r'.*Who-data engine could not start. Switching who-data to real-time.', line)
     if match:
@@ -375,7 +375,7 @@ def callback_restricted(line):
     """ Callback that detects if a line in a log  if a file is ignored due to configured restrict tag.
 
     Returns:
-        Returns the entry that is being ignored.
+        string: returns path for the entry that is being ignored.
     """
     match = re.match(r".*Ignoring entry '(.*?)' due to restriction '.*?'", line)
     if match:
