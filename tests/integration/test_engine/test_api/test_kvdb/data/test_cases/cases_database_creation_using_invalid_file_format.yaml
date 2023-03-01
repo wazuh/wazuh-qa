@@ -9,7 +9,7 @@
       -n: kvdb_invalid_format
       -p: PATH_TO_KVDB_JSON_FILE
     kvdb_names:
-      - kvdb_invalid_format
+      - kvdb_invalid_json_content
     extension: json
 
 - name: Create a kvdb using a non-supported input format file
@@ -23,5 +23,5 @@
       -n: kvdb_invalid_format
       -p: PATH_TO_KVDB_TXT_FILE
     kvdb_names:
-      - kvdb_invalid_format
+      - kvdb_invalid_extension_and_content
     extension: txt

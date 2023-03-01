@@ -37,8 +37,8 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_kvdb_api_database_delete.yaml')
-t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_kvdb_api_database_delete_not_loaded.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_database_delete.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_database_delete_not_loaded.yaml')
 
 # Engine KVDB create API configurations (t1)
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
@@ -85,7 +85,7 @@ def test_kvdb_delete_databases(api_call_data, kvdb_names, clean_stored_kvdb, cre
         - Check that the kvdb has been deleted from memory.
 
     input_description:
-        - The `cases_kvdb_api_database_creation` file provides the test cases.
+        - The `cases_database_creation` file provides the test cases.
 
     expected_output:
         - r"KVDB '.*' successfully deleted\n"
@@ -131,7 +131,7 @@ def test_kvdb_delete_with_no_dbs(api_call_data, clean_all_stored_kvdb):
         - Check that there are no kvdbs when trying to delete.
 
     input_description:
-        - The `cases_kvdb_api_database_creation` file provides the test cases.
+        - The `cases_database_creation` file provides the test cases.
 
     expected_output:
         - r"Database .* not found or could not be loaded"
@@ -182,7 +182,7 @@ def test_kvdb_delete_databases_not_loaded(api_call_data, kvdb_names, clean_store
         - Check that engine's output is the expected.
 
     input_description:
-        - The `cases_kvdb_api_database_creation` file provides the test cases.
+        - The `cases_database_creation` file provides the test cases.
 
     expected_output:
         - r"Database .* not found or could not be loaded"

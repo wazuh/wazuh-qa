@@ -36,7 +36,7 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_kvdb_api_list_and_filtering.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_list_databases.yaml')
 
 # Engine events configurations
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
@@ -44,38 +44,6 @@ t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_c
 # Variables related to api calls and kvdbs
 api_call_data = engine.get_api_call_data(t1_configuration_metadata)
 kvdb_names = engine.get_kvdb_names(t1_configuration_metadata)
-
-
-def get_list_expected_output(kvdb_names, options):
-    """Get the output that the engine would show with the given kvdbs.
-
-    Args:
-        kvdb_names(list): KVDBs that are loaded.
-        options(dict): Test case options.
-    """
-    n_kvdbs = 0
-    actual_n_kvdb = 0
-    expected_output = ''
-
-    if '-n' in options:
-        for kvdb_name in kvdb_names:
-            if options['-n'] in kvdb_name:
-                n_kvdbs += 1
-    else:
-        # If there is no filtering, all the kvdbs will be listed
-        n_kvdbs = len(kvdb_names)
-
-    for kvdb_name in kvdb_names:
-        current_output = f",\"{kvdb_name}\"" if actual_n_kvdb != 0 else f"\"{kvdb_name}\""
-        if '-n' in options:
-            if options['-n'] in kvdb_name:
-                expected_output += current_output
-                actual_n_kvdb += 1
-        else:
-            expected_output += current_output
-            actual_n_kvdb += 1
-
-    return f"[{expected_output}]\n" if actual_n_kvdb != 0 else ''
 
 
 @pytest.mark.tier(level=0)
@@ -111,7 +79,7 @@ def test_kvdb_list(request, api_call_data, kvdb_names, clean_stored_kvdb, create
         - Check that the engine's output matches with the expected.
 
     input_description:
-        - The `cases_kvdb_api_list_and_filtering` file provides the test cases.
+        - The `cases_list_databases` file provides the test cases.
 
     expected_output:
         - r"Databases found: .*"
@@ -130,7 +98,7 @@ def test_kvdb_list(request, api_call_data, kvdb_names, clean_stored_kvdb, create
 
     # Verify that list command output is the expected
     assert processes.run_local_command_returning_output(api_call) == \
-        get_list_expected_output(kvdbs_to_list, api_call_data['options'] if 'options' in api_call_data else {})
+        engine.get_list_expected_output(kvdbs_to_list, api_call_data['options'] if 'options' in api_call_data else {})
 
 
 @pytest.mark.tier(level=0)
@@ -167,7 +135,7 @@ def test_kvdb_list_no_loaded_kvdbs(api_call_data, clean_all_stored_kvdb):
         - Check that the engine's output matches with the expected.
 
     input_description:
-        - The `cases_kvdb_api_list_and_filtering` file provides the test cases.
+        - The `cases_list_databases` file provides the test cases.
 
     expected_output:
         - 'Databases found: 0'
@@ -179,4 +147,4 @@ def test_kvdb_list_no_loaded_kvdbs(api_call_data, clean_all_stored_kvdb):
 
     # Verify that list command output is the expected
     assert processes.run_local_command_returning_output(api_call) == \
-        get_list_expected_output([], api_call_data['options'] if 'options' in api_call_data else {})
+        engine.get_list_expected_output([], api_call_data['options'] if 'options' in api_call_data else {})

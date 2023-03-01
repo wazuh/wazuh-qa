@@ -45,7 +45,7 @@
       - kvdb_empty
       - kvdb_test
 
-- name: Verify filtering existent kvdbs
+- name: Verify listing existent kvdbs using db name
   description: Verify that list subcommand can filter kvdb searches.
   configuration_parameters:
     cfg: TODO
@@ -58,7 +58,7 @@
       - kvdb_empty
       - kvdb_test
 
-- name: Verify filtering existent kvdbs
+- name: Verify listing existent kvdbs using common substring
   description: Verify that list subcommand can filter kvdb searches.
   configuration_parameters:
     cfg: TODO

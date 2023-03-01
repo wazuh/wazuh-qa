@@ -82,7 +82,6 @@ def get_api_call_data(configuration_metadata):
         api_call_data_case = {}
 
         for field in api_call_fields:
-            # which fields should be required? command? or none (in this case the engine will use its default pars)
             if field in test_case:
                 if field == 'options' and '-p' in test_case[field] and 'create' == test_case['subcommand']:
                     extension = ("json" if 'extension' not in test_case else f"{test_case['extension']}")
@@ -240,3 +239,35 @@ def get_available_kvdbs():
                     available_kvdbs += [kvdb_folder]
 
     return available_kvdbs
+
+
+def get_list_expected_output(kvdb_names, options):
+    """Get the output that the engine would show with the given kvdbs.
+
+    Args:
+        kvdb_names(list): KVDBs that are loaded.
+        options(dict): Test case options.
+    """
+    n_kvdbs = 0
+    actual_n_kvdb = 0
+    expected_output = ''
+
+    if '-n' in options:
+        for kvdb_name in kvdb_names:
+            if options['-n'] in kvdb_name:
+                n_kvdbs += 1
+    else:
+        # If there is no filtering, all the kvdbs will be listed
+        n_kvdbs = len(kvdb_names)
+
+    for kvdb_name in kvdb_names:
+        current_output = f",\"{kvdb_name}\"" if actual_n_kvdb != 0 else f"\"{kvdb_name}\""
+        if '-n' in options:
+            if options['-n'] in kvdb_name:
+                expected_output += current_output
+                actual_n_kvdb += 1
+        else:
+            expected_output += current_output
+            actual_n_kvdb += 1
+
+    return f"[{expected_output}]\n" if actual_n_kvdb != 0 else ''

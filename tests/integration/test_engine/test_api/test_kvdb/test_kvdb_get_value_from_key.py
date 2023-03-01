@@ -37,8 +37,8 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_kvdb_api_database_get_key_value.yaml')
-t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_kvdb_api_database_get_non_existent_key_value.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_database_get_key_value.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_database_get_non_existent_key_value.yaml')
 
 # Engine KVDB create API configurations (t1)
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
@@ -89,7 +89,7 @@ def test_kvdb_get_key_value(request, api_call_data, kvdb_names, clean_stored_kvd
         - Check that API's output is the expected.
 
     input_description:
-        - The `cases_kvdb_api_database_get_key_value` file provides the test cases.
+        - The `cases_database_get_key_value` file provides the test cases.
 
     expected_output:
         - "{{\"key\":\".*\",\"value\":\".*\"}, ..., {\"key\":\".*\",\"value\":\".*\"}}\n"
@@ -147,7 +147,7 @@ def test_kvdb_get_key_value_from_non_existent_db(api_call_data, clean_all_stored
         - Check that there is no db.
 
     input_description:
-        - The `cases_kvdb_api_database_get_key_value` file provides the test cases.
+        - The `cases_database_get_key_value` file provides the test cases.
 
     expected_output:
         - r".* not found or could not be loaded."
@@ -200,7 +200,7 @@ def test_kvdb_get_key_value_for_non_existent_key(api_call_data, kvdb_names, clea
         - Check that API's output is the expected.
 
     input_description:
-        - The `cases_kvdb_api_database_get_non_existent_key_value` file provides the test cases.
+        - The `cases_database_get_non_existent_key_value` file provides the test cases.
 
     expected_output:
         - r"Cannot read value .*"

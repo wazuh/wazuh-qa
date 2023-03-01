@@ -10,8 +10,8 @@
     kvdb_names:
       - kvdb_empty
 
-- name: Dump the content of a non-existent database
-  description: Dump the content of a database that it is not loaded on memory.
+- name: Dump the content of a non-existent empty database
+  description: Dump the content of an empty database that it is not loaded on memory.
   configuration_parameters:
     cfg: TODO
   metadata:

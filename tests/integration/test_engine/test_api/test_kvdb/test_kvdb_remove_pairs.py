@@ -37,8 +37,8 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_kvdb_api_database_remove_pairs.yaml')
-t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_kvdb_api_database_remove_pairs_non_existent_key.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_database_remove_pairs.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_database_remove_pairs_non_existent_key.yaml')
 
 # Engine KVDB create API configurations (t1)
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
@@ -86,7 +86,7 @@ def test_kvdb_remove_pairs(api_call_data, kvdb_names, clean_stored_kvdb, create_
         - Check that the database content is the expected after removing the pair
 
     input_description:
-        - The `cases_kvdb_api_database_remove_pairs` file provides the test cases.
+        - The `cases_database_remove_pairs` file provides the test cases.
 
     expected_output:
         - Database content without the removed pair,
@@ -145,7 +145,7 @@ def test_kvdb_remove_from_non_existent_db(api_call_data, clean_all_stored_kvdb):
         - Check that the database is not in memory.
 
     input_description:
-        - The `cases_kvdb_api_database_remove_pairs` file provides the test cases.
+        - The `cases_database_remove_pairs` file provides the test cases.
 
     expected_output:
         - r".* not found or could not be loaded."
@@ -200,7 +200,7 @@ def test_kvdb_remove_value_for_non_existent_key(api_call_data, kvdb_names, clean
         - Check that the kvdb has been deleted from memory.
 
     input_description:
-        - The `cases_kvdb_api_database_remove_pairs_non_existent_key` file provides the test cases.
+        - The `cases_database_remove_pairs_non_existent_key` file provides the test cases.
 
     expected_output:
         - r"KVDB '.*' successfully deleted\n"

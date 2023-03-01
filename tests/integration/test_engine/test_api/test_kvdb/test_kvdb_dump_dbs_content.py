@@ -37,8 +37,8 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_kvdb_api_database_content_dump.yaml')
-t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_kvdb_api_non_existent_database_content_dump.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_database_content_dump.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_non_existent_database_content_dump.yaml')
 
 # Engine events configurations
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
@@ -87,7 +87,7 @@ def test_kvdb_dump_db_content(request, api_call_data, kvdb_names, clean_stored_k
         - Check that DB content is the expected.
 
     input_description:
-        - The `cases_kvdb_api_database_content_dump` file provides the test cases.
+        - The `cases_database_content_dump` file provides the test cases.
 
     expected_output:
         - List of pairs that the db contains.
@@ -139,7 +139,7 @@ def test_kvdb_dump_non_existent_db(api_call_data, clean_all_stored_kvdb):
         - Check that dump output is the expected.
 
     input_description:
-        - The `cases_kvdb_api_database_content_dump` file provides the test cases.
+        - The `cases_database_content_dump` file provides the test cases.
 
     expected_output:
         - r"Database '.*' not found or could not be loaded."
@@ -186,7 +186,7 @@ def test_kvdb_dump_non_existent_db_no_loaded_dbs(api_call_data, kvdb_names, clea
         - Check that DB content is the expected.
 
     input_description:
-        - The `cases_kvdb_api_non_existent_database_content_dump` file provides the test cases.
+        - The `cases_non_existent_database_content_dump` file provides the test cases.
 
     expected_output:
         - r"Database '.*' not found or could not be loaded."

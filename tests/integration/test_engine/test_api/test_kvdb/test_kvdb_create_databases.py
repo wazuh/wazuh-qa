@@ -2,22 +2,32 @@
 copyright: Copyright (C) 2015-2023, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 type: integration
+
 brief: These tests will check that the engine's API allows all expected requests, verifying its behavior.
+
 components:
     - engine
+
 suite: test_api
+
 targets:
     - manager
+
 daemons:
     - wazuh-engine
+
 os_platform:
     - linux
+
 os_version:
     - Ubuntu Focal
+
 references:
     - https://github.com/wazuh/wazuh/issues/11334
     - https://python-rocksdb.readthedocs.io/en/latest/api/database.html#database-interactions
+
 tags:
     - engine
     - kvdb
@@ -37,8 +47,8 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_kvdb_api_database_creation.yaml')
-t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_kvdb_api_database_creation_using_invalid_file_format.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_database_creation.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_database_creation_using_invalid_file_format.yaml')
 
 # Engine KVDB create API configurations (t1)
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
@@ -93,7 +103,7 @@ def test_kvdb_create_databases(api_call_data, kvdb_names, clean_stored_kvdb):
         - Check that the database content matches with the expected.
 
     input_description:
-        - The `cases_kvdb_api_database_creation` file provides the test cases.
+        - The `cases__database_creation` file provides the test cases.
 
     expected_output:
         - The KVDB content collected via rocksdb API matches with the expected content.
@@ -151,7 +161,7 @@ def test_kvdb_create_already_existing_db(api_call_data, kvdb_names, clean_stored
         - Check that the database content did not change.
 
     input_description:
-        - The `cases_kvdb_api_database_creation` file provides the test cases.
+        - The `cases__database_creation` file provides the test cases.
 
     expected_output:
         - f"Database '.*' already exists\n"
@@ -216,7 +226,7 @@ def test_create_db_using_invalid_file_format(api_call_data, kvdb_names, clean_st
         - Check that the database was not created.
 
     input_description:
-        - The `cases_kvdb_api_database_creation_using_invalid_file_format` file provides the test cases.
+        - The `cases__database_creation_using_invalid_file_format` file provides the test cases.
 
     expected_output:
         - r".* An error occurred while parsing the JSON file .*"
