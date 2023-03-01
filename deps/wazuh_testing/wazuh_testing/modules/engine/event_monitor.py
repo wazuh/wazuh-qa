@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2022, Wazuh Inc.
+# Copyright (C) 2015-2023, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -32,7 +32,7 @@ def make_engine_callback(pattern, prefix=engine.ENGINE_PREFIX):
 def check_engine_event_output(file_monitor=None, event='', error_message=None, update_position=True,
                               timeout=engine.T_1, accum_results=1, prefix=engine.ENGINE_PREFIX,
                               file_to_monitor=engine.ENGINE_ALERTS_PATH):
-    """Check if a vulnerability event occurs
+    """Check if an event appears within the file.
 
     Args:
         file_monitor (FileMonitor): FileMonitor object to monitor the file content

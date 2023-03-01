@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2022, Wazuh Inc.
+copyright: Copyright (C) 2015-2023, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -57,7 +57,8 @@ t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_c
 @pytest.mark.parametrize('events_data', t1_configuration_metadata, ids=t1_case_ids)
 def test_receiving_events_socket(events_data, truncate_engine_files, restart_engine_function):
     '''
-    description: Check that every event sent through the engine's queue socket is correctly received and stored in the expected log files.
+    description: Check that every event sent through the engine's queue socket is correctly received and stored in the
+                 expected log files.
 
     test_phases:
         - Clean the log and alert files
@@ -87,7 +88,7 @@ def test_receiving_events_socket(events_data, truncate_engine_files, restart_eng
         - The `cases_engine_events.yaml` file provides the module configuration for this test.
 
     expected_output:
-        - Every item within the metadata.engine_outputs object should be placed within the expected log files
+        - Every item within the metadata.engine_outputs object should be placed within the expected log files.
     '''
     # Send the messages through the queue socket to the engine
     engine.send_events_to_engine_dgram(events=events_data['events'])

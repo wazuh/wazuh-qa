@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.0] - Development (unreleased)
+
+Wazuh commit: TBD \
+Release report: TBD
+
+### Added
+
+- Add engine input events' tests using the events' socket ([#3698](https://github.com/wazuh/wazuh-qa/pull/3698)) \- (Framework + Tests)
+
+
 ## [4.5.0] - Development (unreleased)
 
 Wazuh commit: TBD \
