@@ -18,7 +18,7 @@ def make_callback(pattern, prefix=''):
 
 
 def check_event(file_monitor=None, callback='', error_message=None, update_position=True, timeout=20,
-                accum_results=1, file_to_monitor=None, prefix=''):
+                accum_results=1, file_to_monitor=None, prefix=None):
     """Check if an API event occurs
     Args:
         file_monitor (FileMonitor): FileMonitor object to monitor the file content.
@@ -26,7 +26,7 @@ def check_event(file_monitor=None, callback='', error_message=None, update_posit
         error_message (str): error message to show in case of expected event does not occur
         update_position (boolean): filter configuration parameter to search in the file
         timeout (str): timeout to check the event in the file
-        prefix (str): log pattern regex
+        prefix (str): prefix of the log message regex
         accum_results (int): Accumulation of matches.
     """
     file_monitor = FileMonitor(file_to_monitor) if file_monitor is None else file_monitor
