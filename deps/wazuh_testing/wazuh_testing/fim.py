@@ -1150,13 +1150,6 @@ def callback_audit_health_check(line):
     return None
 
 
-def callback_audit_cannot_start(line):
-    match = re.match(r'.*Who-data engine could not start. Switching who-data to real-time.', line)
-    if match:
-        return True
-    return None
-
-
 def callback_audit_added_rule(line):
     match = re.match(r'.*Added audit rule for monitoring directory: \'(.+)\'', line)
     if match:
