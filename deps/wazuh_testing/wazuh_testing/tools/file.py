@@ -258,7 +258,7 @@ def remove_files_in_folder(dir_path):
                 os.unlink(file_path)
             elif os.path.isdir(file_path):
                 delete_path_recursively(file_path)
-        except Exception as error:
+        except (OSError, PermissionError) as error:
             print(f"Failed to remove {file_path}.\nError: {error}")
 
 
