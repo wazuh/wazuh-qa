@@ -134,10 +134,6 @@ def test_authd_use_password_invalid(metadata, configuration, truncate_monitored_
         - .*Empty password provided.
         - .*Invalid password provided.
     '''
-    # The expected error log must be defined.
-    if not metadata.get('error'):
-        raise ValueError('Expected error not provided.')
-
     if metadata.get('error') == 'Invalid password provided.':
         pytest.xfail(reason="No password validation in authd.pass - Issue wazuh/wazuh#16282.")
 
