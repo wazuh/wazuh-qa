@@ -80,13 +80,26 @@ timeout = 20
 # Fixtures
 @pytest.fixture()
 def modify_local_internal_options(status_guess_agent_group):
+    """Fixture to configure the local internal options file.
+
+    It uses the variable local_internal_options. This should be
+    a dictionary wich keys and values corresponds to the internal option configuration and host to apply, For example:
+    local_internal_options = {'wazuh-master': [{'name': 'remoted.guess_agent_group', 'value': '0'}],
+                              'wazuh-worker1': [{'name': 'remoted.debug', 'value': '2'}, {'name': 'authd.debug',
+                                                                                          'value': '2'}]}
+    """
     local_internal_options = {test_infra_managers[0]: [{'name': 'remoted.guess_agent_group', 'value':
                                                         f"{status_guess_agent_group}"}]}
+
+    # Get previous local internal options
     backup_local_internal_options = host_manager.get_file_content(test_infra_managers[0], WAZUH_LOCAL_INTERNAL_OPTIONS)
+
+    # Add local internal options
     host_manager.configure_internal_options(local_internal_options)
 
     yield
 
+    # Restore local internal options
     host_manager.modify_file_content(test_infra_managers[0], WAZUH_LOCAL_INTERNAL_OPTIONS,
                                      backup_local_internal_options)
 
