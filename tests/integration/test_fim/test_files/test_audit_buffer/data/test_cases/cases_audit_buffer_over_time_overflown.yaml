@@ -1,8 +1,13 @@
-- name: Audit buffer overflown - Get events in scheduled 2
+- name: Audit Buffer overflows
   description: Verify if value set is inside valid range it is configured and whodata starts correctly.
   configuration_parameters:
     TEST_DIRECTORIES: /
+    QUEUE_SIZE: 20
+    MAX_EPS: 4
+    FREQUENCY: 10
   metadata:
-    files_to_add: 10
-    whodata_events: 5
-  
+    files_first_insert: 24
+    queue_size: 20
+    wait_time: 5
+    files_second_insert: 10
+    fim_mode: whodata

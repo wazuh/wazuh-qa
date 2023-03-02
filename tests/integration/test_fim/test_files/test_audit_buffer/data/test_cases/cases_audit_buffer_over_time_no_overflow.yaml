@@ -1,8 +1,12 @@
-- name: Audit Buffer does not overflow 1
-  description: Verify if value set is inside valid range it is configured and whodata starts correctly.
+- name: Audit Buffer full - new files detected in whodata
+  description: Verify that after filling the queue, after space is in queue is freed new files are detected in whodata
   configuration_parameters:
     TEST_DIRECTORIES: /
+    QUEUE_SIZE: 50
+    MAX_EPS: 5
+    FREQUENCY: 20
   metadata:
-    files_first_insert: 8
-    wait_time: 3
-    files_second_insert: 1
+    files_first_insert: 50      # Fills queue 100%  - log is only generated when it overflows.
+    wait_time: 5                # Time to wait between inserts to allow for files to be  processed
+    files_second_insert: 20     # Insert files to check that files are still being detected in whodata
+    fim_mode: whodata

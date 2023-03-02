@@ -8,14 +8,17 @@ copyright: Copyright (C) 2015-2023, Wazuh Inc.
 type: integration
 
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these files are
-       added, modified or deleted. Specifically, these tests will check that FIM is able to monitor Windows system
-       folders. FIM can redirect %WINDIR%/Sysnative monitoring toward System32 folder, so the tests also check that
-       when monitoring Sysnative the path is converted to system32 and events are generated there properly.
+       added, modified or deleted. It can monitor using Audit information (whodata mode). Whodata mode has an option
+       'queue_size' that will save whodata events up until it is full so it can decode them and generate alerts. Events
+       in excess of the queue will be dropped and handled in the next scheduled scan. This is done to avoid blocking
+       the audit socket. Events in the queue are processed and removed from the queue, at a rate set my the max_eps tag.
+       This tests aim to test the behavior of the queue in conjunction with max_eps, that fill/overflow the queue, then
+       waiting for events to be processed and inserting files again, to verify files are processed in expected modes.
 
 components:
     - fim
 
-suite: windows_system_folder_redirection
+suite: audit_buffer
 
 targets:
     - agent
@@ -27,6 +30,15 @@ os_platform:
     - windows
 
 os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - Debian Buster
+    - Red Hat 8
+    - Ubuntu Focal
+    - Ubuntu Bionic
     - Windows 10
     - Windows Server 2019
     - Windows Server 2016
@@ -51,15 +63,15 @@ import os
 import time
 
 import pytest
-from wazuh_testing import LOG_FILE_PATH, REGULAR, T_10, T_20
-from wazuh_testing.tools import PREFIX 
+from wazuh_testing import LOG_FILE_PATH, REGULAR, T_60, T_20
+from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.file import create_file
 from wazuh_testing.modules.fim import TEST_DIR_1
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim.event_monitor import (callback_detect_file_added_event,  detect_audit_queue_full,
-                                                     detect_initial_scan_start, get_messages)
+                                                     get_messages)
 
 
 # Marks
@@ -84,14 +96,14 @@ t1_configuration_parameters, t1_configuration_metadata, t1_test_case_ids = get_t
 for count, value in enumerate(t1_configuration_parameters):
     t1_configuration_parameters[count]['TEST_DIRECTORIES'] = test_folders[0]
 t1_configurations = load_configuration_template(configurations_path, t1_configuration_parameters,
-                                                              t1_configuration_metadata)
+                                                t1_configuration_metadata)
 
 # Test configurations
 t2_configuration_parameters, t2_configuration_metadata, t2_test_case_ids = get_test_cases_data(t2_test_cases_path)
 for count, value in enumerate(t2_configuration_parameters):
     t2_configuration_parameters[count]['TEST_DIRECTORIES'] = test_folders[0]
 t2_configurations = load_configuration_template(configurations_path, t2_configuration_parameters,
-                                                              t2_configuration_metadata)
+                                                t2_configuration_metadata)
 
 
 # Tests
@@ -99,12 +111,12 @@ t2_configurations = load_configuration_template(configurations_path, t2_configur
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata),
                          ids=t1_test_case_ids)
 def test_audit_buffer_over_time_no_overflow(configuration, metadata, test_folders, set_wazuh_configuration,
-                                   create_monitored_folders, configure_local_internal_options_function,
-                                   restart_syscheck_function, wait_syscheck_start):
+                                            create_monitored_folders, configure_local_internal_options_function,
+                                            restart_syscheck_function, wait_syscheck_start):
     '''
-    description: Check  when setting values to whodata's 'queue_size' option. The value is configured correctly.Also,
-                 verify that the whodata thread is started correctly when value is inside valid range, and it fails 
-                 to start with values outside range and error messages are shown accordingly.
+    description: Check that when inserting files into the queue so that queue is full, after waiting for files to be
+                 processed at a max_eps rate, after inserting files for a second time with to fill the queue again, all
+                 files are processed in whodata mode.
 
     test_phases:
         - setup:
@@ -112,9 +124,11 @@ def test_audit_buffer_over_time_no_overflow(configuration, metadata, test_folder
             - Create custom folder for monitoring
             - Clean logs files and restart wazuh to apply the configuration.
         - test:
-            - Assert configured queue_size value is default value
-            - Validate real-time whodata thread is started correctly
-            - On invalid values, validate error and that whodata does not start.
+            - Insert enough files to fill queue
+            - Wait x seconds for space to be freed in queue
+            - Insert enough files to fill queue again
+            - Validate queue was full
+            - Validate no event was dropped and all events were detected in whodata mode
         - teardown:
             - Delete custom monitored folder
             - Restore configuration
@@ -122,7 +136,7 @@ def test_audit_buffer_over_time_no_overflow(configuration, metadata, test_folder
 
     wazuh_min_version: 4.5.0
 
-    tier: 1
+    tier: 2
 
     parameters:
         - configuration:
@@ -151,57 +165,59 @@ def test_audit_buffer_over_time_no_overflow(configuration, metadata, test_folder
             brief: check that the starting FIM scan is detected.
 
     assertions:
-        - Verify when queue is full an event informs audit events may be lost
-        - Verify when queue is full at start up audit healthcheck fails and does not start
-        - Verify when using invalid values an error message is shown and does not start
-        - Verify configured queue_size value
-        - Verify real-time whodata thread is started correctly
+        - Verify whadata queue is full
+        - Verify all inserted files are detected in whodata mode if files are inserted after queue space is freed
 
-    input_description: The file 'configuration_audit_buffer_values' provides the configuration template.
-                       The file 'cases_audit_buffer_values.yaml' provides the tes cases configuration
+    input_description: The file 'configuration_audit_buffer_over_time.yaml' provides the configuration
+                       template.
+                       The file 'cases_audit_buffer_over_time_no_overflow.yaml' provides the tes cases configuration
                        details for each test case.
 
     expected_output:
         - r".*(Internal audit queue is full). Some events may be lost. Next scheduled scan will recover lost data."
-        - r".*(Audit health check couldn't be completed correctly)."
-        - fr".*Invalid value for element (\'{element}\': .*)"
-        - r".*Internal audit queue size set to \'(.*)\'."
-        - r'.*File integrity monitoring (real-time Whodata) engine started.*'
+        - r".*Sending FIM event: (.+)$"
     '''
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     whodata_events = metadata['files_first_insert'] + metadata['files_second_insert']
-    
-    # Insert an ammount of files
+
+    # Wait for FIM to process all initial whodata messages
+    time.sleep(2)
+
+    # Insert an amount of files
     for file in range(0, metadata['files_first_insert']):
         create_file(REGULAR, test_folders[0], f'test_file_{file}', content='')
-    
+
+    # Wait for files to be processed
     time.sleep(metadata['wait_time'])
 
-    # Insert an ammount of files
+    # Insert a second amount of files
     for file in range(0, metadata['files_second_insert']):
         create_file(REGULAR, test_folders[0], f'test_file_second_insert_{file}', content='')
-    
-    with pytest.raises(TimeoutError):
-        detect_audit_queue_full(wazuh_log_monitor, update_position = False)
 
-    results = wazuh_log_monitor.start(timeout=T_10, callback=callback_detect_file_added_event,
+    # Detect audit queue is full
+    with pytest.raises(TimeoutError):
+        detect_audit_queue_full(wazuh_log_monitor, update_position=False)
+
+    # Get all file events
+    results = wazuh_log_monitor.start(timeout=T_60, callback=callback_detect_file_added_event,
                                       accum_results=whodata_events,
                                       error_message=f"Did not receive the expected amount of \
                                                       whodata file added events").result()
+    # Validate all files where found in whodata mode - no files where dropped
     for result in results:
         assert result['data']['mode'] == 'whodata', f"Expected whodata event, found {result['data']['mode']} event"
 
-"""
-@pytest.mark.parametrize('test_folders', [test_folders], ids='', scope='module')
+
+@pytest.mark.parametrize('test_folders', [test_folders], ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata),
                          ids=t2_test_case_ids)
 def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh_configuration,
-                                   create_monitored_folders_module, configure_local_internal_options_function,
-                                   restart_syscheck_function, wait_syscheck_start):
+                                create_monitored_folders, configure_local_internal_options_function,
+                                restart_syscheck_function, wait_syscheck_start):
     '''
-    description: Check  when setting values to whodata's 'queue_size' option. The value is configured correctly.Also,
-                 verify that the whodata thread is started correctly when value is inside valid range, and it fails 
-                 to start with values outside range and error messages are shown accordingly.
+    description: Check that when inserting files into the queue so that queue is full, after waiting for files to be
+                 processed at a max_eps rate, after inserting files for a second time with to fill the queue again, all
+                 files are processed in whodata mode.
 
     test_phases:
         - setup:
@@ -266,47 +282,41 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
         - r'.*File integrity monitoring (real-time Whodata) engine started.*'
     '''
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    files_to_add = metadata['files_to_add']
-    
-    
+    files_first_insert = metadata['files_first_insert']
+    files_second_insert = metadata['files_second_insert']
+    total_files = files_first_insert + files_second_insert
+
+    # Wait for FIM to process all initial whodata messages
+    time.sleep(2)
+
     # Insert an ammount of files
-    for file in range(0, files_to_add):
-        create_file(REGULAR, test_folders[0], f'test_file_{file}', content='')
+    for file in range(0, files_first_insert):
+        create_file(REGULAR, test_folders[0], f'test_file_first_insert_{file}', content='')
 
-    # Detect If queue_full message has been generated    
+    # Wait for files to be processed
+    time.sleep(metadata["wait_time"])
+
+    # Detect If queue_full message has been generated
     detect_audit_queue_full(wazuh_log_monitor, update_position=False)
-    
+
+    # Insert a second amount of files
+    for file in range(0, files_second_insert):
+        create_file(REGULAR, test_folders[0], f'test_file_second_insert_{file}', content='')
+
     # Get all file added events
-    results = get_messages(callback_detect_file_added_event, timeout=T_10,
+    results = get_messages(callback_detect_file_added_event, timeout=T_20, max_events=total_files,
                            error_message=f"Did not receive the expected file added events")
-    print("RESULT-------------"+str(results))
-    # Check the ammount of added events in whodata mode is equal or more than the expected value    
-    found_whodata_events = 0
+
+    second_set_events = 0
     for result in results:
-        # print("RESULT-------------"+str(result))
-        if result['data']['mode'] == 'whodata':
-            print("Added-------------")
-            found_whodata_events = found_whodata_events + 1
-    assert found_whodata_events >= metadata['whodata_events'], f"Found less whodata File added events \
-                                                                 than the expected {metadata['whodata_events']}"
-
-    # Wait for scheduled scan so the rest of file events are generated
-
-    detect_initial_scan_start(wazuh_log_monitor, timeout=T_10)
-    
-    # Get all file added events
-    results = get_messages(callback_detect_file_added_event, timeout=T_10,
-                           error_message=f"Did not receive the expected file added events")
-    
-
-    # Check the amount of added events in scheduled mode is equal to the amount of files created
-    # minus the generated whodata events
-    scheduled_events = files_to_add - found_whodata_events
-    found_scheduled_events = 0
-    for result in results:
+        # Check that all of the files processed in scheduled mode where from the first batch only
         if result['data']['mode'] == 'scheduled':
-            found_scheduled_events += 1
-    
-    assert found_scheduled_events == scheduled_events, f"Wrong amount of scheduled events found. Found \
-                                                             {found_scheduled_events}, Expected {scheduled_events}"
-"""
+            assert 'test_file_first_insert_' in result['data']['path'], "Expected only files from first set to be in\
+                                                                         scheduled mode, found file from second set"
+        # Count the events detected from second batch of files. Will only contain whodata because of previous assert
+        if 'test_file_second_insert_' in result['data']['path']:
+            second_set_events += 1
+
+    # Check that all the files from the second insert have been detected
+    assert second_set_events == files_second_insert, f"Unexpected amount of files detected from second insert, found: \
+                                                       {second_set_events}, expected: {files_second_insert}"
