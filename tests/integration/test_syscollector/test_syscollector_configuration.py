@@ -226,7 +226,7 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
             # Is not necessary to set the update_position to False because the Syscollector is configured to run its
             # scan every 2 seconds in `case_test_all_scans_disabled.yaml`
             check_function(file_monitor=file_monitor)
-            pytest.fail('It seems that a scan was triggered.' \
+            pytest.fail('It seems that a scan was triggered.'
                         f"This check has a match in the log: {check_function.__name__}")
 
 
@@ -299,18 +299,17 @@ def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_
     # tag error.
     if field is not None:
         evm.check_tag_error(file_monitor=file_monitor, field=field)
+        # Check that the module has started if the field is not critical
+        if field in non_critical_fields:
+            file_monitor = FileMonitor(LOG_FILE_PATH)
+            evm.check_module_is_starting(file_monitor=file_monitor)
     else:
         evm.check_attr_error(file_monitor=file_monitor, attr=attribute)
 
-    # Check that the module has started if the field is not critical
-    if field in non_critical_fields:
-        file_monitor = FileMonitor(LOG_FILE_PATH)
+    # Check that the module does not start if the field is critical
+    with pytest.raises(TimeoutError):
         evm.check_module_is_starting(file_monitor=file_monitor)
-    else:
-        # Check that the module does not start if the field is critical
-        with pytest.raises(TimeoutError):
-            evm.check_module_is_starting(file_monitor=file_monitor)
-            pytest.fail(f"The module has started anyway. This behaviour is not the expected.")
+        pytest.fail(f"The module has started anyway. This behaviour is not the expected.")
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t4_configurations, t4_config_metadata), ids=t4_case_ids)
