@@ -45,7 +45,7 @@ import pytest
 import os
 
 from wazuh_testing.modules.authd import event_monitor as evm
-from wazuh_testing.tools import DEFAUL_AUTHD_PASS_PATH
+from wazuh_testing import DEFAULT_AUTHD_PASS_PATH
 from wazuh_testing.tools.file import write_file, delete_file
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.services import control_service
@@ -74,12 +74,12 @@ local_internal_options = {'authd.debug': '2'}
 def set_authd_pass(metadata: dict):
     """Configure the file 'authd.pass' as needed for the test."""
     # Write the content in the authd.pass file.
-    write_file(DEFAUL_AUTHD_PASS_PATH, metadata.get('password'))
+    write_file(DEFAULT_AUTHD_PASS_PATH, metadata.get('password'))
 
     yield
 
     # Delete the file as by default it doesn't exist.
-    delete_file(DEFAUL_AUTHD_PASS_PATH)
+    delete_file(DEFAULT_AUTHD_PASS_PATH)
 
 
 # Test
