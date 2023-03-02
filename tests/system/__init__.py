@@ -78,11 +78,7 @@ def create_new_agent_group(host, group_name, host_manager):
     host_manager.run_command(host, f"/var/ossec/bin/agent_groups -q -a -g {group_name}")
 
 
-# Create new group and assing agent
 def assign_agent_to_new_group(host, id_group, id_agent, host_manager):
-    # Create group
-    host_manager.run_command(host, f"/var/ossec/bin/agent_groups -q -a -g {id_group}")
-
     # Add agent to a group
     host_manager.run_command(host, f"/var/ossec/bin/agent_groups -q -a -i {id_agent} -g {id_group}")
 

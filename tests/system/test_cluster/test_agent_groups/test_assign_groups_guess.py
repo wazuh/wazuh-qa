@@ -45,8 +45,8 @@ import time
 import pytest
 
 from system.test_cluster.test_agent_groups.common import register_agent
-from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups,
-                    check_keys_file, delete_group_of_agents, remove_cluster_agents,
+from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups, check_keys_file,
+                    create_new_agent_group, delete_group_of_agents, remove_cluster_agents,
                     assign_agent_to_new_group, restart_cluster)
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.file import replace_regex_in_file
@@ -107,7 +107,7 @@ def modify_local_internal_options(status_guess_agent_group):
 # Tests
 @pytest.mark.parametrize('status_guess_agent_group', ['0', '1'])
 @pytest.mark.parametrize('target_node', ['wazuh-master', 'wazuh-worker1'])
-def test_guess_single_group(target_node, status_guess_agent_group, clean_environment, modify_internal_options):
+def test_guess_single_group(target_node, status_guess_agent_group, clean_environment, modify_local_internal_options):
     '''
     description: Check that when an agent registered in the manager and assigned to group is removed, performs a
                  guessing operation and determinates the groups to with the agent was assigned.
@@ -133,21 +133,24 @@ def test_guess_single_group(target_node, status_guess_agent_group, clean_environ
     expected_output:
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
-    # Restart managers
+    # Restart master to apply local internal options
     restart_cluster([test_infra_managers[0]], host_manager)
     time.sleep(timeout)
+
+    # Create new group
+    create_new_agent_group(test_infra_managers[0], group_id, host_manager)
 
     # Register agent with agent-auth
     agent_ip, agent_id, agent_name, manager_ip = register_agent(test_infra_agents[0], target_node,
                                                                 host_manager)
     # Restart agent
-    restart_cluster(test_infra_agents, host_manager)
+    restart_cluster([test_infra_agents[0]], host_manager)
 
     # Check that agent has client key file
     assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
 
     try:
-        # Create new group and assing agent
+        # Create new group and assign agent
         assign_agent_to_new_group(test_infra_managers[0], group_id, agent_id, host_manager)
 
         # Remove agent from default to test single group guess (not multigroup)
@@ -169,7 +172,7 @@ def test_guess_single_group(target_node, status_guess_agent_group, clean_environ
         assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
 
         # Restart agent
-        restart_cluster(test_infra_agents, host_manager)
+        restart_cluster([test_infra_agents[0]], host_manager)
         time.sleep(timeout)
 
         # Check if remoted.guess_agent_group is disabled
@@ -193,7 +196,8 @@ def test_guess_single_group(target_node, status_guess_agent_group, clean_environ
 @pytest.mark.parametrize('n_agents', [1, 2])
 @pytest.mark.parametrize('status_guess_agent_group', ['0', '1'])
 @pytest.mark.parametrize('target_node', ['wazuh-master', 'wazuh-worker1'])
-def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clean_environment, modify_internal_options):
+def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clean_environment,
+                           modify_local_internal_options):
     '''
     description: Check that when an agent registered in the manager and assigned to group is removed, performs a
                  guessing operation and determinates the groups to with the agent was assigned.
@@ -222,9 +226,12 @@ def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clea
     expected_output:
         - The agent 'Agent_name' with ID 'Agent_id' belongs to groups: group_test."
     '''
-    # Restart managers
+    # Restart master to apply local internal options
     restart_cluster([test_infra_managers[0]], host_manager)
     time.sleep(timeout)
+
+    # Create new group
+    create_new_agent_group(test_infra_managers[0], group_id, host_manager)
 
     # Register agent with agent-auth
     agents_data = []
