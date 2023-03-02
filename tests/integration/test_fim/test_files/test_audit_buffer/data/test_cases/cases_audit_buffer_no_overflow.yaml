@@ -1,8 +1,7 @@
-- name: Audit Buffer does not overflow 1
-  description: Verify if value set is inside valid range it is configured and whodata starts correctly.
+- name: Audit Buffer does not overflow
+  description: Verify if files are equal to queue_size, it does not everflow and files are detected in whodata mode
   configuration_parameters:
     TEST_DIRECTORIES: /
   metadata:
     files_to_add: 5
-    whodata_events: 5
     fim_mode: whodata

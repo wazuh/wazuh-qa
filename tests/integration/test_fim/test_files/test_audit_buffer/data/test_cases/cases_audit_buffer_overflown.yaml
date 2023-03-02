@@ -1,5 +1,5 @@
-- name: Audit buffer overflown - Get events in scheduled 2
-  description: Verify if value set is inside valid range it is configured and whodata starts correctly.
+- name: Audit buffer overflowns
+  description: Verify if files are added over the queue's size, it overflows and files are detected in scheduled mode.
   configuration_parameters:
     TEST_DIRECTORIES: /
   metadata:

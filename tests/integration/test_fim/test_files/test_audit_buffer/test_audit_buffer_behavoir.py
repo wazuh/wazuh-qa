@@ -113,9 +113,9 @@ def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_waz
                                   create_monitored_folders, configure_local_internal_options_function,
                                   restart_syscheck_function, wait_syscheck_start):
     '''
-    description: Check  when setting values to whodata's 'queue_size' option. The value is configured correctly.Also,
-                 verify that the whodata thread is started correctly when value is inside valid range, and it fails
-                 to start with values outside range and error messages are shown accordingly.
+    description: Check that when files are added equal to the whodata "queue_size", the queue does not overflow, all
+                 files are detected in whodata mode, and after the next scan no file is detected in scheduled mode.
+                 
 
     test_phases:
         - setup:
@@ -123,7 +123,8 @@ def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_waz
             - Create custom folder for monitoring
             - Clean logs files and restart wazuh to apply the configuration.
         - test:
-            - Assert configured queue_size value is default value
+            - Insert a given amount of files
+            - Check that no "queue full" message is detected (Queue has not overflown)
             - Validate real-time whodata thread is started correctly
             - On invalid values, validate error and that whodata does not start.
         - teardown:
@@ -148,9 +149,9 @@ def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_waz
         - set_wazuh_configuration:
             type: fixture
             brief: Set ossec.conf configuration.
-        - create_monitored_folders_module:
+        - create_monitored_folders:
             type: fixture
-            brief: Create a given list of folders when the module starts. Delete the folders at the end of the module.
+            brief: Create a given list of folders when the test starts. Delete the folders at the end of the test.
         - configure_local_internal_options_function:
             type: fixture
             brief: Set local_internal_options.conf file.
@@ -162,42 +163,41 @@ def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_waz
             brief: check that the starting FIM scan is detected.
 
     assertions:
-        - Verify when queue is full an event informs audit events may be lost
-        - Verify when queue is full at start up audit healthcheck fails and does not start
-        - Verify when using invalid values an error message is shown and does not start
-        - Verify configured queue_size value
-        - Verify real-time whodata thread is started correctly
+        - Verify the queue does not overflow after inserting files
+        - Verify all files are detected in whodata mode 
 
     input_description: The file 'configuration_audit_buffer_values' provides the configuration template.
-                       The file 'cases_audit_buffer_values.yaml' provides the tes cases configuration
-                       details for each test case.
+                       The file 'cases_audit_buffer_values.yaml' provides the test cases details for each test case.
 
     expected_output:
         - r".*(Internal audit queue is full). Some events may be lost. Next scheduled scan will recover lost data."
-        - r".*(Audit health check couldn't be completed correctly)."
-        - fr".*Invalid value for element (\'{element}\': .*)"
-        - r".*Internal audit queue size set to \'(.*)\'."
-        - r'.*File integrity monitoring (real-time Whodata) engine started.*'
+        - r".*Sending FIM event: (.+)$"
     '''
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    whodata_events = metadata['whodata_events']
+    files_to_add = metadata['files_to_add']
+    whodata_events = files_to_add
 
     # Insert an ammount of files
-    for file in range(0, metadata['files_to_add']):
+    for file in range(0, files_to_add):
         create_file(REGULAR, test_folders[0], f'test_file_{file}', content='')
 
+    # Check that queue has not been overflown
     with pytest.raises(TimeoutError):
         detect_audit_queue_full(wazuh_log_monitor, update_position=False)
 
+    # Get all file events
     results = wazuh_log_monitor.start(timeout=T_10, callback=callback_detect_file_added_event,
                                       accum_results=whodata_events,
                                       error_message=f"Did not receive the expected {whodata_events} amount of \
                                                       whodata file added events").result()
+    # Check all files are detected in whodata mode
     for result in results:
         assert result['data']['mode'] == 'whodata', f"Expected whodata event, found {result['data']['mode']} event"
 
+    # Detect next scheduled scan
     detect_initial_scan_start(wazuh_log_monitor, timeout=T_10)
 
+    # Check no events are found after scan.
     with pytest.raises(TimeoutError):
         wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_file_added_event,
                                 accum_results=1, error_message="Found unexpected file added event \
@@ -211,9 +211,8 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
                                 create_monitored_folders_module, configure_local_internal_options_function,
                                 restart_syscheck_function, wait_syscheck_start):
     '''
-    description: Check  when setting values to whodata's 'queue_size' option. The value is configured correctly.Also,
-                 verify that the whodata thread is started correctly when value is inside valid range, and it fails
-                 to start with values outside range and error messages are shown accordingly.
+    description: Check that when files are exceeding the whodata "queue_size" value the queue overflows, and the
+                 excess files files are detected in scheduled mode, and after the next scheduled scan.
 
     test_phases:
         - setup:
@@ -221,9 +220,10 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
             - Create custom folder for monitoring
             - Clean logs files and restart wazuh to apply the configuration.
         - test:
-            - Assert configured queue_size value is default value
-            - Validate real-time whodata thread is started correctly
-            - On invalid values, validate error and that whodata does not start.
+            - Insert a given number of files
+            - Check that the "queue_full" event appears
+            - Check the amount of files that were detected prior to the queue being full
+            - Check the excess files are detected in scheduled mode after the following scan
         - teardown:
             - Delete custom monitored folder
             - Restore configuration
@@ -246,9 +246,9 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
         - set_wazuh_configuration:
             type: fixture
             brief: Set ossec.conf configuration.
-        - create_monitored_folders_module:
+        - create_monitored_folders:
             type: fixture
-            brief: Create a given list of folders when the module starts. Delete the folders at the end of the module.
+            brief: Create a given list of folders when the test starts. Delete the folders at the end of the test.
         - configure_local_internal_options_function:
             type: fixture
             brief: Set local_internal_options.conf file.
@@ -261,10 +261,8 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
 
     assertions:
         - Verify when queue is full an event informs audit events may be lost
-        - Verify when queue is full at start up audit healthcheck fails and does not start
-        - Verify when using invalid values an error message is shown and does not start
-        - Verify configured queue_size value
-        - Verify real-time whodata thread is started correctly
+        - Verify that files detected in whodata mode before it being full are equal or more than the configured value
+        - Verify the excess files inserted after queue full are detected in scheduled mode.
 
     input_description: The file 'configuration_audit_buffer_values' provides the configuration template.
                        The file 'cases_audit_buffer_values.yaml' provides the tes cases configuration
@@ -272,10 +270,7 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
 
     expected_output:
         - r".*(Internal audit queue is full). Some events may be lost. Next scheduled scan will recover lost data."
-        - r".*(Audit health check couldn't be completed correctly)."
-        - fr".*Invalid value for element (\'{element}\': .*)"
-        - r".*Internal audit queue size set to \'(.*)\'."
-        - r'.*File integrity monitoring (real-time Whodata) engine started.*'
+        - r".*Sending FIM event: (.+)$"
     '''
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     files_to_add = metadata['files_to_add']

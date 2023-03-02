@@ -63,7 +63,7 @@ import os
 import pytest
 from wazuh_testing import LOG_FILE_PATH, T_5
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.configuration import get_test_cases_data, load_configuration_template
+from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.fim import TEST_DIR_1, AUDIT_QUEUE_SIZE_DEFAULT_VALUE
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options

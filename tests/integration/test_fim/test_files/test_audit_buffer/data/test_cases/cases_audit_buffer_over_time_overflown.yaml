@@ -1,5 +1,5 @@
-- name: Audit Buffer overflows
-  description: Verify if value set is inside valid range it is configured and whodata starts correctly.
+- name: Audit Buffer overflows - New files in whodata
+  description: Verify if files are added over the queue's size, and time passes, new files are detected in whodata mode
   configuration_parameters:
     TEST_DIRECTORIES: /
     QUEUE_SIZE: 20

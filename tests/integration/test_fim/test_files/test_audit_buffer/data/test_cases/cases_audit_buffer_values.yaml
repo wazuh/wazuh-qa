@@ -1,4 +1,4 @@
-- name: Queue Size 5 (Small value in range) starts properly
+- name: Queue Size 10 (Small value in range) starts properly
   description: Verify if value set is inside valid range it is configured and whodata starts correctly.
   configuration_parameters:
     QUEUE_SIZE: 5
@@ -7,7 +7,7 @@
     audit_starts: true
     valid_range: true
 
-- name: Queue Size 1 (Lower limit) causes audit healthcheck fail
+- name: Queue Size 5 (Lower limit) causes audit healthcheck fail
   description: Verify if value set is inside valid range too small is causes whodata to fail to start starts.
   configuration_parameters:
     QUEUE_SIZE: 1

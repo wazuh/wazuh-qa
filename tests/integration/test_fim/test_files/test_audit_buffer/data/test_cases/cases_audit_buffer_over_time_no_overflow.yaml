@@ -1,5 +1,5 @@
-- name: Audit Buffer full - new files detected in whodata
-  description: Verify that after filling the queue, after space is in queue is freed new files are detected in whodata
+- name: Audit Buffer full - all files detected in whodata
+  description: Verify if files are added below the queue's size, after space is freed, all files appear in whodata mode
   configuration_parameters:
     TEST_DIRECTORIES: /
     QUEUE_SIZE: 50

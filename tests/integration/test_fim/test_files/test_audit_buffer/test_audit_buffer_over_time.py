@@ -114,10 +114,10 @@ def test_audit_buffer_over_time_no_overflow(configuration, metadata, test_folder
                                             create_monitored_folders, configure_local_internal_options_function,
                                             restart_syscheck_function, wait_syscheck_start):
     '''
-    description: Check that when inserting files into the queue so that queue is full, after waiting for files to be
-                 processed at a max_eps rate, after inserting files for a second time with to fill the queue again, all
-                 files are processed in whodata mode.
-
+    description: This test validates the behavior of "queue_size" in tandem with "max_eps". Check that when files are
+                 added equal to the whodata "queue_size" the queue does not overflow, after some files are processed
+                 adding new files that do not exceed the empty space in the queue, all files are detected in whodata
+                 mode.
     test_phases:
         - setup:
             - Set wazuh configuration and local_internal_options.
@@ -215,9 +215,10 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
                                 create_monitored_folders, configure_local_internal_options_function,
                                 restart_syscheck_function, wait_syscheck_start):
     '''
-    description: Check that when inserting files into the queue so that queue is full, after waiting for files to be
-                 processed at a max_eps rate, after inserting files for a second time with to fill the queue again, all
-                 files are processed in whodata mode.
+    description: This test validates the behavior of "queue_size" in tandem with "max_eps". Check that when files are
+                 added causing whodata queue to overflow, and after some files are processed, if new files are added 
+                 that do not exceed the empty space in the queue, only the files from the first insertion, that caused
+                 the overflow are detected in scheduled mode. All files from second insertion are detected in whodata.
 
     test_phases:
         - setup:
@@ -225,9 +226,12 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
             - Create custom folder for monitoring
             - Clean logs files and restart wazuh to apply the configuration.
         - test:
-            - Assert configured queue_size value is default value
-            - Validate real-time whodata thread is started correctly
-            - On invalid values, validate error and that whodata does not start.
+            - Insert enough files to fill queue
+            - Detect if whodata queue has overflowed
+            - Wait x seconds for space to be freed in queue
+            - Insert files a second time
+            - Validate only files from the first insert were detected in scheduled mode
+            - Validate a all files from the second insert are detected.
         - teardown:
             - Delete custom monitored folder
             - Restore configuration
