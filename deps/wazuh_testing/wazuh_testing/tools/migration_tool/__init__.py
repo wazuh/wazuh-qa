@@ -6,7 +6,7 @@ This program is free software; you can redistribute it and/or modify it under th
 import os
 
 
-# Useful variables
+# Module variables
 CVE5_SCHEMA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'CVE_JSON_5.0_bundled.json')
 DELTA_SCHEMA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'delta_schema.json')
 WORKING_DIR = '/var/wazuh'
@@ -15,6 +15,13 @@ MIGRATION_TOOL_LOG_PATH = f"{WORKING_DIR}/logs/content_migration.log"
 GENERATED_FILES_DIR = f"{WORKING_DIR}/incoming"
 SNAPSHOTS_DIR = f"{GENERATED_FILES_DIR}/snapshots"
 DOWNLOADS_DIR = f"{GENERATED_FILES_DIR}/downloads"
+MYSQL_CREDENTIALS = {
+    'user': None,
+    'password': None,
+    'host': None,
+    'port': None,
+    'database': None
+}
 
 # Callback messages
 CB_PROCESS_STARTED = r'.+\[info\]\[Orchestrator - start\]: Starting process'

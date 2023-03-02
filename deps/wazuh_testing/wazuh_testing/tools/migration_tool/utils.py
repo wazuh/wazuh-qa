@@ -13,8 +13,9 @@ from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from mysql.connector import errorcode
 from wazuh_testing.tools.migration_tool import MIGRATION_TOOL_PATH, CVE5_SCHEMA_PATH, DELTA_SCHEMA_PATH, \
-                                               ERROR_MESSAGES, SNAPSHOTS_DIR, DOWNLOADS_DIR, MIGRATION_TOOL_LOG_PATH
-from wazuh_testing.tools.file import delete_file, read_json_file, truncate_file
+                                               ERROR_MESSAGES, SNAPSHOTS_DIR, DOWNLOADS_DIR, MIGRATION_TOOL_LOG_PATH, \
+                                               MYSQL_CREDENTIALS
+from wazuh_testing.tools.file import remove_files_in_folder, read_json_file, truncate_file
 from wazuh_testing.tools.logging import Logging
 
 logger = Logging('migration_tool')
@@ -43,8 +44,8 @@ def run_content_migration_tool(args='', config_files=None):
         command = ' '.join([MIGRATION_TOOL_PATH, '-i', file_path, args])
         output, _ = run_tool(command)
         output = output.decode()
-        err_checker = [True for msg in ERROR_MESSAGES if msg in output]
-        if len(err_checker) > 0:
+        error_checker = [True for msg in ERROR_MESSAGES if msg in output]
+        if len(error_checker) > 0:
             errors += f"\n{output}"
 
     return output, errors
@@ -145,26 +146,26 @@ def query_publisher_db(query):
     result = []
 
     try:
-        cnx = mysql.connector.connect(
-            host="localhost",
-            user="test",
-            password="Test123$",
-            database="test_database"
+        connection = mysql.connector.connect(
+            host=MYSQL_CREDENTIALS.host,
+            user=MYSQL_CREDENTIALS.user,
+            password=MYSQL_CREDENTIALS.password,
+            database=MYSQL_CREDENTIALS.database
             )
-    except mysql.connector.Error as err:
-        cnx = None
-        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            logger.error("Something is wrong with your user name or password")
-        elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            logger.error("Database does not exist")
+    except mysql.connector.Error as error:
+        connection = None
+        if error.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            logger.error('Something is wrong with your user name or password')
+        elif error.errno == errorcode.ER_BAD_DB_ERROR:
+            logger.error('Database does not exist')
         else:
-            logger.error(err)
+            logger.error(error)
 
-    if cnx is not None:
-        cursor = cnx.cursor()
+    if connection is not None:
+        cursor = connection.cursor()
         cursor.execute(query)
         result = cursor.fetchall()
-        cnx.close()
+        connection.close()
 
     return result
 
