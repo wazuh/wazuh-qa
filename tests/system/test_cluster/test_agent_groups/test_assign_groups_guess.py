@@ -79,7 +79,7 @@ timeout = 20
 
 # Fixtures
 @pytest.fixture()
-def modify_internal_options(status_guess_agent_group):
+def modify_local_internal_options(status_guess_agent_group):
     local_internal_options = {test_infra_managers[0]: [{'name': 'remoted.guess_agent_group', 'value':
                                                         f"{status_guess_agent_group}"}]}
     backup_local_internal_options = host_manager.get_file_content(test_infra_managers[0], WAZUH_LOCAL_INTERNAL_OPTIONS)

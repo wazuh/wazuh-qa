@@ -322,7 +322,7 @@ class HostManager:
         """
         return self.get_host(host).ansible("stat", f"path={path}")
 
-    def configure_internal_options(self, local_internal_options: dict):
+    def configure_local_internal_options(self, local_internal_options: dict):
         """Add internal options in local_internal_options.conf
 
         Args:
