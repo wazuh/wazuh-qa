@@ -16,7 +16,7 @@ brief: File Integrity Monitoring (FIM) system watches selected files and trigger
 components:
     - fim
 
-suite: windows_system_folder_redirection
+suite: audit_buffer
 
 targets:
     - manager
@@ -62,7 +62,8 @@ import os
 
 import pytest
 from wazuh_testing import LOG_FILE_PATH, T_5
-from wazuh_testing.tools import PREFIX, configuration
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.fim import TEST_DIR_1, AUDIT_QUEUE_SIZE_DEFAULT_VALUE
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
@@ -82,36 +83,35 @@ TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
-
-#---------------------------------------TEST_AUDIT_BUFFER_DEFAULT-------------------------------------------
+# ---------------------------------------TEST_AUDIT_BUFFER_DEFAULT-------------------------------------------
 # Configuration and cases data
 t1_test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_audit_buffer_default.yaml')
 t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_audit_buffer_default.yaml')
 
 # Test configurations
-t1_configuration_parameters, t1_configuration_metadata, t1_test_case_ids = configuration.get_test_cases_data(t1_test_cases_path)
-print("PARAMETERS--------" + str(t1_configuration_parameters))
+t1_configuration_parameters, t1_configuration_metadata, t1_test_case_ids = get_test_cases_data(t1_test_cases_path)
 for count, value in enumerate(t1_configuration_parameters):
     t1_configuration_parameters[count]['TEST_DIRECTORIES'] = test_folders[0]
-t1_configurations = configuration.load_configuration_template(t1_configurations_path, t1_configuration_parameters,
-                                                           t1_configuration_metadata)
+t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
+                                                t1_configuration_metadata)
 
-#---------------------------------------TEST_AUDIT_BUFFER_VALUES-------------------------------------------
+# ---------------------------------------TEST_AUDIT_BUFFER_VALUES-------------------------------------------
 # Configuration and cases data
 t2_test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_audit_buffer_values.yaml')
 t2_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_audit_buffer_values.yaml')
 
 # Test configurations
-t2_configuration_parameters, t2_configuration_metadata, t2_test_case_ids = configuration.get_test_cases_data(t2_test_cases_path)
+t2_configuration_parameters, t2_configuration_metadata, t2_test_case_ids = get_test_cases_data(t2_test_cases_path)
 for count, value in enumerate(t2_configuration_parameters):
     t2_configuration_parameters[count]['TEST_DIRECTORIES'] = test_folders[0]
-t2_configurations = configuration.load_configuration_template(t2_configurations_path, t2_configuration_parameters,
-                                                           t2_configuration_metadata)
+t2_configurations = load_configuration_template(t2_configurations_path, t2_configuration_parameters,
+                                                t2_configuration_metadata)
 
 
 # Tests
 @pytest.mark.parametrize('test_folders', [test_folders], ids='', scope='module')
-@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_test_case_ids)
+@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata),
+                         ids=t1_test_case_ids)
 def test_audit_buffer_default(configuration, metadata, test_folders, set_wazuh_configuration,
                               create_monitored_folders_module, configure_local_internal_options_function,
                               restart_syscheck_function):
@@ -173,23 +173,24 @@ def test_audit_buffer_default(configuration, metadata, test_folders, set_wazuh_c
         - r'.*File integrity monitoring (real-time Whodata) engine started.*'
     '''
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    
+
     # Detect configured value
     configured_value = get_configured_whodata_queue_size(wazuh_log_monitor)
-    assert str(AUDIT_QUEUE_SIZE_DEFAULT_VALUE) in configured_value, 'Unexpected value found in "queue_size" in ossec.conf'
+    assert str(AUDIT_QUEUE_SIZE_DEFAULT_VALUE) in configured_value, 'Unexpected "queue_size" value found in ossec.log'
 
     # Detect real-time whodata thread started correctly
     detect_whodata_start(wazuh_log_monitor)
 
 
 @pytest.mark.parametrize('test_folders', [test_folders], ids='', scope='module')
-@pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_test_case_ids)
+@pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata),
+                         ids=t2_test_case_ids)
 def test_audit_buffer_values(configuration, metadata, test_folders, set_wazuh_configuration,
-                                   create_monitored_folders_module, configure_local_internal_options_function,
-                                   restart_syscheck_function):
+                             create_monitored_folders_module, configure_local_internal_options_function,
+                             restart_syscheck_function):
     '''
     description: Check  when setting values to whodata's 'queue_size' option. The value is configured correctly.Also,
-                 verify that the whodata thread is started correctly when value is inside valid range, and it fails 
+                 verify that the whodata thread is started correctly when value is inside valid range, and it fails
                  to start with values outside range and error messages are shown accordingly.
 
     test_phases:
@@ -267,7 +268,7 @@ def test_audit_buffer_values(configuration, metadata, test_folders, set_wazuh_co
             detect_invalid_conf_value(wazuh_log_monitor, element='queue_size')
         with pytest.raises(TimeoutError):
             # Detect real-time whodata thread does not start
-            detect_whodata_start(wazuh_log_monitor, timeout=T_5)    
+            detect_whodata_start(wazuh_log_monitor, timeout=T_5)
     else:
         # Detect real-time whodata thread started correctly
         detect_whodata_start(wazuh_log_monitor)

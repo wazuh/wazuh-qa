@@ -10,13 +10,12 @@
 - name: Queue Size 1 (Lower limit) causes audit healthcheck fail
   description: Verify if value set is inside valid range too small is causes whodata to fail to start starts.
   configuration_parameters:
-    QUEUE_SIZE: 1 
+    QUEUE_SIZE: 1
   metadata:
     queue_size: 1
     valid_range: true
     audit_starts: false
     fail_reason: queue_full
-
 
 - name: Queue Size 1048576 (Upper limit) starts properly
   description: Verify if value set is inside valid range it is configured and whodata starts correctly.
@@ -30,7 +29,7 @@
 - name: Queue Size Invalid value below minimum
   description: Verify if value set is below allowed minimum, whodata fails to start.
   configuration_parameters:
-    QUEUE_SIZE: -1 
+    QUEUE_SIZE: -1
   metadata:
     queue_size: -1
     valid_range: false
