@@ -8,14 +8,16 @@ copyright: Copyright (C) 2015-2023, Wazuh Inc.
 type: integration
 
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these files are
-       added, modified or deleted. Specifically, these tests will check that FIM is able to monitor Windows system
-       folders. FIM can redirect %WINDIR%/Sysnative monitoring toward System32 folder, so the tests also check that
-       when monitoring Sysnative the path is converted to system32 and events are generated there properly.
+       added, modified or deleted. It can monitor using Audit information (whodata mode). Whodata mode has an option
+       'queue_size' that will save whodata events up until it is full so it can decode them and generate alerts. Events
+       in excess of the queue will be dropped and handled in the next scheduled scan. This is done to avoid blocking
+       the audit socket. This tests aim to test the behavior of the queue, by inserting files above or below the set
+       value for queue_size, and verify if events were detected in whodata or scheduled mode appropiately.
 
 components:
     - fim
 
-suite: windows_system_folder_redirection
+suite: audit_buffer
 
 targets:
     - agent
@@ -27,6 +29,15 @@ os_platform:
     - windows
 
 os_version:
+    - Arch Linux
+    - Amazon Linux 2
+    - Amazon Linux 1
+    - CentOS 8
+    - CentOS 7
+    - Debian Buster
+    - Red Hat 8
+    - Ubuntu Focal
+    - Ubuntu Bionic
     - Windows 10
     - Windows Server 2019
     - Windows Server 2016
@@ -52,7 +63,7 @@ import os
 
 import pytest
 from wazuh_testing import LOG_FILE_PATH, REGULAR, T_10, T_20
-from wazuh_testing.tools import PREFIX, configuration 
+from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.file import create_file
@@ -84,14 +95,14 @@ t1_configuration_parameters, t1_configuration_metadata, t1_test_case_ids = get_t
 for count, value in enumerate(t1_configuration_parameters):
     t1_configuration_parameters[count]['TEST_DIRECTORIES'] = test_folders[0]
 t1_configurations = load_configuration_template(configurations_path, t1_configuration_parameters,
-                                                              t1_configuration_metadata)
+                                                t1_configuration_metadata)
 
 # Test configurations
 t2_configuration_parameters, t2_configuration_metadata, t2_test_case_ids = get_test_cases_data(t2_test_cases_path)
 for count, value in enumerate(t2_configuration_parameters):
     t2_configuration_parameters[count]['TEST_DIRECTORIES'] = test_folders[0]
 t2_configurations = load_configuration_template(configurations_path, t2_configuration_parameters,
-                                                              t2_configuration_metadata)
+                                                t2_configuration_metadata)
 
 
 # Tests
@@ -99,11 +110,11 @@ t2_configurations = load_configuration_template(configurations_path, t2_configur
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata),
                          ids=t1_test_case_ids)
 def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_wazuh_configuration,
-                                   create_monitored_folders, configure_local_internal_options_function,
-                                   restart_syscheck_function, wait_syscheck_start):
+                                  create_monitored_folders, configure_local_internal_options_function,
+                                  restart_syscheck_function, wait_syscheck_start):
     '''
     description: Check  when setting values to whodata's 'queue_size' option. The value is configured correctly.Also,
-                 verify that the whodata thread is started correctly when value is inside valid range, and it fails 
+                 verify that the whodata thread is started correctly when value is inside valid range, and it fails
                  to start with values outside range and error messages are shown accordingly.
 
     test_phases:
@@ -170,14 +181,14 @@ def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_waz
     '''
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     whodata_events = metadata['whodata_events']
-    
+
     # Insert an ammount of files
     for file in range(0, metadata['files_to_add']):
         create_file(REGULAR, test_folders[0], f'test_file_{file}', content='')
-    
+
     with pytest.raises(TimeoutError):
-        detect_audit_queue_full(wazuh_log_monitor, update_position = False)
-    
+        detect_audit_queue_full(wazuh_log_monitor, update_position=False)
+
     results = wazuh_log_monitor.start(timeout=T_10, callback=callback_detect_file_added_event,
                                       accum_results=whodata_events,
                                       error_message=f"Did not receive the expected {whodata_events} amount of \
@@ -197,11 +208,11 @@ def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_waz
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata),
                          ids=t2_test_case_ids)
 def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh_configuration,
-                                   create_monitored_folders_module, configure_local_internal_options_function,
-                                   restart_syscheck_function, wait_syscheck_start):
+                                create_monitored_folders_module, configure_local_internal_options_function,
+                                restart_syscheck_function, wait_syscheck_start):
     '''
     description: Check  when setting values to whodata's 'queue_size' option. The value is configured correctly.Also,
-                 verify that the whodata thread is started correctly when value is inside valid range, and it fails 
+                 verify that the whodata thread is started correctly when value is inside valid range, and it fails
                  to start with values outside range and error messages are shown accordingly.
 
     test_phases:
@@ -268,20 +279,19 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
     '''
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     files_to_add = metadata['files_to_add']
-    
-    
+
     # Insert an ammount of files
     for file in range(0, files_to_add):
         create_file(REGULAR, test_folders[0], f'test_file_{file}', content='')
 
-    # Detect If queue_full message has been generated    
+    # Detect If queue_full message has been generated
     detect_audit_queue_full(wazuh_log_monitor, update_position=False)
-    
+
     # Get all file added events
     results = get_messages(callback_detect_file_added_event, timeout=T_10,
                            error_message=f"Did not receive the expected file added events")
-    
-    # Check the ammount of added events in whodata mode is equal or more than the expected value    
+
+    # Check the ammount of added events in whodata mode is equal or more than the expected value
     found_whodata_events = 0
     for result in results:
         if result['data']['mode'] == 'whodata':
@@ -292,11 +302,10 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
     # Wait for scheduled scan so the rest of file events are generated
 
     detect_initial_scan_start(wazuh_log_monitor, timeout=T_10)
-    
+
     # Get all file added events
     results = get_messages(callback_detect_file_added_event, timeout=T_10,
                            error_message=f"Did not receive the expected file added events")
-    
 
     # Check the amount of added events in scheduled mode is equal to the amount of files created
     # minus the generated whodata events
@@ -305,6 +314,6 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
     for result in results:
         if result['data']['mode'] == 'scheduled':
             found_scheduled_events += 1
-    
+
     assert found_scheduled_events == scheduled_events, f"Wrong amount of scheduled events found. Found \
                                                              {found_scheduled_events}, Expected {scheduled_events}"
