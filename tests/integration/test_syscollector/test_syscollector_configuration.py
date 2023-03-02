@@ -223,6 +223,8 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
         # Expected: the function must throw a TimoutError
         with pytest.raises(TimeoutError):
             file_monitor = FileMonitor(LOG_FILE_PATH)
+            # Is not necessary to set the update_position to False because the Syscollector is configured to run its
+            # scan every 2 seconds in `case_test_all_scans_disabled.yaml`
             check_function(file_monitor=file_monitor)
             pytest.fail('It seems that a scan was triggered.' \
                         f"This check has a match in the log: {check_function.__name__}")
@@ -320,10 +322,19 @@ def test_syscollector_default_values(configuration, metadata, set_wazuh_configur
     description: Check that Syscollector sets the default values when the configuration block is empty.
 
     test_phases:
-        - Configure syscollector.
-        - Configure modulesd in debug mode.
-        - Truncate the log.
-        - Restart analysisd, wazuh-db and modulesd
+        - setup:
+            - Set Syscollector configuration.
+            - Configure modulesd in debug mode.
+            - Truncate all the log files and json alerts files.
+            - Restart the necessary daemons for each test case.
+        - test:
+            - Check if the default configuration was applied.
+            - Check if Syscollector starts correctly.
+        - teardown:
+            - Restore Wazuh configuration.
+            - Restore local internal options.
+            - Truncate all the log files and json alerts files.
+            - Stop the necessary daemons.
 
     wazuh_min_version: 4.4.0
 
@@ -369,10 +380,19 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
     description: Check that the scan is completed when all scans are enabled.
 
     test_phases:
-        - Configure syscollector.
-        - Configure modulesd in debug mode.
-        - Truncate the log.
-        - Restart analysisd, wazuh-db and modulesd
+        - setup:
+            - Set Syscollector configuration.
+            - Configure modulesd in debug mode.
+            - Truncate all the log files and json alerts files.
+            - Restart the necessary daemons for each test case.
+        - test:
+            - Check if the default configuration was applied.
+            - Check if Syscollector starts correctly.
+        - teardown:
+            - Restore Wazuh configuration.
+            - Restore local internal options.
+            - Truncate all the log files and json alerts files.
+            - Stop the necessary daemons.
 
     wazuh_min_version: 4.4.0
 
