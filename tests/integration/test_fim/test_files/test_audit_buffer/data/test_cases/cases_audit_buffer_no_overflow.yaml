@@ -3,5 +3,5 @@
   configuration_parameters:
     TEST_DIRECTORIES: /
   metadata:
-    files_to_add: 5
+    files_to_add: 10
     fim_mode: whodata
