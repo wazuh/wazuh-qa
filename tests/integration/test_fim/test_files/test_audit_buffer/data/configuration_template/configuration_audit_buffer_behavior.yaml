@@ -12,7 +12,7 @@
         - whodata:
             elements:
               - queue_size:
-                  value: 5
+                  value: 10
 
     - section: sca
       elements:

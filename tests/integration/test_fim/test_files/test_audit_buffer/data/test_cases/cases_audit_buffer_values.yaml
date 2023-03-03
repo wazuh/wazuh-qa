@@ -1,24 +1,23 @@
-- name: Queue Size 10 (Small value in range) starts properly
+- name: Queue Size 100 (value inside range) starts properly
   description: Verify if value set is inside valid range it is configured and whodata starts correctly.
   configuration_parameters:
-    QUEUE_SIZE: 5
+    QUEUE_SIZE: 100
   metadata:
-    queue_size: 5
+    queue_size: 100
     audit_starts: true
     valid_range: true
 
-- name: Queue Size 5 (Lower limit) causes audit healthcheck fail
-  description: Verify if value set is inside valid range too small is causes whodata to fail to start starts.
+- name: Queue Size 10 (Lower limit) starts properly
+  description: Verify if value set is the lower allowed limit, whodata estarts correctly
   configuration_parameters:
-    QUEUE_SIZE: 1
+    QUEUE_SIZE: 10
   metadata:
-    queue_size: 1
+    queue_size: 10
     valid_range: true
-    audit_starts: false
-    fail_reason: queue_full
+    audit_starts: true
 
 - name: Queue Size 1048576 (Upper limit) starts properly
-  description: Verify if value set is inside valid range it is configured and whodata starts correctly.
+  description: Verify if value set to the upper limit whodata starts correctly.
   configuration_parameters:
     QUEUE_SIZE: 1048576
   metadata:
@@ -29,9 +28,9 @@
 - name: Queue Size Invalid value below minimum
   description: Verify if value set is below allowed minimum, whodata fails to start.
   configuration_parameters:
-    QUEUE_SIZE: -1
+    QUEUE_SIZE: 9
   metadata:
-    queue_size: -1
+    queue_size: 9
     valid_range: false
     audit_starts: false
     fail_reason: invalid_value
