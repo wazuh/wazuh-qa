@@ -147,10 +147,10 @@ def query_publisher_db(query):
 
     try:
         connection = mysql.connector.connect(
-            host=MYSQL_CREDENTIALS.host,
-            user=MYSQL_CREDENTIALS.user,
-            password=MYSQL_CREDENTIALS.password,
-            database=MYSQL_CREDENTIALS.database
+            host=MYSQL_CREDENTIALS['host'],
+            user=MYSQL_CREDENTIALS['user'],
+            password=MYSQL_CREDENTIALS['password'],
+            database=MYSQL_CREDENTIALS['database']
             )
     except mysql.connector.Error as error:
         connection = None
