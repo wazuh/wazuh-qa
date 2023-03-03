@@ -21,16 +21,18 @@ local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0'
 
 # -------------------------------------------- TEST_BUCKET_DEFAULTS ----------------------------------------------------
 # Configuration and cases data
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_defaults.yaml')
-cases_path = os.path.join(TEST_CASES_PATH, 'cases_defaults.yaml')
+t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'bucket_configuration_defaults.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_bucket_defaults.yaml')
 
 # Enabled test configurations
-configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
-configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
+t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
+t1_configurations = load_configuration_template(
+    t1_configurations_path, t1_configuration_parameters, t1_configuration_metadata
+)
 
 
 @pytest.mark.tier(level=0)
-@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
+@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 def test_bucket_defaults(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_s3_cloudtrail_db,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
@@ -115,16 +117,18 @@ def test_bucket_defaults(
 
 # -------------------------------------------- TEST_SERVICE_DEFAULTS ---------------------------------------------------
 # Configuration and cases data
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'service_configuration_defaults.yaml')
-cases_path = os.path.join(TEST_CASES_PATH, 'cases_service_defaults.yaml')
+t2_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'service_configuration_defaults.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_service_defaults.yaml')
 
 # Enabled test configurations
-configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
-configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
+t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
+configurations = load_configuration_template(
+    t2_configurations_path, t2_configuration_parameters, t2_configuration_metadata
+)
 
 
 @pytest.mark.tier(level=0)
-@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, t2_configuration_metadata), ids=t2_case_ids)
 def test_service_defaults(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_aws_services_db,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
@@ -172,7 +176,7 @@ def test_service_defaults(
             brief: Restart the wazuh service.
         - wazuh_log_monitor:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Return a `ossec.log` monitor.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the log that no errors occurs.
@@ -180,6 +184,8 @@ def test_service_defaults(
         - The `configuration_defaults` file provides the module configuration for this test.
         - The `cases_defaults` file provides the test cases.
     """
+    log_groups = metadata.get('log_group_name')
+
     parameters = [
         'wodles/aws/aws-s3',
         '--service', metadata['service_type'],
@@ -187,6 +193,11 @@ def test_service_defaults(
         '--regions', 'us-east-1',
         '--debug', '2'
     ]
+
+    if log_groups is not None:
+        parameters.insert(7, log_groups)
+        parameters.insert(7, '--aws_log_groups')
+
     # Check AWS module started
     wazuh_log_monitor.start(
         timeout=global_parameters.default_timeout,

@@ -10,6 +10,7 @@ from wazuh_testing.modules.aws.db_utils import (
     s3_db_exists,
     services_db_exists,
     table_exists_or_has_values,
+    get_multiple_service_db_row
 )
 from wazuh_testing.tools.configuration import (
     get_test_cases_data,
@@ -29,8 +30,8 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, TEST_CASES_DIR, MODULE)
 local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0'}
 
 # ---------------------------------------------------- TEST_PATH -------------------------------------------------------
-t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_regions.yaml')
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_regions.yaml')
+t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'bucket_configuration_regions.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_bucket_regions.yaml')
 
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 t1_configurations = load_configuration_template(
@@ -239,6 +240,7 @@ def test_service_regions(
         - The `cases_regions` file provides the test cases.
     """
     service_type = metadata['service_type']
+    log_group_name = metadata.get('log_group_name')
     only_logs_after = metadata['only_logs_after']
     regions: str = metadata['regions']
     expected_results = metadata['expected_results']
@@ -252,6 +254,10 @@ def test_service_regions(
         '--regions', regions,
         '--debug', '2'
     ]
+
+    if log_group_name is not None:
+        parameters.insert(9, log_group_name)
+        parameters.insert(9, '--aws_log_groups')
 
     # Check AWS module started
     wazuh_log_monitor.start(
@@ -270,15 +276,19 @@ def test_service_regions(
     if expected_results:
         wazuh_log_monitor.start(
             timeout=T_20,
-            callback=event_monitor.callback_detect_inspector_event_processed(expected_results),
+            callback=event_monitor.callback_detect_service_event_processed(expected_results, service_type),
             error_message='The AWS module did not process the expected number of events',
             accum_results=len(regions_list)
         ).result()
     else:
+        pattern = (
+            r'DEBUG: \+\+\+ \d+ events collected and processed in' if service_type == 'inspector'
+            else r'DEBUG: \+\+\+ Sent \d+ events to Analysisd'
+        )
         with pytest.raises(TimeoutError):
             wazuh_log_monitor.start(
                 timeout=global_parameters.default_timeout,
-                callback=event_monitor.make_aws_callback(r'DEBUG: \+\+\+ \d+ events collected and processed in'),
+                callback=event_monitor.make_aws_callback(pattern),
             ).result()
 
         wazuh_log_monitor.start(
@@ -291,8 +301,9 @@ def test_service_regions(
 
     assert services_db_exists()
 
+    table_name = 'aws_services' if service_type == 'inspector' else 'cloudwatch_logs'
     if expected_results:
-        for row in get_multiple_service_db_row(table_name='aws_services'):
-            assert row.region in regions_list
+        for row in get_multiple_service_db_row(table_name=table_name):
+            assert (getattr(row, 'region', None) or getattr(row, 'aws_region')) in regions_list
     else:
-        assert not table_exists(table_name='aws_services', db_path=AWS_SERVICES_DB_PATH)
+        assert not table_exists_or_has_values(table_name=table_name, db_path=AWS_SERVICES_DB_PATH)
