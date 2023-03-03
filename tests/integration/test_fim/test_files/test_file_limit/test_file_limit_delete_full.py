@@ -64,7 +64,7 @@ import os
 from time import sleep
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import T_10, T_20
 from wazuh_testing.fim import LOG_FILE_PATH, delete_file, generate_params, create_file, REGULAR
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -176,7 +176,7 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
         - who_data
     '''
     #Check that database is full and assert database usage percentage is 100%
-    database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    database_state = wazuh_log_monitor.start(timeout=T_20,
                                              callback=generate_monitoring_callback(CB_FILE_LIMIT_CAPACITY),
                                              error_message=ERR_MSG_DATABASE_FULL_ALERT_EVENT).result()
 
@@ -190,7 +190,7 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
 
     # Check no Creation or Deleted event has been  generated
     with pytest.raises(TimeoutError):
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+        event = wazuh_log_monitor.start(timeout=T_10,
                                         callback=callback_detect_event).result()
         assert event is None, ERR_MSG_NO_EVENTS_EXPECTED
 
@@ -198,7 +198,7 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
     delete_file(folder, f'{file_name}{0}')
 
     #Get that the file deleted generetes an event and assert the event data path.
-    event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    event = wazuh_log_monitor.start(timeout=T_20,
                                     callback=callback_detect_event,
                                     error_message=ERR_MSG_DELETED_EVENT_NOT_RECIEVED).result()
 
