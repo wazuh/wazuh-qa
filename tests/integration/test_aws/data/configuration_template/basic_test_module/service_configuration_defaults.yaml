@@ -11,5 +11,7 @@
             elements:
               - aws_profile:
                   value: qa
+              - aws_log_groups:
+                  value: LOG_GROUP_NAME
               - regions:
                   value: us-east-1

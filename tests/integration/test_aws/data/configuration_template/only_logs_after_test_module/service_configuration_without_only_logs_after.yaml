@@ -13,7 +13,5 @@
                   value: qa
               - aws_log_groups:
                   value: LOG_GROUP_NAME
-              - only_logs_after:
-                  value: ONLY_LOGS_AFTER
               - regions:
                   value: us-east-1
