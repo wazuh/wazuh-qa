@@ -15,6 +15,7 @@ MIGRATION_TOOL_LOG_PATH = f"{WORKING_DIR}/logs/content_migration.log"
 GENERATED_FILES_DIR = f"{WORKING_DIR}/incoming"
 SNAPSHOTS_DIR = f"{GENERATED_FILES_DIR}/snapshots"
 DOWNLOADS_DIR = f"{GENERATED_FILES_DIR}/downloads"
+UNCOMPRESSED_DIR = f"{GENERATED_FILES_DIR}/uncompressed"
 MYSQL_CREDENTIALS = {
     'user': None,
     'password': None,
