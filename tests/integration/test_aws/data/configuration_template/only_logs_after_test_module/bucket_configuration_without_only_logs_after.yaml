@@ -13,3 +13,5 @@
                   value: qa
               - name:
                   value: BUCKET_NAME
+              - path:
+                  value: PATH

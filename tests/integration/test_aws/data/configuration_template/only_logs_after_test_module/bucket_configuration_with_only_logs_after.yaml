@@ -15,3 +15,5 @@
                   value: BUCKET_NAME
               - only_logs_after:
                   value: ONLY_LOGS_AFTER
+              - path:
+                  value: PATH

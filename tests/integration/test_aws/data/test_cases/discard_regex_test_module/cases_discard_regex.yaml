@@ -5,6 +5,7 @@
     BUCKET_NAME: wazuh-cloudtrail-integration-tests
     DISCARD_FIELD: eventSource
     DISCARD_REGEX: .*ec2.amazonaws.com.*
+    PATH: ''
   metadata:
     bucket_type: cloudtrail
     bucket_name: wazuh-cloudtrail-integration-tests
@@ -205,3 +206,21 @@
     discard_regex: '200'
     found_logs: 3
     skipped_logs: 1
+
+- name: cisco_umbrella_discard_regex
+  description: CloudTrail discard regex configurations
+  configuration_parameters:
+    BUCKET_TYPE: cisco_umbrella
+    BUCKET_NAME: wazuh-umbrella-integration-tests
+    DISCARD_FIELD: action
+    DISCARD_REGEX: Blocked
+    PATH: dnslogs
+  metadata:
+    bucket_type: cisco_umbrella
+    bucket_name: wazuh-umbrella-integration-tests
+    only_logs_after: 2022-NOV-20
+    discard_field: action
+    discard_regex: Blocked
+    found_logs: 3
+    skipped_logs: 1
+    path: dnslogs
