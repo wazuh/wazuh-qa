@@ -127,6 +127,7 @@ def create_multiple_files(get_configuration):
 
 
 # Tests
+@pytest.mark.skip("This test is affected by QA Issue #3997, when it is fixed it should be enabled again.")
 def test_max_eps_sync_valid_within_range(configure_local_internal_options_module, get_configuration,
                                          create_multiple_files, configure_environment, restart_wazuh):
     '''
