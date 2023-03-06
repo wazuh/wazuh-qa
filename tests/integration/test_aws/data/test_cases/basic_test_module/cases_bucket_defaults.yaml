@@ -114,3 +114,12 @@
   metadata:
     bucket_type: server_access
     bucket_name: wazuh-server-access-integration-tests
+
+- name: cisco_umbrella_defaults
+  description: Umbrella default configurations
+  configuration_parameters:
+    BUCKET_TYPE: cisco_umbrella
+    BUCKET_NAME: wazuh-umbrella-integration-tests
+  metadata:
+    bucket_type: cisco_umbrella
+    bucket_name: wazuh-umbrella-integration-tests

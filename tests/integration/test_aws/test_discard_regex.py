@@ -99,6 +99,7 @@ def test_discard_regex(
     discard_regex = metadata['discard_regex']
     found_logs = metadata['found_logs']
     skipped_logs = metadata['skipped_logs']
+    path = metadata.get('path')
 
     pattern = fr'.*The "{discard_regex}" regex found a match in the "{discard_field}" field. The event will be skipped.'
 
@@ -112,6 +113,10 @@ def test_discard_regex(
         '--type', bucket_type,
         '--debug', '2'
     ]
+
+    if path is not None:
+        parameters.insert(5, path)
+        parameters.insert(5, '--trail_prefix')
 
     # Check AWS module started
     wazuh_log_monitor.start(

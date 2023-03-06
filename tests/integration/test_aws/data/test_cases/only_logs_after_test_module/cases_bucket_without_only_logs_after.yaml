@@ -128,3 +128,15 @@
     bucket_name: wazuh-server-access-integration-tests
     expected_results: 1
     table_name: s3_server_access
+
+- name: cisco_umbrella_without_only_logs_after
+  description: Umbrella only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: cisco_umbrella
+    BUCKET_NAME: wazuh-umbrella-integration-tests
+    PATH: dnslogs
+  metadata:
+    bucket_type: cisco_umbrella
+    bucket_name: wazuh-umbrella-integration-tests
+    expected_results: 1
+    path: dnslogs

@@ -154,3 +154,17 @@
     only_logs_after: 2022-NOV-20
     expected_results: 3
     table_name: s3_server_access
+
+- name: cisco_umbrella_with_only_logs_after
+  description: Umbrella only logs after configurations
+  configuration_parameters:
+    BUCKET_TYPE: cisco_umbrella
+    BUCKET_NAME: wazuh-umbrella-integration-tests
+    ONLY_LOGS_AFTER: 2022-NOV-20
+    PATH: dnslogs
+  metadata:
+    bucket_type: cisco_umbrella
+    bucket_name: wazuh-umbrella-integration-tests
+    only_logs_after: 2022-NOV-20
+    expected_results: 3
+    path: dnslogs
