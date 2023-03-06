@@ -15,3 +15,5 @@
                   value: BUCKET_NAME
               - remove_from_bucket:
                   value: 'yes'
+              - path:
+                  value: PATH

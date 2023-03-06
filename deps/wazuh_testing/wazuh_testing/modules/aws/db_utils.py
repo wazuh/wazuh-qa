@@ -5,16 +5,17 @@ from typing import Iterator, Type
 
 from .constants import (
     ALB_TYPE,
+    AWS_SERVICES_DB_PATH,
+    CISCO_UMBRELLA_TYPE,
     CLB_TYPE,
     CLOUD_TRAIL_TYPE,
     CUSTOM_TYPE,
     GUARD_DUTY_TYPE,
     NLB_TYPE,
     S3_CLOUDTRAIL_DB_PATH,
+    SERVER_ACCESS_TABLE_NAME,
     VPC_FLOW_TYPE,
     WAF_TYPE,
-    SERVER_ACCESS_TABLE_NAME,
-    AWS_SERVICES_DB_PATH
 )
 
 SELECT_QUERY_TEMPLATE = 'SELECT * FROM {table_name}'
@@ -55,6 +56,10 @@ ServiceCloudWatchRow = namedtuple(
     'ServiceCloudWatchRow', 'aws_region aws_log_group aws_log_stream next_token start_time end_time'
 )
 
+S3UmbrellaRow = namedtuple(
+    'S3UmbrellaRow', 'bucket_path aws_account_id log_key processed_date created_date'
+)
+
 s3_rows_map = {
     CLOUD_TRAIL_TYPE: S3CloudTrailRow,
     VPC_FLOW_TYPE: S3VPCFlowRow,
@@ -64,13 +69,13 @@ s3_rows_map = {
     CUSTOM_TYPE: S3CustomRow,
     GUARD_DUTY_TYPE: S3GuardDutyRow,
     WAF_TYPE: S3WAFRow,
-    SERVER_ACCESS_TABLE_NAME: S3ServerAccessRow
+    SERVER_ACCESS_TABLE_NAME: S3ServerAccessRow,
+    CISCO_UMBRELLA_TYPE: S3UmbrellaRow
 }
 
 service_rows_map = {
     'cloudwatch_logs': ServiceCloudWatchRow,
     'aws_services': ServiceInspectorRow
-
 }
 
 
@@ -141,7 +146,6 @@ def get_s3_db_row(table_name: str) -> S3CloudTrailRow:
     cursor = connection.cursor()
     result = cursor.execute(SELECT_QUERY_TEMPLATE.format(table_name=table_name)).fetchone()
     row_type = _get_s3_row_type(table_name)
-
     return row_type(*result)
 
 

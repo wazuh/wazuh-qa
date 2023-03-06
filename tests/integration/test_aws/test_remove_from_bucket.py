@@ -95,6 +95,7 @@ def test_remove_from_bucket(
         - The `cases_defaults` file provides the test cases.
     """
     bucket_name = metadata['bucket_name']
+    path = metadata.get('path')
     parameters = [
         'wodles/aws/aws-s3',
         '--bucket', bucket_name,
@@ -103,6 +104,10 @@ def test_remove_from_bucket(
         '--type', metadata['bucket_type'],
         '--debug', '2'
     ]
+
+    if path is not None:
+        parameters.insert(6, path)
+        parameters.insert(6, '--trail_prefix')
 
     # Check AWS module started
     wazuh_log_monitor.start(

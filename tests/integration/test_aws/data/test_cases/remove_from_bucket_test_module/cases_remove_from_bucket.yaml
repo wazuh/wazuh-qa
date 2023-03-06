@@ -3,6 +3,7 @@
   configuration_parameters:
     BUCKET_TYPE: cloudtrail
     BUCKET_NAME: wazuh-cloudtrail-integration-tests
+    PATH: ''
   metadata:
     bucket_type: cloudtrail
     bucket_name: wazuh-cloudtrail-integration-tests
@@ -114,3 +115,14 @@
   metadata:
     bucket_type: server_access
     bucket_name: wazuh-server-access-integration-tests
+
+- name: cisco_umbrella_remove_from_bucket
+  description: CloudTrail remove from bucket configurations
+  configuration_parameters:
+    BUCKET_TYPE: cisco_umbrella
+    BUCKET_NAME: wazuh-umbrella-integration-tests
+    PATH: dnslogs
+  metadata:
+    bucket_type: cisco_umbrella
+    bucket_name: wazuh-umbrella-integration-tests
+    path: dnslogs
