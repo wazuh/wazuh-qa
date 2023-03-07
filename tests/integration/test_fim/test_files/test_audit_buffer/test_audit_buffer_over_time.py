@@ -39,9 +39,6 @@ os_version:
     - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
-    - Windows 10
-    - Windows Server 2019
-    - Windows Server 2016
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html
@@ -75,7 +72,7 @@ from wazuh_testing.modules.fim.event_monitor import (callback_detect_file_added_
 
 
 # Marks
-pytestmark = [pytest.mark.tier(level=1)]
+pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
 # Variables
 test_folders = [os.path.join(PREFIX, TEST_DIR_1)]
