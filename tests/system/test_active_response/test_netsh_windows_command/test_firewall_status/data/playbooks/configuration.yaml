@@ -1,0 +1,90 @@
+- name: Configure manager environment
+  hosts: manager
+  become: true
+  tasks:
+
+    - name: Update packages list (Ubuntu)
+      ansible.builtin.apt:
+        update_cache: true
+      when: ansible_facts['distribution'] == "Ubuntu"
+
+    # Install hydra to attempt the RDP brute force attack
+    - name: Install hydra (Ubuntu)
+      package:
+        name: hydra=9.2-1ubuntu1
+        state: present
+      when: ansible_facts['distribution'] == "Ubuntu"
+
+    - name: Update packages list (CentOS)
+      ansible.builtin.yum:
+        update_cache: true
+      when: ansible_facts['distribution'] == "CentOS"
+
+    - name: Install hydra (CentOS)
+      become: true
+      package:
+        name: hydra
+        state: present
+      when: ansible_facts['distribution'] == "CentOS"
+
+    - name: Configure the active-response module
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
+          <active-response>
+          <disabled>no</disabled>
+          <command>netsh</command>
+          <location>all</location>
+          <rules_id>60122</rules_id>
+          <timeout>5</timeout>
+          </active-response>
+        os: linux
+
+    - name: Restart wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux
+
+- name: Configure Windows agent environment
+  hosts: windows-agent
+  tasks:
+
+    - name: Create temp folder
+      win_file:
+        path: C:\temp
+        state: directory
+
+    - name: Make a backup of ossec.conf
+      ansible.windows.win_copy:
+        src: C:\Program Files (x86)\ossec-agent\ossec.conf
+        dest: C:\temp
+        remote_src: true
+
+    - name: Add active-response configuration
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<ossec_config>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<active-response>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<disabled>no</disabled>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</active-response>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
+        os: windows
+
+    - name: Truncate active-responses.log
+      win_file:
+        path: C:\Program Files (x86)\ossec-agent\active-response\active-responses.log
+        state: absent
+
+    - name: Restart wazuh-agent
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: windows

@@ -58,17 +58,18 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters, DATA
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params
+from wazuh_testing import global_parameters, DATA, LOG_FILE_PATH
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.fim_module.fim_variables import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
-                                                    YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
-                                                    SYNCHRONIZATION_ENABLED, CB_INTEGRITY_CONTROL_MESSAGE,
-                                                    SYNCHRONIZATION_REGISTRY_ENABLED)
-# Marks
+from wazuh_testing.modules.fim import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, YAML_CONF_SYNC_WIN32,
+                                       TEST_DIRECTORIES, TEST_REGISTRIES, SYNCHRONIZATION_ENABLED,
+                                       SYNCHRONIZATION_REGISTRY_ENABLED)
+from wazuh_testing.modules.fim.event_monitor import CB_INTEGRITY_CONTROL_MESSAGE
+from wazuh_testing.modules.fim.utils import generate_params
 
+
+# Marks
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # variables
@@ -104,7 +105,7 @@ def get_configuration(request):
 
 # Tests
 
-def test_sync_disabled(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start_sync_disabled):
+def test_sync_disabled(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start_sync):
     '''
     description: Check if the 'wazuh-syscheckd' daemon uses the value of the 'enabled' tag to start/stop
                  the file/registry synchronization. For this purpose, the test will monitor a directory/key.
@@ -125,7 +126,7 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
         - restart_syscheckd:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start_sync_disabled:
+        - wait_for_fim_start_sync:
             type: fixture
             brief: Wait for end of initial FIM scan.
     assertions:

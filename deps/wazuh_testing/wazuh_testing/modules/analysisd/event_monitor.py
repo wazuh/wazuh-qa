@@ -1,9 +1,21 @@
 import re
 
-from wazuh_testing import T_10, T_20, T_60
-from wazuh_testing.modules.analysisd import ANALYSISD_PREFIX, MAILD_PREFIX
+from wazuh_testing import T_10, T_60
+from wazuh_testing.modules.analysisd import ANALYSISD_PREFIX, MAILD_PREFIX, TESTRULE_PREFIX
 from wazuh_testing import LOG_FILE_PATH, ANALYSISD_STATE
-from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback_groups
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+
+
+# Callback events
+CB_SID_NOT_FOUND = r".*Signature ID '(\d*)' was not found and will be ignored in the 'if_sid'.* of rule '(\d*)'"
+CB_EMPTY_IF_SID_RULE_IGNORED = fr"{TESTRULE_PREFIX}Empty 'if_sid' value. Rule '(\d*)' will be ignored.*"
+CB_INVALID_IF_SID_RULE_IGNORED = fr"{TESTRULE_PREFIX}Invalid 'if_sid' value: '(.*)'. Rule '(\d*)' will be ignored.*"
+CB_INVALID_EMPTY_IF_SID_RULE_IGNORED = fr"{TESTRULE_PREFIX}Invalid 'if_sid' value: ''. Rule '(\d*)' will be ignored.*"
+
+# Error Messages
+ERR_MSG_SID_NOT_FOUND = "Did not receive the expected 'Signature ID  not found...' event"
+ERR_MSG_EMPTY_IF_SID = "Did not receive the expected 'Empty 'if_sid' value. Rule '(\\d*)' will be ignored' event"
+ERR_MSG_INVALID_IF_SID = "Did not receive the expected 'Invalid 'if_sid' value. Rule '(\\d*)' will be ignored' event"
 
 
 def make_analysisd_callback(pattern, prefix=ANALYSISD_PREFIX):
@@ -50,7 +62,14 @@ def check_analysisd_event(file_monitor=None, callback='', error_message=None, up
 
 def check_eps_disabled():
     """Check if the eps module is disabled"""
-    check_analysisd_event(callback=fr'.*INFO: EPS limit disabled.*', timeout=T_10)
+    check_analysisd_event(callback=r".*INFO: EPS limit disabled.*", timeout=T_10)
+
+
+def check_eps_missing_maximum():
+    """Check if the eps block has the maximum tag"""
+    check_analysisd_event(callback=r".*WARNING: EPS limit disabled. "
+                                   "The maximum value is missing in the configuration block.*",
+                          timeout=T_10)
 
 
 def check_eps_enabled(maximum, timeframe):
@@ -103,3 +122,36 @@ def check_stop_dropping_events_and_credits_available_log(log_level='WARNING', ti
     """
     check_analysisd_event(callback=fr'.*{log_level}: Queues back to normal and EPS credits, no dropping events.*',
                           timeout=timeout)
+
+
+def check_if_sid_not_found(file_monitor):
+    """Check if an invalid if_sid rule value is ignored when detected
+
+    Args:
+        file_monitor (FileMonitor): Log monitor.
+    """
+    file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_SID_NOT_FOUND),
+                       error_message=ERR_MSG_SID_NOT_FOUND)
+
+
+def check_invalid_if_sid(file_monitor, is_empty):
+    """Check if an invalid if_sid rule value is ignored when detected
+
+    Args:
+        file_monitor (FileMonitor): Log monitor.
+        is_empty (Boolean): True if is_sid tag has nothing inside/ is empty.
+    """
+    callback = CB_INVALID_EMPTY_IF_SID_RULE_IGNORED if is_empty else CB_INVALID_IF_SID_RULE_IGNORED
+
+    file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(callback),
+                       error_message=ERR_MSG_INVALID_IF_SID)
+
+
+def check_empty_if_sid(file_monitor):
+    """Check if an invalid if_sid rule value is ignored when detected
+
+    Args:
+        file_monitor (FileMonitor): Log monitor.
+    """
+    file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_EMPTY_IF_SID_RULE_IGNORED),
+                       error_message=ERR_MSG_EMPTY_IF_SID)

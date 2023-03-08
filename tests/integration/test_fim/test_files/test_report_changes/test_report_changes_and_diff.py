@@ -65,7 +65,7 @@ tags:
     - fim_report_changes
 '''
 import os
-
+import sys
 
 import pytest
 from wazuh_testing.tools import PREFIX, configuration
@@ -75,10 +75,9 @@ from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as loca
 from wazuh_testing.modules.fim.utils import regular_file_cud
 from test_fim.common import make_diff_file_path
 
+
 # Marks
-
-pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
-
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -109,11 +108,11 @@ configurations = configuration.load_configuration_template(configurations_path, 
 
 
 # tests
-@pytest.mark.parametrize('test_folders', [test_directories])
+@pytest.mark.parametrize('test_folders', [test_directories], scope="module", ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuration,
                                  configure_local_internal_options_function, restart_syscheck_function,
-                                 create_monitored_folders, wait_fim_start_function):
+                                 create_monitored_folders_module, wait_syscheck_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon reports the file changes (or truncates if required)
                  in the generated events using the 'nodiff' tag and vice versa. For this purpose, the test
@@ -143,10 +142,10 @@ def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuratio
         - restart_syscheck_function:
             type: fixture
             brief: restart syscheckd daemon, and truncate the ossec.log.
-        - create_monitored_folders
+        - create_monitored_folders_module
             type: fixture
             brief: Create folders to be monitored, delete after test.
-        - wait_for_fim_start_function:
+        - wait_syscheck_start:
             type: fixture
             brief: check that the starting fim scan is detected.
 
@@ -172,6 +171,7 @@ def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuratio
     file_list = [f"regular_file"]
     is_truncated = metadata['folder'] == 'testdir_nodiff'
     folder = os.path.join(PREFIX, metadata['folder'])
+    escaped = True if sys.platform == 'win32' else False
 
     def report_changes_validator(event):
         """Validate content_changes attribute exists in the event"""
@@ -188,7 +188,8 @@ def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuratio
         else:
             assert '<Diff truncated because nodiff option>' not in event['data'].get('content_changes'), \
                 f'content_changes is truncated'
+
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, time_travel=False,
-                     min_timeout=global_parameters.default_timeout*4, triggers_event=True,
-                     validators_after_update=[report_changes_validator, no_diff_validator])
+    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, min_timeout=global_parameters.default_timeout*4,
+                     triggers_event=True, validators_after_update=[report_changes_validator, no_diff_validator],
+                     escaped=escaped)

@@ -26,8 +26,11 @@ from stat import ST_ATIME, ST_MTIME
 from wazuh_testing import logger, REGULAR, SYMLINK, HARDLINK
 
 if sys.platform == 'win32':
+    import win32con
+    import win32api
     import win32security as win32sec
     import ntsecuritycon as ntc
+    import pywintypes
 
 
 def read_json(file_path):
@@ -252,7 +255,7 @@ def on_write_error(function, path, exc_info):
     # Check if the error is an access error for Write permissions.
     if not os.access(path, os.W_OK):
         # Add write permissions so file can be edited and execute function.
-        os.chmod(path, stat.S_IWUSR)
+        os.chmod(path, 0o0777)
         function(path)
     # If error is not Write access error, raise the error
     else:
@@ -300,6 +303,25 @@ def copy_files_in_folder(folder, target_folder='/tmp', files_to_move=None):
                     copy(os.path.join(folder, file), target_folder)
                     remove_file(os.path.join(folder, file))
     return file_list
+
+
+def modify_all_files_in_folder(folder_path, data):
+    """Write data into all files in a folder
+    Args:
+        file_path (str): File or directory path to modify.
+        data (str): what to write into the file.
+    """
+    for file in os.listdir(folder_path):
+        write_file(os.path.join(folder_path, file), data)
+
+
+def delete_all_files_in_folder(folder_path):
+    """ Remove al files inside a folder
+    Args:
+        file_path (str): File or directory path to remove.
+    """
+    for file in os.listdir(folder_path):
+        os.remove(os.path.join(folder_path, file))
 
 
 def validate_json_file(file_path):

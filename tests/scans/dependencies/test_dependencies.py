@@ -1,6 +1,7 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+import os
 import tempfile
 from json import loads
 from urllib.request import urlretrieve
@@ -22,7 +23,8 @@ def test_python_dependencies_vuln_scan(pytestconfig):
     report_path = pytestconfig.getoption('--report-path')
     requirements_url = f"https://raw.githubusercontent.com/wazuh/{repo}/{branch}/{requirements_path}"
     urlretrieve(requirements_url, REQUIREMENTS_TEMP_FILE.name)
-    result = report_for_pytest(REQUIREMENTS_TEMP_FILE.name)
+    result = report_for_pytest(REQUIREMENTS_TEMP_FILE.name,
+                               os.path.join(os.path.dirname(os.path.abspath(__file__)), "known_flaws_deps.json"))
     REQUIREMENTS_TEMP_FILE.close()
     export_report(result, report_path)
     assert loads(result)['vulnerabilities_found'] == 0, f'Vulnerables packages were found, full report at: ' \

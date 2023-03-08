@@ -155,7 +155,7 @@ def test_sync_interval(get_configuration, configure_environment, restart_syschec
 
         # This should fail as we are only advancing half the time needed for synchronization to occur
     except TimeoutError:
-        pytest.xfail("Expected fail due to issue: https://github.com/wazuh/wazuh-qa/issues/947 ")
+        pytest.skip("Expected fail due to issue: https://github.com/wazuh/wazuh-qa/issues/947 ")
 
     check_time_travel(True, interval=interval / 2)
     try:
