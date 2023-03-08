@@ -243,7 +243,7 @@ def get_rows_from_table(value, column, table, limit=None):
     """
 
     query_string = f"SELECT * FROM {table} WHERE {column} LIKE '{value}'"
-    
+
     if limit is not None:
         query_string = query_string + f"LIMIT {limit}"
 
