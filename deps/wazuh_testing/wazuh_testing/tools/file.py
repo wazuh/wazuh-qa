@@ -244,24 +244,6 @@ def delete_path_recursively(path):
         shutil.rmtree(path, onerror=on_write_error)
 
 
-def remove_files_in_folder(dir_path):
-    '''Remove files (and directories) recursively preserving the directory.
-
-    Args:
-        dir_path (str): The path of the directory that contains all the files to be removed.
-    '''
-    files_in_path = os.listdir(dir_path)
-    for filename in files_in_path:
-        file_path = os.path.join(dir_path, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                delete_path_recursively(file_path)
-        except (OSError, PermissionError) as error:
-            print(f"Failed to remove {file_path}.\nError: {error}")
-
-
 def on_write_error(function, path, exc_info):
     """ Error handler for functions that try to modify a file. If the error is due to an access error (read only file),
     it attempts to add write permission and then retries. If the error is for another reason it re-raises the error.
