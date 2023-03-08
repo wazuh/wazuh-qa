@@ -38,15 +38,129 @@ def callback_detect_aws_module_called(parameters: list) -> Callable:
     return lambda line: regex.match(line)
 
 
-def callback_detect_aws_module_start(line: str) -> Optional[str]:
+def callback_detect_aws_error_for_missing_type(line: str) -> Optional[str]:
+    """Detect if the AWS module displays an error about missing type.
+
+    Args:
+        line (str): Line to match.
+
+    Returns:
+        Optional[str]: Line if it matches.
+    """
+
+    if re.match(
+        r".*ERROR: Undefined type for service.", line
+    ):
+        return line
+
+
+def callback_detect_aws_legacy_module_warning(line: str) -> Optional[str]:
+    """Detect if the AWS module displays a warning about legacy config.
+
+    Args:
+        line (str): Line to match.
+
+    Returns:
+        Optional[str]: Line if it matches.
+    """
+
+    if re.match(
+        r".*WARNING: Deprecated config defined; please use current config definition at module 'aws-s3'.", line
+    ):
+        return line
+
+
+def callback_detect_aws_module_warning(line: str) -> Optional[str]:
+    """Detect if the AWS module displays a warning.
+
+    Args:
+        line (str): Line to match.
+
+    Returns:
+        Optional[str]: Line if it matches.
+    """
+
+    if re.match(r".*WARNING: No buckets or services definitions found at module 'aws-s3'.", line):
+        return line
+
+
+def callback_detect_aws_module_started(line: str) -> Optional[str]:
+    """Detect if the AWS module was called.
+
+    Args:
+        line (str): Line to match.
+
+    Returns:
+        Optional[str]: Line if it matches.
+    """
+
+    if re.match(r'.*DEBUG: Launching S3 Command: .*', line):
+        return line
+
+
+def callback_detect_aws_empty_value(line: str) -> Optional[str]:
+    """Detect if the AWS module displays a message about an empty value.
+
+    Args:
+        line (str): Line to match.
+
+    Returns:
+        Optional[str]: Line if it matches.
+    """
+
+    if (
+        re.match(r".*ERROR: Invalid \w+ type ''", line) or
+        re.match(r".*ERROR: Empty content for tag '\w+' at module 'aws-s3'.", line) or
+        re.match(r".*WARNING: Empty content for tag '\w+' at module 'aws-s3'.", line)
+    ):
+        return line
+
+
+def callback_detect_aws_invalid_value(line: str) -> Optional[str]:
+    """Detect if the AWS module displays a message about an invalid value.
+
+    Args:
+        line (str): Line to match.
+
+    Returns:
+        Optional[str]: Line if it matches.
+    """
+
+    if (
+        re.match(r".*ERROR: Invalid \w+ type '\w+'.*", line) or
+        re.match(r'.*ERROR: Invalid content for tag*', line) or
+        re.match(r'.*WARNING: Bucket:  -  Error parsing arguments.*', line)
+    ):
+        return line
+
+
+def callback_detect_bucket_or_service_call(line: str) -> Optional[str]:
+    """Detect if bucket or service module was called.
+
+    Args:
+        line (str): Line to match.
+
+    Returns:
+        Optional[str]: Line if it match.
+    """
+
+    if (
+        re.match(r".*INFO: Executing Service Analysis:*", line) or
+        re.match(r'.*INFO: Executing Bucket Analysis:*', line)
+    ):
+        return line
+
+
+def callback_detect_aws_module_start(line):
     """Search for start message in the given line.
 
     Args:
         line (str): Line to match.
 
     Returns:
-        Optional[str]: line if it match.
+        Optional[str]: Line if it match.
     """
+
     if re.match(r'.*INFO: Module AWS started*', line):
         return line
 
