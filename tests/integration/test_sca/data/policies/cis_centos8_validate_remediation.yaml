@@ -1,9 +1,3 @@
-# Copyright (C) 2015-2022, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
-# CIS Checks for SCA tests on CentOS 8
-
 policy:
   id: cis_centos8_validate_remediation
   file: cis_centos8_validate_remediation.yaml
@@ -24,9 +18,9 @@ checks:
 
   # Check that permitions for file are 222
   - id: 1
-    title: Test 1
+    title: Test_1
     description: Test osregex regex engine with osregex rules
-    rationale: Test 1
+    rationale: Test_1
     remediation: The testfile permissions should be '0222'. Use chmod 222 /testfile command to fix permissions
     compliance:
       - cis: [1.8.1.5]
@@ -36,9 +30,9 @@ checks:
 
   # Check that permitions for file are 644
   - id: 2
-    title: Test2
+    title: Test_2
     description: Test osregex regex engine with pcre2 rules
-    rationale: Test2
+    rationale: Test_2
     remediation: The testfile permissions should be '644'. Use chmod 666 /testfile command to fix permissions
     compliance:
       - cis: [1.8.1.5]

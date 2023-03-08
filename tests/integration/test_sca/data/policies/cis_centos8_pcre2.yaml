@@ -1,9 +1,3 @@
-# Copyright (C) 2015-2022, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
-# CIS Checks for SCA tests on CentOS 8
-
 policy:
   id: cis_centos8_pcre2
   file: cis_centos8_pcre2
@@ -25,9 +19,9 @@ checks:
 
   # Check with default value - OS_REGEX
   - id: 1
-    title: Test 1
+    title: Test_1
     description: Test pcre2 regex engine with osregex rules
-    rationale: Test 1
+    rationale: Test_1
     remediation: Run osregex
     compliance:
       - cis: [1.8.1.5]
@@ -44,9 +38,9 @@ checks:
 
   # Check with PCRE2 value
   - id: 2
-    title: Test2
+    title: Test_2
     description: Test pcre2 regex engine with pcre2 rules
-    rationale: Test2
+    rationale: Test_2
     remediation: Run pcre2
     compliance:
       - cis: [1.7.5]
