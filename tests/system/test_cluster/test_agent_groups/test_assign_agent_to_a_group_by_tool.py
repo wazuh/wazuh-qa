@@ -47,15 +47,16 @@ import time
 import pytest
 
 from system.test_cluster.test_agent_groups.common import register_agent
-from system import (check_agent_groups, check_agent_status, check_keys_file, delete_group_of_agents,
-                    assign_agent_to_new_group, AGENT_NO_GROUPS, AGENT_STATUS_NEVER_CONNECTED)
+from system import (check_agent_groups, check_agent_status, check_keys_file, create_new_agent_group,
+                    delete_group_of_agents, assign_agent_to_new_group, AGENT_NO_GROUPS, AGENT_STATUS_NEVER_CONNECTED)
 from wazuh_testing.tools.system import HostManager
 
+
+pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
 
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
 test_infra_agents = ["wazuh-agent1"]
-pytestmark = [pytest.mark.cluster]
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'enrollment_cluster', 'inventory.yml')
@@ -104,6 +105,9 @@ def test_assign_agent_to_a_group_by_tool(agent_target, clean_environment):
     check_agent_groups(agent_id, AGENT_NO_GROUPS, test_infra_managers, host_manager)
 
     try:
+        # Create group
+        create_new_agent_group(test_infra_managers[0], group_id, host_manager)
+
         # Add group to agent1
         assign_agent_to_new_group(test_infra_managers[0], group_id, agent_id, host_manager)
 

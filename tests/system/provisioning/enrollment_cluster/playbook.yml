@@ -49,6 +49,18 @@
         networks:
           - name: "{{ docker_network }}"
 
+- name: Create our container (Agent2)
+  hosts: localhost
+  vars_files:
+    - ./vars/configurations.yaml
+  tasks:
+    - docker_container:
+        name: "{{ agent2_hostname }}"
+        image: "{{ image }}"
+        hostname: "{{ agent2_hostname }}"
+        networks:
+          - name: "{{ docker_network }}"
+
 - name: Wazuh Master
   hosts: wazuh-master
   vars:
@@ -81,6 +93,16 @@
   vars:
     manager_hostname: wazuh-master
     agent_hostname: "{{ agent1_hostname }}"
+  vars_files:
+    - ./vars/configurations.yaml
+  roles:
+    - name: roles/agent-role
+
+- name: Wazuh Agent2
+  hosts: wazuh-agent2
+  vars:
+    manager_hostname: wazuh-master
+    agent_hostname: "{{ agent2_hostname }}"
   vars_files:
     - ./vars/configurations.yaml
   roles:

@@ -9,6 +9,11 @@ Release report: TBD
 
 ### Added
 
+- Add multigroups tests cases for `test_assign_groups_guess` ([#3979](https://github.com/wazuh/wazuh-qa/pull/3979)) \- (Tests)
+- Fix test_agent_groups system test ([#3955](https://github.com/wazuh/wazuh-qa/pull/3964)) \- (Tests)
+- Add new group_hash case and update the `without condition` case output in `wazuh_db/sync_agent_groups_get` ([#3959](https://github.com/wazuh/wazuh-qa/pull/3959)) \- (Tests)
+- Add markers for each system test environment ([#3961](https://github.com/wazuh/wazuh-qa/pull/3961)) \- (Framework + Tests)
+- Adapt binary performance module to wazuh-cluster script renaming ([#3944](https://github.com/wazuh/wazuh-qa/pull/3944)) \- (Framework)
 - Add an option to store logs in system tests ([#2445](https://github.com/wazuh/wazuh-qa/pull/2445)) \- (Framework + Tests)
 - Add new test to check cpe_helper.json file ([#3731](https://github.com/wazuh/wazuh-qa/pull/3731))
 - Add new tests analysid handling of invalid/empty rule signature IDs ([#3649]
@@ -44,6 +49,7 @@ Release report: TBD
 
 ### Changed
 
+- Improve `test_agent_groups_new_cluster_node` ([#3971](https://github.com/wazuh/wazuh-qa/pull/3971)) \- (Tests)
 - Fix Solaris agent provision schema ([#3750](https://github.com/wazuh/wazuh-qa/issues/3744)) \- (Framework)
 - Fix wazuh-db integration tests for agent-groups ([#3926](https://github.com/wazuh/wazuh-qa/pull/3926)) \- (Tests + Framework)
 - Fix `test_set_agent_groups` ([#3920](https://github.com/wazuh/wazuh-qa/pull/3920)) \- (Tests)
