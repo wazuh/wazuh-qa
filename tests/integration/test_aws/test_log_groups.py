@@ -136,7 +136,7 @@ def test_log_groups(
     if expected_results:
         wazuh_log_monitor.start(
             timeout=global_parameters.default_timeout,
-            callback=event_monitor.callback_detect_cloudwatch_event_processed(expected_results),
+            callback=event_monitor.callback_detect_service_event_processed(expected_results, service_type),
             error_message='The AWS module did not process the expected number of events',
             accum_results=len(log_group_names.split(','))
         ).result()
@@ -158,6 +158,6 @@ def test_log_groups(
     if expected_results:
         log_group_list = log_group_names.split(",")
         for row in get_multiple_service_db_row(table_name='cloudwatch_logs'):
-            assert row.aws_log_stream in log_group_list
+            assert row.aws_log_group in log_group_list
     else:
         assert not table_exists(table_name='cloudwatch_logs')
