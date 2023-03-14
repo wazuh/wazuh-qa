@@ -563,7 +563,7 @@ def detect_invalid_conf_value(file_monitor, element):
 
 
 def detect_audit_healthcheck_failed(file_monitor):
-    """Detects if the initial audit healtcheck hass failed
+    """Detects if the initial audit healtcheck has failed
 
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
