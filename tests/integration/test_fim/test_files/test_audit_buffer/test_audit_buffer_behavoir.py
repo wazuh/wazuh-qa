@@ -26,7 +26,7 @@ daemons:
     - wazuh-syscheckd
 
 os_platform:
-    - windows
+    - linux
 
 os_version:
     - Arch Linux
@@ -112,7 +112,7 @@ def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_waz
     '''
     description: Check that when files are added equal to the whodata "queue_size", the queue does not overflow, all
                  files are detected in whodata mode, and after the next scan no file is detected in scheduled mode.
-                 
+
 
     test_phases:
         - setup:
@@ -161,7 +161,7 @@ def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_waz
 
     assertions:
         - Verify the queue does not overflow after inserting files
-        - Verify all files are detected in whodata mode 
+        - Verify all files are detected in whodata mode
 
     input_description: The file 'configuration_audit_buffer_values' provides the configuration template.
                        The file 'cases_audit_buffer_values.yaml' provides the test cases details for each test case.
@@ -292,7 +292,6 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
                                                                  than the expected {metadata['whodata_events']}"
 
     # Wait for scheduled scan so the rest of file events are generated
-
     detect_initial_scan_start(wazuh_log_monitor, timeout=T_10)
 
     # Get all file added events

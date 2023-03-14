@@ -209,7 +209,7 @@ def callback_integrity_sync_message(line):
 
     Args:
         line (String): string line to be checked by callback in File_Monitor.
-    
+
     Returns:
         List: returns a list with formated datetime, And the event's JSON data.
     """
@@ -448,11 +448,12 @@ def get_messages(callback, timeout=T_10, update_position=True, max_events=MAX_EV
         callback (object): callback that returns the events that are being looked for.
         timeout (int): Timeout that will be used to get the dbsync_no_data message.
         update_position (bool, optional): True if we pop items from the queue once they are read. False otherwise.
-                Default `True`
+                                          Default `True`
         max_events (int, optional):
 
     Returns:
-        A list with all the events.    """
+        A list with all the events.
+    """
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     error_message = error_message if error_message is not None else 'Did not receive expected events'
@@ -540,8 +541,8 @@ def detect_audit_queue_full(file_monitor, update_position=True):
 
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
-        update_position (bool, optional) : True if we pop items from the queue once they are read. False otherwise.
-                Default `True`
+        update_position (bool, optional): True if we pop items from the queue once they are read. False otherwise.
+                                          Default `True`
     """
 
     return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_WHODATA_QUEUE_FULL),

@@ -27,7 +27,6 @@ daemons:
 
 os_platform:
     - linux
-    - windows
 
 os_version:
     - Arch Linux

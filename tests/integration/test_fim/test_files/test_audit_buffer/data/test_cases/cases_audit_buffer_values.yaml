@@ -8,7 +8,7 @@
     valid_range: true
 
 - name: Queue Size 10 (Lower limit) starts properly
-  description: Verify if value set is the lower allowed limit, whodata estarts correctly
+  description: Verify if value set is the lower allowed limit, whodata starts correctly
   configuration_parameters:
     QUEUE_SIZE: 10
   metadata:

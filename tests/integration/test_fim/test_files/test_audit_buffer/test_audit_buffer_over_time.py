@@ -27,7 +27,7 @@ daemons:
     - wazuh-syscheckd
 
 os_platform:
-    - windows
+    - linux
 
 os_version:
     - Arch Linux
@@ -213,7 +213,7 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
                                 restart_syscheck_function, wait_syscheck_start):
     '''
     description: This test validates the behavior of "queue_size" in tandem with "max_eps". Check that when files are
-                 added causing whodata queue to overflow, and after some files are processed, if new files are added 
+                 added causing whodata queue to overflow, and after some files are processed, if new files are added
                  that do not exceed the empty space in the queue, only the files from the first insertion, that caused
                  the overflow are detected in scheduled mode. All files from second insertion are detected in whodata.
 
