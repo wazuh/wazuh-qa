@@ -154,10 +154,8 @@ def test_ambiguous_whodata_thread(configuration, metadata, set_wazuh_configurati
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     if metadata['whodata_enabled']:
-        print("PRINT ENABLED")
         detect_whodata_start(wazuh_log_monitor, timeout=T_10)
     else:
         with pytest.raises(TimeoutError):
             detect_whodata_start(wazuh_log_monitor, timeout=T_10)
-            print("PRINT DIsABLED")
             raise AttributeError(f'Unexpected event "File integrity monitoring real-time Whodata engine started"')

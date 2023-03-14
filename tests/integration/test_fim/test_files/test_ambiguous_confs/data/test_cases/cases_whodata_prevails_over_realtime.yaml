@@ -1,5 +1,5 @@
 - name: Whodata thread started with realtime enabled
-  description: Check Whodata thread is enabled and is used with realtime enabled or disabled on same tag
+  description: Check Whodata thread is enabled and is used with realtime enabled on same tag
   configuration_parameters:
     WHODATA: 'yes'
     REALTIME: 'yes'
@@ -7,7 +7,7 @@
     fim_mode: whodata
 
 - name: Whodata thread started with realtime disabled
-  description: Check Whodata thread is enabled and is used with realtime enabled or disabled on same tag
+  description: Check Whodata thread is enabled and is used with realtime disabled on same tag
   configuration_parameters:
     WHODATA: 'yes'
     REALTIME: 'no'
