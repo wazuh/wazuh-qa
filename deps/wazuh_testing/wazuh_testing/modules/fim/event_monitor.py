@@ -198,7 +198,28 @@ def callback_detect_file_integrity_event(line):
     return None
 
 
+def callback_key_event(line):
+    """ Callback that detects if a line contains a registry integrity event for a registry_key
+
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    """
+
+    event = callback_detect_event(line)
+
+    if event is None or event['data']['attributes']['type'] != 'registry_key':
+        return None
+
+    return event
+
+
 def callback_value_event(line):
+    """ Callback that detects if a line contains a registry integrity event for a registry_value
+
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    """
+
     event = callback_detect_event(line)
 
     if event is None or event['data']['attributes']['type'] != 'registry_value':
