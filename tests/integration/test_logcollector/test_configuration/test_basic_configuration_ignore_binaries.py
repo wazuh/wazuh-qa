@@ -148,7 +148,7 @@ def check_ignore_binaries_valid(cfg):
 
     if sys.platform == 'win32':
         check_wildcard_pattern_no_match(re.escape(cfg['location']), WINDOWS_AGENT_PREFIX, escape=False)
-        
+
     if wazuh_component == 'wazuh-manager':
         real_configuration = cfg.copy()
         real_configuration.pop('valid_value')

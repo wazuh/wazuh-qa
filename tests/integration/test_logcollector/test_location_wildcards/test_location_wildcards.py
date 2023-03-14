@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2022, Wazuh Inc.
+copyright: Copyright (C) 2015-2023, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -151,7 +151,7 @@ def test_location_wildcards(configuration, metadata, folder_path, file_list, cre
     file = re.escape(test_file)
 
     if not metadata['matches']:
-        # If it does not match, check that mesage shows no matching file was found
+        # If it does not match, check that message shows no matching file was found
         evm.check_wildcard_pattern_no_match(re.escape(metadata['location']), prefix)
     else:
         # Check that pattern is expanded to configured file
