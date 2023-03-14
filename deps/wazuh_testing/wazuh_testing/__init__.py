@@ -25,7 +25,6 @@ WAZUH_CONF_PATH = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc' if platform.system() == 'Linux' else '', 'client.keys')
 CONF_FILE_PATH = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
-DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 QUEUE_SOCKETS_PATH = os.path.join(WAZUH_PATH, 'queue', 'sockets')
 WAZUH_DB_SOCKET_PATH = os.path.join(QUEUE_DB_PATH, 'wdb')
@@ -41,6 +40,7 @@ API_JSON_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.json')
 API_LOG_FOLDER = os.path.join(WAZUH_PATH, 'logs', 'api')
 WAZUH_TESTING_PATH = os.path.dirname(os.path.abspath(__file__))
 WAZUH_TESTING_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+DEFAULT_AUTHD_PASS_PATH = os.path.join(WAZUH_PATH, 'etc', 'authd.pass')
 
 
 # Daemons

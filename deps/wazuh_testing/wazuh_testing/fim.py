@@ -1134,12 +1134,22 @@ def callback_detect_integrity_state(line):
 
 
 def callback_start_synchronization(line):
+    """ Callback that detects if a line contains the FIM sync module has started.
+
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    """
     if 'FIM sync module started' in line:
         return line
     return None
 
 
 def callback_detect_synchronization(line):
+    """ Callback that detects if a line contains a FIM sync has started.
+
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    """
     if 'Executing FIM sync' in line:
         return line
     return None
@@ -1168,13 +1178,6 @@ def callback_restricted(line):
 
 def callback_audit_health_check(line):
     if 'Whodata health-check: Success.' in line:
-        return True
-    return None
-
-
-def callback_audit_cannot_start(line):
-    match = re.match(r'.*Who-data engine could not start. Switching who-data to real-time.', line)
-    if match:
         return True
     return None
 

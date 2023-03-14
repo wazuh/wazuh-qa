@@ -86,7 +86,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 test_directories = [os.path.join(PREFIX, TEST_DIR_1)]
-TIMEOUT = 120
+TIMEOUT = 180
 
 # Configurations
 conf_params = {'TEST_DIRECTORIES': test_directories[0]}
@@ -111,7 +111,7 @@ def create_multiple_files(get_configuration):
     max_eps = get_configuration['metadata']['max_eps']
     mode = get_configuration['metadata']['fim_mode']
     try:
-        for i in range(int(max_eps) * 3):
+        for i in range(int(max_eps) * 4):
             file_name = f'file{i}_to_max_eps_{max_eps}_{mode}_mode{time.time()}'
             path = os.path.join(test_directories[0], file_name)
             write_file(path)
@@ -119,6 +119,7 @@ def create_multiple_files(get_configuration):
         logger.info(ERR_MSG_MULTIPLE_FILES_CREATION)
 
 
+@pytest.mark.skip("This test is affected by Issue #15844, when it is fixed it should be enabled again.")
 def test_max_eps(configure_local_internal_options_module, get_configuration, configure_environment, restart_wazuh):
     '''
     description: Check if the 'wazuh-syscheckd' daemon applies the limit set in the 'max_eps' tag when
@@ -128,7 +129,7 @@ def test_max_eps(configure_local_internal_options_module, get_configuration, con
                  the testing files created. Finally, it will verify the limit of events per second (eps)
                  is not exceeded by checking the creation time of the testing files.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 

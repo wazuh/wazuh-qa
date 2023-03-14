@@ -58,7 +58,7 @@ import os
 
 import pytest
 from wazuh_testing import LOG_FILE_PATH, global_parameters
-from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2, 
+from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
                                        KEY_WOW64_32KEY, KEY_WOW64_64KEY, SIZE_LIMIT_CONFIGURED_VALUE)
 from wazuh_testing.modules.fim.event_monitor import ERR_MSG_CONTENT_CHANGES_EMPTY, ERR_MSG_CONTENT_CHANGES_NOT_EMPTY
 from wazuh_testing.modules.fim.utils import (registry_value_create, registry_value_update, registry_value_delete,

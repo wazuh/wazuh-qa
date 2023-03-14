@@ -11,7 +11,7 @@ from typing import Sequence, Union, Generator, Any
 from copy import deepcopy
 from hashlib import sha1
 
-from wazuh_testing import global_parameters, logger, REGULAR, LOG_FILE_PATH, WAZUH_PATH, T_30
+from wazuh_testing import global_parameters, logger, REGULAR, LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.file import create_file, modify_file, delete_file, generate_string
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools.time import TimeMachine

@@ -1002,7 +1002,7 @@ def file_monitoring(request):
     logger.debug(f"Trucanted {file_to_monitor}")
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def set_wazuh_configuration(configuration):
     """Set wazuh configuration
 
@@ -1047,7 +1047,7 @@ def truncate_monitored_files():
             truncate_file(log_file)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def stop_modules_function_after_execution():
     """Stop wazuh modules daemon after finishing a test"""
     yield

@@ -11,6 +11,7 @@ from wazuh_testing.tools.services import control_service
 from wazuh_testing.modules.fim.event_monitor import (detect_initial_scan, detect_realtime_start, detect_whodata_start,
                                                      detect_initial_scan_start)
 
+
 @pytest.fixture(scope="module")
 def restart_syscheckd(get_configuration, request):
     """

@@ -17,16 +17,17 @@ file_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Callbacks messages
 CB_DETECT_FIM_EVENT = r".*Sending FIM event: (.+)$"
-CB_REALTIME_MONITORED_FOLDERS = r'.*Folders monitored with real-time engine: (\d+)'
+CB_FOLDERS_MONITORED_REALTIME = r'.*Folders monitored with real-time engine: (\d+)'
 CB_INVALID_CONFIG_VALUE = r".*Invalid value for element '(.*)': (.*)."
 CB_INTEGRITY_CONTROL_MESSAGE = r".*Sending integrity control message: (.+)$"
-CB_AGENT_CONNECT = r".* Connected to the server .*"
+CB_MAXIMUM_FILE_SIZE = r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*'
+CB_AGENT_CONNECT = r'.* Connected to the server .*'
 CB_INODE_ENTRIES_PATH_COUNT = r".*Fim inode entries: '(\d+)', path count: '(\d+)'"
 CB_DATABASE_FULL_COULD_NOT_INSERT_VALUE = r".*registry_value.*Couldn't insert ('.*') entry into DB. The DB is full.*"
 CB_DATABASE_FULL_COULD_NOT_INSERT_KEY = r".*registry_key.*Couldn't insert ('.*') entry into DB. The DB is full.*"
 CB_COUNT_REGISTRY_ENTRIES = r".*Fim registry entries count: '(\d+)'"
 CB_COUNT_REGISTRY_VALUE_ENTRIES = r".*Fim registry values entries count: '(\d+)'"
-CB_REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
+CB_REGISTRY_DBSYNC_NO_DATA = r".*fim_registry_(.*) dbsync no_data (.*)'"
 CB_REGISTRY_LIMIT_CAPACITY = r".*Registry database is (\d+)% full."
 CB_REGISTRY_DB_BACK_TO_NORMAL = r".*(The registry database status returns to normal)."
 CB_REGISTRY_LIMIT_VALUE = r".*Maximum number of registry values to be monitored: '(\d+)'"
@@ -42,9 +43,6 @@ CB_SYNC_SKIPPED = r".*Sync still in progress. Skipped next sync and increased in
 CB_SYNC_INTERVAL_RESET = r".*Previous sync was successful. Sync interval is reset to: '(\d+)s'"
 CB_IGNORING_DUE_TO_SREGEX = r".*?Ignoring path '(.*)' due to sregex '(.*)'.*"
 CB_IGNORING_DUE_TO_PATTERN = r".*?Ignoring path '(.*)' due to pattern '(.*)'.*"
-CB_MAXIMUM_FILE_SIZE = r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*'
-CB_AGENT_CONNECT = r'.* Connected to the server .*'
-CB_FOLDERS_MONITORED_REALTIME = r'.*Folders monitored with real-time engine: (\d+)'
 CB_REALTIME_WHODATA_ENGINE_STARTED = r'.*File integrity monitoring (real-time Whodata) engine started.*'
 CB_DISK_QUOTA_LIMIT_CONFIGURED_VALUE = r'.*Maximum disk quota size limit configured to \'(\d+) KB\'.*'
 CB_FILE_EXCEEDS_DISK_QUOTA = r'.*The (.*) of the file size \'(.*)\' exceeds the disk_quota.*'
@@ -56,7 +54,6 @@ CB_STARTING_WINDOWS_AUDIT = r'.*state_checker.*(Starting check of Windows Audit 
 CB_SWITCHING_DIRECTORIES_TO_REALTIME = r'.*state_checker.*(Audit policy change detected.\
                                          Switching directories to realtime)'
 CB_RECIEVED_EVENT_4719 = r'.*win_whodata.*(Event 4719).*Switching directories to realtime'
-
 
 # Error message
 ERR_MSG_REALTIME_FOLDERS_EVENT = 'Did not receive expected "Folders monitored with real-time engine" event'
@@ -80,7 +77,7 @@ ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES = 'Did not receive expected "Fim Registry val
 ERR_MSG_REGISTRY_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of registry values to \
                                  be monitored: ..." event'
 ERR_MSG_WRONG_REGISTRY_LIMIT_VALUE = 'Wrong value for db_value_limit registries tag.'
-ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of files to be monitored: \
+ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of entries to be monitored: \
                              ..." event'
 ERR_MSG_WRONG_FILE_LIMIT_VALUE = 'Wrong value for file_limit.'
 ERR_MSG_FILE_LIMIT_DISABLED = 'Did not receive expected "DEBUG: ...: No limit set to maximum number of entries \
@@ -110,8 +107,7 @@ ERR_MSG_DISK_QUOTA_LIMIT = 'Did not receive "Maximum disk quota size limit confi
 ERR_MSG_FILE_LIMIT_REACHED = 'Did not receive "File ... is too big ... to perform diff operation" event.'
 ERR_MSG_FOLDER_DELETED = 'Did not receive expected "Folder ... has been deleted." event.'
 ERR_MSG_SACL_CONFIGURED_EVENT = 'Did not receive the expected "The SACL of <file> will be configured" event'
-ERR_MSG_WHDATA_REALTIME_MODE_CHANGE_EVENT = 'Expected "directory starts to monitored in real-time" event not received'
-
+ERR_MSG_WHODATA_REALTIME_MODE_CHANGE_EVENT = 'Expected "directory starts to monitored in real-time" event not received'
 
 
 # Callback functions
@@ -191,6 +187,11 @@ def callback_integrity_message(line):
 
 
 def callback_detect_file_integrity_event(line):
+    """ Callback that detects if a line contains a file integrity event
+
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    """
     event = callback_detect_integrity_control_event(line)
     if event and event['component'] == 'fim_file':
         return event
@@ -200,22 +201,18 @@ def callback_detect_file_integrity_event(line):
 def callback_value_event(line):
     event = callback_detect_event(line)
 
-    if event and event['data']['attributes']['type'] == 'registry_value':
-        return event
+    if event is None or event['data']['attributes']['type'] != 'registry_value':
+        return None
 
-    return None
-
-
-def callback_key_event(line):
-    event = callback_detect_event(line)
-
-    if event and event['data']['attributes']['type'] == 'registry_key':
-        return event
-
-    return None
+    return event
 
 
 def callback_detect_registry_integrity_event(line):
+    """ Callback that detects if a line contains a registry integrity event for a registry_key or registry_value
+
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    """
     event = callback_detect_integrity_control_event(line)
     if event and event['component'] == 'fim_registry_key':
         return event
@@ -225,6 +222,11 @@ def callback_detect_registry_integrity_event(line):
 
 
 def callback_detect_registry_integrity_state_event(line):
+    """ Callback that detects if a line contains a registry integrity event of the state type
+
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    """
     event = callback_detect_registry_integrity_event(line)
     if event and event['type'] == 'state':
         return event['data']
@@ -250,7 +252,7 @@ def callback_num_inotify_watches(line):
     Args:
         line (String): string line to be checked by callback in File_Monitor.
     """
-    match = re.match(CB_REALTIME_MONITORED_FOLDERS, line)
+    match = re.match(CB_FOLDERS_MONITORED_REALTIME, line)
 
     if match:
         return match.group(1)
@@ -280,6 +282,11 @@ def callback_real_time_whodata_started(line):
 
 
 def callback_detect_registry_integrity_clear_event(line):
+    """ Callback that detects if a line contains a registry integrity_clear event
+
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    """
     event = callback_detect_integrity_control_event(line)
     if event and event['component'] == 'fim_registry_key' and event['type'] == 'integrity_clear':
         return True
@@ -346,6 +353,32 @@ def callback_detect_file_deleted_event(line):
         if json_event['data']['type'] == 'deleted':
             return json_event
 
+    return None
+
+
+def callback_audit_cannot_start(line):
+    """ Callback that detects if a line shows whodata engine could not start and monitoring switched to realtime.
+
+    Args:
+        line (String): string line to be checked by callback in FileMonitor.
+
+    Returns:
+        boolean: return True if line matches, None otherwise
+    """
+    match = re.match(r'.*Who-data engine could not start. Switching who-data to real-time.', line)
+    if match:
+        return True
+
+
+def callback_restricted(line):
+    """ Callback that detects if a line in a log  if a file is ignored due to configured restrict tag.
+
+    Returns:
+        string: returns path for the entry that is being ignored.
+    """
+    match = re.match(r".*Ignoring entry '(.*?)' due to restriction '.*?'", line)
+    if match:
+        return match.group(1)
     return None
 
 
@@ -452,6 +485,8 @@ def check_registry_crud_event(callback, path,  timeout=T_30, type='added', arch=
                 return event
 
     return None
+    file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(CB_REALTIME_WHODATA_ENGINE_STARTED),
+                       error_message=ERR_MSG_WHODATA_ENGINE_EVENT)
 
 
 def detect_windows_sacl_configured(file_monitor, file='.*'):
@@ -463,7 +498,6 @@ def detect_windows_sacl_configured(file_monitor, file='.*'):
     """
 
     pattern = fr".*win_whodata.*The SACL of '({file})' will be configured"
-
     file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(pattern),
                        error_message=ERR_MSG_SACL_CONFIGURED_EVENT)
 
@@ -479,4 +513,4 @@ def detect_windows_whodata_mode_change(file_monitor, file='.*'):
     pattern = fr".*set_whodata_mode_changes.*The '({file})' directory starts to be monitored in real-time mode."
 
     file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(pattern),
-                       error_message=ERR_MSG_WHDATA_REALTIME_MODE_CHANGE_EVENT)
+                       error_message=ERR_MSG_WHODATA_REALTIME_MODE_CHANGE_EVENT)

@@ -10,10 +10,10 @@ import pytest
 from distro import id
 from wazuh_testing import (global_parameters, LOG_FILE_PATH, REGULAR, WAZUH_SERVICES_START, WAZUH_SERVICES_STOP,
                            WAZUH_LOG_MONITOR)
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.local_actions import run_local_command_returning_output
-from wazuh_testing.tools.file import truncate_file, delete_path_recursively, create_file
 from wazuh_testing.tools.services import control_service
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.file import truncate_file, delete_path_recursively, create_file
+from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, SYNC_INTERVAL_VALUE, KEY_WOW64_64KEY,
                                        MONITORED_DIR_1, registry_parser)
 from wazuh_testing.modules.fim import event_monitor as evm
@@ -77,6 +77,39 @@ def install_audit(get_configuration):
 
 
 @pytest.fixture()
+def create_files_in_folder(files_number):
+    """Create files in monitored folder and files"""
+
+    for file in range(0, files_number):
+        create_file(REGULAR, MONITORED_DIR_1, f"test_file_{time.time()}_{file}")
+
+    yield
+
+    delete_path_recursively(MONITORED_DIR_1)
+
+
+@pytest.fixture(scope='module')
+def install_audit(get_configuration):
+    """Install auditd before test"""
+
+    # Check distro
+    linux_distro = id()
+
+    if re.match(linux_distro, "centos"):
+        package_management = "yum"
+        audit = "audit"
+        option = "--assumeyes"
+    elif re.match(linux_distro, "ubuntu") or re.match(linux_distro, "debian"):
+        package_management = "apt-get"
+        audit = "auditd"
+        option = "--yes"
+    else:
+        # Install audit and start the service
+        process = subprocess.run([package_management, "install", audit, option], check=True)
+        process = subprocess.run(["service", "auditd", "start"], check=True)
+
+
+@pytest.fixture()
 def wait_fim_start(configuration):
     """ Wait for realtime start, whodata start or end of initial FIM scan.
 
@@ -100,7 +133,6 @@ def wait_fim_start(configuration):
 @pytest.fixture()
 def wait_syscheck_start(metadata):
     """ Wait for realtime start, whodata start or end of initial FIM scan.
-
     Args:
         metadata (dict): Test additional metadata
     """

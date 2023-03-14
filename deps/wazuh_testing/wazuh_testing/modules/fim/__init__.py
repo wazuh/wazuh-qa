@@ -177,7 +177,7 @@ DIFF_LIMIT_VALUE = 2
 DIFF_DEFAULT_LIMIT_VALUE = 51200
 
 
-# FIM modules
+# FIM modes
 SCHEDULED_MODE = 'scheduled'
 REALTIME_MODE = 'realtime'
 WHODATA_MODE = 'whodata'
@@ -192,7 +192,6 @@ YAML_CONF_MAX_EPS_SYNC = 'wazuh_sync_conf_max_eps.yaml'
 # Synchronization options
 SYNCHRONIZATION_ENABLED = 'SYNCHRONIZATION_ENABLED'
 SYNCHRONIZATION_REGISTRY_ENABLED = 'SYNCHRONIZATION_REGISTRY_ENABLED'
-
 
 # Setting Local_internal_option file
 if sys.platform == 'win32':
