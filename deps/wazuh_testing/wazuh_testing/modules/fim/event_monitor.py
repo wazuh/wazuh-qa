@@ -563,7 +563,7 @@ def detect_invalid_conf_value(file_monitor, element):
 
 
 def detect_audit_healthcheck_failed(file_monitor):
-    """Detects the configured value for the whodata queue
+    """Detects if the initial audit healtcheck hass failed
 
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
