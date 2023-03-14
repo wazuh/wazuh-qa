@@ -89,7 +89,7 @@ t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_c
 t2_configurations = load_configuration_template(configurations_path, t2_configuration_parameters,
                                                 t2_configuration_metadata)
 
-
+# Variables
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 key_name = 'test_key'
 value_name = 'test_value'
@@ -101,44 +101,70 @@ def test_registry_key_wildcards(configuration, metadata, set_wazuh_configuration
                                 configure_local_internal_options_function, restart_wazuh_function,
                                 wait_syscheck_start):
     '''
-    description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
-                 'full database alert' mode for reaching the limit of entries to monitor set in the 'entries' option
-                 of the 'registry_limit' tag.
-                 For this purpose, the test will monitor a key in which several testing values will be created
-                 until the entry monitoring limit is reached. Then, it will check if the FIM event 'full' is generated
-                 when a new testing value is added to the monitored key. Finally, the test will verify that,
-                 in the FIM 'entries' event, the number of entries and monitored values match.
+    description: Check the behavior of FIM when using wildcards to configure the path of registry keys, and validate
+                 the keys creation, modification and deletion is detected correctly.
 
     wazuh_min_version: 4.5.0
+
+    test_phases:
+        - setup:
+            - Set wazuh configuration.
+            - Clean logs files and restart wazuh to apply the configuration.
+        - test:
+            - Check that one or more keys are detected when the configured wildcard is expanded
+            - Create a subkey inside the first monitored key and check
+            - Wait for scan and check subkey has been detected as 'added'
+            - Modify the subkey
+            - Wait for scan and check subkey has been detected as 'modified'
+            - Delete the subkey
+            - Wait for scan and check subkey has been detected as 'deleted'
+        - teardown:
+            - Restore configuration
+            - Stop wazuh
 
     tier: 1
 
     parameters:
-        - configure_local_internal_options_module:
+        - configuration:
+            type: dict
+            brief: Configuration values for ossec.conf.
+        - metadata:
+            type: dict
+            brief: Test case data.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Set the local_internal_options for the test.
-        - get_configuration:
+            brief: Set ossec.conf configuration.
+        - configure_local_internal_options_function:
             type: fixture
-            brief: Get configurations from the module.
-        - configure_environment:
+            brief: Set local_internal_options configuration.
+        - policies_file:
+            type: string
+            brief: path for audit policies file to use on restore_win_whodata_policies fixture
+        - restore_win_whodata_policies
             type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_syscheckd:
+            brief: restores windows audit policies using a given csv file after yield
+        - restart_syscheck_function:
             type: fixture
-            brief: Clear the Wazuh logs file and start a new monitor.
+            brief: restart syscheckd daemon, and truncate the ossec.log.
+        - wait_for_fim_start_function:
+            type: fixture
+            brief: check that the starting fim scan is detected.
 
     assertions:
-        - Verify that the FIM database is in 'full database alert' mode
-          when the maximum number of values to monitor has been reached.
-        - Verify that proper FIM events are generated while the database
-          is in 'full database alert' mode.
+        - One or more keys have been configured after wildcard expansion
+        - Assert 'registry_key added' event has been detected
+        - Assert 'registry_key modified' event has been detected
+        - Assert 'registry_key deleted' event has been detected
 
-    input_description: A test case (fim_registry_limit) is contained in external YAML file (wazuh_conf.yaml)
-                       which includes configuration settings for the 'wazuh-syscheckd' daemon. That is combined
-                       with the testing registry key to be monitored defined in this module.
+    input_description:
+        - The file 'configuration_registry_wildcards.yaml' contains the configuration template for the test.
+        - The file 'cases_registry_key_wildcards.yaml' contains test case descriptions, configuration values and
+          metadata for each case.
+
 
     expected_output:
-        -
+        - r".*Expanding entry '.*' to '(.*)' to monitor FIM events."
+        - r".*Sending FIM event: (.+)$" - For 'registry_key' attributes.type and 'added/modified/deleted' type.
 
     tags:
         - scheduled
@@ -176,45 +202,71 @@ def test_registry_value_wildcards(configuration, metadata, set_wazuh_configurati
                                   configure_local_internal_options_function, restart_syscheck_function,
                                   wait_syscheck_start):
     '''
-    description: Check if the 'wazuh-syscheckd' daemon generates proper events while the FIM database is in
-                 'full database alert' mode for reaching the limit of entries to monitor set in the 'entries' option
-                 of the 'registry_limit' tag.
-                 For this purpose, the test will monitor a key in which several testing values will be created
-                 until the entry monitoring limit is reached. Then, it will check if the FIM event 'full' is generated
-                 when a new testing value is added to the monitored key. Finally, the test will verify that,
-                 in the FIM 'entries' event, the number of entries and monitored values match.
+    description: Check the behavior of FIM when using wildcards to configure the path of registry keys, and validate
+                 when values are created inside a monitored key, creation, modification and deletion is detected
+                 correctly.
 
     wazuh_min_version: 4.5.0
+
+    test_phases:
+        - setup:
+            - Set wazuh configuration.
+            - Clean logs files and restart wazuh to apply the configuration.
+        - test:
+            - Check that one or more keys are detected when the configured wildcard is expanded
+            - Create a registry_value inside the first monitored key and check
+            - Wait for scan and check registry_value has been detected as 'added'
+            - Modify the registry_value
+            - Wait for scan and check registry_value has been detected as 'modified'
+            - Delete the registry_value
+            - Wait for scan and check registry_value has been detected as 'deleted'
+        - teardown:
+            - Restore configuration
+            - Stop wazuh
 
     tier: 1
 
     parameters:
-        - configure_local_internal_options_module:
+        - configuration:
+            type: dict
+            brief: Configuration values for ossec.conf.
+        - metadata:
+            type: dict
+            brief: Test case data.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Set the local_internal_options for the test.
-        - get_configuration:
+            brief: Set ossec.conf configuration.
+        - configure_local_internal_options_function:
             type: fixture
-            brief: Get configurations from the module.
-        - configure_environment:
+            brief: Set local_internal_options configuration.
+        - policies_file:
+            type: string
+            brief: path for audit policies file to use on restore_win_whodata_policies fixture
+        - restore_win_whodata_policies
             type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_syscheckd:
+            brief: restores windows audit policies using a given csv file after yield
+        - restart_syscheck_function:
             type: fixture
-            brief: Clear the Wazuh logs file and start a new monitor.
+            brief: restart syscheckd daemon, and truncate the ossec.log.
+        - wait_for_fim_start_function:
+            type: fixture
+            brief: check that the starting fim scan is detected.
 
     assertions:
-        - Verify that the FIM database is in 'full database alert' mode
-          when the maximum number of values to monitor has been reached.
-        - Verify that proper FIM events are generated while the database
-          is in 'full database alert' mode.
+        - One or more keys have been configured after wildcard expansion
+        - Assert 'registry_value added' event has been detected
+        - Assert 'registry_value modified' event has been detected
+        - Assert 'registry_value deleted' event has been detected
 
-    input_description: A test case (fim_registry_limit) is contained in external YAML file (wazuh_conf.yaml)
-                       which includes configuration settings for the 'wazuh-syscheckd' daemon. That is combined
-                       with the testing registry key to be monitored defined in this module.
+    input_description:
+        - The file 'configuration_registry_wildcards.yaml' contains the configuration template for the test.
+        - The file 'cases_registry_value_wildcards.yaml' contains test case descriptions, configuration values and
+          metadata for each case.
+
 
     expected_output:
-        -
-
+        - r".*Expanding entry '.*' to '(.*)' to monitor FIM events."
+        - r".*Sending FIM event: (.+)$" - For 'registry_value' attributes.type and 'added/modified/deleted' type.
     tags:
         - scheduled
     '''
@@ -245,5 +297,5 @@ def test_registry_value_wildcards(configuration, metadata, set_wazuh_configurati
                                               arch='x64')
     assert event_deleted is not None, 'Did not find the expected "registry_value deleted" event'
 
-    # Delete key to clean envirmoent
+    # Delete key to clean enviroment
     delete_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
