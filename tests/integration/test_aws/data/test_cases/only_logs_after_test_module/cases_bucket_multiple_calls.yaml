@@ -103,3 +103,4 @@
     bucket_type: cisco_umbrella
     bucket_name: wazuh-umbrella-integration-tests
     path: dnslogs
+    expected_skipped_logs_step_3: 3
