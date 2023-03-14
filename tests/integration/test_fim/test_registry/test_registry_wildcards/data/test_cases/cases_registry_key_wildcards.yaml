@@ -13,7 +13,7 @@
     WINDOWS_REGISTRY: HKEY_LOCAL_MACHINE\HARDWARE\DEVICEMAP\*
   metadata:
     fim_mode: scheduled
-  
+
 - name: Test key with asterisk+question mark (Scheduled)
   description: Test path with multiple asterisks and question mark wildcards combined in scheduled mode
   configuration_parameters:

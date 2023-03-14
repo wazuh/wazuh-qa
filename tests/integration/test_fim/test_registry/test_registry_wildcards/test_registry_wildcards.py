@@ -9,7 +9,7 @@ type: integration
 
 brief: File Integrity Monitoring (FIM) system watches selected files and triggering alerts when these files are
        modified. Specifically, these tests will check the use of wildcards '*' or '?' when configuring windows
-       registries to be monitored. When using wildcards, they should be expanded and matching keys should be 
+       registries to be monitored. When using wildcards, they should be expanded and matching keys should be
        configured to be monitored. The tests will verify registry keys and values events are properly generated
        when they are created, modified and deleted in registries configured through wildcards expansion.
 
@@ -64,7 +64,8 @@ from wazuh_testing.modules.fim import (registry_parser, KEY_WOW64_64KEY, REG_SZ,
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim.event_monitor import (CB_FIM_WILDCARD_EXPANDING, callback_key_event, get_messages,
                                                      check_registry_crud_event, callback_value_event)
-from wazuh_testing.modules.fim.utils import (create_registry,modify_registry_value, delete_registry, delete_registry_value)
+from wazuh_testing.modules.fim.utils import (create_registry, modify_registry_value, delete_registry,
+                                             delete_registry_value)
 
 # Marks
 pytestmark = [WINDOWS, TIER1]
@@ -153,17 +154,20 @@ def test_registry_key_wildcards(configuration, metadata, set_wazuh_configuration
 
     # Create a new key inside monitored key and check it is detected
     reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
-    event_added = check_registry_crud_event(callback=callback_key_event, path=path, type='added', timeout=T_10, arch='x64')
+    event_added = check_registry_crud_event(callback=callback_key_event, path=path, type='added', timeout=T_10,
+                                            arch='x64')
     assert event_added is not None, 'Did not find the expected "registry_key added" event'
 
     # Add new value in the key and detect the modification of created monitored key is detected
     modify_registry_value(reg_handle, value_name, REG_SZ, 'added')
-    event_modified = check_registry_crud_event(callback=callback_key_event, path=path, type='modified', timeout=T_10, arch='x64')
+    event_modified = check_registry_crud_event(callback=callback_key_event, path=path, type='modified', timeout=T_10,
+                                               arch='x64')
     assert event_modified is not None, 'Did not find the expected "registry_key modified" event'
 
     # Delete the created key and check it's deletion is detected
     delete_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
-    event_deleted = check_registry_crud_event(callback=callback_key_event, path=path, type='deleted', timeout=T_10, arch='x64')
+    event_deleted = check_registry_crud_event(callback=callback_key_event, path=path, type='deleted', timeout=T_10,
+                                              arch='x64')
     assert event_deleted is not None, 'Did not find the expected "registry_key deleted" event'
 
 
@@ -222,20 +226,23 @@ def test_registry_value_wildcards(configuration, metadata, set_wazuh_configurati
     subkey = subkey+f"\\{key_name}"
     path = monitored_keys[0] + f"\\{key_name}"
 
-    # Create custom key and custom value 
-    reg_handle =  create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
+    # Create custom key and custom value
+    reg_handle = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
     modify_registry_value(reg_handle, value_name, REG_SZ, 'added')
-    event_added = check_registry_crud_event(callback=callback_value_event, path=path, type='added', timeout=T_10, arch='x64')
+    event_added = check_registry_crud_event(callback=callback_value_event, path=path, type='added', timeout=T_10,
+                                            arch='x64')
     assert event_added is not None, 'Did not find the expected "registry_value added" event'
 
     # Add new value in the key and detect the modification of created monitored key is detected
     modify_registry_value(reg_handle, value_name, REG_SZ, 'modified')
-    event_modified = check_registry_crud_event(callback=callback_value_event, path=path, type='modified', timeout=T_10, arch='x64')
+    event_modified = check_registry_crud_event(callback=callback_value_event, path=path, type='modified', timeout=T_10,
+                                               arch='x64')
     assert event_modified is not None, 'Did not find the expected "registry_value modified" event'
 
     # Delete the created key and check it's deletion is detected
     delete_registry_value(reg_handle, value_name)
-    event_deleted = check_registry_crud_event(callback=callback_value_event, path=path, type='deleted', timeout=T_10, arch='x64')
+    event_deleted = check_registry_crud_event(callback=callback_value_event, path=path, type='deleted', timeout=T_10,
+                                              arch='x64')
     assert event_deleted is not None, 'Did not find the expected "registry_value deleted" event'
 
     # Delete key to clean envirmoent
