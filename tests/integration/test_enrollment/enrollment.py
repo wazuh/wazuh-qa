@@ -26,8 +26,9 @@ def launch_agent_auth(configuration):
         configuration (dict): Dictionary with the agent-auth configuration.
     """
     if configuration.get('manager_address'):
-        parser = AgentAuthParser(server_address=configuration.get('manager_address'), BINARY_PATH=AGENT_AUTH_BINARY_PATH,
-                             sudo=True if platform.system() == 'Linux' else False)
+        parser = AgentAuthParser(server_address=configuration.get('manager_address'),
+                                 BINARY_PATH=AGENT_AUTH_BINARY_PATH,
+                                 sudo=True if platform.system() == 'Linux' else False)
     else:
         parser = AgentAuthParser(server_address=MANAGER_ADDRESS, BINARY_PATH=AGENT_AUTH_BINARY_PATH,
                                  sudo=True if platform.system() == 'Linux' else False)
