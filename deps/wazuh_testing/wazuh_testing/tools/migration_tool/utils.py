@@ -178,7 +178,8 @@ def clean_migration_tool_output_files():
     for output_folder in output_folders:
         for folder in vendors_folders:
             folder = os.path.join(output_folder, folder)
-            delete_all_files_in_folder(folder)
+            if os.path.exists(folder):
+                delete_all_files_in_folder(folder)
 
 
 def drop_migration_tool_tables():
