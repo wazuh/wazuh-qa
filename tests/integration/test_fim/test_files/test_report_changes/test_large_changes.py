@@ -172,7 +172,6 @@ def test_large_changes(configuration, metadata, set_wazuh_configuration, configu
     create_file(REGULAR, testdir, metadata['filename'], content=original_string)
 
     result = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event).result()
-    print("resultsssssssssssssssssss" + str(result))
 
     # Modify the file with new content
     modified_string = generate_string(metadata['modified_size'], '1')
