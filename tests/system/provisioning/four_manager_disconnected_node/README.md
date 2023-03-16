@@ -75,7 +75,7 @@ The base environment defined for Docker provisioning is:
 
 - A master node.
 - Two workers nodes.
-- Three agents, all connected to master manager.
+- Two agents, all connected to master manager.
 - A fourth manager is created that can be later connected to the cluster.
 
 ## Environment management

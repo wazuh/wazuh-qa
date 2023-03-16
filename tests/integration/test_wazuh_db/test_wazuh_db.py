@@ -185,7 +185,8 @@ def insert_agents_test():
 
 @pytest.fixture(scope='module')
 def restart_wazuh(request):
-    control_service('start')
+    control_service('restart')
+
     yield
 
     delete_dbs()
@@ -203,7 +204,7 @@ def execute_wazuh_db_query(command, single_response=True):
         str: A response from the socket
     """
     receiver_sockets[0].send(command, size=True)
-    if single_response == True:
+    if single_response:
         return receiver_sockets[0].receive(size=True).decode()
     else:
         response_array = []
