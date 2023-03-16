@@ -235,6 +235,11 @@ def delete_file(file_path):
 
 
 def delete_path_recursively(path):
+    '''Remove a directory recursively.
+
+    Args:
+        path (str): Directory path.
+    '''
     if os.path.exists(path):
         shutil.rmtree(path, onerror=on_write_error)
 
@@ -279,6 +284,25 @@ def remove_file(file_path):
             os.remove(file_path)
         elif os.path.isdir(file_path):
             delete_path_recursively(file_path)
+
+
+def modify_all_files_in_folder(folder_path, data):
+    """Write data into all files in a folder
+    Args:
+        file_path (str): File or directory path to modify.
+        data (str): what to write into the file.
+    """
+    for file in os.listdir(folder_path):
+        write_file(os.path.join(folder_path, file), data)
+
+
+def delete_all_files_in_folder(folder_path):
+    """ Remove al files inside a folder
+    Args:
+        file_path (str): File or directory path to remove.
+    """
+    for file in os.listdir(folder_path):
+        os.remove(os.path.join(folder_path, file))
 
 
 def validate_json_file(file_path):

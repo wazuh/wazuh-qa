@@ -64,16 +64,19 @@ import os
 from time import sleep
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import T_10, T_20
 from wazuh_testing.fim import LOG_FILE_PATH, delete_file, generate_params, create_file, REGULAR
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import create_file, delete_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.fim_module import (ERR_MSG_DATABASE_FULL_ALERT_EVENT, CB_FILE_LIMIT_CAPACITY,
-    ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL, ERR_MSG_NO_EVENTS_EXPECTED, ERR_MSG_DELETED_EVENT_NOT_RECIEVED)
-from wazuh_testing.fim_module.event_monitor import callback_detect_event
-# Marks
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing.modules.fim.event_monitor import (callback_detect_event, ERR_MSG_DATABASE_FULL_ALERT_EVENT,
+                                                     CB_FILE_LIMIT_CAPACITY, ERR_MSG_WRONG_VALUE_FOR_DATABASE_FULL,
+                                                     ERR_MSG_NO_EVENTS_EXPECTED, ERR_MSG_DELETED_EVENT_NOT_RECIEVED)
+from wazuh_testing.modules.fim.utils import generate_params
 
+# Marks
 pytestmark = [pytest.mark.tier(level=1)]
 
 # Variables
@@ -123,7 +126,8 @@ def extra_configuration_before_yield():
 
 
 @pytest.mark.parametrize('folder, file_name', [(testdir1, f'{base_file_name}{1}')])
-def test_file_limit_delete_full(folder, file_name, get_configuration, configure_environment, restart_syscheckd):
+def test_file_limit_delete_full(folder, file_name, configure_local_internal_options_module, get_configuration,
+                                configure_environment, restart_syscheckd):
     '''
     description: Check a specific case. If a testing file ('test_file1') is not inserted in the FIM database
                  (because the maximum number of files to be monitored has already been reached), and another
@@ -134,7 +138,7 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
                  no FIM events to be generated (file limit reached). Finally, it will delete 'test_file10'
                  and verify that the 'deleted' FIM event matches that file.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
@@ -145,6 +149,9 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
         - file_name:
             type: str
             brief: Name of the testing file to be created.
+        - configure_local_internal_options_module:
+            type: fixture
+            brief: Set the local_internal_options for the test.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -168,7 +175,7 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
                        the testing directory to be monitored defined in this module.
 
     expected_output:
-        - r'.*Sending DB * full alert.'
+        - r'.*File database is (\\d+)% full'
         - r'.*Sending FIM event: (.+)$' ('deleted' event)
 
     tags:
@@ -176,7 +183,7 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
         - who_data
     '''
     #Check that database is full and assert database usage percentage is 100%
-    database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    database_state = wazuh_log_monitor.start(timeout=T_20,
                                              callback=generate_monitoring_callback(CB_FILE_LIMIT_CAPACITY),
                                              error_message=ERR_MSG_DATABASE_FULL_ALERT_EVENT).result()
 
@@ -186,19 +193,19 @@ def test_file_limit_delete_full(folder, file_name, get_configuration, configure_
     create_file(REGULAR, testdir1, file_name)
     sleep(sleep_time)
     # Delete the file created - Should not generate events
-    delete_file(folder, file_name)
+    delete_file(os.path.join(folder, file_name))
 
     # Check no Creation or Deleted event has been  generated
     with pytest.raises(TimeoutError):
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+        event = wazuh_log_monitor.start(timeout=T_10,
                                         callback=callback_detect_event).result()
         assert event is None, ERR_MSG_NO_EVENTS_EXPECTED
 
     # Delete the first file that was created (It is included in DB)
-    delete_file(folder, f'{file_name}{0}')
+    delete_file(os.path.join(folder, f'{file_name}{0}'))
 
     #Get that the file deleted generetes an event and assert the event data path.
-    event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    event = wazuh_log_monitor.start(timeout=T_20,
                                     callback=callback_detect_event,
                                     error_message=ERR_MSG_DELETED_EVENT_NOT_RECIEVED).result()
 

@@ -1,10 +1,10 @@
 # Test cluster logs order
 
-## Overview 
+## Overview
 
 Check that logs in the cluster nodes are printed in the expected order.
 
-This test checks the order of the logs for the three cluster tasks (`agent-info sync`, `agent-groups recv`, `agent-groups sync`, `integrity check` and `integrity sync`) in the worker nodes. 
+This test checks the order of the logs for the three cluster tasks (`agent-info sync`, `agent-groups recv`, `integrity check` and `integrity sync`) in the worker nodes.
 
 ## Objective
 
@@ -26,7 +26,7 @@ The test needs to receive one parameter (artifacts) in order to be run. If this 
     │       └── cluster.log
     └── ...
     ```
-- `--html=report.html`: Create a html report with the test results. 
+- `--html=report.html`: Create a html report with the test results.
 - `--self-contained-html`: Store all the necessary data for the report inside the html file.
 
 #### Example output
@@ -36,7 +36,7 @@ python3 -m pytest test_cluster_logs/test_cluster_worker_logs_order/test_cluster_
 platform linux -- Python 3.8.10, pytest-5.0.0, py-1.8.2, pluggy-0.13.1
 rootdir: /home/selu/Git/wazuh-qa/tests/performance/test_cluster
 plugins: metadata-1.10.0, html-3.1.1, testinfra-5.0.0, tavern-1.2.2, pep8-1.0.6, cov-2.10.0, asyncio-0.14.0
-collected 1 item                                                                                                
+collected 1 item
 
 test_cluster_logs/test_cluster_worker_logs_order/test_cluster_worker_logs_order.py F                                    [100%]
 
@@ -47,19 +47,19 @@ artifacts_path = '/tmp/artifacts/cluster_performance/59'
 
     def test_check_logs_order_workers(artifacts_path):
         """Check that cluster logs appear in the expected order.
-    
+
         Check that for each group of logs (agent-info, integrity-check, etc), each message
         appears in the order it should. If any log is duplicated, skipped, etc. the test will fail.
-    
+
         Args:
             artifacts_path (str): Path where folders with cluster information can be found.
         """
         if not artifacts_path:
             pytest.fail('Parameter "--artifacts_path=<path>" is required.')
-    
+
         if len(cluster_log_files := glob(join(artifacts_path, 'worker_*', 'logs', 'cluster.log'))) == 0:
             pytest.fail(f'No files found inside {artifacts_path}.')
-    
+
         for log_file in cluster_log_files:
             with open(log_file) as file:
                 for line in file.readlines():
@@ -80,10 +80,10 @@ artifacts_path = '/tmp/artifacts/cluster_performance/59'
                                         'expected_logs': [str(log) for log in logs_order[result.group(1)].get_children()]
                                     })
                                     break
-    
+
             # Update status of all logs so they point to their tree root.
             logs_order.update({log_type: tree.get_root() for log_type, tree in logs_order.items()})
-    
+
 >       assert not incorrect_order, '\n\n'.join('{node}:\n'
                                                 ' - Log type: {log_type}\n'
                                                 ' - Expected logs: {expected_logs}\n'

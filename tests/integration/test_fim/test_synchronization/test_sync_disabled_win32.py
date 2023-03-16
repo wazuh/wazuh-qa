@@ -57,17 +57,18 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters, DATA
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params
+from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR, DATA
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import create_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.fim_module.fim_variables import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY,
-                                                    YAML_CONF_SYNC_WIN32, TEST_DIRECTORIES, TEST_REGISTRIES,
-                                                    SYNCHRONIZATION_ENABLED, CB_INTEGRITY_CONTROL_MESSAGE,
-                                                    SYNCHRONIZATION_REGISTRY_ENABLED)
-# Marks
+from wazuh_testing.modules.fim import (TEST_DIR_1, WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, TEST_DIRECTORIES,
+                                       YAML_CONF_SYNC_WIN32, TEST_REGISTRIES, SYNCHRONIZATION_ENABLED,
+                                       SYNCHRONIZATION_REGISTRY_ENABLED)
+from wazuh_testing.modules.fim.event_monitor import CB_INTEGRITY_CONTROL_MESSAGE
+from wazuh_testing.modules.fim.utils import generate_params
 
+# Marks
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # variables
@@ -94,16 +95,21 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 
 # fixtures
-
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
 
-# Tests
+@pytest.fixture(scope='module')
+def create_a_file(get_configuration):
+    """Create a file previous to restart syscheckd"""
+    create_file(REGULAR, test_directories[0], 'test_file.txt')
 
-def test_sync_disabled(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start_sync_disabled):
+
+# Tests
+def test_sync_disabled(get_configuration, configure_environment, create_a_file, restart_syscheckd,
+                       wait_for_fim_start_sync):
     '''
     description: Check if the 'wazuh-syscheckd' daemon uses the value of the 'enabled' tag to start/stop
                  the file/registry synchronization. For this purpose, the test will monitor a directory/key.
@@ -124,7 +130,7 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
         - restart_syscheckd:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start_sync_disabled:
+        - wait_for_fim_start_sync:
             type: fixture
             brief: Wait for end of initial FIM scan.
     assertions:

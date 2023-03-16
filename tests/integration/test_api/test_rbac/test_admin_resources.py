@@ -51,6 +51,9 @@ tags:
 import pytest
 import requests
 
+# Marks
+pytestmark = [pytest.mark.server]
+
 
 @pytest.fixture(scope='module')
 def get_configuration():
