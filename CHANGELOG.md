@@ -16,10 +16,12 @@ Release report: TBD
 - Add test to check if active-response netsh generates alerts when firewall is disabled. ([#3787](https://github.com/wazuh/wazuh-qa/pull/3787)) \- (Framework + Tests)
 - Add new tests for logcollector 'ignore' and 'restrict' options ([#3582](https://github.com/wazuh/wazuh-qa/pull/3582)) \- (Tests)
 - Add 'Force reconnect' feature to agent_simulator tool. ([#3111](https://github.com/wazuh/wazuh-qa/pull/3111)) \- (Tools)
+- Add new module to support migration tool. ([#3837](https://github.com/wazuh/wazuh-qa/pull/3837))
 
 ### Changed
 
 - Fix FIM test_large_changes test suite ([#3948](https://github.com/wazuh/wazuh-qa/pull/3948)) \- (Tests)
+- Update FIM `test_audit` tests to new framework ([#3939](https://github.com/wazuh/wazuh-qa/pull/3939)) \- (Framework + Tests)
 - Update FIM test to new FIM DBSync process  ([#2728](https://github.com/wazuh/wazuh-qa/pull/2728)) \- (Framework + Tests)
 - Update file_limit and registry_limit tests ([#3280](https://github.com/wazuh/wazuh-qa/pull/3280)) \- (Tests)
 - Change expected timestamp for proftpd analysisd test predecoder test case ([#3900](https://github.com/wazuh/wazuh-qa/pull/3900)) \- (Tests)
@@ -43,7 +45,14 @@ Release report: TBD
 
 ### Added
 
+- Add new integration test for `authd` to validate error when `authd.pass` is empty ([#3721](https://github.com/wazuh/wazuh-qa/pull/3721)) \- (Framework + Tests)
 - Add new test to check missing fields in `cpe_helper.json` file ([#3766](https://github.com/wazuh/wazuh-qa/pull/3766)) \- (Framework + Tests)
+- Add multigroups tests cases for `test_assign_groups_guess` ([#3979](https://github.com/wazuh/wazuh-qa/pull/3979)) \- (Tests)
+- Fix test_agent_groups system test ([#3955](https://github.com/wazuh/wazuh-qa/pull/3964)) \- (Tests)
+- Add new group_hash case and update the `without condition` case output in `wazuh_db/sync_agent_groups_get` ([#3959](https://github.com/wazuh/wazuh-qa/pull/3959)) \- (Tests)
+- Add markers for each system test environment ([#3961](https://github.com/wazuh/wazuh-qa/pull/3961)) \- (Framework + Tests)
+- Adapt binary performance module to wazuh-cluster script renaming ([#3944](https://github.com/wazuh/wazuh-qa/pull/3944)) \- (Framework)
+- Add an option to store logs in system tests ([#2445](https://github.com/wazuh/wazuh-qa/pull/2445)) \- (Framework + Tests)
 - Add new test to check cpe_helper.json file ([#3731](https://github.com/wazuh/wazuh-qa/pull/3731))
 - Add new tests analysid handling of invalid/empty rule signature IDs ([#3649]
 (https://github.com/wazuh/wazuh-qa/pull/3649)) \- (Framework + Tests)
@@ -78,6 +87,14 @@ Release report: TBD
 
 ### Changed
 
+- Fix `test_file_limit_delete_full` module ([#3990](https://github.com/wazuh/wazuh-qa/pull/3990)) \- (Tests)
+- Improve `test_agent_groups_new_cluster_node` ([#3971](https://github.com/wazuh/wazuh-qa/pull/3971)) \- (Tests)
+- Fix Solaris agent provision schema ([#3750](https://github.com/wazuh/wazuh-qa/issues/3744)) \- (Framework)
+- Fix wazuh-db integration tests for agent-groups ([#3926](https://github.com/wazuh/wazuh-qa/pull/3926)) \- (Tests + Framework)
+- Fix `test_set_agent_groups` ([#3920](https://github.com/wazuh/wazuh-qa/pull/3920)) \- (Tests)
+- Improve `test_assign_groups_guess` ([#3901](https://github.com/wazuh/wazuh-qa/pull/3901)) \- (Tests)
+- Update `test_cluster_worker_logs_order` test ([#3896](https://github.com/wazuh/wazuh-qa/pull/3896)) \- (Tests)
+- Fix `test_agent_groups` ([#3889](https://github.com/wazuh/wazuh-qa/pull/3889)) \- (Tests + Framework)
 - Increase NVE download feed test timeout([#3769](https://github.com/wazuh/wazuh-qa/pull/3769)) \- (Tests)
 - Adapt wazuhdb integration tests for auto-vacuum ([#3613](https://github.com/wazuh/wazuh-qa/issues/3613)) \- (Tests)
 - Update logcollector format test due to audit changes ([#3641](https://github.com/wazuh/wazuh-qa/pull/3641)) \- (Framework)
@@ -118,6 +135,7 @@ Release report: TBD
 
 ### Fixed
 
+- Fix test_sync_agent_groups_get, replace hardcoded hash to a dinamically calculated one ([#3895](https://github.com/wazuh/wazuh-qa/pull/3895)) \- (Framework + Tests)
 - Fix test_db_backup for Ubuntu OS ([#3802](https://github.com/wazuh/wazuh-qa/pull/3802)) \- (Tests)
 - Fix commit option of the scan module for master case ([#3157](https://github.com/wazuh/wazuh-qa/pull/3157)) \- (Tests)
 - Fix Vulnerability Detector IT: test_validate_feed_content yaml cases had wrong extension. ([#3299](https://github.com/wazuh/wazuh-qa/pull/3299)) \- (Tests)

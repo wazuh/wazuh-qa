@@ -235,6 +235,11 @@ def delete_file(file_path):
 
 
 def delete_path_recursively(path):
+    '''Remove a directory recursively.
+
+    Args:
+        path (str): Directory path.
+    '''
     if os.path.exists(path):
         shutil.rmtree(path, onerror=on_write_error)
 

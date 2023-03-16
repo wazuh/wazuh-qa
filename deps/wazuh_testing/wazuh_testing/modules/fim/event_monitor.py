@@ -372,14 +372,25 @@ def callback_detect_file_more_changes(line):
             return json_event
 
 
-def callback_restricted(line):
-    """ Callback that detects if a line in a log  if a file is ignored due to configured restrict tag.
+def callback_audit_cannot_start(line):
+    """ Callback that detects if a line shows whodata engine could not start and monitoring switched to realtime.
 
     Args:
         line (String): string line to be checked by callback in FileMonitor.
 
     Returns:
-        returns the entry that is being ignored.
+        boolean: return True if line matches, None otherwise
+    """
+    match = re.match(r'.*Who-data engine could not start. Switching who-data to real-time.', line)
+    if match:
+        return True
+
+
+def callback_restricted(line):
+    """ Callback that detects if a line in a log  if a file is ignored due to configured restrict tag.
+
+    Returns:
+        string: returns path for the entry that is being ignored.
     """
     match = re.match(r".*Ignoring entry '(.*?)' due to restriction '.*?'", line)
     if match:

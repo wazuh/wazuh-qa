@@ -10,7 +10,7 @@ type: integration
 brief: Wazuh-db is the daemon in charge of the databases with all the Wazuh persistent information, exposing a socket
        to receive requests and provide information. The Wazuh core uses list-based databases to store information
        related to agent keys, and FIM/Rootcheck event data.
-       This test checks the usage of the get-groups-integrity command used to determine if the agent groups are synced 
+       This test checks the usage of the get-groups-integrity command used to determine if the agent groups are synced
        or if a sync is needed.
 
 tier: 0
@@ -55,7 +55,7 @@ tags:
 import os
 import time
 import pytest
-import yaml
+
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.wazuh_db import query_wdb, insert_agent_in_db, remove_agent
 from wazuh_testing.tools.file import get_list_of_content_yml
@@ -68,11 +68,7 @@ test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data
 messages_file = os.path.join(os.path.join(test_data_path, 'global'), 'get_groups_integrity_messages.yaml')
 module_tests = get_list_of_content_yml(messages_file)
 
-log_monitor_paths = []
 wdb_path = os.path.join(os.path.join(WAZUH_PATH, 'queue', 'db', 'wdb'))
-receiver_sockets_params = [(wdb_path, 'AF_UNIX', 'TCP')]
-monitored_sockets_params = [('wazuh-db', None, True)]
-receiver_sockets= None  # Set in the fixtures
 
 
 # Tests
@@ -82,7 +78,7 @@ receiver_sockets= None  # Set in the fixtures
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
-def test_get_groups_integrity(configure_sockets_environment, connect_to_sockets_module, test_case):
+def test_get_groups_integrity(test_case, create_groups):
     '''
     description: Check that every input message using the 'get-groups-integrity' command in wazuh-db socket generates
                  the proper output to wazuh-db socket. To do this, it performs a query to the socket with a command
@@ -92,22 +88,19 @@ def test_get_groups_integrity(configure_sockets_environment, connect_to_sockets_
     wazuh_min_version: 4.4.0
 
     parameters:
-        - configure_sockets_environment:
-            type: fixture
-            brief: Configure environment for sockets and MITM.
-        - connect_to_sockets_module:
-            type: fixture
-            brief: Module scope version of 'connect_to_sockets' fixture.
         - test_case:
             type: fixture
             brief: List of test_case stages (dicts with input, output and agent_id and expected_groups keys).
+        - create_groups:
+            type: fixture
+            brief: Create required groups
 
     assertions:
         - Verify that the socket response matches the expected output.
 
     input_description:
         - Test cases are defined in the get_groups_integrity_messages.yaml file. This file contains the agent id's to
-          register, as well as the group_sync_status that each agent will have, as well as the expected output and 
+          register, as well as the group_sync_status that each agent will have, as well as the expected output and
           result for the test.
 
     expected_output:
@@ -119,31 +112,29 @@ def test_get_groups_integrity(configure_sockets_environment, connect_to_sockets_
         - wazuh_db
         - wdb_socket
     '''
-
-    case_data = test_case[0]
-    output = case_data["output"]
-    agent_ids= case_data["agent_ids"]
-    agent_status= case_data["agent_status"]
+    output = test_case["output"]
+    agent_ids = test_case["agent_ids"]
+    agent_status = test_case["agent_status"]
 
     # Insert test Agents
     for index, id in enumerate(agent_ids):
-        response = insert_agent_in_db(id=id+1, connection_status="disconnected", 
+        response = insert_agent_in_db(id=id+1, connection_status="disconnected",
                                       registration_time=str(time.time()))
         command = f'global set-agent-groups {{"mode":"append","sync_status":"{agent_status[index]}","source":"remote",\
                     "data":[{{"id":{id},"groups":["Test_group{id}"]}}]}}'
-        response =  query_wdb(command)
+        response = query_wdb(command)
 
     # Get database hash
-    if "invalid_hash" in case_data:
-        hash = case_data["invalid_hash"]
+    if "invalid_hash" in test_case:
+        hash = test_case["invalid_hash"]
     else:
-        response = query_wdb(f'global sync-agent-groups-get {{"last_id": 0, "condition": "all", "get_global_hash": true, \
-                             "set_synced": false, "agent_delta_registration": 0}}')
+        response = query_wdb('global sync-agent-groups-get {"last_id": 0, "condition": "all", "get_global_hash": true,'
+                             '"set_synced": false, "agent_delta_registration": 0}')
         response = response[0]
         hash = response["hash"]
-        if "no_hash" in case_data:
+        if "no_hash" in test_case:
             response = str(response)
-            assert output in response , f'Unexpected response: got {response}, but expected {output}'
+            assert output in response, f'Unexpected response: got {response}, but expected {output}'
             return
 
     # Get groups integrity
