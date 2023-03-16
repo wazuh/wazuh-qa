@@ -71,7 +71,7 @@ import pytest
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR
+from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR, T_20
 from wazuh_testing.modules.fim import TEST_DIR_1
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim.event_monitor import (callback_detect_event, get_fim_event,
@@ -171,7 +171,8 @@ def test_large_changes(configuration, metadata, set_wazuh_configuration, configu
     original_string = generate_string(metadata['original_size'], '0')
     create_file(REGULAR, testdir, metadata['filename'], content=original_string)
 
-    wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event).result()
+    result = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event).result()
+    print("resultsssssssssssssssssss" + str(result))
 
     # Modify the file with new content
     modified_string = generate_string(metadata['modified_size'], '1')
@@ -179,7 +180,7 @@ def test_large_changes(configuration, metadata, set_wazuh_configuration, configu
 
     # Assert 'More changes' is shown when the command returns more than 'limit' characters
     if metadata['has_more_changes']:
-        event = get_fim_event(timeout=global_parameters.default_timeout, callback=callback_detect_file_more_changes,
+        event = get_fim_event(timeout=T_20, callback=callback_detect_file_more_changes,
                               error_message='Did not find event with "More changes" within content_changes.')
     else:
         event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,

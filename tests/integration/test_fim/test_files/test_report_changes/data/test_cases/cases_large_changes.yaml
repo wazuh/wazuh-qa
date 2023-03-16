@@ -45,8 +45,8 @@
     WHODATA: 'no'
   metadata:
     filename: regular_2
-    original_size: 20000
-    modified_size: 20000
+    original_size: 200000
+    modified_size: 200000
     has_more_changes: true
     fim_mode: scheduled
 
@@ -58,8 +58,8 @@
     WHODATA: 'no'
   metadata:
     filename: regular_2
-    original_size: 20000
-    modified_size: 20000
+    original_size: 200000
+    modified_size: 200000
     has_more_changes: true
     fim_mode: realtime
 
@@ -71,8 +71,8 @@
     WHODATA: 'yes'
   metadata:
     filename: regular_2
-    original_size: 20000
-    modified_size: 20000
+    original_size: 200000
+    modified_size: 200000
     has_more_changes: true
     fim_mode: whodata
 
@@ -85,7 +85,7 @@
   metadata:
     filename: regular_3
     original_size: 10
-    modified_size: 20000
+    modified_size: 200000
     has_more_changes: true
     fim_mode: scheduled
 
@@ -98,7 +98,7 @@
   metadata:
     filename: regular_3
     original_size: 10
-    modified_size: 20000
+    modified_size: 200000
     has_more_changes: true
     fim_mode: realtime
 
@@ -111,7 +111,7 @@
   metadata:
     filename: regular_3
     original_size: 10
-    modified_size: 20000
+    modified_size: 200000
     has_more_changes: true
     fim_mode: whodata
 
@@ -123,7 +123,7 @@
     WHODATA: 'no'
   metadata:
     filename: regular_4
-    original_size: 20000
+    original_size: 200000
     modified_size: 10
     has_more_changes: true
     fim_mode: scheduled
@@ -136,7 +136,7 @@
     WHODATA: 'no'
   metadata:
     filename: regular_4
-    original_size: 20000
+    original_size: 200000
     modified_size: 10
     has_more_changes: true
     fim_mode: realtime
@@ -149,7 +149,7 @@
     WHODATA: 'yes'
   metadata:
     filename: regular_4
-    original_size: 20000
+    original_size: 200000
     modified_size: 10
     has_more_changes: true
     fim_mode: whodata
