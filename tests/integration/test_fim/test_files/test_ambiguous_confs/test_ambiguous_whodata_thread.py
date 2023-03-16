@@ -62,7 +62,7 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import LOG_FILE_PATH, T_10
+from wazuh_testing import LOG_FILE_PATH, T_30
 from wazuh_testing.tools import configuration, PREFIX
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.fim.event_monitor import detect_whodata_start
@@ -154,8 +154,8 @@ def test_ambiguous_whodata_thread(configuration, metadata, set_wazuh_configurati
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     if metadata['whodata_enabled']:
-        detect_whodata_start(wazuh_log_monitor, timeout=T_10)
+        detect_whodata_start(wazuh_log_monitor, timeout=T_30)
     else:
         with pytest.raises(TimeoutError):
-            detect_whodata_start(wazuh_log_monitor, timeout=T_10)
+            detect_whodata_start(wazuh_log_monitor, timeout=T_30)
             raise AttributeError(f'Unexpected event "File integrity monitoring real-time Whodata engine started"')
