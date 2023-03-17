@@ -1,6 +1,7 @@
 """AWS S3 related utils"""
 
 import gzip
+from datetime import datetime
 
 import boto3
 from botocore import exceptions
@@ -67,12 +68,13 @@ def file_exists(filename: str, bucket_name: str) -> bool:
     return exists
 
 
-def get_last_file_key(bucket_type: str, bucket_name: str) -> str:
+def get_last_file_key(bucket_type: str, bucket_name: str, execution_datetime: datetime) -> str:
     """Return the last file key contained in a default path of a bucket.
 
     Args:
         bucket_type (str): Bucket type to obtain the data generator.
         bucket_name (str): Bucket that contains the file.
+        execution_datetime (datetime): Datetime to use to use as prefix.
 
     Returns:
         str: The last key in the bucket.
@@ -83,7 +85,7 @@ def get_last_file_key(bucket_type: str, bucket_name: str) -> str:
     last_key = None
 
     try:
-        *_, last_item = bucket.objects.filter(Prefix=dg.BASE_PATH)
+        *_, last_item = bucket.objects.filter(Prefix=dg.BASE_PATH or str(execution_datetime.year))
         last_key = last_item.key
     except ValueError:
         last_key = ''

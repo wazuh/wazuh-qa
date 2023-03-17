@@ -587,16 +587,11 @@ def test_bucket_multiple_calls(
 
     # Call the module without only_logs_after and check that no logs were processed
     last_marker_key = datetime.utcnow().strftime(cons.PATH_DATE_FORMAT)
-    if bucket_type == cons.CUSTOM_TYPE or (bucket_type == cons.GUARD_DUTY_TYPE and 'native' not in bucket_name):
-        event_monitor.check_marker_from_output(
-            command_output=call_aws_module(*base_parameters),
-            file_key=last_marker_key
-        )
-    else:
-        event_monitor.check_non_processed_logs_from_output(
-            command_output=call_aws_module(*base_parameters),
-            bucket_type=bucket_type
-        )
+
+    event_monitor.check_non_processed_logs_from_output(
+        command_output=call_aws_module(*base_parameters),
+        bucket_type=bucket_type
+    )
 
     # Call the module with only_logs_after set in the past and check that the expected number of logs were
     # processed
@@ -623,8 +618,7 @@ def test_bucket_multiple_calls(
 
     # Upload a log file for the day of the test execution and call the module without only_logs_after and check that
     # only the uploaded logs were processed and the last marker is specified in the DB.
-    if bucket_type != cons.CUSTOM_TYPE:
-        last_marker_key = get_last_file_key(bucket_type, bucket_name)
+    last_marker_key = get_last_file_key(bucket_type, bucket_name, datetime.utcnow())
     metadata['filename'] = upload_file(bucket_type, bucket_name)
 
     event_monitor.check_marker_from_output(
