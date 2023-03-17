@@ -3,6 +3,7 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import json
 
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, CLUSTER_LOGS_PATH
 
@@ -135,3 +136,14 @@ def execute_wdb_query(query, host, host_manager):
     response = host_manager.run_command(host, f"python3 {WAZUH_PATH}/bin/wdb-query.py {query}")
 
     return response
+
+
+def get_group_id(group_name, host, host_manager):
+    group_table_command = 'sql select * from `group`;'
+    query = f"global '{group_table_command}'"
+    group_table = execute_wdb_query(query, host, host_manager)
+    for group_data in json.loads(group_table):
+        if group_data['name'] == group_name:
+            group_id = group_data['id']
+
+    return group_id
