@@ -1,0 +1,7 @@
+- name: api
+  description: remove agent with api
+  configuration_parameters: null
+  metadata:
+    method: |
+            master_token = host_manager.get_api_token(test_infra_managers[0])
+            response = host_manager.make_api_call(host=test_infra_managers[0], method='DELETE', token=master_token, endpoint=f"/groups?groups_list={group}")
