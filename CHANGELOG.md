@@ -35,6 +35,7 @@ Release report: TBD
 - Fix imports and add windows support for test_report_changes_and_diff IT ([#3548](https://github.com/wazuh/wazuh-qa/issues/3548)) \- (Framework + Tests)
 - Fix a regex error in the FIM integration tests ([#3061](https://github.com/wazuh/wazuh-qa/issues/3061)) \- (Framework + Tests)
 - Fix an error in the cluster performance tests related to CSV parser ([#2999](https://github.com/wazuh/wazuh-qa/pull/2999)) \- (Framework + Tests)
+- Fix bug in the framework on migration tool ([#2999](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
 
 
 ## [4.4.0] - Development (unreleased)
