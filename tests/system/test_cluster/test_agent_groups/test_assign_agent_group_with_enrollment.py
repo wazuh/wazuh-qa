@@ -47,6 +47,7 @@ import pytest
 
 from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, restart_cluster, check_keys_file, delete_group_of_agents,
                     check_agent_groups_db)
+from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools import WAZUH_PATH
 
@@ -62,10 +63,11 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
+data_path = os.path.join(local_path, 'data')
+messages_path = os.path.join(data_path, 'enrollment_group_messages.yaml')
 
 
 # Variables
-agent_groups_send_full = 60
 id_group = 'group_test'
 enrollment_group = f"""
     <enrollment>
@@ -108,7 +110,9 @@ def test_assign_agent_to_a_group(agent_target, clean_environment):
     restart_cluster(test_infra_agents, host_manager)
 
     # Wait to Agent-groups send full task to end due to race condition
-    time.sleep(agent_groups_send_full)
+    HostMonitor(inventory_path=inventory_path,
+                messages_path=messages_path,
+                tmp_path=tmp_path).run(update_position=True)
 
     # Check that agent has client key file
     assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
