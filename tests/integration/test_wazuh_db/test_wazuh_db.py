@@ -257,7 +257,8 @@ def insert_agent(agent_id, agent_name='TestName'):
 
     update_data = json.dumps({'id': agent_id,
                               'sync_status': 'syncreq',
-                              'connection_status': 'active'
+                              'connection_status': 'active',
+                              'status_code': 0
                               })
 
     command = f"global insert-agent {insert_data}"
