@@ -294,15 +294,15 @@ def test_service_regions(
         wazuh_log_monitor.start(
             timeout=global_parameters.default_timeout,
             callback=event_monitor.make_aws_callback(
-                fr".*DEBUG: \+\+\+ The region {regions} is not a valid one."
+                fr".*\+\+\+ WARNING: The region '{regions}' is not a valid one."
             ),
             error_message='The AWS module did not show correct message non-existent region'
         ).result()
 
-    assert services_db_exists()
-
     table_name = 'aws_services' if service_type == 'inspector' else 'cloudwatch_logs'
+
     if expected_results:
+        assert table_exists_or_has_values(table_name=table_name, db_path=AWS_SERVICES_DB_PATH)
         for row in get_multiple_service_db_row(table_name=table_name):
             assert (getattr(row, 'region', None) or getattr(row, 'aws_region')) in regions_list
     else:
