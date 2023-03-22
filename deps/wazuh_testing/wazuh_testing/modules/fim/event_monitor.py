@@ -305,8 +305,10 @@ def callback_real_time_whodata_started(line):
     Args:
         line (String): string line to be checked by callback in File_Monitor.
     """
-    if CB_REALTIME_WHODATA_ENGINE_STARTED in line:
+    match = re.match(CB_REALTIME_WHODATA_ENGINE_STARTED, line)
+    if match:
         return True
+    return None
 
 
 def callback_detect_registry_integrity_clear_event(line):
