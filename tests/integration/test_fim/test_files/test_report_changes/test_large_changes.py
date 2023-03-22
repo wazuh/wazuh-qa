@@ -171,7 +171,8 @@ def test_large_changes(configuration, metadata, set_wazuh_configuration, configu
     original_string = generate_string(metadata['original_size'], '0')
     create_file(REGULAR, testdir, metadata['filename'], content=original_string)
 
-    result = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event).result()
+    wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event,
+                            error_message="Did not receive the expected FIM event").result()
 
     # Modify the file with new content
     modified_string = generate_string(metadata['modified_size'], '1')
@@ -182,8 +183,8 @@ def test_large_changes(configuration, metadata, set_wazuh_configuration, configu
         event = get_fim_event(timeout=T_20, callback=callback_detect_file_more_changes,
                               error_message='Did not find event with "More changes" within content_changes.')
     else:
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                        callback=callback_detect_event).result()
+        event = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event,
+                                        error_message="Did not receive the expected FIM event").result()
         assert 'More changes' not in event['data']['content_changes'], '"More changes" found within content_changes.'
 
     # Assert old content is shown in content_changes

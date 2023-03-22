@@ -62,7 +62,7 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import T_20
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_real_time_whodata_started
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -152,11 +152,11 @@ def test_ambiguous_whodata_thread(whodata_enabled, tags_to_apply, get_configurat
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
     if whodata_enabled:
-        wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_real_time_whodata_started,
+        wazuh_log_monitor.start(timeout=T_20, callback=callback_real_time_whodata_started,
                                 error_message='Did not receive expected '
                                               '"File integrity monitoring real-time Whodata engine started" event')
     else:
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+            wazuh_log_monitor.start(timeout=T_20,
                                     callback=callback_real_time_whodata_started)
             raise AttributeError(f'Unexpected event "File integrity monitoring real-time Whodata engine started"')
