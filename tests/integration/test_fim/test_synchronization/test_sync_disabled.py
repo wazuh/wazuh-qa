@@ -94,7 +94,7 @@ def get_configuration(request):
 # Tests
 
 
-def test_sync_disabled(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
+def test_sync_disabled(get_configuration, configure_environment, install_audit, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon uses the value of the 'enabled' tag to disable
                  the file synchronization. For this purpose, the test will monitor a testing directory,
@@ -112,12 +112,12 @@ def test_sync_disabled(get_configuration, configure_environment, restart_syschec
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
+        - install_audit:
+            type: fixture
+            brief: install audit to check whodata.
         - restart_syscheckd:
             type: fixture
             brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start:
-            type: fixture
-            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
 
     assertions:
         - Verify that no FIM 'integrity' event is generated when the value
