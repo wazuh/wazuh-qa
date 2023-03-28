@@ -1,7 +1,40 @@
 - name: api
-  description: remove agent with api
+  description: remove group with api
   configuration_parameters: null
   metadata:
     method: |
             master_token = host_manager.get_api_token(test_infra_managers[0])
-            response = host_manager.make_api_call(host=test_infra_managers[0], method='DELETE', token=master_token, endpoint=f"/groups?groups_list={group}")
+            host_manager.make_api_call(host=test_infra_managers[0], method='DELETE', token=master_token, endpoint=f"/groups?groups_list={group}")
+    deleted: yes
+
+- name: tool
+  description: remove group with agent_groups
+  configuration_parameters: null
+  metadata:
+    method: |
+            host_manager.run_command(test_infra_managers[0], f"/var/ossec/bin/agent_groups -q -r -g {group}")
+    deleted: yes
+
+- name: master_folder
+  description: remove group by removing its folder in master node
+  configuration_parameters: null
+  metadata:
+    method: |
+            host_manager.run_command(test_infra_managers[0], f"rm -rf /var/ossec/etc/shared/{group}")
+    deleted: yes
+
+- name: worker1_folder
+  description: remove group by removing its folder in worker node
+  configuration_parameters: null
+  metadata:
+    method: |
+            host_manager.run_command(test_infra_managers[1], f"rm -rf /var/ossec/etc/shared/{group}")
+    deleted: no
+
+- name: worker2_folder
+  description: remove group by removing its folder in worker node
+  configuration_parameters: null
+  metadata:
+    method: |
+            host_manager.run_command(test_infra_managers[2], f"rm -rf /var/ossec/etc/shared/{group}")
+    deleted: no
