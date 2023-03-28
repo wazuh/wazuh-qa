@@ -7,6 +7,7 @@
     REGIONS: us-east-1
     PATH: test_prefix
     PATH_SUFFIX: test_suffix
+    REMOVE_FROM_BUCKET: 'no'
   metadata: []
 
 - name: parser_empty_name_in_bucket
@@ -18,6 +19,7 @@
     REGIONS: us-east-1
     PATH: test_prefix
     PATH_SUFFIX: test_suffix
+    REMOVE_FROM_BUCKET: 'no'
   metadata: []
 
 - name: parser_empty_only_logs_after_in_bucket
@@ -29,6 +31,7 @@
     REGIONS: us-east-1
     PATH: test_prefix
     PATH_SUFFIX: test_suffix
+    REMOVE_FROM_BUCKET: 'no'
   metadata: []
 
 - name: parser_empty_regions_in_bucket
@@ -40,6 +43,7 @@
     REGIONS: ''
     PATH: test_prefix
     PATH_SUFFIX: test_suffix
+    REMOVE_FROM_BUCKET: 'no'
   metadata: []
 
 - name: parser_empty_path_in_bucket
@@ -51,6 +55,7 @@
     REGIONS: us-east-1
     PATH: ''
     PATH_SUFFIX: test_suffix
+    REMOVE_FROM_BUCKET: 'no'
   metadata: []
 
 - name: parser_empty_path_suffix_in_bucket
@@ -62,4 +67,5 @@
     REGIONS: us-east-1
     PATH: test_prefix
     PATH_SUFFIX: ''
+    REMOVE_FROM_BUCKET: 'no'
   metadata: []

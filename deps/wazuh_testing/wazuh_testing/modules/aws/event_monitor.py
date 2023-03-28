@@ -129,7 +129,8 @@ def callback_detect_aws_invalid_value(line: str) -> Optional[str]:
     if (
         re.match(r".*ERROR: Invalid \w+ type '\w+'.*", line) or
         re.match(r'.*ERROR: Invalid content for tag*', line) or
-        re.match(r'.*WARNING: Bucket:  -  Error parsing arguments.*', line)
+        re.match(r'.*WARNING: Bucket:  -  Error parsing arguments.*', line),
+        re.match(r'.*WARNING: Service:  -  Error parsing arguments.*', line)
     ):
         return line
 

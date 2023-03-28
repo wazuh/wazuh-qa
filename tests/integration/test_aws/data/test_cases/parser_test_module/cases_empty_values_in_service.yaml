@@ -5,6 +5,7 @@
     LOG_GROUPS: wazuh-cloudwatch-integration-tests
     ONLY_LOGS_AFTER: 2023-JAN-31
     REGIONS: us-east-1
+    REMOVE_FROM_BUCKET: 'no'
   metadata: []
 
 - name: parser_empty_log_groups_in_service
@@ -14,6 +15,7 @@
     LOG_GROUPS: ''
     ONLY_LOGS_AFTER: 2023-JAN-31
     REGIONS: us-east-1
+    REMOVE_FROM_BUCKET: 'no'
   metadata: []
 
 - name: parser_empty_only_logs_after_in_service
@@ -23,6 +25,7 @@
     LOG_GROUPS: wazuh-cloudwatchlogs-integration-tests
     ONLY_LOGS_AFTER: ''
     REGIONS: us-east-1
+    REMOVE_FROM_BUCKET: 'no'
   metadata: []
 
 - name: parser_empty_regions_in_service
@@ -32,4 +35,5 @@
     LOG_GROUPS: wazuh-cloudwatchlogs-integration-tests
     ONLY_LOGS_AFTER: 2023-JAN-31
     REGIONS: ''
+    REMOVE_FROM_BUCKET: 'no'
   metadata: []

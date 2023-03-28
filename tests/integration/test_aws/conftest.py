@@ -55,7 +55,7 @@ def mark_cases_as_skipped(metadata: dict) -> None:
 def restart_wazuh_function_without_exception(daemon=None):
     """Restart all Wazuh daemons."""
     try:
-        control_service("restart", daemon=daemon)
+        control_service("start", daemon=daemon)
     except ValueError:
         pass
 
