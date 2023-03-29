@@ -101,7 +101,6 @@ def create_registry(key, subkey, arch):
 
     if sys.platform == 'win32':
         try:
-            logger.info("Creating registry key " + str(os.path.join(fim.registry_class_name[key], subkey)))
 
             key = win32api.RegCreateKeyEx(key, subkey, win32con.KEY_ALL_ACCESS | arch)
 
