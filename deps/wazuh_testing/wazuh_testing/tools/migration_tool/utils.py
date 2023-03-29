@@ -12,9 +12,10 @@ from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from mysql.connector import errorcode
 
+import wazuh_testing.tools.migration_tool as migration_tool
 from wazuh_testing.tools.migration_tool import MIGRATION_TOOL_PATH, CVE5_SCHEMA_PATH, DELTA_SCHEMA_PATH, \
                                                ERROR_MESSAGES, SNAPSHOTS_DIR, DOWNLOADS_DIR, MIGRATION_TOOL_LOG_PATH, \
-                                               MYSQL_CREDENTIALS, UNCOMPRESSED_DIR
+                                               UNCOMPRESSED_DIR
 from wazuh_testing.tools.file import delete_all_files_in_folder, read_json_file, truncate_file
 from wazuh_testing.tools.logging import Logging
 
@@ -149,10 +150,10 @@ def query_publisher_db(query):
 
     try:
         connection = mysql.connector.connect(
-            host=MYSQL_CREDENTIALS['host'],
-            user=MYSQL_CREDENTIALS['user'],
-            password=MYSQL_CREDENTIALS['password'],
-            database=MYSQL_CREDENTIALS['database']
+            host=migration_tool.MYSQL_CREDENTIALS['host'],
+            user=migration_tool.MYSQL_CREDENTIALS['user'],
+            password=migration_tool.MYSQL_CREDENTIALS['password'],
+            database=migration_tool.MYSQL_CREDENTIALS['database']
             )
     except mysql.connector.Error as error:
         connection = None
