@@ -294,7 +294,7 @@ def test_service_regions(
         wazuh_log_monitor.start(
             timeout=global_parameters.default_timeout,
             callback=event_monitor.make_aws_callback(
-                fr".*\+\+\+ WARNING: The region '{regions}' is not a valid one."
+                fr".*\+\+\+ ERROR: The region '{regions}' is not a valid one."
             ),
             error_message='The AWS module did not show correct message non-existent region'
         ).result()
