@@ -133,12 +133,28 @@ def change_agent_group_with_wdb(agent_id, new_group, host, host_manager):
 
 
 def execute_wdb_query(query, host, host_manager):
+    """Function to execute wdb query.
+    Args:
+        query (str): Query to execute
+        host (str): Host name where the query will be executed.
+        host_manager (obj): Instance of HostManager.
+    Returns:
+        response (str): Obtained response.
+    """
     response = host_manager.run_command(host, f"python3 {WAZUH_PATH}/bin/wdb-query.py {query}")
 
     return response
 
 
 def get_group_id(group_name, host, host_manager):
+    """Function to obtain the group ID.
+    Args:
+        group_name (str): Name of the group from which the id will be obtained.
+        host (str): Host name where the query will be executed.
+        host_manager (obj): Instance of HostManager.
+    Returns:
+        group_id (int): Obtained group ID.
+    """
     group_table_command = 'sql select * from `group`;'
     query = f"global '{group_table_command}'"
     group_table = execute_wdb_query(query, host, host_manager)
