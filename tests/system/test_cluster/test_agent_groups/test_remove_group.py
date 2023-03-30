@@ -3,7 +3,8 @@ import pytest
 from time import sleep
 
 from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups, check_keys_file,
-                    create_new_agent_group, assign_agent_to_new_group, restart_cluster, execute_wdb_query, get_group_id)
+                    create_new_agent_group, assign_agent_to_new_group, restart_cluster, execute_wdb_query, get_group_id,
+                    delete_group_of_agents)
 from wazuh_testing import T_10
 from system.test_cluster.test_agent_groups.common import register_agent
 from wazuh_testing.tools.configuration import get_test_cases_data
@@ -58,6 +59,11 @@ def pre_configured_groups(target_node, group):
 
     # Check that agent has group assigned on every node
     check_agent_groups(agent_id, group, test_infra_managers, host_manager)
+
+    yield
+
+    if group != 'default':
+        delete_group_of_agents(test_infra_managers[0], group, host_manager)
 
 
 # Tests
