@@ -2,9 +2,9 @@ import os
 import pytest
 from time import sleep
 
-import wazuh_testing as fw
 from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups, check_keys_file,
                     create_new_agent_group, assign_agent_to_new_group, restart_cluster, execute_wdb_query, get_group_id)
+from wazuh_testing import T_10
 from system.test_cluster.test_agent_groups.common import register_agent
 from wazuh_testing.tools.configuration import get_test_cases_data
 from wazuh_testing.tools.monitoring import HostMonitor
@@ -95,7 +95,7 @@ def test_remove_group(metadata, group, target_node, pre_configured_groups, clean
 
     # Delete group
     exec(metadata['method'])
-    sleep(fw.T_10)
+    sleep(T_10)
 
     if not metadata['deleted']:
         HostMonitor(inventory_path=inventory_path,
