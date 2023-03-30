@@ -105,7 +105,7 @@ def test_remove_group(metadata, group, target_node, pre_configured_groups, clean
         for manager in test_infra_managers:
             group_ids[manager] = str(get_group_id(group, manager, host_manager))
 
-    # Check group is deleted or not if exepceted in agent table in every node
+    # Check group is deleted or not if expected in agent table in every node
     for query in queries:
         for manager in test_infra_managers:
             global_query = f"global '{query}'"
