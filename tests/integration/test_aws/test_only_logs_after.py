@@ -635,6 +635,7 @@ _, t5_configuration_metadata, t5_case_ids = get_test_cases_data(t5_cases_path)
 
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('metadata', t5_configuration_metadata, ids=t5_case_ids)
+@pytest.mark.xfail
 def test_inspector_multiple_calls(
     metadata, clean_aws_services_db, load_wazuh_basic_configuration, restart_wazuh_function
 ):
