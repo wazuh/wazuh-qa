@@ -22,6 +22,8 @@
               value: 'CLIENT_ID'
           - client_secret:
               value: 'CLIENT_SECRET'
+          - api_type:
+              value: 'API_TYPE'
       - subscriptions:
           elements:
           - subscription:
