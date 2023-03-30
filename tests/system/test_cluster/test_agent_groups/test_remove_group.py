@@ -62,8 +62,8 @@ def pre_configured_groups(target_node, group):
 @pytest.mark.parametrize('target_node', ['wazuh-master', 'wazuh-worker1'])
 def test_remove_group(metadata, group, target_node, pre_configured_groups, clean_environment):
     '''
-    description: Check that when a group is deleted using different methods, it is deleted on all nodes, except when
-                 the group folder is deleted in a worker.
+    description: Check that a group is completely deleted from all nodes when using different deletion methods, with the
+                 exception of cases where the group folder is deleted on a worker node.
     wazuh_min_version: 4.4.0
     parameters:
         - metadata:
