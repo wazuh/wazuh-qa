@@ -33,7 +33,11 @@ queries = ['sql select `group` from agent;', 'sql select name from `group`;', 's
 # Fixtures
 @pytest.fixture()
 def pre_configured_groups(target_node, group):
-    """Fixture to create a group and assign an agent during the setup."""
+    """Fixture to create a group and assign an agent during the setup.
+    Args:
+        target_node (str): Name of the host where the agent will register.
+        group (str): Group name.
+    """
     # Create group
     if group != 'default':
         create_new_agent_group(test_infra_managers[0], group, host_manager)
