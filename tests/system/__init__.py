@@ -84,9 +84,18 @@ def assign_agent_to_new_group(host, id_group, id_agent, host_manager):
     host_manager.run_command(host, f"/var/ossec/bin/agent_groups -q -a -i {id_agent} -g {id_group}")
 
 
-def delete_group_of_agents(host, id_group, host_manager):
+def delete_agent_group(host, id_group, host_manager, method='tool'):
     # Delete group
-    host_manager.run_command(host, f"/var/ossec/bin/agent_groups -q -r -g {id_group}")
+    if method == 'tool':
+        host_manager.run_command(host, f"/var/ossec/bin/agent_groups -q -r -g {id_group}")
+    elif method == 'api':
+        master_token = host_manager.get_api_token(host)
+        host_manager.make_api_call(host=host, method='DELETE', token=master_token,
+                                   endpoint=f"/groups?groups_list={id_group}")
+    elif method == 'folder':
+        host_manager.run_command(host, f"rm -rf /var/ossec/etc/shared/{id_group}")
+    else:
+        raise ValueError(f"{method} is not a valid method, it should be tool, api or folder")
 
 
 def check_agent_groups(agent_id, group_to_check, hosts_list, host_manager):

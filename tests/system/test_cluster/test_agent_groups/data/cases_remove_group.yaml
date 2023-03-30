@@ -3,9 +3,7 @@
   configuration_parameters: null
   metadata:
     method: |
-      master_token = host_manager.get_api_token(test_infra_managers[0])
-      host_manager.make_api_call(host=test_infra_managers[0], method='DELETE', token=master_token,
-      endpoint=f"/groups?groups_list={group}")
+      delete_agent_group(test_infra_managers[0], group, host_manager, 'api')
     deleted: true
 
 - name: tool
@@ -13,7 +11,7 @@
   configuration_parameters: null
   metadata:
     method: |
-      host_manager.run_command(test_infra_managers[0], f"/var/ossec/bin/agent_groups -q -r -g {group}")
+      delete_agent_group(test_infra_managers[0], group, host_manager, 'tool')
     deleted: true
 
 - name: master_folder
@@ -21,7 +19,7 @@
   configuration_parameters: null
   metadata:
     method: |
-      host_manager.run_command(test_infra_managers[0], f"rm -rf /var/ossec/etc/shared/{group}")
+      delete_agent_group(test_infra_managers[0], group, host_manager, 'folder')
     deleted: true
 
 - name: worker1_folder
@@ -29,7 +27,7 @@
   configuration_parameters: null
   metadata:
     method: |
-      host_manager.run_command(test_infra_managers[1], f"rm -rf /var/ossec/etc/shared/{group}")
+      delete_agent_group(test_infra_managers[1], group, host_manager, 'folder')
     deleted: false
 
 - name: worker2_folder
@@ -37,5 +35,5 @@
   configuration_parameters: null
   metadata:
     method: |
-      host_manager.run_command(test_infra_managers[2], f"rm -rf /var/ossec/etc/shared/{group}")
+      delete_agent_group(test_infra_managers[2], group, host_manager, 'folder')
     deleted: false
