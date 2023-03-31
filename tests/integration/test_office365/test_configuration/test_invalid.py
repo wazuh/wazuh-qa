@@ -205,6 +205,7 @@ cases = [
             'TENANT_ID': 'test_tenant',
             'CLIENT_ID': 'teat_client',
             'CLIENT_SECRET': 'test_secret',
+            'API_TYPE': 'commercial',
             'SUBSCRIPTION': ''
         },
         'metadata': {
