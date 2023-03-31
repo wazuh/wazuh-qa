@@ -51,7 +51,8 @@ import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.office365 import callback_detect_enabled_err, callback_detect_only_future_events_err, \
     callback_detect_interval_err, callback_detect_curl_max_size_err, callback_detect_tenant_id_err, \
-    callback_detect_client_id_err, callback_detect_client_secret_err, callback_detect_subscription_err
+    callback_detect_client_id_err, callback_detect_client_secret_err, callback_detect_subscription_err, \
+    callback_detect_api_type_err
 from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -85,6 +86,7 @@ cases = [
             'TENANT_ID': 'test_tenant',
             'CLIENT_ID': 'teat_client',
             'CLIENT_SECRET': 'test_secret',
+            'API_TYPE': 'commercial',
             'SUBSCRIPTION': 'test_subscription'
         },
         'metadata': {
@@ -101,6 +103,7 @@ cases = [
             'TENANT_ID': 'test_tenant',
             'CLIENT_ID': 'teat_client',
             'CLIENT_SECRET': 'test_secret',
+            'API_TYPE': 'commercial',
             'SUBSCRIPTION': 'test_subscription'
         },
         'metadata': {
@@ -117,6 +120,7 @@ cases = [
             'TENANT_ID': 'test_tenant',
             'CLIENT_ID': 'teat_client',
             'CLIENT_SECRET': 'test_secret',
+            'API_TYPE': 'commercial',
             'SUBSCRIPTION': 'test_subscription'
         },
         'metadata': {
@@ -133,6 +137,7 @@ cases = [
             'TENANT_ID': 'test_tenant',
             'CLIENT_ID': 'teat_client',
             'CLIENT_SECRET': 'test_secret',
+            'API_TYPE': 'commercial',
             'SUBSCRIPTION': 'test_subscription'
         },
         'metadata': {
@@ -149,6 +154,7 @@ cases = [
             'TENANT_ID': '',
             'CLIENT_ID': 'teat_client',
             'CLIENT_SECRET': 'test_secret',
+            'API_TYPE': 'commercial',
             'SUBSCRIPTION': 'test_subscription'
         },
         'metadata': {
@@ -165,6 +171,7 @@ cases = [
             'TENANT_ID': 'test_tenant',
             'CLIENT_ID': '',
             'CLIENT_SECRET': 'test_secret',
+            'API_TYPE': 'commercial',
             'SUBSCRIPTION': 'test_subscription'
         },
         'metadata': {
@@ -181,6 +188,7 @@ cases = [
             'TENANT_ID': 'test_tenant',
             'CLIENT_ID': 'teat_client',
             'CLIENT_SECRET': '',
+            'API_TYPE': 'commercial',
             'SUBSCRIPTION': 'test_subscription'
         },
         'metadata': {
@@ -202,6 +210,23 @@ cases = [
         'metadata': {
             'tags': 'invalid_subscription'
         }
+    },
+    # Case 9: Invalid api_type (version 4.5)
+    {
+        'params': {
+            'ENABLED': 'yes',
+            'ONLY_FUTURE_EVENTS': 'yes',
+            'INTERVAL': '1m',
+            'CURL_MAX_SIZE': '1024',
+            'TENANT_ID': 'test_tenant',
+            'CLIENT_ID': 'teat_client',
+            'CLIENT_SECRET': 'test_secret',
+            'API_TYPE': '',
+            'SUBSCRIPTION': 'test_subscription'
+        },
+        'metadata': {
+            'tags': 'invalid_api_type'
+        }
     }
 ]
 params = [case['params'] for case in cases]
@@ -220,7 +245,8 @@ callbacks = {
                 'invalid_tenant_id': callback_detect_tenant_id_err,
                 'invalid_client_id': callback_detect_client_id_err,
                 'invalid_client_secret': callback_detect_client_secret_err,
-                'invalid_subscription': callback_detect_subscription_err
+                'invalid_subscription': callback_detect_subscription_err,
+                'invalid_api_type': callback_detect_api_type_err
             }
 
 
