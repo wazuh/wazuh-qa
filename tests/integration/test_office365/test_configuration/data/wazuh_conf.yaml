@@ -16,14 +16,14 @@
         - api_auth:
             elements:
               - tenant_id:
-                value: TENANT_ID
+                  value: TENANT_ID
               - client_id:
-                value: CLIENT_ID
+                  value: CLIENT_ID
               - client_secret:
-                value: CLIENT_SECRET
+                  value: CLIENT_SECRET
               - api_type:
-                value: API_TYPE
+                  value: API_TYPE
         - subscriptions:
             elements:
               - subscription:
-                value: SUBSCRIPTION
+                  value: SUBSCRIPTION
