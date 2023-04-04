@@ -99,7 +99,7 @@ local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 
 
 # Tests
-@pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
+@pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#4071")
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 @pytest.mark.parametrize('files_number', [configuration_metadata[0]['files']])
 def test_sync_overlap(configuration, metadata, set_wazuh_configuration, configure_local_internal_options_function,
