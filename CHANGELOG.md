@@ -10,6 +10,7 @@ Release report: TBD
 ### Added
 
 - Add package support for system tests ([#3965](https://github.com/wazuh/wazuh-qa/pull/3966))
+- Add multigroups tests cases for `test_assign_groups_guess` ([#3979](https://github.com/wazuh/wazuh-qa/pull/3979)) \- (Tests)
 - Fix test_agent_groups system test ([#3955](https://github.com/wazuh/wazuh-qa/pull/3964)) \- (Tests)
 - Add new group_hash case and update the `without condition` case output in `wazuh_db/sync_agent_groups_get` ([#3959](https://github.com/wazuh/wazuh-qa/pull/3959)) \- (Tests)
 - Add markers for each system test environment ([#3961](https://github.com/wazuh/wazuh-qa/pull/3961)) \- (Framework + Tests)
@@ -49,6 +50,8 @@ Release report: TBD
 
 ### Changed
 
+- Fix `test_assign_agent_group_with_enrollment` ([#3956](https://github.com/wazuh/wazuh-qa/pull/3956)) \- (Tests)
+- Fix `test_file_limit_delete_full` module ([#3990](https://github.com/wazuh/wazuh-qa/pull/3990)) \- (Tests)
 - Improve `test_agent_groups_new_cluster_node` ([#3971](https://github.com/wazuh/wazuh-qa/pull/3971)) \- (Tests)
 - Fix Solaris agent provision schema ([#3750](https://github.com/wazuh/wazuh-qa/issues/3744)) \- (Framework)
 - Fix wazuh-db integration tests for agent-groups ([#3926](https://github.com/wazuh/wazuh-qa/pull/3926)) \- (Tests + Framework)
