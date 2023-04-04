@@ -186,6 +186,33 @@ def callback_integrity_message(line):
             return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))
 
 
+def callback_integrity_sync_message(line):
+    """ Callback that detects if a line contains a integrity sync event
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    Returns:
+        List: returns a list with formated datetime, And the event's JSON data.
+    """
+    if callback_detect_integrity_control_event(line):
+        match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*({.*?})$", line)
+        if match:
+            return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))
+
+
+def callback_detect_integrity_check_global(line):
+    """ Callback that detects if a line contains an 'integrity_check_global' event
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    Returns:
+        JSON: returns event's JSON data.
+    """
+    match = callback_detect_integrity_control_event(line)
+    if match:
+        if match['type'] == 'integrity_check_global':
+            return match
+    return None
+
+
 def callback_detect_file_integrity_event(line):
     """ Callback that detects if a line contains a file integrity event
 
