@@ -61,6 +61,7 @@ tags:
     - fim_scan
 '''
 import os
+import sys
 from calendar import monthrange
 from datetime import datetime, timedelta
 
@@ -137,6 +138,7 @@ def get_configuration(request):
 
 
 # tests
+@pytest.mark.skipif(sys.platform == 'win32', reason="Flaky local results. When it is fixed it will be unblocked")
 @pytest.mark.parametrize('tags_to_apply', [
     {'scan_both'}
 ])

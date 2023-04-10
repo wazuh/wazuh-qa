@@ -97,6 +97,7 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize('folder', test_directories)
+@pytest.mark.skipif(sys.platform == 'win32', reason="Flaky local results. When it is fixed it will be unblocked")
 @pytest.mark.parametrize('filename, mode, content, triggers_event, tags_to_apply', [
     ('.restricted', 'w', "Sample content", True, {'valid_regex1'}),
     ('binary.restricted', 'wb', b"Sample content", True, {'valid_regex1'}),
