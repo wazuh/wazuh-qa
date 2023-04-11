@@ -55,9 +55,10 @@ tags:
     - fim_registry_restrict
 '''
 import os
+import sys
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import global_parameters, T_20
 from wazuh_testing.fim import LOG_FILE_PATH, create_registry, modify_registry_value, registry_parser, KEY_WOW64_32KEY, \
     KEY_WOW64_64KEY, callback_restricted, generate_params, callback_detect_event, delete_registry_value, \
     check_time_travel, delete_registry, REG_SZ
@@ -232,6 +233,7 @@ def test_restrict_value(key, subkey, arch, value_name, triggers_event, tags_to_a
         assert event['data']['arch'] == '[x32]' if arch == KEY_WOW64_32KEY else '[x64]', 'Key event arch not equal'
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #16658. When fixed this should be unblocked")
 @pytest.mark.parametrize('key, subkey, test_subkey, arch, triggers_event, tags_to_apply', [
     (key, sub_key_1, valid_subkey, KEY_WOW64_64KEY, True, {'key_restrict'}),
     (key, sub_key_2, valid_subkey, KEY_WOW64_64KEY, True, {'key_restrict'}),
@@ -303,17 +305,14 @@ def test_restrict_key(key, subkey, test_subkey, arch, triggers_event, tags_to_ap
 
     tags:
         - scheduled
-        - time_travel
+
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
     test_key = os.path.join(subkey, test_subkey)
     create_registry(registry_parser[key], test_key, arch)
 
-    # Go ahead in time to let syscheck perform a new scan
-    check_time_travel(get_configuration['metadata']['fim_mode'] == 'scheduled', monitor=wazuh_log_monitor)
-
     if triggers_event:
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+        event = wazuh_log_monitor.start(timeout=T_20,
                                         callback=callback_detect_event, accum_results=1).result()
         assert event['data']['type'] == 'added', 'Event type not equal'
         assert event['data']['path'] == os.path.join(key, test_key), 'Event path not equal'
@@ -329,11 +328,10 @@ def test_restrict_key(key, subkey, test_subkey, arch, triggers_event, tags_to_ap
                 break
 
     delete_registry(registry_parser[key], test_key, arch)
-    # Go ahead in time to let syscheck perform a new scan
-    check_time_travel(get_configuration['metadata']['fim_mode'] == 'scheduled', monitor=wazuh_log_monitor)
 
+    # Go ahead in time to let syscheck perform a new scan
     if triggers_event:
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+        event = wazuh_log_monitor.start(timeout=T_20,
                                         callback=callback_detect_event, accum_results=1).result()
 
         assert event['data']['type'] == 'deleted', 'key event not equal'

@@ -30,6 +30,8 @@
             value: WINDOWS_REGISTRY_2
             attributes:
                 - arch: '64bit'
+        - frequency:
+            value: 3
   - section: sca
     elements:
     - enabled:
@@ -75,6 +77,8 @@
             value: WINDOWS_REGISTRY_2
             attributes:
                 - arch: '64bit'
+        - frequency:
+            value: 3
   - section: sca
     elements:
     - enabled:

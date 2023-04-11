@@ -55,6 +55,8 @@
         attributes:
         - arch: "both"
         - restrict_key: RESTRICT_KEY
+    - frequency:
+        value: 3
   - section: sca
     elements:
     - enabled:

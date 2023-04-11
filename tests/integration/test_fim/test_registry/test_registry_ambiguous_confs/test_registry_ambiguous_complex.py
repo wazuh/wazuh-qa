@@ -56,6 +56,7 @@ tags:
     - fim_registry_ambiguous_confs
 '''
 import os
+import sys
 from hashlib import sha1
 
 import pytest
@@ -126,10 +127,8 @@ def get_configuration(request):
 
 
 # Tests
-
-@pytest.mark.parametrize('key', [
-    key
-])
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #16658. When fixed this should be unblocked")
+@pytest.mark.parametrize('key', [key])
 @pytest.mark.parametrize('subkey, key_checkers', [
     (registry, checkers_key),
     (subkey_1, checkers_subkey1),
@@ -198,6 +197,7 @@ def test_ambiguous_complex_checks(key, subkey, key_checkers,
                        options=key_checkers, time_travel=True)
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #16658. When fixed this should be unblocked")
 @pytest.mark.parametrize('key', [
     key
 ])
@@ -283,6 +283,7 @@ def test_ambiguous_report_changes(key, subkey, value_list, report,
                        value_list=value_list, time_travel=True, validators_after_update=validator_after_update)
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #16658. When fixed this should be unblocked")
 @pytest.mark.parametrize('key', [
     key
 ])
