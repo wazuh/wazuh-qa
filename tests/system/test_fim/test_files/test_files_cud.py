@@ -49,6 +49,8 @@ from wazuh_testing.tools import WAZUH_LOGS_PATH
 from wazuh_testing.fim import create_folder_file, wait_for_fim_scan_end
 
 
+pytestmark = [pytest.mark.one_manager_agent_env]
+
 # Hosts
 testinfra_hosts = ["wazuh-manager", "wazuh-agent1"]
 
