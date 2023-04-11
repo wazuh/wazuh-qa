@@ -8,6 +8,7 @@ Wazuh commit: TBD \
 Release report: TBD
 
 ### Changed
+- Update code analysis and dependencies known flaws. [#3319](https://github.com/wazuh/wazuh-qa/pull/4083) \- (Tests)
 - Update schema database version([#3879](https://github.com/wazuh/wazuh-qa/pull/3879)) \- (Tests)
 
 ## [4.5.0] - Development (unreleased)
