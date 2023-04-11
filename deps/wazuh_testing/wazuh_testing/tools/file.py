@@ -281,12 +281,12 @@ def remove_file(file_path):
             delete_path_recursively(file_path)
 
 
-def copy_files_in_folder(folder, target_folder='/tmp', files_to_move=None):
+def copy_files_in_folder(folder, dst_folder='/tmp', files_to_move=None):
     """Copy files from a folder to target folder
 
     Args:
         folder (str): directory path from where to copy files.
-        target_folder (str): directory path where files will be copied to.
+        dst_folder (str): directory path where files will be copied to.
         files_to_move (list): List with files to move copy from a folder.
     """
     file_list = []
@@ -294,13 +294,13 @@ def copy_files_in_folder(folder, target_folder='/tmp', files_to_move=None):
         if files_to_move is None:
             for file in os.listdir(folder):
                 file_list.append(file)
-                copy(os.path.join(folder, file), target_folder)
+                copy(os.path.join(folder, file), dst_folder)
                 remove_file(os.path.join(folder, file))
         else:
             for file in files_to_move:
                 if os.path.isfile(os.path.join(folder, file)):
                     file_list.append(file)
-                    copy(os.path.join(folder, file), target_folder)
+                    copy(os.path.join(folder, file), dst_folder)
                     remove_file(os.path.join(folder, file))
     return file_list
 

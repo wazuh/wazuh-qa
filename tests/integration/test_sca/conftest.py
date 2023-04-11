@@ -29,12 +29,12 @@ def prepare_cis_policies_file(metadata):
     Args:
         metadata (dict): contains the test metadata. Must contain policy_file key with file name.
     '''
-    files_to_restore = copy_files_in_folder(folder=CIS_RULESET_PATH, target_folder=sca.TEMP_FILE_PATH)
+    files_to_restore = copy_files_in_folder(folder=CIS_RULESET_PATH, dst_folder=sca.TEMP_FILE_PATH)
     filename = metadata['policy_file']
     filepath = os.path.join(TEST_DATA_PATH, 'policies', filename)
     copy(filepath, CIS_RULESET_PATH)
     yield
-    copy_files_in_folder(folder=sca.TEMP_FILE_PATH, target_folder=CIS_RULESET_PATH, files_to_move=files_to_restore)
+    copy_files_in_folder(folder=sca.TEMP_FILE_PATH, dst_folder=CIS_RULESET_PATH, files_to_move=files_to_restore)
     delete_file(os.path.join(CIS_RULESET_PATH, filename))
 
 
