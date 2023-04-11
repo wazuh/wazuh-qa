@@ -23,6 +23,8 @@ from wazuh_testing.modules.fim.classes import CustomValidator, EventChecker, Reg
 if sys.platform == 'win32':
     import win32con
     import win32api
+    import win32security as win32sec
+    import ntsecuritycon as ntc
     import pywintypes
 
 

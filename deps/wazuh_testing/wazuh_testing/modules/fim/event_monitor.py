@@ -55,6 +55,8 @@ CB_STARTING_WINDOWS_AUDIT = r'.*state_checker.*(Starting check of Windows Audit 
 CB_SWITCHING_DIRECTORIES_TO_REALTIME = r'.*state_checker.*(Audit policy change detected.\
                                          Switching directories to realtime)'
 CB_RECIEVED_EVENT_4719 = r'.*win_whodata.*(Event 4719).*Switching directories to realtime'
+CB_FIM_REGISTRY_ENTRIES_COUNT = r".*Fim registry entries count: '(.*)'"
+CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT = r".*Fim registry values entries count: '(.*)'"
 
 # Error message
 ERR_MSG_REALTIME_FOLDERS_EVENT = 'Did not receive expected "Folders monitored with real-time engine" event'
