@@ -17,7 +17,7 @@ from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_call
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.modules import fim
 from wazuh_testing.modules.fim import event_monitor as ev
-from wazuh_testing.modules.fim.classes import CustomValidator, EventChecker
+from wazuh_testing.modules.fim.classes import CustomValidator, EventChecker, RegistryEventChecker
 
 
 if sys.platform == 'win32':
