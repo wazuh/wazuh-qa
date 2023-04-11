@@ -65,7 +65,6 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
 data_path = os.path.join(local_path, 'data')
 messages_path = os.path.join(data_path, 'enrollment_group_messages.yaml')
-
 timeout_full_task_end = 60
 
 # Variables
@@ -112,6 +111,7 @@ def test_assign_agent_to_a_group(agent_target, clean_environment):
 
     time.sleep(timeout_full_task_end)
 
+    # Check that agent has client key file
     assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
 
     try:
