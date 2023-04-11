@@ -57,7 +57,7 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import T_20
 from wazuh_testing.fim import LOG_FILE_PATH, calculate_registry_diff_paths, registry_value_cud, KEY_WOW64_32KEY, \
     KEY_WOW64_64KEY, generate_params
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -176,6 +176,5 @@ def test_report_changes(key, subkey, arch, value_name, tags_to_apply,
             assert event['data'].get('content_changes') is not None, 'content_changes is empty'
 
     registry_value_cud(key, subkey, wazuh_log_monitor, arch=arch, value_list=values,
-                       time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                       min_timeout=global_parameters.default_timeout, triggers_event=True,
+                       min_timeout=T_20, triggers_event=True,
                        validators_after_update=[report_changes_validator])

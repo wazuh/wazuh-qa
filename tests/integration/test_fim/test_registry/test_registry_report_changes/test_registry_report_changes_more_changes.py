@@ -58,7 +58,7 @@ import os
 
 import pytest
 from test_fim.common import generate_string
-from wazuh_testing import global_parameters
+from wazuh_testing import global_parameters, T_20
 from wazuh_testing.fim import LOG_FILE_PATH, calculate_registry_diff_paths, registry_value_cud, KEY_WOW64_32KEY, \
     KEY_WOW64_64KEY, generate_params
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -181,6 +181,4 @@ def test_report_changes_more_changes(key, subkey, arch, value_name, tags_to_appl
             assert event['data'].get('content_changes')[-len(MORE_CHANGES_STR):] == MORE_CHANGES_STR, error_str
 
     registry_value_cud(key, subkey, wazuh_log_monitor, arch=arch, value_list=values,
-                       time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                       min_timeout=global_parameters.default_timeout, triggers_event=True,
-                       validators_after_update=[report_changes_validator])
+                       min_timeout=T_20, triggers_event=True, validators_after_update=[report_changes_validator])
