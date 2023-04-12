@@ -8,6 +8,11 @@ All notable changes to this project will be documented in this file.
 
 - Fix unstable system tests ([#4080](https://github.com/wazuh/wazuh-qa/pull/4080)) \- (Tests)
 
+## [4.4.1] - 12-04-2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/63a0580562007c4ba9c117f4a232ce90160481ff \
+Release report: https://github.com/wazuh/wazuh/issues/16620
+
 ## [4.4.0] - 28-03-2023
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/2477e9fa50bc1424e834ac8401ce2450a5978e75 \
