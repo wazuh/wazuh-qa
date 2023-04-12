@@ -14,7 +14,6 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 
 ### Added
 
-- Fix agentd IT for python3.10 AMI ([#3973](https://github.com/wazuh/wazuh-qa/pull/3973)) \- (Fixed)
 - Add multigroups tests cases for `test_assign_groups_guess` ([#3979](https://github.com/wazuh/wazuh-qa/pull/3979)) \- (Tests)
 - Add new group_hash case and update the `without condition` case output in `wazuh_db/sync_agent_groups_get` ([#3959](https://github.com/wazuh/wazuh-qa/pull/3959)) \- (Tests)
 - Add markers for each system test environment ([#3961](https://github.com/wazuh/wazuh-qa/pull/3961)) \- (Framework + Tests)
@@ -95,6 +94,7 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 
 ### Fixed
 
+- Fix agentd IT for python3.10 AMI ([#3973](https://github.com/wazuh/wazuh-qa/pull/3973)) \- (Tests)
 - Fix `test_assign_agent_group_with_enrollment` ([#3956](https://github.com/wazuh/wazuh-qa/pull/3956)) \- (Tests)
 - Fix `test_file_limit_delete_full` module ([#3990](https://github.com/wazuh/wazuh-qa/pull/3990)) \- (Tests)
 - Fix test_agent_groups system test ([#3955](https://github.com/wazuh/wazuh-qa/pull/3964)) \- (Tests)
