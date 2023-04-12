@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.4.2] - TBD
+
+### Fixed
+
+- Fix unstable system tests ([#4080](https://github.com/wazuh/wazuh-qa/pull/4080)) \- (Tests)
+
 ## [4.4.0] - 28-03-2023
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/2477e9fa50bc1424e834ac8401ce2450a5978e75 \
@@ -9,7 +15,6 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 
 ### Added
 
-- Fix unstable system tests ([#4080](https://github.com/wazuh/wazuh-qa/pull/4080)) \- (Tests)
 - Add multigroups tests cases for `test_assign_groups_guess` ([#3979](https://github.com/wazuh/wazuh-qa/pull/3979)) \- (Tests)
 - Add new group_hash case and update the `without condition` case output in `wazuh_db/sync_agent_groups_get` ([#3959](https://github.com/wazuh/wazuh-qa/pull/3959)) \- (Tests)
 - Add markers for each system test environment ([#3961](https://github.com/wazuh/wazuh-qa/pull/3961)) \- (Framework + Tests)
