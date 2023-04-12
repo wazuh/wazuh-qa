@@ -104,7 +104,7 @@ global remoted_server
 remoted_server = None
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def teardown():
     yield
     global remoted_server
@@ -250,6 +250,9 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configu
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - teardown:
+            type: fixture
+            brief: Stop the Remoted server
 
     assertions:
         - Verify that the agent enrollment is successful.
@@ -336,6 +339,9 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, conf
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - teardown:
+            type: fixture
+            brief: Stop the Remoted server
 
     assertions:
         - Verify that the agent enrollment is successful.

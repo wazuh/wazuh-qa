@@ -103,7 +103,7 @@ authd_server = AuthdSimulator('127.0.0.1', key_path=SERVER_KEY_PATH, cert_path=S
 remoted_server = None
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def teardown():
     yield
 
@@ -340,6 +340,9 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - teardown:
+            type: fixture
+            brief: Stop the Remoted server
 
     assertions:
         - Verify that when the 'wazuh-agentd' daemon initializes, it connects to
