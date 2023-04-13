@@ -103,7 +103,10 @@ authd_server = AuthdSimulator('127.0.0.1', key_path=SERVER_KEY_PATH, cert_path=S
 remoted_server = None
 
 
+@pytest.fixture
 def teardown():
+    yield
+
     global remoted_server
     if remoted_server is not None:
         remoted_server.stop()
@@ -308,7 +311,7 @@ This test covers different options of delays between server connection attempts:
 
 
 def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, stop_agent, set_keys,
-                                           configure_environment, get_configuration):
+                                           configure_environment, get_configuration, teardown):
     '''
     description: Check how the agent behaves when there are delays between connection
                  attempts to the server. For this purpose, different values for
@@ -337,6 +340,9 @@ def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, 
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - teardown:
+            type: fixture
+            brief: Stop the Remoted server
 
     assertions:
         - Verify that when the 'wazuh-agentd' daemon initializes, it connects to
