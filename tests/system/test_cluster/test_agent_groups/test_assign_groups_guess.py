@@ -95,7 +95,7 @@ def modify_local_internal_options(status_guess_agent_group):
     backup_local_internal_options = host_manager.get_file_content(test_infra_managers[0], WAZUH_LOCAL_INTERNAL_OPTIONS)
 
     # Add local internal options
-    host_manager.configure_internal_options(local_internal_options)
+    host_manager.configure_local_internal_options(local_internal_options)
 
     yield
 
