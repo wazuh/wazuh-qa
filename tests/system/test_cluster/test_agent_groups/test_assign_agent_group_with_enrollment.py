@@ -45,7 +45,7 @@ import os
 import time
 import pytest
 
-from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, restart_cluster, check_keys_file, delete_group_of_agents,
+from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, restart_cluster, check_keys_file, delete_agent_group,
                     check_agent_groups_db)
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
@@ -121,4 +121,4 @@ def test_assign_agent_to_a_group(agent_target, clean_environment):
 
     finally:
         # Delete group of agent
-        delete_group_of_agents(test_infra_managers[0], id_group, host_manager)
+        delete_agent_group(test_infra_managers[0], id_group, host_manager)

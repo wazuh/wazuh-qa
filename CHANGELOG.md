@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.4.2] - TBD
 
+### Added
+
+- Add system tests for groups deletion ([#4057](https://github.com/wazuh/wazuh-qa/pull/4057)) \- (Tests)
+
 ### Fixed
 
 - Fix agentd IT for python3.10 AMI ([#3973](https://github.com/wazuh/wazuh-qa/pull/3973)) \- (Tests)
