@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.4.2] - TBD
 
+### Added
+
+- Add system tests for groups deletion ([#4057](https://github.com/wazuh/wazuh-qa/pull/4057)) \- (Tests)
+
 ### Fixed
 
 - Fix agentd IT for python3.10 AMI ([#3973](https://github.com/wazuh/wazuh-qa/pull/3973)) \- (Tests)
@@ -21,7 +25,6 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 
 ### Added
 
-- Add system tests for groups deletion ([#4057](https://github.com/wazuh/wazuh-qa/pull/4057)) \- (Tests)
 - Add multigroups tests cases for `test_assign_groups_guess` ([#3979](https://github.com/wazuh/wazuh-qa/pull/3979)) \- (Tests)
 - Add new group_hash case and update the `without condition` case output in `wazuh_db/sync_agent_groups_get` ([#3959](https://github.com/wazuh/wazuh-qa/pull/3959)) \- (Tests)
 - Add markers for each system test environment ([#3961](https://github.com/wazuh/wazuh-qa/pull/3961)) \- (Framework + Tests)
