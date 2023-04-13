@@ -431,6 +431,9 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - teardown:
+            type: fixture
+            brief: Stop the Remoted server
 
     assertions:
         - Verify that the agent enrollment is successful.
@@ -520,6 +523,9 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, configure_env
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - teardown:
+            type: fixture
+            brief: Stop the Remoted server
 
     assertions:
         - Verify that the agent enrollment is successful.
@@ -615,6 +621,9 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, config
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - teardown:
+            type: fixture
+            brief: Stop the Remoted server
 
     assertions:
         - Verify that the agent enrollment is successful.
