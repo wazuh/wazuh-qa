@@ -1,0 +1,21 @@
+-
+  name: 'delete_folder_master'
+  test_case:
+    host: 'wazuh-master'
+    g_deleted: 'g_master'
+    first_time: 'syncreq'
+    second_time: 'synced'
+-
+  name: 'delete_folder_worker1'
+  test_case:
+    host: 'wazuh-worker1'
+    g_deleted: 'g_worker1'
+    first_time: 'synced'
+    second_time: 'synced'
+-
+  name: 'delete_folder_worker2'
+  test_case:
+    host: 'wazuh-worker2'
+    g_deleted: 'g_worker2'
+    first_time: 'synced'
+    second_time: 'synced'
