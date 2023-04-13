@@ -5,7 +5,7 @@
 import os
 import json
 
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, CLUSTER_LOGS_PATH
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, CLUSTER_LOGS_PATH, AGENT_GROUPS_BINARY_PATH
 
 # Agent Variables
 AGENT_STATUS_ACTIVE = 'active'
@@ -87,7 +87,7 @@ def assign_agent_to_new_group(host, id_group, id_agent, host_manager):
 def delete_agent_group(host, id_group, host_manager, method='tool'):
     # Delete group
     if method == 'tool':
-        host_manager.run_command(host, f"/var/ossec/bin/agent_groups -q -r -g {id_group}")
+        host_manager.run_command(host, f"{AGENT_GROUPS_BINARY_PATH} -q -r -g {id_group}")
     elif method == 'api':
         master_token = host_manager.get_api_token(host)
         host_manager.make_api_call(host=host, method='DELETE', token=master_token,
