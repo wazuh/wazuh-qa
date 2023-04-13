@@ -85,7 +85,13 @@ def assign_agent_to_new_group(host, id_group, id_agent, host_manager):
 
 
 def delete_agent_group(host, id_group, host_manager, method='tool'):
-    # Delete group
+    """Function to delete a group.
+    Args:
+        host (str): Host name where the query will be executed.
+        id_group (str): Name of the group from which the id will be obtained.
+        host_manager (obj): Instance of HostManager.
+        method (str): Method to be used to delete the group. Default:  tool.
+    """
     if method == 'tool':
         host_manager.run_command(host, f"{AGENT_GROUPS_BINARY_PATH} -q -r -g {id_group}")
     elif method == 'api':
