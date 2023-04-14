@@ -83,7 +83,7 @@ t2_cases_path = os.path.join(TEST_CASES_PATH, 'case_test_all_scans_disabled.yaml
 t2_config_parameters, t2_config_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
 t2_configurations = load_configuration_template(t2_config_path, t2_config_parameters, t2_config_metadata)
 
-# T3 Parameters: Check the behaviour of Syscollector while setting invalid configurations.
+# T3 Parameters: Check the behavior of Syscollector while setting invalid configurations.
 t3_config_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_syscollector.yaml')
 t3_cases_path = os.path.join(TEST_CASES_PATH, 'case_test_invalid_configurations.yaml')
 t3_config_parameters, t3_config_metadata, t3_case_ids = get_test_cases_data(t3_cases_path)
@@ -220,7 +220,7 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
 
     # Check that no scan is triggered.
     for check_function in check_functions:
-        # Expected: the function must throw a TimoutError
+        # Expected: the function must throw a TimeoutError
         with pytest.raises(TimeoutError):
             file_monitor = FileMonitor(LOG_FILE_PATH)
             # Is not necessary to set the update_position to False because the Syscollector is configured to run its
@@ -236,7 +236,7 @@ def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_
                                              configure_local_internal_options_module, truncate_monitored_files,
                                              daemons_handler_function):
     '''
-    description: Check the behaviour of Syscollector while setting invalid configurations.
+    description: Check the behavior of Syscollector while setting invalid configurations.
 
     test_phases:
         - setup:
@@ -309,7 +309,7 @@ def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_
     # Check that the module does not start if the field is critical
     with pytest.raises(TimeoutError):
         evm.check_module_is_starting(file_monitor=file_monitor)
-        pytest.fail(f"The module has started anyway. This behaviour is not the expected.")
+        pytest.fail(f"The module has started anyway. This behavior is not the expected.")
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t4_configurations, t4_config_metadata), ids=t4_case_ids)
@@ -372,9 +372,9 @@ def test_syscollector_default_values(configuration, metadata, set_wazuh_configur
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t5_configurations, t5_config_metadata), ids=t5_case_ids)
-def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
-                              configure_local_internal_options_module, truncate_monitored_files,
-                              daemons_handler_function):
+def test_syscollector_scanning(configuration, metadata, set_wazuh_configuration,
+                               configure_local_internal_options_module, truncate_monitored_files,
+                               daemons_handler_function):
     '''
     description: Check that the scan is completed when all scans are enabled.
 
@@ -427,9 +427,9 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
     '''
     file_monitor = FileMonitor(LOG_FILE_PATH)
     # 60s + 2 seconds of margin because it includes the case when the agent starts for the first time
-    evm.check_module_is_starting(file_monitor=file_monitor, timeout=T_60 + 2, update_position=False)
+    evm.check_module_is_starting(file_monitor=file_monitor, timeout=T_60 + 2)
     # Check general scan has started
-    evm.check_scan_started(file_monitor=file_monitor, timeout=T_10, update_position=False)
+    evm.check_scan_started(file_monitor=file_monitor, timeout=T_10)
 
     # Check that each scan was accomplished
     checks_to_run = [evm.check_hardware_scan_finished, evm.check_os_scan_finished, evm.check_network_scan_finished,
@@ -439,9 +439,9 @@ def test_syscollector_scannig(configuration, metadata, set_wazuh_configuration,
 
     for check_runner in checks_to_run:
         # Run check
-        check_runner(file_monitor=file_monitor, timeout=T_10, update_position=False)
+        check_runner(file_monitor=file_monitor, timeout=T_10)
 
     # Check general scan has finished
-    evm.check_scan_finished(file_monitor=file_monitor, timeout=T_10, update_position=False)
+    evm.check_scan_finished(file_monitor=file_monitor, timeout=T_10)
     # Check that the sync has finished
-    evm.check_sync_finished(file_monitor=file_monitor, timeout=T_10, update_position=False)
+    evm.check_sync_finished(file_monitor=file_monitor, timeout=T_10)

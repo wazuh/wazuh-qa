@@ -21,7 +21,7 @@ def make_callback(pattern, prefix=''):
 
 def check_event(file_monitor=None, callback='', error_message=None, update_position=True, timeout=20,
                 accum_results=1, file_to_monitor=None, prefix=None):
-    """Check if an API event occurs
+    """Check if an event occurs.
 
     Args:
         file_monitor (FileMonitor): FileMonitor object to monitor the file content.
