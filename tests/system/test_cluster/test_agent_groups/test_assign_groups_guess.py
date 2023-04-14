@@ -46,7 +46,7 @@ import pytest
 
 from system.test_cluster.test_agent_groups.common import register_agent
 from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups, check_keys_file,
-                    create_new_agent_group, delete_group_of_agents, remove_cluster_agents,
+                    create_new_agent_group, delete_agent_group, remove_cluster_agents,
                     assign_agent_to_new_group, restart_cluster)
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.file import replace_regex_in_file
@@ -95,7 +95,7 @@ def modify_local_internal_options(status_guess_agent_group):
     backup_local_internal_options = host_manager.get_file_content(test_infra_managers[0], WAZUH_LOCAL_INTERNAL_OPTIONS)
 
     # Add local internal options
-    host_manager.configure_internal_options(local_internal_options)
+    host_manager.configure_local_internal_options(local_internal_options)
 
     yield
 
@@ -189,7 +189,7 @@ def test_guess_single_group(target_node, status_guess_agent_group, clean_environ
 
     finally:
         # Delete group of agent
-        delete_group_of_agents(test_infra_managers[0], group_id, host_manager)
+        delete_agent_group(test_infra_managers[0], group_id, host_manager)
         replace_regex_in_file([agent_id, expected_group], ['AGENT_ID', 'GROUP_ID'], messages_path)
 
 
@@ -285,5 +285,5 @@ def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clea
 
     finally:
         # Delete group of agent
-        delete_group_of_agents(test_infra_managers[0], group_id, host_manager)
+        delete_agent_group(test_infra_managers[0], group_id, host_manager)
         replace_regex_in_file([agent1_id, expected_group], ['AGENT_ID', 'GROUP_ID'], messages_path)
