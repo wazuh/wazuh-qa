@@ -1,14 +1,3 @@
-- name: inspector_with_only_logs_after
-  description: Inspector only logs after configurations
-  configuration_parameters:
-    SERVICE_TYPE: inspector
-    ONLY_LOGS_AFTER: 2023-JAN-30
-    LOG_GROUP_NAME: ''
-  metadata:
-    service_type: inspector
-    only_logs_after: 2023-JAN-30
-    expected_results: 4
-
 - name: cloudwatchlogs_with_only_logs_after
   description: CloudWatch only logs after configurations
   configuration_parameters:

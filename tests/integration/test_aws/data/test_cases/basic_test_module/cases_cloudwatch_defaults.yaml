@@ -1,11 +1,3 @@
-- name: inspector_defaults
-  description: Inspector default configurations
-  configuration_parameters:
-    SERVICE_TYPE: inspector
-    LOG_GROUP_NAME: ''
-  metadata:
-    service_type: inspector
-
 - name: cloudwatchlogs_defaults
   description: CloudWatch default configurations
   configuration_parameters:

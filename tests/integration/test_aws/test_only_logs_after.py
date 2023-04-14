@@ -388,9 +388,9 @@ def test_bucket_with_only_logs_after(
         )
 
 
-# -------------------------------------------- TEST_SERVICE_WITH_ONLY_LOGS_AFTER ---------------------------------------
-t4_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'service_configuration_with_only_logs_after.yaml')
-t4_cases_path = os.path.join(TEST_CASES_PATH, 'cases_service_with_only_logs_after.yaml')
+# --------------------------------------------TEST_CLOUDWATCH_WITH_ONLY_LOGS_AFTER -------------------------------------
+t4_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'cloudwatch_configuration_with_only_logs_after.yaml')
+t4_cases_path = os.path.join(TEST_CASES_PATH, 'cases_cloudwatch_with_only_logs_after.yaml')
 
 t4_configuration_parameters, t4_configuration_metadata, t4_case_ids = get_test_cases_data(t4_cases_path)
 t4_configurations = load_configuration_template(
@@ -400,7 +400,7 @@ t4_configurations = load_configuration_template(
 
 @pytest.mark.tier(level=0)
 @pytest.mark.parametrize('configuration, metadata', zip(t4_configurations, t4_configuration_metadata), ids=t4_case_ids)
-def test_service_with_only_logs_after(
+def test_cloudwatch_with_only_logs_after(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_aws_services_db,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
 ):
@@ -474,12 +474,9 @@ def test_service_with_only_logs_after(
         '--aws_profile', 'qa',
         '--only_logs_after', only_logs_after,
         '--regions', 'us-east-1',
+        '--aws_log_groups', log_group_name,
         '--debug', '2'
     ]
-
-    if log_group_name is not None:
-        parameters.insert(9, log_group_name)
-        parameters.insert(9, '--aws_log_groups')
 
     # Check AWS module started
     wazuh_log_monitor.start(
@@ -505,24 +502,136 @@ def test_service_with_only_logs_after(
 
     data = get_service_db_row(table_name=table_name_map[service_type])
 
-    if service_type == 'inspector':
-        assert data.service == service_type
-        assert (
-            datetime.strptime(data.timestamp, '%Y-%m-%d %H:%M:%S.%f') == datetime.strptime(only_logs_after, '%Y-%b-%d')
-        )
-    else:
-        assert log_group_name == data.aws_log_group
-        assert metadata['log_stream'] == data.aws_log_stream
+    assert log_group_name == data.aws_log_group
+    assert metadata['log_stream'] == data.aws_log_stream
+
+
+# ------------------------------------------ TEST_INSPECTOR_WITH_ONLY_LOGS_AFTER ---------------------------------------
+t5_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'inspector_configuration_with_only_logs_after.yaml')
+t5_cases_path = os.path.join(TEST_CASES_PATH, 'cases_inspector_with_only_logs_after.yaml')
+
+t5_configuration_parameters, t5_configuration_metadata, t5_case_ids = get_test_cases_data(t5_cases_path)
+t5_configurations = load_configuration_template(
+    t5_configurations_path, t5_configuration_parameters, t5_configuration_metadata
+)
+
+
+@pytest.mark.tier(level=0)
+@pytest.mark.parametrize('configuration, metadata', zip(t5_configurations, t5_configuration_metadata), ids=t5_case_ids)
+def test_inspector_with_only_logs_after(
+    configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_aws_services_db,
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
+):
+    """
+    description: All events with a timestamp greater than the only_logs_after value are processed.
+    test_phases:
+        - setup:
+            - Load Wazuh light configuration.
+            - Apply ossec.conf configuration changes according to the configuration template and use case.
+            - Apply custom settings in local_internal_options.conf.
+            - Truncate wazuh logs.
+            - Restart wazuh-manager service to apply configuration changes.
+        - test:
+            - Check in the ossec.log that a line has appeared calling the module with correct parameters.
+            - Check the expected number of events were sent to analysisd. Only the logs whose timestamp is greater than
+              the date specified in the configuration should be processed.
+            - Check the database was created and updated accordingly.
+        - teardown:
+            - Truncate wazuh logs.
+            - Restore initial configuration, both ossec.conf and local_internal_options.conf.
+            - Delete the uploaded file.
+    wazuh_min_version: 4.5.0
+    parameters:
+        - configuration:
+            type: dict
+            brief: Get configurations from the module.
+        - metadata:
+            type: dict
+            brief: Get metadata from the module.
+        - load_wazuh_basic_configuration:
+            type: fixture
+            brief: Load basic wazuh configuration.
+        - set_wazuh_configuration:
+            type: fixture
+            brief: Apply changes to the ossec.conf configuration.
+        - clean_aws_services_db:
+            type: fixture
+            brief: Delete the DB file before and after the test execution.
+        - configure_local_internal_options_function:
+            type: fixture
+            brief: Apply changes to the local_internal_options.conf configuration.
+        - truncate_monitored_files:
+            type: fixture
+            brief: Truncate wazuh logs.
+        - restart_wazuh_daemon_function:
+            type: fixture
+            brief: Restart the wazuh service.
+        - wazuh_log_monitor:
+            type: fixture
+            brief: Return a `ossec.log` monitor.
+    assertions:
+        - Check in the log that the module was called with correct parameters.
+        - Check in the bucket that the uploaded log was removed.
+    input_description:
+        - The `configuration_defaults` file provides the module configuration for this test.
+        - The `cases_defaults` file provides the test cases.
+    """
+    table_name_map = {
+        'inspector': 'aws_services',
+        'cloudwatchlogs': 'cloudwatch_logs'
+    }
+
+    service_type = metadata['service_type']
+    only_logs_after = metadata['only_logs_after']
+    expected_results = metadata['expected_results']
+
+    parameters = [
+        'wodles/aws/aws-s3',
+        '--service', service_type,
+        '--aws_profile', 'qa',
+        '--only_logs_after', only_logs_after,
+        '--regions', 'us-east-1',
+        '--debug', '2'
+    ]
+
+    # Check AWS module started
+    wazuh_log_monitor.start(
+        timeout=global_parameters.default_timeout,
+        callback=event_monitor.callback_detect_aws_module_start,
+        error_message='The AWS module did not start as expected',
+    ).result()
+
+    # Check command was called correctly
+    wazuh_log_monitor.start(
+        timeout=global_parameters.default_timeout,
+        callback=event_monitor.callback_detect_aws_module_called(parameters),
+        error_message='The AWS module was not called with the correct parameters',
+    ).result()
+
+    wazuh_log_monitor.start(
+        timeout=global_parameters.default_timeout,
+        callback=event_monitor.callback_detect_service_event_processed(expected_results, service_type),
+        error_message='The AWS module did not process the expected number of events',
+    ).result()
+
+    assert services_db_exists()
+
+    data = get_service_db_row(table_name=table_name_map[service_type])
+
+    assert data.service == service_type
+    assert (
+        datetime.strptime(data.timestamp, '%Y-%m-%d %H:%M:%S.%f') == datetime.strptime(only_logs_after, '%Y-%b-%d')
+    )
 
 
 # ---------------------------------------------------- TEST_MULTIPLE_CALLS ---------------------------------------------
-t4_cases_path = os.path.join(TEST_CASES_PATH, 'cases_bucket_multiple_calls.yaml')
+t5_cases_path = os.path.join(TEST_CASES_PATH, 'cases_bucket_multiple_calls.yaml')
 
-_, t4_configuration_metadata, t4_case_ids = get_test_cases_data(t4_cases_path)
+_, t5_configuration_metadata, t5_case_ids = get_test_cases_data(t5_cases_path)
 
 
 @pytest.mark.tier(level=1)
-@pytest.mark.parametrize('metadata', t4_configuration_metadata, ids=t4_case_ids)
+@pytest.mark.parametrize('metadata', t5_configuration_metadata, ids=t5_case_ids)
 def test_bucket_multiple_calls(
     metadata, clean_s3_cloudtrail_db, load_wazuh_basic_configuration, restart_wazuh_function, delete_file_from_s3
 ):
@@ -628,13 +737,13 @@ def test_bucket_multiple_calls(
 
 
 # -------------------------------------------- TEST_INSPECTOR_MULTIPLE_CALLS -------------------------------------------
-t5_cases_path = os.path.join(TEST_CASES_PATH, 'cases_inspector_multiple_calls.yaml')
+t6_cases_path = os.path.join(TEST_CASES_PATH, 'cases_inspector_multiple_calls.yaml')
 
-_, t5_configuration_metadata, t5_case_ids = get_test_cases_data(t5_cases_path)
+_, t6_configuration_metadata, t6_case_ids = get_test_cases_data(t6_cases_path)
 
 
 @pytest.mark.tier(level=1)
-@pytest.mark.parametrize('metadata', t5_configuration_metadata, ids=t5_case_ids)
+@pytest.mark.parametrize('metadata', t6_configuration_metadata, ids=t6_case_ids)
 @pytest.mark.xfail
 def test_inspector_multiple_calls(
     metadata, clean_aws_services_db, load_wazuh_basic_configuration, restart_wazuh_function
@@ -711,9 +820,9 @@ def test_inspector_multiple_calls(
 
 
 # ----------------------------------------- TEST_CLOUDWATCH_MULTIPLE_CALLS ---------------------------------------------
-t6_cases_path = os.path.join(TEST_CASES_PATH, 'cases_cloudwatch_multiple_calls.yaml')
+t7_cases_path = os.path.join(TEST_CASES_PATH, 'cases_cloudwatch_multiple_calls.yaml')
 
-_, t6_configuration_metadata, t6_case_ids = get_test_cases_data(t6_cases_path)
+_, t7_configuration_metadata, t7_case_ids = get_test_cases_data(t7_cases_path)
 
 
 @pytest.mark.tier(level=1)
