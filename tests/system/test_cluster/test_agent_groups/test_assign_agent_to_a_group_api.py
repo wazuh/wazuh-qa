@@ -46,9 +46,11 @@ import pytest
 from system.test_cluster.test_agent_groups.common import register_agent
 from system import (AGENT_NO_GROUPS, AGENT_STATUS_ACTIVE, AGENT_STATUS_DISCONNECTED, ERR_MSG_FAILED_TO_SET_AGENT_GROUP,
                     ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups, check_agent_status, restart_cluster,
-                    check_keys_file, delete_group_of_agents, create_new_agent_group)
+                    check_keys_file, delete_agent_group, create_new_agent_group)
 from wazuh_testing.tools.system import HostManager
 
+
+pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
 
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
@@ -66,13 +68,9 @@ test_group = 'group_test'
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
-@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("initial_status", [AGENT_STATUS_ACTIVE, AGENT_STATUS_DISCONNECTED])
 @pytest.mark.parametrize("agent_target", ["wazuh-master", "wazuh-worker1"])
-def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment, test_infra_managers,
-                                 test_infra_agents, host_manager):
+def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment):
     '''
     description: Check agent enrollment process and new group assignment works as expected in a cluster environment.
                  Check that when an agent pointing to a master/worker node is registered, and when
@@ -88,15 +86,6 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
         - clean_enviroment:
             type: Fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
-        - test_infra_managers
-            type: List
-            brief: List of manager hosts in enviroment.
-        - test_infra_agents
-            type: List
-            brief: List of agent hosts in enviroment.
-        - host_manager
-            type: HostManager object
-            brief: Handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering and before starting the agent, it has no groups assigned.
@@ -142,4 +131,4 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
 
     # Delete group of agent
     finally:
-        delete_group_of_agents(test_infra_managers[0], test_group, host_manager)
+        delete_agent_group(test_infra_managers[0], test_group, host_manager)
