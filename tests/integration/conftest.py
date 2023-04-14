@@ -15,13 +15,10 @@ import pytest
 import wazuh_testing.tools.configuration as conf
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
-from wazuh_testing import ALERTS_JSON_PATH, ARCHIVES_JSON_PATH, ARCHIVES_LOG_PATH, DB_PATH, SYSCOLLECTOR_DB_PATH, \
-                          global_parameters, logger, mocking
-from wazuh_testing.db_interface import global_db
+from wazuh_testing import ALERTS_JSON_PATH, ARCHIVES_JSON_PATH, ARCHIVES_LOG_PATH, global_parameters, logger, mocking
 from wazuh_testing.db_interface.agent_db import update_os_info
 from wazuh_testing.db_interface.global_db import get_system, modify_system
-from wazuh_testing.logcollector import (create_file_structure,
-                                        delete_file_structure)
+from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import ALERT_FILE_PATH, LOG_FILE_PATH, WAZUH_CONF, WAZUH_LOCAL_INTERNAL_OPTIONS, get_service
 from wazuh_testing.tools.configuration import get_minimal_configuration, get_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import copy, recursive_directory_creation, remove_file, truncate_file, write_file
