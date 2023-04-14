@@ -973,6 +973,7 @@ def daemons_handler(request):
             control_service('stop', daemon=daemon)
 
 
+# Wrapper of `daemons_handler` function to change its scope from `module` to `function`
 daemons_handler_function = pytest.fixture(daemons_handler.__wrapped__, scope='function')
 
 
