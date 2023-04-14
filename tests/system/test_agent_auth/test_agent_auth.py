@@ -35,6 +35,8 @@ from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.utils import format_ipv6_long
 
 
+pytestmark = [pytest.mark.basic_environment_env]
+
 # Hosts
 testinfra_hosts = ["wazuh-manager", "wazuh-agent1"]
 
