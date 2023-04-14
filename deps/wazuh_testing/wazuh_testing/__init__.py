@@ -71,11 +71,9 @@ T_20 = 20
 T_30 = 30
 T_60 = 60
 
-# Local Internal Options values
-MODULESD_DEBUG = 'wazuh_modules.debug'
-VERBOSE_DEBUG_OUTPUT = '2'
 
 # Local internal options
+MODULESD_DEBUG = 'wazuh_modules.debug'
 WINDOWS_DEBUG = 'windows.debug'
 SYSCHECK_DEBUG = 'syscheck.debug'
 VERBOSE_DEBUG_OUTPUT = 2
