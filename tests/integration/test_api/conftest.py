@@ -4,15 +4,16 @@
 
 import os
 import shutil
+
 import pytest
 
 import wazuh_testing as fw
 from wazuh_testing import api
-from wazuh_testing.tools.file import truncate_file
-from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools import services as svcs
 from wazuh_testing.modules.api import event_monitor as evm
 from wazuh_testing.tools import configuration as conf
+from wazuh_testing.tools import services as svcs
+from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools.monitoring import FileMonitor
 
 
 @pytest.fixture(scope='module')
@@ -144,6 +145,7 @@ def restart_api_module(request):
 
     # Start Wazuh API
     svcs.control_service('start')
+    evm.check_api_start_log(file_monitor)
 
 
 @pytest.fixture(scope='module')

@@ -46,7 +46,7 @@ import pytest
 from system.test_cluster.test_agent_groups.common import register_agent
 from system import (AGENT_NO_GROUPS, AGENT_STATUS_ACTIVE, AGENT_STATUS_DISCONNECTED, ERR_MSG_FAILED_TO_SET_AGENT_GROUP,
                     ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups, check_agent_status, restart_cluster,
-                    check_keys_file, delete_group_of_agents, create_new_agent_group)
+                    check_keys_file, delete_agent_group, create_new_agent_group)
 from wazuh_testing.tools.system import HostManager
 
 
@@ -131,4 +131,4 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
 
     # Delete group of agent
     finally:
-        delete_group_of_agents(test_infra_managers[0], test_group, host_manager)
+        delete_agent_group(test_infra_managers[0], test_group, host_manager)
