@@ -230,7 +230,6 @@ def test_syscollector_all_scans_disabled(configuration, metadata, set_wazuh_conf
                         f"This check has a match in the log: {check_function.__name__}")
 
 
-@pytest.mark.xfail(sys.platform == "win32", reason='Reported in wazuh/wazuh#15412')
 @pytest.mark.parametrize('configuration, metadata', zip(t3_configurations, t3_config_metadata), ids=t3_case_ids)
 def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_configuration,
                                              configure_local_internal_options_module, truncate_monitored_files,
@@ -313,7 +312,7 @@ def test_syscollector_invalid_configurations(configuration, metadata, set_wazuh_
 
 
 @pytest.mark.parametrize('configuration, metadata', zip(t4_configurations, t4_config_metadata), ids=t4_case_ids)
-@pytest.mark.xfail(reason='Reported in wazuh/wazuh#15413')
+@pytest.mark.xfail(reason='Reported in wazuh/wazuh#15413 - To be removed in 4.5: wazuh/wazuh-qa#3798')
 def test_syscollector_default_values(configuration, metadata, set_wazuh_configuration,
                                      configure_local_internal_options_module, truncate_monitored_files,
                                      daemons_handler_function):
