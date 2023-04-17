@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import global_parameters, T_10, T_20
 from wazuh_testing.modules.aws import event_monitor
 from wazuh_testing.modules.aws.constants import RANDOM_ACCOUNT_ID
 from wazuh_testing.modules.aws.db_utils import (
@@ -135,7 +135,7 @@ def test_log_groups(
 
     if expected_results:
         wazuh_log_monitor.start(
-            timeout=global_parameters.default_timeout,
+            timeout=T_20,
             callback=event_monitor.callback_detect_service_event_processed(expected_results, service_type),
             error_message='The AWS module did not process the expected number of events',
             accum_results=len(log_group_names.split(','))
@@ -148,7 +148,7 @@ def test_log_groups(
             ).result()
 
         wazuh_log_monitor.start(
-            timeout=global_parameters.default_timeout,
+            timeout=T_10,
             callback=event_monitor.make_aws_callback(r".*The specified log group does not exist."),
             error_message='The AWS module did not show correct message non-existent log group'
         ).result()

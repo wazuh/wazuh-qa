@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import global_parameters, T_20
 from wazuh_testing.modules.aws import event_monitor
 from wazuh_testing.tools.configuration import (
     get_test_cases_data,
@@ -590,7 +590,7 @@ def test_multiple_bucket_and_service_tags(
         - The `configuration_multiple_bucket_and_service_tags` file provides the configuration for this test.
     """
     wazuh_log_monitor.start(
-        timeout=global_parameters.default_timeout,
+        timeout=T_20,
         callback=event_monitor.callback_detect_bucket_or_service_call,
         error_message='The AWS module was not called for bucket or service the right amount of times',
         accum_results=4

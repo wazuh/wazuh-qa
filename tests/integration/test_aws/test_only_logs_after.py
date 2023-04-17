@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 import pytest
-from wazuh_testing import T_20, global_parameters
+from wazuh_testing import T_20, T_10, global_parameters
 from wazuh_testing.modules.aws import event_monitor
 from wazuh_testing.modules.aws import constants as cons
 from wazuh_testing.modules.aws.cli_utils import call_aws_module
@@ -255,7 +255,7 @@ def test_service_without_only_logs_after(
     ).result()
 
     wazuh_log_monitor.start(
-        timeout=global_parameters.default_timeout,
+        timeout=T_10,
         callback=event_monitor.callback_detect_service_event_processed(expected_results, service_type),
         error_message='The AWS module did not process the expected number of events',
     ).result()
@@ -493,7 +493,7 @@ def test_cloudwatch_with_only_logs_after(
     ).result()
 
     wazuh_log_monitor.start(
-        timeout=global_parameters.default_timeout,
+        timeout=T_10,
         callback=event_monitor.callback_detect_service_event_processed(expected_results, service_type),
         error_message='The AWS module did not process the expected number of events',
     ).result()
@@ -609,7 +609,7 @@ def test_inspector_with_only_logs_after(
     ).result()
 
     wazuh_log_monitor.start(
-        timeout=global_parameters.default_timeout,
+        timeout=T_10,
         callback=event_monitor.callback_detect_service_event_processed(expected_results, service_type),
         error_message='The AWS module did not process the expected number of events',
     ).result()
