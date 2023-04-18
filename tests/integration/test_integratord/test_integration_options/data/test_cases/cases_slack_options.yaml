@@ -1,17 +1,61 @@
-- name: Read valid json alert
-  description: Read a valid alert from alerts.json
+- name: slack_option_tag_no_value
+  description: When the option has no value passed, the slack integration is unable to run
   configuration_parameters:
-    API_KEY: Insert using --integration-api-key parameter
+    HOOK_URL: Insert using --integration-api-key parameter
+    OPTIONS_VALUE:
   metadata:
-    alert_sample: '{"timestamp":"2022-07-20T14:53:16.482+0000","rule":{"level":5,"description":
-                   "File added to the system.","id":"554","firedtimes":1,"mail":false,"groups":["ossec","syscheck",
-                   "syscheck_entry_added","syscheck_file"],"pci_dss":["11.5"],"gpg13":["4.11"],"gdpr":["II_5.1.f"],
-                   "hipaa":["164.312.c.1","164.312.c.2"],"nist_800_53":["SI.7"],"tsc":["PI1.4","PI1.5","CC6.1","CC6.8",
-                   "CC7.2","CC7.3"]},"agent":{"id":"000","name":"padding_input"},"manager":{"name":"c3"},"id":
-                   "1657551196.2754","full_log":"File /test_folder/TEST_VALID_ALERT.txt added\nMode: scheduled\n",
-                   "syscheck":{"path":"/test_folder/TEST_VALID_ALERT.txt","mode":"scheduled","size_after":"16",
-                   "perm_after":"rw-r--r--","uid_after":"0","gid_after":"0","md5_after":
-                   "2982666f29e2736e7ca0e12dd638d433","sha1_after":"49999430cc5652dedd26352b0342097e8fa3affe",
-                   "sha256_after":"32bc19c9406a98ab21e5ec79fbd5bba2cb79755607a9f382c662d37b5bf5d8ea","uname_after":
-                   "root","gname_after":"root","mtime_after":"2022-07-11T14:53:07","inode_after":9793,"event":"added"},
-                   "decoder":{"name":"syscheck_new_entry"},"location":"syscheck"}'
+    integration: slack
+    sends_message: false
+
+- name: slack_option_empty_json_value
+  description: When the option is passed an empty JSON, the slack integration is unable to run
+  configuration_parameters:
+    HOOK_URL: Insert using --integration-api-key parameter
+    OPTIONS_VALUE: '{}'
+  metadata:
+    integration: slack
+    sends_message: true
+    added_option:
+    response_code: '200'
+
+- name: slack_option_custom_pretext
+  description: When a custom value is added to an option, the slack integration works and the option is in the message
+  configuration_parameters:
+    HOOK_URL: Insert using --integration-api-key parameter
+    OPTIONS_VALUE: '{"pretext":"Custom Pretext"}'
+  metadata:
+    integration: slack
+    sends_message: true
+    added_option: '"pretext": "Custom Pretext"'
+    response_code: '200'
+
+- name: slack_option_invalid_json
+  description: When an invalid json is passed, the integration is unable to send the message
+  configuration_parameters:
+    HOOK_URL: Insert using --integration-api-key parameter
+    OPTIONS_VALUE: '{"pretext":"Custom Pretext}'
+  metadata:
+    integration: slack
+    sends_message: false
+
+- name: slack_option_invalid_value
+  description: When an invalid value for an option, the message is sent to the integration endpoint
+  configuration_parameters:
+    HOOK_URL: Insert using --integration-api-key parameter
+    OPTIONS_VALUE: '{"title_link":"invalid value - no link"}'
+  metadata:
+    integration: slack
+    sends_message: true
+    added_option: '"title_link": "invalid value - no link"'
+    response_code: '200'
+
+- name: slack_custom_option
+  description: When a non existent option is passed, the message is sent to the integration endpoint and works properly
+  configuration_parameters:
+    HOOK_URL: Insert using --integration-api-key parameter
+    OPTIONS_VALUE: '{"custom_option":"custom value"}'
+  metadata:
+    integration: slack
+    sends_message: true
+    added_option: '"custom_option": "custom value"'
+    response_code: '200'

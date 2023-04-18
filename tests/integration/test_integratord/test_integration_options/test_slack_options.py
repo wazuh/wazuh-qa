@@ -43,15 +43,12 @@ tags:
 '''
 import os
 import pytest
-import time
 
 from wazuh_testing import global_parameters
-from wazuh_testing.tools import LOG_FILE_PATH, ALERT_FILE_PATH
-from wazuh_testing.modules import integratord as integrator
-from wazuh_testing.modules.integratord.event_monitor import check_integratord_event
-from wazuh_testing.tools.local_actions import run_local_command_returning_output
+from wazuh_testing.tools import LOG_FILE_PATH
+from wazuh_testing.modules.integratord import event_monitor as evm
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
-from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.tools.monitoring import FileMonitor
 
 
 # Marks
@@ -63,20 +60,23 @@ CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'config_integratord_read_json_alerts.yaml')
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_valid_json_alerts.yaml')
-t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_integratord_read_invalid_json_alerts.yaml')
-
+t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'config_integration_no_option_tag.yaml')
+t2_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'config_slack_options.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_integration_no_option_tag.yaml')
+t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_slack_options.yaml')
 
 # Configurations
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
-t1_configuration_parameters[0]['API_KEY'] = global_parameters.integration_api_key
-t1_configurations = load_configuration_template(configurations_path, t1_configuration_parameters,
+t1_configuration_parameters[0]['HOOK_URL'] = global_parameters.slack_webhook_url
+t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters,
                                                 t1_configuration_metadata)
+
 t2_configuration_parameters, t2_configuration_metadata, t2_case_ids = get_test_cases_data(t2_cases_path)
-t2_configuration_parameters[0]['API_KEY'] = global_parameters.integration_api_key
-t2_configurations = load_configuration_template(configurations_path, t2_configuration_parameters,
+for config_params in t2_configuration_parameters:
+    config_params['HOOK_URL'] = global_parameters.slack_webhook_url
+t2_configurations = load_configuration_template(t2_configurations_path, t2_configuration_parameters,
                                                 t2_configuration_metadata)
+
 local_internal_options = {'integrator.debug': '2'}
 
 
@@ -84,7 +84,7 @@ local_internal_options = {'integrator.debug': '2'}
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata',
                          zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
-def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
+def test_integration_no_option_tag(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
                                        configure_local_internal_options_module, restart_wazuh_daemon_function,
                                        wait_for_start_module):
     '''
@@ -131,34 +131,35 @@ def test_integratord_read_valid_alerts(configuration, metadata, set_wazuh_config
     expected_output:
         - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
     '''
-
-    sample = metadata['alert_sample']
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
-    run_local_command_returning_output(f"echo '{sample}' >> {ALERT_FILE_PATH}")
 
     # Read Response in ossec.log
-    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
-                            callback=generate_monitoring_callback(integrator.CB_VIRUSTOTAL_ALERT),
-                            error_message=integrator.ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED)
+    evm.detect_integration_enabled(integration=metadata['integration'], file_monitor=wazuh_monitor)
+        
+    evm.detect_options_json_file_does_not_exist(file_monitor=wazuh_monitor)
+    
+    evm.get_message_sent(integration='Slack', file_monitor=wazuh_monitor)
+    
+    evm.detect_integration_response_code(response=metadata['response_code'], file_monitor=wazuh_monitor)
 
 
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata',
                          zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
-def test_integratord_read_invalid_alerts(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
-                                         configure_local_internal_options_module, restart_wazuh_daemon_function,
-                                         wait_for_start_module):
+def test_slack_options(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
+                                       configure_local_internal_options_module, restart_wazuh_daemon_function,
+                                       wait_for_start_module):
     '''
     description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
-    of a valid alert, a virustotal integration alert is expected in the alerts.json file. If the alert is invalid or
-    broken, or overly long a message will appear in the ossec.log file.
-    wazuh_min_version: 4.3.7
+    of a valid alert, a virustotal integration alert is expected in the alerts.json file.
+    wazuh_min_version: 4.5.0
 
     test_phases:
         - Insert an alert alerts.json file.
-        - Check that the expected response message is given for an invalid alert.
+        - Check virustotal response is added in ossec.log
 
     tier: 1
+
     parameters:
         - configuration:
             type: dict
@@ -181,32 +182,27 @@ def test_integratord_read_invalid_alerts(configuration, metadata, set_wazuh_conf
         - wait_for_start_module:
             type: fixture
             brief: Detect the start of the Integratord module in the ossec.log
+
     assertions:
         - Verify the expected response with for a given alert is recieved
+
     input_description:
         - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
-        - The `cases_integratord_read_invalid_json_alerts` file provides the test cases.
-    expected_output:
-        - r'.*wazuh-integratord.*WARNING: Invalid JSON alert read.*'
-        - r'.*wazuh-integratord.*WARNING: Overlong JSON alert read.*'
+        - The `cases_integratord_read_valid_json_alerts` file provides the test cases.
 
+    expected_output:
+        - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
     '''
-    sample = metadata['alert_sample']
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
 
-    if metadata['alert_type'] == 'invalid':
-        callback = integrator.CB_INVALID_JSON_ALERT_READ
-        error_message = integrator.ERR_MSG_INVALID_ALERT_NOT_FOUND
-
-    elif metadata['alert_type'] == 'overlong':
-        callback = integrator.CB_OVERLONG_JSON_ALERT_READ
-        error_message = integrator. ERR_MSG_OVERLONG_ALERT_NOT_FOUND
-        # Add 90kb of padding to alert to make it go over the allowed value of 64KB.
-        padding = "0"*90000
-        sample = sample.replace("padding_input", "agent_" + padding)
-
-    run_local_command_returning_output(f"echo '{sample}' >> {ALERT_FILE_PATH}")
-
     # Read Response in ossec.log
-    check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
-                            callback=generate_monitoring_callback(callback), error_message=error_message)
+    evm.detect_integration_enabled(integration=metadata['integration'], file_monitor=wazuh_monitor)
+    if not metadata['sends_message']:
+        evm.detect_unable_to_run_integration(integration=metadata['integration'], file_monitor=wazuh_monitor)
+        
+    else:
+        message = evm.get_message_sent(integration='Slack', file_monitor=wazuh_monitor)
+        if metadata['added_option'] is not None:
+            assert metadata['added_option'] in message, "Error1"
+
+        evm.detect_integration_response_code(response=metadata['response_code'], file_monitor=wazuh_monitor)

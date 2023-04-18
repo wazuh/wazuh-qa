@@ -1,0 +1,7 @@
+- name: slack_works_with_no_option_tag_present
+  description: When the option tag is missing, the slack integration works
+  configuration_parameters:
+    HOOK_URL: Insert using --integration-api-key parameter
+  metadata:
+    integration: slack
+    response_code: '200'
