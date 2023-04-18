@@ -4,12 +4,12 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 '''
 
-from wazuh_testing.tools import LOG_FILE_PATH
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing import LOG_FILE_PATH, T_10
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 
 
 # Callback string
-CB_OPTIONS_NON_EXISTENT = ".*OS_IntegratorD.*JSON file  doesn't exist"
+CB_OPTIONS_FILE_DOES_NOT_EXISTENT = ".*OS_IntegratorD.*(JSON file for options  doesn't exist)"
 
 
 # Functions
@@ -41,8 +41,9 @@ def detect_integration_enabled(integration, file_monitor=None):
         integration (str): The integratio that is being checked. Ex: Slack, Pagerduty and Shuffle
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    callback = fr".*Enabling integration for: '{integration}'."
-    check_integratord_event(file_monitor=file_monitor, callback=callback)
+    callback = fr".*(Enabling integration for: '{integration}')."
+    check_integratord_event(file_monitor=file_monitor, callback=generate_monitoring_callback(callback), 
+                            error_message="Could not find the expected 'Enabling integration for...' event")
 
 
 def detect_unable_to_run_integration(integration, file_monitor=None):
@@ -52,8 +53,9 @@ def detect_unable_to_run_integration(integration, file_monitor=None):
         integration (str): The integration that is being checked. Ex: Slack, Pagerduty and Shuffle
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    callback = fr".*ERROR: Unable to run integration for {integration} -> integrations"
-    check_integratord_event(file_monitor=file_monitor, callback=callback)
+    callback = fr".*ERROR: Unable to run integration for ({integration}) -> integrations"
+    check_integratord_event(file_monitor=file_monitor, callback=generate_monitoring_callback(callback),
+                            error_message="Could not find the expected 'Unable to run integration for...' event")
 
 
 def detect_options_json_file_does_not_exist(file_monitor=None):
@@ -62,4 +64,36 @@ def detect_options_json_file_does_not_exist(file_monitor=None):
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    check_integratord_event(file_monitor=file_monitor, callback=CB_OPTIONS_NON_EXISTENT)
+    check_integratord_event(file_monitor=file_monitor, timeout=T_10,
+                            callback=generate_monitoring_callback(CB_OPTIONS_FILE_DOES_NOT_EXISTENT),
+                            error_message="Could not find the expected 'JSON file doesn't exist...' event")
+
+
+def detect_integration_response_code(response='200', file_monitor=None):
+    """Detects the response code for the integration.
+
+    Args:
+        response (str): the response code for the integration. Defaults to 200
+        file_monitor (FileMonitor): file log monitor to detect events
+    """
+    callback = fr'.*Response received.* \[({response})\].*'
+    check_integratord_event(file_monitor=file_monitor, callback=generate_monitoring_callback(callback),
+                            error_message="Could not find the expected 'Response received...' event")
+
+
+
+def get_message_sent(integration, file_monitor):
+    """Gets the message that is being sent to the integration.
+
+    Args:
+        integration (str): The integration that is being checked. Ex: Slack, Pagerduty and Shuffle
+        file_monitor (FileMonitor): file log monitor to detect events
+    Returns:
+        string: Returns the message JSON string that was sent.
+    """
+    callback = fr'.*Sending message (.*) to {integration} server'
+    
+    result = file_monitor.start(timeout=T_10, update_position=True, accum_results=1, 
+                                callback=generate_monitoring_callback(callback),
+                                error_message="Could not find the expected 'Sending message...' event").result()
+    return result
