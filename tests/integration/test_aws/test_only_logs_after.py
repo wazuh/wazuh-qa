@@ -826,7 +826,7 @@ _, t7_configuration_metadata, t7_case_ids = get_test_cases_data(t7_cases_path)
 
 
 @pytest.mark.tier(level=1)
-@pytest.mark.parametrize('metadata', t6_configuration_metadata, ids=t6_case_ids)
+@pytest.mark.parametrize('metadata', t7_configuration_metadata, ids=t7_case_ids)
 def test_cloudwatch_multiple_calls(
     metadata, clean_aws_services_db, load_wazuh_basic_configuration, restart_wazuh_function, delete_log_stream
 ):
