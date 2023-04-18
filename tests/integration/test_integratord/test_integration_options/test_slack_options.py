@@ -5,17 +5,19 @@ copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
 type: integration
 
-brief: Integratord manages wazuh integrations with other applications such as Yara or Virustotal, by feeding
-the integrated aplications with the alerts located in alerts.json file. This test module aims to validate that
-given a specific alert, the expected response is recieved, depending if it is a valid/invalid json alert, an
-overlong alert (64kb+) or what happens when it cannot read the file because it is missing.
+brief: Integratord manages wazuh integrations with other applications such as Slack, Pagerduty, Shuffle, Yara or
+Virustotal by feeding the integrated aplications with the alerts located in alerts.json file. Custom values for fields
+can be configured to be sent using the 'options' tag. This test modules aim to test how the Slack integration works
+with different configurations, when the options tag is not present or when custom values are passed into the tag for
+the Slack integration
 
 components:
     - integratord
 
-suite: integratord_read_json_alerts
+suite: integration_options
 
 targets:
+    - manager
     - agent
 
 daemons:
@@ -39,7 +41,7 @@ pytest_args:
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 
 tags:
-    - virustotal
+    - slack
 '''
 import os
 import pytest
@@ -82,19 +84,28 @@ local_internal_options = {'integrator.debug': '2'}
 
 # Tests
 @pytest.mark.tier(level=1)
-@pytest.mark.parametrize('configuration, metadata',
-                         zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
+@pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 def test_integration_no_option_tag(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
-                                       configure_local_internal_options_module, restart_wazuh_daemon_function,
-                                       wait_for_start_module):
+                                   configure_local_internal_options_module, restart_wazuh_daemon_function,
+                                   wait_for_start_module):
     '''
-    description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
-    of a valid alert, a virustotal integration alert is expected in the alerts.json file.
-    wazuh_min_version: 4.3.7
+    description: Check that when the options tag is not present for the Slack integration, the integration works
+                 properly.
+
+    wazuh_min_version: 4.5.0
 
     test_phases:
-        - Insert an alert alerts.json file.
-        - Check virustotal response is added in ossec.log
+        - setup:
+            - Set wazuh configuration and local_internal_options.
+            - Clean logs files and restart wazuh to apply the configuration.
+        - test:
+            - Check integration is enabled
+            - Check no options JSON file is created
+            - Check the message is sent to the Slack server
+            - Check the response code is 200
+        - teardown:
+            - Restore configuration
+            - Stop wazuh
 
     tier: 1
 
@@ -122,41 +133,58 @@ def test_integration_no_option_tag(configuration, metadata, set_wazuh_configurat
             brief: Detect the start of the Integratord module in the ossec.log
 
     assertions:
-        - Verify the expected response with for a given alert is recieved
+        - Verify the integration is enabled
+        - Verify no options JSON file is detected
+        - Verify the integration sends message to the integrated app's server
+        - Verify the response code from the integrated app
 
     input_description:
-        - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
-        - The `cases_integratord_read_valid_json_alerts` file provides the test cases.
+        - The `config_integration_no_option_tag.yaml` file provides the module configuration for this test.
+        - The `cases_integration_no_option_tag_alerts` file provides the test cases.
 
     expected_output:
-        - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
+        - ".*(Enabling integration for: '{integration}')."
+        - ".*ERROR: Unable to run integration for ({integration}) -> integrations"
+        - '.*OS_IntegratorD.*(JSON file for options  doesn't exist)'
+        - '.*Response received.* [200].*'
     '''
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
 
-    # Read Response in ossec.log
+    # Check integration is enabled
     evm.detect_integration_enabled(integration=metadata['integration'], file_monitor=wazuh_monitor)
-        
+
+    # Check no options JSON file is detected
     evm.detect_options_json_file_does_not_exist(file_monitor=wazuh_monitor)
-    
+
+    # Check the message is sent to the integration's server
     evm.get_message_sent(integration='Slack', file_monitor=wazuh_monitor)
-    
+
+    # Check the response code from the integration's server
     evm.detect_integration_response_code(response=metadata['response_code'], file_monitor=wazuh_monitor)
 
 
 @pytest.mark.tier(level=1)
-@pytest.mark.parametrize('configuration, metadata',
-                         zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
+@pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
 def test_slack_options(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
-                                       configure_local_internal_options_module, restart_wazuh_daemon_function,
-                                       wait_for_start_module):
+                       configure_local_internal_options_module, restart_wazuh_daemon_function,
+                       wait_for_start_module):
     '''
-    description: Check that when a given alert is inserted into alerts.json, integratord works as expected. In case
-    of a valid alert, a virustotal integration alert is expected in the alerts.json file.
+    description: Check that when configuring the options tag with differents values, the integration works as expected.
+                 The test also checks that when it is supposed to fail, it fails.
+
     wazuh_min_version: 4.5.0
 
     test_phases:
-        - Insert an alert alerts.json file.
-        - Check virustotal response is added in ossec.log
+        - setup:
+            - Set wazuh configuration and local_internal_options.
+            - Clean logs files and restart wazuh to apply the configuration.
+        - test:
+            - Check integration is enabled
+            - Check the integration is unable to run when expected
+            - Check the integration sends the message and gets a response when expected
+        - teardown:
+            - Restore configuration
+            - Stop wazuh
 
     tier: 1
 
@@ -184,25 +212,38 @@ def test_slack_options(configuration, metadata, set_wazuh_configuration, truncat
             brief: Detect the start of the Integratord module in the ossec.log
 
     assertions:
-        - Verify the expected response with for a given alert is recieved
+        - Verify the integration is enabled
+        - Verify no options JSON file is detected
+        - Verify the integration sends message to the integrated app's server
+        - Verify the response code from the integrated app
+
 
     input_description:
-        - The `config_integratord_read_json_alerts.yaml` file provides the module configuration for this test.
-        - The `cases_integratord_read_valid_json_alerts` file provides the test cases.
+        - The `config_slack_options.yaml` file provides the module configuration for this test.
+        - The `cases_slack_options.yaml` file provides the test cases.
 
     expected_output:
-        - r'.*wazuh-integratord.*alert_id.*\"integration\": \"virustotal\".*'
+        - ".*(Enabling integration for: '{integration}')."
+        - ".*ERROR: Unable to run integration for ({integration}) -> integrations"
+        - '.*OS_IntegratorD.*(JSON file for options  doesn't exist)'
+        - '.*Response received.* [200].*'
+
     '''
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
 
     # Read Response in ossec.log
     evm.detect_integration_enabled(integration=metadata['integration'], file_monitor=wazuh_monitor)
-    if not metadata['sends_message']:
-        evm.detect_unable_to_run_integration(integration=metadata['integration'], file_monitor=wazuh_monitor)
-        
-    else:
-        message = evm.get_message_sent(integration='Slack', file_monitor=wazuh_monitor)
-        if metadata['added_option'] is not None:
-            assert metadata['added_option'] in message, "Error1"
 
+    if not metadata['sends_message']:
+        # Check the integration is unable to run when it should.
+        evm.detect_unable_to_run_integration(integration=metadata['integration'], file_monitor=wazuh_monitor)
+    else:
+        # Verify that the message is sent
+        message = evm.get_message_sent(integration='Slack', file_monitor=wazuh_monitor)
+
+        # Verify that when the options JSON was not empty the sent information is in the response message.
+        if metadata['added_option'] is not None:
+            assert metadata['added_option'] in message, "The configured option is not present in the message sent"
+
+        # Check the response code from the integration's server
         evm.detect_integration_response_code(response=metadata['response_code'], file_monitor=wazuh_monitor)

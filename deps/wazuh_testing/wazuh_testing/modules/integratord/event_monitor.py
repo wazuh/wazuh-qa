@@ -32,7 +32,6 @@ def check_integratord_event(file_monitor=None, callback='', error_message=None, 
                        callback=callback, error_message=error_message)
 
 
-
 # Callback functions
 def detect_integration_enabled(integration, file_monitor=None):
     """Detects integration has been enabled.
@@ -42,7 +41,7 @@ def detect_integration_enabled(integration, file_monitor=None):
         file_monitor (FileMonitor): file log monitor to detect events
     """
     callback = fr".*(Enabling integration for: '{integration}')."
-    check_integratord_event(file_monitor=file_monitor, callback=generate_monitoring_callback(callback), 
+    check_integratord_event(file_monitor=file_monitor, callback=generate_monitoring_callback(callback),
                             error_message="Could not find the expected 'Enabling integration for...' event")
 
 
@@ -81,7 +80,6 @@ def detect_integration_response_code(response='200', file_monitor=None):
                             error_message="Could not find the expected 'Response received...' event")
 
 
-
 def get_message_sent(integration, file_monitor):
     """Gets the message that is being sent to the integration.
 
@@ -92,8 +90,8 @@ def get_message_sent(integration, file_monitor):
         string: Returns the message JSON string that was sent.
     """
     callback = fr'.*Sending message (.*) to {integration} server'
-    
-    result = file_monitor.start(timeout=T_10, update_position=True, accum_results=1, 
+
+    result = file_monitor.start(timeout=T_10, update_position=True, accum_results=1,
                                 callback=generate_monitoring_callback(callback),
                                 error_message="Could not find the expected 'Sending message...' event").result()
     return result

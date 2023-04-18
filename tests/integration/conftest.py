@@ -318,7 +318,7 @@ def pytest_addoption(parser):
         type=str,
         help="pass web hook url required for slack integratord tests."
     )
-    
+
 
 def pytest_configure(config):
     # Register an additional marker
