@@ -9,12 +9,11 @@ import shutil
 import subprocess
 import sys
 import uuid
-from datetime import datetime
-
 import pytest
-import wazuh_testing.tools.configuration as conf
+from datetime import datetime
 from numpydoc.docscrape import FunctionDoc
 from py.xml import html
+
 from wazuh_testing import ALERTS_JSON_PATH, ARCHIVES_JSON_PATH, ARCHIVES_LOG_PATH, global_parameters, logger, mocking
 from wazuh_testing.db_interface.agent_db import update_os_info
 from wazuh_testing.db_interface.global_db import get_system, modify_system
@@ -25,6 +24,7 @@ from wazuh_testing.tools.file import copy, recursive_directory_creation, remove_
 from wazuh_testing.tools.monitoring import FileMonitor, QueueMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import check_daemon_status, control_service, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
+import wazuh_testing.tools.configuration as conf
 
 
 if sys.platform == 'win32':
