@@ -9,8 +9,8 @@ INTEGRATORD_PREFIX = 'wazuh-integratord'
 
 # Callback Messages
 CB_VIRUSTOTAL_ENABLED = r".*(wazuh-integratord.*Enabling integration for: 'virustotal').*"
-CB_INTEGRATORD_SENDING_ALERT = r'(.*wazuh-integratord.*DEBUG: sending new alert).*'
-CB_PROCESSING_ALERT = r'.*(wazuh-integratord.*Processing alert.*)'
+CB_INTEGRATORD_SENDING_ALERT = r'(.*wazuh-integratord.*DEBUG: Sending new alert).*'
+CB_VIRUSTOTAL_INTEGRATION_RESPONSE_MSG = r'.*(wazuh-integratord.*Final message to send.*)'
 CB_INTEGRATORD_THREAD_READY = r'.*(wazuh-integratord.*DEBUG: Local requests thread ready).*'
 CB_VIRUSTOTAL_ALERT = r'.*(wazuh-integratord.*alert_id.*\"integration\": \"virustotal\").*'
 CB_VIRUSTOTAL_ALERT_JSON = r'.*(VirusTotal: Alert.*\"integration\":\"virustotal\").*'
@@ -28,4 +28,4 @@ ERR_MSG_OVERLONG_ALERT_NOT_FOUND = r'Did not recieve the expected "...Overlong J
 ERR_MSG_ALERT_INODE_CHANGED_NOT_FOUND = r'Did not recieve the expected "...Alert file inode changed..." event'
 ERR_MSG_CANNOT_RETRIEVE_MSG_NOT_FOUND = r'Did not recieve the expected "...Could not retrieve information/open file"'
 ERR_MSG_SENDING_ALERT_NOT_FOUND = r'Did not recieve the expected "...sending new alert" event'
-ERR_MSG_PROCESSING_ALERT_NOT_FOUND = r'Did not recieve the expected "...Procesing alert" event'
+ERR_MSG_VIRUSTOTAL_RESPONSE_NOT_FOUND = r'Did not recieve the expected "Final message to send..." event'
