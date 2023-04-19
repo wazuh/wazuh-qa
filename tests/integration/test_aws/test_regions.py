@@ -306,7 +306,7 @@ def test_cloudwatch_regions(
         assert not table_exists_or_has_values(table_name=table_name, db_path=AWS_SERVICES_DB_PATH)
 
 
-# -------------------------------------------- TEST_INSPECTOR_PATH -------------------------------------------------------
+# ------------------------------------------ TEST_INSPECTOR_PATH -------------------------------------------------------
 t3_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'inspector_configuration_regions.yaml')
 t3_cases_path = os.path.join(TEST_CASES_PATH, 'cases_inspector_regions.yaml')
 

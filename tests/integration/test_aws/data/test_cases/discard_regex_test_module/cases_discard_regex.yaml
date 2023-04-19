@@ -6,7 +6,6 @@
     DISCARD_FIELD: eventSource
     DISCARD_REGEX: .*ec2.amazonaws.com.*
     PATH: ''
-    PATH: ''
   metadata:
     bucket_type: cloudtrail
     bucket_name: wazuh-cloudtrail-integration-tests

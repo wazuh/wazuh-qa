@@ -217,7 +217,7 @@ def test_service_defaults(
         ).result()
 
 
-# -------------------------------------------- TEST_INSPECTOR_DEFAULTS ---------------------------------------------------
+# ------------------------------------------ TEST_INSPECTOR_DEFAULTS ---------------------------------------------------
 # Configuration and cases data
 t3_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'inspector_configuration_defaults.yaml')
 t3_cases_path = os.path.join(TEST_CASES_PATH, 'cases_inspector_defaults.yaml')
