@@ -335,6 +335,7 @@ def pytest_addoption(parser):
         help="pass web hook url required for shuffle integratord tests."
     )
 
+
 def pytest_configure(config):
     # Register an additional marker
     config.addinivalue_line(
@@ -417,6 +418,7 @@ def pytest_configure(config):
     shuffle_webhook_url = config.getoption("--shuffle-webhook-url")
     if shuffle_webhook_url:
         global_parameters.shuffle_webhook_url = shuffle_webhook_url
+
 
 def pytest_html_results_table_header(cells):
     cells.insert(4, html.th('Tier', class_='sortable tier', col='tier'))

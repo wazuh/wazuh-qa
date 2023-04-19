@@ -166,11 +166,11 @@ def test_integration_no_option_tag(configuration, metadata, set_wazuh_configurat
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
 def test_shuffle_options(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
-                       configure_local_internal_options_module, restart_wazuh_daemon_function,
-                       wait_for_start_module):
+                         configure_local_internal_options_module, restart_wazuh_daemon_function,
+                         wait_for_start_module):
     '''
-    description: Check that when configuring the options tag with differents values, the Shuffle integration works as expected.
-                 The test also checks that when it is supposed to fail, it fails.
+    description: Check that when configuring the options tag with differents values, the Shuffle integration works as
+                 expected. The test also checks that when it is supposed to fail, it fails.
 
     wazuh_min_version: 4.5.0
 

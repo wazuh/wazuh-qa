@@ -86,8 +86,8 @@ local_internal_options = {'integrator.debug': '2'}
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 def test_pagerduty_no_option_tag(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
-                                   configure_local_internal_options_module, restart_wazuh_daemon_function,
-                                   wait_for_start_module):
+                                 configure_local_internal_options_module, restart_wazuh_daemon_function,
+                                 wait_for_start_module):
     '''
     description: Check that when the options tag is not present for the PagerDuty integration, the integration works
                  properly.
@@ -166,8 +166,8 @@ def test_pagerduty_no_option_tag(configuration, metadata, set_wazuh_configuratio
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata), ids=t2_case_ids)
 def test_pagerduty_options(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
-                       configure_local_internal_options_module, restart_wazuh_daemon_function,
-                       wait_for_start_module):
+                           configure_local_internal_options_module, restart_wazuh_daemon_function,
+                           wait_for_start_module):
     '''
     description: Check that when configuring the options tag with differents values, the integration works as expected.
                  The test also checks that when it is supposed to fail, it fails.
