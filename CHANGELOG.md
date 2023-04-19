@@ -18,6 +18,7 @@ Release report: TBD
 - Add new tests for logcollector 'ignore' and 'restrict' options ([#3582](https://github.com/wazuh/wazuh-qa/pull/3582)) \- (Tests)
 - Add 'Force reconnect' feature to agent_simulator tool. ([#3111](https://github.com/wazuh/wazuh-qa/pull/3111)) \- (Tools)
 - Add new module to support migration tool. ([#3837](https://github.com/wazuh/wazuh-qa/pull/3837))
+- Add integration tests for AWS module. ([#3911](https://github.com/wazuh/wazuh-qa/pull/3911))
 
 ### Changed
 
