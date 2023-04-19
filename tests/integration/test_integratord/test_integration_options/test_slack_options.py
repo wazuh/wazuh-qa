@@ -62,9 +62,9 @@ CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
-t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'config_integration_no_option_tag.yaml')
+t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'config_slack_no_option_tag.yaml')
 t2_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'config_slack_options.yaml')
-t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_integration_no_option_tag.yaml')
+t1_cases_path = os.path.join(TEST_CASES_PATH, 'cases_slack_no_option_tag.yaml')
 t2_cases_path = os.path.join(TEST_CASES_PATH, 'cases_slack_options.yaml')
 
 # Configurations
