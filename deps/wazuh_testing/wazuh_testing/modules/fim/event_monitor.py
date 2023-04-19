@@ -278,7 +278,7 @@ def callback_real_time_whodata_started(line):
     Args:
         line (String): string line to be checked by callback in File_Monitor.
     """
-    if CB_REALTIME_WHODATA_ENGINE_STARTED in line:
+    if 'File integrity monitoring real-time Whodata engine started' in line:
         return True
 
 
