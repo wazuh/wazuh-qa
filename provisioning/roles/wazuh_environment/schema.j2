@@ -311,8 +311,11 @@ all:
     {%- if wazuh_custom_packages_installation_agent_macos_url is defined-%}
     wazuh_custom_packages_installation_agent_macos_url: {{ wazuh_custom_packages_installation_agent_macos_url}}
     {% endif %}
-    {%- if wazuh_custom_packages_installation_agent_solaris_url is defined-%}
-    wazuh_custom_packages_installation_agent_solaris_url: {{ wazuh_custom_packages_installation_agent_solaris_url}}
+    {%- if wazuh_custom_packages_installation_agent_solaris_11_url is defined-%}
+    wazuh_custom_packages_installation_agent_solaris_11_url: {{ wazuh_custom_packages_installation_agent_solaris_11_url}}
+    {% endif %}
+    {%- if wazuh_custom_packages_installation_agent_solaris_10_url is defined-%}
+    wazuh_custom_packages_installation_agent_solaris_10_url: {{ wazuh_custom_packages_installation_agent_solaris_10_url}}
     {% endif %}
     {%- if wazuh_custom_packages_installation_manager_deb_url is defined-%}
     wazuh_custom_packages_installation_manager_deb_url: {{ wazuh_custom_packages_installation_manager_deb_url}}

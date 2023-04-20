@@ -1,0 +1,4 @@
+wazuh-master:
+  - regex: .*Agent-groups send full.*Finished in.*
+    path: /var/ossec/logs/cluster.log
+    timeout: 60
