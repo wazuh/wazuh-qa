@@ -51,6 +51,7 @@ pytest_args:
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 '''
 import os
+import sys
 
 import pytest
 from wazuh_testing import global_parameters
@@ -89,13 +90,13 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #16658. When fixed this should be unblocked")
 @pytest.mark.parametrize('key, subkey, arch', [
     (key, sub_key, KEY_WOW64_32KEY),
     (key, sub_key, KEY_WOW64_64KEY),
     (key, sub_key_2, KEY_WOW64_64KEY)
 ])
-def test_tags(key, subkey, arch,
-              get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
+def test_tags(key, subkey, arch, get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates the tags required for each event depending
                  on the values set in the 'tags' attribute. This attribute allows adding tags to alerts for
