@@ -138,7 +138,7 @@ def get_configuration(request):
 
 
 # Tests
-@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #16658. When fixed this should be unblocked")
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
 @pytest.mark.parametrize('key, sub_keys, arch', [
     (key, (subkey_1, os.path.join(subkey_1, key_name)), KEY_WOW64_64KEY),
     (key, (subkey_2, os.path.join(subkey_2, key_name)), KEY_WOW64_64KEY),
@@ -216,7 +216,7 @@ def test_ambiguous_tags(key, sub_keys, arch,
                      min_timeout=global_parameters.default_timeout, validators_after_cud=[no_tag_validator])
 
 
-@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #16658. When fixed this should be unblocked")
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
 @pytest.mark.parametrize('key, subkey, arch', [
     (key, os.path.join(subkey_1, recursion_key), KEY_WOW64_64KEY),
     (key, os.path.join(subkey_2, recursion_key), KEY_WOW64_64KEY),
@@ -286,7 +286,7 @@ def test_ambiguous_recursion(key, subkey, arch,
                        time_travel=True, triggers_event=True, min_timeout=global_parameters.default_timeout)
 
 
-@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #16658. When fixed this should be unblocked")
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
 @pytest.mark.parametrize('key, subkey, key_checkers, subkey_checkers', [
     (key, (subkey_1, os.path.join(subkey_1, key_name)), checkers_key_case1, checkers_subkey_case1),
     (key, (subkey_2, os.path.join(subkey_2, key_name)), checkers_key_case2, checkers_subkey_case2)

@@ -215,7 +215,7 @@ def test_ignore_registry_key(root_key, registry, arch, subkey, triggers_event, t
                                                           '"Sending FIM event: ..." event').result()
 
 
-@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #16658. When fixed this should be unblocked")
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
 @pytest.mark.parametrize('root_key, registry, arch, value, triggers_event, tags_to_apply', [
     (key, subkey_1, fim.KEY_WOW64_32KEY, "some_value", True, {'ignore_registry_value'}),
     (key, subkey_1, fim.KEY_WOW64_64KEY, "some_value", True, {'ignore_registry_value'}),

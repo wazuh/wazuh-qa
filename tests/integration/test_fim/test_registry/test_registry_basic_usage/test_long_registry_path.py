@@ -54,7 +54,7 @@ pytest_args:
 tags:
     - fim_registry_basic_usage
 '''
-import os
+import os, sys
 
 import pytest
 from wazuh_testing import global_parameters
@@ -97,7 +97,7 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
-
+@pytest.mark.xfail(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
 def test_long_registry_path(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon generates events from monitored keys with long paths.

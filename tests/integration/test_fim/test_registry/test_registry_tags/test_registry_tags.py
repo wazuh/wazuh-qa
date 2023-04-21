@@ -90,7 +90,7 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #16658. When fixed this should be unblocked")
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
 @pytest.mark.parametrize('key, subkey, arch', [
     (key, sub_key, KEY_WOW64_32KEY),
     (key, sub_key, KEY_WOW64_64KEY),

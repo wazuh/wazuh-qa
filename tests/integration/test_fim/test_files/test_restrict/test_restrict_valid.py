@@ -97,7 +97,7 @@ def get_configuration(request):
 
 
 @pytest.mark.parametrize('folder', test_directories)
-@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #16658. When fixed this should be unblocked")
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
 @pytest.mark.parametrize('filename, mode, content, triggers_event, tags_to_apply', [
     ('.restricted', 'w', "Sample content", True, {'valid_regex1'}),
     ('binary.restricted', 'wb', b"Sample content", True, {'valid_regex1'}),

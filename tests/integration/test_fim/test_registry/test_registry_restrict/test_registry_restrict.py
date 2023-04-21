@@ -233,7 +233,7 @@ def test_restrict_value(key, subkey, arch, value_name, triggers_event, tags_to_a
         assert event['data']['arch'] == '[x32]' if arch == KEY_WOW64_32KEY else '[x64]', 'Key event arch not equal'
 
 
-@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #16658. When fixed this should be unblocked")
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
 @pytest.mark.parametrize('key, subkey, test_subkey, arch, triggers_event, tags_to_apply', [
     (key, sub_key_1, valid_subkey, KEY_WOW64_64KEY, True, {'key_restrict'}),
     (key, sub_key_2, valid_subkey, KEY_WOW64_64KEY, True, {'key_restrict'}),
