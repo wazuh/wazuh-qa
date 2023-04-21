@@ -3,9 +3,7 @@ copyright: Copyright (C) 2015-2023, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: system
-brief: Wazuh manager should receive correctly the agent closing message. 
-       The closing process will happen gracefully, therefore, this test is designed to check the status of the agent in wazuh-manager(agent_control) after the shutdown. 
-
+brief: sys
 tier: 0
 modules:
     - enrollment
@@ -45,6 +43,7 @@ host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..',
                                'provisioning', 'big_cluster_40_agents', 'roles', 'agent-role', 'files', 'ossec.conf')
+
 
 def get_ip_directions(hosts):
     global network
