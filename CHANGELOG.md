@@ -27,7 +27,7 @@ Release report: TBD
 - Add new module to support migration tool. ([#3837](https://github.com/wazuh/wazuh-qa/pull/3837))
 
 ### Changed
-
+- Fix flaky skip tests ([#4110](https://github.com/wazuh/wazuh-qa/pull/4110)) \- (Tests)
 - Update `test_office365` to support the new tag `API_TYPE` ([#4065](https://github.com/wazuh/wazuh-qa/pull/4065)) \- (Framework + Tests)
 - Update `test_wazuh_db` & `test_enrollment` to support new column `status_code` and new value on the enrollment `payload`. ([#4021](https://github.com/wazuh/wazuh-qa/pull/4021)) \- (Tests)
 - Update FIM `test_audit` tests to new framework ([#3939](https://github.com/wazuh/wazuh-qa/pull/3939)) \- (Framework + Tests)

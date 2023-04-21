@@ -11,7 +11,7 @@
     - disabled:
         value: 'no'
     - frequency:
-        value: 30
+        value: 20
     - directories:
         value: TEST_DIRECTORIES
         attributes:
