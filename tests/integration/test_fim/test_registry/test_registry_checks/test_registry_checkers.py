@@ -54,7 +54,8 @@ pytest_args:
 tags:
     - fim_registry_checks
 '''
-import os, sys
+import os
+import sys
 
 import pytest
 from wazuh_testing import global_parameters

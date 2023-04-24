@@ -59,7 +59,8 @@ pytest_args:
 tags:
     - fim_synchronization
 '''
-import os, sys
+import os
+import sys
 import pytest
 
 from wazuh_testing import global_parameters

@@ -50,7 +50,8 @@ pytest_args:
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 '''
-import os, sys
+import os
+import sys
 
 import pytest
 from wazuh_testing import global_parameters

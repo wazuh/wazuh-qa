@@ -54,7 +54,8 @@ pytest_args:
 tags:
     - fim_synchronization
 '''
-import os, sys
+import os
+import sys
 import pytest
 from wazuh_testing import LOG_FILE_PATH, DATA, WAZUH_SERVICES_START
 from wazuh_testing.tools.configuration import load_wazuh_configurations

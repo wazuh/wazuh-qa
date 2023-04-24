@@ -56,7 +56,8 @@ pytest_args:
 tags:
     - fim_registry_ambiguous_confs
 '''
-import os, sys
+import os
+import sys
 from hashlib import sha1
 
 import pytest

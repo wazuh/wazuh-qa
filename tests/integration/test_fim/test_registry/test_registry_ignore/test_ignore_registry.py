@@ -53,7 +53,8 @@ pytest_args:
 tags:
     - fim_registry_ignore
 '''
-import os, sys
+import os
+import sys
 
 import pytest
 from wazuh_testing import T_20, fim

@@ -53,7 +53,8 @@ pytest_args:
 tags:
     - fim_registry_multiple_registries
 '''
-import os, sys
+import os
+import sys
 import time
 
 import pytest

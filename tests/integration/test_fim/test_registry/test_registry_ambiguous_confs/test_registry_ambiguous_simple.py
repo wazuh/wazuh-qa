@@ -56,7 +56,8 @@ pytest_args:
 tags:
     - fim_registry_ambiguous_confs
 '''
-import os, sys
+import os
+import sys
 
 import pytest
 from wazuh_testing import global_parameters

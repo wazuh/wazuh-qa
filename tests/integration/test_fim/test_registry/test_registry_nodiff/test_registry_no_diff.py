@@ -53,7 +53,8 @@ pytest_args:
 tags:
     - fim_registry_nodiff
 '''
-import os, sys
+import os
+import sys
 from hashlib import sha1
 from time import sleep
 

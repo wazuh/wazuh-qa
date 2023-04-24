@@ -53,7 +53,8 @@ pytest_args:
 tags:
     - fim_registry_basic_usage
 '''
-import os, sys
+import os
+import sys
 from collections import Counter
 
 import pytest

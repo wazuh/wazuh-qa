@@ -54,7 +54,8 @@ pytest_args:
 tags:
     - fim_registry_report_changes
 '''
-import os, sys
+import os
+import sys
 
 import pytest
 from test_fim.common import generate_string
