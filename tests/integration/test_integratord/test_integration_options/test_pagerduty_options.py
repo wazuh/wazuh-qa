@@ -18,7 +18,6 @@ suite: integration_options
 
 targets:
     - manager
-    - agent
 
 daemons:
     - wazuh-integratord
@@ -52,6 +51,9 @@ from wazuh_testing.modules.integratord import event_monitor as evm
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor
 
+
+# Marks
+pytestmark = [pytest.mark.server]
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
