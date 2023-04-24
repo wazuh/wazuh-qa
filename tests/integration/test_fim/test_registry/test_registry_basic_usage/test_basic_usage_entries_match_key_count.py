@@ -151,8 +151,8 @@ def test_entries_match_key_count(get_configuration, configure_environment, resta
                                                callback=generate_monitoring_callback(CB_FIM_REGISTRY_ENTRIES_COUNT),
                                                error_message=f'Did not receive expected \
                                                               "{CB_FIM_REGISTRY_ENTRIES_COUNT}" event').result()
-    
-    callback=generate_monitoring_callback(CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT)
+
+    callback = generate_monitoring_callback(CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT)
     value_entries = wazuh_log_monitor.start(timeout=T_20, callback=callback,
                                             error_message=f'Did not receive expected \
                                                            "{CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT}" event').result()
