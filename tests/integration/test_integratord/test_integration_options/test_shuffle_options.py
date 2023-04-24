@@ -1,15 +1,15 @@
 '''
-copyright: Copyright (C) 2015-2022, Wazuh Inc.
+copyright: Copyright (C) 2015-2023, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 type: integration
 
-brief: Integratord manages wazuh integrations with other applications such as shuffle, Pagerduty, Shuffle, Yara or
-Virustotal by feeding the integrated aplications with the alerts located in alerts.json file. Custom values for fields
-can be configured to be sent using the 'options' tag. This test modules aim to test how the shuffle integration works
-with different configurations, when the options tag is not present or when custom values are passed into the tag for
-the shuffle integration
+brief: Integratord manages wazuh integrations with other applications such as Slack, Pagerduty, Shuffle, Yara or
+       Virustotal by feeding the integrated aplications with the alerts located in alerts.json file. Custom values for
+       fields can be configured to be sent using the 'options' tag. This test modules aim to test how the shuffle
+       integration works with different configurations, when the options tag is not present or when custom values are
+       passed into the tag for the shuffle integration
 
 components:
     - integratord
@@ -52,9 +52,6 @@ from wazuh_testing.modules.integratord import event_monitor as evm
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor
 
-
-# Marks
-pytestmark = [pytest.mark.server]
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')

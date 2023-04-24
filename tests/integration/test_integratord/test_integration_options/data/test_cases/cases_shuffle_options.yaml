@@ -8,7 +8,7 @@
     sends_message: false
 
 - name: shuffle_option_empty_json_value
-  description: When the option is passed an empty JSON, the shuffle integration is works properly
+  description: When the option is passed an empty JSON, the integration works properly with default values
   configuration_parameters:
     HOOK_URL: Insert using --shuffle-webhook-url parameter
     OPTIONS_VALUE: '{}'
@@ -19,7 +19,7 @@
     response_code: '200'
 
 - name: shuffle_option_custom_pretext
-  description: When a custom value is added to an option, the shuffle integration works and the option is in the message
+  description: When a custom value is added to an option, the integration works and the passed value is in the message
   configuration_parameters:
     HOOK_URL: Insert using --shuffle-webhook-url parameter
     OPTIONS_VALUE: '{"pretext":"Custom Pretext"}'

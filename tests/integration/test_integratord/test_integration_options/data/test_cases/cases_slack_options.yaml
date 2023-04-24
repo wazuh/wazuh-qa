@@ -8,7 +8,7 @@
     sends_message: false
 
 - name: slack_option_empty_json_value
-  description: When the option is passed an empty JSON, the slack integration is works properly
+  description: When the option is passed an empty JSON, the integration works with default values
   configuration_parameters:
     HOOK_URL: Insert using --slack-webhook-url parameter
     OPTIONS_VALUE: '{}'
@@ -19,7 +19,7 @@
     response_code: '200'
 
 - name: slack_option_custom_pretext
-  description: When a custom value is added to an option, the slack integration works and the option is in the message
+  description: When a custom value is added to an option, the integration works and the passed value is in the message
   configuration_parameters:
     HOOK_URL: Insert using --slack-webhook-url parameter
     OPTIONS_VALUE: '{"pretext":"Custom Pretext"}'

@@ -1,7 +1,7 @@
 - tags:
     - all
   apply_to_modules:
-    - test_slack_options
+    - test_pagerduty_options
   sections:
     - section: integration
       elements:
