@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2022, Wazuh Inc.
+copyright: Copyright (C) 2015-2023, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -59,47 +59,43 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, generate_params, callback_detect_event,
-                               REGULAR, create_file, delete_file)
+from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
+from wazuh_testing.tools.file import create_file, delete_file
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.fim.event_monitor import callback_detect_event
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+
 
 # Marks
 pytestmark = pytest.mark.tier(level=2)
 
-# Variables and configuration
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+# Variables
+test_directories = [os.path.join(PREFIX, 'testdir1')]
 
-test_directories = [os.path.join(PREFIX, 'testdir1'),
-                    os.path.join(PREFIX, 'testdir2')
-                    ]
-dir1, dir2 = test_directories
+# Configuration paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_templates')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf_whodata_prevails_over_realtime.yaml')
+# Configuration and cases data
+test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_whodata_prevails_over_realtime.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_whodata_prevails_over_realtime.yaml')
 
-conf_params = {'TEST_DIR1': dir1, 'TEST_DIR2': dir2, 'MODULE_NAME': __name__}
-p, m = generate_params(extra_params=conf_params, modes=['whodata'])
-
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
-
-
-# Fixture
-@pytest.fixture(scope='module', params=configurations)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
+# Test configurations
+configuration_parameters, configuration_metadata, test_case_ids = get_test_cases_data(test_cases_path)
+for count, value in enumerate(configuration_parameters):
+    configuration_parameters[count]['TEST_DIR'] = test_directories[0]
+configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
 
 
 # Test
-@pytest.mark.parametrize('directory', [
-    dir1,
-    dir2,
-])
-def test_whodata_prevails_over_realtime(directory, get_configuration, put_env_variables, configure_environment,
-                                        restart_syscheckd, wait_for_fim_start):
+@pytest.mark.parametrize('test_folders', [test_directories], scope="module", ids='')
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
+def test_whodata_prevails_over_realtime(configuration, metadata, set_wazuh_configuration, test_folders,
+                                        create_monitored_folders_module, configure_local_internal_options_function,
+                                        restart_syscheck_function, wait_syscheck_start):
     '''
     description: Check if when using the options who-data and real-time at the same time
                  the value of 'whodata' is the one used. For example, when using 'whodata=yes'
@@ -109,59 +105,80 @@ def test_whodata_prevails_over_realtime(directory, get_configuration, put_env_va
                  'who-data' is set to 'yes', the 'realtime' value is not taken into account,
                  enabling in this case the real-time file monitoring.
 
+    test_phases:
+        - setup:
+            - Set wazuh configuration and local_internal_options.
+            - Create custom folder for monitoring
+            - Clean logs files and restart wazuh to apply the configuration.
+        - test:
+            - Create file and detect event creation event
+            - Validate mode is whodata
+            - Delete file and detect event deletion event
+            - Validate mode is whodata
+        - teardown:
+            - Delete custom monitored folder
+            - Restore configuration
+            - Stop wazuh
+
     wazuh_min_version: 4.2.0
 
     tier: 2
 
     parameters:
-        - directory:
-            type: str
-            brief: Testing directory.
-        - get_configuration:
+        - configuration:
+            type: dict
+            brief: Configuration values for ossec.conf.
+        - metadata:
+            type: dict
+            brief: Test case data.
+        - test_folders:
+            type: dict
+            brief: List of folders to be created for monitoring.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Get configurations from the module.
-        - put_env_variables:
+            brief: Set ossec.conf configuration.
+        - create_monitored_folders_module:
             type: fixture
-            brief: Create environment variables.
-        - configure_environment:
+            brief: Create a given list of folders when the module starts. Delete the folders at the end of the module.
+        - configure_local_internal_options_function:
             type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_syscheckd:
+            brief: Set local_internal_options.conf file.
+        - restart_syscheck_function:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start:
+            brief: restart syscheckd daemon, and truncate the ossec.log.
+        - wait_syscheck_start:
             type: fixture
-            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+            brief: check that the starting FIM scan is detected.
 
     assertions:
-        - Verify that real-time file monitoring is active.
+        - Verify that real-time whodata thread active.
 
-    input_description: A test case is contained in external YAML file
-                       (wazuh_conf_whodata_prevails_over_realtime.yaml)
-                       which includes configuration settings for the 'wazuh-syscheckd' daemon
-                       and testing directories to monitor.
+    input_description: The file 'configuration_whodata_prevails_over_realtime.yaml' provides the configuration
+                       template.
+                       The file 'cases_whodata_prevails_over_realtime.yaml' provides the tes cases configuration
+                       details for each test case.
 
     expected_output:
         - r'.*Sending FIM event: (.+)$'
 
     tags:
-        - realtime
         - who_data
     '''
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     filename = "testfile"
 
-    create_file(REGULAR, directory, filename, content="")
+    create_file(REGULAR, test_directories[0], filename, content="")
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                     callback=callback_detect_event).result()
 
     if (event['data']['mode'] != 'whodata' and event['data']['type'] != 'added' and
-            os.path.join(directory, filename) in event['data']['path']):
+            os.path.join(test_directories[0], filename) in event['data']['path']):
         raise AssertionError('Event not found')
 
-    delete_file(directory, filename)
+    delete_file(os.path.join(test_directories[0], filename))
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                     callback=callback_detect_event).result()
 
     if (event['data']['mode'] != 'whodata' and event['data']['type'] != 'deleted' and
-            os.path.join(directory, filename) in event['data']['path']):
+            os.path.join(test_directories[0], filename) in event['data']['path']):
         raise AssertionError('Event not found')
