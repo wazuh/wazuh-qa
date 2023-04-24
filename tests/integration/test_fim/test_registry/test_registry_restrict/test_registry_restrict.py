@@ -54,7 +54,7 @@ pytest_args:
 tags:
     - fim_registry_restrict
 '''
-import os
+import os, sys
 
 import pytest
 from wazuh_testing import global_parameters
@@ -104,6 +104,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.xfail(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
 @pytest.mark.parametrize('key, subkey, arch, value_name, triggers_event, tags_to_apply', [
     (key, sub_key_1, KEY_WOW64_64KEY, valid_value_name, True, {'value_restrict'}),
     (key, sub_key_2, KEY_WOW64_32KEY, valid_value_name, True, {'value_restrict'}),

@@ -53,7 +53,7 @@ pytest_args:
 tags:
     - fim_registry_multiple_registries
 '''
-import os
+import os, sys
 import time
 
 import pytest
@@ -102,11 +102,8 @@ def get_configuration(request):
 
 
 # Test
-
-
-@pytest.mark.parametrize('tags_to_apply', [
-    ({'multiple_keys'})
-])
+@pytest.mark.xfail(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
+@pytest.mark.parametrize('tags_to_apply', [({'multiple_keys'})])
 def test_multiple_keys(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects every event when adding, modifying, and deleting

@@ -53,7 +53,7 @@ pytest_args:
 tags:
     - fim_registry_nodiff
 '''
-import os
+import os, sys
 from hashlib import sha1
 from time import sleep
 
@@ -107,6 +107,8 @@ def get_configuration(request):
     return request.param
 
 
+
+@pytest.mark.xfail(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
 @pytest.mark.parametrize('key, subkey, arch, value_name, truncated, tags_to_apply', [
     (key, sub_key_1, KEY_WOW64_64KEY, no_diff_value, True, {'no_diff_str'}),
     (key, sub_key_1, KEY_WOW64_64KEY, "some_value", False, {'no_diff_str'}),

@@ -56,12 +56,12 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, callback_registry_count_entries, \
-    check_time_travel, create_registry, modify_registry_value, registry_parser, KEY_WOW64_64KEY, \
-    REG_SZ, REG_MULTI_SZ, REG_DWORD
+from wazuh_testing import T_20, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules.fim import registry_parser, KEY_WOW64_64KEY, REG_SZ, REG_MULTI_SZ, REG_DWORD
+from wazuh_testing.modules.fim.utils import generate_params, create_registry, modify_registry_value 
+from wazuh_testing.modules.fim.event_monitor import CB_FIM_REGISTRY_ENTRIES_COUNT, CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT
 
 # Marks
 
@@ -147,14 +147,14 @@ def test_entries_match_key_count(get_configuration, configure_environment, resta
         - scheduled
         - time_travel
     '''
-    entries = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                      callback=callback_registry_count_entries,
-                                      error_message='Did not receive expected '
-                                                    '"Fim inode entries: ..., path count: ..." event'
-                                      ).result()
-    check_time_travel(True, monitor=wazuh_log_monitor)
+    registry_entries = wazuh_log_monitor.start(timeout=T_20, update_position=False,
+                                               callback=generate_monitoring_callback(CB_FIM_REGISTRY_ENTRIES_COUNT),
+                                               error_message=f'Did not receive expected "{CB_FIM_REGISTRY_ENTRIES_COUNT}" \
+                                                               event').result()
 
-    if entries:
-        assert entries == '4', 'Wrong number of entries'
-    else:
-        raise AssertionError('Wrong number of entries')
+    value_entries = wazuh_log_monitor.start(timeout=T_20,
+                                      callback=generate_monitoring_callback(CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT),
+                                      error_message=f'Did not receive expected \
+                                                     "{CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT}" event').result()
+
+    assert int(registry_entries) + int(value_entries) == 4, 'Wrong number of entries'

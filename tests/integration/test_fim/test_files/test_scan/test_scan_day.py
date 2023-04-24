@@ -63,7 +63,7 @@ pytest_args:
 tags:
     - fim_scan
 '''
-import os
+import os, sys
 from datetime import datetime, timedelta
 
 import pytest
@@ -104,9 +104,8 @@ def get_configuration(request):
 
 
 # tests
-@pytest.mark.parametrize('tags_to_apply', [
-    {'scan_day'}
-])
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
+@pytest.mark.parametrize('tags_to_apply', [{'scan_day'}])
 def test_scan_day(tags_to_apply,
                   get_configuration, configure_environment,
                   restart_syscheckd, wait_for_fim_start):

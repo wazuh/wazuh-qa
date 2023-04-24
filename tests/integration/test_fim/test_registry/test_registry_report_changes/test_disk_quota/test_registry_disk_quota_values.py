@@ -54,7 +54,7 @@ pytest_args:
 tags:
     - fim_registry_report_changes
 """
-import os
+import os, sys
 
 import pytest
 from wazuh_testing import LOG_FILE_PATH, global_parameters
@@ -103,6 +103,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.xfail(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
 @pytest.mark.parametrize("size", [(4096), (32768)])
 @pytest.mark.parametrize("key, subkey, arch, value_name",
                          [

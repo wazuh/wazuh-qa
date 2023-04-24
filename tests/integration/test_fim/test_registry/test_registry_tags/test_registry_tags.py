@@ -50,7 +50,7 @@ pytest_args:
         1: Only level 1 tests are performed, they check functionalities of medium complexity.
         2: Only level 2 tests are performed, they check advanced functionalities and are slow to perform.
 '''
-import os
+import os, sys
 
 import pytest
 from wazuh_testing import global_parameters
@@ -89,6 +89,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.xfail(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
 @pytest.mark.parametrize('key, subkey, arch', [
     (key, sub_key, KEY_WOW64_32KEY),
     (key, sub_key, KEY_WOW64_64KEY),

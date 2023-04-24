@@ -54,7 +54,7 @@ pytest_args:
 tags:
     - fim_registry_checks
 '''
-import os
+import os, sys
 
 import pytest
 from wazuh_testing import global_parameters
@@ -137,9 +137,8 @@ def get_configuration(request):
 
 
 # Test
-@pytest.mark.parametrize('key', [
-    key
-])
+@pytest.mark.xfail(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
+@pytest.mark.parametrize('key', [key])
 @pytest.mark.parametrize('subkey, arch, key_attrs, value_attrs, tags_to_apply, triggers_modification', [
     (sub_key_1, KEY_WOW64_64KEY, key_all_attrs, value_all_attrs, {'check_all_yes'}, True),
     (sub_key_2, KEY_WOW64_32KEY, key_all_attrs, value_all_attrs, {'check_all_yes'}, True),

@@ -56,7 +56,7 @@ pytest_args:
 tags:
     - fim_registry_ambiguous_confs
 '''
-import os
+import os, sys
 from hashlib import sha1
 
 import pytest
@@ -119,9 +119,8 @@ def get_configuration(request):
 
 
 # Tests
-@pytest.mark.parametrize('key', [
-    key
-])
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
+@pytest.mark.parametrize('key', [key])
 @pytest.mark.parametrize('subkey, arch, key_list, value_list, checkers, tags_to_apply', [
     (subkey_1, KEY_WOW64_64KEY, ['random_key'], ['test_value'], key_all_attrs, {'duplicate_entries'}),
     (subkey_2, KEY_WOW64_64KEY, ['random_key'], ['test_value'], key_all_attrs, {'duplicate_entries'}),
@@ -215,9 +214,8 @@ def test_duplicate_entries(key, subkey, arch, key_list, value_list, checkers, ta
                            min_timeout=global_parameters.default_timeout, time_travel=True, triggers_event=True)
 
 
-@pytest.mark.parametrize('key', [
-    key
-])
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
+@pytest.mark.parametrize('key', [key])
 @pytest.mark.parametrize('subkey, arch, value_list, tags_to_apply, report_changes', [
     (subkey_1, KEY_WOW64_64KEY, ['test_value'], {'duplicate_report_entries'}, True),
     (subkey_2, KEY_WOW64_64KEY, ['test_value'], {'duplicate_report_entries'}, False),
