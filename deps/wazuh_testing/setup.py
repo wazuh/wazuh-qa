@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2021, Wazuh Inc.
+# Copyright (C) 2015-2023, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 from setuptools import setup, find_packages
@@ -55,7 +55,7 @@ def get_files_from_directory(directory):
 package_data_list.extend(get_files_from_directory('wazuh_testing/qa_docs/search_ui'))
 
 setup(name='wazuh_testing',
-      version='4.3.10',
+      version='4.3.11',
       description='Wazuh testing utilities to help programmers automate tests',
       url='https://github.com/wazuh',
       author='Wazuh',
