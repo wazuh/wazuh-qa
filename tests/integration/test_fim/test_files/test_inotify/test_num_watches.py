@@ -64,7 +64,7 @@ import shutil as sh
 import sys
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import T_60, T_40
 from wazuh_testing.fim import LOG_FILE_PATH, callback_num_inotify_watches, generate_params, detect_initial_scan
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
@@ -205,8 +205,7 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
 
     # Check that the number of inotify watches is correct before modifying the folder
     try:
-        num_watches = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                              callback=callback_num_inotify_watches,
+        num_watches = wazuh_log_monitor.start(timeout=T_40, callback=callback_num_inotify_watches,
                                               error_message='Did not receive expected '
                                                             '"Folders monitored with real-time engine: ..." event'
                                               ).result()
@@ -239,7 +238,7 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
 
     try:
         # Check that the number of inotify watches is correct after modifying the folder
-        num_watches = wazuh_log_monitor.start(timeout=40,
+        num_watches = wazuh_log_monitor.start(timeout=T_40,
                                               callback=callback_num_inotify_watches,
                                               error_message='Did not receive expected '
                                                             '"Folders monitored with real-time engine: ..." event'
@@ -270,7 +269,7 @@ def test_num_watches(realtime_enabled, decreases_num_watches, rename_folder, get
         for directory in test_directories:
             os.mkdir(directory)
 
-        num_watches = wazuh_log_monitor.start(timeout=40,
+        num_watches = wazuh_log_monitor.start(timeout=T_40,
                                               callback=callback_num_inotify_watches,
                                               error_message='Did not receive expected '
                                                             '"Folders monitored with real-time engine: ..." event'
