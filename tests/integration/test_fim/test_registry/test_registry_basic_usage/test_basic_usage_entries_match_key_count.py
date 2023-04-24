@@ -60,7 +60,7 @@ from wazuh_testing import T_20, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules.fim import registry_parser, KEY_WOW64_64KEY, REG_SZ, REG_MULTI_SZ, REG_DWORD
-from wazuh_testing.modules.fim.utils import generate_params, create_registry, modify_registry_value 
+from wazuh_testing.modules.fim.utils import generate_params, create_registry, modify_registry_value
 from wazuh_testing.modules.fim.event_monitor import CB_FIM_REGISTRY_ENTRIES_COUNT, CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT
 
 # Marks
@@ -149,12 +149,12 @@ def test_entries_match_key_count(get_configuration, configure_environment, resta
     '''
     registry_entries = wazuh_log_monitor.start(timeout=T_20, update_position=False,
                                                callback=generate_monitoring_callback(CB_FIM_REGISTRY_ENTRIES_COUNT),
-                                               error_message=f'Did not receive expected "{CB_FIM_REGISTRY_ENTRIES_COUNT}" \
-                                                               event').result()
-
-    value_entries = wazuh_log_monitor.start(timeout=T_20,
-                                      callback=generate_monitoring_callback(CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT),
-                                      error_message=f'Did not receive expected \
-                                                     "{CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT}" event').result()
+                                               error_message=f'Did not receive expected \
+                                                              "{CB_FIM_REGISTRY_ENTRIES_COUNT}" event').result()
+    
+    callback=generate_monitoring_callback(CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT)
+    value_entries = wazuh_log_monitor.start(timeout=T_20, callback=callback,
+                                            error_message=f'Did not receive expected \
+                                                           "{CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT}" event').result()
 
     assert int(registry_entries) + int(value_entries) == 4, 'Wrong number of entries'
