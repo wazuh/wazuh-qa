@@ -99,7 +99,6 @@ local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 
 
 # Tests
-@pytest.mark.xfail(sys.platform == 'win32', reason="Blocked for Issue #4077. When fixed this should be unblocked")
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 @pytest.mark.parametrize('files_number', [configuration_metadata[0]['files']])
 def test_sync_overlap(configuration, metadata, set_wazuh_configuration, configure_local_internal_options_function,
@@ -161,6 +160,8 @@ def test_sync_overlap(configuration, metadata, set_wazuh_configuration, configur
     tags:
         - scheduled
     '''
+    if sys.platform == 'win32' and metadata['lower']:
+        pytest.xfail("It will be blocked by wazuh/wazuh-qa#4071")
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
