@@ -3,8 +3,8 @@ import os
 import pytest
 from wazuh_testing import global_parameters
 from wazuh_testing.modules.aws import event_monitor
-from wazuh_testing.modules.aws.s3_utils import file_exists
 from wazuh_testing.modules.aws.cloudwatch_utils import log_stream_exists
+from wazuh_testing.modules.aws.s3_utils import file_exists
 from wazuh_testing.tools.configuration import (
     get_test_cases_data,
     load_configuration_template,

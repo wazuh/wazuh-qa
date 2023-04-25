@@ -3,7 +3,7 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Iterator, Type
 
-from .constants import (
+from wazuh_testing.modules.aws import (
     ALB_TYPE,
     AWS_SERVICES_DB_PATH,
     CISCO_UMBRELLA_TYPE,

@@ -2,18 +2,19 @@ from typing import Generator
 
 import pytest
 from wazuh_testing import UDP, logger
-from wazuh_testing.modules.aws.s3_utils import delete_file, upload_file, file_exists
-from wazuh_testing.modules.aws.db_utils import delete_s3_db, delete_services_db
+from wazuh_testing.modules.aws import (
+    FAKE_CLOUDWATCH_LOG_GROUP,
+    PERMANENT_CLOUDWATCH_LOG_GROUP,
+)
 from wazuh_testing.modules.aws.cloudwatch_utils import (
     create_log_events,
     create_log_group,
     create_log_stream,
     delete_log_group,
-    delete_log_stream
+    delete_log_stream,
 )
 from wazuh_testing.modules.aws.db_utils import delete_s3_db, delete_services_db
-from wazuh_testing.modules.aws.constants import PERMANENT_CLOUDWATCH_LOG_GROUP, FAKE_CLOUDWATCH_LOG_GROUP
-from wazuh_testing.modules.aws.s3_utils import delete_file, upload_file
+from wazuh_testing.modules.aws.s3_utils import delete_file, file_exists, upload_file
 from wazuh_testing.tools import ANALYSISD_QUEUE_SOCKET_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.file import bind_unix_socket
 from wazuh_testing.tools.monitoring import FileMonitor, ManInTheMiddle, QueueMonitor

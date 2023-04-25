@@ -4,8 +4,7 @@ from time import time
 from uuid import uuid4
 
 import boto3
-
-from .constants import PERMANENT_CLOUDWATCH_LOG_GROUP, US_EAST_1_REGION
+from wazuh_testing.modules.aws import PERMANENT_CLOUDWATCH_LOG_GROUP, US_EAST_1_REGION
 
 session = boto3.Session(profile_name='qa')
 logs = session.client('logs', region_name=US_EAST_1_REGION)

@@ -2,19 +2,22 @@ import os
 from datetime import datetime
 
 import pytest
-from wazuh_testing import T_20, T_10, global_parameters
+from wazuh_testing import T_10, T_20, global_parameters
+from wazuh_testing.modules import aws as cons
 from wazuh_testing.modules.aws import event_monitor
-from wazuh_testing.modules.aws import constants as cons
 from wazuh_testing.modules.aws.cli_utils import call_aws_module
+from wazuh_testing.modules.aws.cloudwatch_utils import (
+    create_log_events,
+    create_log_stream,
+)
 from wazuh_testing.modules.aws.db_utils import (
     get_multiple_s3_db_row,
     get_s3_db_row,
+    get_service_db_row,
     s3_db_exists,
     services_db_exists,
-    get_service_db_row, table_exists
 )
 from wazuh_testing.modules.aws.s3_utils import get_last_file_key, upload_file
-from wazuh_testing.modules.aws.cloudwatch_utils import create_log_stream, create_log_events
 from wazuh_testing.tools.configuration import (
     get_test_cases_data,
     load_configuration_template,

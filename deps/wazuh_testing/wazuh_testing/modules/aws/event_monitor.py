@@ -1,8 +1,8 @@
 import re
 from typing import Callable, Optional
 
-from .cli_utils import analyze_command_output
-from .constants import CLOUD_TRAIL_TYPE, VPC_FLOW_TYPE, CUSTOM_TYPE
+from wazuh_testing.modules.aws import VPC_FLOW_TYPE
+from wazuh_testing.modules.aws.cli_utils import analyze_command_output
 
 PARSER_ERROR = r'.*wm_aws_read\(\): ERROR:.*'
 MODULE_ERROR = r'.*wm_aws_run_s3\(\): ERROR: .*'

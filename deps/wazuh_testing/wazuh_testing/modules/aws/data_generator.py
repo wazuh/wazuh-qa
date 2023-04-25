@@ -1,15 +1,13 @@
 """Utils to generate sample data to AWS"""
 import csv
 import json
-import gzip
 from datetime import datetime
-from os.path import join
 from io import StringIO
+from os.path import join
 from uuid import uuid4
 
+from wazuh_testing.modules import aws as cons
 from wazuh_testing.tools.utils import get_random_ip, get_random_port, get_random_string
-
-from . import constants as cons
 
 
 def get_random_interface_id() -> str:

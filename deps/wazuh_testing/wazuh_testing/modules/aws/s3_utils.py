@@ -8,7 +8,7 @@ from botocore import exceptions
 from botocore.exceptions import ClientError
 from wazuh_testing import logger
 
-from .data_generator import get_data_generator
+from wazuh_testing.modules.aws.data_generator import get_data_generator
 
 session = boto3.Session(profile_name='qa')
 s3 = session.resource('s3')

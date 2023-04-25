@@ -3,8 +3,7 @@ from pathlib import Path
 from typing import Callable
 
 from wazuh_testing import logger
-
-from .constants import AWS_MODULE_PATH
+from wazuh_testing.modules.aws import AWS_MODULE_PATH
 
 AWS_BINARY_PATH = Path(AWS_MODULE_PATH, "aws-s3")
 

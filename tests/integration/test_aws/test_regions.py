@@ -2,15 +2,16 @@ import os
 
 import pytest
 from wazuh_testing import T_10, T_20, global_parameters
-from wazuh_testing.modules.aws import event_monitor
-from wazuh_testing.modules.aws.constants import AWS_SERVICES_DB_PATH, RANDOM_ACCOUNT_ID
+from wazuh_testing.modules.aws import (
+    AWS_SERVICES_DB_PATH,
+    RANDOM_ACCOUNT_ID,
+    event_monitor,
+)
 from wazuh_testing.modules.aws.db_utils import (
     get_multiple_s3_db_row,
     get_multiple_service_db_row,
     s3_db_exists,
-    services_db_exists,
     table_exists_or_has_values,
-    get_multiple_service_db_row
 )
 from wazuh_testing.tools.configuration import (
     get_test_cases_data,

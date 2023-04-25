@@ -3,7 +3,11 @@ import os
 import pytest
 from wazuh_testing import T_10, T_20, global_parameters
 from wazuh_testing.modules.aws import event_monitor
-from wazuh_testing.modules.aws.db_utils import get_s3_db_row, s3_db_exists, table_exists_or_has_values
+from wazuh_testing.modules.aws.db_utils import (
+    get_s3_db_row,
+    s3_db_exists,
+    table_exists_or_has_values,
+)
 from wazuh_testing.tools.configuration import (
     get_test_cases_data,
     load_configuration_template,
