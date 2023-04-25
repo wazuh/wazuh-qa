@@ -78,8 +78,7 @@ ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES = 'Did not receive expected "Fim Registry val
 ERR_MSG_REGISTRY_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of registry values to \
                                  be monitored: ..." event'
 ERR_MSG_WRONG_REGISTRY_LIMIT_VALUE = 'Wrong value for db_value_limit registries tag.'
-ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of entries to be monitored: \
-                             ..." event'
+ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG:...: Maximum number of files to be monitored:..." event'
 ERR_MSG_WRONG_FILE_LIMIT_VALUE = 'Wrong value for file_limit.'
 ERR_MSG_FILE_LIMIT_DISABLED = 'Did not receive expected "DEBUG: ...: No limit set to maximum number of entries \
                                to be monitored" event'
@@ -185,6 +184,33 @@ def callback_integrity_message(line):
         match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*({.*?})$", line)
         if match:
             return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))
+
+
+def callback_integrity_sync_message(line):
+    """ Callback that detects if a line contains a integrity sync event
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    Returns:
+        List: returns a list with formated datetime, And the event's JSON data.
+    """
+    if callback_detect_integrity_control_event(line):
+        match = re.match(r"(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}).*({.*?})$", line)
+        if match:
+            return datetime.strptime(match.group(1), '%Y/%m/%d %H:%M:%S'), json.dumps(match.group(2))
+
+
+def callback_detect_integrity_check_global(line):
+    """ Callback that detects if a line contains an 'integrity_check_global' event
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    Returns:
+        JSON: returns event's JSON data.
+    """
+    match = callback_detect_integrity_control_event(line)
+    if match:
+        if match['type'] == 'integrity_check_global':
+            return match
+    return None
 
 
 def callback_detect_file_integrity_event(line):

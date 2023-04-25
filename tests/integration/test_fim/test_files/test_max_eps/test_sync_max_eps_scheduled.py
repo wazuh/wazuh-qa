@@ -70,7 +70,8 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.modules import DATA, TIER1, AGENT, WINDOWS, LINUX
 from wazuh_testing.modules.fim import TEST_DIR_1, TEST_DIRECTORIES, YAML_CONF_MAX_EPS_SYNC, SCHEDULED_MODE
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
-from wazuh_testing.modules.fim.event_monitor import (callback_integrity_message, ERR_MSG_INTEGRITY_CONTROL_MSG,
+from wazuh_testing.modules.fim.event_monitor import (callback_detect_integrity_check_global,
+                                                     callback_integrity_sync_message, ERR_MSG_INTEGRITY_CONTROL_MSG,
                                                      ERR_MSG_MULTIPLE_FILES_CREATION)
 from wazuh_testing.tools.file import delete_path_recursively, write_file
 from wazuh_testing.modules.fim.utils import generate_params
@@ -181,13 +182,13 @@ def test_max_eps_sync_valid_within_range(configure_local_internal_options_module
 
         # Find integrity start before attempting to read max_eps.
         wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_INTEGRATY_START,
-                                callback=callback_integrity_message,
+                                callback=callback_detect_integrity_check_global,
                                 error_message=ERR_MSG_INTEGRITY_CONTROL_MSG).result()
 
         # Find integrity message for each file created after read max_eps.
         total_file_created = max_eps + 5
         result = wazuh_log_monitor.start(timeout=TIMEOUT_CHECK_EACH_INTEGRITY_MSG, accum_results=total_file_created,
-                                         callback=callback_integrity_message,
+                                         callback=callback_integrity_sync_message,
                                          error_message=f'Received less results than expected\
                                                         ({total_file_created})').result()
         # Collect by time received the messages.
