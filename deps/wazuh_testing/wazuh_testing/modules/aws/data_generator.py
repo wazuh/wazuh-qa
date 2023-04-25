@@ -11,7 +11,7 @@ from wazuh_testing.tools.utils import get_random_ip, get_random_port, get_random
 
 
 def get_random_interface_id() -> str:
-    """Return a random interface ID."""
+    """Return a random interface ID that match with the AWS format."""
     return f"eni-{get_random_string(17)}"
 
 
