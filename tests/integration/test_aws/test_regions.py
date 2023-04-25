@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from wazuh_testing import T_10, T_20, global_parameters
+from wazuh_testing import T_10, T_20, TEMPLATE_DIR, TEST_CASES_DIR, global_parameters
 from wazuh_testing.modules.aws import (
     AWS_SERVICES_DB_PATH,
     RANDOM_ACCOUNT_ID,
@@ -22,8 +22,6 @@ pytestmark = [pytest.mark.server]
 
 
 # Generic vars
-TEMPLATE_DIR = 'configuration_template'
-TEST_CASES_DIR = 'test_cases'
 MODULE = 'regions_test_module'
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, TEMPLATE_DIR, MODULE)

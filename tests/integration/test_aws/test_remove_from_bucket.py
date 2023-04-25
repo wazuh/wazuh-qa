@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import TEMPLATE_DIR, TEST_CASES_DIR, global_parameters
 from wazuh_testing.modules.aws import event_monitor
 from wazuh_testing.modules.aws.cloudwatch_utils import log_stream_exists
 from wazuh_testing.modules.aws.s3_utils import file_exists
@@ -14,8 +14,6 @@ pytestmark = [pytest.mark.server]
 
 
 # Generic vars
-TEMPLATE_DIR = 'configuration_template'
-TEST_CASES_DIR = 'test_cases'
 MODULE = 'remove_from_bucket_test_module'
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, TEMPLATE_DIR, MODULE)
