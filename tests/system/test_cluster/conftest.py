@@ -8,7 +8,6 @@ from functools import reduce
 from operator import getitem
 
 import pytest
-
 from wazuh_testing.tools import PYTHON_PATH
 
 

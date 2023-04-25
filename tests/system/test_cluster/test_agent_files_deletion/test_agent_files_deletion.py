@@ -11,6 +11,9 @@ from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
+
+pytestmark = [pytest.mark.cluster, pytest.mark.basic_cluster_env]
+
 master_host = 'wazuh-master'
 worker_host = 'wazuh-worker2'
 agent_host = 'wazuh-agent3'

@@ -3,9 +3,9 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import os
+import json
 
-from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
-
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, CLUSTER_LOGS_PATH, AGENT_GROUPS_BINARY_PATH
 
 # Agent Variables
 AGENT_STATUS_ACTIVE = 'active'
@@ -42,21 +42,26 @@ def restart_cluster(hosts_list, host_manager):
 def clean_cluster_logs(hosts_list, host_manager):
     # Clean ossec.log and cluster.log
     for host in hosts_list:
-        host_manager.clear_file(host=host, file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
+        host_manager.clear_file_without_recreate(host=host, file_path=LOG_FILE_PATH)
         if "worker" in host or "master" in host:
-            host_manager.clear_file(host=host, file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
+            host_manager.clear_file_without_recreate(host=host, file_path=CLUSTER_LOGS_PATH)
 
 
-def remove_cluster_agents(wazuh_master, agents_list, host_manager):
+def remove_cluster_agents(wazuh_master, agents_list, host_manager, agents_id=None):
     # Removes a list of agents from the cluster using manage_agents
-    agent_id = get_agent_id(host_manager)
     for agent in agents_list:
-        host_manager.control_service(host=agent, service='wazuh', state="stopped")
+        host_manager.control_service(host=agent, service='wazuh', state='stopped')
         host_manager.clear_file(agent, file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
-    while (agent_id != ''):
-        host_manager.get_host(wazuh_master).ansible("command", f'{WAZUH_PATH}/bin/manage_agents -r {agent_id}',
-                                                    check=False)
-        agent_id = get_agent_id(host_manager)
+    if agents_id is None:
+        id = get_agent_id(host_manager)
+        while id != '':
+            host_manager.get_host(wazuh_master).ansible('command', f"{WAZUH_PATH}/bin/manage_agents -r {id}",
+                                                        check=False)
+            id = get_agent_id(host_manager)
+    else:
+        for id in agents_id:
+            host_manager.get_host(wazuh_master).ansible('command', f"{WAZUH_PATH}/bin/manage_agents -r {id}",
+                                                        check=False)
 
 
 def get_agents_in_cluster(host, host_manager):
@@ -74,18 +79,29 @@ def create_new_agent_group(host, group_name, host_manager):
     host_manager.run_command(host, f"/var/ossec/bin/agent_groups -q -a -g {group_name}")
 
 
-# Create new group and assing agent
 def assign_agent_to_new_group(host, id_group, id_agent, host_manager):
-    # Create group
-    host_manager.run_command(host, f"/var/ossec/bin/agent_groups -q -a -g {id_group}")
-
     # Add agent to a group
     host_manager.run_command(host, f"/var/ossec/bin/agent_groups -q -a -i {id_agent} -g {id_group}")
 
 
-def delete_group_of_agents(host, id_group, host_manager):
-    # Delete group
-    host_manager.run_command(host, f"/var/ossec/bin/agent_groups -q -r -g {id_group}")
+def delete_agent_group(host, id_group, host_manager, method='tool'):
+    """Function to delete a group.
+    Args:
+        host (str): Host name where the query will be executed.
+        id_group (str): Name of the group from which the id will be obtained.
+        host_manager (obj): Instance of HostManager.
+        method (str): Method to be used to delete the group. Default:  tool.
+    """
+    if method == 'tool':
+        host_manager.run_command(host, f"{AGENT_GROUPS_BINARY_PATH} -q -r -g {id_group}")
+    elif method == 'api':
+        master_token = host_manager.get_api_token(host)
+        host_manager.make_api_call(host=host, method='DELETE', token=master_token,
+                                   endpoint=f"/groups?groups_list={id_group}")
+    elif method == 'folder':
+        host_manager.run_command(host, f"rm -rf /var/ossec/etc/shared/{id_group}")
+    else:
+        raise ValueError(f"{method} is not a valid method, it should be tool, api or folder")
 
 
 def check_agent_groups(agent_id, group_to_check, hosts_list, host_manager):
@@ -129,3 +145,36 @@ def change_agent_group_with_wdb(agent_id, new_group, host, host_manager):
     group_data = host_manager.run_command(host, f"python3 {WAZUH_PATH}/bin/wdb-query.py global \
                                           'set-agent-groups {query}'")
     return group_data
+
+
+def execute_wdb_query(query, host, host_manager):
+    """Function to execute wdb query.
+    Args:
+        query (str): Query to execute
+        host (str): Host name where the query will be executed.
+        host_manager (obj): Instance of HostManager.
+    Returns:
+        response (str): Obtained response.
+    """
+    response = host_manager.run_command(host, f"python3 {WAZUH_PATH}/bin/wdb-query.py {query}")
+
+    return response
+
+
+def get_group_id(group_name, host, host_manager):
+    """Function to obtain the group ID.
+    Args:
+        group_name (str): Name of the group from which the id will be obtained.
+        host (str): Host name where the query will be executed.
+        host_manager (obj): Instance of HostManager.
+    Returns:
+        group_id (int): Obtained group ID.
+    """
+    group_table_command = 'sql select * from `group`;'
+    query = f"global '{group_table_command}'"
+    group_table = execute_wdb_query(query, host, host_manager)
+    for group_data in json.loads(group_table):
+        if group_data['name'] == group_name:
+            group_id = group_data['id']
+
+    return group_id
