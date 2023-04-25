@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 
 import pytest
+from test_aws import ONLY_LOGS_AFTER_PARAM, local_internal_options  # noqa: F401
 from wazuh_testing import T_10, T_20, TEMPLATE_DIR, TEST_CASES_DIR, global_parameters
 from wazuh_testing.modules import aws as cons
 from wazuh_testing.modules.aws import event_monitor
@@ -31,7 +32,6 @@ MODULE = 'only_logs_after_test_module'
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, TEMPLATE_DIR, MODULE)
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, TEST_CASES_DIR, MODULE)
-local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0'}
 
 # --------------------------------------------- TEST_BUCKET_WITHOUT_ONLY_LOGS_AFTER ------------------------------------
 t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'bucket_configuration_without_only_logs_after.yaml')
@@ -678,7 +678,6 @@ def test_bucket_multiple_calls(
     input_description:
         - The `cases_multiple_calls` file provides the test cases.
     """
-    ONLY_LOGS_AFTER_PARAM = '--only_logs_after'
 
     bucket_type = metadata['bucket_type']
     bucket_name = metadata['bucket_name']
@@ -780,7 +779,6 @@ def test_inspector_multiple_calls(
     input_description:
         - The `cases_multiple_calls` file provides the test cases.
     """
-    ONLY_LOGS_AFTER_PARAM = '--only_logs_after'
 
     service_type = metadata['service_type']
 
@@ -871,7 +869,6 @@ def test_cloudwatch_multiple_calls(
     input_description:
         - The `cases_multiple_calls` file provides the test cases.
     """
-    ONLY_LOGS_AFTER_PARAM = '--only_logs_after'
 
     service_type = metadata['service_type']
     log_group_name = metadata['log_group_name']

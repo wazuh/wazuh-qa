@@ -1,6 +1,7 @@
 import os
 
 import pytest
+from test_aws import local_internal_options  # noqa: F401
 from wazuh_testing import TEMPLATE_DIR, TEST_CASES_DIR, global_parameters
 from wazuh_testing.modules.aws import event_monitor
 from wazuh_testing.tools.configuration import (
@@ -16,7 +17,6 @@ MODULE = 'basic_test_module'
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, TEMPLATE_DIR, MODULE)
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, TEST_CASES_DIR, MODULE)
-local_internal_options = {'wazuh_modules.debug': '2', 'monitord.rotate_log': '0'}
 
 # -------------------------------------------- TEST_BUCKET_DEFAULTS ----------------------------------------------------
 # Configuration and cases data
