@@ -63,9 +63,9 @@ import os
 import sys
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import T_20
 from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
-    callback_detect_event, check_time_travel, delete_file, validate_event
+    callback_detect_event, delete_file, validate_event
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -187,17 +187,15 @@ def test_move_file(file, file_content, tags_to_apply, source_folder, target_fold
     create_file(REGULAR, source_folder, file, content=file_content)
 
     if source_folder in test_directories:
-        check_time_travel(scheduled, monitor=wazuh_log_monitor)
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+        event = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event,
                                         error_message='Did not receive expected "Sending FIM event: .." event').result()
         validate_event(event, mode=mode)
 
     # Move file to target directory
     os.rename(os.path.join(source_folder, file), os.path.join(target_folder, file))
-    check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     # Monitor expected events
-    events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    events = wazuh_log_monitor.start(timeout=T_20,
                                      callback=callback_detect_event,
                                      accum_results=(triggers_add_event + triggers_delete_event),
                                      error_message='Did not receive expected '
@@ -226,7 +224,6 @@ def test_move_file(file, file_content, tags_to_apply, source_folder, target_fold
     # Remove file
     delete_file(target_folder, file)
     if target_folder in test_directories:
-        check_time_travel(scheduled, monitor=wazuh_log_monitor)
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+        event = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event,
                                         error_message='Did not receive expected "Sending FIM event: .." event').result()
         validate_event(event, mode=mode)
