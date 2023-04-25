@@ -124,7 +124,7 @@ configuration_ids = [f"{x['location']}_{x['log_format']}_{x['ignore_binaries']}"
 problematic_values = ['yesTesting', 'noTesting']
 
 
-# fixtures
+# Fixtures
 @pytest.fixture(scope="module", params=configurations, ids=configuration_ids)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -183,6 +183,9 @@ def check_ignore_binaries_invalid(cfg):
                                 error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
 
+
+# Test
+@pytest.mark.xfail(sys.platform == 'win32', reason="Flaky behavior in Windows agent. Blocked by Issue #4122")
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_ignore_binaries(get_configuration, configure_environment):
     '''
