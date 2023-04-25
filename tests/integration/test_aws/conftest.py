@@ -15,16 +15,10 @@ from wazuh_testing.modules.aws.cloudwatch_utils import (
 )
 from wazuh_testing.modules.aws.db_utils import delete_s3_db, delete_services_db
 from wazuh_testing.modules.aws.s3_utils import delete_file, file_exists, upload_file
-from wazuh_testing.tools import ANALYSISD_QUEUE_SOCKET_PATH, LOG_FILE_PATH
+from wazuh_testing.tools import ANALYSISD_QUEUE_SOCKET_PATH
 from wazuh_testing.tools.file import bind_unix_socket
-from wazuh_testing.tools.monitoring import FileMonitor, ManInTheMiddle, QueueMonitor
+from wazuh_testing.tools.monitoring import ManInTheMiddle, QueueMonitor
 from wazuh_testing.tools.services import control_service
-
-
-@pytest.fixture(scope='function')
-def wazuh_log_monitor() -> FileMonitor:
-    """Returns a file monitor for `WAZUH_PATH/logs/ossec.log`."""
-    return FileMonitor(LOG_FILE_PATH)
 
 
 @pytest.fixture(scope='function')

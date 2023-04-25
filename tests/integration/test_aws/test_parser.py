@@ -34,7 +34,7 @@ t1_configurations = load_configuration_template(
 def test_bucket_and_service_missing(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function_without_exception,
-    wazuh_log_monitor
+    file_monitoring
 ):
     """
     description: Command for bucket and service weren't invoked.
@@ -73,9 +73,9 @@ def test_bucket_and_service_missing(
         - restart_wazuh_function_without_exception:
             type: fixture
             brief: Restart the wazuh service catching the exception.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was not called.
 
@@ -83,7 +83,7 @@ def test_bucket_and_service_missing(
         - The `configuration_bucket_and_service_missing` file provides the configuration for this test.
     """
 
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_warning,
         error_message='The AWS module did not show the expected warning',
@@ -91,7 +91,7 @@ def test_bucket_and_service_missing(
 
     # Check AWS module not started
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(
+        log_monitor.start(
             timeout=global_parameters.default_timeout,
             callback=event_monitor.callback_detect_aws_module_started,
         ).result()
@@ -114,7 +114,7 @@ t2_configurations = load_configuration_template(
 def test_type_missing_in_bucket(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function_without_exception,
-    wazuh_log_monitor
+    file_monitoring
 ):
     """
     description: A warning occurs and was displayed in `ossec.log`.
@@ -153,15 +153,15 @@ def test_type_missing_in_bucket(
         - restart_wazuh_function_without_exception:
             type: fixture
             brief: Restart the wazuh service catching the exception.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module displays the message about missing attributes.
     input_description:
         - The `configuration_type_missing_in_bucket` file provides the configuration for this test.
     """
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_legacy_module_warning,
         error_message='The AWS module did not show the expected legacy warning',
@@ -185,7 +185,7 @@ t3_configurations = load_configuration_template(
 def test_type_missing_in_service(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function_without_exception,
-    wazuh_log_monitor
+    file_monitoring
 ):
     """
     description: An error occurs and was displayed in `ossec.log`.
@@ -224,16 +224,16 @@ def test_type_missing_in_service(
         - restart_wazuh_function_without_exception:
             type: fixture
             brief: Restart the wazuh service catching the exception.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module displays the message about missing attributes.
 
     input_description:
         - The `configuration_type_missing_in_service` file provides the configuration for this test.
     """
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_error_for_missing_type,
         error_message='The AWS module did not show the expected error message',
@@ -257,7 +257,7 @@ t4_configurations = load_configuration_template(
 def test_empty_values_in_bucket(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function_without_exception,
-    wazuh_log_monitor
+    file_monitoring
 ):
     """
     description: An error occurs and was displayed in `ossec.log`.
@@ -296,15 +296,15 @@ def test_empty_values_in_bucket(
         - restart_wazuh_function_without_exception:
             type: fixture
             brief: Restart the wazuh service catching the exception.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module displays the message about an empty value.
     input_description:
         - The `configuration_values_in_bucket` file provides the configuration for this test.
     """
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_empty_value,
         error_message='The AWS module did not show the expected message about empty value',
@@ -328,7 +328,7 @@ t5_configurations = load_configuration_template(
 def test_empty_values_in_service(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function_without_exception,
-    wazuh_log_monitor
+    file_monitoring
 ):
     """
     description: An error occurs and was displayed in `ossec.log`.
@@ -367,16 +367,16 @@ def test_empty_values_in_service(
         - restart_wazuh_function_without_exception:
             type: fixture
             brief: Restart the wazuh service catching the exception.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module displays the message about an empty value.
 
     input_description:
         - The `configuration_values_in_service` file provides the configuration for this test.
     """
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_empty_value,
         error_message='The AWS module did not show the expected message about empty value',
@@ -400,7 +400,7 @@ t6_configurations = load_configuration_template(
 def test_invalid_values_in_bucket(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function_without_exception,
-    wazuh_log_monitor
+    file_monitoring
 ):
     """
     description: An error occurs and was displayed in `ossec.log`.
@@ -439,15 +439,15 @@ def test_invalid_values_in_bucket(
         - restart_wazuh_function_without_exception:
             type: fixture
             brief: Restart the wazuh service catching the exception.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module displays the message about an invalid value.
     input_description:
         - The `configuration_values_in_bucket` file provides the configuration for this test.
     """
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_invalid_value,
         error_message='The AWS module did not show the expected message about invalid value',
@@ -471,7 +471,7 @@ t7_configurations = load_configuration_template(
 def test_invalid_values_in_service(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function_without_exception,
-    wazuh_log_monitor
+    file_monitoring
 ):
     """
     description: An error occurs and was displayed in `ossec.log`.
@@ -510,15 +510,15 @@ def test_invalid_values_in_service(
         - restart_wazuh_function_without_exception:
             type: fixture
             brief: Restart the wazuh service catching the exception.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module displays the message about an invalid value.
     input_description:
         - The `configuration_values_in_service` file provides the configuration for this test.
     """
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_invalid_value,
         error_message='The AWS module did not show the expected message about invalid value',
@@ -542,7 +542,7 @@ t8_configurations = load_configuration_template(
 def test_multiple_bucket_and_service_tags(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function_without_exception,
-    wazuh_log_monitor
+    file_monitoring
 ):
     """
     description: The command is invoked two times for buckets and two times for services.
@@ -581,15 +581,15 @@ def test_multiple_bucket_and_service_tags(
         - restart_wazuh_function_without_exception:
             type: fixture
             brief: Restart the wazuh service catching the exception.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was called the right amount of times.
     input_description:
         - The `configuration_multiple_bucket_and_service_tags` file provides the configuration for this test.
     """
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=T_20,
         callback=event_monitor.callback_detect_bucket_or_service_call,
         error_message='The AWS module was not called for bucket or service the right amount of times',

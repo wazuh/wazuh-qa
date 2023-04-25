@@ -44,7 +44,7 @@ t1_configurations = load_configuration_template(
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 def test_regions(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_s3_cloudtrail_db,
-    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, file_monitoring
 ):
     """
     description: Only the logs for the specified region are processed.
@@ -92,9 +92,9 @@ def test_regions(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check the expected number of events were forwarded to analysisd.
@@ -121,21 +121,21 @@ def test_regions(
     ]
 
     # Check AWS module started
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
         error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message='The AWS module was not called with the correct parameters',
     ).result()
 
     if expected_results:
-        wazuh_log_monitor.start(
+        log_monitor.start(
             timeout=T_20,
             callback=event_monitor.callback_detect_event_processed,
             error_message='The AWS module did not process the expected number of events',
@@ -143,12 +143,12 @@ def test_regions(
         ).result()
     else:
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(
+            log_monitor.start(
                 timeout=global_parameters.default_timeout,
                 callback=event_monitor.callback_detect_event_processed,
             ).result()
 
-        wazuh_log_monitor.start(
+        log_monitor.start(
             timeout=T_10,
             callback=event_monitor.make_aws_callback(pattern),
             error_message='The AWS module did not show correct message about non-existent region'
@@ -181,7 +181,7 @@ configurations = load_configuration_template(
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, t2_configuration_metadata), ids=t2_case_ids)
 def test_cloudwatch_regions(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_aws_services_db,
-    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, file_monitoring
 ):
     """
     description: Only the logs for the specified region are processed.
@@ -229,9 +229,9 @@ def test_cloudwatch_regions(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check the expected number of events were forwarded to analysisd.
@@ -258,21 +258,21 @@ def test_cloudwatch_regions(
     ]
 
     # Check AWS module started
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
         error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message='The AWS module was not called with the correct parameters',
     ).result()
 
     if expected_results:
-        wazuh_log_monitor.start(
+        log_monitor.start(
             timeout=T_20,
             callback=event_monitor.callback_detect_service_event_processed(expected_results, service_type),
             error_message='The AWS module did not process the expected number of events',
@@ -284,12 +284,12 @@ def test_cloudwatch_regions(
             else r'DEBUG: \+\+\+ Sent \d+ events to Analysisd'
         )
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(
+            log_monitor.start(
                 timeout=global_parameters.default_timeout,
                 callback=event_monitor.make_aws_callback(pattern),
             ).result()
 
-        wazuh_log_monitor.start(
+        log_monitor.start(
             timeout=global_parameters.default_timeout,
             callback=event_monitor.make_aws_callback(
                 fr".*\+\+\+ ERROR: The region '{regions}' is not a valid one."
@@ -321,7 +321,7 @@ configurations = load_configuration_template(
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, t3_configuration_metadata), ids=t3_case_ids)
 def test_inspector_regions(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_aws_services_db,
-    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, file_monitoring
 ):
     """
     description: Only the logs for the specified region are processed.
@@ -369,9 +369,9 @@ def test_inspector_regions(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check the expected number of events were forwarded to analysisd.
@@ -396,21 +396,21 @@ def test_inspector_regions(
     ]
 
     # Check AWS module started
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
         error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message='The AWS module was not called with the correct parameters',
     ).result()
 
     if expected_results:
-        wazuh_log_monitor.start(
+        log_monitor.start(
             timeout=T_20,
             callback=event_monitor.callback_detect_service_event_processed(expected_results, service_type),
             error_message='The AWS module did not process the expected number of events',
@@ -422,12 +422,12 @@ def test_inspector_regions(
             else r'DEBUG: \+\+\+ Sent \d+ events to Analysisd'
         )
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(
+            log_monitor.start(
                 timeout=global_parameters.default_timeout,
                 callback=event_monitor.make_aws_callback(pattern),
             ).result()
 
-        wazuh_log_monitor.start(
+        log_monitor.start(
             timeout=global_parameters.default_timeout,
             callback=event_monitor.make_aws_callback(
                 fr".*\+\+\+ ERROR: The region '{regions}' is not a valid one."

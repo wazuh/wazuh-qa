@@ -39,7 +39,7 @@ configurations = load_configuration_template(
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_path(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_s3_cloudtrail_db,
-    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, file_monitoring
 ):
     """
     description: Only logs within a path are processed.
@@ -86,9 +86,9 @@ def test_path(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check the expected number of events were forwarded to analysisd.
@@ -116,33 +116,33 @@ def test_path(
     ]
 
     # Check AWS module started
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
         error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message='The AWS module was not called with the correct parameters',
     ).result()
 
     if expected_results:
-        wazuh_log_monitor.start(
+        log_monitor.start(
             timeout=T_20,
             callback=event_monitor.callback_detect_event_processed,
             error_message='The AWS module did not process the expected number of events',
         ).result()
     else:
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(
+            log_monitor.start(
                 timeout=global_parameters.default_timeout,
                 callback=event_monitor.callback_detect_event_processed,
             ).result()
 
-        wazuh_log_monitor.start(
+        log_monitor.start(
             timeout=T_10,
             callback=event_monitor.make_aws_callback(pattern),
             error_message='The AWS module did not show correct message about empty path'

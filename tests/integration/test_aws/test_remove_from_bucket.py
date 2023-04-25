@@ -38,7 +38,7 @@ t1_configurations = load_configuration_template(
 def test_remove_from_bucket(
     configuration, metadata, mark_cases_as_skipped, upload_and_delete_file_to_s3, load_wazuh_basic_configuration,
     set_wazuh_configuration, clean_s3_cloudtrail_db, configure_local_internal_options_function,
-    truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
+    truncate_monitored_files, restart_wazuh_function, file_monitoring
 ):
     """
     description: The uploaded file was removed after the execution.
@@ -84,9 +84,9 @@ def test_remove_from_bucket(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the bucket that the uploaded log was removed.
@@ -110,14 +110,14 @@ def test_remove_from_bucket(
         parameters.insert(6, '--trail_prefix')
 
     # Check AWS module started
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
         error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message='The AWS module was not called with the correct parameters',
@@ -142,7 +142,7 @@ t2_configurations = load_configuration_template(
 def test_remove_log_stream(
     configuration, metadata, create_log_stream, load_wazuh_basic_configuration, set_wazuh_configuration,
     clean_aws_services_db, configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function,
-    wazuh_log_monitor
+    file_monitoring
 ):
     """
     description: The created log stream was removed after the execution.
@@ -188,9 +188,9 @@ def test_remove_log_stream(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the log group that the created stream was removed.
@@ -212,14 +212,14 @@ def test_remove_log_stream(
     ]
 
     # Check AWS module started
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
         error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message='The AWS module was not called with the correct parameters',

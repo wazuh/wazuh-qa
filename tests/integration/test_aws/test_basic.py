@@ -33,7 +33,7 @@ t1_configurations = load_configuration_template(
 @pytest.mark.parametrize('configuration, metadata', zip(t1_configurations, t1_configuration_metadata), ids=t1_case_ids)
 def test_bucket_defaults(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_s3_cloudtrail_db,
-    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, file_monitoring
 ):
     """
     description: The module is invoked with the expected parameters and no error occurs.
@@ -73,9 +73,9 @@ def test_bucket_defaults(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the log that no errors occurs.
@@ -92,14 +92,14 @@ def test_bucket_defaults(
     ]
 
     # Check AWS module started
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
         error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message='The AWS module was not called with the correct parameters',
@@ -107,7 +107,7 @@ def test_bucket_defaults(
 
     # Detect any ERROR message
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(
+        log_monitor.start(
             timeout=global_parameters.default_timeout,
             callback=event_monitor.callback_detect_all_aws_err,
         ).result()
@@ -129,7 +129,7 @@ configurations = load_configuration_template(
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, t2_configuration_metadata), ids=t2_case_ids)
 def test_service_defaults(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_aws_services_db,
-    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, file_monitoring
 ):
     """
     description: The module is invoked with the expected parameters and no error occurs.
@@ -172,9 +172,9 @@ def test_service_defaults(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the log that no errors occurs.
@@ -194,14 +194,14 @@ def test_service_defaults(
     ]
 
     # Check AWS module started
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
         error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message='The AWS module was not called with the correct parameters',
@@ -209,7 +209,7 @@ def test_service_defaults(
 
     # Detect any ERROR message
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(
+        log_monitor.start(
             timeout=global_parameters.default_timeout,
             callback=event_monitor.callback_detect_all_aws_err,
         ).result()
@@ -231,7 +231,7 @@ configurations = load_configuration_template(
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, t3_configuration_metadata), ids=t3_case_ids)
 def test_inspector_defaults(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_aws_services_db,
-    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, file_monitoring
 ):
     """
     description: The module is invoked with the expected parameters and no error occurs.
@@ -274,9 +274,9 @@ def test_inspector_defaults(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the log that no errors occurs.
@@ -294,14 +294,14 @@ def test_inspector_defaults(
     ]
 
     # Check AWS module started
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
         error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message='The AWS module was not called with the correct parameters',
@@ -309,7 +309,7 @@ def test_inspector_defaults(
 
     # Detect any ERROR message
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(
+        log_monitor.start(
             timeout=global_parameters.default_timeout,
             callback=event_monitor.callback_detect_all_aws_err,
         ).result()

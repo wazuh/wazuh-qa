@@ -50,7 +50,7 @@ t1_configurations = load_configuration_template(
 def test_bucket_without_only_logs_after(
     configuration, metadata, upload_and_delete_file_to_s3, load_wazuh_basic_configuration, set_wazuh_configuration,
     clean_s3_cloudtrail_db, configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function,
-    wazuh_log_monitor
+    file_monitoring
 ):
     """
     description: Only the log uploaded during execution is processed.
@@ -99,9 +99,9 @@ def test_bucket_without_only_logs_after(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the bucket that the uploaded log was removed.
@@ -128,20 +128,20 @@ def test_bucket_without_only_logs_after(
         parameters.insert(5, '--trail_prefix')
 
     # Check AWS module started
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
         error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message='The AWS module was not called with the correct parameters',
     ).result()
 
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_event_processed,
         error_message='The AWS module did not process the expected number of events',
@@ -171,7 +171,7 @@ t2_configurations = load_configuration_template(
 def test_service_without_only_logs_after(
     configuration, metadata, create_log_stream_in_existent_group, load_wazuh_basic_configuration,
     set_wazuh_configuration, clean_aws_services_db, configure_local_internal_options_function, truncate_monitored_files,
-    restart_wazuh_function, wazuh_log_monitor
+    restart_wazuh_function, file_monitoring
 ):
     """
     description: Only the event created during execution is processed.
@@ -220,9 +220,9 @@ def test_service_without_only_logs_after(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the bucket that the uploaded log was removed.
@@ -244,20 +244,20 @@ def test_service_without_only_logs_after(
     ]
 
     # Check AWS module started
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
         error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message='The AWS module was not called with the correct parameters',
     ).result()
 
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=T_10,
         callback=event_monitor.callback_detect_service_event_processed(expected_results, service_type),
         error_message='The AWS module did not process the expected number of events',
@@ -285,7 +285,7 @@ t3_configurations = load_configuration_template(
 @pytest.mark.parametrize('configuration, metadata', zip(t3_configurations, t3_configuration_metadata), ids=t3_case_ids)
 def test_bucket_with_only_logs_after(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_s3_cloudtrail_db,
-    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, file_monitoring
 ):
     """
     description: All logs with a timestamp greater than the only_logs_after value are processed.
@@ -331,9 +331,9 @@ def test_bucket_with_only_logs_after(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the bucket that the uploaded log was removed.
@@ -362,20 +362,20 @@ def test_bucket_with_only_logs_after(
         parameters.insert(5, '--trail_prefix')
 
     # Check AWS module started
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
         error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message='The AWS module was not called with the correct parameters',
     ).result()
 
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=T_20,
         callback=event_monitor.callback_detect_event_processed,
         accum_results=expected_results,
@@ -405,7 +405,7 @@ t4_configurations = load_configuration_template(
 @pytest.mark.parametrize('configuration, metadata', zip(t4_configurations, t4_configuration_metadata), ids=t4_case_ids)
 def test_cloudwatch_with_only_logs_after(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_aws_services_db,
-    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, file_monitoring
 ):
     """
     description: All events with a timestamp greater than the only_logs_after value are processed.
@@ -451,9 +451,9 @@ def test_cloudwatch_with_only_logs_after(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the bucket that the uploaded log was removed.
@@ -482,20 +482,20 @@ def test_cloudwatch_with_only_logs_after(
     ]
 
     # Check AWS module started
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
         error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message='The AWS module was not called with the correct parameters',
     ).result()
 
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=T_10,
         callback=event_monitor.callback_detect_service_event_processed(expected_results, service_type),
         error_message='The AWS module did not process the expected number of events',
@@ -523,7 +523,7 @@ t5_configurations = load_configuration_template(
 @pytest.mark.parametrize('configuration, metadata', zip(t5_configurations, t5_configuration_metadata), ids=t5_case_ids)
 def test_inspector_with_only_logs_after(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_aws_services_db,
-    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
+    configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, file_monitoring
 ):
     """
     description: All events with a timestamp greater than the only_logs_after value are processed.
@@ -569,9 +569,9 @@ def test_inspector_with_only_logs_after(
         - restart_wazuh_daemon_function:
             type: fixture
             brief: Restart the wazuh service.
-        - wazuh_log_monitor:
+        - file_monitoring:
             type: fixture
-            brief: Return a `ossec.log` monitor.
+            brief: Handle the monitoring of a specified file.
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check in the bucket that the uploaded log was removed.
@@ -598,20 +598,20 @@ def test_inspector_with_only_logs_after(
     ]
 
     # Check AWS module started
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_start,
         error_message='The AWS module did not start as expected',
     ).result()
 
     # Check command was called correctly
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=global_parameters.default_timeout,
         callback=event_monitor.callback_detect_aws_module_called(parameters),
         error_message='The AWS module was not called with the correct parameters',
     ).result()
 
-    wazuh_log_monitor.start(
+    log_monitor.start(
         timeout=T_10,
         callback=event_monitor.callback_detect_service_event_processed(expected_results, service_type),
         error_message='The AWS module did not process the expected number of events',
