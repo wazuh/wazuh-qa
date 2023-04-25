@@ -183,7 +183,6 @@ def check_ignore_binaries_invalid(cfg):
                                 error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
 
-
 # Test
 @pytest.mark.xfail(sys.platform == 'win32', reason="Flaky behavior in Windows agent. Blocked by Issue #4122")
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
