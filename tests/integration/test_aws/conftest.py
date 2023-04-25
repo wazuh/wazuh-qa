@@ -1,7 +1,5 @@
-from typing import Generator
-
 import pytest
-from wazuh_testing import UDP, logger
+from wazuh_testing import logger
 from wazuh_testing.modules.aws import (
     FAKE_CLOUDWATCH_LOG_GROUP,
     PERMANENT_CLOUDWATCH_LOG_GROUP,
@@ -15,38 +13,16 @@ from wazuh_testing.modules.aws.cloudwatch_utils import (
 )
 from wazuh_testing.modules.aws.db_utils import delete_s3_db, delete_services_db
 from wazuh_testing.modules.aws.s3_utils import delete_file, file_exists, upload_file
-from wazuh_testing.tools import ANALYSISD_QUEUE_SOCKET_PATH
-from wazuh_testing.tools.file import bind_unix_socket
-from wazuh_testing.tools.monitoring import ManInTheMiddle, QueueMonitor
 from wazuh_testing.tools.services import control_service
 
 
-@pytest.fixture(scope='function')
-def analysisd_monitor() -> Generator:
-    def intercept_socket_data(data):
-        return data
-
-    control_service('stop', daemon='wazuh-analysisd')
-    bind_unix_socket(ANALYSISD_QUEUE_SOCKET_PATH, UDP)
-
-    mitm = ManInTheMiddle(
-        address=ANALYSISD_QUEUE_SOCKET_PATH, family='AF_UNIX', connection_protocol=UDP, func=intercept_socket_data
-    )
-    mitm.start()
-
-    yield QueueMonitor(mitm.queue)
-
-    mitm.shutdown()
-    control_service('start', daemon='wazuh-analysisd')
-
-
-@pytest.fixture(scope='function')
+@pytest.fixture
 def mark_cases_as_skipped(metadata: dict) -> None:
     if metadata['name'] in ['alb_remove_from_bucket', 'clb_remove_from_bucket', 'nlb_remove_from_bucket']:
         pytest.skip(reason='ALB, CLB and NLB integrations are removing older logs from other region')
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def restart_wazuh_function_without_exception(daemon=None):
     """Restart all Wazuh daemons."""
     try:
@@ -61,21 +37,7 @@ def restart_wazuh_function_without_exception(daemon=None):
 
 # S3 fixtures
 
-@pytest.fixture(scope='function')
-def upload_file_to_s3(metadata: dict) -> None:
-    """Upload a file to S3 bucket.
-
-    Args:
-        metadata (dict): Metadata to get the parameters.
-    """
-    bucket_name = metadata['bucket_name']
-    filename = upload_file(bucket_type=metadata['bucket_type'], bucket_name=bucket_name)
-    if filename != '':
-        logger.debug('Uploaded file: %s to bucket "%s"', filename, bucket_name)
-        metadata['uploaded_file'] = filename
-
-
-@pytest.fixture(scope='function')
+@pytest.fixture
 def upload_and_delete_file_to_s3(metadata: dict):
     """Upload a file to S3 bucket and delete after the test ends.
 
@@ -95,7 +57,7 @@ def upload_and_delete_file_to_s3(metadata: dict):
         logger.debug('Deleted file: %s from bucket %s', filename, bucket_name)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def delete_file_from_s3(metadata: dict):
     """Delete a file from S3 bucket after the test ends.
 
@@ -113,7 +75,7 @@ def delete_file_from_s3(metadata: dict):
 
 # CloudWatch fixtures
 
-@pytest.fixture(scope='function', name='create_log_stream')
+@pytest.fixture(name='create_log_stream')
 def fixture_create_log_stream(metadata: dict):
     """Create a log stream with events and delete after the execution.
 
@@ -144,7 +106,7 @@ def fixture_create_log_stream(metadata: dict):
         logger.debug('Deleted log group: %s', log_group_name)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def create_log_stream_in_existent_group(metadata: dict):
     """Create a log stream with events and delete after the execution.
 
@@ -164,8 +126,8 @@ def create_log_stream_in_existent_group(metadata: dict):
     logger.debug('Deleted log stream: %s', log_stream)
 
 
-@pytest.fixture(scope='function', name='delete_log_stream')
-def fixture_delete_log_stream_(metadata: dict):
+@pytest.fixture(name='delete_log_stream')
+def fixture_delete_log_stream(metadata: dict):
     """Create a log stream with events and delete after the execution.
 
     Args:
@@ -179,7 +141,7 @@ def fixture_delete_log_stream_(metadata: dict):
 # DB fixtures
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def clean_s3_cloudtrail_db():
     """Delete the DB file before and after the test execution"""
     delete_s3_db()
@@ -189,7 +151,7 @@ def clean_s3_cloudtrail_db():
     delete_s3_db()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture
 def clean_aws_services_db():
     """Delete the DB file before and after the test execution."""
     delete_services_db()
