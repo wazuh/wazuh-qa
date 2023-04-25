@@ -144,7 +144,7 @@ def test_log_groups(
 
         log_monitor.start(
             timeout=T_10,
-            callback=event_monitor.make_aws_callback(r".*The specified log group does not exist."),
+            callback=event_monitor.make_aws_callback(r'.*The specified log group does not exist.'),
             error_message='The AWS module did not show correct message non-existent log group'
         ).result()
 

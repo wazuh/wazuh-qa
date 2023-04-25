@@ -110,7 +110,7 @@ class CloudTrailDataGenerator(DataGenerator):
 
 class VPCDataGenerator(DataGenerator):
     BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.VPC_FLOW_LOGS, cons.US_EAST_1_REGION)
-    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.VPC_FLOW_LOGS}_{cons.US_EAST_1_REGION}_'
+    BASE_FILE_NAME = f"{cons.RANDOM_ACCOUNT_ID}_{cons.VPC_FLOW_LOGS}_{cons.US_EAST_1_REGION}_"
 
     def get_filename(self) -> str:
         """Return the filename in the VPC format.
@@ -124,8 +124,8 @@ class VPCDataGenerator(DataGenerator):
         now = datetime.utcnow()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = (
-            f'{self.BASE_FILE_NAME}{cons.FLOW_LOG_ID}_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}'
-            f'{cons.LOG_EXT}'
+            f"{self.BASE_FILE_NAME}{cons.FLOW_LOG_ID}_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}"
+            f"{cons.LOG_EXT}"
         )
 
         return join(path, name)
@@ -138,20 +138,20 @@ class VPCDataGenerator(DataGenerator):
         """
         data = [
             [
-                "version", "account-id", "interface-id", "srcaddr", "dstaddr", "srcport", "dstport", "protocol",
-                "packets", "bytes", "start", "end", "action", "log-status"
+                'version', 'account-id', 'interface-id', 'srcaddr', 'dstaddr', 'srcport', 'dstport', 'protocol',
+                'packets', 'bytes', 'start', 'end', 'action', 'log-status'
             ]
         ]
 
         for _ in range(5):
             data.append(
                 [
-                    "2", cons.RANDOM_ACCOUNT_ID, get_random_interface_id(), get_random_ip(), get_random_ip(),
-                    get_random_port(), get_random_port(), "6", "39", "4698", "1622505433", "1622505730", "ACCEPT", "OK"
+                    '2', cons.RANDOM_ACCOUNT_ID, get_random_interface_id(), get_random_ip(), get_random_ip(),
+                    get_random_port(), get_random_port(), '6', '39', '4698', '1622505433', '1622505730', 'ACCEPT', 'OK'
                 ]
             )
         buffer = StringIO()
-        csv.writer(buffer, delimiter=" ").writerows(data)
+        csv.writer(buffer, delimiter=' ').writerows(data)
 
         return buffer.getvalue()
 
@@ -226,7 +226,7 @@ class ConfigDataGenerator(DataGenerator):
 
 class ALBDataGenerator(DataGenerator):
     BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTIC_LOAD_BALANCING, cons.US_EAST_1_REGION)
-    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTIC_LOAD_BALANCING}_{cons.US_EAST_1_REGION}_'
+    BASE_FILE_NAME = f"{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTIC_LOAD_BALANCING}_{cons.US_EAST_1_REGION}_"
 
     def get_filename(self) -> str:
         """Return the filename in the ALB format.
@@ -240,8 +240,8 @@ class ALBDataGenerator(DataGenerator):
         now = datetime.utcnow()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = (
-            f'{self.BASE_FILE_NAME}_app.ALB-qatests_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}_'
-            f'{get_random_ip()}_pczeay_{cons.LOG_EXT}'
+            f"{self.BASE_FILE_NAME}_app.ALB-qatests_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}_"
+            f"{get_random_ip()}_pczeay_{cons.LOG_EXT}"
         )
 
         return join(path, name)
@@ -258,7 +258,7 @@ class ALBDataGenerator(DataGenerator):
         for _ in range(5):
             data.append(
                 [
-                    "http",  # type
+                    'http',  # type
                     now.strftime(cons.ALB_DATE_FORMAT),  # time
                     'app/ALB-qatests',  # elb
                     f"{get_random_ip()}:{get_random_port()}",  # client:port
@@ -277,28 +277,28 @@ class ALBDataGenerator(DataGenerator):
                     # target_group_arn
                     f"arn:aws:elasticloadbalancing:{cons.US_EAST_1_REGION}:{cons.RANDOM_ACCOUNT_ID}:targetgroup/EC2/",
                     f"Root=1-5fbc4c52-{get_random_string(24)}",  # trace_id
-                    "-",  # domain_name
-                    "-",  # chosen_cert_arn
+                    '-',  # domain_name
+                    '-',  # chosen_cert_arn
                     0,  # matched_rule_priority
                     now.strftime(cons.ALB_DATE_FORMAT),  # request_creation_time
-                    "forward",  # actions_executed
-                    "-",  # redirect_url
-                    "-",  # error_reason
+                    'forward',  # actions_executed
+                    '-',  # redirect_url
+                    '-',  # error_reason
                     f"{get_random_ip()}:{get_random_port()} {get_random_ip()}:{get_random_port()}",  # target:port_list
-                    "403",  # target_status_code_list
-                    "-",  # classification
-                    "-"  # classification_reason
+                    '403',  # target_status_code_list
+                    '-',  # classification
+                    '-'  # classification_reason
                 ]
             )
         buffer = StringIO()
-        csv.writer(buffer, delimiter=" ").writerows(data)
+        csv.writer(buffer, delimiter=' ').writerows(data)
 
         return buffer.getvalue()
 
 
 class CLBDataGenerator(DataGenerator):
     BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTIC_LOAD_BALANCING, cons.US_EAST_1_REGION)
-    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTIC_LOAD_BALANCING}_{cons.US_EAST_1_REGION}_'
+    BASE_FILE_NAME = f"{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTIC_LOAD_BALANCING}_{cons.US_EAST_1_REGION}_"
 
     def get_filename(self) -> str:
         """Return the filename in the CLB format.
@@ -312,8 +312,8 @@ class CLBDataGenerator(DataGenerator):
         now = datetime.utcnow()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = (
-            f'{self.BASE_FILE_NAME}qatests-APIClassi_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}_'
-            f'{get_random_ip()}{cons.LOG_EXT}'
+            f"{self.BASE_FILE_NAME}qatests-APIClassi_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}_"
+            f"{get_random_ip()}{cons.LOG_EXT}"
         )
 
         return join(path, name)
@@ -347,14 +347,14 @@ class CLBDataGenerator(DataGenerator):
                 ]
             )
         buffer = StringIO()
-        csv.writer(buffer, delimiter=" ").writerows(data)
+        csv.writer(buffer, delimiter=' ').writerows(data)
 
         return buffer.getvalue()
 
 
 class NLBDataGenerator(DataGenerator):
     BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTIC_LOAD_BALANCING, cons.US_EAST_1_REGION)
-    BASE_FILE_NAME = f'{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTIC_LOAD_BALANCING}_{cons.US_EAST_1_REGION}_'
+    BASE_FILE_NAME = f"{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTIC_LOAD_BALANCING}_{cons.US_EAST_1_REGION}_"
 
     def get_filename(self) -> str:
         """Return the filename in the NLB format.
@@ -368,8 +368,8 @@ class NLBDataGenerator(DataGenerator):
         now = datetime.utcnow()
         path = join(self.BASE_PATH, now.strftime(cons.PATH_DATE_FORMAT))
         name = (
-            f'{self.BASE_FILE_NAME}net.qatests_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}_'
-            f'{get_random_ip()}{cons.LOG_EXT}'
+            f"{self.BASE_FILE_NAME}net.qatests_{now.strftime(cons.FILENAME_DATE_FORMAT)}_{abs(hash(now))}_"
+            f"{get_random_ip()}{cons.LOG_EXT}"
         )
 
         return join(path, name)
@@ -409,14 +409,14 @@ class NLBDataGenerator(DataGenerator):
                 ]
             )
         buffer = StringIO()
-        csv.writer(buffer, delimiter=" ").writerows(data)
+        csv.writer(buffer, delimiter=' ').writerows(data)
 
         return buffer.getvalue()
 
 
 class KMSDataGenerator(DataGenerator):
     BASE_PATH = ''
-    BASE_FILE_NAME = f'firehose_kms-1-'
+    BASE_FILE_NAME = 'firehose_kms-1-'
 
     def get_filename(self) -> str:
         """Return the filename in the KMS format.
@@ -607,7 +607,7 @@ class MacieDataGenerator(DataGenerator):
 
 class TrustedAdvisorDataGenerator(DataGenerator):
     BASE_PATH = ''
-    BASE_FILE_NAME = f'firehose_trustedadvisor-1-'
+    BASE_FILE_NAME = 'firehose_trustedadvisor-1-'
 
     def get_filename(self) -> str:
         """Return the filename in the Trusted Advisor format.
@@ -659,7 +659,7 @@ class TrustedAdvisorDataGenerator(DataGenerator):
 
 class GuardDutyDataGenerator(DataGenerator):
     BASE_PATH = ''
-    BASE_FILE_NAME = f'firehose_guardduty-1-'
+    BASE_FILE_NAME = 'firehose_guardduty-1-'
 
     def get_filename(self) -> str:
         """Return the filename in the Guard Duty format.
@@ -785,32 +785,32 @@ class GuardDutyDataGenerator(DataGenerator):
                                 'blocked': False
                             }
                         },
-                        "resourceRole": "TARGET",
-                        "additionalInfo": {
-                            "threatName": "Scanner",
-                            "threatListName": "ProofPoint"
+                        'resourceRole': 'TARGET',
+                        'additionalInfo': {
+                            'threatName': 'Scanner',
+                            'threatListName': 'ProofPoint'
                         },
-                        "evidence": {
-                            "threatIntelligenceDetails": [
+                        'evidence': {
+                            'threatIntelligenceDetails': [
                                 {
-                                    "threatNames": [
-                                        "Scanner"
+                                    'threatNames': [
+                                        'Scanner'
                                     ],
-                                    "threatListName": "ProofPoint"
+                                    'threatListName': 'ProofPoint'
                                 }
                             ]
                         },
-                        "eventFirstSeen": "2021-04-20T14:40:04Z",
-                        "eventLastSeen": "2021-07-08T03:15:41Z",
-                        "archived": False,
-                        "count": 5
+                        'eventFirstSeen': '2021-04-20T14:40:04Z',
+                        'eventLastSeen': '2021-07-08T03:15:41Z',
+                        'archived': False,
+                        'count': 5
                     },
-                    "severity": 2,
-                    "createdAt": "2021-04-20T14:53:32.735Z",
-                    "updatedAt": "2021-07-08T03:31:04.017Z",
-                    "title": "Unprotected port on EC2 instance i-3bf6a5c5 is being probed.",
-                    "description": (
-                        "EC2 instance has an unprotected port which is being probed by a known malicious host."
+                    'severity': 2,
+                    'createdAt': '2021-04-20T14:53:32.735Z',
+                    'updatedAt': '2021-07-08T03:31:04.017Z',
+                    'title': 'Unprotected port on EC2 instance i-3bf6a5c5 is being probed.',
+                    'description': (
+                        'EC2 instance has an unprotected port which is being probed by a known malicious host.'
                         )
                 }
             }
@@ -962,7 +962,7 @@ class NativeGuardDutyDataGenerator(DataGenerator):
 
 class WAFDataGenerator(DataGenerator):
     BASE_PATH = ''
-    BASE_FILE_NAME = "aws-waf-logs-delivery-stream-1-"
+    BASE_FILE_NAME = 'aws-waf-logs-delivery-stream-1-'
 
     def get_filename(self) -> str:
         """Return the filename in the KMS format.
@@ -1063,7 +1063,7 @@ class ServerAccessDataGenerator(DataGenerator):
         """
         now = datetime.utcnow()
         date_format = '%Y-%m-%d-%H-%M-%S'
-        name = f'{now.strftime(date_format)}-{get_random_string(16).upper()}'
+        name = f"{now.strftime(date_format)}-{get_random_string(16).upper()}"
         return join(self.BASE_PATH, name)
 
     def get_data_sample(self) -> str:
@@ -1094,7 +1094,7 @@ class ServerAccessDataGenerator(DataGenerator):
                 ]
             )
         buffer = StringIO()
-        csv.writer(buffer, delimiter=" ").writerows(data)
+        csv.writer(buffer, delimiter=' ').writerows(data)
 
         return buffer.getvalue()
 

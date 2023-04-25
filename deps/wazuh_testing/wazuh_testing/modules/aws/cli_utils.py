@@ -6,7 +6,7 @@ from wazuh_testing import logger
 from wazuh_testing.modules.aws import AWS_MODULE_PATH
 from wazuh_testing.modules.aws.exceptions import OutputAnalysisError
 
-AWS_BINARY_PATH = Path(AWS_MODULE_PATH, "aws-s3")
+AWS_BINARY_PATH = Path(AWS_MODULE_PATH, 'aws-s3')
 
 
 def call_aws_module(*parameters) -> str:
