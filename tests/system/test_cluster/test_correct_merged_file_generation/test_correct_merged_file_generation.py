@@ -29,10 +29,10 @@ from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.file import read_yaml
 from wazuh_testing.tools.system import HostManager
 from system import assign_agent_to_new_group, clean_cluster_logs, create_new_agent_group, delete_group_of_agents,restart_cluster
+
 folder_value = False
 merged_malformed_check_value = False
 log_value = False
-
 reset_files = {
     'default':['TestFile','TestFile2','EmptyFile','EmptyFile2','EmptyFile3','EmptyFile4','EmptyFile5','EmptyFile6','EmptyFile7','EmptyFile8','EmptyFile9','EmptyFile10'],
     'TestGroup1':['TestFileInTestGroup','TestFileInTestGroup2','EmptyFileInGroup','EmptyFileInGroup2','EmptyFileInGroup3','EmptyFileInGroup4','EmptyFileInGroup5','EmptyFileInGroup6','EmptyFileInGroup7','EmptyFileInGroup8','EmptyFileInGroup9','EmptyFileInGroup10']
