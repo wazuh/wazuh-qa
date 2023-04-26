@@ -97,7 +97,7 @@ def test_discard_regex(
     discard_regex = metadata['discard_regex']
     found_logs = metadata['found_logs']
     skipped_logs = metadata['skipped_logs']
-    path = metadata.get('path')
+    path = metadata['path'] if 'path' in metadata else None
 
     pattern = fr'.*The "{discard_regex}" regex found a match in the "{discard_field}" field. The event will be skipped.'
 
