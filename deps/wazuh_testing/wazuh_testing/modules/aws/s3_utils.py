@@ -1,20 +1,18 @@
 """AWS S3 related utils"""
 
 import gzip
-from datetime import datetime
 
 import boto3
 from botocore import exceptions
 from botocore.exceptions import ClientError
 from wazuh_testing import logger
-
 from wazuh_testing.modules.aws.data_generator import get_data_generator
 
 session = boto3.Session(profile_name='qa')
 s3 = session.resource('s3')
 
 
-def upload_file(bucket_type: str, bucket_name: str) -> str:
+def upload_file(bucket_type, bucket_name):
     """Upload a file to an S3 bucket.
 
     Args:
@@ -39,7 +37,7 @@ def upload_file(bucket_type: str, bucket_name: str) -> str:
     return filename
 
 
-def delete_file(filename: str, bucket_name: str) -> None:
+def delete_file(filename, bucket_name):
     """Delete a given file from the bucket.
 
     Args:
@@ -49,7 +47,7 @@ def delete_file(filename: str, bucket_name: str) -> None:
     s3.Object(bucket_name, filename).delete()
 
 
-def file_exists(filename: str, bucket_name: str) -> bool:
+def file_exists(filename, bucket_name):
     """Check if a file exists in a bucket.
 
     Args:
@@ -68,7 +66,7 @@ def file_exists(filename: str, bucket_name: str) -> bool:
     return exists
 
 
-def get_last_file_key(bucket_type: str, bucket_name: str, execution_datetime: datetime) -> str:
+def get_last_file_key(bucket_type, bucket_name, execution_datetime):
     """Return the last file key contained in a default path of a bucket.
 
     Args:

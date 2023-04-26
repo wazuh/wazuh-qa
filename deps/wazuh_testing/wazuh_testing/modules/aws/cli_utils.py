@@ -1,6 +1,5 @@
 import subprocess
 from pathlib import Path
-from typing import Callable
 
 from wazuh_testing import logger
 from wazuh_testing.modules.aws import AWS_MODULE_PATH
@@ -9,7 +8,7 @@ from wazuh_testing.modules.aws.exceptions import OutputAnalysisError
 AWS_BINARY_PATH = Path(AWS_MODULE_PATH, 'aws-s3')
 
 
-def call_aws_module(*parameters) -> str:
+def call_aws_module(*parameters):
     """Given some parameters call the AWS module and return the output.
 
     Returns:
@@ -22,13 +21,13 @@ def call_aws_module(*parameters) -> str:
     return command_result.stdout.decode()
 
 
-def _default_callback(line: str) -> str:
+def _default_callback(line: str):
     print(line)
     return line
 
 
 def analyze_command_output(
-    command_output: str, callback: Callable = _default_callback, expected_results: int = 1, error_message: str = ''
+    command_output, callback=_default_callback, expected_results=1, error_message=''
 ):
     """Analyze the given command output searching for a pattern.
 

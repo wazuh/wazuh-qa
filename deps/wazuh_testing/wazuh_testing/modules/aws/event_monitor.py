@@ -1,5 +1,4 @@
 import re
-from typing import Callable, Optional
 
 from wazuh_testing.modules.aws import VPC_FLOW_TYPE
 from wazuh_testing.modules.aws.cli_utils import analyze_command_output
@@ -25,7 +24,7 @@ def make_aws_callback(pattern, prefix=''):
     return lambda line: regex.match(line)
 
 
-def callback_detect_aws_module_called(parameters: list) -> Callable:
+def callback_detect_aws_module_called(parameters):
     """Detect if aws module was called with correct parameters.
 
     Args:
@@ -38,7 +37,7 @@ def callback_detect_aws_module_called(parameters: list) -> Callable:
     return lambda line: regex.match(line)
 
 
-def callback_detect_aws_error_for_missing_type(line: str) -> Optional[str]:
+def callback_detect_aws_error_for_missing_type(line):
     """Detect if the AWS module displays an error about missing type.
 
     Args:
@@ -54,7 +53,7 @@ def callback_detect_aws_error_for_missing_type(line: str) -> Optional[str]:
         return line
 
 
-def callback_detect_aws_legacy_module_warning(line: str) -> Optional[str]:
+def callback_detect_aws_legacy_module_warning(line):
     """Detect if the AWS module displays a warning about legacy config.
 
     Args:
@@ -70,7 +69,7 @@ def callback_detect_aws_legacy_module_warning(line: str) -> Optional[str]:
         return line
 
 
-def callback_detect_aws_module_warning(line: str) -> Optional[str]:
+def callback_detect_aws_module_warning(line):
     """Detect if the AWS module displays a warning.
 
     Args:
@@ -84,7 +83,7 @@ def callback_detect_aws_module_warning(line: str) -> Optional[str]:
         return line
 
 
-def callback_detect_aws_module_started(line: str) -> Optional[str]:
+def callback_detect_aws_module_started(line):
     """Detect if the AWS module was called.
 
     Args:
@@ -98,7 +97,7 @@ def callback_detect_aws_module_started(line: str) -> Optional[str]:
         return line
 
 
-def callback_detect_aws_empty_value(line: str) -> Optional[str]:
+def callback_detect_aws_empty_value(line):
     """Detect if the AWS module displays a message about an empty value.
 
     Args:
@@ -116,7 +115,7 @@ def callback_detect_aws_empty_value(line: str) -> Optional[str]:
         return line
 
 
-def callback_detect_aws_invalid_value(line: str) -> Optional[str]:
+def callback_detect_aws_invalid_value(line):
     """Detect if the AWS module displays a message about an invalid value.
 
     Args:
@@ -135,7 +134,7 @@ def callback_detect_aws_invalid_value(line: str) -> Optional[str]:
         return line
 
 
-def callback_detect_bucket_or_service_call(line: str) -> Optional[str]:
+def callback_detect_bucket_or_service_call(line):
     """Detect if bucket or service module was called.
 
     Args:
@@ -166,7 +165,7 @@ def callback_detect_aws_module_start(line):
         return line
 
 
-def callback_detect_all_aws_err(line) -> Optional[str]:
+def callback_detect_all_aws_err(line):
     """Search for parse or module error message in the given line.
 
     Args:
@@ -179,7 +178,7 @@ def callback_detect_all_aws_err(line) -> Optional[str]:
         return line
 
 
-def callback_detect_aws_read_err(line) -> Optional[str]:
+def callback_detect_aws_read_err(line):
     """Search for parser error message in the given line.
 
     Args:
@@ -192,7 +191,7 @@ def callback_detect_aws_read_err(line) -> Optional[str]:
         return line
 
 
-def callback_detect_aws_wmodule_err(line) -> Optional[str]:
+def callback_detect_aws_wmodule_err(line):
     """Search for module error message in the given line.
 
     Args:
@@ -205,7 +204,7 @@ def callback_detect_aws_wmodule_err(line) -> Optional[str]:
         return line
 
 
-def callback_detect_event_processed(line) -> Optional[str]:
+def callback_detect_event_processed(line):
     """Search for event processed message in the given line.
 
     Args:
@@ -218,7 +217,7 @@ def callback_detect_event_processed(line) -> Optional[str]:
         return line
 
 
-def callback_detect_event_processed_or_skipped(pattern: str) -> Callable:
+def callback_detect_event_processed_or_skipped(pattern):
     """Search for event processed or skipped message in the given line.
 
     Args:
@@ -230,7 +229,7 @@ def callback_detect_event_processed_or_skipped(pattern: str) -> Callable:
     return lambda line: pattern_regex.match(line) or callback_detect_event_processed(line)
 
 
-def callback_detect_service_event_processed(expected_results: int, service_type: str) -> Callable:
+def callback_detect_service_event_processed(expected_results, service_type):
     if service_type == 'inspector':
         regex = re.compile(fr"DEBUG: \+\+\+ {expected_results} events collected and processed in")
     else:
@@ -251,7 +250,7 @@ def callback_event_sent_to_analysisd(line):
         return line
 
 
-def check_processed_logs_from_output(command_output: str, expected_results: int = 1):
+def check_processed_logs_from_output(command_output, expected_results=1):
     """Check for processed messages in the give output.
 
     Args:
@@ -266,7 +265,7 @@ def check_processed_logs_from_output(command_output: str, expected_results: int 
     )
 
 
-def check_non_processed_logs_from_output(command_output: str, bucket_type: str, expected_results: int = 1):
+def check_non_processed_logs_from_output(command_output, bucket_type, expected_results=1):
     """Check for non processed messages in the give output.
 
     Args:
@@ -287,7 +286,7 @@ def check_non_processed_logs_from_output(command_output: str, bucket_type: str, 
     )
 
 
-def check_marker_from_output(command_output: str, file_key: str, expected_results: int = 1):
+def check_marker_from_output(command_output, file_key, expected_results=1):
     """Check for marker message in the given output.
 
     Args:
@@ -306,7 +305,7 @@ def check_marker_from_output(command_output: str, file_key: str, expected_result
 
 
 def check_service_processed_logs_from_output(
-        command_output: str, events_sent: int, service_type: str, expected_results: int = 1
+        command_output, events_sent, service_type, expected_results=1
 ):
     analyze_command_output(
         command_output=command_output,
@@ -316,7 +315,7 @@ def check_service_processed_logs_from_output(
     )
 
 
-def check_service_non_processed_logs_from_output(command_output: str, service_type: str, expected_results: int = 1):
+def check_service_non_processed_logs_from_output(command_output, service_type, expected_results=1):
     if service_type == 'inspector':
         pattern = r'DEBUG: \+\+\+ There are no new events in .*'
     else:

@@ -1,7 +1,5 @@
 import sqlite3
 from collections import namedtuple
-from pathlib import Path
-from typing import Iterator, Type
 
 from wazuh_testing.modules.aws import (
     ALB_TYPE,
@@ -79,19 +77,43 @@ service_rows_map = {
 }
 
 
-def _get_s3_row_type(bucket_type: str) -> Type[S3CloudTrailRow]:
+def _get_s3_row_type(bucket_type):
+    """Get row type for bucket integration.
+
+    Args:
+        bucket_type (str): The name of the bucket.
+
+    Returns:
+        Type[S3CloudTrailRow]: The type that match or a default one.
+    """
     return s3_rows_map.get(bucket_type, S3CloudTrailRow)
 
 
-def _get_service_row_type(table_name: str) -> Type[ServiceCloudWatchRow]:
+def _get_service_row_type(table_name):
+    """Get row type for service integration.
+
+    Args:
+        table_name (str): Table name to match.
+
+    Returns:
+        Type[ServiceCloudWatchRow]: The type that match or a default one.
+    """
     return service_rows_map.get(table_name, ServiceCloudWatchRow)
 
 
-def get_db_connection(path: Path) -> sqlite3.Connection:
+def get_db_connection(path):
+    """Get an open DB connection.
+
+    Args:
+        path (Path): The path of the sqlite file.
+
+    Returns:
+        sqlite3.Connection: A connection with the specified DB.
+    """
     return sqlite3.connect(path)
 
 
-def table_exists(table_name: str, db_path: Path = S3_CLOUDTRAIL_DB_PATH) -> bool:
+def table_exists(table_name, db_path=S3_CLOUDTRAIL_DB_PATH):
     """Check if the given table name exists.
 
     Args:
@@ -118,7 +140,7 @@ def table_exists(table_name: str, db_path: Path = S3_CLOUDTRAIL_DB_PATH) -> bool
 # cloudtrail.db utils
 
 
-def s3_db_exists() -> bool:
+def s3_db_exists():
     """Check if `s3_cloudtrail.db` exists.
 
     Returns:
@@ -133,7 +155,7 @@ def delete_s3_db() -> None:
         S3_CLOUDTRAIL_DB_PATH.unlink()
 
 
-def get_s3_db_row(table_name: str) -> S3CloudTrailRow:
+def get_s3_db_row(table_name) -> S3CloudTrailRow:
     """Return one row from the given table name.
 
     Args:
@@ -149,7 +171,7 @@ def get_s3_db_row(table_name: str) -> S3CloudTrailRow:
     return row_type(*result)
 
 
-def get_multiple_s3_db_row(table_name: str) -> Iterator[S3CloudTrailRow]:
+def get_multiple_s3_db_row(table_name):
     """Return all rows from the given table name.
 
     Args:
@@ -166,7 +188,7 @@ def get_multiple_s3_db_row(table_name: str) -> Iterator[S3CloudTrailRow]:
         yield row_type(*row)
 
 
-def table_exists_or_has_values(table_name: str, db_path: Path = S3_CLOUDTRAIL_DB_PATH) -> bool:
+def table_exists_or_has_values(table_name, db_path=S3_CLOUDTRAIL_DB_PATH):
     """Check if the given table name exists. If exists check if has values.
 
     Args:
@@ -185,7 +207,7 @@ def table_exists_or_has_values(table_name: str, db_path: Path = S3_CLOUDTRAIL_DB
 
 # aws_services.db utils
 
-def services_db_exists() -> bool:
+def services_db_exists():
     """Check if `aws_services.db` exists.
 
     Returns:
@@ -200,7 +222,7 @@ def delete_services_db() -> None:
         AWS_SERVICES_DB_PATH.unlink()
 
 
-def get_service_db_row(table_name: str) -> ServiceCloudWatchRow:
+def get_service_db_row(table_name):
     """Return one row from the given table name.
 
     Args:
@@ -217,7 +239,7 @@ def get_service_db_row(table_name: str) -> ServiceCloudWatchRow:
     return row_type(*result)
 
 
-def get_multiple_service_db_row(table_name: str) -> Iterator[ServiceCloudWatchRow]:
+def get_multiple_service_db_row(table_name):
     """Return all rows from the given table name.
 
     Args:

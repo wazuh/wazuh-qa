@@ -17,7 +17,7 @@ from wazuh_testing.tools.services import control_service
 
 
 @pytest.fixture
-def mark_cases_as_skipped(metadata: dict) -> None:
+def mark_cases_as_skipped(metadata):
     if metadata['name'] in ['alb_remove_from_bucket', 'clb_remove_from_bucket', 'nlb_remove_from_bucket']:
         pytest.skip(reason='ALB, CLB and NLB integrations are removing older logs from other region')
 
@@ -38,7 +38,7 @@ def restart_wazuh_function_without_exception(daemon=None):
 # S3 fixtures
 
 @pytest.fixture
-def upload_and_delete_file_to_s3(metadata: dict):
+def upload_and_delete_file_to_s3(metadata):
     """Upload a file to S3 bucket and delete after the test ends.
 
     Args:
@@ -58,7 +58,7 @@ def upload_and_delete_file_to_s3(metadata: dict):
 
 
 @pytest.fixture
-def delete_file_from_s3(metadata: dict):
+def delete_file_from_s3(metadata):
     """Delete a file from S3 bucket after the test ends.
 
     Args:
@@ -76,7 +76,7 @@ def delete_file_from_s3(metadata: dict):
 # CloudWatch fixtures
 
 @pytest.fixture(name='create_log_stream')
-def fixture_create_log_stream(metadata: dict):
+def fixture_create_log_stream(metadata):
     """Create a log stream with events and delete after the execution.
 
     Args:
@@ -107,7 +107,7 @@ def fixture_create_log_stream(metadata: dict):
 
 
 @pytest.fixture
-def create_log_stream_in_existent_group(metadata: dict):
+def create_log_stream_in_existent_group(metadata):
     """Create a log stream with events and delete after the execution.
 
     Args:
@@ -127,7 +127,7 @@ def create_log_stream_in_existent_group(metadata: dict):
 
 
 @pytest.fixture(name='delete_log_stream')
-def fixture_delete_log_stream(metadata: dict):
+def fixture_delete_log_stream(metadata):
     """Create a log stream with events and delete after the execution.
 
     Args:

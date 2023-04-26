@@ -10,25 +10,25 @@ session = boto3.Session(profile_name='qa')
 logs = session.client('logs', region_name=US_EAST_1_REGION)
 
 
-def create_log_group(log_group_name: str) -> None:
+def create_log_group(log_group_name):
     """Create a log group.
 
     Args:
-        log_group_name (str, optional): Log group name to create.
+        log_group_name (str): Log group name to create.
     """
     logs.create_log_group(logGroupName=log_group_name)
 
 
-def delete_log_group(log_group_name: str) -> None:
+def delete_log_group(log_group_name):
     """Delete the given log group.
 
     Args:
-        log_group_name (str, optional): Log group name to delete.
+        log_group_name (str): Log group name to delete.
     """
     logs.delete_log_group(logGroupName=log_group_name)
 
 
-def create_log_stream(log_group: str = PERMANENT_CLOUDWATCH_LOG_GROUP) -> str:
+def create_log_stream(log_group=PERMANENT_CLOUDWATCH_LOG_GROUP):
     """Create a log stream within the given log group.
 
     Args:
@@ -43,7 +43,7 @@ def create_log_stream(log_group: str = PERMANENT_CLOUDWATCH_LOG_GROUP) -> str:
     return log_stream_name
 
 
-def delete_log_stream(log_stream: str, log_group: str = PERMANENT_CLOUDWATCH_LOG_GROUP) -> None:
+def delete_log_stream(log_stream, log_group=PERMANENT_CLOUDWATCH_LOG_GROUP):
     """Delete a log stream from the given log group.
 
     Args:
@@ -53,7 +53,7 @@ def delete_log_stream(log_stream: str, log_group: str = PERMANENT_CLOUDWATCH_LOG
     logs.delete_log_stream(logGroupName=log_group, logStreamName=log_stream)
 
 
-def create_log_events(log_stream: str, log_group: str = PERMANENT_CLOUDWATCH_LOG_GROUP, event_number: int = 1) -> None:
+def create_log_events(log_stream, log_group=PERMANENT_CLOUDWATCH_LOG_GROUP, event_number=1):
     """Create a log event within the given log stream and group.
 
     Args:
@@ -71,7 +71,7 @@ def create_log_events(log_stream: str, log_group: str = PERMANENT_CLOUDWATCH_LOG
     )
 
 
-def log_stream_exists(log_group: str, log_stream: str) -> bool:
+def log_stream_exists(log_group, log_stream) -> bool:
     """Check if a log stream exists in a group.
 
     Args:

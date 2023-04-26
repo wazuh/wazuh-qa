@@ -10,7 +10,7 @@ from wazuh_testing.modules import aws as cons
 from wazuh_testing.tools.utils import get_random_ip, get_random_port, get_random_string
 
 
-def get_random_interface_id() -> str:
+def get_random_interface_id():
     """Return a random interface ID that match with the AWS format."""
     return f"eni-{get_random_string(17)}"
 
@@ -21,7 +21,7 @@ class DataGenerator:
 
     compress = False
 
-    def get_filename(self, *args, **kwargs) -> str:
+    def get_filename(self, *args, **kwargs):
         """Return the filename according to the integration format.
 
         Returns:
@@ -29,7 +29,7 @@ class DataGenerator:
         """
         raise NotImplementedError()
 
-    def get_data_sample(self, *args, **kwargs) -> str:
+    def get_data_sample(self, *args, **kwargs):
         """Return a sample of data according to the integration format.
 
         Returns:
@@ -42,7 +42,7 @@ class CloudTrailDataGenerator(DataGenerator):
     BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.CLOUDTRAIL, cons.US_EAST_1_REGION)
     BASE_FILE_NAME = f"{cons.RANDOM_ACCOUNT_ID}_{cons.CLOUDTRAIL}_{cons.US_EAST_1_REGION}_"
 
-    def get_filename(self) -> str:
+    def get_filename(self):
         """Return the filename in the cloudtrail format.
 
         Example:
@@ -57,7 +57,7 @@ class CloudTrailDataGenerator(DataGenerator):
 
         return join(path, name)
 
-    def get_data_sample(self) -> str:
+    def get_data_sample(self):
         """Return a sample of data according to the cloudtrail format.
 
         Returns:
@@ -112,7 +112,7 @@ class VPCDataGenerator(DataGenerator):
     BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.VPC_FLOW_LOGS, cons.US_EAST_1_REGION)
     BASE_FILE_NAME = f"{cons.RANDOM_ACCOUNT_ID}_{cons.VPC_FLOW_LOGS}_{cons.US_EAST_1_REGION}_"
 
-    def get_filename(self) -> str:
+    def get_filename(self):
         """Return the filename in the VPC format.
 
         Example:
@@ -130,7 +130,7 @@ class VPCDataGenerator(DataGenerator):
 
         return join(path, name)
 
-    def get_data_sample(self) -> str:
+    def get_data_sample(self):
         """Return a sample of data according to the VPC format.
 
         Returns:
@@ -160,7 +160,7 @@ class ConfigDataGenerator(DataGenerator):
     BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.CONFIG, cons.US_EAST_1_REGION)
     BASE_FILE_NAME = f"{cons.RANDOM_ACCOUNT_ID}_{cons.CONFIG}_{cons.US_EAST_1_REGION}_ConfigHistory_AWS_"
 
-    def get_filename(self) -> str:
+    def get_filename(self):
         """Return the filename in the Config format.
 
         Example:
@@ -175,7 +175,7 @@ class ConfigDataGenerator(DataGenerator):
 
         return join(path, name)
 
-    def get_data_sample(self) -> str:
+    def get_data_sample(self):
         """Return a sample of data according to the Config format.
 
         Returns:
@@ -228,7 +228,7 @@ class ALBDataGenerator(DataGenerator):
     BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTIC_LOAD_BALANCING, cons.US_EAST_1_REGION)
     BASE_FILE_NAME = f"{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTIC_LOAD_BALANCING}_{cons.US_EAST_1_REGION}_"
 
-    def get_filename(self) -> str:
+    def get_filename(self):
         """Return the filename in the ALB format.
 
         Example:
@@ -246,7 +246,7 @@ class ALBDataGenerator(DataGenerator):
 
         return join(path, name)
 
-    def get_data_sample(self) -> str:
+    def get_data_sample(self):
         """Return a sample of data according to the ALB format.
 
         Returns:
@@ -300,7 +300,7 @@ class CLBDataGenerator(DataGenerator):
     BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTIC_LOAD_BALANCING, cons.US_EAST_1_REGION)
     BASE_FILE_NAME = f"{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTIC_LOAD_BALANCING}_{cons.US_EAST_1_REGION}_"
 
-    def get_filename(self) -> str:
+    def get_filename(self):
         """Return the filename in the CLB format.
 
         Example:
@@ -318,7 +318,7 @@ class CLBDataGenerator(DataGenerator):
 
         return join(path, name)
 
-    def get_data_sample(self) -> str:
+    def get_data_sample(self):
         """Return a sample of data according to the CLB format.
 
         Returns:
@@ -356,7 +356,7 @@ class NLBDataGenerator(DataGenerator):
     BASE_PATH = join(cons.AWS_LOGS, cons.RANDOM_ACCOUNT_ID, cons.ELASTIC_LOAD_BALANCING, cons.US_EAST_1_REGION)
     BASE_FILE_NAME = f"{cons.RANDOM_ACCOUNT_ID}_{cons.ELASTIC_LOAD_BALANCING}_{cons.US_EAST_1_REGION}_"
 
-    def get_filename(self) -> str:
+    def get_filename(self):
         """Return the filename in the NLB format.
 
         Example:
@@ -374,7 +374,7 @@ class NLBDataGenerator(DataGenerator):
 
         return join(path, name)
 
-    def get_data_sample(self) -> str:
+    def get_data_sample(self):
         """Return a sample of data according to the NLB format.
 
         Returns:
@@ -418,7 +418,7 @@ class KMSDataGenerator(DataGenerator):
     BASE_PATH = ''
     BASE_FILE_NAME = 'firehose_kms-1-'
 
-    def get_filename(self) -> str:
+    def get_filename(self):
         """Return the filename in the KMS format.
 
         Example:
@@ -433,7 +433,7 @@ class KMSDataGenerator(DataGenerator):
 
         return join(path, name)
 
-    def get_data_sample(self) -> str:
+    def get_data_sample(self):
         """Return a sample of data according to the KMS format.
 
         Returns:
@@ -502,7 +502,7 @@ class MacieDataGenerator(DataGenerator):
     BASE_PATH = ''
     BASE_FILE_NAME = 'firehose_macie-1-'
 
-    def get_filename(self) -> str:
+    def get_filename(self):
         """Return the filename in the Macie format.
 
         Example:
@@ -517,7 +517,7 @@ class MacieDataGenerator(DataGenerator):
 
         return join(path, name)
 
-    def get_data_sample(self) -> str:
+    def get_data_sample(self):
         """Return a sample of data according to the Macie format.
 
         Returns:
@@ -609,7 +609,7 @@ class TrustedAdvisorDataGenerator(DataGenerator):
     BASE_PATH = ''
     BASE_FILE_NAME = 'firehose_trustedadvisor-1-'
 
-    def get_filename(self) -> str:
+    def get_filename(self):
         """Return the filename in the Trusted Advisor format.
 
         Example:
@@ -623,7 +623,7 @@ class TrustedAdvisorDataGenerator(DataGenerator):
 
         return join(path, name)
 
-    def get_data_sample(self) -> str:
+    def get_data_sample(self):
         """Return a sample of data according to the Trusted Advisor format.
 
         Returns:
@@ -661,7 +661,7 @@ class GuardDutyDataGenerator(DataGenerator):
     BASE_PATH = ''
     BASE_FILE_NAME = 'firehose_guardduty-1-'
 
-    def get_filename(self) -> str:
+    def get_filename(self):
         """Return the filename in the Guard Duty format.
 
         Example:
@@ -675,7 +675,7 @@ class GuardDutyDataGenerator(DataGenerator):
 
         return join(path, name)
 
-    def get_data_sample(self) -> str:
+    def get_data_sample(self):
         """Return a sample of data according to the Guard Duty format.
 
         Returns:
@@ -823,7 +823,7 @@ class NativeGuardDutyDataGenerator(DataGenerator):
 
     compress = True
 
-    def get_filename(self) -> str:
+    def get_filename(self):
         """Return the filename in the Native Guard Duty format.
 
         Example:
@@ -838,7 +838,7 @@ class NativeGuardDutyDataGenerator(DataGenerator):
 
         return join(path, name)
 
-    def get_data_sample(self) -> str:
+    def get_data_sample(self):
         """Return a sample of data according to the Native Guard Duty format.
 
         Returns:
@@ -964,7 +964,7 @@ class WAFDataGenerator(DataGenerator):
     BASE_PATH = ''
     BASE_FILE_NAME = 'aws-waf-logs-delivery-stream-1-'
 
-    def get_filename(self) -> str:
+    def get_filename(self):
         """Return the filename in the KMS format.
 
         Example:
@@ -978,7 +978,7 @@ class WAFDataGenerator(DataGenerator):
 
         return join(path, name)
 
-    def get_data_sample(self) -> str:
+    def get_data_sample(self):
         """Return a sample of data according to the cloudtrail format.
 
         Returns:
@@ -1052,7 +1052,7 @@ class ServerAccessDataGenerator(DataGenerator):
     BASE_PATH = ''
     BASE_FILE_NAME = ''
 
-    def get_filename(self) -> str:
+    def get_filename(self):
         """Return the filename in the server access format.
 
         Example:
@@ -1066,7 +1066,7 @@ class ServerAccessDataGenerator(DataGenerator):
         name = f"{now.strftime(date_format)}-{get_random_string(16).upper()}"
         return join(self.BASE_PATH, name)
 
-    def get_data_sample(self) -> str:
+    def get_data_sample(self):
         """Return a sample of data according to the server access format.
 
         Returns:
@@ -1103,7 +1103,7 @@ class UmbrellaDataGenerator(DataGenerator):
     BASE_PATH = 'dnslogs'
     BASE_FILE_NAME = ''
 
-    def get_filename(self) -> str:
+    def get_filename(self):
         """Return the filename in the umbrella format.
 
         Example:
@@ -1117,7 +1117,7 @@ class UmbrellaDataGenerator(DataGenerator):
 
         return join(path, name)
 
-    def get_data_sample(self) -> str:
+    def get_data_sample(self):
         """Return a sample of data according to the cloudtrail format.
 
         Returns:
@@ -1165,7 +1165,7 @@ buckets_data_mapping = {
 }
 
 
-def get_data_generator(bucket_type: str, bucket_name: str) -> DataGenerator:
+def get_data_generator(bucket_type, bucket_name):
     """Given the bucket type return the correspondant data generator instance.
 
     Args:
