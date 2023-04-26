@@ -50,4 +50,4 @@ treelib==1.6.1
 prettytable; platform_system == "Linux"
 mysql-connector-python==8.0.32; platform_system == 'Linux' and python_version >= '3.7'
 protobuf>=3.11.0,<=3.20.3; platform_system == 'Linux' and python_version >= '3.7'
-boto3==1.26.11
+boto3==1.26.11; platform_system == 'Linux'
