@@ -274,7 +274,7 @@ def check_log_format_invalid(cfg):
                             error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
 
     if sys.platform != 'win32':
-        log_callback = gc.callback_error_in_configuration('ERROR', prefix,
+        log_callback = gc.callback_error_in_configuration('CRITICAL', prefix,
                                                           conf_path=f'{wazuh_configuration}')
         wazuh_log_monitor.start(timeout=5, callback=log_callback,
                                 error_message=gc.GENERIC_CALLBACK_ERROR_MESSAGE)
