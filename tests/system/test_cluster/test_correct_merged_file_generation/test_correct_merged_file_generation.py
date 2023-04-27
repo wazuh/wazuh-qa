@@ -55,8 +55,6 @@ def check_merged(group):
     value = host_manager.run_command(testinfra_hosts[0], f'ls {WAZUH_PATH}/etc/shared/{group} -la | grep merged')
     if 'merged.mg' in value:
         check = True
-    print(value)
-    print(check)
     assert check
     
 def read_merged(group):
@@ -75,18 +73,12 @@ def add_non_zero_file(name, content, group='default'):
 def clear_files_and_directories():
     for file in reset_files['default']:
         host_manager.run_command(testinfra_hosts[0], f'rm {WAZUH_PATH}/etc/shared/default/{file}.txt -f')
-        print(file)
     for file in reset_files['TestGroup1']:
         host_manager.run_command(testinfra_hosts[0], f'rm {WAZUH_PATH}/etc/shared/TestGroup1/{file}.txt -f')
-        print(file)
     delete_group_of_agents(testinfra_hosts[0], 'TestGroup1', host_manager)
-    print('group deleted')
     host_manager.run_command(testinfra_hosts[0], f'rm -r {WAZUH_PATH}/etc/shared/TestGroup1 -f')   
-    print('group folder deleted')
     create_new_agent_group(testinfra_hosts[0],'TestGroup1',host_manager)
-    print('group created') 
     assign_agent_to_new_group(testinfra_hosts[0],'TestGroup1', host_manager.run_command('wazuh-manager', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys') , host_manager)
-    print('group assigned')
 
 @pytest.fixture
 def clean_cluster():
