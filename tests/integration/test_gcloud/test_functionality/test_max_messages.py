@@ -25,7 +25,6 @@ targets:
     - manager
 
 daemons:
-    - wazuh-analysisd
     - wazuh-monitord
     - wazuh-modulesd
 
@@ -82,7 +81,7 @@ force_restart_after_restoring = False
 
 # configurations
 
-daemons_handler_configuration = {'daemons': ['wazuh-analysisd', 'wazuh-modulesd']}
+daemons_handler_configuration = {'daemons': ['wazuh-modulesd']}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,

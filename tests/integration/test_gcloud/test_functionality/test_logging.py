@@ -24,7 +24,6 @@ targets:
     - manager
 
 daemons:
-    - wazuh-analysisd
     - wazuh-monitord
     - wazuh-modulesd
 
@@ -76,7 +75,7 @@ force_restart_after_restoring = False
 
 # configurations
 
-daemons_handler_configuration = {'daemons': ['wazuh-analysisd', 'wazuh-modulesd']}
+daemons_handler_configuration = {'daemons': ['wazuh-modulesd']}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -95,13 +94,13 @@ configurations = conf.load_wazuh_configurations(configurations_path, __name__,
 
 # fixtures
 @pytest.fixture(scope='package', params= [
-    {'wazuh_modules.debug': 0, 'analysisd.debug': 2,
+    {'wazuh_modules.debug': 0,
       'monitord.rotate_log': 0, 'monitord.day_wait': 0,
       'monitord.keep_log_days': 0, 'monitord.size_rotate': 0},
-    {'wazuh_modules.debug': 1, 'analysisd.debug': 2,
+    {'wazuh_modules.debug': 1,
      'monitord.rotate_log': 0, 'monitord.day_wait': 0,
      'monitord.keep_log_days': 0, 'monitord.size_rotate': 0},
-    {'wazuh_modules.debug': 2, 'analysisd.debug': 2,
+    {'wazuh_modules.debug': 2,
      'monitord.rotate_log': 0, 'monitord.day_wait': 0,
      'monitord.keep_log_days': 0, 'monitord.size_rotate': 0}
 ])
