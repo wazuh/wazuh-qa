@@ -156,7 +156,8 @@ def check_wildcard_pattern_expanded(file_path, location_regex, prefix, error_mes
                                     error_message=error_message, prefix=prefix, escape=escape)
 
 
-def check_wildcard_pattern_no_match(regex, prefix, error_message=None, file_monitor=None, timeout=T_10, escape=False):
+def check_win_wildcard_pattern_no_match(regex, prefix, error_message=None, file_monitor=None, timeout=T_10,
+                                        escape=False):
     """Create a callback to detect "DEBUG: No file/folder that matches ..." line.
 
     Args:

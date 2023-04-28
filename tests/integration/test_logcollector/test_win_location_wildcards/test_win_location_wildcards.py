@@ -78,7 +78,7 @@ log_sample = 'Nov 10 12:19:04 localhost sshd: test log'
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('folder_path, file_list', [(folder_path, ['test'])], ids=[''])
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
-def test_location_wildcards(configuration, metadata, folder_path, file_list, create_files_in_folder,
+def test_win_location_wildcards(configuration, metadata, folder_path, file_list, create_files_in_folder,
                             truncate_monitored_files, set_wazuh_configuration,
                             configure_local_internal_options_function, restart_wazuh_function):
     '''
@@ -152,7 +152,7 @@ def test_location_wildcards(configuration, metadata, folder_path, file_list, cre
 
     if not metadata['matches']:
         # If it does not match, check that message shows no matching file was found
-        evm.check_wildcard_pattern_no_match(re.escape(metadata['location']), prefix)
+        evm.check_win_wildcard_pattern_no_match(re.escape(metadata['location']), prefix)
     else:
         # Check that pattern is expanded to configured file
         evm.check_wildcard_pattern_expanded(file, re.escape(metadata['location']), prefix)
