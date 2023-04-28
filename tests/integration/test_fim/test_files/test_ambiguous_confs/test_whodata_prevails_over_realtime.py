@@ -171,14 +171,14 @@ def test_whodata_prevails_over_realtime(configuration, metadata, set_wazuh_confi
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                     callback=callback_detect_event).result()
 
-    if (event['data']['mode'] != 'whodata' and event['data']['type'] != 'added' and
-            os.path.join(test_directories[0], filename) in event['data']['path']):
-        raise AssertionError('Event not found')
+    assert event['data']['mode'] == 'whodata', f"Unexpected event mode found:{event['data']['mode']}, expected whodata"
+    assert event['data']['type'] == 'added', f"Unexpected event type found:{event['data']['type']}, expected added"
+    assert os.path.join(test_directories[0], filename) in event['data']['path'], 'Unexpected file path found'
 
     delete_file(os.path.join(test_directories[0], filename))
     event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                     callback=callback_detect_event).result()
 
-    if (event['data']['mode'] != 'whodata' and event['data']['type'] != 'deleted' and
-            os.path.join(test_directories[0], filename) in event['data']['path']):
-        raise AssertionError('Event not found')
+    assert event['data']['mode'] == 'whodata', f"Unexpected event mode found:{event['data']['mode']}, expected whodata"
+    assert event['data']['type'] == 'deleted', f"Unexpected event type found:{event['data']['type']}, expected deleted"
+    assert os.path.join(test_directories[0], filename) in event['data']['path'], 'Unexpected file path found'

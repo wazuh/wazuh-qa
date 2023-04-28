@@ -279,7 +279,7 @@ def callback_num_inotify_watches(line):
     """ Callback that detects if a line contains the folders monitored in realtime event
 
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     match = re.match(CB_FOLDERS_MONITORED_REALTIME, line)
 
@@ -304,12 +304,12 @@ def callback_state_event_time(line):
 def callback_real_time_whodata_started(line):
     """ Callback that detects if a line contains "Whodata engine started" event
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     match = re.match(CB_REALTIME_WHODATA_ENGINE_STARTED, line)
     if match:
         return True
-        return True
+
     return None
 
 

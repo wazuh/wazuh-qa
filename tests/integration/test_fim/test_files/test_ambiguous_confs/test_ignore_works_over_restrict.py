@@ -117,11 +117,11 @@ def test_ignore_works_over_restrict(configuration, metadata, set_wazuh_configura
             - Clean logs files and restart wazuh to apply the configuration.
         - test:
             - Create file and detect event creation event
-            - Validate Ignored event is generated with matching regex
+            - Validate ignored event is generated with matching regex
         - teardown:
             - Delete custom monitored folder
             - Restore configuration
-            - Stop wazuh
+            - Stop Wazuh
 
     wazuh_min_version: 4.2.0
 
