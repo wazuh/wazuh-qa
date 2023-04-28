@@ -67,7 +67,7 @@ from wazuh_testing.tools.file import truncate_file
 import wazuh_testing.api as api
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.logcollector import LOG_COLLECTOR_PREFIX, WINDOWS_AGENT_PREFIX
-from wazuh_testing.modules.logcollector.event_monitor import check_wildcard_pattern_no_match
+from wazuh_testing.modules.logcollector.event_monitor import check_win_wildcard_pattern_no_match
 
 
 import subprocess as sb
@@ -147,7 +147,7 @@ def check_ignore_binaries_valid(cfg):
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     if sys.platform == 'win32':
-        check_wildcard_pattern_no_match(re.escape(cfg['location']), WINDOWS_AGENT_PREFIX, escape=False)
+        check_win_wildcard_pattern_no_match(re.escape(cfg['location']), WINDOWS_AGENT_PREFIX, escape=False)
 
     if wazuh_component == 'wazuh-manager':
         real_configuration = cfg.copy()
