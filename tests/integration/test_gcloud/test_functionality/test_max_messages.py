@@ -61,6 +61,8 @@ from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools import get_service
+
 from google.cloud import pubsub_v1
 
 # Marks
@@ -81,7 +83,11 @@ force_restart_after_restoring = False
 
 # configurations
 
-daemons_handler_configuration = {'daemons': ['wazuh-modulesd']}
+if get_service() == 'wazuh-manager':
+    daemons_handler_configuration = {'daemons': ['wazuh-modulesd', 'wazuh-analysisd']}
+else:
+    daemons_handler_configuration = {'daemons': ['wazuh-modulesd']}
+
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
