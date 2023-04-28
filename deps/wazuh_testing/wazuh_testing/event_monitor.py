@@ -14,7 +14,7 @@ def make_callback(pattern, prefix=''):
         lambda: function that returns if there's a match in the file
     """
     pattern = r'\s+'.join(pattern.split())
-    regex = re.compile(r'{}{}'.format(prefix, pattern))
+    regex = re.compile(r'{}{}'.format(prefix, pattern)) if prefix else re.compile(pattern)
 
     return lambda line: regex.match(line)
 
