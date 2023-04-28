@@ -93,7 +93,7 @@ configurations = conf.load_wazuh_configurations(configurations_path, __name__,
 
 
 # fixtures
-@pytest.fixture(scope='package', params= [
+@pytest.fixture(scope='module', params= [
     {'wazuh_modules.debug': 0,
       'monitord.rotate_log': 0, 'monitord.day_wait': 0,
       'monitord.keep_log_days': 0, 'monitord.size_rotate': 0},
@@ -109,8 +109,8 @@ def get_local_internal_options(request):
     return request.param
 
 
-@pytest.fixture(scope='package')
-def configure_local_internal_options_package(get_local_internal_options):
+@pytest.fixture(scope='module')
+def configure_local_internal_options_module(get_local_internal_options):
     """Fixture to configure the local internal options file.
 
     It uses the test fixture get_local_internal_options. This should be
@@ -144,7 +144,7 @@ def get_configuration(request):
     (['{level} GCP'.format(level=log_level) for log_level in log_levels]),
 ], indirect=True)
 def test_logging(get_configuration, configure_environment, reset_ossec_log,
-                 publish_messages, configure_local_internal_options_package,
+                 publish_messages, configure_local_internal_options_module,
                  daemons_handler, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module generates logs according to the debug level set for wazuh_modules.
@@ -166,7 +166,7 @@ def test_logging(get_configuration, configure_environment, reset_ossec_log,
         - publish_messages:
             type: list
             brief: List of testing GCP logs.
-        - configure_local_internal_options_package:
+        - configure_local_internal_options_module:
             type: fixture
             brief: Fixture to modify the local_internal_options.conf file
                    and restart modulesd.
