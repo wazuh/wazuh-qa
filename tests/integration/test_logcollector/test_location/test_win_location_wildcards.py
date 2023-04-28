@@ -62,8 +62,8 @@ folder_path = os.path.join(PREFIX, 'testfolder', 'subfolder')
 test_file = os.path.join(folder_path, 'test')
 
 # --------------------------------TEST_LOCATION_WILDCARDS-------------------------------------------
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_location_wildcards.yaml')
-cases_path = os.path.join(TEST_CASES_PATH, 'cases_location_wildcards.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_win_location_wildcards.yaml')
+cases_path = os.path.join(TEST_CASES_PATH, 'cases_win_location_wildcards.yaml')
 
 configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
 configurations = load_configuration_template(configurations_path, configuration_parameters,
@@ -138,8 +138,8 @@ def test_win_location_wildcards(configuration, metadata, folder_path, file_list,
         - Check that logs are ignored when they match with configured regex
 
     input_description:
-        - The `configuration_location_wildcards.yaml` file provides the module configuration for this test.
-        - The `cases_location_wildcards` file provides the test cases.
+        - The `configuration_win_location_wildcards.yaml` file provides the module configuration for this test.
+        - The `cases_win_location_wildcards` file provides the test cases.
 
     expected_output:
         - r".*wazuh-agent.*expand_win32_wildcards.*DEBUG: No file/folder that matches {regex}"
