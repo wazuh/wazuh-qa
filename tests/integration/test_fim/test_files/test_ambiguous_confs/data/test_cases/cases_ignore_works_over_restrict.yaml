@@ -1,4 +1,4 @@
-- name: Ignore file pattern over restrict regex (Scheduled mode)
+- name: ignore_file_pattern_over_restrict_regex_scheduled
   description: Check ignore pattern is applied over restrict regex
   configuration_parameters:
     REALTIME: 'no'
@@ -9,7 +9,7 @@
     is_pattern: true
     fim_mode: scheduled
 
-- name: Ignore file pattern over restrict regex (Realtime mode)
+- name: ignore_file_pattern_over_restrict_regex_realtime
   description: Check ignore pattern is applied over restrict regex
   configuration_parameters:
     REALTIME: 'yes'
@@ -20,7 +20,7 @@
     is_pattern: true
     fim_mode: realtime
 
-- name: Ignore file pattern over restrict regex (Whodata mode)
+- name: ignore_file_pattern_over_restrict_regex_whodata
   description: Check ignore pattern is applied over restrict regex
   configuration_parameters:
     REALTIME: 'no'
@@ -31,7 +31,7 @@
     is_pattern: true
     fim_mode: whodata
 
-- name: Ignore sregex over restrict regex - different regex (Scheduled mode)
+- name: ignore_sregex_over_restrict_regex_different_regex_scheduled
   description: Check ignore with sregex is applied over restrict regex - Regexes are different
   configuration_parameters:
     REALTIME: 'no'
@@ -42,7 +42,7 @@
     is_pattern: false
     fim_mode: scheduled
 
-- name: Ignore sregex over restrict regex - different regex (Realtime mode)
+- name: ignore_sregex_over_restrict_regex_different_regex_realtime
   description: Check ignore with sregex is applied over restrict regex - Regexes are different
   configuration_parameters:
     REALTIME: 'yes'
@@ -53,7 +53,7 @@
     is_pattern: false
     fim_mode: realtime
 
-- name: Ignore sregex over restrict regex - different regex (Whodata mode)
+- name: ignore_sregex_over_restrict_regex_different_regex_whodata
   description: Check ignore with sregex is applied over restrict regex - Regexes are different
   configuration_parameters:
     REALTIME: 'no'
@@ -64,7 +64,7 @@
     is_pattern: false
     fim_mode: whodata
 
-- name: Ignore sregex over restrict regex - same regex (Scheduled mode)
+- name: ignore_sregex_over_restrict_regex_same_regex_scheduled
   description: Check ignore with sregex is applied over restrict regex - Regexes are the same
   configuration_parameters:
     REALTIME: 'no'
@@ -75,7 +75,7 @@
     is_pattern: false
     fim_mode: scheduled
 
-- name: Ignore sregex over restrict regex - same regex (Realtime mode)
+- name: ignore_sregex_over_restrict_regex_same_regex_realtime
   description: Check ignore with sregex is applied over restrict regex - Regexes are the same
   configuration_parameters:
     REALTIME: 'yes'
@@ -86,7 +86,7 @@
     is_pattern: false
     fim_mode: realtime
 
-- name: Ignore sregex over restrict regex - same regex (Whodata mode)
+- name: ignore_sregex_over_restrict_regex_same_regex_whodata
   description: Check ignore with sregex is applied over restrict regex - Regexes are the same
   configuration_parameters:
     REALTIME: 'no'

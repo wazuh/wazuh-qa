@@ -1,4 +1,4 @@
-- name: Whodata thread Disabled
+- name: whodata_thread_disabled
   description: Check Whodata thread is disabled when last directory has it set to 'no'
   configuration_parameters:
     WHODATA1: 'yes'
@@ -7,7 +7,7 @@
     fim_mode: whodata
     whodata_enabled: false
 
-- name: Whodata thread Enabled
+- name: whodata_thread_enabled
   description: Check Whodata thread is enabled when last directory has it set to 'yes'
   configuration_parameters:
     WHODATA1: 'no'
