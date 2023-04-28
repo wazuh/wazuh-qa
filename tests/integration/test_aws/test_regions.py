@@ -1,12 +1,12 @@
 import os
 
 import pytest
-from test_aws import local_internal_options  # noqa: F401
 from wazuh_testing import T_10, T_20, TEMPLATE_DIR, TEST_CASES_DIR, global_parameters
-from wazuh_testing.modules.aws import (
+from wazuh_testing.modules.aws import (  # noqa: F401
     AWS_SERVICES_DB_PATH,
     RANDOM_ACCOUNT_ID,
     event_monitor,
+    local_internal_options
 )
 from wazuh_testing.modules.aws.db_utils import (
     get_multiple_s3_db_row,

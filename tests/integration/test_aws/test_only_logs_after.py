@@ -2,10 +2,9 @@ import os
 from datetime import datetime
 
 import pytest
-from test_aws import ONLY_LOGS_AFTER_PARAM, local_internal_options  # noqa: F401
 from wazuh_testing import T_10, T_20, TEMPLATE_DIR, TEST_CASES_DIR, global_parameters
 from wazuh_testing.modules import aws as cons
-from wazuh_testing.modules.aws import event_monitor
+from wazuh_testing.modules.aws import ONLY_LOGS_AFTER_PARAM, event_monitor, local_internal_options  # noqa: F401
 from wazuh_testing.modules.aws.cli_utils import call_aws_module
 from wazuh_testing.modules.aws.cloudwatch_utils import (
     create_log_events,

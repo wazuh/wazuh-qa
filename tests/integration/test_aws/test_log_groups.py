@@ -1,9 +1,8 @@
 import os
 
 import pytest
-from test_aws import local_internal_options  # noqa: F401
 from wazuh_testing import T_10, T_20, TEMPLATE_DIR, TEST_CASES_DIR, global_parameters
-from wazuh_testing.modules.aws import event_monitor
+from wazuh_testing.modules.aws import event_monitor, local_internal_options  # noqa: F401
 from wazuh_testing.modules.aws.db_utils import (
     get_multiple_service_db_row,
     services_db_exists,

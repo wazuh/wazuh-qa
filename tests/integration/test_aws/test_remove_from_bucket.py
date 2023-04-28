@@ -1,9 +1,8 @@
 import os
 
 import pytest
-from test_aws import local_internal_options  # noqa: F401
 from wazuh_testing import TEMPLATE_DIR, TEST_CASES_DIR, global_parameters
-from wazuh_testing.modules.aws import event_monitor
+from wazuh_testing.modules.aws import event_monitor, local_internal_options  # noqa: F401
 from wazuh_testing.modules.aws.cloudwatch_utils import log_stream_exists
 from wazuh_testing.modules.aws.s3_utils import file_exists
 from wazuh_testing.tools.configuration import (
