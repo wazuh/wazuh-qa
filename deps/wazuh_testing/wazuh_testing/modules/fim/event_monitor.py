@@ -191,7 +191,7 @@ def callback_integrity_message(line):
 def callback_integrity_sync_message(line):
     """ Callback that detects if a line contains a integrity sync event
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     Returns:
         List: returns a list with formated datetime, And the event's JSON data.
     """
@@ -204,7 +204,7 @@ def callback_integrity_sync_message(line):
 def callback_detect_integrity_check_global(line):
     """ Callback that detects if a line contains an 'integrity_check_global' event
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     Returns:
         JSON: returns event's JSON data.
     """
@@ -219,7 +219,7 @@ def callback_detect_file_integrity_event(line):
     """ Callback that detects if a line contains a file integrity event
 
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     event = callback_detect_integrity_control_event(line)
     if event and event['component'] == 'fim_file':
@@ -240,7 +240,7 @@ def callback_detect_registry_integrity_event(line):
     """ Callback that detects if a line contains a registry integrity event for a registry_key or registry_value
 
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     event = callback_detect_integrity_control_event(line)
     if event and event['component'] == 'fim_registry_key':
@@ -254,7 +254,7 @@ def callback_detect_registry_integrity_state_event(line):
     """ Callback that detects if a line contains a registry integrity event of the state type
 
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     event = callback_detect_registry_integrity_event(line)
     if event and event['type'] == 'state':
@@ -317,7 +317,7 @@ def callback_detect_registry_integrity_clear_event(line):
     """ Callback that detects if a line contains a registry integrity_clear event
 
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     event = callback_detect_integrity_control_event(line)
     if event and event['component'] == 'fim_registry_key' and event['type'] == 'integrity_clear':
