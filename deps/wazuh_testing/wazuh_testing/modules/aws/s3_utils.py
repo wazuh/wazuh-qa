@@ -3,7 +3,6 @@
 import gzip
 
 import boto3
-from botocore import exceptions
 from botocore.exceptions import ClientError
 from wazuh_testing import logger
 from wazuh_testing.modules.aws.data_generator import get_data_generator
@@ -59,7 +58,7 @@ def file_exists(filename, bucket_name):
     exists = True
     try:
         s3.Object(bucket_name, filename).load()
-    except exceptions.ClientError as error:
+    except ClientError as error:
         if error.response['Error']['Code'] == '404':
             exists = False
 
