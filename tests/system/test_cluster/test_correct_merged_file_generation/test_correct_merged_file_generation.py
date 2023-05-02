@@ -237,3 +237,4 @@ def test_correct_merged_file_generation(test_case, clear_files_and_directories, 
     assert folder_value
     assert merged_malformed_check_value 
     assert log_value
+
