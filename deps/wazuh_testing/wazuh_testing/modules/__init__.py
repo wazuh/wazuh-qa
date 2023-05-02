@@ -1,15 +1,13 @@
-# Copyright (C) 2015-2023, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
-
 '''
-The purpose of this file is to contain all the variables necessary for Wazuh in order to be easier
-to maintain if one of them changes in the future.
+copyright: Copyright (C) 2015-2023, Wazuh Inc.
+           Created by Wazuh, Inc. <info@wazuh.com>.
+           This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 '''
 import pytest
 
-WAZUH_SERVICE_PREFIX = 'wazuh'
+# Services Variables
 WAZUH_SERVICES_STOPPED = 'stopped'
+WAZUH_SERVICE_PREFIX = 'wazuh'
 WAZUH_SERVICES_STOP = 'stop'
 WAZUH_SERVICES_START = 'start'
 

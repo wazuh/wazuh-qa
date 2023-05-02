@@ -281,7 +281,7 @@
     output: err An error occurred during the set of the groups
     agent_id: 27
     expected_group: None
-    expected_warint: ".*WARNING: Invalid group name. 'Test,Group1' contains invalid characters"
+    expected_warning: ".*WARNING: Invalid group name. 'Test,Group1' contains invalid characters"
     expected_group_sync_status: synced
 
 - name: Wrong group name format - Assign a group with an invalid group name (has invalid '@' character) - Warning
@@ -301,7 +301,7 @@
     output: err An error occurred during the set of the groups
     agent_id: 29
     expected_group: None
-    expected_warint: ".*WARNING: Invalid group name. '.' represents the current directory in unix systems"
+    expected_warning: ".*WARNING: Invalid group name. '.' represents the current directory in unix systems"
     expected_group_sync_status: synced
 
 - name: Wrong group name format - Assign a group with an invalid group name (..) - Warning
