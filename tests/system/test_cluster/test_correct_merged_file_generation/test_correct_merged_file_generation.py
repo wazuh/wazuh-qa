@@ -4,7 +4,8 @@ copyright: Copyright (C) 2015-2023, Wazuh Inc.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: system
 brief: Wazuh manager should be able to create merged.mg file in order to share files with group of agents.
-       In order to do it, when new files are present in any directory in /var/ossec/share/ , those files must be monitored and to be taken in consideration by merged.mg
+       In order to do it, when new files are present in any directory in /var/ossec/share/, 
+       those files must be monitored and to be taken in consideration by merged.mg
 tier: 1, 2
 modules:
     - enrollment
@@ -34,8 +35,11 @@ folder_value = False
 merged_malformed_check_value = False
 log_value = False
 reset_files = {
-    'default':['TestFile','TestFile2','EmptyFile','EmptyFile2','EmptyFile3','EmptyFile4','EmptyFile5','EmptyFile6','EmptyFile7','EmptyFile8','EmptyFile9','EmptyFile10'],
-    'TestGroup1':['TestFileInTestGroup','TestFileInTestGroup2','EmptyFileInGroup','EmptyFileInGroup2','EmptyFileInGroup3','EmptyFileInGroup4','EmptyFileInGroup5','EmptyFileInGroup6','EmptyFileInGroup7','EmptyFileInGroup8','EmptyFileInGroup9','EmptyFileInGroup10']
+    'default': ['TestFile', 'TestFile2', 'EmptyFile', 'EmptyFile2', 'EmptyFile3', 'EmptyFile4', 'EmptyFile5', 'EmptyFile6', 
+                'EmptyFile7', 'EmptyFile8', 'EmptyFile9', 'EmptyFile10'],
+    'TestGroup1': ['TestFileInTestGroup', 'TestFileInTestGroup2', 'EmptyFileInGroup', 'EmptyFileInGroup2', 
+                   'EmptyFileInGroup3', 'EmptyFileInGroup4', 'EmptyFileInGroup5', 'EmptyFileInGroup6', 'EmptyFileInGroup7', 
+                   'EmptyFileInGroup8', 'EmptyFileInGroup9', 'EmptyFileInGroup10']
 }
 testinfra_hosts = ['wazuh-manager', 'wazuh-agent1']
 
@@ -56,10 +60,11 @@ def check_merged(group):
     if 'merged.mg' in value:
         check = True
     assert check
-    
+
 def read_merged(group):
-    merge_info = host_manager.run_command(testinfra_hosts[0], f'cat {WAZUH_PATH}/etc/shared/{group}/merged.mg')
-    return merge_info
+    return host_manager.run_command(
+        testinfra_hosts[0], f'cat {WAZUH_PATH}/etc/shared/{group}/merged.mg'
+    )
 
 def add_zero_file(group, name):
     host_manager.run_command(testinfra_hosts[0], f'touch {WAZUH_PATH}/etc/shared/{group}/{name}.txt')
@@ -77,13 +82,14 @@ def clear_files_and_directories():
         host_manager.run_command(testinfra_hosts[0], f'rm {WAZUH_PATH}/etc/shared/TestGroup1/{file}.txt -f')
     delete_group_of_agents(testinfra_hosts[0], 'TestGroup1', host_manager)
     host_manager.run_command(testinfra_hosts[0], f'rm -r {WAZUH_PATH}/etc/shared/TestGroup1 -f')   
-    create_new_agent_group(testinfra_hosts[0],'TestGroup1',host_manager)
-    assign_agent_to_new_group(testinfra_hosts[0],'TestGroup1', host_manager.run_command('wazuh-manager', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys') , host_manager)
+    create_new_agent_group(testinfra_hosts[0], 'TestGroup1', host_manager)
+    assign_agent_to_new_group(testinfra_hosts[0], 'TestGroup1', host_manager.run_command('wazuh-manager', 
+                                                                                        f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys'), host_manager)
 
 @pytest.fixture
 def clean_cluster():
     clean_cluster_logs(testinfra_hosts, host_manager)
-    
+
 @pytest.fixture
 def stop_manager(test_case):
     time.sleep(1)
@@ -103,10 +109,10 @@ def trigger(test_case):
                     add_zero_file(test_case['test_case'][0]['folder'], file)
         if test_case['test_case'][0]['content']  != 'zero':
             if test_case['test_case'][0]['number'] == '1':
-                add_non_zero_file(test_case['test_case'][0]['name'], test_case['test_case'][0]['content'] , test_case['test_case'][0]['folder'])
+                add_non_zero_file(test_case['test_case'][0]['name'], test_case['test_case'][0]['content'], test_case['test_case'][0]['folder'])
             if test_case['test_case'][0]['number'] == 'several':
                 for file in test_case['test_case'][0]['name']:
-                    add_non_zero_file(file, test_case['test_case'][0]['content'] , test_case['test_case'][0]['folder'])
+                    add_non_zero_file(file, test_case['test_case'][0]['content'], test_case['test_case'][0]['folder'])
 
 @pytest.fixture
 def check_closed_merged(test_case, group='default'):
@@ -116,7 +122,7 @@ def check_closed_merged(test_case, group='default'):
         check = True
     if test_case['test_case'][0]['trigger_value'] == 'remove' and test_case['test_case'][0]['test_type'] == 'start':
         assert not check
-        
+
 @pytest.fixture
 def restart_or_sleep(test_case):
     group = 'default'
@@ -134,17 +140,17 @@ def check_folder(test_case):
     value_files = False
     value_merged = False
     counter = 0
-    if test_case['test_case'][0]['folder'] != None:
+    if test_case['test_case'][0]['folder'] is None: folder = 'default'
+    else:
         folder = test_case['test_case'][0]['folder']
-    else : folder = 'default'
-    files_info = host_manager.run_command(testinfra_hosts[0],f'ls {WAZUH_PATH}/etc/shared/{folder}')
-    if test_case['test_case'][0]['name'] != None:
+    files_info = host_manager.run_command(testinfra_hosts[0], f'ls {WAZUH_PATH}/etc/shared/{folder}')
+    if test_case['test_case'][0]['name'] is not None:
         for file in test_case['test_case'][0]['name']:
             if file in files_info:
                 counter = counter + 1
         if counter == len(test_case['test_case'][0]['name']):
             value_files = True
-    if test_case['test_case'][0]['name'] == None:
+    if test_case['test_case'][0]['name'] is None:
         value_files = True
     if 'merged.mg' in files_info:
         value_merged = True
@@ -154,7 +160,7 @@ def check_folder(test_case):
 @pytest.fixture
 def check_merged_malformed(test_case, group='default'):
     global merged_malformed_check_value
-    if test_case['test_case'][0]['malformed_value'] != None:
+    if test_case['test_case'][0]['malformed_value'] is not None:
         folder_info = read_merged(test_case['test_case'][0]['folder'])
         for value in test_case['test_case'][0]['malformed_value']:
             if value in folder_info:
@@ -165,20 +171,20 @@ def check_merged_malformed(test_case, group='default'):
 def check_log(test_case):
     global log_value
     counter = 0
-    if test_case['test_case'][0]['log_content'] != None:
+    if test_case['test_case'][0]['log_content'] is not None:
         if test_case['test_case'][0]['content'] == "zero":
-            logs_info = host_manager.run_command(testinfra_hosts[0],f'cat {WAZUH_PATH}/logs/ossec.log')  
+            logs_info = host_manager.run_command(testinfra_hosts[0], f'cat {WAZUH_PATH}/logs/ossec.log')  
             for expected_log in test_case['test_case'][0]['log_content']:
                 if expected_log in logs_info:
                     counter= counter + 1
         if len(test_case['test_case'][0]['log_content']) == counter:
             log_value = True
     else: log_value = True
-        
+
 @pytest.mark.parametrize('test_case', [cases for cases in test_cases_yaml], ids=[cases['name']
                          for cases in test_cases_yaml])
 
-def test_correct_merged_file_generation(test_case ,clear_files_and_directories, clean_cluster, 
+def test_correct_merged_file_generation(test_case, clear_files_and_directories, clean_cluster, 
                                         stop_manager, trigger, check_closed_merged, restart_or_sleep,
                                         check_folder, check_merged_malformed, check_log):
     
