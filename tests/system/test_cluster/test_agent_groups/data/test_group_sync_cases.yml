@@ -1,22 +1,19 @@
--
-  name: 'delete_folder_master'
+---
+- name: delete_folder_master
   test_case:
-    host: 'wazuh-master'
-    group_deleted: 'group_master'
-    first_time_check: 'syncreq'
-    second_time_check: 'synced'
--
-  name: 'delete_folder_worker1'
+    host: wazuh-master
+    group_deleted: group_master
+    first_time_check: syncreq
+    second_time_check: synced
+- name: delete_folder_worker1
   test_case:
-    host: 'wazuh-worker1'
-    group_deleted: 'group_worker1'
-    first_time_check: 'synced'
-    second_time_check: 'synced'
--
-  name: 'delete_folder_worker2'
+    host: wazuh-worker1
+    group_deleted: group_worker1
+    first_time_check: synced
+    second_time_check: synced
+- name: delete_folder_worker2
   test_case:
-    host: 'wazuh-worker2'
-    group_deleted: 'group_worker2'
-    first_time_check: 'synced'
-    second_time_check: 'synced'
-
+    host: wazuh-worker2
+    group_deleted: group_worker2
+    first_time_check: synced
+    second_time_check: synced
