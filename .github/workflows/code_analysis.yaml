@@ -1,6 +1,9 @@
 name: Code analysis
 on:
-  pull_request
+  pull_request:
+    types:
+      - opened
+      - ready_for_review
 jobs:
   Linting:
     if: ${{ !github.event.pull_request.draft }}
