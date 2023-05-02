@@ -486,7 +486,12 @@ def set_correct_prefix(configurations, new_prefix):
 
     for config in configurations:
         for section in config['sections']:
-            if section['elements']:
+            # Capture exception if there is no elements in the section
+            try:
+                elements = section['elements']
+            except KeyError:
+                elements = None
+            if elements is not None:
                 for element in section['elements']:
                     if isinstance(element, dict):
                         # ADD HERE all fields with format sub_element: - value
