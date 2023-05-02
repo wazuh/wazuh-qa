@@ -137,6 +137,11 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 - Remove all FIM Integration skipped tests ([#2927](https://github.com/wazuh/wazuh-qa/issues/2927)) \- (Framework + Tests)
 - VDT ITs: Remove Debian Stretch test support. ([#3172](https://github.com/wazuh/wazuh-qa/pull/3172)) \- (Tests)
 
+## [4.3.11] - 20-04-2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/776fda906581a1e4ee170c3e7e73a58d69e41f95 \
+Release report: https://github.com/wazuh/wazuh/issues/16758
+
 ## [4.3.10] - 16-11-2022
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/89530f11c9e592cd2e551432209b0080f08ff8e5 \
