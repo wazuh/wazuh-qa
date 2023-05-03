@@ -62,24 +62,6 @@ def get_latest_delta_file(deltas_filepath):
     return newest_file
 
 
-def sanitize_configuration(configuration):
-    """Normalize the configuration for it to be correctly processed and compatible.
-
-    Args:
-        configuration (list): Test case configuration to be sanitized.
-
-    Returns:
-        configuration (list): Configuration normalized.
-    """
-    for configurations_obj in configuration:
-        configurations_list = configurations_obj['configurations']
-        for config_obj in configurations_list:
-            for key in config_obj:
-                config_obj[key.lower()] = config_obj.pop(key)
-
-    return configuration
-
-
 def validate_json_against_schema(json_document, schema):
     """Validate a JSON document under the given schema.
 
