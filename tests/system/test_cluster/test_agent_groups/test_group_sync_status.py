@@ -33,6 +33,7 @@ from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.file import read_file, read_yaml
 from wazuh_testing.tools.system import HostManager
 from system import assign_agent_to_new_group, create_new_agent_group, delete_agent_group, execute_wdb_query
+from wazuh_testing import T_10, T_20
 
 pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
 
@@ -49,7 +50,7 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os
                               'provisioning', 'enrollment_cluster', 'inventory.yml')
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
-test_cases_yaml = read_yaml(os.path.join(local_path, 'data/test_group_sync_cases.yml'))
+test_cases_yaml = read_yaml(os.path.join(local_path, 'data/cases_group_sync.yml'))
 wdb_query = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'script/wdb-query.py')
 agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                '..', '..', 'provisioning', 'enrollment_cluster', 'roles', 'agent-role', 
@@ -72,15 +73,14 @@ def query_database():
 def first_check():
     global first_time_check
     first_time_check = "synced"
-    s_time = 15
-    for i in range(s_time):
+    for i in range(T_20):
         time.sleep(0.25)
         result = query_database()
         if 'syncreq' in result:
             first_time_check = "syncreq"
 
 def second_check():
-    time.sleep(10)
+    time.sleep(T_10)
     global second_time_check
     second_time_check = "synced"
     result = query_database()
@@ -102,9 +102,10 @@ def network_configuration():
 
 @pytest.fixture
 def group_creation():
-    delete_all_groups()
     for group in groups:
         create_new_agent_group(testinfra_hosts[0], group, host_manager)
+    yield
+    delete_all_groups()
 
 @pytest.fixture
 def agent_group_assignation():
@@ -142,19 +143,19 @@ def test_group_sync_status(test_case, network_configuration,
             type: list
             brief: List of tests to be performed.
         - network_configuration
-            type: function
+            type: fixture
             brief: Delete logs generally talking           
         - group_creation:
-            type: function
+            type: fixture
             brief: Delete and create from zero all the groups that are going to be used for testing
         - agent_group_assignation:
-            type: function
+            type: fixture
             brief: Assign agents to groups      
         - wait_end_initial_syncreq:
-            type: function
+            type: fixture
             brief: Wait until syncreqs related with the test-environment setting get neutralized
         - delete_group_folder:
-            type: function
+            type: fixture
             brief: Delete the folder-group assigned by test case (trigger)
 
     assertions:
