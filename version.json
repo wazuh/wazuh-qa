@@ -1,4 +1,9 @@
 {
+<<<<<<< HEAD
     "version": "4.5.0",
     "revision": "40500"
+=======
+    "version": "4.4.2",
+    "revision": "40407"
+>>>>>>> 947106bebea3ec50b440aad9c442ad47f5653257
 }
