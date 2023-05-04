@@ -73,7 +73,7 @@ from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_call
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 
 # Marks
-pytestmark = pytest.mark.tier(level=2)
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=2)]
 
 # Variables
 test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]

@@ -69,7 +69,7 @@ from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as loca
 
 
 # Marks
-pytestmark = pytest.mark.tier(level=2)
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=2)]
 
 # Variables
 test_directories = [os.path.join(PREFIX, 'testdir1')]
