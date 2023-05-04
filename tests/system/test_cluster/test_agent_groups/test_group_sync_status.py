@@ -32,8 +32,11 @@ import time
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.file import read_file, read_yaml
 from wazuh_testing.tools.system import HostManager
-from system import assign_agent_to_new_group, create_new_agent_group, delete_agent_group, execute_wdb_query
+from system import (get_agent_id, assign_agent_to_new_group, create_new_agent_group, 
+                            delete_agent_group, execute_wdb_query, restart_cluster)
 from wazuh_testing import T_10, T_20
+
+from system.test_cluster.test_agent_groups.common import register_agent
 
 pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
 
@@ -42,9 +45,7 @@ groups = ['group_master', 'group_worker1', 'group_worker2']
 agents = ['wazuh-agent1', 'wazuh-agent2']
 workers = ['wazuh-worker1', 'wazuh-worker2']
 groups_created = []
-first_time_check = "synced"
-second_time_check = "synced"
-network = {}
+
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'enrollment_cluster', 'inventory.yml')
@@ -56,83 +57,41 @@ agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                '..', '..', 'provisioning', 'enrollment_cluster', 'roles', 'agent-role', 
                                'files', 'ossec.conf')
 
-def get_ip_directions():
-    global network
-    for host in testinfra_hosts:
-        network[host] = host_manager.get_host_ip(host, 'eth0')
-
-def delete_all_groups():
-    for group in groups:
-        delete_agent_group(testinfra_hosts[0], group, host_manager, 'api')
-
-def query_database(): 
-    query = "global 'sql select group_sync_status from agent;'"
-    response = execute_wdb_query(query, testinfra_hosts[0], host_manager)
-    return response 
-
-def first_check():
-    global first_time_check
-    first_time_check = "synced"
-    for i in range(T_20):
-        time.sleep(0.25)
-        result = query_database()
-        if 'syncreq' in result:
-            first_time_check = "syncreq"
-
-def second_check():
-    time.sleep(T_10)
-    global second_time_check
-    second_time_check = "synced"
-    result = query_database()
-    if 'syncreq' in result:
-        second_time_check = "syncreq"   
-
 @pytest.fixture
-def network_configuration():
-    get_ip_directions()
-    for worker in workers:
-        old_agent_configuration = read_file(agent_conf_file)
-        new_configuration = old_agent_configuration.replace('<address>MANAGER_IP</address>',
-                                                            f"<address>{network[worker][0]}</address>")
-        host_manager.modify_file_content(host=agents[worker.index(worker)], path=f'{WAZUH_PATH}/etc/ossec.conf',
-                                        content=new_configuration)
-        host_manager.get_host(testinfra_hosts[0]).ansible('command', f'service wazuh-manager restart', check=False)
-    for agent in agents:
-        host_manager.get_host(agent).ansible('command', f'service wazuh-agent restart', check=False)
-
+def agent_configuration():
+    restart_cluster(workers, host_manager)
+    
 @pytest.fixture
-def group_creation():
+def group_creation_and_assignation():
     for group in groups:
         create_new_agent_group(testinfra_hosts[0], group, host_manager)
-    yield
-    delete_all_groups()
-
-@pytest.fixture
-def agent_group_assignation():
-    agent_ids = host_manager.run_command(testinfra_hosts[0], f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys').split()
+        
+    agent_ids = get_agent_id(host_manager).split()
     for group in groups:
         for agent_id in agent_ids:
             assign_agent_to_new_group(testinfra_hosts[0], group, agent_id, host_manager)
+            
+    yield
+    for group in groups:
+        delete_agent_group(testinfra_hosts[0], group, host_manager, 'api')
 
 @pytest.fixture
 def delete_group_folder(test_case):
-    groups_created = host_manager.run_command(testinfra_hosts[0], f'{WAZUH_PATH}/bin/agent_groups')
-    if test_case['test_case']['group_deleted'] in groups_created:
-        host_manager.run_command(test_case['test_case']['host'], 
-                                 f"rm -r {WAZUH_PATH}/etc/shared/{test_case['test_case']['group_deleted']} -f")
+    host_manager.run_command(test_case['test_case']['host'], 
+                             f"rm -r {WAZUH_PATH}/etc/shared/{test_case['test_case']['group_deleted']} -f") 
 
 @pytest.fixture
 def wait_end_initial_syncreq():
-    result = query_database()
+    query = "global 'sql select group_sync_status from agent;'"
+    result = execute_wdb_query(query, testinfra_hosts[0], host_manager)
     while 'syncreq' in result:
         time.sleep(1)
-        result = query_database()
+        result = execute_wdb_query(query, testinfra_hosts[0], host_manager)
 
 @pytest.mark.parametrize('test_case', [cases for cases in test_cases_yaml], ids=[cases['name']
                          for cases in test_cases_yaml])
 
-def test_group_sync_status(test_case, network_configuration, 
-                           group_creation, agent_group_assignation, 
+def test_group_sync_status(test_case, agent_configuration, group_creation_and_assignation, 
                            wait_end_initial_syncreq, delete_group_folder):
 
     '''
@@ -141,16 +100,14 @@ def test_group_sync_status(test_case, network_configuration,
     parameters:
         - test_case:
             type: list
-            brief: List of tests to be performed.
-        - network_configuration
+            brief: List of tests to be performed.     
+        - agent_configuration:
             type: fixture
-            brief: Delete logs generally talking           
-        - group_creation:
+            brief: Restarting agents to be included in the network.     
+        - group_creation_and_assignation:
             type: fixture
-            brief: Delete and create from zero all the groups that are going to be used for testing
-        - agent_group_assignation:
-            type: fixture
-            brief: Assign agents to groups      
+            brief: Delete and create from zero all the groups that are going to be used for testing.
+                    It includes group cleaning after tests.
         - wait_end_initial_syncreq:
             type: fixture
             brief: Wait until syncreqs related with the test-environment setting get neutralized
@@ -170,10 +127,23 @@ def test_group_sync_status(test_case, network_configuration,
         cluster recreates groups without syncreq status.
     '''
     #Checks
-    first_check()
-    second_check()
+    query = "global 'sql select group_sync_status from agent;'"
+
+    first_time_check = "synced"
+    second_time_check = "synced"
     
+    for i in range(T_20):
+        time.sleep(0.25)
+        result = execute_wdb_query(query, testinfra_hosts[0], host_manager)
+        if 'syncreq' in result:
+            first_time_check = "syncreq"
+
+    time.sleep(T_10)
+
+    result = execute_wdb_query(query, testinfra_hosts[0], host_manager)
+    if 'syncreq' in result:
+        second_time_check = "syncreq"   
+        
     #Results
     assert test_case['test_case']['first_time_check'] == first_time_check 
     assert test_case['test_case']['second_time_check'] == second_time_check  
-
