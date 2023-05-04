@@ -63,8 +63,8 @@ messages_files = ['data/messages_415_or_lower.yml', 'data/messages_420_to_424.ym
 tmp_path = os.path.join(local_path, 'tmp')
 log_path = "/var/log/secure"
 ip = ".".join(str(randint(0, 255)) for _ in range(4))
-log_sample = f"""Dec  9 22:15:40 localhost sshd[5332]: Failed password for invalid
-                user BALROG from {ip} port 52620 '$token': `132`! ssh2\n\n"""
+log_sample = f"Dec  9 22:15:40 localhost sshd[5332]: Failed password for invalid user BALROG from {ip} port 52620" + \
+              "'$token': `132`! ssh2\n\n"
 sleep_time = 5
 
 
@@ -96,6 +96,7 @@ def test_active_response_log_format(wazuh_agent, message_file):
     # Clear the agents files that will be monitored.
     enviroment_files = [(wazuh_agent, os.path.join(WAZUH_LOGS_PATH, 'ossec.log')),
                         (wazuh_agent, os.path.join(WAZUH_LOGS_PATH, 'active-responses.log'))]
+
     clean_environment(host_manager, enviroment_files)
 
     # Add log message to agent monitored source
