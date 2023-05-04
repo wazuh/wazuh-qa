@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Add Windows location wildcards tests ([#3906](https://github.com/wazuh/wazuh-qa/pull/3906)) \- (Tests)
+- Add Windows location wildcards tests ([#3906](https://github.com/wazuh/wazuh-qa/pull/3906)) \- (Tests + Framework)
 - Add integration tests for AWS module. ([#3911](https://github.com/wazuh/wazuh-qa/pull/3911)) \- (Framework + Tests + Documentation)
 - Add tests for msu patches with no associated CVE . ([#4009](https://github.com/wazuh/wazuh-qa/pull/4009)) \- (Framework + Tests)
 - Add tests with new options to avoid FIM synchronization overlapping. ([#3318](https://github.com/wazuh/wazuh-qa/pull/3318)) \- (Framework + tests)
