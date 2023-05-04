@@ -123,7 +123,7 @@ def network_review():
 def restart_all_agents():
     host_manager.run_command(testinfra_hosts[0], f'{WAZUH_PATH}/bin/agent_control -R -a')
     time.sleep(2)
-        
+
 @pytest.fixture
 def stop_gracefully_all_agents():
     for agent in agents:
