@@ -46,7 +46,6 @@ agents = ['wazuh-agent1', 'wazuh-agent2']
 workers = ['wazuh-worker1', 'wazuh-worker2']
 groups_created = []
 
-
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'enrollment_cluster', 'inventory.yml')
 host_manager = HostManager(inventory_path)
@@ -60,17 +59,17 @@ agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
 @pytest.fixture
 def agent_configuration():
     restart_cluster(workers, host_manager)
-    
+
 @pytest.fixture
 def group_creation_and_assignation():
     for group in groups:
         create_new_agent_group(testinfra_hosts[0], group, host_manager)
-        
+    
     agent_ids = get_agent_id(host_manager).split()
     for group in groups:
         for agent_id in agent_ids:
             assign_agent_to_new_group(testinfra_hosts[0], group, agent_id, host_manager)
-            
+    
     yield
     for group in groups:
         delete_agent_group(testinfra_hosts[0], group, host_manager, 'api')
