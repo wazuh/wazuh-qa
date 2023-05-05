@@ -1,20 +1,71 @@
-- name: delete_folder_master
+- name: delete_folder_master_agent_in_group_all
   test_case:
-    host: wazuh-master
+    host: 'wazuh-master'
+    agent_in_group: all
     group_deleted: group_master
     first_time_check: syncreq
     second_time_check: synced
 
-- name: delete_folder_worker1
+- name: delete_folder_worker1_agent_in_group_all
   test_case:
-    host: wazuh-worker1
+    host: 'wazuh-worker1'
+    agent_in_group: all
     group_deleted: group_worker1
     first_time_check: synced
     second_time_check: synced
 
-- name: delete_folder_worker2
+- name: delete_folder_worker2_agent_in_group_all
   test_case:
-    host: wazuh-worker2
+    host: 'wazuh-worker2'
+    agent_in_group: all
+    group_deleted: group_worker2
+    first_time_check: synced
+    second_time_check: synced
+
+- name: delete_folder_master_agent_in_group_agent1
+  test_case:
+    host: 'wazuh-master'
+    agent_in_group: agent1
+    group_deleted: group_master
+    first_time_check: syncreq
+    second_time_check: synced
+
+- name: delete_folder_worker1_in_group_agent1
+  test_case:
+    host: 'wazuh-worker1'
+    agent_in_group: agent1
+    group_deleted: group_worker1
+    first_time_check: synced
+    second_time_check: synced
+
+- name: delete_folder_worker2_in_group_agent1
+  test_case:
+    host: 'wazuh-worker2'
+    agent_in_group: agent1
+    group_deleted: group_worker2
+    first_time_check: synced
+    second_time_check: synced
+
+- name: delete_folder_master_agent_in_group_agent2
+  test_case:
+    host: 'wazuh-master'
+    agent_in_group: agent2
+    group_deleted: group_master
+    first_time_check: syncreq
+    second_time_check: synced
+
+- name: delete_folder_worker1_in_group_agent2
+  test_case:
+    host: 'wazuh-worker1'
+    agent_in_group: agent2
+    group_deleted: group_worker1
+    first_time_check: synced
+    second_time_check: synced
+
+- name: delete_folder_worker2_in_group_agent2
+  test_case:
+    host: 'wazuh-worker2'
+    agent_in_group: agent2
     group_deleted: group_worker2
     first_time_check: synced
     second_time_check: synced

@@ -26,17 +26,15 @@ references:
     - https://documentation.wazuh.com/current/user-manual/registering/agent-enrollment.html
 '''
 
+import json
 import os
 import pytest
 import time
-from wazuh_testing.tools import WAZUH_PATH
-from wazuh_testing.tools.file import read_file, read_yaml
+from wazuh_testing import T_025, T_1, T_10
+from wazuh_testing.tools.file import read_yaml
 from wazuh_testing.tools.system import HostManager
 from system import (get_agent_id, assign_agent_to_new_group, create_new_agent_group, 
                             delete_agent_group, execute_wdb_query, restart_cluster)
-from wazuh_testing import T_10, T_20
-
-from system.test_cluster.test_agent_groups.common import register_agent
 
 pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
 
@@ -45,6 +43,7 @@ groups = ['group_master', 'group_worker1', 'group_worker2']
 agents = ['wazuh-agent1', 'wazuh-agent2']
 workers = ['wazuh-worker1', 'wazuh-worker2']
 groups_created = []
+query = "global 'sql select name, group_sync_status from agent;'"
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'enrollment_cluster', 'inventory.yml')
@@ -58,41 +57,43 @@ agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
 
 @pytest.fixture
 def agent_configuration():
-    restart_cluster(workers, host_manager)
+    restart_cluster(agents, host_manager)
 
 @pytest.fixture
-def group_creation_and_assignation():
+def group_creation_and_assignation(test_case):
+    agent_ids = get_agent_id(host_manager).split()
     for group in groups:
         create_new_agent_group(testinfra_hosts[0], group, host_manager)
     
-    agent_ids = get_agent_id(host_manager).split()
-    for group in groups:
-        for agent_id in agent_ids:
-            assign_agent_to_new_group(testinfra_hosts[0], group, agent_id, host_manager)
+    if test_case['test_case']['agent_in_group'] == 'all':
+        for group in groups:
+            for agent_id in agent_ids:
+                assign_agent_to_new_group(testinfra_hosts[0], group, agent_id, host_manager)
+                
+    if test_case['test_case']['agent_in_group'] == 'agent1':
+        for group in groups:
+            assign_agent_to_new_group(testinfra_hosts[0], group, agent_ids[0], host_manager)
+            
+    if test_case['test_case']['agent_in_group'] == 'agent2':
+        for group in groups:
+            assign_agent_to_new_group(testinfra_hosts[0], group, agent_ids[1], host_manager)
     
     yield
     for group in groups:
         delete_agent_group(testinfra_hosts[0], group, host_manager, 'api')
 
 @pytest.fixture
-def delete_group_folder(test_case):
-    host_manager.run_command(test_case['test_case']['host'], 
-                             f"rm -r {WAZUH_PATH}/etc/shared/{test_case['test_case']['group_deleted']} -f") 
-
-@pytest.fixture
 def wait_end_initial_syncreq():
-    query = "global 'sql select group_sync_status from agent;'"
     result = execute_wdb_query(query, testinfra_hosts[0], host_manager)
     while 'syncreq' in result:
-        time.sleep(T_10/10)
+        time.sleep(T_1)
         result = execute_wdb_query(query, testinfra_hosts[0], host_manager)
 
 @pytest.mark.parametrize('test_case', [cases for cases in test_cases_yaml], ids=[cases['name']
                          for cases in test_cases_yaml])
 
 def test_group_sync_status(test_case, agent_configuration, group_creation_and_assignation, 
-                           wait_end_initial_syncreq, delete_group_folder):
-
+                           wait_end_initial_syncreq):
     '''
     description: Delete a group folder in wazuh server cluster and check group_sync status in 2 times.
     wazuh_min_version: 4.4.0
@@ -110,10 +111,7 @@ def test_group_sync_status(test_case, agent_configuration, group_creation_and_as
         - wait_end_initial_syncreq:
             type: fixture
             brief: Wait until syncreqs related with the test-environment setting get neutralized
-        - delete_group_folder:
-            type: fixture
-            brief: Delete the folder-group assigned by test case (trigger)
-
+            
     assertions:
         - Verify that group_sync status changes according the trigger.
         
@@ -125,24 +123,31 @@ def test_group_sync_status(test_case, agent_configuration, group_creation_and_as
         - If the group-folder is deletef rom a worker cluster, it is expected that master 
         cluster recreates groups without syncreq status.
     '''
-    #Checks
-    query = "global 'sql select group_sync_status from agent;'"
-
-    first_time_check = "synced"
-    second_time_check = "synced"
+    #Delete group
+    delete_agent_group(test_case['test_case']['host'], test_case['test_case']['group_deleted'], host_manager, 'folder')
     
-    for i in range(T_20):
-        time.sleep(T_10/40)
+    #Checks
+    first_time_check = second_time_check = "synced"
+    
+    for i in range(T_10):
+        time.sleep(T_025)
         result = execute_wdb_query(query, testinfra_hosts[0], host_manager)
-        if 'syncreq' in result:
-            first_time_check = "syncreq"
-
+        if test_case['test_case']['agent_in_group'] == 'all':
+            if 'syncreq' == json.loads(result)[1]['group_sync_status'] and 'syncreq' == json.loads(result)[2]['group_sync_status']:
+                first_time_check = "syncreq"
+        if test_case['test_case']['agent_in_group'] == 'agent1':
+                if 'syncreq' == json.loads(result)[1]['group_sync_status']  and 'synced' == json.loads(result)[2]['group_sync_status']:
+                    first_time_check = "syncreq"
+        if test_case['test_case']['agent_in_group'] == 'agent2': 
+                if 'synced' == json.loads(result)[1]['group_sync_status']  and 'syncreq' == json.loads(result)[2]['group_sync_status']:
+                    first_time_check = "syncreq"
+                    
     time.sleep(T_10)
-
+    
     result = execute_wdb_query(query, testinfra_hosts[0], host_manager)
     if 'syncreq' in result:
-        second_time_check = "syncreq"   
-        
+        second_time_check = "syncreq"
+    
     #Results
-    assert test_case['test_case']['first_time_check'] == first_time_check 
-    assert test_case['test_case']['second_time_check'] == second_time_check  
+    assert test_case['test_case']['first_time_check'] == first_time_check
+    assert test_case['test_case']['second_time_check'] == second_time_check
