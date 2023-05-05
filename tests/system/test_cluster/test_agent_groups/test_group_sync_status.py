@@ -135,9 +135,11 @@ def test_group_sync_status(test_case, agent_configuration, group_creation_and_as
         if test_case['test_case']['agent_in_group'] == 'all':
             if 'syncreq' == json.loads(result)[1]['group_sync_status'] and 'syncreq' == json.loads(result)[2]['group_sync_status']:
                 first_time_check = "syncreq"
+        
         if test_case['test_case']['agent_in_group'] == 'agent1':
                 if 'syncreq' == json.loads(result)[1]['group_sync_status']  and 'synced' == json.loads(result)[2]['group_sync_status']:
                     first_time_check = "syncreq"
+        
         if test_case['test_case']['agent_in_group'] == 'agent2': 
                 if 'synced' == json.loads(result)[1]['group_sync_status']  and 'syncreq' == json.loads(result)[2]['group_sync_status']:
                     first_time_check = "syncreq"
