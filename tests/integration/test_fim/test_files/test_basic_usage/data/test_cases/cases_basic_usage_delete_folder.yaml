@@ -1,0 +1,29 @@
+- name: check_folder_deletion_generates_file_events_whodata
+  description: Check when folder is deleted files inside folder generate deleted events
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+    fim_mode: whodata
+  metadata:
+    fim_mode: whodata
+
+- name: check_folder_deletion_generates_file_events_realtime
+  description: Check when folder is deleted files inside folder generate deleted events
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+    fim_mode: realtime
+  metadata:
+    fim_mode: realtime
+
+- name: check_folder_deletion_generates_file_events_scheduled
+  description: Check when folder is deleted files inside folder generate deleted events
+  configuration_parameters:
+    INTERVAL: 2
+    REALTIME: 'no'
+    WHODATA: 'no'
+    fim_mode: scheduled
+  metadata:
+    fim_mode: scheduled

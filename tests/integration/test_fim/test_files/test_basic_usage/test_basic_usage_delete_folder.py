@@ -65,54 +65,49 @@ import shutil
 from collections import Counter
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
-    callback_detect_event, check_time_travel, validate_event
+from wazuh_testing import T_20, LOG_FILE_PATH, REGULAR
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.file import create_file
+from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.fim.event_monitor import  callback_detect_event
+from wazuh_testing.modules.fim.classes import validate_event
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 
 # Marks
 
 pytestmark = pytest.mark.tier(level=0)
 
 # variables
-
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
-directory_str = ','.join(test_directories)
-for direc in list(test_directories):
-    test_directories.append(os.path.join(direc, 'subdir'))
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-testdir1, testdir2 = test_directories[2:]
+test_folders = [os.path.join(PREFIX, 'testdir1')]
+directory_str = ','.join(test_folders)
 mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
-# configurations
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
-conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
-p, m = generate_params(extra_params=conf_params)
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+# Configuration and cases data
+test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_basic_usage_delete_folder.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_basic_usage.yaml' if sys.platform != 'win32'
+                                   else 'configuration_basic_usage_win32.yaml')
+
+# Test configurations
+configuration_parameters, configuration_metadata, test_case_ids = get_test_cases_data(test_cases_path)
+for count, value in enumerate(configuration_parameters):
+    configuration_parameters[count]['TEST_DIRECTORIES'] = directory_str
+configurations = load_configuration_template(configurations_path, configuration_parameters,
+                                                           configuration_metadata)
 
 
-# fixtures
-
-@pytest.fixture(scope='module', params=configurations)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
-
-
-# tests
-
-@pytest.mark.parametrize('folder, file_list, filetype, tags_to_apply', [
-    (testdir1, ['regular0', 'regular1', 'regular2'], REGULAR, {'ossec_conf'},),
-    (testdir2, ['regular0', 'regular1', 'regular2'], REGULAR, {'ossec_conf'},)
-])
+# Tests
 @mark_skip_agentWindows
-def test_delete_folder(folder, file_list, filetype, tags_to_apply,
-                       get_configuration, configure_environment,
-                       restart_syscheckd, wait_for_fim_start):
+@pytest.mark.parametrize('test_folders', [test_folders], ids='')
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
+def test_delete_folder(configuration, metadata, test_folders, set_wazuh_configuration,
+                       create_monitored_folders, configure_local_internal_options_function,
+                       restart_syscheck_function, wait_syscheck_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects 'deleted' events from the files contained
                  in a folder that is being deleted. For example, the folder '/testdir' is monitored, and
@@ -166,18 +161,18 @@ def test_delete_folder(folder, file_list, filetype, tags_to_apply,
 
     tags:
         - scheduled
-        - time_travel
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
-    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
-    mode = get_configuration['metadata']['fim_mode']
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    mode = metadata['fim_mode']
+    folder = test_folders[0]
+    file_list = ['regular0', 'regular1', 'regular2']
+    filetype = REGULAR
 
     # Create files inside subdir folder
     for file in file_list:
         create_file(filetype, folder, file, content='')
 
-    check_time_travel(scheduled, monitor=wazuh_log_monitor)
-    events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+    events = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event,
                                      accum_results=len(file_list),
                                      error_message='Did not receive expected "Sending FIM event: ..." event').result()
     for ev in events:
@@ -185,10 +180,9 @@ def test_delete_folder(folder, file_list, filetype, tags_to_apply,
 
     # Remove folder
     shutil.rmtree(folder, ignore_errors=True)
-    check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
     # Expect deleted events
-    event_list = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_event,
+    event_list = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event,
                                          error_message='Did not receive expected '
                                                        '"Sending FIM event: ..." event',
                                          accum_results=len(file_list)).result()
