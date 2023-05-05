@@ -84,7 +84,7 @@ def wait_end_initial_syncreq():
     query = "global 'sql select group_sync_status from agent;'"
     result = execute_wdb_query(query, testinfra_hosts[0], host_manager)
     while 'syncreq' in result:
-        time.sleep(1)
+        time.sleep(T_10/10)
         result = execute_wdb_query(query, testinfra_hosts[0], host_manager)
 
 @pytest.mark.parametrize('test_case', [cases for cases in test_cases_yaml], ids=[cases['name']
@@ -132,7 +132,7 @@ def test_group_sync_status(test_case, agent_configuration, group_creation_and_as
     second_time_check = "synced"
     
     for i in range(T_20):
-        time.sleep(0.25)
+        time.sleep(T_10/40)
         result = execute_wdb_query(query, testinfra_hosts[0], host_manager)
         if 'syncreq' in result:
             first_time_check = "syncreq"
