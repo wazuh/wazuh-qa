@@ -29,7 +29,7 @@ import time
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.file import read_yaml
 from wazuh_testing.tools.system import HostManager
-from system import assign_agent_to_new_group, clean_cluster_logs, create_new_agent_group, delete_group_of_agents,restart_cluster
+from system import assign_agent_to_new_group, clean_cluster_logs, create_new_agent_group, delete_agent_group, restart_cluster
 
 folder_value = False
 merged_malformed_check_value = False
@@ -80,7 +80,7 @@ def clear_files_and_directories():
         host_manager.run_command(testinfra_hosts[0], f'rm {WAZUH_PATH}/etc/shared/default/{file}.txt -f')
     for file in reset_files['TestGroup1']:
         host_manager.run_command(testinfra_hosts[0], f'rm {WAZUH_PATH}/etc/shared/TestGroup1/{file}.txt -f')
-    delete_group_of_agents(testinfra_hosts[0], 'TestGroup1', host_manager)
+    delete_agent_group(testinfra_hosts[0], 'TestGroup1', host_manager, 'api')
     host_manager.run_command(testinfra_hosts[0], f'rm -r {WAZUH_PATH}/etc/shared/TestGroup1 -f')   
     create_new_agent_group(testinfra_hosts[0], 'TestGroup1', host_manager)
     assign_agent_to_new_group(testinfra_hosts[0], 'TestGroup1', host_manager.run_command('wazuh-manager', 
