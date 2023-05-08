@@ -1,0 +1,8 @@
+- name: check_deffered_deletion_generate_events
+  description: Check if files deleted in a deferred manner generate events.
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata

@@ -1,0 +1,17 @@
+- name: check_events_after_folder_deleted_and_recreated_realtime
+  description: Check if FIM keeps reporting events after a monitored folder was deleted and created again
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+
+- name: check_events_after_folder_deleted_and_recreated_realtime
+  description: Check if FIM keeps reporting events after a monitored folder was deleted and created again
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata

@@ -53,9 +53,10 @@ tags:
 import os
 
 import pytest
-import re
+from wazuh_testing import LOG_FILE_PATH
 from wazuh_testing.fim import generate_params, regular_file_cud, detect_initial_scan, callback_ignore_realtime_flag
 from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 
 # Marks
@@ -134,6 +135,7 @@ def test_realtime_unsupported(get_configuration, configure_environment, file_mon
         - realtime
         - scheduled
     '''
+    log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=realtime_flag_timeout, callback=callback_ignore_realtime_flag,
                       error_message="Did not receive expected 'Ignoring flag for real time monitoring on  \
                                      directory: ...' event", update_position=False)

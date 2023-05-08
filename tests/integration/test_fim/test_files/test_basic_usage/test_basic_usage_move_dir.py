@@ -66,10 +66,10 @@ import sys
 import pytest
 from wazuh_testing import T_20, LOG_FILE_PATH, REGULAR
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.file import  create_file, delete_path_recursively
+from wazuh_testing.tools.file import delete_path_recursively
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
-from wazuh_testing.modules.fim.event_monitor import callback_detect_event
+from wazuh_testing.modules.fim.event_monitor import callback_detect_event, ERR_MSG_FIM_EVENT_NOT_RECIEVED
 from wazuh_testing.modules.fim.classes import validate_event
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 
@@ -194,8 +194,7 @@ def test_move_dir(configuration, metadata, test_folders, file_list, set_wazuh_co
     # Monitor expected events
     events = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event,
                                      accum_results=(triggers_add_event + triggers_delete_event),
-                                     error_message='Did not receive expected "Sending FIM event: ..." event'
-                                     ).result()
+                                     error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
 
     # Expect deleted events
     if isinstance(events, list):

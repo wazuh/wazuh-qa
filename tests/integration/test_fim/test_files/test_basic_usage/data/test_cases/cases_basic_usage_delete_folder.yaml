@@ -4,7 +4,6 @@
     INTERVAL: 10000
     REALTIME: 'no'
     WHODATA: 'yes'
-    fim_mode: whodata
   metadata:
     fim_mode: whodata
 
@@ -14,7 +13,6 @@
     INTERVAL: 10000
     REALTIME: 'yes'
     WHODATA: 'no'
-    fim_mode: realtime
   metadata:
     fim_mode: realtime
 
@@ -24,6 +22,5 @@
     INTERVAL: 2
     REALTIME: 'no'
     WHODATA: 'no'
-    fim_mode: scheduled
   metadata:
     fim_mode: scheduled

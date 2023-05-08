@@ -1,0 +1,32 @@
+- name: rename_file_generates_events_scheduled
+  description: Check when file renamed inside a monitored folder, events are generated
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+    folder_id: 0
+    filename: regular0
+
+- name: rename_file_generates_events_realtime
+  description: Check when file renamed inside a monitored folder, events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+    folder_id: 0
+    filename: regular0
+
+- name: rename_file_generates_events_whodata
+  description: Check when file renamed inside a monitored folder, events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    folder_id: 0
+    filename: regular0
