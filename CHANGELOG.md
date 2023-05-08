@@ -11,7 +11,7 @@ Release report: TBD
 - Update schema database version([#3879](https://github.com/wazuh/wazuh-qa/pull/3879)) \- (Tests)
 
 ### Fixed
-- Fix warnings in the rids tests([#4151](https://github.com/wazuh/wazuh-qa/pull/4151)) \- (Tests)
+- Fix warnings in the rids tests([#4151](https://github.com/wazuh/wazuh-qa/pull/4151)) \- (Framework + Tests)
 
 ## [4.5.0] - TBD
 
