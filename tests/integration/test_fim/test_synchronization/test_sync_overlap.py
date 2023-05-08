@@ -102,7 +102,7 @@ local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 @pytest.mark.parametrize('files_number', [configuration_metadata[0]['files']])
 def test_sync_overlap(configuration, metadata, set_wazuh_configuration, configure_local_internal_options_function,
-                      create_files_in_folder, restart_syscheck_function, wait_fim_start):
+                      create_files_in_folder, restart_syscheck_function, wait_syscheck_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon is performing a synchronization at the interval specified in the
                  configuration, using the 'interval' tag, if a new synchronization is fired, and the last sync message

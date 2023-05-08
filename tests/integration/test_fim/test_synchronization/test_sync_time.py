@@ -97,7 +97,7 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 @pytest.mark.parametrize('files_number', [configuration_metadata[0]['files']])
 def test_sync_time(configuration, metadata, set_wazuh_configuration, configure_local_internal_options_function,
-                   create_files_in_folder, restart_syscheck_function, wait_fim_start):
+                   create_files_in_folder, restart_syscheck_function, wait_syscheck_start):
     '''
     description: Check when the 'wazuh-syscheckd' daemon is performing a synchronization, a normal synchronization
                  will end before the configured `interval` and `max_interval`.

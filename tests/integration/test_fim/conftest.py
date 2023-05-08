@@ -77,27 +77,6 @@ def install_audit(get_configuration):
 
 
 @pytest.fixture()
-def wait_fim_start(configuration):
-    """ Wait for realtime start, whodata start or end of initial FIM scan.
-
-    Args:
-        configuration (dict): Configuration template data to write in the ossec.conf.
-    """
-    file_monitor = FileMonitor(LOG_FILE_PATH)
-    mode_key = 'fim_mode' if 'fim_mode2' not in configuration else 'fim_mode2'
-
-    try:
-        if configuration[mode_key] == 'realtime':
-            evm.detect_realtime_start(file_monitor)
-        elif configuration[mode_key] == 'whodata':
-            evm.detect_whodata_start(file_monitor)
-        else:  # scheduled
-            evm.detect_initial_scan(file_monitor)
-    except KeyError:
-        evm.detect_initial_scan(file_monitor)
-
-
-@pytest.fixture()
 def wait_syscheck_start(metadata):
     """ Wait for realtime start, whodata start or end of initial FIM scan.
     Args:
@@ -136,12 +115,14 @@ def create_monitored_folders(test_folders):
         test_folders(list): List of folders to create and delete
     """
     for folder in test_folders:
-        os.mkdir(folder, mode=0o0777)
+        if not os.path.exists(folder):
+            os.mkdir(folder, mode=0o0777)
 
     yield
 
     for folder in test_folders:
-        delete_path_recursively(folder)
+        if os.path.exists(folder):
+            delete_path_recursively(folder)
 
 
 @pytest.fixture(scope='module')
@@ -153,12 +134,14 @@ def create_monitored_folders_module(test_folders):
         test_folders(list): List of folders to create and delete
     """
     for folder in test_folders:
-        os.mkdir(folder, mode=0o0777)
+        if not os.path.exists(folder):
+            os.mkdir(folder, mode=0o0777)
 
     yield
 
     for folder in test_folders:
-        delete_path_recursively(folder)
+        if os.path.exists(folder):
+            delete_path_recursively(folder)
 
 
 @pytest.fixture()
