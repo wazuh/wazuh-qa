@@ -63,167 +63,162 @@ import os
 import sys
 
 import pytest
-from wazuh_testing import T_20
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
-    callback_detect_event, delete_file, validate_event
+from wazuh_testing import T_20, LOG_FILE_PATH, REGULAR
+from wazuh_testing.fim import create_file, delete_file
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.fim.event_monitor import callback_detect_event, ERR_MSG_FIM_EVENT_NOT_RECIEVED
+from wazuh_testing.modules.fim.classes import validate_event
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 
 # Marks
 
 pytestmark = pytest.mark.tier(level=0)
 
-# variables
-
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2'),
-                    os.path.join(PREFIX, 'testdir1', 'subdir')]
-directory_str = ','.join(test_directories)
+# Cariables
+test_folders = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2'),
+                os.path.join(PREFIX, 'testdir1', 'subdir')]
+directory_str = ','.join(test_folders)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-testdir1, testdir2, testdir1_subdir = test_directories
 mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
 
-# configurations
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
-conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
-p, m = generate_params(extra_params=conf_params)
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
+# Configuration and cases data
+test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_basic_usage_move_file.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_basic_usage.yaml')
+
+# Test configurations
+configuration_parameters, configuration_metadata, test_case_ids = get_test_cases_data(test_cases_path)
+for count, value in enumerate(configuration_parameters):
+    configuration_parameters[count]['TEST_DIRECTORIES'] = directory_str
+configurations = load_configuration_template(configurations_path, configuration_parameters,
+                                                           configuration_metadata)
 
 
-# fixtures
-
-@pytest.fixture(scope='module', params=configurations)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
-
-
-# tests
-
-
-@pytest.mark.parametrize('file, file_content, tags_to_apply', [
-    ('regular1', '', {'ossec_conf'})
-])
-@pytest.mark.parametrize('source_folder, target_folder, triggers_delete_event, triggers_add_event', [
-    (testdir1, PREFIX, True, False),
-    (testdir1, testdir1_subdir, True, True),
-    (testdir1, testdir2, True, True),
-    (PREFIX, testdir1, False, True),
-    (PREFIX, testdir1_subdir, False, True)
-])
-@mark_skip_agentWindows
-def test_move_file(file, file_content, tags_to_apply, source_folder, target_folder,
-                   triggers_delete_event, triggers_add_event,
-                   get_configuration, configure_environment,
-                   restart_syscheckd, wait_for_fim_start):
+# Tests
+@pytest.mark.parametrize('test_folders', [test_folders], ids='')
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
+def test_move_file(configuration, metadata, test_folders, set_wazuh_configuration, create_monitored_folders,
+                   configure_local_internal_options_function, restart_syscheck_function,
+                   wait_syscheck_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects 'added' and 'deleted' events when moving a file
                  from a monitored folder to another one. For this purpose, the test will create a testing file and
-                 move it from the source directory to the target directory. Then, it changes the system time until
+                 move it from the source directory to the target directory. Then, it waits until
                  the next scheduled scan, and finally, it removes the testing file and verifies that
                  the expected FIM events have been generated.
+
+    test_phases:
+        - setup:
+            - Set wazuh configuration and local_internal_options.
+            - Create custom folder for monitoring
+            - Create files in monitored folders
+            - Clean logs files and restart wazuh to apply the configuration.
+        - test:
+            - Move file from source directory to target directory.
+            - Check that events are generated as expected.
+        - teardown:
+            - Delete custom monitored folder
+            - Restore configuration
+            - Stop wazuh
 
     wazuh_min_version: 4.2.0
 
     tier: 0
 
     parameters:
-        - file:
-            type: str
-            brief: Name of the testing file to be created.
-        - file_content:
-            type: str
-            brief: Content of the testing file to be created.
-        - tags_to_apply:
-            type: set
-            brief: Run test if match with a configuration identifier, skip otherwise.
-        - source_folder:
-            type: str
-            brief: Path to the source directory where the testing file to move is located.
-        - target_folder:
-            type: str
-            brief: Path to the destination directory where the testing file will be moved.
-        - triggers_delete_event:
-            type: bool
-            brief: True if it expects a 'deleted' event in the source folder. False otherwise.
-        - triggers_add_event:
-            type: bool
-            brief: True if it expects an 'added' event in the target folder. False otherwise.
-        - get_configuration:
+        - configuration:
+            type: dict
+            brief: Configuration values for ossec.conf.
+        - metadata:
+            type: dict
+            brief: Test case data.
+        - test_folders:
+            type: dict
+            brief: List of folders to be created for monitoring.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Get configurations from the module.
-        - configure_environment:
+            brief: Set ossec.conf configuration.
+        - create_monitored_folders:
             type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_syscheckd:
+            brief: Create a given list of folders when the test starts. Delete the folders at the end of the test.
+        - configure_local_internal_options_function:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start:
+            brief: Set local_internal_options.conf file.
+        - restart_syscheck_function:
             type: fixture
-            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+            brief: restart syscheckd daemon, and truncate the ossec.log.
+        - wait_syscheck_start:
+            type: fixture
+            brief: check that the starting FIM scan is detected.
 
     assertions:
-        - Verify that FIM events of type 'added' and 'deleted' are generated
-          when files are moved between monitored directories.
+        - Verify that FIM events of type 'added' and 'deleted' are generated when files are moved between monitored and
+          unmonitored directories.
 
-    input_description: A test case (ossec_conf) is contained in external YAML file (wazuh_conf.yaml)
-                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, it
-                       is combined with the testing directories to be monitored defined in this module.
+    input_description: The file 'configuration_basic_usage.yaml' provides the configuration
+                       template.
+                       The file 'cases_basic_usage_move_file.yaml' provides the tes cases configuration
+                       details for each test case.
 
     expected_output:
-        - r'.*Sending FIM event: (.+)$' ('added' and 'deleted' events)
-
-    tags:
-        - scheduled
-        - time_travel
+        - r'.*Sending FIM event: (.+)$' ('added', and 'deleted' events)'
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
-    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
-    mode = get_configuration['metadata']['fim_mode']
+    # Variables
+    source_folder = test_folders[metadata['source_folder']]
+    target_folder = PREFIX if metadata['target_folder'] == 'prefix' else test_folders[metadata['target_folder']]
+    triggers_delete_event = metadata['triggers_delete_event']
+    triggers_add_event = metadata['triggers_add_event']
+    file_name ='regular_file'
+    mode = metadata['fim_mode']
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+
 
     # Create file inside folder
-    create_file(REGULAR, source_folder, file, content=file_content)
+    create_file(REGULAR, source_folder, file_name, content='')
 
-    if source_folder in test_directories:
+    if source_folder in test_folders:
         event = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event,
-                                        error_message='Did not receive expected "Sending FIM event: .." event').result()
+                                        error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
         validate_event(event, mode=mode)
 
     # Move file to target directory
-    os.rename(os.path.join(source_folder, file), os.path.join(target_folder, file))
+    os.rename(os.path.join(source_folder, file_name), os.path.join(target_folder, file_name))
 
     # Monitor expected events
-    events = wazuh_log_monitor.start(timeout=T_20,
-                                     callback=callback_detect_event,
+    events = wazuh_log_monitor.start(timeout=T_20,callback=callback_detect_event,
                                      accum_results=(triggers_add_event + triggers_delete_event),
-                                     error_message='Did not receive expected '
-                                                   '"Sending FIM event: ..." event').result()
+                                     error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
 
     # Expect deleted events
     if isinstance(events, list):
         events_data = [(event['data']['type'],
                         event['data']['path'],
-                        os.path.join(source_folder, file) if event['data']['type'] == 'deleted' else os.path.join(
-                            target_folder, file))
+                        os.path.join(source_folder, file_name) if event['data']['type'] == 'deleted' else os.path.join(
+                            target_folder, file_name))
                        for event in events]
         assert set([event[0] for event in events_data]) == {'deleted', 'added'}
         for _, path, expected_path in events_data:
             assert path == expected_path
     else:
         if triggers_delete_event:
-            assert 'deleted' in events['data']['type'] and os.path.join(source_folder, file) in events['data']['path']
+            assert 'deleted' in events['data']['type'] and os.path.join(source_folder, file_name) in events['data']['path']
         else:
-            assert 'added' in events['data']['type'] and os.path.join(target_folder, file) in events['data']['path']
+            assert 'added' in events['data']['type'] and os.path.join(target_folder, file_name) in events['data']['path']
 
     events = [events] if not isinstance(events, list) else events
     for ev in events:
         validate_event(ev, mode=mode)
 
     # Remove file
-    delete_file(target_folder, file)
-    if target_folder in test_directories:
+    delete_file(target_folder, file_name)
+    if target_folder in test_folders:
         event = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event,
-                                        error_message='Did not receive expected "Sending FIM event: .." event').result()
+                                        error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
         validate_event(event, mode=mode)

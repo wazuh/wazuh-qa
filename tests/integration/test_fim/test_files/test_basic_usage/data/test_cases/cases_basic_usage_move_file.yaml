@@ -1,0 +1,156 @@
+- name: move_to_unmonitored_dirs_scheduled
+  description: Check when file is moved from monitored folder to non monitored one, only deleted events are generated
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+    source_folder: 0
+    target_folder: prefix
+    triggers_delete_event: true
+    triggers_add_event: false
+
+- name: move_to_unmonitored_dirs_realtime
+  description: Check when file is moved from monitored folder to non monitored one, only deleted events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+    source_folder: 0
+    target_folder: prefix
+    triggers_delete_event: true
+    triggers_add_event: false
+
+- name: move_to_unmonitored_dirs_whodata
+  description: Check when file is moved from monitored folder to non monitored one, only deleted events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    source_folder: 0
+    target_folder: prefix
+    triggers_delete_event: true
+    triggers_add_event: false
+
+- name: move_between_monitored_dirs_scheduled
+  description: Check when file is moved between monitored folders, added+deleted events are generated
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+    source_folder: 0
+    target_folder: 1
+    triggers_delete_event: true
+    triggers_add_event: true
+
+- name: move_between_monitored_dirs_realtime
+  description: Check when file is moved between monitored folders, added+deleted events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+    source_folder: 0
+    target_folder: 1
+    subdir: subdir1
+    triggers_delete_event: true
+    triggers_add_event: true
+
+- name: move_between_monitored_dirs_whodata
+  description: Check when file is moved between monitored folders, added+deleted events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    source_folder: 0
+    target_folder: 1
+    triggers_delete_event: true
+    triggers_add_event: true
+
+- name: move_to_subdir_scheduled
+  description: Check when file is moved from monitored folder to a subdirectory, added+deleted events are generated
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+    source_folder: 0
+    target_folder: 2
+    triggers_delete_event: true
+    triggers_add_event: true
+
+- name: move_to_subdir_realtime
+  description: Check when file is moved from monitored folder to a subdirectory, added+deleted events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+    source_folder: 0
+    target_folder: 2
+    triggers_delete_event: true
+    triggers_add_event: true
+
+- name: move_to_subdir_whodata
+  description: Check when file is moved from monitored folder to a subdirectory, added+deleted events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    source_folder: 0
+    target_folder: 2
+    triggers_delete_event: true
+    triggers_add_event: true
+
+- name: move_from_unmonitored_folder_scheduled
+  description: Check when file is moved from unmonitored folder monitored one, only added events are generated
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+    source_folder: 0
+    target_folder: 2
+    triggers_delete_event: true
+    triggers_add_event: true
+
+- name: move_from_unmonitored_folder_realtime
+  description: Check when file is moved from unmonitored folder monitored one, only added events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+    source_folder: 0
+    target_folder: 2
+    triggers_delete_event: true
+    triggers_add_event: true
+
+- name: move_from_unmonitored_folder_whodata
+  description: Check when file is moved from unmonitored folder monitored one, only added events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    source_folder: 0
+    target_folder: 2
+    triggers_delete_event: true
+    triggers_add_event: true

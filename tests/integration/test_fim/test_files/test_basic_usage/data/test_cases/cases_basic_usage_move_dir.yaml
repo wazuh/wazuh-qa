@@ -1,0 +1,125 @@
+- name: check_moving_between_monitored_dirs_scheduled
+  description: Check when folder is moved from non monitored folder to monitored one, added+deleted events are generated
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+    source_folder: 0
+    target_folder: 1
+    subdir: subdir1
+    triggers_delete_event: true
+    triggers_add_event: true
+
+- name: check_moving_between_monitored_dirs_realtime
+  description: Check when folder is moved from non monitored folder to monitored one, added+deleted events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+    source_folder: 0
+    target_folder: 1
+    subdir: subdir1
+    triggers_delete_event: true
+    triggers_add_event: true
+
+- name: check_moving_between_monitored_dirs_whodata
+  description: Check when folder is moved from non monitored folder to monitored one, added+deleted events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    source_folder: 0
+    target_folder: 1
+    subdir: subdir1
+    triggers_delete_event: true
+    triggers_add_event: true
+
+- name: check_moving_to_not_monitored_scheduled
+  description: Check when folder is moved from non monitored folder to monitored one, only deleted events are generated
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+    source_folder: 0
+    target_folder: prefix
+    subdir: subdir1
+    triggers_delete_event: true
+    triggers_add_event: false
+
+- name: check_moving_to_not_monitored_realtime
+  description: Check when folder is moved from non monitored folder to monitored one, only deleted events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+    source_folder: 0
+    target_folder: prefix
+    subdir: subdir1
+    triggers_delete_event: true
+    triggers_add_event: false
+
+- name: check_moving_to_not_monitored_whodata
+  description: Check when folder is moved from non monitored folder to monitored one, only deleted events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    source_folder: 0
+    target_folder: prefix
+    subdir: subdir1
+    triggers_delete_event: true
+    triggers_add_event: false
+
+- name: check_moving_to_monitored_dirs_scheduled
+  description: Check when folder is moved from non monitored folder to monitored one, only added events are generated
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+    source_folder: 2
+    target_folder: 1
+    subdir: subdir3
+    triggers_delete_event: false
+    triggers_add_event: true
+
+- name: check_moving_to_monitored_dirs_realtime
+  description: Check when folder is moved from non monitored folder to monitored one, only added events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+    source_folder: 2
+    target_folder: 1
+    subdir: subdir3
+    triggers_delete_event: false
+    triggers_add_event: true
+
+- name: check_moving_to_monitored_dirs_whodata
+  description: Check when folder is moved from non monitored folder to monitored one, only added events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    source_folder: 2
+    target_folder: 1
+    subdir: subdir3
+    triggers_delete_event: false
+    triggers_add_event: true

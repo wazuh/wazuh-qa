@@ -60,149 +60,139 @@ tags:
     - fim_basic_usage
 '''
 import os
-import shutil
+from shutil import move
 import sys
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, \
-    callback_detect_event, check_time_travel, validate_event
+from wazuh_testing import T_20, LOG_FILE_PATH, REGULAR
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.file import  create_file, delete_path_recursively
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
+from wazuh_testing.modules.fim.event_monitor import callback_detect_event
+from wazuh_testing.modules.fim.classes import validate_event
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+
 
 # marks
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0)]
 
-# variables
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2'),
-                    os.path.join(PREFIX, 'testdir3')]
-directory_str = ','.join(test_directories)
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-testdir1, testdir2, testdir3 = test_directories
-mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
+# Variables
+test_folders = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
+directory_str = ','.join(test_folders)
+testdir1, testdir2= test_folders
+# This directories won't be monitored and should be deleted after the test
+testdir3 = os.path.join(PREFIX, 'testdir3')
+test_folders.append(testdir3)
+file_list = [{'type': REGULAR, 'path': os.path.join(testdir1, 'subdir1'), 'name':'regular1', 'content':''},
+             {'type': REGULAR, 'path': os.path.join(testdir2, 'subdir2'), 'name':'regular2', 'content':''},
+             {'type': REGULAR, 'path': os.path.join(testdir3, 'subdir3'), 'name':'regular3', 'content':''}]
+
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
+
+# Configuration and cases data
+test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_basic_usage_move_dir.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_basic_usage.yaml')
+
+# Test configurations
+configuration_parameters, configuration_metadata, test_case_ids = get_test_cases_data(test_cases_path)
+for count, value in enumerate(configuration_parameters):
+    configuration_parameters[count]['TEST_DIRECTORIES'] = directory_str
+configurations = load_configuration_template(configurations_path, configuration_parameters,
+                                                           configuration_metadata)
 
 
-# This directory won't be monitored
-testdir4 = os.path.join(PREFIX, 'testdir4')
-
-# configurations
-conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
-p, m = generate_params(extra_params=conf_params)
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
-
-
-# fixtures
-
-
-@pytest.fixture(scope='module', params=configurations)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
-
-
-# tests
-
-
-def extra_configuration_before_yield():
-    """Create subdirs before restarting Wazuh."""
-    create_file(REGULAR, os.path.join(testdir1, 'subdir'), 'regular1', content='')
-    create_file(REGULAR, os.path.join(testdir3, 'subdir2'), 'regular2', content='')
-    create_file(REGULAR, os.path.join(testdir3, 'subdir3'), 'regular3', content='')
-    create_file(REGULAR, os.path.join(testdir4, 'subdir'), 'regular1', content='')
-
-
-def extra_configuration_after_yield():
-    """Delete subdir directory after finishing the module execution since it's not monitored."""
-    shutil.rmtree(os.path.join(PREFIX, 'subdir'), ignore_errors=True)
-    shutil.rmtree(testdir4, ignore_errors=True)
-
-
-@pytest.mark.parametrize('source_folder, target_folder, subdir, tags_to_apply, \
-                triggers_delete_event, triggers_add_event', [
-    (testdir4, testdir2, 'subdir', {'ossec_conf'}, False, True),
-    (testdir1, PREFIX, 'subdir', {'ossec_conf'}, True, False),
-    (testdir3, testdir2, 'subdir2', {'ossec_conf'}, True, True),
-    (testdir3, testdir2, f'subdir3{os.path.sep}', {'ossec_conf'}, True, True)
-])
-@mark_skip_agentWindows
-def test_move_dir(source_folder, target_folder, subdir, tags_to_apply, triggers_delete_event, triggers_add_event,
-                  get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
+# Tests
+@pytest.mark.parametrize('test_folders', [test_folders], ids='')
+@pytest.mark.parametrize('file_list', [file_list], ids='')
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
+def test_move_dir(configuration, metadata, test_folders, file_list, set_wazuh_configuration, create_files_before_test,
+                  create_monitored_folders, configure_local_internal_options_function, restart_syscheck_function,
+                  wait_syscheck_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects 'added' and 'deleted' events when moving a subdirectory
                  from a monitored folder to another one. For this purpose, the test will move a testing subfolder
                  from the source directory to the target directory and change the system time until the next
                  scheduled scan. Finally, it verifies that the expected FIM events have been generated.
 
+    test_phases:
+        - setup:
+            - Set wazuh configuration and local_internal_options.
+            - Create custom folder for monitoring
+            - Create files in monitored folders
+            - Clean logs files and restart wazuh to apply the configuration.
+        - test:
+            - Move subdirectory from source directory to target directory.
+            - Check that events are generated as expected.
+        - teardown:
+            - Delete custom monitored folder
+            - Restore configuration
+            - Stop wazuh
+
     wazuh_min_version: 4.2.0
 
     tier: 0
 
     parameters:
-        - source_folder:
-            type: str
-            brief: Path to the source directory where the subfolder to move is located.
-        - target_folder:
-            type: str
-            brief: Path to the destination directory where the subfolder will be moved.
-        - subdir:
-            type: str
-            brief: Name of the subfolder to be moved.
-        - tags_to_apply:
-            type: set
-            brief: Run test if match with a configuration identifier, skip otherwise.
-        - triggers_delete_event:
-            type: bool
-            brief: True if it expects a 'deleted' event in the source folder. False otherwise.
-        - triggers_add_event:
-            type: bool
-            brief: True if it expects an 'added' event in the target folder. False otherwise.
-        - get_configuration:
+        - configuration:
+            type: dict
+            brief: Configuration values for ossec.conf.
+        - metadata:
+            type: dict
+            brief: Test case data.
+        - test_folders:
+            type: dict
+            brief: List of folders to be created for monitoring.
+        - file_list:
+            type: dict
+            brief: List of files to be created before test starts.
+        - create_files_before_test:    
             type: fixture
-            brief: Get configurations from the module.
-        - configure_environment:
+            brief: create a given list of files before the test starts.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_syscheckd:
+            brief: Set ossec.conf configuration.
+        - create_monitored_folders:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start:
+            brief: Create a given list of folders when the test starts. Delete the folders at the end of the module.
+        - configure_local_internal_options_function:
             type: fixture
-            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+            brief: Set local_internal_options.conf file.
+        - restart_syscheck_function:
+            type: fixture
+            brief: restart syscheckd daemon, and truncate the ossec.log.
+        - wait_syscheck_start:
+            type: fixture
+            brief: check that the starting FIM scan is detected.
 
     assertions:
         - Verify that FIM events of type 'added' and 'deleted' are generated
           when subfolders are moved between monitored directories.
 
-    input_description: A test case (ossec_conf) is contained in external YAML file (wazuh_conf.yaml)
-                       which includes configuration settings for the 'wazuh-syscheckd' daemon and, it
-                       is combined with the testing directories to be monitored defined in this module.
+    input_description: The file 'configuration_basic_usage.yaml' provides the configuration
+                       template.
+                       The file 'cases_basic_usage_move_dir.yaml' provides the tes cases configuration
+                       details for each test case.
 
     expected_output:
-        - r'.*Sending FIM event: (.+)$' ('added' and 'deleted' events)
-
-    tags:
-        - scheduled
-        - time_travel
+        - r'.*Sending FIM event: (.+)$' ('added', and 'deleted' events)'
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
-    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
-    mode = get_configuration['metadata']['fim_mode']
-
-    if mode == 'whodata' and subdir[-1] == os.path.sep and sys.platform == 'linux':
-        pytest.xfail('Xfailing due to issue: https://github.com/wazuh/wazuh/issues/4720')
-    elif mode == 'whodata' and subdir[-1] == os.path.sep and sys.platform == 'win32':
-        pytest.xfail('Xfailing due to issue: https://github.com/wazuh/wazuh/issues/6089')
-
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    source_folder = test_folders[metadata['source_folder']]
+    target_folder = PREFIX if metadata['target_folder'] == 'prefix' else test_folders[metadata['target_folder']]
+    subdir = metadata['subdir']
+    triggers_delete_event = metadata['triggers_delete_event']
+    triggers_add_event = metadata['triggers_add_event']
+    mode = metadata['fim_mode']
+    
     # Move folder to target directory
-    os.rename(os.path.join(source_folder, subdir), os.path.join(target_folder, subdir))
-    check_time_travel(scheduled, monitor=wazuh_log_monitor)
+    move(os.path.join(source_folder, subdir), target_folder)
 
     # Monitor expected events
-    events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                     callback=callback_detect_event,
+    events = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event,
                                      accum_results=(triggers_add_event + triggers_delete_event),
                                      error_message='Did not receive expected "Sending FIM event: ..." event'
                                      ).result()
@@ -228,3 +218,6 @@ def test_move_dir(source_folder, target_folder, subdir, tags_to_apply, triggers_
     events = [events] if not isinstance(events, list) else events
     for ev in events:
         validate_event(ev, mode=mode)
+
+    if target_folder == PREFIX:
+        delete_path_recursively(os.path.join(PREFIX, subdir))
