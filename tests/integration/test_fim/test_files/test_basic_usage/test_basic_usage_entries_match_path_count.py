@@ -69,53 +69,56 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, create_file, REGULAR, SYMLINK, HARDLINK, \
-    check_time_travel
+from wazuh_testing import T_20, LOG_FILE_PATH, REGULAR, SYMLINK, HARDLINK
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.file import create_file
+from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.fim.event_monitor import callback_entries_path_count
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+
 
 # Marks
-
 pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
 
 # variables
+test_folders = [os.path.join(PREFIX, 'testdir1')]
+directory_str = ','.join(test_folders)
 
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2'),
-                    os.path.join(PREFIX, 'testdir1', 'subdir')]
-directory_str = ','.join(test_directories)
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-testdir1, testdir2, testdir1_subdir = test_directories
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
-# configurations
+# Configuration and cases data
+test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_basic_usage_entries_match_path_count.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_basic_usage.yaml')
 
-conf_params = {'TEST_DIRECTORIES': directory_str, 'MODULE_NAME': __name__}
-p, m = generate_params(extra_params=conf_params, modes=['scheduled'])
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m, )
-
-
-# fixtures
-
-@pytest.fixture(scope='module', params=configurations)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
+# Test configurations
+configuration_parameters, configuration_metadata, test_case_ids = get_test_cases_data(test_cases_path)
+for count, value in enumerate(configuration_parameters):
+    configuration_parameters[count]['TEST_DIRECTORIES'] = directory_str
+configurations = load_configuration_template(configurations_path, configuration_parameters,
+                                                           configuration_metadata)
 
 
-# tests
+# Fixtures
+@pytest.fixture()
+def create_files_before_test():
 
-def extra_configuration_before_yield():
-    create_file(REGULAR, testdir1, 'test_1', content='')
-    create_file(REGULAR, testdir1, 'test_2', content='')
-    create_file(SYMLINK, testdir1, 'symlink', target=os.path.join(testdir1, 'test_1'))
-    create_file(HARDLINK, testdir1, 'hardlink', target=os.path.join(testdir1, 'test_2'))
+    # Create files
+    create_file(REGULAR, test_folders[0], 'test_1', content='')
+    create_file(REGULAR, test_folders[0], 'test_2', content='')
+    create_file(SYMLINK, test_folders[0], 'symlink', target=os.path.join(test_folders[0], 'test_1'))
+    create_file(HARDLINK, test_folders[0], 'hardlink', target=os.path.join(test_folders[0], 'test_2'))    
 
 
-def test_entries_match_path_count(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
+# Tests
+@pytest.mark.parametrize('test_folders', [test_folders], ids='')
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
+def test_entries_match_path_count(configuration, metadata, test_folders, set_wazuh_configuration,
+                       create_monitored_folders, configure_local_internal_options_function, 
+                       create_files_before_test, restart_syscheck_function, wait_syscheck_start):
     '''
     description: Check if FIM events contain the correct number of file paths when 'hard'
                  and 'symbolic' links are used. For this purpose, the test will monitor
@@ -155,18 +158,18 @@ def test_entries_match_path_count(get_configuration, configure_environment, rest
 
     tags:
         - scheduled
-        - time_travel
     '''
-    check_apply_test({'ossec_conf'}, get_configuration['tags'])
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
-    entries, path_count = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                                  callback=callback_entries_path_count,
+    # Wait for scan and get entries and path_count
+    entries, path_count = wazuh_log_monitor.start(timeout=T_20, callback=callback_entries_path_count,
                                                   error_message='Did not receive expected '
                                                                 '"Fim inode entries: ..., path count: ..." event'
                                                   ).result()
-    check_time_travel(True, monitor=wazuh_log_monitor)
 
     if entries and path_count:
-        assert entries == '3' and path_count == '4', 'Wrong number of inodes and path count'
+        assert entries == '3', 'Wrong number of inodes found' 
+        assert path_count == '4', 'Wrong number path_count found'
     else:
         raise AssertionError('Wrong number of inodes and path count')
+

@@ -1,0 +1,8 @@
+- name: check_entries_and_path_count
+  description: When files and symlinks are generated in a folder the correct number of entries and path_count is found.
+  configuration_parameters:
+    INTERVAL: 4
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
