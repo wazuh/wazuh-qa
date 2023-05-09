@@ -1,26 +1,30 @@
-# conf 1
-- tags:
-    - ossec_conf
-  apply_to_modules:
-    - test_dir
-    - test_dir_win32
-  sections:
+- sections:
     - section: syscheck
       elements:
         - disabled:
             value: 'no'
-        - directories:
+        - frequency:
+            value: INTERVAL
+        - nodiff:
             value: TEST_ENV_VARIABLES
+        - directories:
+            value: TEST_DIRECTORIES
             attributes:
-              - FIM_MODE
+              - realtime: REALTIME
+              - whodata: WHODATA
+              - check_all: 'yes'
+              - report_changes: 'yes'
+
     - section: sca
       elements:
         - enabled:
             value: 'no'
+
     - section: rootcheck
       elements:
         - disabled:
             value: 'yes'
+
     - section: wodle
       attributes:
         - name: syscollector

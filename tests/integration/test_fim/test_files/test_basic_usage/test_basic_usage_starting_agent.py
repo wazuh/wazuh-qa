@@ -60,12 +60,11 @@ tags:
     - fim_basic_usage
 '''
 import os
-import sys
 
 import pytest
 from wazuh_testing import T_20, LOG_FILE_PATH, REGULAR
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.file import create_file, modify_file_content, delete_file
+from wazuh_testing.tools.file import modify_file_content, delete_file
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.fim.event_monitor import (callback_detect_file_modified_event, callback_detect_file_deleted_event,
@@ -78,7 +77,6 @@ from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as loca
 pytestmark = pytest.mark.tier(level=0)
 
 # Variables
-
 test_folders = [os.path.join(PREFIX, 'testdir1')]
 directory_str = ','.join(test_folders)
 testdir1 = test_folders[0]

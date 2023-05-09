@@ -1,0 +1,59 @@
+- name: monitor_env_variable_single_folder_scheduled
+  description: Check when folders are configured using a simple environment variable, events are generated
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+    folder_id: 0
+
+- name: monitor_env_variable_single_folder_realtime
+  description: Check when folders are configured using a simple environment variable, events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+    folder_id: 0
+
+- name: monitor_env_variable_single_folder_whodata
+  description: Check when folders are configured using a simple environment variable, events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    folder_id: 0
+
+- name: monitor_env_variable_multiple_folders_whodata
+  description: Check when folders are configured using a long environment variable, events are generated
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+    folder_id: 1
+
+- name: monitor_env_variable_multiple_folders_whodata
+  description: Check when folders are configured using a long environment variable, events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+    folder_id: 1
+
+- name: monitor_env_variable_multiple_folders_whodata
+  description: Check when folders are configured using a long environment variable, events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    folder_id: 1

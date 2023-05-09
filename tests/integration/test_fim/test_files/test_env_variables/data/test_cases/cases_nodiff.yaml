@@ -1,0 +1,71 @@
+- name: nodiff_tag_with_env_variable_no_match_scheduled
+  description: With nodiff configured with env. vaiables, check report_changes is not truncated when no match is found
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+    folder_id: 0
+    filename: testing.txt
+    hidden_content: false
+
+- name: monitor_env_variable_single_folder_realtime
+  description: With nodiff configured with env. vaiables, check report_changes is not truncated when no match is found
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+    folder_id: 0
+    filename: testing.txt
+    hidden_content: false
+
+- name: monitor_env_variable_single_folder_whodata
+  description: With nodiff configured with env. vaiables, check report_changes is not truncated when no match is found
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    folder_id: 0
+    filename: testing.txt
+    hidden_content: false
+
+- name: nodiff_tag_with_env_variable_no_match_scheduled
+  description: With nodiff configured with env. vaiables, check report_changes is truncated when match is found
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+    folder_id: 1
+    filename: test.txt
+    hidden_content: true
+
+- name: monitor_env_variable_single_folder_realtime
+  description: With nodiff configured with env. vaiables, check report_changes is truncated when match is found
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+    folder_id: 1
+    filename: test.txt
+    hidden_content: true
+
+- name: monitor_env_variable_single_folder_whodata
+  description: With nodiff configured with env. vaiables, check report_changes is truncated when match is found
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    folder_id: 1
+    filename: test.txt
+    hidden_content: true

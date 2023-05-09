@@ -67,66 +67,57 @@ import sys
 
 import pytest
 from test_fim.common import make_diff_file_path
-from wazuh_testing import global_parameters, LOG_FILE_PATH
-from wazuh_testing.modules.fim.utils import regular_file_cud, generate_params
-from wazuh_testing.tools.configuration import load_wazuh_configurations, PREFIX
+from wazuh_testing import T_20, LOG_FILE_PATH
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.modules.fim.utils import regular_file_cud
+from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+
 
 # Marks
 pytestmark = pytest.mark.tier(level=2)
 
 # Variables and configuration
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
-test_directories = [os.path.join(PREFIX, 'testdir1'),
-                    os.path.join(PREFIX, 'testdir2'),
-                    os.path.join(PREFIX, 'testdir3'),
-                    os.path.join(PREFIX, 'testdir4')
-                    ]
-dir1, dir2, dir3, dir4 = test_directories
+test_folders = [os.path.join(PREFIX, 'testdir1'),
+                os.path.join(PREFIX, 'testdir2')]
+dir2 = test_folders[1]
+dir_config = ",".join(test_folders)
 
 # Check big environment variables ending with backslash
 if sys.platform == 'win32':
-    paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(10)] + \
-            [os.path.join(dir2, "test.txt"), os.path.join(dir3, "test.txt")]
+    paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(10)] + [os.path.join(dir2, "test.txt")]
     test_env = "%TEST_NODIFF_ENV%"
 else:
-    paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(100)] + \
-            [os.path.join(dir2, "test.txt"), os.path.join(dir3, "test.txt")]
+    paths = [os.path.join(PREFIX, 'a' * 50 + '\\') for i in range(100)] + [os.path.join(dir2, "test.txt")]
     test_env = "$TEST_NODIFF_ENV"
 
 multiple_env_var = os.pathsep.join(paths)
 environment_variables = [("TEST_NODIFF_ENV", multiple_env_var)]
 
-dir_config = ",".join(test_directories)
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf_nodiff.yaml')
-mark_skip_agentWindows = pytest.mark.skipif(sys.platform == 'win32', reason="It will be blocked by wazuh/wazuh-qa#2174")
+# Configuration and cases data
+test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_nodiff.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_nodiff.yaml')
 
-conf_params = {'TEST_DIRECTORIES': dir_config, 'TEST_ENV_VARIABLES': test_env, 'MODULE_NAME': __name__}
-p, m = generate_params(extra_params=conf_params)
-
-configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
-
-
-# Fixture
-@pytest.fixture(scope='module', params=configurations)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
+# Test configurations
+configuration_parameters, configuration_metadata, test_case_ids = get_test_cases_data(test_cases_path)
+for count, value in enumerate(configuration_parameters):
+    configuration_parameters[count]['TEST_ENV_VARIABLES'] = test_env
+    configuration_parameters[count]['TEST_DIRECTORIES'] = dir_config
+configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
 
 
 # Test
-@pytest.mark.parametrize('directory, filename, hidden_content', [
-    (dir1, "testing.txt", False),
-    (dir2, "test.txt", True),
-    (dir3, "test.txt", True),
-    (dir4, "testing.txt", False),
-])
-@mark_skip_agentWindows
-def test_tag_nodiff(directory, filename, hidden_content, get_configuration, put_env_variables, configure_environment,
-                    restart_syscheckd, wait_for_fim_start):
+@pytest.mark.parametrize('test_folders', [test_folders], ids='')
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
+def test_tag_nodiff(configuration, metadata, test_folders, set_wazuh_configuration, put_env_variables,
+                    create_monitored_folders, configure_local_internal_options_function,
+                    restart_syscheck_function, wait_syscheck_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon truncates the content in the 'diff' files when testing files
                  are defined using environment variables via the 'nodiff' tag. For this purpose, the test will monitor
@@ -171,9 +162,10 @@ def test_tag_nodiff(directory, filename, hidden_content, get_configuration, put_
         - Verify that 'diff' files are its content truncated when files are specified
           via environment variables using the 'nodiff' tag.
 
-    input_description: A test case (ossec_conf) is contained in external YAML file (wazuh_conf_nodiff.yaml) which
-                       includes configuration settings for the 'wazuh-syscheckd' daemon and, it is combined
-                       with the directories and testing files defined as environment variables in this module.
+    input_description: The file 'configuration_nodiff.yaml' provides the configuration
+                       template.
+                       The file 'cases_nodiff.yaml' provides the tes cases configuration
+                       details for each test case.
 
     expected_output:
         - r'.*Sending FIM event: (.+)$' ('added', 'modified', and 'deleted' events)
@@ -183,6 +175,11 @@ def test_tag_nodiff(directory, filename, hidden_content, get_configuration, put_
         - scheduled
         - time_travel
     '''
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    hidden_content = metadata['hidden_content']
+    filename = metadata['filename']
+    directory = test_folders[metadata['folder_id']]
+    
     files = {filename: b'Hello word!'}
 
     def report_changes_validator(event):
@@ -202,6 +199,5 @@ def test_tag_nodiff(directory, filename, hidden_content, get_configuration, put_
             assert '<Diff truncated because nodiff option>' not in event['data'].get('content_changes'), \
                 'content_changes is truncated'
 
-    regular_file_cud(directory, wazuh_log_monitor, file_list=files,
-                     min_timeout=global_parameters.default_timeout*2, triggers_event=True,
-                     validators_after_update=[report_changes_validator, no_diff_validator])
+    regular_file_cud(directory, wazuh_log_monitor, file_list=files, min_timeout=T_20, triggers_event=True,
+                     validators_after_update=[report_changes_validator, no_diff_validator], escaped=True)
