@@ -144,6 +144,15 @@ def create_monitored_folders_module(test_folders):
             delete_path_recursively(folder)
 
 
+# Fixtures
+@pytest.fixture()
+def create_files_before_test(file_list):
+    
+    """Create files before restarting Wazuh."""
+    for file in file_list:
+        create_file(file['type'], file['path'], file['name'], content=file['content'])
+
+
 @pytest.fixture()
 def restore_win_whodata_policies(policies_file):
 

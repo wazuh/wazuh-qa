@@ -866,7 +866,7 @@ def configure_sockets_environment_function(request):
 
 
 @pytest.fixture(scope='module')
-def put_env_variables(get_configuration, request):
+def put_env_variables(request):
     """
     Create environment variables
     """

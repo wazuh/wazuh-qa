@@ -57,7 +57,6 @@ CB_SWITCHING_DIRECTORIES_TO_REALTIME = r'.*state_checker.*(Audit policy change d
 CB_RECIEVED_EVENT_4719 = r'.*win_whodata.*(Event 4719).*Switching directories to realtime'
 
 # Error message
-ERR_MSG_REALTIME_FOLDERS_EVENT = 'Did not receive expected "Folders monitored with real-time engine" event'
 ERR_MSG_WHODATA_ENGINE_EVENT = 'Did not receive expected "real-time Whodata engine started" event'
 ERR_MSG_INVALID_CONFIG_VALUE = 'Did not receive expected "Invalid value for element" event'
 ERR_MSG_AGENT_DISCONNECT = 'Agent couldn\'t connect to server.'
@@ -88,7 +87,6 @@ ERR_MSG_DELETED_EVENT_NOT_RECIEVED = 'Did not receive expected deleted event'
 ERR_MSG_FIM_EVENT_NOT_RECIEVED = 'Did not receive expected "Sending FIM event: ..." event'
 ERR_MSG_MONITORING_PATH = 'Did not get the expected monitoring path line'
 ERR_MSG_MULTIPLE_FILES_CREATION = 'Multiple files could not be created.'
-ERR_MSG_SCHEDULED_SCAN_ENDED = 'Did not recieve the expected  "DEBUG: ... Sending FIM event: {type:scan_end"...} event'
 ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE = 'Wrong value for diff_size_limit'
 ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED = 'Did not receive expected "File integrity monitoring real-time Whodata \
                                             engine started" or "Initializing FIM Integrity Synchronization check"'
@@ -99,7 +97,6 @@ ERR_MSG_SYNC_INTERVAL_RESET_EVENT = 'Did not recieve the expected "Sync interval
 ERR_MSG_CONTENT_CHANGES_EMPTY = "content_changes is empty"
 ERR_MSG_CONTENT_CHANGES_NOT_EMPTY = "content_changes isn't empty"
 ERR_MSG_FOLDERS_MONITORED_REALTIME = 'Did not receive expected "Folders monitored with real-time engine..." event'
-ERR_MSG_WHODATA_ENGINE_EVENT = 'Did not receive "File integrity monitoring real-time Whodata engine started" event'
 ERR_MSG_FIM_EVENT_NOT_DETECTED = 'Did not receive expected "Sending FIM event: ..." event.'
 ERR_MSG_SCHEDULED_SCAN_STARTED = 'Did not receive expected "File integrity monitoring scan started" event'
 ERR_MSG_SCHEDULED_SCAN_ENDED = 'Did not receive expected "File integrity monitoring scan ended" event'
