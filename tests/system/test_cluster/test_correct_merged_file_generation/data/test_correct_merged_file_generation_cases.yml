@@ -3,7 +3,7 @@
     - test_type: start
       trigger_value: remove
       number: null
-      folder: null
+      folder: default
       name: null
       content: null
       malformed_value: null
@@ -14,7 +14,7 @@
     - test_type: 10s
       trigger_value: remove
       number: null
-      folder: null
+      folder: default
       name: null
       content: null
       malformed_value: null
@@ -43,7 +43,7 @@
       malformed_value:
         - "!0 EmptyFile.txt"
       log_content:
-        - "'default/EmptyFile.txt' is empty"
+        - "etc/shared/default/EmptyFile.txt' is empty"
 
 - name: Add_non_zero_size_file_default_folder_check_merged_updated_10_sec
   test_case:
@@ -92,7 +92,7 @@
       malformed_value:
         - "!0 EmptyFile2.txt"
       log_content:
-        - "'default/EmptyFile.txt' is empty"
+        - "'etc/shared/default/EmptyFile2.txt' is empty"
 
 - name: Add_zero_size_file_TestGroup1_folder_check_merged_updated_manager_starts
   test_case:
@@ -105,7 +105,7 @@
       malformed_value:
         - "!0 EmptyFileInGroup2.txt"
       log_content:
-        - "'TestGroup1/EmptyFile2.txt' is empty"
+        - "'etc/shared/TestGroup1/EmptyFileInGroup2.txt' is empty"
 
 - name: Add_zero_size_file_TestGroup1_folder_check_merged_updated_10_sec
   test_case:
@@ -118,7 +118,7 @@
       malformed_value:
         - "!0 EmptyFileInGroup.txt"
       log_content:
-        - "'TestGroup1/EmptyFileInGroup.txt' is empty"
+        - "'etc/shared/TestGroup1/EmptyFileInGroup.txt' is empty"
 
 - name: Add_serveral_zero_size_file_default_folder_check_merged_updated_manager_starts
   test_case:
@@ -146,14 +146,14 @@
         - "!0 EmptyFile9"
         - "!0 EmptyFile10"
       log_content:
-        - "'default/EmptyFile3.txt' is empty"
-        - "'default/EmptyFile4.txt' is empty"
-        - "'default/EmptyFile5.txt' is empty"
-        - "'default/EmptyFile6.txt' is empty"
-        - "'default/EmptyFile7.txt' is empty"
-        - "'default/EmptyFile8.txt' is empty"
-        - "'default/EmptyFile9.txt' is empty"
-        - "'default/EmptyFile10.txt' is empty"
+        - "'etc/shared/default/EmptyFile3.txt' is empty"
+        - "'etc/shared/default/EmptyFile4.txt' is empty"
+        - "'etc/shared/default/EmptyFile5.txt' is empty"
+        - "'etc/shared/default/EmptyFile6.txt' is empty"
+        - "'etc/shared/default/EmptyFile7.txt' is empty"
+        - "'etc/shared/default/EmptyFile8.txt' is empty"
+        - "'etc/shared/default/EmptyFile9.txt' is empty"
+        - "'etc/shared/default/EmptyFile10.txt' is empty"
 
 - name: Add_serveral_zero_size_file_TestGroup1_folder_check_merged_updated_manager_start
   test_case:
@@ -181,12 +181,12 @@
         - "!0 EmptyFileInGroup9"
         - "!0 EmptyFileInGroup10"
       log_content:
-        - "'TestGroup1/EmptyFileInGroup3.txt' is empty"
-        - "'TestGroup1/EmptyFileInGroup4.txt' is empty"
-        - "'TestGroup1/EmptyFileInGroup5.txt' is empty"
-        - "'TestGroup1/EmptyFileInGroup6.txt' is empty"
-        - "'TestGroup1/EmptyFileInGroup7.txt' is empty"
-        - "'TestGroup1/EmptyFileInGroup8.txt' is empty"
-        - "'TestGroup1/EmptyFileInGroup9.txt' is empty"
-        - "'/TestGroup1/EmptyFileInGroup10.txt' is empty"
+        - "'etc/shared/TestGroup1/EmptyFileInGroup3.txt' is empty"
+        - "'etc/shared/TestGroup1/EmptyFileInGroup4.txt' is empty"
+        - "'etc/shared/TestGroup1/EmptyFileInGroup5.txt' is empty"
+        - "'etc/shared/TestGroup1/EmptyFileInGroup6.txt' is empty"
+        - "'etc/shared/TestGroup1/EmptyFileInGroup7.txt' is empty"
+        - "'etc/shared/TestGroup1/EmptyFileInGroup8.txt' is empty"
+        - "'etc/shared/TestGroup1/EmptyFileInGroup9.txt' is empty"
+        - "'etc/shared/TestGroup1/EmptyFileInGroup10.txt' is empty"
 
