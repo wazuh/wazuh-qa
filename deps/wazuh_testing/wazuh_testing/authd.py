@@ -73,63 +73,49 @@ def validate_argument(received, expected, argument_name):
         return 'success', ''
 
 
+def parse_authd_response(response):
+    """
+    Parses an Authd response into a dictionary.
+
+    Args:
+        response (str): Raw response received from Authd.
+    Returns:
+        dict: Parsed components of the response.
+    """
+    response_dict = {}
+    try:
+        header, payload = response.split(sep=' ', maxsplit=1)
+        if header == 'OSSEC':
+            response_dict['status'] = 'success'
+            # The agent key is sent within '' and each component is separated by white spaces:
+            # K:'001 agent_name any TopSecret
+            agent_key = payload.split('\'')[1]
+            response_dict['id'], response_dict['name'], response_dict['ip'], response_dict['key'] = agent_key.split(' ')
+        elif header == 'ERROR:':
+            response_dict['status'] = 'error'
+            response_dict['message'] = payload
+        else:
+            raise
+
+    except Exception:
+        raise IndexError(f"Authd response does not have the expected format: '{response}'")
+    return response_dict
+
+
 def validate_authd_response(response, expected):
     """
     Validates if the different items of an Authd response are as expected. Any item inexistent in expected won't
     be validated.
-
     Args:
         response (str): The Authd response to be validated.
         expected (dict): Dictionary with the items to validate.
     """
-    response = response.split(sep=" ", maxsplit=1)
-    status = response[0]
-    result = 'success'
-    err_msg = ''
-    if expected['status'] == 'success':
-        result, err_msg = validate_argument(status, 'OSSEC', 'status')
-        if result != 'success':
-            return result, err_msg
+    response_dict = parse_authd_response(response)
 
-        agent_key = response[1].split('\'')[1::2][0].split()
-        id = agent_key[0]
-        name = agent_key[1]
-        ip = agent_key[2]
-        key = agent_key[3]
-
-        if 'id' in expected:
-            result, err_msg = validate_argument(id, expected['id'], 'id')
-            if result != 'success':
-                return result, err_msg
-
-        if 'name' in expected:
-            result, err_msg = validate_argument(name, expected['name'], 'name')
-            if result != 'success':
-                return result, err_msg
-
-        if 'ip' in expected:
-            result, err_msg = validate_argument(ip, expected['ip'], 'ip')
-            if result != 'success':
-                return result, err_msg
-
-        if 'key' in expected:
-            result, err_msg = validate_argument(key, expected['key'], 'key')
-            if result != 'success':
-                return result, err_msg
-
-    elif expected['status'] == 'error':
-        result, err_msg = validate_argument(status, 'ERROR:', 'status')
-        if result != 'success':
-            return result, err_msg
-
-        message = response[1]
-        if 'message' in expected:
-            if re.match(expected['message'], message) is None:
-                return 'error', f"Invalid 'message': '{message}' received, '{expected['message']}' expected"
-    else:
-        raise Exception('Invalid expected status')
-
-    return result, err_msg
+    for key in expected.keys():
+        if re.match(expected[key], response_dict[key]) is None:
+            return 'error', f"Invalid {key}: '{response_dict[key]}' received, '{expected[key]}' expected"
+    return 'success', ''
 
 
 def clean_agents_from_db():

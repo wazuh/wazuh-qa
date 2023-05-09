@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2021, Wazuh Inc.
+copyright: Copyright (C) 2015-2022, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -9,12 +9,10 @@ type: integration
 
 brief: This module verifies the correct behavior of 'authd' under different name/IP combinations.
 
-tier: 0
-
-modules:
+components:
     - authd
 
-components:
+targets:
     - manager
 
 daemons:
@@ -26,22 +24,15 @@ os_platform:
     - linux
 
 os_version:
-    - Amazon Linux 1
-    - Amazon Linux 2
     - Arch Linux
-    - CentOS 6
-    - CentOS 7
+    - Amazon Linux 2
+    - Amazon Linux 1
     - CentOS 8
+    - CentOS 7
     - Debian Buster
-    - Debian Stretch
-    - Debian Jessie
-    - Debian Wheezy
-    - Red Hat 6
-    - Red Hat 7
     - Red Hat 8
+    - Ubuntu Focal
     - Ubuntu Bionic
-    - Ubuntu Trusty
-    - Ubuntu Xenial
 
 tags:
     - enrollment
@@ -74,6 +65,8 @@ receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 hostname = socket.gethostname()
+daemons_handler_configuration = {'all_daemons': True}
+
 
 # Fixtures
 
@@ -88,18 +81,19 @@ def get_configuration(request):
 
 # Test
 
-
-@pytest.mark.parametrize('test_case', [case for case in test_authd_valid_name_ip_tests],
+@pytest.mark.parametrize('test_case', [case['test_case'] for case in test_authd_valid_name_ip_tests],
                          ids=[test_case['name'] for test_case in test_authd_valid_name_ip_tests])
-def test_authd_force_options(get_configuration, configure_environment, configure_sockets_environment,
-                             clean_client_keys_file_module, restart_authd, wait_for_authd_startup_module,
-                             connect_to_sockets_module, test_case, tear_down):
+def test_authd_valid_name_ip(get_configuration, configure_environment, configure_sockets_environment,
+                             clean_client_keys_file_function, connect_to_sockets_module, test_case,
+                             wait_for_authd_startup_function, restart_authd_function, tear_down):
     '''
     description:
         Checks that every input message in authd port generates the adequate output.
 
     wazuh_min_version:
         4.2.0
+
+    tier: 0
 
     parameters:
         - get_configuration:
@@ -142,32 +136,33 @@ def test_authd_force_options(get_configuration, configure_environment, configure
         - Registration request responses on Authd socket
     '''
 
-    for index, stage in enumerate(test_case['test_case']):
-        # Reopen socket (socket is closed by manager after sending message with client key)
-        receiver_sockets[0].open()
-        # Checking 'hostname' test case
-        try:
-            if stage['insert_hostname_in_query'] == 'yes':
-                stage['input'] = stage['input'].format(hostname)
-                if 'message' in stage['output']:
-                    stage['output']['message'] = stage['output']['message'].format(hostname)
-        except KeyError:
-            pass
-        except IndexError:
-            raise
+    # Reopen socket (socket is closed by manager after sending message with client key).
+    receiver_sockets[0].open()
 
-        receiver_sockets[0].send(stage['input'], size=False)
-        timeout = time.time() + 10
-        response = ''
-        while response == '':
-            response = receiver_sockets[0].receive().decode()
-            if time.time() > timeout:
-                raise ConnectionResetError('Manager did not respond to sent message!')
+    # Set 'hostname' in test case's expected output message.
+    if test_case.get('insert_hostname_in_query') == 'yes':
+        test_case['input'] = test_case.get('input').format(hostname)
+        if 'message' in test_case.get('output'):
+            test_case['output']['message'] = test_case['output'].get('message').format(hostname)
 
-        if stage.get('expected_fail') == 'yes':
-            with pytest.raises(Exception):
-                result, err_msg = validate_authd_response(response, stage['output'])
-                assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"
-        else:
-            result, err_msg = validate_authd_response(response, stage['output'])
-            assert result == 'success', f"Failed stage '{index+1}': {err_msg} Complete response: '{response}'"
+    # Send the message to the socket.
+    receiver_sockets[0].send(test_case['input'], size=False)
+    # Set the timeout and the empty response str.
+    timeout = time.time() + 10
+    response = ''
+
+    # Wait the socket response or raise an error if timeout.
+    while response == '':
+        if time.time() > timeout:
+            raise ConnectionResetError('Manager did not respond to sent message!')
+        response = receiver_sockets[0].receive().decode()
+
+    # Get the validated authd response. 
+    result, err_msg = validate_authd_response(response, test_case['output'])
+
+    # ASSERTIONS.
+    if test_case.get('expected_fail') == 'yes':
+        with pytest.raises(Exception):
+            assert "ERROR" in result, f"No error raised. Complete response: '{response}'"
+    else:
+        assert result == 'success', f"Failed with {err_msg} Complete response: '{response}'"
