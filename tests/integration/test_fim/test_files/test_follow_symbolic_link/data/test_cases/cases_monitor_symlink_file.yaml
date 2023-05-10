@@ -1,0 +1,32 @@
+- name: symlink_pointing_to_file_scheduled
+  description: Check when a symlink is pointing to a file, new events are generated
+  configuration_parameters:
+    INTERVAL: 5
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+    main_folder: 0
+    symlink_target: file
+
+- name: symlink_pointing_to_file_realtime
+  description:  new events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+    main_folder: 0
+    symlink_target: file
+
+- name: symlink_pointing_to_file_whodata
+  description: Check when a symlink is pointing to a file, new events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    main_folder: 0
+    symlink_target: file

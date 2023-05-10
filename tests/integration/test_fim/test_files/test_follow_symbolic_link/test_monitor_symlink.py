@@ -61,48 +61,58 @@ pytest_args:
 tags:
     - fim_follow_symbolic_link
 '''
+import os
 import pytest
-import wazuh_testing.fim as fim
 
-from test_fim.test_files.test_follow_symbolic_link.common import configurations_path, testdir1, \
-    testdir_target, delete_f
-# noinspection PyUnresolvedReferences
-from test_fim.test_files.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
-    extra_configuration_after_yield
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from test_fim.test_files.test_follow_symbolic_link.common import delete_file_or_path, test_directories
+from wazuh_testing import LOG_FILE_PATH, REGULAR
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
+from wazuh_testing.tools.file import modify_file_content, create_file
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.fim.event_monitor import callback_detect_event, ERR_MSG_FIM_EVENT_NOT_RECIEVED
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 
 # Marks
-
 pytestmark = [pytest.mark.linux, pytest.mark.sunos5, pytest.mark.darwin, pytest.mark.tier(level=1)]
 
-# configurations
+# Variables
+test_dirs = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir_target')]
 
-conf_params, conf_metadata = fim.generate_params(extra_params={'FOLLOW_MODE': 'yes'})
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=conf_params,
-                                           metadata=conf_metadata
-                                           )
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
-wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
+# Configuration and cases data
+t1_test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_monitor_symlink_file.yaml')
+t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_monitored_file.yaml')
+t2_test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_monitor_symlink_folder.yaml')
+t2_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_monitored_dir.yaml')
 
+# Test configurations
+t1_configuration_parameters, t1_configuration_metadata, t1_test_case_ids = get_test_cases_data(t1_test_cases_path)
+for count, value in enumerate(t1_configuration_parameters):
+    t1_configuration_parameters[count]['FOLLOW_MODE'] = 'yes'
+t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters, t1_configuration_metadata)
 
-# fixtures
+t2_configuration_parameters, t2_configuration_metadata, t2_test_case_ids = get_test_cases_data(t2_test_cases_path)
+for count, value in enumerate(t2_configuration_parameters):
+    t2_configuration_parameters[count]['FOLLOW_MODE'] = 'yes'
+t2_configurations = load_configuration_template(t2_configurations_path, t2_configuration_parameters, t2_configuration_metadata)
 
-@pytest.fixture(scope='module', params=configurations)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
+configurations = t1_configurations + t2_configurations
+configuration_metadata = t1_configuration_metadata + t2_configuration_metadata
+test_case_ids = t1_test_case_ids + t2_test_case_ids
 
+# Tests
+@pytest.mark.parametrize('test_folders', [test_directories], ids='')
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
+def test_symlink_dir_inside_monitored_dir(configuration, metadata, test_folders, create_monitored_folders, 
+                                          prepare_symlinks, set_wazuh_configuration,
+                                          configure_local_internal_options_function, restart_syscheck_function,
+                                          wait_syscheck_start):
 
-# tests
-
-@pytest.mark.parametrize('tags_to_apply, main_folder', [
-    ({'monitored_file'}, testdir1),
-    ({'monitored_dir'}, testdir_target)
-])
-def test_symbolic_monitor_symlink(tags_to_apply, main_folder, get_configuration, configure_environment,
-                                  restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects events when monitoring a symlink that points
                  to a file or a directory. For this purpose, the test will monitor a 'symbolic link' pointing
@@ -111,71 +121,92 @@ def test_symbolic_monitor_symlink(tags_to_apply, main_folder, get_configuration,
                  the 'modified' event. Finally, the test will remove the link target and verify that
                  the FIM 'delete' event is generated.
 
+    test_phases:
+        - setup:
+            - Set wazuh configuration and local_internal_options.
+            - Create custom folder for monitoring
+            - Create files and symlink
+            - Clean logs files and restart wazuh to apply the configuration.
+        - test:
+            - Create a file in folder if symlink is targeting a folder.
+            - Modify and Delete file in symlink target.
+            - Check events are generated correctly.
+        - teardown:
+            - Delete custom monitored folder
+            - Restore configuration
+            - Stop wazuh
+
     wazuh_min_version: 4.2.0
 
     tier: 1
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
-        - main_folder:
-            type: str
-            brief: Directory that is being pointed at or contains the pointed file.
-        - get_configuration:
+        - configuration:
+            type: dict
+            brief: Configuration values for ossec.conf.
+        - metadata:
+            type: dict
+            brief: Test case data.
+        - test_folders:
+            type: dict
+            brief: List of folders to be created for monitoring.
+        - prepare_symlinks:
             type: fixture
-            brief: Get configurations from the module.
-        - configure_environment:
+            brief: Prepare the symbolic link and the target directory.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_syscheckd:
+            brief: Set ossec.conf configuration.
+        - create_monitored_folders:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start:
+            brief: Create a given list of folders when the test starts. Delete the folders at the end of the module.
+        - configure_local_internal_options_function:
             type: fixture
-            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+            brief: Set local_internal_options.conf file.
+        - restart_syscheck_function:
+            type: fixture
+            brief: restart syscheckd daemon, and truncate the ossec.log.
+        - wait_syscheck_start:
+            type: fixture
+            brief: check that the starting FIM scan is detected.
+
 
     assertions:
         - Verify that FIM events are generated when performing file operations on a 'symbolic link' target.
 
-    input_description: Two test cases (monitored_file and monitored_dir) are contained in external YAML file
-                       (wazuh_conf.yaml) which includes configuration settings for the 'wazuh-syscheckd' daemon
-                       and, these are combined with the testing directories to be monitored defined in
-                       the 'common.py' module.
+    input_description: Two configuration files 'monitored_dir.yaml' and 'monitored_file.yaml' provide the 
+                       configuration template.
+                       Two files 'cases_monitor_symlink_file.yaml' and 'cases_monitor_symlink_folder.yaml' provide the
+                       test cases configuration details for each test case.
 
     expected_output:
         - r'.*Sending FIM event: (.+)$' ('added', 'modified' and 'deleted' events)
 
     tags:
         - scheduled
-        - time_travel
+        - realtime
+        - whodata
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
-    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    main_folder = test_dirs[metadata['main_folder']]
     file1 = 'regular1'
 
     # Add creation if symlink is pointing to a folder
-    if tags_to_apply == {'monitored_dir'}:
-        fim.create_file(fim.REGULAR, main_folder, file1, content='')
-        fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
-        add = wazuh_log_monitor.start(timeout=10, callback=fim.callback_detect_event).result()
+    if metadata['symlink_target'] == 'folder':
+        create_file(REGULAR, main_folder, file1, content='')
+        add = wazuh_log_monitor.start(timeout=10, callback=callback_detect_event).result()
         assert 'added' in add['data']['type'] and file1 in add['data']['path'], \
             "'added' event not matching"
 
     # Modify the linked file and expect an event
-    fim.modify_file_content(main_folder, file1, 'Sample modification')
-    fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
-    modify = wazuh_log_monitor.start(timeout=10, callback=fim.callback_detect_event,
-                                     error_message='Did not receive expected '
-                                                   '"Sending FIM event: ..." event').result()
+    modify_file_content(main_folder, file1, 'Sample modification')
+    modify = wazuh_log_monitor.start(timeout=10, callback=callback_detect_event,
+                                     error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
     assert 'modified' in modify['data']['type'] and file1 in modify['data']['path'], \
         "'modified' event not matching"
 
     # Delete the linked file and expect an event
-    delete_f(main_folder, file1)
-    fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
-    delete = wazuh_log_monitor.start(timeout=10, callback=fim.callback_detect_event,
-                                     error_message='Did not receive expected '
-                                                   '"Sending FIM event: ..." event').result()
+    delete_file_or_path(main_folder, file1)
+    delete = wazuh_log_monitor.start(timeout=10, callback=callback_detect_event,
+                                     error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
     assert 'deleted' in delete['data']['type'] and file1 in delete['data']['path'], \
         "'deleted' event not matching"
