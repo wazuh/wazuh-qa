@@ -15,7 +15,7 @@
         - check_all: 'yes'
         - FIM_MODE
     - frequency:
-        value: 3
+        value: 5
   - section: sca
     elements:
     - enabled:

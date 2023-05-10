@@ -123,37 +123,62 @@ def test_follow_symbolic_disabled(configuration, metadata, test_folders, create_
                  no events are triggered. Finally, it will remove the link target and verify that no FIM events
                  have been generated.
 
+    test_phases:
+        - setup:
+            - Set wazuh configuration and local_internal_options.
+            - Create custom folder for monitoring
+            - Create files and symlink
+            - Clean logs files and restart wazuh to apply the configuration.
+        - test:
+            - Create a file in folder if symlink is targeting a folder.
+            - Modify and Delete file in symlink target.
+            - Check that events are are not generated.
+        - teardown:
+            - Delete custom monitored folder, files and symlinks
+            - Restore configuration
+            - Stop wazuh
+
     wazuh_min_version: 4.2.0
 
     tier: 1
 
+
     parameters:
-        - path:
-            type: str
-            brief: Path to the target file or directory.
-        - tags_to_apply:
-            type: set
-            brief: Run test if matches with a configuration identifier, skip otherwise.
-        - get_configuration:
+        - configuration:
+            type: dict
+            brief: Configuration values for ossec.conf.
+        - metadata:
+            type: dict
+            brief: Test case data.
+        - test_folders:
+            type: dict
+            brief: List of folders to be created for monitoring.
+        - prepare_symlinks:
             type: fixture
-            brief: Get configurations from the module.
-        - configure_environment:
+            brief: Prepare the symbolic link and the target directory.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_syscheckd:
+            brief: Set ossec.conf configuration.
+        - create_monitored_folders:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start:
+            brief: Create a given list of folders when the test starts. Delete the folders at the end of the module.
+        - configure_local_internal_options_function:
             type: fixture
-            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+            brief: Set local_internal_options.conf file.
+        - restart_syscheck_function:
+            type: fixture
+            brief: restart syscheckd daemon, and truncate the ossec.log.
+        - wait_syscheck_start:
+            type: fixture
+            brief: check that the starting FIM scan is detected.
 
     assertions:
         - Verify that no FIM events are generated when performing file operations on a 'symbolic link' target.
 
-    input_description: Two test cases (monitored_file and monitored_dir) are contained in external YAML file
-                       (wazuh_conf.yaml) which includes configuration settings for the 'wazuh-syscheckd' daemon
-                       and, these are combined with the testing directories to be monitored defined in
-                       the 'common.py' module.
+    input_description: Two configuration files 'monitored_dir.yaml' and 'monitored_file.yaml' provide the 
+                       configuration template.
+                       Two files 'follow_symbolic_disabled_file' and 'follow_symbolic_disabled_folder' provide the
+                       test cases configuration details for each test case.
 
     expected_output:
         - r'.*Sending FIM event: (.+)$' ('added', 'modified' and 'deleted' events)
