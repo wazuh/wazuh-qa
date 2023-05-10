@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file.
 - Add test to check the Syscollector configuration. ([#3584](https://github.com/wazuh/wazuh-qa/pull/3584)) \- (Framework + Tests)
 - Add system tests for groups deletion ([#4057](https://github.com/wazuh/wazuh-qa/pull/4057)) \- (Tests)
 
+### Changed
+
+- Change integratord test to use slack instead of virustotal ([#3540](https://github.com/wazuh/wazuh-qa/pull/3540)) \- (Framework + Tests)
+
 ### Fixed
 
 - Fix daemons_handler fixture (fix GCP IT) ([#4134](https://github.com/wazuh/wazuh-qa/pull/4134)) \- (Tests)
@@ -68,7 +72,6 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 
 - Improve `test_agent_groups_new_cluster_node` ([#3971](https://github.com/wazuh/wazuh-qa/pull/3971)) \- (Tests)
 - Improve `test_assign_groups_guess` ([#3901](https://github.com/wazuh/wazuh-qa/pull/3901)) \- (Tests)
-- Change integratord test to use slack instead of virustotal ([#3540](https://github.com/wazuh/wazuh-qa/pull/3540)) \- (Framework + Tests)
 - Update `test_cluster_worker_logs_order` test ([#3896](https://github.com/wazuh/wazuh-qa/pull/3896)) \- (Tests)
 - Increase NVE download feed test timeout([#3769](https://github.com/wazuh/wazuh-qa/pull/3769)) \- (Tests)
 - Adapt wazuhdb integration tests for auto-vacuum ([#3613](https://github.com/wazuh/wazuh-qa/issues/3613)) \- (Tests)
