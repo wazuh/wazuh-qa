@@ -55,6 +55,7 @@ CB_STARTING_WINDOWS_AUDIT = r'.*state_checker.*(Starting check of Windows Audit 
 CB_SWITCHING_DIRECTORIES_TO_REALTIME = r'.*state_checker.*(Audit policy change detected.\
                                          Switching directories to realtime)'
 CB_RECIEVED_EVENT_4719 = r'.*win_whodata.*(Event 4719).*Switching directories to realtime'
+CB_AUDIT_RELOAD_RULES = r'.*Audit rules reloaded\. Rules loaded: (.+)'
 
 # Error message
 ERR_MSG_WHODATA_ENGINE_EVENT = 'Did not receive expected "real-time Whodata engine started" event'
@@ -492,3 +493,15 @@ def detect_windows_whodata_mode_change(file_monitor, file='.*'):
 
     file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(pattern),
                        error_message=ERR_MSG_WHODATA_REALTIME_MODE_CHANGE_EVENT)
+
+
+def detect_audit_rules_reloaded(whodata, monitor):
+    """Wait for the audit callback if we are using whodata monitoring.
+    Args:
+        whodata (boolean): True if whodata is active.
+        monitor (FileMonitor): LogMonitor to use.
+    """
+    if whodata:
+        monitor.start(timeout=35, callback=generate_monitoring_callback(CB_AUDIT_RELOAD_RULES), update_position=False,
+                      error_message='Did not receive expected "Audit rules reloaded..." event')
+

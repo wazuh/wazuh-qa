@@ -10,11 +10,14 @@ from wazuh_testing.tools import PREFIX
 # variables
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-test_directories = [os.path.join(PREFIX, 'testdir_link'), os.path.join(PREFIX, 'testdir1'),
-                    os.path.join(PREFIX, 'testdir2'), os.path.join(PREFIX, 'testdir_target'),
-                    os.path.join(PREFIX, 'testdir_not_target'), os.path.join(PREFIX, 'testdir1', 'subdir')]
+test_directories = [os.path.join(PREFIX, 'testdir_link'),
+                    os.path.join(PREFIX, 'testdir1'),
+                    os.path.join(PREFIX, 'testdir2'),
+                    os.path.join(PREFIX, 'testdir_target'),
+                    os.path.join(PREFIX, 'testdir_not_target'),
+                    os.path.join(PREFIX, 'testdir1', 'subdir')]
 testdir_link, testdir1, testdir2, testdir_target, testdir_not_target, test_subdir = test_directories
-symlink_interval = 20
+symlink_interval = 5
 
 
 def debug_sym_check(func):
@@ -42,7 +45,7 @@ def modify_symlink(target, path, file=None):
         subprocess.call(['ln', '-sfn', target, path])
 
 
-def delete_f(path, file=None):
+def delete_file_or_path(path, file=None):
     """Delete given path. Directory or file"""
     if file is None:
         shutil.rmtree(path, ignore_errors=True)
@@ -52,10 +55,10 @@ def delete_f(path, file=None):
             os.remove(regular_path)
 
 
-@debug_sym_check
+
 def wait_for_symlink_check(monitor):
     """Wait for symlink thread to finish its scan"""
-    monitor.start(timeout=(symlink_interval + 2), callback=callback_symlink_scan_ended,
+    monitor.start(timeout=(symlink_interval * 2), callback=callback_symlink_scan_ended,
                   error_message='Did not receive expected "Links check finalized" event')
 
 
