@@ -64,50 +64,57 @@ tags:
 import os
 
 import pytest
-import wazuh_testing.fim as fim
-from test_fim.test_files.test_follow_symbolic_link.common import testdir_target, testdir1
-# noinspection PyUnresolvedReferences
-from test_fim.test_files.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
-     extra_configuration_after_yield
-from wazuh_testing import logger
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+
+from test_fim.test_files.test_follow_symbolic_link.common import testdir_target, testdir1, test_directories
+from wazuh_testing import logger, T_10, LOG_FILE_PATH, REGULAR  
+from wazuh_testing.tools import PREFIX
+from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
+from wazuh_testing.tools.file import create_file, modify_file_content, delete_file
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.fim.event_monitor import callback_detect_event, ERR_MSG_FIM_EVENT_NOT_RECIEVED
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+
 
 # Marks
-
 pytestmark = [pytest.mark.linux, pytest.mark.sunos5, pytest.mark.darwin, pytest.mark.tier(level=1)]
 
-# variables
+# Variables
+test_dirs = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir_target')]
 
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-wazuh_log_monitor = FileMonitor(fim.LOG_FILE_PATH)
+# Reference paths
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
-# configurations
+# Configuration and cases data
+t1_test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_symlink_disabled_file.yaml')
+t1_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_monitored_file.yaml')
+t2_test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_symlink_disabled_folder.yaml')
+t2_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_monitored_dir.yaml')
 
-conf_params, conf_metadata = fim.generate_params(extra_params={'FOLLOW_MODE': 'no'})
-configurations = load_wazuh_configurations(configurations_path, __name__,
-                                           params=conf_params,
-                                           metadata=conf_metadata
-                                           )
+# Test configurations
+t1_configuration_parameters, t1_configuration_metadata, t1_test_case_ids = get_test_cases_data(t1_test_cases_path)
+for count, value in enumerate(t1_configuration_parameters):
+    t1_configuration_parameters[count]['FOLLOW_MODE'] = 'no'
+t1_configurations = load_configuration_template(t1_configurations_path, t1_configuration_parameters, t1_configuration_metadata)
+
+t2_configuration_parameters, t2_configuration_metadata, t2_test_case_ids = get_test_cases_data(t2_test_cases_path)
+for count, value in enumerate(t2_configuration_parameters):
+    t2_configuration_parameters[count]['FOLLOW_MODE'] = 'no'
+t2_configurations = load_configuration_template(t2_configurations_path, t2_configuration_parameters, t2_configuration_metadata)
+
+configurations = t1_configurations + t2_configurations
+configuration_metadata = t1_configuration_metadata + t2_configuration_metadata
+test_case_ids = t1_test_case_ids + t2_test_case_ids
 
 
-# fixtures
-
-@pytest.fixture(scope='module', params=configurations)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
-
-
-# tests
-
-@pytest.mark.parametrize('tags_to_apply, path', [
-    ({'monitored_file'}, testdir1),
-    ({'monitored_dir'}, testdir_target)
-])
-def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, configure_environment, restart_syscheckd,
-                                  wait_for_fim_start):
+# Tests
+@pytest.mark.parametrize('test_folders', [test_directories], ids='')
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
+def test_follow_symbolic_disabled(configuration, metadata, test_folders, create_monitored_folders, 
+                                          prepare_symlinks, set_wazuh_configuration,
+                                          configure_local_internal_options_function, restart_syscheck_function,
+                                          wait_syscheck_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon considers a 'symbolic link' to be a regular file when
                  the attribute 'follow_symbolic_link' is set to 'no'. For this purpose, the test will monitor
@@ -153,34 +160,32 @@ def test_follow_symbolic_disabled(path, tags_to_apply, get_configuration, config
 
     tags:
         - scheduled
-        - time_travel
+        - whodata
+        - realtime
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
-    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     regular_file = 'regular1'
     error_msg = 'A "Sending FIM event: ..." event has been detected. No events should be detected at this time.'
+    main_folder = test_dirs[metadata['main_folder']]
 
     # If the symlink targets to a directory, create a file in it and ensure no event is raised.
-    if tags_to_apply == {'monitored_dir'}:
-        fim.create_file(fim.REGULAR, path, regular_file)
-        fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
+    if metadata['symlink_target'] == {'monitored_dir'}:
+        create_file(REGULAR, main_folder, regular_file)
         with pytest.raises(TimeoutError):
-            wazuh_log_monitor.start(timeout=5, callback=fim.callback_detect_event)
+            wazuh_log_monitor.start(timeout=T_10, callback=callback_detect_event)
             logger.error(error_msg)
             raise AttributeError(error_msg)
 
     # Modify the target file and don't expect any events
-    fim.modify_file(path, regular_file, new_content='Modify sample')
-    fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
+    modify_file_content(main_folder, regular_file, new_content='Modify sample')
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=5, callback=fim.callback_detect_event)
+        wazuh_log_monitor.start(timeout=T_10, callback=callback_detect_event)
         logger.error(error_msg)
         raise AttributeError(error_msg)
 
     # Delete the target file and don't expect any events
-    fim.delete_file(path, regular_file)
-    fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
+    delete_file(os.path.join(main_folder, regular_file))
     with pytest.raises(TimeoutError):
-        wazuh_log_monitor.start(timeout=5, callback=fim.callback_detect_event)
+        wazuh_log_monitor.start(timeout=T_10, callback=callback_detect_event)
         logger.error(error_msg)
         raise AttributeError(error_msg)
