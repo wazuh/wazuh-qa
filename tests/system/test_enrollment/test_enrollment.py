@@ -39,8 +39,11 @@ from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.utils import format_ipv6_long
 
 
+pytestmark = [pytest.mark.basic_environment_env]
+
 # Hosts
 testinfra_hosts = ['wazuh-manager', 'wazuh-agent1']
+
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                               'provisioning', 'basic_environment', 'inventory.yml')

@@ -63,3 +63,6 @@ def test_agent_database_version(restart_wazuh_daemon, remove_agents):
     assert agent_version == expected_database_version, 'The agent database version is not the expected one. \n' \
                                                        f'Expected version: {expected_database_version}\n'\
                                                        f'Obtained version: {agent_version}'
+
+    for agent in agents:
+        agent.stop_receiver()
