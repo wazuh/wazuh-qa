@@ -85,7 +85,7 @@ def get_configuration(request):
                          ids=[test_case['name'] for test_case in test_authd_valid_name_ip_tests])
 def test_authd_valid_name_ip(get_configuration, configure_environment, configure_sockets_environment,
                              clean_client_keys_file_function, connect_to_sockets_module, test_case,
-                             wait_for_authd_startup_function, restart_authd_function, tear_down):
+                             restart_authd_function, wait_for_authd_startup_function, tear_down):
     '''
     description:
         Checks that every input message in authd port generates the adequate output.
@@ -105,13 +105,13 @@ def test_authd_valid_name_ip(get_configuration, configure_environment, configure
         - configure_sockets_environment:
             type: fixture
             brief: Configure the socket listener to receive and send messages on the sockets.
-        - clean_client_keys_file_module:
+        - clean_client_keys_file_function:
             type: fixture
-            brief: Stops Wazuh and cleans any previous key in client.keys file at module scope.
-        - restart_authd:
+            brief: Stops Wazuh and cleans any previous key in client.keys file at function scope.
+        - restart_authd_function:
             type: fixture
             brief: Restart the 'wazuh-authd' daemon, clear the 'ossec.log' file and start a new file monitor.
-        - wait_for_authd_startup_module:
+        - wait_for_authd_startup_function:
             type: fixture
             brief: Waits until Authd is accepting connections.
         - connect_to_sockets_module:
@@ -140,7 +140,7 @@ def test_authd_valid_name_ip(get_configuration, configure_environment, configure
     receiver_sockets[0].open()
 
     # Set 'hostname' in test case's expected output message.
-    if test_case.get('insert_hostname_in_query') == 'yes':
+    if test_case.get('insert_hostname_in_query'):
         test_case['input'] = test_case.get('input').format(hostname)
         if 'message' in test_case.get('output'):
             test_case['output']['message'] = test_case['output'].get('message').format(hostname)
@@ -157,11 +157,11 @@ def test_authd_valid_name_ip(get_configuration, configure_environment, configure
             raise ConnectionResetError('Manager did not respond to sent message!')
         response = receiver_sockets[0].receive().decode()
 
-    # Get the validated authd response. 
+    # Get the validated authd response.
     result, err_msg = validate_authd_response(response, test_case['output'])
 
     # ASSERTIONS.
-    if test_case.get('expected_fail') == 'yes':
+    if test_case.get('expected_fail'):
         with pytest.raises(Exception):
             assert "ERROR" in result, f"No error raised. Complete response: '{response}'"
     else:
