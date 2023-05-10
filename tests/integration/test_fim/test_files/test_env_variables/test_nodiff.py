@@ -126,35 +126,49 @@ def test_tag_nodiff(configuration, metadata, test_folders, set_wazuh_configurati
                  and check if the corresponding diff files have been created. Finally, the test will verify that
                  the 'diff' files of the testing files set in the 'nodiff' tag have their content truncated.
 
+    test_phases:
+        - setup:
+            - Set wazuh configuration and local_internal_options.
+            - Create custom folder for monitoring
+            - Set nodiff tag to be monitored in environment variables
+            - Clean logs files and restart wazuh to apply the configuration.
+        - test:
+            - Create, Modify and Delete files in the monitored folder.
+            - Check that report_changes data is shown or truncated when the file matches with the nodiff tag.
+        - teardown:
+            - Delete custom monitored folder
+            - Restore configuration
+            - Stop wazuh
+
     wazuh_min_version: 4.2.0
 
     tier: 2
 
     parameters:
-        - directory:
-            type: str
-            brief: Path to the directory to be monitored.
-        - filename:
-            type: str
-            brief: Name of the testing file to be tracked.
-        - hidden_content:
-            type: bool
-            brief: True if the 'diff' file must not be created. False otherwise.
-        - get_configuration:
+        - configuration:
+            type: dict
+            brief: Configuration values for ossec.conf.
+        - metadata:
+            type: dict
+            brief: Test case data.
+        - test_folders:
+            type: dict
+            brief: List of folders to be created for monitoring.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Get configurations from the module.
-        - put_env_variables:
+            brief: Set ossec.conf configuration.
+        - create_monitored_folders:
             type: fixture
-            brief: Create the environment variables.
-        - configure_environment:
+            brief: Create a given list of folders when the test starts. Delete the folders at the end of the module.
+        - configure_local_internal_options_function:
             type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_syscheckd:
+            brief: Set local_internal_options.conf file.
+        - restart_syscheck_function:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start:
+            brief: restart syscheckd daemon, and truncate the ossec.log.
+        - wait_syscheck_start:
             type: fixture
-            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+            brief: check that the starting FIM scan is detected.
 
     assertions:
         - Verify that the 'content_changes' field of FIM events has a message
@@ -173,7 +187,8 @@ def test_tag_nodiff(configuration, metadata, test_folders, set_wazuh_configurati
 
     tags:
         - scheduled
-        - time_travel
+        - whodata
+        - realtime
     '''
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     hidden_content = metadata['hidden_content']

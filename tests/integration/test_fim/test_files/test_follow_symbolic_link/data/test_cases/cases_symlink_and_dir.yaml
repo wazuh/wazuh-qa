@@ -1,0 +1,26 @@
+- name: change_symlink_target_to_dir_scheduled
+  description: Check when a symlink target is changed to non empty dir, new events are generated, old files are ignored
+  configuration_parameters:
+    INTERVAL: 3
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+
+- name: change_symlink_target_to_dir_realtime
+  description: Check when a symlink target is changed to non empty dir, new events are generated, old files are ignored
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+
+- name: change_symlink_target_to_dir_whodata
+  description: Check when a symlink target is changed to non empty dir, new events are generated, old files are ignored
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata

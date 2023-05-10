@@ -1,0 +1,59 @@
+- name: events_on_folder_not_detected_when_monitoring_symlink_scheduled
+  description: Check that events are not generated when affecting folder and not the target of symlink
+  configuration_parameters:
+    INTERVAL: 5
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+    sym_target: file
+
+- name: events_on_folder_not_detected_when_monitoring_symlink_realtime
+  description: Check that events are not generated when affecting folder and not the target of symlink
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+    sym_target: file
+
+- name: events_on_folder_not_detected_when_monitoring_symlink_whodata
+  description: Check that events are not generated when affecting folder and not the target of symlink
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    sym_target: file
+
+- name: events_on_folder_not_detected_when_monitoring_symlink_scheduled
+  description: Check that events are not generated when affecting folder and not the target of symlink
+  configuration_parameters:
+    INTERVAL: 5
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+    sym_target: folder
+
+- name: events_on_folder_not_detected_when_monitoring_symlink_realtime
+  description: Check that events are not generated when affecting folder and not the target of symlink
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+    sym_target: folder
+
+- name: events_on_folder_not_detected_when_monitoring_symlink_whodata
+  description: Check that events are not generated when affecting folder and not the target of symlink
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata
+    sym_target: folder

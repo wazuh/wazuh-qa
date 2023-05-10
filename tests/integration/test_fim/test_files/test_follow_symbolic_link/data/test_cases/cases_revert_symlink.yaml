@@ -1,0 +1,26 @@
+- name: check_events_afer_reverting_symlink_target_scheduled
+  description: Check after changing a symlink target and generating events, if target is reverted events are generated
+  configuration_parameters:
+    INTERVAL: 5
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: scheduled
+
+- name: change_symlink_target_to_dir_realtime
+  description: Check after changing a symlink target and generating events, if target is reverted events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    fim_mode: realtime
+
+- name: change_symlink_target_to_dir_whodata
+  description: Check after changing a symlink target and generating events, if target is reverted events are generated
+  configuration_parameters:
+    INTERVAL: 10000
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    fim_mode: whodata

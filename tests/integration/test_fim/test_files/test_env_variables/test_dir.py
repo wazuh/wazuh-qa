@@ -142,24 +142,30 @@ def test_tag_directories(configuration, metadata, test_folders, set_wazuh_config
     tier: 2
 
     parameters:
-        - directory:
-            type: str
-            brief: Path to the directory to be monitored.
-        - get_configuration:
+        - configuration:
+            type: dict
+            brief: Configuration values for ossec.conf.
+        - metadata:
+            type: dict
+            brief: Test case data.
+        - test_folders:
+            type: dict
+            brief: List of folders to be created for monitoring.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Get configurations from the module.
-        - put_env_variables:
+            brief: Set ossec.conf configuration.
+        - create_monitored_folders:
             type: fixture
-            brief: Create the environment variables.
-        - configure_environment:
+            brief: Create a given list of folders when the test starts. Delete the folders at the end of the module.
+        - configure_local_internal_options_function:
             type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_syscheckd:
+            brief: Set local_internal_options.conf file.
+        - restart_syscheck_function:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start:
+            brief: restart syscheckd daemon, and truncate the ossec.log.
+        - wait_syscheck_start:
             type: fixture
-            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+            brief: check that the starting FIM scan is detected.
 
     assertions:
         - Verify that FIM events are generated when environment variables are used to monitor directories.
