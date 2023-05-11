@@ -34,6 +34,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix cases yaml of the analysisd windows registry IT ([#4149](https://github.com/wazuh/wazuh-qa/pull/4149)) \- (Tests)
 - Fix a bug in on Migration tool's library ([#4106](https://github.com/wazuh/wazuh-qa/pull/4106)) \- (Framework)
 - Fix imports and add windows support for test_report_changes_and_diff IT ([#3548](https://github.com/wazuh/wazuh-qa/issues/3548)) \- (Framework + Tests)
 - Fix a regex error in the FIM integration tests ([#3061](https://github.com/wazuh/wazuh-qa/issues/3061)) \- (Framework + Tests)
