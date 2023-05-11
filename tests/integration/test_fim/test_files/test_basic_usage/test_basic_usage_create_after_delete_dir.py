@@ -104,8 +104,8 @@ configurations = load_configuration_template(configurations_path, configuration_
 @pytest.mark.parametrize('test_folders', [test_folders], ids='', scope='module')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 def test_create_after_delete(configuration, metadata, test_folders, set_wazuh_configuration,
-                                   create_monitored_folders_module, configure_local_internal_options_function,
-                                   restart_syscheck_function, wait_syscheck_start):
+                             create_monitored_folders_module, configure_local_internal_options_function,
+                             restart_syscheck_function, wait_syscheck_start):
     '''
     description: Check if a monitored directory keeps reporting FIM events after deleting and creating it again.
                  Under Windows systems, it verifies that the directory watcher is refreshed (checks the SACLs)
@@ -118,21 +118,36 @@ def test_create_after_delete(configuration, metadata, test_folders, set_wazuh_co
     tier: 0
 
     parameters:
-        - tags_to_apply:
-            type: set
-            brief: Run test if match with a configuration identifier, skip otherwise.
-        - get_configuration:
+        - configuration:
+            type: dict
+            brief: Configuration values for ossec.conf.
+        - metadata:
+            type: dict
+            brief: Test case data.
+        - test_folders:
+            type: dict
+            brief: List of folders to be created for monitoring.
+        - file_list:
+            type: dict
+            brief: List of files to be created before test starts.
+        - create_files_before_test:    
             type: fixture
-            brief: Get configurations from the module.
-        - configure_environment:
+            brief: create a given list of files before the test starts.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_syscheckd:
+            brief: Set ossec.conf configuration.
+        - create_monitored_folders:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start:
+            brief: Create a given list of folders when the test starts. Delete the folders at the end of the module.
+        - configure_local_internal_options_function:
             type: fixture
-            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+            brief: Set local_internal_options.conf file.
+        - restart_syscheck_function:
+            type: fixture
+            brief: restart syscheckd daemon, and truncate the ossec.log.
+        - wait_syscheck_start:
+            type: fixture
+            brief: check that the starting FIM scan is detected.
 
     assertions:
         - Verify that FIM events are still generated when a monitored directory is deleted and created again.

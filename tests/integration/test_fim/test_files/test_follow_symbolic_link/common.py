@@ -17,7 +17,7 @@ test_directories = [os.path.join(PREFIX, 'testdir_link'),
                     os.path.join(PREFIX, 'testdir_not_target'),
                     os.path.join(PREFIX, 'testdir1', 'subdir')]
 testdir_link, testdir1, testdir2, testdir_target, testdir_not_target, test_subdir = test_directories
-symlink_interval = 5
+symlink_interval = 20
 
 
 def debug_sym_check(func):

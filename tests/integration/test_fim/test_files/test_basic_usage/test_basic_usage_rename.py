@@ -204,9 +204,6 @@ def test_rename(configuration, metadata, test_folders, set_wazuh_configuration, 
     # testdir1 will have renamed files within.
     if folder == change_file_name:
         # Change the file name
-        print("FOLDERS IN PATH " + str(os.listdir(folder)))
-        print("FOLDER OLD NAME " + str(os.path.join(folder, old_name)))
-        print("FOLDER NEW NAME " + os.path.join(os.path.join(folder, new_name)))
         rename_file(os.path.join(folder, old_name), os.path.join(folder, new_name))
         # Expect deleted and created events
         deleted = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event,
@@ -228,9 +225,6 @@ def test_rename(configuration, metadata, test_folders, set_wazuh_configuration, 
         validate_event(added, mode=mode)
     
     else:
-        print("FOLDERS IN PATH " + str(os.listdir(folder)))
-        print("FOLDER OLD NAME " + str(folder))
-        print("FOLDER NEW NAME " + os.path.join(os.path.dirname(folder), new_name))
         rename_file(folder, os.path.join(os.path.dirname(folder), new_name))
         expect_events(new_name)
         expect_events(folder)

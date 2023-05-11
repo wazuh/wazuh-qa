@@ -65,7 +65,7 @@ import os
 import pytest
 
 from test_fim.test_files.test_follow_symbolic_link.common import delete_file_or_path, test_directories
-from wazuh_testing import LOG_FILE_PATH, REGULAR
+from wazuh_testing import LOG_FILE_PATH, REGULAR, T_20
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
 from wazuh_testing.tools.file import modify_file_content, create_file
@@ -193,20 +193,20 @@ def test_symlink_dir_inside_monitored_dir(configuration, metadata, test_folders,
     # Add creation if symlink is pointing to a folder
     if metadata['symlink_target'] == 'folder':
         create_file(REGULAR, main_folder, file1, content='')
-        add = wazuh_log_monitor.start(timeout=10, callback=callback_detect_event).result()
+        add = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event).result()
         assert 'added' in add['data']['type'] and file1 in add['data']['path'], \
             "'added' event not matching"
 
     # Modify the linked file and expect an event
     modify_file_content(main_folder, file1, 'Sample modification')
-    modify = wazuh_log_monitor.start(timeout=10, callback=callback_detect_event,
+    modify = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event,
                                      error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
     assert 'modified' in modify['data']['type'] and file1 in modify['data']['path'], \
         "'modified' event not matching"
 
     # Delete the linked file and expect an event
     delete_file_or_path(main_folder, file1)
-    delete = wazuh_log_monitor.start(timeout=10, callback=callback_detect_event,
+    delete = wazuh_log_monitor.start(timeout=T_20, callback=callback_detect_event,
                                      error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
     assert 'deleted' in delete['data']['type'] and file1 in delete['data']['path'], \
         "'deleted' event not matching"

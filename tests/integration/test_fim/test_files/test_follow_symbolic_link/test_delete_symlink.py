@@ -67,7 +67,7 @@ import pytest
 import wazuh_testing.fim as fim
 
 from test_fim.test_files.test_follow_symbolic_link.common import configurations_path, testdir1, \
-    testdir_link, wait_for_symlink_check, testdir_target, testdir_not_target, delete_f
+    testdir_link, wait_for_symlink_check, testdir_target, testdir_not_target, delete_file_or_path
 # noinspection PyUnresolvedReferences
 from test_fim.test_files.test_follow_symbolic_link.common import test_directories, extra_configuration_before_yield, \
     extra_configuration_after_yield
@@ -171,7 +171,7 @@ def test_symbolic_delete_symlink(tags_to_apply, main_folder, aux_folder, get_con
 
     # Remove symlink and don't expect events
     symlink = 'symlink' if tags_to_apply == {'monitored_file'} else 'symlink2'
-    delete_f(testdir_link, symlink)
+    delete_file_or_path(testdir_link, symlink)
     wait_for_symlink_check(wazuh_log_monitor)
     fim.modify_file_content(main_folder, file1, new_content='Sample modification')
     fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)

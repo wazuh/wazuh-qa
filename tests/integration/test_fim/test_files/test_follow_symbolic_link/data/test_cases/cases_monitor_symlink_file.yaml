@@ -1,7 +1,7 @@
 - name: symlink_pointing_to_file_scheduled
   description: Check when a symlink is pointing to a file, new events are generated
   configuration_parameters:
-    INTERVAL: 5
+    INTERVAL: 3
     REALTIME: 'no'
     WHODATA: 'no'
   metadata:
