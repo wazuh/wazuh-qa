@@ -48,14 +48,16 @@ agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'
 def restart_all_agents():
     for number_agent in range(number_agents):
         agents.append(f'wazuh-agent{number_agent+1}')
-    
+
     restart_cluster(testinfra_hosts + agents, host_manager)   
-    
+
     time.sleep(T_1)
-    
+
     yield
+
     for agent in agents:
         host_manager.run_command(agent, f'{WAZUH_PATH}/bin/wazuh-control restart')
+
 
 @pytest.fixture
 def stop_gracefully_all_agents():
@@ -83,10 +85,11 @@ def test_shut_down_message_gracefully_stopped_agent(restart_all_agents, stop_gra
             - Gracefully closed, it is expected to find agents 'Disconected' in agent-manager
         
     '''
-    
+
     host_manager.get_host(testinfra_hosts[0]).ansible('command', f'service wazuh-manager restart', check=False)
     time.sleep(T_3)
-    
-    matches = re.findall(r"Disconnected", host_manager.run_command(testinfra_hosts[0], f'{WAZUH_PATH}/bin/agent_control -l'))
-    
+
+    matches = re.findall(r"Disconnected", host_manager.run_command(testinfra_hosts[0], 
+                                                                   f'{WAZUH_PATH}/bin/agent_control -l'))
+
     assert len(matches) == number_agents 
