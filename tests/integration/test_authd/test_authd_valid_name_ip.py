@@ -55,7 +55,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_authd_configuration.yaml')
 client_keys_path = os.path.join(WAZUH_PATH, 'etc', 'client.keys')
-test_authd_valid_name_ip_tests = read_yaml(os.path.join(test_data_path, 'test_authd_valid_name_ip.yaml'))
+test_cases = read_yaml(os.path.join(test_data_path, 'test_authd_valid_name_ip.yaml'))
 configurations = load_wazuh_configurations(configurations_path, __name__)
 
 # Variables
@@ -65,7 +65,6 @@ receiver_sockets_params = [(("localhost", 1515), 'AF_INET', 'SSL_TLSv1_2')]
 monitored_sockets_params = [('wazuh-modulesd', None, True), ('wazuh-db', None, True), ('wazuh-authd', None, True)]
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 hostname = socket.gethostname()
-daemons_handler_configuration = {'all_daemons': True}
 
 
 # Fixtures
@@ -81,8 +80,8 @@ def get_configuration(request):
 
 # Test
 
-@pytest.mark.parametrize('test_case', [case['test_case'] for case in test_authd_valid_name_ip_tests],
-                         ids=[test_case['name'] for test_case in test_authd_valid_name_ip_tests])
+@pytest.mark.parametrize('test_case', [case['test_case'] for case in test_cases],
+                         ids=[case['name'] for case in test_cases])
 def test_authd_valid_name_ip(get_configuration, configure_environment, configure_sockets_environment,
                              clean_client_keys_file_function, connect_to_sockets_module, test_case,
                              restart_authd_function, wait_for_authd_startup_function, tear_down):
