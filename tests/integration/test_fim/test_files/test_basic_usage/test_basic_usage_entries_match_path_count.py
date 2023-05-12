@@ -107,6 +107,7 @@ configurations = load_configuration_template(configurations_path, configuration_
 
 
 # Tests
+@pytest.mark.parametrize('file_list', [file_list], ids='')
 @pytest.mark.parametrize('test_folders', [test_folders], ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
 def test_entries_match_path_count(configuration, metadata, test_folders, file_list, set_wazuh_configuration,
