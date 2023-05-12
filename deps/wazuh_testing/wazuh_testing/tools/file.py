@@ -241,7 +241,7 @@ def delete_path_recursively(path):
         path (str): Directory path.
     '''
     if os.path.exists(path):
-        shutil.rmtree(path, ignore_errors=True, onerror=on_write_error)
+        shutil.rmtree(path, ignore_errors=False, onerror=on_write_error)
 
 
 def on_write_error(function, path, exc_info):
@@ -260,7 +260,10 @@ def on_write_error(function, path, exc_info):
     # Check if the error is an access error for Write permissions.
     if not os.access(path, os.W_OK):
         # Add write permissions so file can be edited and execute function.
-        os.chmod(path, 0o0777)
+        if sys.platform == 'win32':
+            os.chmod(path, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO) # 0777
+        else:
+            os.chmod(path, 0o0777)
         function(path)
     # If error is not Write access error, raise the error
     else:
