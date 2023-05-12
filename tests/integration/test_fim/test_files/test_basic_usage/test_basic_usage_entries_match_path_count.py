@@ -84,6 +84,10 @@ pytestmark = [pytest.mark.linux, pytest.mark.darwin, pytest.mark.sunos5, pytest.
 # variables
 test_folders = [os.path.join(PREFIX, 'testdir1')]
 directory_str = ','.join(test_folders)
+file_list = [{'type': REGULAR, 'path': test_folders[0], 'name':'test_1', 'content':''},
+             {'type': REGULAR, 'path': test_folders[0], 'name':'test_2', 'content':''},
+             {'type': SYMLINK, 'path': test_folders[0], 'name':'symlink', 'target':os.path.join(test_folders[0], 'test_1')},
+             {'type': HARDLINK, 'path': test_folders[0], 'name':'hardlink', 'target':os.path.join(test_folders[0], 'test_2')}]
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
@@ -102,21 +106,10 @@ configurations = load_configuration_template(configurations_path, configuration_
                                                            configuration_metadata)
 
 
-# Fixtures
-@pytest.fixture()
-def create_files_before_test():
-
-    # Create files
-    create_file(REGULAR, test_folders[0], 'test_1', content='')
-    create_file(REGULAR, test_folders[0], 'test_2', content='')
-    create_file(SYMLINK, test_folders[0], 'symlink', target=os.path.join(test_folders[0], 'test_1'))
-    create_file(HARDLINK, test_folders[0], 'hardlink', target=os.path.join(test_folders[0], 'test_2'))    
-
-
 # Tests
 @pytest.mark.parametrize('test_folders', [test_folders], ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
-def test_entries_match_path_count(configuration, metadata, test_folders, set_wazuh_configuration,
+def test_entries_match_path_count(configuration, metadata, test_folders, file_list, set_wazuh_configuration,
                        create_monitored_folders, configure_local_internal_options_function, 
                        create_files_before_test, restart_syscheck_function, wait_syscheck_start):
     '''

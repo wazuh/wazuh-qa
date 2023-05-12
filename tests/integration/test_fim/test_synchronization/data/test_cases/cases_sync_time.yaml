@@ -5,6 +5,7 @@
     RESPONSE_TIMEOUT: 5
     MAX_INTERVAL: 10
   metadata:
+    fim_mode: scheduled
     interval: 10
     response_timeout: 5
     max_interval: 10

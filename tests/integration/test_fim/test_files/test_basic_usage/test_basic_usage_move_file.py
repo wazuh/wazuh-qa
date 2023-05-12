@@ -101,9 +101,9 @@ configurations = load_configuration_template(configurations_path, configuration_
 
 
 # Tests
-@pytest.mark.parametrize('test_folders', [test_folders], ids='')
+@pytest.mark.parametrize('test_folders', [test_folders], ids='', scope='module')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
-def test_move_file(configuration, metadata, test_folders, set_wazuh_configuration, create_monitored_folders,
+def test_move_file(configuration, metadata, test_folders, set_wazuh_configuration, create_monitored_folders_module,
                    configure_local_internal_options_function, restart_syscheck_function,
                    wait_syscheck_start):
     '''
@@ -144,7 +144,7 @@ def test_move_file(configuration, metadata, test_folders, set_wazuh_configuratio
         - set_wazuh_configuration:
             type: fixture
             brief: Set ossec.conf configuration.
-        - create_monitored_folders:
+        - create_monitored_folders_module:
             type: fixture
             brief: Create a given list of folders when the test starts. Delete the folders at the end of the test.
         - configure_local_internal_options_function:

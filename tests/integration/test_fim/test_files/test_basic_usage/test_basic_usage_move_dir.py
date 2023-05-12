@@ -109,8 +109,8 @@ configurations = load_configuration_template(configurations_path, configuration_
 @pytest.mark.parametrize('test_folders', [test_folders], ids='')
 @pytest.mark.parametrize('file_list', [file_list], ids='')
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
-def test_move_dir(configuration, metadata, test_folders, file_list, set_wazuh_configuration, create_files_before_test,
-                  create_monitored_folders, configure_local_internal_options_function, restart_syscheck_function,
+def test_move_dir(configuration, metadata, test_folders, file_list, set_wazuh_configuration, create_monitored_folders,
+                  create_files_before_test, configure_local_internal_options_function, restart_syscheck_function,
                   wait_syscheck_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects 'added' and 'deleted' events when moving a subdirectory

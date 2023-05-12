@@ -12,7 +12,7 @@ from wazuh_testing import (global_parameters, LOG_FILE_PATH, REGULAR, WAZUH_SERV
                            WAZUH_LOG_MONITOR)
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.file import truncate_file, delete_path_recursively, create_file
+from wazuh_testing.tools.file import truncate_file, delete_path_recursively, create_file, delete_file
 from wazuh_testing.tools.local_actions import run_local_command_returning_output
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, SYNC_INTERVAL_VALUE, KEY_WOW64_64KEY,
                                        MONITORED_DIR_1, registry_parser)
@@ -151,6 +151,11 @@ def create_files_before_test(file_list):
     """Create files before restarting Wazuh."""
     for file in file_list:
         create_file(file['type'], file['path'], file['name'], content=file['content'])
+    
+    yield
+    
+    for file in file_list:
+        delete_file(os.path.join(file['path'], file['name']))
 
 
 @pytest.fixture()

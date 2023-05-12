@@ -241,7 +241,7 @@ def delete_path_recursively(path):
         path (str): Directory path.
     '''
     if os.path.exists(path):
-        shutil.rmtree(path, onerror=on_write_error)
+        shutil.rmtree(path, ignore_errors=True, onerror=on_write_error)
 
 
 def on_write_error(function, path, exc_info):
