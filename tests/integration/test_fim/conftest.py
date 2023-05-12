@@ -150,7 +150,10 @@ def create_files_before_test(file_list):
     
     """Create files before restarting Wazuh."""
     for file in file_list:
-        create_file(file['type'], file['path'], file['name'], content=file['content'])
+        if 'content' in file:
+            create_file(file['type'], file['path'], file['name'], content=file['content'])
+        elif 'target' in file:
+            create_file(file['type'], file['path'], file['name'], target=file['target'])
     
     yield
     
