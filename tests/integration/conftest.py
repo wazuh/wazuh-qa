@@ -309,6 +309,30 @@ def pytest_addoption(parser):
         type=str,
         help="pass api key required for integratord tests."
     )
+    parser.addoption(
+        "--slack-webhook-url",
+        action="store",
+        metavar="slack_webhook_url",
+        default=None,
+        type=str,
+        help="pass web hook url required for slack integratord tests."
+    )
+    parser.addoption(
+        "--pagerduty-api-key",
+        action="store",
+        metavar="pagerduty_api_key",
+        default=None,
+        type=str,
+        help="pass api key required for pagerduty integratord tests."
+    )
+    parser.addoption(
+        "--shuffle-webhook-url",
+        action="store",
+        metavar="shuffle_webhook_url",
+        default=None,
+        type=str,
+        help="pass web hook url required for shuffle integratord tests."
+    )
 
 
 def pytest_configure(config):
@@ -370,6 +394,21 @@ def pytest_configure(config):
     integration_api_key = config.getoption("--integration-api-key")
     if integration_api_key:
         global_parameters.integration_api_key = integration_api_key
+
+    # Set slack_webhook_url if it is passed through command line args
+    slack_webhook_url = config.getoption("--slack-webhook-url")
+    if slack_webhook_url:
+        global_parameters.slack_webhook_url = slack_webhook_url
+
+    # Set pagerduty_api_key if it is passed through command line args
+    pagerduty_api_key = config.getoption("--pagerduty-api-key")
+    if pagerduty_api_key:
+        global_parameters.pagerduty_api_key = pagerduty_api_key
+
+    # Set shuffle_webhook_url if it is passed through command line args
+    shuffle_webhook_url = config.getoption("--shuffle-webhook-url")
+    if shuffle_webhook_url:
+        global_parameters.shuffle_webhook_url = shuffle_webhook_url
 
     # Set files to add to the HTML report
     set_report_files(config.getoption("--save-file"))
