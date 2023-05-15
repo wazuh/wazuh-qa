@@ -163,4 +163,4 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     # Read Response in ossec.log
     check_integratord_event(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout,
                             callback=generate_monitoring_callback(integrator.CB_PROCESSING_ALERT),
-                            error_message=integrator.ERR_MSG_VIRUSTOTAL_ALERT_NOT_DETECTED)
+                            error_message=integrator.ERR_MSG_PROCESSING_ALERT_NOT_FOUND)
