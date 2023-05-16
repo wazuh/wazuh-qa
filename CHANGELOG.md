@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 ### Fixed
-- Changed the last uses of 4.4.2 in setup.py and schema.yaml. ([#4172](https://github.com/wazuh/wazuh-qa/pull/4172)) \- (Framework + Tests)
+- Changed the last uses of 4.4.2 in setup.py and schema.yaml. ([#4172](https://github.com/wazuh/wazuh-qa/pull/4172)) \- (Framework)
 
 ## [4.4.2] - TBD
 
