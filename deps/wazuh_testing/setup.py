@@ -57,7 +57,10 @@ def get_files_from_directory(directory):
     return paths
 
 def get_version():
-    f = open('../../version.json')
+    script_path = os.path.dirname(__file__)
+    rel_path = "../../version.json"
+    abs_file_path = os.path.join(script_path, rel_path)
+    f = open(abs_file_path)
     data = json.load(f)
     version = data['version']
     return version
