@@ -61,6 +61,7 @@ Release report: TBD
 
 ### Fixed
 
+- Limit urllib3 major required version ([#4162](https://github.com/wazuh/wazuh-qa/pull/4162)) \- (Framework)
 - Fix daemons_handler fixture (fix GCP IT) ([#4134](https://github.com/wazuh/wazuh-qa/pull/4134)) \- (Tests)
 - Fix wazuhdb IT. ([#3584](https://github.com/wazuh/wazuh-qa/pull/3584)) \- (Framework + Tests)
 - Fix agentd IT for python3.10 AMI ([#3973](https://github.com/wazuh/wazuh-qa/pull/3973)) \- (Tests)
