@@ -91,6 +91,7 @@ def set_datetime_info():
     wday = today.strftime('%A')
     day_time = today.strftime("%H:%M")
 
+
 set_datetime_info()
 
 # configurations
