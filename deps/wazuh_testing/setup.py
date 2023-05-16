@@ -60,7 +60,7 @@ package_data_list.extend(get_files_from_directory('wazuh_testing/qa_docs/search_
 
 setup(
     name='wazuh_testing',
-    version='4.4.0',
+    version='4.4.2',
     description='Wazuh testing utilities to help programmers automate tests',
     url='https://github.com/wazuh',
     author='Wazuh',
