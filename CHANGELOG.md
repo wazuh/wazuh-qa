@@ -2,13 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.5.0] - Development (unreleased)
-
-Wazuh commit: TBD \
-Release report: TBD
+## [4.5.0] - TBD
 
 ### Added
 
+- Add integration tests for AWS module. ([#3911](https://github.com/wazuh/wazuh-qa/pull/3911)) \- (Framework + Tests + Documentation)
 - Add tests for msu patches with no associated CVE . ([#4009](https://github.com/wazuh/wazuh-qa/pull/4009)) \- (Framework + Tests)
 - Add tests with new options to avoid FIM synchronization overlapping. ([#3318](https://github.com/wazuh/wazuh-qa/pull/3318)) \- (Framework + tests)
 - Add Logcollector millisecond granularity support test case ([#3910](https://github.com/wazuh/wazuh-qa/pull/3910)) \- (Tests)
@@ -36,20 +34,26 @@ Release report: TBD
 
 ### Fixed
 
+- Fix boto3 version requirement for legacy OS ([#4150](https://github.com/wazuh/wazuh-qa/pull/4150)) \- (Framework)
+- Fix cases yaml of the analysisd windows registry IT ([#4149](https://github.com/wazuh/wazuh-qa/pull/4149)) \- (Tests)
 - Fix a bug in on Migration tool's library ([#4106](https://github.com/wazuh/wazuh-qa/pull/4106)) \- (Framework)
 - Fix imports and add windows support for test_report_changes_and_diff IT ([#3548](https://github.com/wazuh/wazuh-qa/issues/3548)) \- (Framework + Tests)
 - Fix a regex error in the FIM integration tests ([#3061](https://github.com/wazuh/wazuh-qa/issues/3061)) \- (Framework + Tests)
 - Fix an error in the cluster performance tests related to CSV parser ([#2999](https://github.com/wazuh/wazuh-qa/pull/2999)) \- (Framework + Tests)
 - Fix bug in the framework on migration tool ([#2999](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
 
-## [4.4.2] - Development (unreleased)
+## [4.4.2] - TBD
 
 ### Added
 
+- Add test to check the Syscollector configuration. ([#3584](https://github.com/wazuh/wazuh-qa/pull/3584)) \- (Framework + Tests)
 - Add system tests for groups deletion ([#4057](https://github.com/wazuh/wazuh-qa/pull/4057)) \- (Tests)
 
 ### Fixed
 
+- Limit urllib3 major required version ([#4162](https://github.com/wazuh/wazuh-qa/pull/4162)) \- (Framework)
+- Fix daemons_handler fixture (fix GCP IT) ([#4134](https://github.com/wazuh/wazuh-qa/pull/4134)) \- (Tests)
+- Fix wazuhdb IT. ([#3584](https://github.com/wazuh/wazuh-qa/pull/3584)) \- (Framework + Tests)
 - Fix agentd IT for python3.10 AMI ([#3973](https://github.com/wazuh/wazuh-qa/pull/3973)) \- (Tests)
 - Fix unstable system tests ([#4080](https://github.com/wazuh/wazuh-qa/pull/4080)) \- (Tests)
 
@@ -176,6 +180,11 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 
 - Remove all FIM Integration skipped tests ([#2927](https://github.com/wazuh/wazuh-qa/issues/2927)) \- (Framework + Tests)
 - VDT ITs: Remove Debian Stretch test support. ([#3172](https://github.com/wazuh/wazuh-qa/pull/3172)) \- (Tests)
+
+## [4.3.11] - 20-04-2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/776fda906581a1e4ee170c3e7e73a58d69e41f95 \
+Release report: https://github.com/wazuh/wazuh/issues/16758
 
 ## [4.3.10] - 16-11-2022
 
