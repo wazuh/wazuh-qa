@@ -35,6 +35,9 @@ def callback_integrity_message(line):
 def callback_detect_event(line):
     """
     Detect an 'event' type FIM log.
+    
+    Args:
+        line (String): string line to be checked by callback in FileMonitor.
     """
     msg = CB_DETECT_FIM_EVENT
     match = re.match(msg, line)

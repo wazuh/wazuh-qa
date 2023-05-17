@@ -56,9 +56,10 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters 
+from wazuh_testing import global_parameters
 from wazuh_testing.fim import (create_registry, generate_params, LOG_FILE_PATH, REGULAR, create_file,
-    modify_registry_value, callback_real_time_whodata_started, KEY_WOW64_64KEY, registry_parser, REG_SZ)
+                               modify_registry_value, callback_real_time_whodata_started, KEY_WOW64_64KEY,
+                               registry_parser, REG_SZ)
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
