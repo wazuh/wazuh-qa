@@ -17,3 +17,5 @@
         value: TEST_REGS
         attributes:
         - arch: "both"
+    - frequency:
+        value: 5
