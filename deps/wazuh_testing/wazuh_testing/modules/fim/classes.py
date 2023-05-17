@@ -244,36 +244,6 @@ class EventChecker:
             extra_timeout (int, optional): Additional time to wait after the min_timeout
             error_message (str): Message to explain a possible timeout error
         """
-
-        def clean_results(event_list):
-            """Iterate the event_list provided and check if the 'modified' events contained should be merged to fix
-            whodata's bug that raise more than one modification event when a file is modified. If some 'modified' event
-            shares 'path' and 'timestamp' we assume that belongs to the same modification.
-            """
-            if not isinstance(event_list, list):
-                return event_list
-            result_list = list()
-            previous = None
-            while len(event_list) > 0:
-                current = event_list.pop(0)
-                if current['data']['type'] == "modified":
-                    if not previous:
-                        previous = current
-                    elif (previous['data']['path'] == current['data']['path'] and
-                          current['data']['timestamp'] in [previous['data']['timestamp'],
-                                                           previous['data']['timestamp'] + 1]):
-                        previous['data']['changed_attributes'] = list(set(previous['data']['changed_attributes']
-                                                                          + current['data']['changed_attributes']))
-                        previous['data']['attributes'] = current['data']['attributes']
-                    else:
-                        result_list.append(previous)
-                        previous = current
-                else:
-                    result_list.append(current)
-            if previous:
-                result_list.append(previous)
-            return result_list
-
         try:
             result = self.log_monitor.start(timeout=max(len(self.file_list) * 0.01, min_timeout),
                                             callback=self.callback,
@@ -282,8 +252,7 @@ class EventChecker:
                                             encoding=self.encoding,
                                             error_message=error_message).result()
             assert triggers_event, f'No events should be detected.'
-            if extra_timeout > 0:
-                result = clean_results(result)
+
             return result if isinstance(result, list) else [result]
         except TimeoutError:
             if triggers_event:
