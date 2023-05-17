@@ -713,17 +713,22 @@ def get_test_cases_data(data_file_path):
     Returns:
         (list(dict), list(dict), list(str)): Configurations, metadata and test case names.
     """
+    fim_modes = global_parameters.fim_mode
+    
     test_cases_data = file.read_yaml(data_file_path)
     configuration_parameters = []
     configuration_metadata = []
     test_cases_ids = []
 
     for test_case in test_cases_data:
-        configuration_parameters.append(test_case['configuration_parameters'])
-        metadata_parameters = {'name': test_case['name'], 'description': test_case['description']}
-        metadata_parameters.update(test_case['metadata'])
-        configuration_metadata.append(metadata_parameters)
-        test_cases_ids.append(test_case['name'])
+        if test_case['metadata']['fim_mode'] not in fim_modes:
+            continue
+        else:
+            configuration_parameters.append(test_case['configuration_parameters'])
+            metadata_parameters = {'name': test_case['name'], 'description': test_case['description']}
+            metadata_parameters.update(test_case['metadata'])
+            configuration_metadata.append(metadata_parameters)
+            test_cases_ids.append(test_case['name'])
 
     return configuration_parameters, configuration_metadata, test_cases_ids
 
