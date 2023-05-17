@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [4.4.2] - TBD
 
+### Fixed
+- Fix missing comma in setup.py. ([#4180](https://github.com/wazuh/wazuh-qa/pull/4180)) (Framework)
+
 ### Added
 
 - Add test to check the Syscollector configuration. ([#3584](https://github.com/wazuh/wazuh-qa/pull/3584)) \- (Framework + Tests)
