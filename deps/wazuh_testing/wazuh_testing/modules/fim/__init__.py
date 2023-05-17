@@ -58,6 +58,7 @@ SYNCHRONIZATION_ENABLED = 'SYNCHRONIZATION_ENABLED'
 SYNCHRONIZATION_REGISTRY_ENABLED = 'SYNCHRONIZATION_REGISTRY_ENABLED'
 
 # Callbacks message
+CB_DETECT_FIM_EVENT = r".*Sending FIM event: (.+)$"
 CB_INTEGRITY_CONTROL_MESSAGE = r'.*Sending integrity control message: (.+)$'
 CB_REGISTRY_DBSYNC_NO_DATA = r'.*#!-fim_registry dbsync no_data (.+)'
 CB_MAXIMUM_FILE_SIZE = r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*'
@@ -68,6 +69,7 @@ ERR_MSG_MAXIMUM_FILE_SIZE = 'Did not receive expected "Maximum file size limit c
 ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE = 'Wrong value for diff_size_limit'
 ERR_MSG_AGENT_DISCONNECT = 'Agent couldn\'t connect to server.'
 ERR_MSG_INTEGRITY_CONTROL_MSG = 'Didn\'t receive control message(integrity_check_global)'
+ERR_MSG_SENDING_FIM_EVENT = 'Did not receive expected "Sending FIM event: ..." event'
 
 # Setting Local_internal_option file
 
