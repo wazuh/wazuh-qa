@@ -90,7 +90,7 @@ def get_configuration(request):
 
 
 # Tests
-def test_realtime_unsupported(get_configuration, configure_environment, truncate_monitored_files,
+def test_realtime_unsupported(get_configuration, configure_environment, file_monitoring,
                               configure_local_internal_options_module, daemons_handler):
     '''
     description: Check if the current OS platform falls to the 'scheduled' mode when 'realtime' is not available.
@@ -135,7 +135,6 @@ def test_realtime_unsupported(get_configuration, configure_environment, truncate
         - realtime
         - scheduled
     '''
-    log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=realtime_flag_timeout, callback=callback_ignore_realtime_flag,
                       error_message="Did not receive expected 'Ignoring flag for real time monitoring on  \
                                      directory: ...' event", update_position=False)
