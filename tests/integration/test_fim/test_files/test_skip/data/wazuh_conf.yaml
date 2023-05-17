@@ -27,3 +27,5 @@
         value: "/dev"
     - skip_dev:
         value: SKIP
+    - frequency:
+        value: 3

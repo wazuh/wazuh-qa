@@ -62,7 +62,7 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters
+from wazuh_testing import T_30
 from wazuh_testing.fim import LOG_FILE_PATH, regular_file_cud, generate_params
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
@@ -83,11 +83,9 @@ test_directories = [os.path.join(PREFIX, 'testdir_tags'),
                     ]
 
 directory_str = ','.join([test_directories[0], test_directories[2]])
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-timeout = 20
+
 
 # configurations
-
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 tags = ['tag1', 'tág', '0tag', '000', 'a' * 1000]
 # Create an increasing tag set. I.e.: ['tag1', 'tag1,tag2', 'tag1,tag2,tag3']
@@ -168,13 +166,12 @@ def test_tags(folder, name, content,
         - time_travel
     '''
     defined_tags = get_configuration['metadata']['fim_tags']
-
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    
     def tag_validator(event):
         assert defined_tags == event['data']['tags'], f'defined_tags are not equal'
 
     files = {name: content}
 
-    regular_file_cud(folder, wazuh_log_monitor, file_list=files,
-                     time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled',
-                     min_timeout=timeout, validators_after_cud=[tag_validator]
-                     )
+    regular_file_cud(folder, wazuh_log_monitor, file_list=files, min_timeout=T_30,
+                     validators_after_cud=[tag_validator])

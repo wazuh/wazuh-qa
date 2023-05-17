@@ -53,14 +53,15 @@ tags:
 import os
 
 import pytest
-import re
-from wazuh_testing.fim import generate_params, regular_file_cud, detect_initial_scan, callback_ignore_realtime_flag
+from wazuh_testing import LOG_FILE_PATH
+from wazuh_testing.fim import detect_initial_scan, callback_ignore_realtime_flag
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.fim.utils import generate_params, regular_file_cud
+
 
 # Marks
-
-
 pytestmark = [pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
 
 # variables
@@ -89,7 +90,7 @@ def get_configuration(request):
 
 
 # Tests
-def test_realtime_unsupported(get_configuration, configure_environment, file_monitoring,
+def test_realtime_unsupported(get_configuration, configure_environment, truncate_monitored_files,
                               configure_local_internal_options_module, daemons_handler):
     '''
     description: Check if the current OS platform falls to the 'scheduled' mode when 'realtime' is not available.
@@ -134,11 +135,12 @@ def test_realtime_unsupported(get_configuration, configure_environment, file_mon
         - realtime
         - scheduled
     '''
+    log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=realtime_flag_timeout, callback=callback_ignore_realtime_flag,
                       error_message="Did not receive expected 'Ignoring flag for real time monitoring on  \
                                      directory: ...' event", update_position=False)
 
     detect_initial_scan(log_monitor)
 
-    regular_file_cud(directory_str, log_monitor, file_list=[test_file], time_travel=False, triggers_event=True,
+    regular_file_cud(directory_str, log_monitor, file_list=[test_file], triggers_event=True,
                      event_mode="scheduled", min_timeout=15)

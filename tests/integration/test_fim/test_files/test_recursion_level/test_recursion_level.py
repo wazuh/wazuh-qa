@@ -70,12 +70,12 @@ import os
 import sys
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, callback_audit_event_too_long, regular_file_cud,
-                               generate_params)
+from wazuh_testing import global_parameters, LOG_FILE_PATH
+from wazuh_testing.fim import callback_audit_event_too_long
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.fim.ufils import regular_file_cud, generate_params
 
 # Marks
 
