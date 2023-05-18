@@ -31,7 +31,7 @@
     version: "{{ wazuh_branch }}"
   when: wazuh_branch is defined
 
-- name: Install master
+- name: Install worker
   args:
     chdir: /wazuh
     creates: /var/ossec
@@ -41,9 +41,9 @@
     USER_INSTALL_TYPE: "server"
     USER_DIR: "/var/ossec"
     USER_ENABLE_EMAIL: "n"
-    USER_ENABLE_SYSCHECK: "n"
-    USER_ENABLE_ROOTCHECK: "n"
-    USER_ENABLE_OPENSCAP: "n"
+    USER_ENABLE_SYSCHECK: "y"
+    USER_ENABLE_ROOTCHECK: "y"
+    USER_ENABLE_OPENSCAP: "y"
     USER_WHITE_LIST: "n"
     USER_ENABLE_SYSLOG: "y"
     USER_ENABLE_AUTHD: "y"
@@ -67,8 +67,8 @@
   copy:
     src: ../files/ossec.conf
     dest: /var/ossec/etc/ossec.conf
-    owner: wazuh
-    group: wazuh
+    owner: root
+    group: root
     mode: '0644'
 
 - name: Set cluster key
@@ -102,7 +102,7 @@
       wazuh_modules.debug=2
 
 - name: Restart Wazuh
-  command: /var/ossec/bin/wazuh-control restart
+  command: "{{restart_command}}"
 
 - name: "Install necessary dependencies"
-  command: /var/ossec/framework/python/bin/python3.9 -m pip install lockfile filetype certifi testinfra
+  command: /var/ossec/framework/python/bin/python3 -m pip install lockfile filetype certifi testinfra
