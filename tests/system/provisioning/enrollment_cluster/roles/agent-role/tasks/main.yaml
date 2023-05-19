@@ -46,6 +46,7 @@
     USER_ENABLE_SYSLOG: y
     USER_ENABLE_AUTHD: y
     USER_AUTO_START: y
+  shell: ./install.sh
   when: wazuh_branch is defined
 
 - name: "Get agent package"
