@@ -6,6 +6,7 @@ worker1_hostname: wazuh-worker1
 worker2_hostname: wazuh-worker2
 
 agent1_hostname: wazuh-agent1
+agent2_hostname: wazuh-agent2
 
 docker_network: cluster_net
 

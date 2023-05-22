@@ -1,0 +1,39 @@
+- name: api
+  description: remove group with api
+  configuration_parameters: null
+  metadata:
+    method: |
+      delete_agent_group(test_infra_managers[0], group, host_manager, 'api')
+    deleted: true
+
+- name: tool
+  description: remove group with agent_groups
+  configuration_parameters: null
+  metadata:
+    method: |
+      delete_agent_group(test_infra_managers[0], group, host_manager, 'tool')
+    deleted: true
+
+- name: master_folder
+  description: remove group by removing its folder in master node
+  configuration_parameters: null
+  metadata:
+    method: |
+      delete_agent_group(test_infra_managers[0], group, host_manager, 'folder')
+    deleted: true
+
+- name: worker1_folder
+  description: remove group by removing its folder in worker node
+  configuration_parameters: null
+  metadata:
+    method: |
+      delete_agent_group(test_infra_managers[1], group, host_manager, 'folder')
+    deleted: false
+
+- name: worker2_folder
+  description: remove group by removing its folder in worker node
+  configuration_parameters: null
+  metadata:
+    method: |
+      delete_agent_group(test_infra_managers[2], group, host_manager, 'folder')
+    deleted: false

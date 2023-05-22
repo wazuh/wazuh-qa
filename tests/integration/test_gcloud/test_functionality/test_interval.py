@@ -24,7 +24,6 @@ targets:
     - manager
 
 daemons:
-    - wazuh-analysisd
     - wazuh-monitord
     - wazuh-modulesd
 

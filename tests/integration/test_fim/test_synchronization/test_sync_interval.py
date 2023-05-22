@@ -94,7 +94,7 @@ def get_configuration(request):
 
 
 # Tests
-
+@pytest.mark.skip(reason="It will be blocked by #3992, when it was solve we can enable again this test")
 def test_sync_interval(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon performs the file synchronization at the intervals

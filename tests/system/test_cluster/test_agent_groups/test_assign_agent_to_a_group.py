@@ -47,7 +47,7 @@ import pytest
 from system.test_cluster.test_agent_groups.common import register_agent
 from system import (AGENT_NO_GROUPS, AGENT_STATUS_ACTIVE, AGENT_STATUS_DISCONNECTED, check_agent_groups,
                     check_agent_status, restart_cluster, check_keys_file, assign_agent_to_new_group,
-                    delete_group_of_agents, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND)
+                    delete_agent_group, ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, create_new_agent_group)
 from wazuh_testing.modules import WAZUH_SERVICE_PREFIX, WAZUH_SERVICES_STOPPED
 from wazuh_testing.tools.system import HostManager
 
@@ -55,7 +55,7 @@ from wazuh_testing.tools.system import HostManager
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
 test_infra_agents = ["wazuh-agent1"]
-pytestmark = [pytest.mark.cluster]
+pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                               'provisioning', 'enrollment_cluster', 'inventory.yml')
@@ -116,6 +116,9 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
         check_agent_status(agent_id, agent_name, agent_ip, AGENT_STATUS_DISCONNECTED, host_manager, test_infra_managers)
 
     try:
+        # Create new group
+        create_new_agent_group(test_infra_managers[0], test_group, host_manager)
+
         # Add agent to a new group
         assign_agent_to_new_group('wazuh-master', test_group, agent_id, host_manager)
 
@@ -125,4 +128,4 @@ def test_assign_agent_to_a_group(agent_target, initial_status, clean_environment
 
     finally:
         # Delete group of agent
-        delete_group_of_agents('wazuh-master', test_group, host_manager)
+        delete_agent_group('wazuh-master', test_group, host_manager)

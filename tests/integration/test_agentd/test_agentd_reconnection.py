@@ -95,10 +95,14 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 receiver_sockets, monitored_sockets, log_monitors = None, None, None  # Set in the fixtures
 authd_server = AuthdSimulator(params[0]['SERVER_ADDRESS'], key_path=SERVER_KEY_PATH, cert_path=SERVER_CERT_PATH)
+
+global remoted_server
 remoted_server = None
 
 
+@pytest.fixture
 def teardown():
+    yield
     global remoted_server
     if remoted_server is not None:
         remoted_server.stop()
@@ -218,7 +222,8 @@ when misses communication with Remoted and a new enrollment is sent to Authd.
 """
 
 
-def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configure_environment, get_configuration):
+def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configure_environment,
+                                                 get_configuration, teardown):
     '''
     description: Check how the agent behaves when losing communication with
                  the 'wazuh-remoted' daemon and a new enrollment is sent to
@@ -239,6 +244,9 @@ def test_agentd_reconection_enrollment_with_keys(configure_authd_server, configu
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - teardown:
+            type: fixture
+            brief: Stop the Remoted server
 
     assertions:
         - Verify that the agent enrollment is successful.
@@ -303,7 +311,8 @@ and an enrollment is sent to Authd to start communicating with Remoted
 """
 
 
-def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, configure_environment, get_configuration):
+def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, configure_environment, get_configuration,
+                                                    teardown):
     '''
     description: Check how the agent behaves when losing communication with
                  the 'wazuh-remoted' daemon and a new enrollment is sent to
@@ -324,6 +333,9 @@ def test_agentd_reconection_enrollment_no_keys_file(configure_authd_server, conf
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - teardown:
+            type: fixture
+            brief: Stop the Remoted server
 
     assertions:
         - Verify that the agent enrollment is successful.
@@ -391,7 +403,8 @@ and an enrollment is sent to Authd to start communicating with Remoted
 """
 
 
-def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure_environment, get_configuration):
+def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure_environment, get_configuration,
+                                               teardown):
     '''
     description: Check how the agent behaves when losing communication with
                  the 'wazuh-remoted' daemon and a new enrollment is sent to
@@ -412,6 +425,9 @@ def test_agentd_reconection_enrollment_no_keys(configure_authd_server, configure
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - teardown:
+            type: fixture
+            brief: Stop the Remoted server
 
     assertions:
         - Verify that the agent enrollment is successful.
@@ -480,7 +496,7 @@ and multiple retries are required until the new key is obtained to start communi
 """
 
 
-def test_agentd_initial_enrollment_retries(configure_authd_server, configure_environment, get_configuration):
+def test_agentd_initial_enrollment_retries(configure_authd_server, configure_environment, get_configuration, teardown):
     '''
     description: Check how the agent behaves when it makes multiple enrollment attempts
                  before getting its key. For this, the agent starts without keys and
@@ -501,6 +517,9 @@ def test_agentd_initial_enrollment_retries(configure_authd_server, configure_env
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - teardown:
+            type: fixture
+            brief: Stop the Remoted server
 
     assertions:
         - Verify that the agent enrollment is successful.
@@ -574,7 +593,8 @@ and multiple connection retries are required prior to requesting a new enrollmen
 """
 
 
-def test_agentd_connection_retries_pre_enrollment(configure_authd_server, configure_environment, get_configuration):
+def test_agentd_connection_retries_pre_enrollment(configure_authd_server, configure_environment, get_configuration,
+                                                  teardown):
     '''
     description: Check how the agent behaves when the 'wazuh-remoted' daemon is not available
                  and performs multiple connection attempts to it. For this, the agent starts
@@ -595,6 +615,9 @@ def test_agentd_connection_retries_pre_enrollment(configure_authd_server, config
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
+        - teardown:
+            type: fixture
+            brief: Stop the Remoted server
 
     assertions:
         - Verify that the agent enrollment is successful.
