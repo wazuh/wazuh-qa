@@ -30,7 +30,7 @@ jobs:
           done
           dir_list=${dir_list[@]::-1}
           output="$output""$dir_list"' ]'
-          echo "$output" >> $GITHUB_OUTPUT
+          echo "$output" >> $GITHUB_ENV
       - name: Show matrix
         run: echo ${{ steps.set-matrix.outputs.matrix }}
 
@@ -39,7 +39,7 @@ jobs:
     needs: setup
     strategy:
       matrix:
-        value: ${{ fromJson(needs.matrix_prep.outputs.matrix) }}
+        value: ${{ needs.setup.outputs.matrix }}
 
     runs-on: ubuntu-latest
     steps:
