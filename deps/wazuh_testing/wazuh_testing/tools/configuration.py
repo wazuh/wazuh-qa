@@ -719,10 +719,17 @@ def get_test_cases_data(data_file_path):
     configuration_parameters = []
     configuration_metadata = []
     test_cases_ids = []
-
+    
     for test_case in test_cases_data:
-        if test_case['metadata']['fim_mode'] not in fim_modes:
-            continue
+        if 'fim_mode' in test_case['metadata']:
+            if test_case['metadata']['fim_mode'] not in fim_modes:
+                continue
+            else:
+                configuration_parameters.append(test_case['configuration_parameters'])
+                metadata_parameters = {'name': test_case['name'], 'description': test_case['description']}
+                metadata_parameters.update(test_case['metadata'])
+                configuration_metadata.append(metadata_parameters)
+                test_cases_ids.append(test_case['name'])
         else:
             configuration_parameters.append(test_case['configuration_parameters'])
             metadata_parameters = {'name': test_case['name'], 'description': test_case['description']}
