@@ -6,58 +6,40 @@ on:
       - tests/**
 
 jobs:
-  setup:
+  test-collection:
     runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
+
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install dependencies
+        run: python3 setup.py install
+        working-directory: deps/wazuh_testing
+
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v14.6
+        uses: tj-actions/changed-files@v35.9.2
 
-      - id: set-matrix
+      - name: Get tests modules changed
+        id: set-changed-modules
         run: |
           files_changed="${{ steps.changed-files.outputs.all_changed_files }}"
           DIRECTORIES=$(echo $files_changed | tr ' ' '\n' |  grep ^tests | grep -v pytest.ini | cut -d/ -f2 | uniq | tr -d ' ')
-          output='matrix=['
-          dir_list=''
+          DIRECTORIES=$(echo $DIRECTORIES | tr ' ' ',')
+          echo "matrix=$DIRECTORIES" >> $GITHUB_OUTPUT
 
-          for dir in $DIRECTORIES; do
-            dir_list="$dir_list\"$dir\","
+      - name: Collect tests
+        run: |
+          DIRECTORIES=$(echo ${{ steps.set-changed-modules.outputs.matrix }} | tr ',' ' ')
+          for directory in $DIRECTORIES; do
+            pytest --collect-only tests/${directory}
           done
-          dir_list=${dir_list[@]::-1}
-          output="$output""$dir_list"' ]'
-          echo "$output" >> $GITHUB_ENV
-      - name: Show matrix
-        run: echo ${{ steps.set-matrix.outputs.matrix }}
-
-  run-pytest:
-    name: Tests Collection
-    needs: setup
-    strategy:
-      matrix:
-        value: ${{ needs.setup.outputs.matrix }}
-
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-
-    - name: Install dependencies
-      run: pip install -r requirements.txt
-
-    - name: Install dependencies
-      run: python3 setup.py install
-      working-directory: deps/wazuh_testing
-
-    - name: Run pytest
-      run: |
-        pytest --collect-only tests/${{ matrix.value }}
