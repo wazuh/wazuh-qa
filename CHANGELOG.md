@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: https://github.com/wazuh/wazuh/commit/776fda906581a1e4ee170c3e7e73a58d69e41f95 \
 Release report: https://github.com/wazuh/wazuh/issues/16758
 
+### Fixed
+
+- Fix flacky `test_authd_valid_name_ip` IT to make it clean the env before each case. ([#4155](https://github.com/wazuh/wazuh-qa/pull/4155)) \- (Tests)
+
 ## [4.3.10] - 16-11-2022
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/89530f11c9e592cd2e551432209b0080f08ff8e5 \
