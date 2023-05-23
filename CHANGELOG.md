@@ -46,6 +46,8 @@ Release report: TBD
 
 ### Fixed
 
+- Fix boto3 version requirement for legacy OS ([#4150](https://github.com/wazuh/wazuh-qa/pull/4150)) \- (Framework)
+- Fix cases yaml of the analysisd windows registry IT ([#4149](https://github.com/wazuh/wazuh-qa/pull/4149)) \- (Tests)
 - Fix a bug in on Migration tool's library ([#4106](https://github.com/wazuh/wazuh-qa/pull/4106)) \- (Framework)
 - Fix imports and add windows support for test_report_changes_and_diff IT ([#3548](https://github.com/wazuh/wazuh-qa/issues/3548)) \- (Framework + Tests)
 - Fix a regex error in the FIM integration tests ([#3061](https://github.com/wazuh/wazuh-qa/issues/3061)) \- (Framework + Tests)
@@ -61,6 +63,7 @@ Release report: TBD
 
 ### Fixed
 
+- Limit urllib3 major required version ([#4162](https://github.com/wazuh/wazuh-qa/pull/4162)) \- (Framework)
 - Fix daemons_handler fixture (fix GCP IT) ([#4134](https://github.com/wazuh/wazuh-qa/pull/4134)) \- (Tests)
 - Fix wazuhdb IT. ([#3584](https://github.com/wazuh/wazuh-qa/pull/3584)) \- (Framework + Tests)
 - Fix agentd IT for python3.10 AMI ([#3973](https://github.com/wazuh/wazuh-qa/pull/3973)) \- (Tests)
