@@ -60,6 +60,8 @@ CB_WHODATA_QUEUE_SIZE = r".*Internal audit queue size set to \'(.*)\'."
 CB_WHODATA_QUEUE_FULL = r".*(Internal audit queue is full). Some events may be lost.*"
 CB_AUDIT_HEALTHCHECK_FAILED = r".*(Audit health check couldn't be completed correctly)."
 
+CB_FIM_REGISTRY_ENTRIES_COUNT = r".*Fim registry entries count: '(.*)'"
+CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT = r".*Fim registry values entries count: '(.*)'"
 
 # Error message
 ERR_MSG_REALTIME_FOLDERS_EVENT = 'Did not receive expected "Folders monitored with real-time engine" event'
@@ -83,8 +85,7 @@ ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES = 'Did not receive expected "Fim Registry val
 ERR_MSG_REGISTRY_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of registry values to \
                                  be monitored: ..." event'
 ERR_MSG_WRONG_REGISTRY_LIMIT_VALUE = 'Wrong value for db_value_limit registries tag.'
-ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of entries to be monitored: \
-                             ..." event'
+ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of files to be monitored:..." event'
 ERR_MSG_WRONG_FILE_LIMIT_VALUE = 'Wrong value for file_limit.'
 ERR_MSG_FILE_LIMIT_DISABLED = 'Did not receive expected "DEBUG: ...: No limit set to maximum number of entries \
                                to be monitored" event'
@@ -239,7 +240,7 @@ def callback_detect_file_integrity_event(line):
     """ Callback that detects if a line contains a file integrity event
 
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     event = callback_detect_integrity_control_event(line)
     if event and event['component'] == 'fim_file':
@@ -260,7 +261,7 @@ def callback_detect_registry_integrity_event(line):
     """ Callback that detects if a line contains a registry integrity event for a registry_key or registry_value
 
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     event = callback_detect_integrity_control_event(line)
     if event and event['component'] == 'fim_registry_key':
@@ -274,7 +275,7 @@ def callback_detect_registry_integrity_state_event(line):
     """ Callback that detects if a line contains a registry integrity event of the state type
 
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     event = callback_detect_registry_integrity_event(line)
     if event and event['type'] == 'state':
@@ -299,7 +300,7 @@ def callback_num_inotify_watches(line):
     """ Callback that detects if a line contains the folders monitored in realtime event
 
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     match = re.match(CB_FOLDERS_MONITORED_REALTIME, line)
 
@@ -324,17 +325,20 @@ def callback_state_event_time(line):
 def callback_real_time_whodata_started(line):
     """ Callback that detects if a line contains "Whodata engine started" event
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
-    if CB_REALTIME_WHODATA_ENGINE_STARTED in line:
+    match = re.match(CB_REALTIME_WHODATA_ENGINE_STARTED, line)
+    if match:
         return True
+
+    return None
 
 
 def callback_detect_registry_integrity_clear_event(line):
     """ Callback that detects if a line contains a registry integrity_clear event
 
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     event = callback_detect_integrity_control_event(line)
     if event and event['component'] == 'fim_registry_key' and event['type'] == 'integrity_clear':
@@ -405,14 +409,25 @@ def callback_detect_file_deleted_event(line):
     return None
 
 
-def callback_restricted(line):
-    """ Callback that detects if a line in a log  if a file is ignored due to configured restrict tag.
+def callback_audit_cannot_start(line):
+    """ Callback that detects if a line shows whodata engine could not start and monitoring switched to realtime.
 
     Args:
         line (String): string line to be checked by callback in FileMonitor.
 
     Returns:
-        returns the entry that is being ignored.
+        boolean: return True if line matches, None otherwise
+    """
+    match = re.match(r'.*Who-data engine could not start. Switching who-data to real-time.', line)
+    if match:
+        return True
+
+
+def callback_restricted(line):
+    """ Callback that detects if a line in a log  if a file is ignored due to configured restrict tag.
+
+    Returns:
+        string: returns path for the entry that is being ignored.
     """
     match = re.match(r".*Ignoring entry '(.*?)' due to restriction '.*?'", line)
     if match:
@@ -504,6 +519,7 @@ def detect_whodata_start(file_monitor, timeout=T_60):
 
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
+        timeout (int): timeout for file monitor to try to detect event
     """
     file_monitor.start(timeout=timeout, callback=generate_monitoring_callback(CB_REALTIME_WHODATA_ENGINE_STARTED),
                        error_message=ERR_MSG_WHODATA_ENGINE_EVENT)

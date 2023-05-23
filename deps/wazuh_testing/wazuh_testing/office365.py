@@ -47,6 +47,12 @@ def callback_detect_client_secret_err(line):
     return None
 
 
+def callback_detect_api_type_err(line):
+    if 'wm_office365_read(): ERROR: Empty content for tag \'api_type\' at module \'office365\'.' in line:
+        return line
+    return None
+
+
 def callback_detect_subscription_err(line):
     if 'wm_office365_read(): ERROR: Empty content for tag \'subscription\' at module \'office365\'.' in line:
         return line

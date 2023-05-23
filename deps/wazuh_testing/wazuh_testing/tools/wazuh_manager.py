@@ -40,3 +40,31 @@ def remove_agents(agents_id, remove_type='wazuhdb'):
 
 def remove_all_agents(remove_type):
     remove_agents(list_agents_ids(), remove_type)
+
+
+def create_group(group):
+    """Create group with /var/ossec/bin/agent_groups
+
+    Args:
+        group (str): Group name
+
+    Returns:
+        result(str): Return code
+    """
+    result = subprocess.run([f'{WAZUH_PATH}/bin/agent_groups', '-a', '-q', '-g', f'{group}']).returncode
+
+    return result
+
+
+def delete_group(group):
+    """Delete group with /var/ossec/bin/agent_groups
+
+    Args:
+        group (str): Group name
+
+    Returns:
+        result(str): Return code
+    """
+    result = subprocess.run([f'{WAZUH_PATH}/bin/agent_groups', '-r', '-q', '-g', f'{group}']).returncode
+
+    return result

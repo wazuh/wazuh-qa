@@ -139,7 +139,8 @@ def control_service(action, daemon=None, debug_mode=False):
                 delete_sockets(WAZUH_SOCKETS[daemon])
             else:
                 daemon_path = os.path.join(WAZUH_PATH, 'bin')
-                subprocess.check_call([f'{daemon_path}/{daemon}', '' if not debug_mode else '-dd'])
+                start_process = [f'{daemon_path}/{daemon}'] if not debug_mode else [f'{daemon_path}/{daemon}', '-dd']
+                subprocess.check_call(start_process)
             result = 0
 
     if result != 0:

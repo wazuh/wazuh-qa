@@ -54,6 +54,7 @@ tags:
     - fim_registry_basic_usage
 '''
 import os
+import sys
 from collections import Counter
 
 import pytest
@@ -101,7 +102,7 @@ def get_configuration(request):
 
 
 # test
-
+@pytest.mark.skip(sys.platform=='win32', reason="Blocked by #4077.")
 @pytest.mark.parametrize('key, subkey, arch, value_list', [
     (key, sub_key_1, KEY_WOW64_64KEY, ['value1', 'value2', 'value3']),
     (key, sub_key_2, KEY_WOW64_32KEY, ['value1', 'value2', 'value3']),
