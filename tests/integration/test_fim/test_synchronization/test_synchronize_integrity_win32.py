@@ -114,7 +114,7 @@ def extra_configuration_before_yield():
     for testdir in test_directories:
         for file, reg in zip(file_list, subkey_list):
             create_file(REGULAR, testdir, file, content='Sample content')
-            create_registry(WINDOWS_HKEY_LOCAL_MACHINE, os.path.join(subkey, reg), KEY_WOW64_64KEY)
+            create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], os.path.join(subkey, reg), KEY_WOW64_64KEY)
 
 
 def callback_integrity_or_whodata(line):
