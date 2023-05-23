@@ -28,7 +28,7 @@
     dest: /wazuh
     version: "{{ wazuh_branch }}"
     depth: '1'
-  when: wazuh_branch is not defined
+  when: wazuh_branch is defined
 
 - name: Install manager
   args:
