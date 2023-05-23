@@ -89,7 +89,7 @@ conf_params = {'TEST_DIRECTORIES': directory_str,
 
 file_list = []
 subkey_list = []
-for i in range(3000):
+for i in range(1000):
     file_list.append(f'regular_{i}')
     subkey_list.append(f'subkey_{i}')
 
@@ -110,11 +110,11 @@ def get_configuration(request):
 
 
 def extra_configuration_before_yield():
-    # Create 3000 files before restarting Wazuh to make sure the integrity scan will not finish before testing
+    # Create 1000 files before restarting Wazuh to make sure the integrity scan will not finish before testing
     for testdir in test_directories:
         for file, reg in zip(file_list, subkey_list):
             create_file(REGULAR, testdir, file, content='Sample content')
-            create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], os.path.join(subkey, reg), KEY_WOW64_64KEY)
+            create_registry(WINDOWS_HKEY_LOCAL_MACHINE, os.path.join(subkey, reg), KEY_WOW64_64KEY)
 
 
 def callback_integrity_or_whodata(line):
@@ -203,7 +203,6 @@ def test_events_while_integrity_scan(get_configuration, configure_environment, r
                                             error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
     assert sending_event['data']['path'] == os.path.join(folder, file_name)
 
-    time.sleep(global_parameters.default_timeout)
     sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*5,
                                             callback=callback_detect_event,
                                             error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()

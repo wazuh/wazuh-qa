@@ -80,7 +80,6 @@ pytestmark = [pytest.mark.tier(level=1)]
 # Variables
 test_directories = [os.path.join(PREFIX, 'testdir1')]
 directory_str = ','.join(test_directories)
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir1 = test_directories[0]
@@ -145,6 +144,8 @@ def test_file_limit_default(configure_local_internal_options_module, get_configu
         - realtime
         - who_data
     '''
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    
     # Check the file limit configured and that it matches expected value (100000)
     file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                                callback=generate_monitoring_callback(CB_FILE_LIMIT_VALUE),
