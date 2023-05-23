@@ -17,6 +17,10 @@ All notable changes to this project will be documented in this file.
 - Fix agentd IT for python3.10 AMI ([#3973](https://github.com/wazuh/wazuh-qa/pull/3973)) \- (Tests)
 - Fix unstable system tests ([#4080](https://github.com/wazuh/wazuh-qa/pull/4080)) \- (Tests)
 
+### Changed
+
+- Modify authd ITs test_authd_valid_name_ip to avoid flackyness. ([#4164](https://github.com/wazuh/wazuh-qa/pull/4164)) \- (Tests)
+
 ## [4.4.1] - 12-04-2023
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/63a0580562007c4ba9c117f4a232ce90160481ff \
