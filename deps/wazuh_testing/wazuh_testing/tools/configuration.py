@@ -714,12 +714,11 @@ def get_test_cases_data(data_file_path):
         (list(dict), list(dict), list(str)): Configurations, metadata and test case names.
     """
     fim_modes = global_parameters.fim_mode
-    
     test_cases_data = file.read_yaml(data_file_path)
     configuration_parameters = []
     configuration_metadata = []
     test_cases_ids = []
-    
+
     for test_case in test_cases_data:
         if 'fim_mode' in test_case['metadata']:
             if test_case['metadata']['fim_mode'] not in fim_modes:

@@ -200,7 +200,7 @@ def test_events_while_integrity_scan(get_configuration, configure_environment, r
                                             callback=callback_detect_file_added_event,
                                             error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
     assert sending_event['data']['path'] == os.path.join(folder, file_name)
-    
+
     sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3,
                                             callback=callback_detect_event,
                                             error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
