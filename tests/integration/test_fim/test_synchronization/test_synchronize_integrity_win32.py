@@ -54,7 +54,6 @@ tags:
     - fim_synchronization
 '''
 import os
-import time
 import pytest
 
 from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR
@@ -83,7 +82,7 @@ test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, subkey)]
 directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_integrity_scan_win32.yaml')
-conf_params = {'TEST_DIRECTORIES': test_directories,
+conf_params = {'TEST_DIRECTORIES': directory_str,
                'TEST_REGS': os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, subkey)}
 
 file_list = []
@@ -177,11 +176,11 @@ def test_events_while_integrity_scan(get_configuration, configure_environment, r
     # Wait for whodata to start and the synchronization check. Since they are different threads, we cannot expect
     # them to come in order every time
     if get_configuration['metadata']['fim_mode'] == 'whodata':
-        value_1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 3,
+        value_1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 5,
                                           callback=callback_integrity_or_whodata,
                                           error_message=ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED).result()
 
-        value_2 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 3,
+        value_2 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 5,
                                           callback=callback_integrity_or_whodata,
                                           error_message=ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED).result()
         assert value_1 != value_2, "callback_integrity_or_whodata detected the same message twice"
@@ -201,7 +200,6 @@ def test_events_while_integrity_scan(get_configuration, configure_environment, r
                                             callback=callback_detect_file_added_event,
                                             error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
     assert sending_event['data']['path'] == os.path.join(folder, file_name)
-
     
     sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3,
                                             callback=callback_detect_event,

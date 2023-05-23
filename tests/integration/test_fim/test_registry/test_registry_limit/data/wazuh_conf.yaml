@@ -11,7 +11,7 @@
         - disabled:
             value: 'no'
         - frequency:
-            value: 5
+            value: 3
         - windows_registry:
             value: WINDOWS_REGISTRY
             attributes:
@@ -52,7 +52,7 @@
         - disabled:
             value: 'no'
         - frequency:
-            value: 5
+            value: 3
         - windows_registry:
             value: WINDOWS_REGISTRY_1
             attributes:
@@ -97,7 +97,7 @@
         - disabled:
             value: 'no'
         - frequency:
-            value: 5
+            value: 3
         - windows_registry:
             value: WINDOWS_REGISTRY_1
             attributes:
