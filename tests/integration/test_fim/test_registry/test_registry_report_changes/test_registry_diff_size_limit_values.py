@@ -55,6 +55,7 @@ tags:
     - fim_registry_report_changes
 '''
 import os
+import sys
 
 import pytest
 from wazuh_testing import LOG_FILE_PATH, global_parameters
@@ -98,6 +99,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by #4077.")
 @pytest.mark.parametrize('size', [(4096), (16384)])
 @pytest.mark.parametrize('key, subkey, arch, value_name', [
     (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_64KEY, 'some_value'),
