@@ -21,6 +21,8 @@
           attributes:
             - arch: '64bit'
             - report_changes: 'yes'
+      - frequency:
+          value: 3
   - section: sca
     elements:
     - enabled:
