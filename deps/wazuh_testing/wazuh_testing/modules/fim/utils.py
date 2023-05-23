@@ -103,9 +103,9 @@ def create_registry(key, subkey, arch):
 
     if sys.platform == 'win32':
         try:
-            key = win32api.RegCreateKeyEx(key, subkey, win32con.KEY_ALL_ACCESS | arch)
+            new_key = win32api.RegCreateKeyEx(key, subkey, win32con.KEY_ALL_ACCESS | arch)
             logger.info("Created registry key " + str(os.path.join(fim.registry_class_name[key], subkey)))
-            return key[0]  # Ignore the flag that RegCreateKeyEx returns
+            return new_key[0]  # Ignore the flag that RegCreateKeyEx returns
         except OSError as e:
             logger.warning(f"Registry could not be created: {e}")
         except pywintypes.error as e:
