@@ -65,7 +65,8 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules import TIER2, WINDOWS
 from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, KEY_WOW64_64KEY, registry_parser,
                                        REG_SZ, MONITORED_KEY)
-from wazuh_testing.modules.fim.event_monitor import (callback_detect_event, callback_real_time_whodata_started,
+from wazuh_testing.modules.fim.event_monitor import (callback_detect_event, callback_detect_file_added_event,
+                                                     callback_real_time_whodata_started,
                                                      callback_detect_synchronization, ERR_MSG_FIM_EVENT_NOT_RECIEVED,
                                                      ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED,
                                                      ERR_MSG_INTEGRITY_CHECK_EVENT)
@@ -83,7 +84,7 @@ test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, subkey)]
 directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_integrity_scan_win32.yaml')
-conf_params = {'TEST_DIRECTORIES': test_directories,
+conf_params = {'TEST_DIRECTORIES': directory_str,
                'TEST_REGS': os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, subkey)}
 
 file_list = []
@@ -177,11 +178,11 @@ def test_events_while_integrity_scan(get_configuration, configure_environment, r
     # Wait for whodata to start and the synchronization check. Since they are different threads, we cannot expect
     # them to come in order every time
     if get_configuration['metadata']['fim_mode'] == 'whodata':
-        value_1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 3,
+        value_1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 5,
                                           callback=callback_integrity_or_whodata,
                                           error_message=ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED).result()
 
-        value_2 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 3,
+        value_2 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 5,
                                           callback=callback_integrity_or_whodata,
                                           error_message=ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED).result()
         assert value_1 != value_2, "callback_integrity_or_whodata detected the same message twice"
@@ -197,12 +198,14 @@ def test_events_while_integrity_scan(get_configuration, configure_environment, r
     create_file(REGULAR, folder, file_name, content='')
     modify_registry_value(key_h, "test_value", REG_SZ, 'added')
 
-    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*5, callback=callback_detect_event,
+    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*5,
+                                            callback=callback_detect_file_added_event,
                                             error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
     assert sending_event['data']['path'] == os.path.join(folder, file_name)
 
     time.sleep(global_parameters.default_timeout)
-    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*5, callback=callback_detect_event,
+    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*5,
+                                            callback=callback_detect_event,
                                             error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
     assert sending_event['data']['path'] == os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, subkey)
     assert sending_event['data']['arch'] == '[x64]'
