@@ -3,7 +3,7 @@
   configuration_parameters:
     TEST_DIRECTORIES: /
     QUEUE_SIZE: 50
-    MAX_EPS: 5
+    MAX_EPS: 6
     FREQUENCY: 20
   metadata:
     files_first_insert: 50      # Fills queue 100%  - log is only generated when it overflows.

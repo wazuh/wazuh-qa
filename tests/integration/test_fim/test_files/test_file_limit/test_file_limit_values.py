@@ -66,7 +66,7 @@ import sys
 
 import pytest
 
-from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR
+from wazuh_testing import T_20, T_40, LOG_FILE_PATH, REGULAR
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import create_file
@@ -87,9 +87,8 @@ test_directories = [os.path.join(PREFIX, 'testdir1')]
 directory_str = ','.join(test_directories)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf_file_limit.yaml')
 testdir1 = test_directories[0]
-monitor_timeout = 40
 
 # Configurations
 
@@ -164,14 +163,14 @@ def test_file_limit_values(configure_local_internal_options_module, get_configur
         - scheduled
     '''
     # Get the file_limit value configured from the wazuh logs
-    file_limit_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+    file_limit_value = wazuh_log_monitor.start(timeout=T_20,
                                                callback=generate_monitoring_callback(CB_FILE_LIMIT_VALUE),
                                                error_message=ERR_MSG_FILE_LIMIT_VALUES).result()
     # assert it matches the expected value
     assert file_limit_value == get_configuration['metadata']['file_limit'], ERR_MSG_WRONG_FILE_LIMIT_VALUE
 
     # Check number of entries and paths in DB and assert the value matches the expected count
-    entries, path_count = wazuh_log_monitor.start(timeout=monitor_timeout, callback=callback_entries_path_count,
+    entries, path_count = wazuh_log_monitor.start(timeout=T_40, callback=callback_entries_path_count,
                                                   error_message=ERR_MSG_FIM_INODE_ENTRIES).result()
 
     if sys.platform != 'win32':
