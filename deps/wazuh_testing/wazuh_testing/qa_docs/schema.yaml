@@ -65,6 +65,7 @@ predefined_values:
     - integration
     - logcollector
     - logtest
+    - modulesd
     - office365
     - osquery
     - remoted
@@ -354,6 +355,7 @@ predefined_values:
     - settings
     - shellshock
     - simulator
+    - syscollector
     - slack
     - sql_injection
     - ssh

@@ -8,7 +8,6 @@ copyright:
 
 
 import subprocess
-import os
 import platform
 
 from wazuh_testing.agent import AgentAuthParser
@@ -27,8 +26,9 @@ def launch_agent_auth(configuration):
         configuration (dict): Dictionary with the agent-auth configuration.
     """
     if configuration.get('manager_address'):
-        parser = AgentAuthParser(server_address=configuration.get('manager_address'), BINARY_PATH=AGENT_AUTH_BINARY_PATH,
-                             sudo=True if platform.system() == 'Linux' else False)
+        parser = AgentAuthParser(server_address=configuration.get('manager_address'),
+                                 BINARY_PATH=AGENT_AUTH_BINARY_PATH,
+                                 sudo=True if platform.system() == 'Linux' else False)
     else:
         parser = AgentAuthParser(server_address=MANAGER_ADDRESS, BINARY_PATH=AGENT_AUTH_BINARY_PATH,
                                  sudo=True if platform.system() == 'Linux' else False)
@@ -51,5 +51,4 @@ def launch_agent_auth(configuration):
     if configuration.get('groups'):
         parser.add_groups(configuration.get('groups'))
 
-    out = subprocess.Popen(parser.get_command(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    out.communicate(timeout=AGENT_AUTH_LAUNCH_TIMEOUT)
+    subprocess.call(parser.get_command(), timeout=AGENT_AUTH_LAUNCH_TIMEOUT)

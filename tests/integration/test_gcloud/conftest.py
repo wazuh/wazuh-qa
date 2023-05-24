@@ -11,6 +11,7 @@ from wazuh_testing.tools.file import write_file, remove_file
 from wazuh_testing.gcloud import detect_gcp_start, publish_sync
 import wazuh_testing.tools.configuration as conf
 
+
 @pytest.fixture(scope='session', autouse=True)
 def handle_credentials_file():
     if global_parameters.gcp_credentials is None or global_parameters.gcp_credentials_file is None:
@@ -49,6 +50,7 @@ def wait_for_gcp_start(get_configuration, request):
     # Wait for module gpc-pubsub starts
     file_monitor = getattr(request.module, 'wazuh_log_monitor')
     detect_gcp_start(file_monitor)
+
 
 @pytest.fixture(scope="session", autouse=True)
 def configure_internal_options():

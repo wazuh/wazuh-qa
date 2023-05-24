@@ -15,8 +15,6 @@ from wazuh_testing.modules.fim.event_monitor import callback_detect_event
 if sys.platform == 'linux2' or sys.platform == 'linux':
     from jq import jq
 
-_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-
 
 def validate_event(event, checks=None, mode=None):
     """Check if event is properly formatted according to some checks.
@@ -103,7 +101,7 @@ def validate_registry_event(event, checks=None, mode=None, is_key=True):
         return result
 
     json_file = 'syscheck_event_windows.json' if sys.platform == "win32" else 'syscheck_event.json'
-    with open(os.path.join(_data_path, json_file), 'r') as f:
+    with open(os.path.join(WAZUH_TESTING_DATA_PATH, json_file), 'r') as f:
         schema = json.load(f)
 
     validate(schema=schema, instance=event)
@@ -460,7 +458,7 @@ class RegistryEventChecker:
                 if self.is_value:
                     validate_registry_event(ev, options, mode, is_key=False)
                 else:
-                    validate_registry_event(ev, options, mode, is_key=False)
+                    validate_registry_event(ev, options, mode, is_key=True)
 
         def check_events_type(events, ev_type, reg_list=['testkey0']):
             """Checks the event type of each events in a list.

@@ -155,12 +155,14 @@ def create_monitored_folders_module(test_folders):
         test_folders(list): List of folders to create and delete
     """
     for folder in test_folders:
-        os.mkdir(folder, mode=0o0777)
+        if not os.path.exists(folder):
+            os.mkdir(folder, mode=0o0777)
 
     yield
 
     for folder in test_folders:
-        delete_path_recursively(folder)
+        if os.path.exists(folder):
+            delete_path_recursively(folder)
 
 
 @pytest.fixture()

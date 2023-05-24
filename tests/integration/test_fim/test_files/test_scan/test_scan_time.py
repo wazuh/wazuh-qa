@@ -60,6 +60,7 @@ tags:
     - fim_scan
 '''
 import os
+import sys
 from datetime import datetime, timedelta
 
 import pytest
@@ -101,9 +102,8 @@ def get_configuration(request):
 
 
 # tests
-@pytest.mark.parametrize('tags_to_apply', [
-    {'scan_time'}
-])
+@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by #4077.")
+@pytest.mark.parametrize('tags_to_apply', [{'scan_time'}])
 def test_scan_time(tags_to_apply,
                    get_configuration, configure_environment,
                    restart_syscheckd, wait_for_fim_start):

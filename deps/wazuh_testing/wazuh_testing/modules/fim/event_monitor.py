@@ -55,6 +55,8 @@ CB_STARTING_WINDOWS_AUDIT = r'.*state_checker.*(Starting check of Windows Audit 
 CB_SWITCHING_DIRECTORIES_TO_REALTIME = r'.*state_checker.*(Audit policy change detected.\
                                          Switching directories to realtime)'
 CB_RECIEVED_EVENT_4719 = r'.*win_whodata.*(Event 4719).*Switching directories to realtime'
+CB_FIM_REGISTRY_ENTRIES_COUNT = r".*Fim registry entries count: '(.*)'"
+CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT = r".*Fim registry values entries count: '(.*)'"
 
 # Error message
 ERR_MSG_REALTIME_FOLDERS_EVENT = 'Did not receive expected "Folders monitored with real-time engine" event'
@@ -78,8 +80,7 @@ ERR_MSG_FIM_REGISTRY_VALUE_ENTRIES = 'Did not receive expected "Fim Registry val
 ERR_MSG_REGISTRY_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of registry values to \
                                  be monitored: ..." event'
 ERR_MSG_WRONG_REGISTRY_LIMIT_VALUE = 'Wrong value for db_value_limit registries tag.'
-ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of entries to be monitored: \
-                             ..." event'
+ERR_MSG_FILE_LIMIT_VALUES = 'Did not receive expected "DEBUG: ...: Maximum number of files to be monitored:..." event'
 ERR_MSG_WRONG_FILE_LIMIT_VALUE = 'Wrong value for file_limit.'
 ERR_MSG_FILE_LIMIT_DISABLED = 'Did not receive expected "DEBUG: ...: No limit set to maximum number of entries \
                                to be monitored" event'
@@ -190,8 +191,9 @@ def callback_integrity_message(line):
 def callback_integrity_sync_message(line):
     """ Callback that detects if a line contains a integrity sync event
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     Returns:
+
         List: returns a list with formated datetime, And the event's JSON data.
     """
     if callback_detect_integrity_control_event(line):
@@ -203,7 +205,8 @@ def callback_integrity_sync_message(line):
 def callback_detect_integrity_check_global(line):
     """ Callback that detects if a line contains an 'integrity_check_global' event
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
+
     Returns:
         JSON: returns event's JSON data.
     """
@@ -218,7 +221,7 @@ def callback_detect_file_integrity_event(line):
     """ Callback that detects if a line contains a file integrity event
 
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     event = callback_detect_integrity_control_event(line)
     if event and event['component'] == 'fim_file':
@@ -239,7 +242,7 @@ def callback_detect_registry_integrity_event(line):
     """ Callback that detects if a line contains a registry integrity event for a registry_key or registry_value
 
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     event = callback_detect_integrity_control_event(line)
     if event and event['component'] == 'fim_registry_key':
@@ -253,7 +256,7 @@ def callback_detect_registry_integrity_state_event(line):
     """ Callback that detects if a line contains a registry integrity event of the state type
 
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     event = callback_detect_registry_integrity_event(line)
     if event and event['type'] == 'state':
@@ -278,7 +281,7 @@ def callback_num_inotify_watches(line):
     """ Callback that detects if a line contains the folders monitored in realtime event
 
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     match = re.match(CB_FOLDERS_MONITORED_REALTIME, line)
 
@@ -303,11 +306,13 @@ def callback_state_event_time(line):
 def callback_real_time_whodata_started(line):
     """ Callback that detects if a line contains "Whodata engine started" event
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     match = re.match(CB_REALTIME_WHODATA_ENGINE_STARTED, line)
     if match:
         return True
+    return None
+
     return None
 
 
@@ -315,7 +320,7 @@ def callback_detect_registry_integrity_clear_event(line):
     """ Callback that detects if a line contains a registry integrity_clear event
 
     Args:
-        line (String): string line to be checked by callback in File_Monitor.
+        line (String): string line to be checked by callback in FileMonitor.
     """
     event = callback_detect_integrity_control_event(line)
     if event and event['component'] == 'fim_registry_key' and event['type'] == 'integrity_clear':
@@ -502,13 +507,14 @@ def detect_realtime_start(file_monitor):
                        error_message=ERR_MSG_FOLDERS_MONITORED_REALTIME)
 
 
-def detect_whodata_start(file_monitor):
+def detect_whodata_start(file_monitor, timeout=T_60):
     """Detect whodata engine start when restarting Wazuh.
 
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
+        timeout (int): timeout for file monitor to try to detect event
     """
-    file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(CB_REALTIME_WHODATA_ENGINE_STARTED),
+    file_monitor.start(timeout=timeout, callback=generate_monitoring_callback(CB_REALTIME_WHODATA_ENGINE_STARTED),
                        error_message=ERR_MSG_WHODATA_ENGINE_EVENT)
 
 
