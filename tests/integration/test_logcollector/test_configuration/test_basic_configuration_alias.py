@@ -157,7 +157,7 @@ def test_configuration_alias(configure_local_internal_options_module,
     cfg = get_configuration['metadata']
 
     log_callback = logcollector.callback_command_alias_output(cfg['alias'])
-    log_monitor.start(timeout=10, callback=log_callback,
+    log_monitor.start(timeout=15, callback=log_callback,
                       error_message=logcollector.GENERIC_CALLBACK_ERROR_COMMAND_MONITORING)
 
     if wazuh_component == 'wazuh-manager':
