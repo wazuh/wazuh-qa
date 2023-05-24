@@ -18,6 +18,8 @@ All notable changes to this project will be documented in this file.
 - Add new module to support migration tool. ([#3837](https://github.com/wazuh/wazuh-qa/pull/3837))
 
 ### Changed
+
+- Improve the way that environment data is managed ([#4059](https://github.com/wazuh/wazuh-qa/pull/4059)) \- (Framework)
 - Update FIM test_ambiguous_confs IT to new framework ([#4121](https://github.com/wazuh/wazuh-qa/pull/4121)) \- (Tests + Framework)
 - Update `test_logcollector` invalid configs log level ([#4094](https://github.com/wazuh/wazuh-qa/pull/4094)) \- (Tests)
 - Update `test_office365` to support the new tag `API_TYPE` ([#4065](https://github.com/wazuh/wazuh-qa/pull/4065)) \- (Framework + Tests)
