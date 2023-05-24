@@ -28,4 +28,4 @@
     - skip_dev:
         value: SKIP
     - frequency:
-        value: 3
+        value: 5
