@@ -96,6 +96,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by #4077.")
 @pytest.mark.parametrize('folder', test_directories)
 @pytest.mark.parametrize('filename, mode, content, triggers_event, tags_to_apply', [
     ('.restricted', 'w', "Sample content", True, {'valid_regex1'}),

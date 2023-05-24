@@ -60,6 +60,7 @@ tags:
     - fim_synchronization
 '''
 import os
+import sys
 import pytest
 
 from wazuh_testing import global_parameters
@@ -159,6 +160,8 @@ def test_sync_overlap(configuration, metadata, set_wazuh_configuration, configur
     tags:
         - scheduled
     '''
+    if sys.platform == 'win32' and metadata['lower']:
+        pytest.xfail("It will be blocked by wazuh/wazuh-qa#4071")
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 

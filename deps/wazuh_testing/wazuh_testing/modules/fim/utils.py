@@ -17,12 +17,14 @@ from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_call
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.modules import fim
 from wazuh_testing.modules.fim import event_monitor as ev
-from wazuh_testing.modules.fim.classes import CustomValidator, EventChecker
+from wazuh_testing.modules.fim.classes import CustomValidator, EventChecker, RegistryEventChecker
 
 
 if sys.platform == 'win32':
     import win32con
     import win32api
+    import win32security as win32sec
+    import ntsecuritycon as ntc
     import pywintypes
 
 
@@ -101,15 +103,14 @@ def create_registry(key, subkey, arch):
 
     if sys.platform == 'win32':
         try:
-            logger.info("Creating registry key " + str(os.path.join(fim.registry_class_name[key], subkey)))
-
             key = win32api.RegCreateKeyEx(key, subkey, win32con.KEY_ALL_ACCESS | arch)
-
+            logger.info("Created registry key " + str(os.path.join(fim.registry_class_name[key], subkey)))
             return key[0]  # Ignore the flag that RegCreateKeyEx returns
         except OSError as e:
             logger.warning(f"Registry could not be created: {e}")
         except pywintypes.error as e:
             logger.warning(f"Registry could not be created: {e}")
+            
 
 
 def modify_key_perms(key, subkey, arch, user):
