@@ -121,6 +121,7 @@ def get_configuration(request):
     ['- DEBUG - GCP message' for _ in range(100)],
     ['- DEBUG - GCP message' for _ in range(120)]
 ], indirect=True)
+@pytest.mark.xfail(reason='Unstable, further information in wazuh/wazuh#17245')
 def test_max_messages(get_configuration, configure_environment, reset_ossec_log, publish_messages,
                       daemons_handler_module, wait_for_gcp_start):
     '''
