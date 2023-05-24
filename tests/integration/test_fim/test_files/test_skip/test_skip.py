@@ -67,7 +67,7 @@ from unittest.mock import patch
 
 import distro
 import pytest
-from wazuh_testing import LOG_FILE_PATH, T_10
+from wazuh_testing import LOG_FILE_PATH, T_20
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import set_section_wazuh_conf, load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.file import truncate_file
@@ -293,4 +293,4 @@ def test_skip_dev(modify_inode_mock, directory, tags_to_apply, get_configuration
     check_apply_test(tags_to_apply, get_configuration['tags'])
     trigger = get_configuration['metadata']['skip'] == 'no'
 
-    regular_file_cud(directory, wazuh_log_monitor, min_timeout=T_10, triggers_event=trigger)
+    regular_file_cud(directory, wazuh_log_monitor, min_timeout=T_20, triggers_event=trigger)
