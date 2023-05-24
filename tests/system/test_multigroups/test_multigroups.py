@@ -13,6 +13,9 @@ import pytest
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
 
+
+pytestmark = [pytest.mark.basic_cluster_env]
+
 # Test variables
 
 test_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
@@ -25,18 +28,16 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__
                               'basic_cluster', 'inventory.yml')
 host_manager = HostManager(inventory_path)
 
-
 time_to_update = 10
 time_to_sync = 20
 
 
-@pytest.fixture(scope="session")
+# Functions
+
 def get_api_token():
     global host_manager
     return host_manager.get_api_token(test_hosts[0])
 
-
-# Functions
 
 def calculate_mg_name(groups_list):
     """Determine multigroup name from a list of groups.
@@ -73,7 +74,7 @@ def get_mtime(folders_to_check, hosts=None):
     return result
 
 
-def get_agent_id(token, agent_name):
+def get_agent_id(agent_name):
     """Get agent ID from its name.
 
     Args:
@@ -83,7 +84,7 @@ def get_agent_id(token, agent_name):
     Returns:
         str: Agent ID.
     """
-    agent_id = host_manager.make_api_call(host=test_hosts[0], token=token, method='GET',
+    agent_id = host_manager.make_api_call(host=test_hosts[0], token=get_api_token(), method='GET',
                                           endpoint=f"/agents?name={agent_name}")
     assert agent_id['status'] == 200, f"Failed trying to get ID of agent {agent_name}"
     return agent_id['json']['data']['affected_items'][0]['id']
@@ -93,7 +94,7 @@ def delete_groups():
     """Delete all groups, except Default"""
     for agent_name, groups in agent_groups.items():
         # Remove any pre-existing group.
-        host_manager.make_api_call(host=test_hosts[0], token=host_manager.get_api_token(test_hosts[0]), method='DELETE',
+        host_manager.make_api_call(host=test_hosts[0], token=get_api_token(), method='DELETE',
                                    endpoint=f"/groups?groups_list={','.join(groups[1:])}")
 
         # Remove any pre-existing multigroup (just in case they weren't removed after deleting the group).
@@ -110,7 +111,7 @@ def agent_healthcheck():
     for agent, _ in agent_groups.items():
         result = {}
         for _ in range(5):
-            result = host_manager.make_api_call(host=test_hosts[0], token=token, method='GET',
+            result = host_manager.make_api_call(host=test_hosts[0], token=get_api_token(), method='GET',
                                                 endpoint=f"/agents?status=active&name={agent}")
             if result['status'] == 200 and result['json']['data']['total_affected_items'] == 1:
                 break
@@ -134,7 +135,7 @@ def create_multigroups():
         for idx, group in enumerate(groups):
             if group != 'default':
                 # Create group.
-                response = host_manager.make_api_call(host=test_hosts[0], token=token, method='POST',
+                response = host_manager.make_api_call(host=test_hosts[0], token=get_api_token(), method='POST',
                                                       endpoint='/groups', request_body={'group_id': group})
                 assert response['status'] == 200, f"Failed to create {group} group: {response}"
 
@@ -146,8 +147,8 @@ def create_multigroups():
                 )['files'],  f"{os.path.join(mg_folder_path, mg_name)} should not exist."
 
                 # Assign agent to group.
-                agent_id = get_agent_id(token=token, agent_name=agent_name)
-                response = host_manager.make_api_call(host=test_hosts[0], token=token, method='PUT',
+                agent_id = get_agent_id(agent_name=agent_name)
+                response = host_manager.make_api_call(host=test_hosts[0], token=get_api_token(), method='PUT',
                                                       endpoint=f"/agents/{agent_id}/group/{group}")
                 assert response['status'] == 200, f"Failed to add {agent_name} ({agent_id}) to group: {response}"
 
@@ -160,7 +161,7 @@ def create_multigroups():
 
 # Tests
 
-def test_multigroups_not_reloaded(get_api_token, clean_environment, agent_healthcheck, create_multigroups):
+def test_multigroups_not_reloaded(clean_environment, agent_healthcheck, create_multigroups):
     """Check that the files are not regenerated when there are no changes.
 
     Check and store the modification time of all group and multigroup files. Wait 10 seconds
@@ -187,7 +188,7 @@ def test_multigroups_not_reloaded(get_api_token, clean_environment, agent_health
     agent_groups['wazuh-agent1'][1],
     'default'
 ])
-def test_multigroups_updated(get_api_token, clean_environment, agent_healthcheck, create_multigroups, target_group):
+def test_multigroups_updated(clean_environment, agent_healthcheck, create_multigroups, target_group):
     """Check that only the appropriate multi-groups are regenerated when a group file is created.
 
     Check and store the modification time of all group and multigroup files. Create a new file inside
@@ -233,7 +234,7 @@ def test_multigroups_updated(get_api_token, clean_environment, agent_healthcheck
                 assert mtime == host_files[host][file], f"This file changed its modification time in {host}: {file}"
 
 
-def test_multigroups_deleted(get_api_token, clean_environment, agent_healthcheck, create_multigroups):
+def test_multigroups_deleted(clean_environment, agent_healthcheck, create_multigroups):
     """Check that multigroups are removed when expected.
 
     Unassign an agent from their groups or delete the groups. Check that the associated multigroup disappears
@@ -242,19 +243,19 @@ def test_multigroups_deleted(get_api_token, clean_environment, agent_healthcheck
     for agent_name, groups in agent_groups.items():
         # Check that multigroups exists for each agent.
         mg_name = os.path.join(mg_folder_path, calculate_mg_name(groups))
-        agent_id = get_agent_id(token=get_api_token, agent_name=agent_name)
+        agent_id = get_agent_id(agent_name=agent_name)
 
         for group in groups:
             if group != 'default':
                 if agent_name == 'wazuh-agent1':
                     # Unassign agent.
-                    response = host_manager.make_api_call(host=test_hosts[0], token=get_api_token, method='DELETE',
+                    response = host_manager.make_api_call(host=test_hosts[0], token=get_api_token(), method='DELETE',
                                                           endpoint=f"/agents/{agent_id}/group/{group}")
                     assert response['status'] == 200, f"Failed when unassigning {agent_name} agent from " \
                                                       f"group {group}: {response}"
                 else:
                     # Delete group.
-                    response = host_manager.make_api_call(host=test_hosts[0], token=get_api_token, method='DELETE',
+                    response = host_manager.make_api_call(host=test_hosts[0], token=get_api_token(), method='DELETE',
                                                           endpoint=f"/groups?groups_list={group}")
                     assert response['status'] == 200, f"Failed to delete {group} group: {response}"
 

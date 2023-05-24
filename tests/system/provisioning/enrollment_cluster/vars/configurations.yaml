@@ -1,0 +1,13 @@
+cluster_key: "00000000000000000000000000000000"
+
+master_hostname: wazuh-master
+
+worker1_hostname: wazuh-worker1
+worker2_hostname: wazuh-worker2
+
+agent1_hostname: wazuh-agent1
+agent2_hostname: wazuh-agent2
+
+docker_network: cluster_net
+
+image: dontpanicat/debian:buster

@@ -60,37 +60,41 @@ tags:
     - fim_max_eps
 '''
 import os
-from collections import Counter
-
+import sys
 import pytest
-from wazuh_testing.fim import LOG_FILE_PATH, REGULAR, create_file, generate_params, callback_event_message, \
-    check_time_travel
+import time
+
+from collections import Counter
+from wazuh_testing import logger, LOG_FILE_PATH
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
-from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.tools.file import write_file
+from wazuh_testing.modules.fim import TEST_DIR_1, REALTIME_MODE, WHODATA_MODE
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
+from wazuh_testing.modules.fim.event_monitor import (ERR_MSG_MULTIPLE_FILES_CREATION, callback_integrity_message,
+                                                     CB_PATH_MONITORED_REALTIME, ERR_MSG_MONITORING_PATH,
+                                                     CB_PATH_MONITORED_WHODATA, CB_PATH_MONITORED_WHODATA_WINDOWS)
+from wazuh_testing.modules.fim.utils import generate_params
+
 
 # Marks
-
 pytestmark = pytest.mark.tier(level=1)
 
 # Variables
-test_directories = [os.path.join(PREFIX, 'testdir1')]
-
-directory_str = ','.join(test_directories)
-
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-testdir1 = os.path.join(PREFIX, 'testdir1')
+test_directories = [os.path.join(PREFIX, TEST_DIR_1)]
+TIMEOUT = 180
 
 # Configurations
-conf_params = {'TEST_DIRECTORIES': directory_str,
-               'MODULE_NAME': __name__}
+conf_params = {'TEST_DIRECTORIES': test_directories[0]}
 
 eps_values = ['50', '10']
 
 p, m = generate_params(extra_params=conf_params, apply_to_all=({'MAX_EPS': eps_value} for eps_value in eps_values),
-                       modes=['scheduled'])
+                       modes=[REALTIME_MODE, WHODATA_MODE])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
 
@@ -102,7 +106,21 @@ def get_configuration(request):
     return request.param
 
 
-def test_max_eps(get_configuration, configure_environment, restart_syscheckd, wait_for_fim_start):
+def create_multiple_files(get_configuration):
+    """Create multiple files of a specific type."""
+    max_eps = get_configuration['metadata']['max_eps']
+    mode = get_configuration['metadata']['fim_mode']
+    try:
+        for i in range(int(max_eps) * 4):
+            file_name = f'file{i}_to_max_eps_{max_eps}_{mode}_mode{time.time()}'
+            path = os.path.join(test_directories[0], file_name)
+            write_file(path)
+    except OSError:
+        logger.info(ERR_MSG_MULTIPLE_FILES_CREATION)
+
+
+@pytest.mark.skip("This test is affected by Issue #15844, when it is fixed it should be enabled again.")
+def test_max_eps(configure_local_internal_options_module, get_configuration, configure_environment, restart_wazuh):
     '''
     description: Check if the 'wazuh-syscheckd' daemon applies the limit set in the 'max_eps' tag when
                  a lot of 'syscheck' events are generated. For this purpose, the test will monitor a folder,
@@ -111,7 +129,7 @@ def test_max_eps(get_configuration, configure_environment, restart_syscheckd, wa
                  the testing files created. Finally, it will verify the limit of events per second (eps)
                  is not exceeded by checking the creation time of the testing files.
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
@@ -141,29 +159,27 @@ def test_max_eps(get_configuration, configure_environment, restart_syscheckd, wa
         - r'.*Sending FIM event: (.+)$' ('added' events)
 
     tags:
-        - realtime
         - scheduled
     '''
-    check_apply_test({'max_eps'}, get_configuration['tags'])
-
     max_eps = int(get_configuration['metadata']['max_eps'])
     mode = get_configuration['metadata']['fim_mode']
+    if sys.platform == 'win32':
+        monitoring_regex = CB_PATH_MONITORED_REALTIME if mode == 'realtime' else CB_PATH_MONITORED_WHODATA_WINDOWS
+    else:
+        monitoring_regex = CB_PATH_MONITORED_REALTIME if mode == 'realtime' else CB_PATH_MONITORED_WHODATA
 
+    result = wazuh_log_monitor.start(timeout=TIMEOUT,
+                                     callback=generate_monitoring_callback(monitoring_regex),
+                                     error_message=ERR_MSG_MONITORING_PATH).result()
+    create_multiple_files(get_configuration)
     # Create files to read max_eps files with added events
-    for i in range(int(max_eps) * 5):
-        create_file(REGULAR, testdir1, f'test{i}_{mode}_{max_eps}', content='')
-
-    check_time_travel(mode == "scheduled")
-    n_results = max_eps * 5
-
-    result = wazuh_log_monitor.start(timeout=(n_results / max_eps) * 6,
+    n_results = max_eps * 3
+    result = wazuh_log_monitor.start(timeout=TIMEOUT,
                                      accum_results=n_results,
-                                     callback=callback_event_message,
+                                     callback=callback_integrity_message,
                                      error_message=f'Received less results than expected ({n_results})').result()
 
     counter = Counter([date_time for date_time, _ in result])
-    error_margin = (max_eps * 0.1)
 
     for _, n_occurrences in counter.items():
-        assert n_occurrences <= round(
-            max_eps + error_margin), f'Sent {n_occurrences} but a maximum of {max_eps} was set'
+        assert n_occurrences <= max_eps, f'Sent {n_occurrences} but a maximum of {max_eps} was set'

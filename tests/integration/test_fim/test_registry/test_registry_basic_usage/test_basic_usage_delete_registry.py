@@ -54,6 +54,7 @@ tags:
     - fim_registry_basic_usage
 '''
 import os
+import sys
 from collections import Counter
 
 import pytest
@@ -101,7 +102,7 @@ def get_configuration(request):
 
 
 # test
-
+@pytest.mark.skip(sys.platform=='win32', reason="Blocked by #4077.")
 @pytest.mark.parametrize('key, subkey, arch, value_list', [
     (key, sub_key_1, KEY_WOW64_64KEY, ['value1', 'value2', 'value3']),
     (key, sub_key_2, KEY_WOW64_32KEY, ['value1', 'value2', 'value3']),
@@ -176,8 +177,8 @@ def test_delete_registry(key, subkey, arch, value_list,
 
     check_time_travel(scheduled, monitor=wazuh_log_monitor)
     events = wazuh_log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_value_event,
-                                     accum_results=len(value_list), error_message='Did not receive expected '
-                                                                                      '"Sending FIM event: ..." event').result()
+                                     accum_results=len(value_list),
+                                     error_message='Did not receive expected "Sending FIM event: ..." event').result()
     for ev in events:
         validate_registry_value_event(ev, mode=mode)
 

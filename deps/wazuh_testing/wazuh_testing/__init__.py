@@ -13,18 +13,19 @@ from collections import defaultdict
 if sys.platform == 'win32':
     WAZUH_PATH = os.path.join("C:", os.sep, "Program Files (x86)", "ossec-agent")
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'ossec.log')
+    SYSCOLLECTOR_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'syscollector', 'db', 'local.db')
 else:
     if sys.platform == 'darwin':
         WAZUH_PATH = os.path.join("/", "Library", "Ossec")
     else:
         WAZUH_PATH = os.path.join("/var", "ossec")
     LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'ossec.log')
+    SYSCOLLECTOR_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'syscollector', 'db', 'local.db')
 
 
 WAZUH_CONF_PATH = os.path.join(WAZUH_PATH, 'etc', 'ossec.conf')
 WAZUH_LOGS_PATH = os.path.join(WAZUH_PATH, 'logs')
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, 'etc' if platform.system() == 'Linux' else '', 'client.keys')
-DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 QUEUE_SOCKETS_PATH = os.path.join(WAZUH_PATH, 'queue', 'sockets')
 WAZUH_DB_SOCKET_PATH = os.path.join(QUEUE_DB_PATH, 'wdb')
@@ -39,6 +40,11 @@ API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
 API_JSON_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.json')
 API_LOG_FOLDER = os.path.join(WAZUH_PATH, 'logs', 'api')
 WAZUH_TESTING_PATH = os.path.dirname(os.path.abspath(__file__))
+WAZUH_TESTING_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+DEFAULT_AUTHD_PASS_PATH = os.path.join(WAZUH_PATH, 'etc', 'authd.pass')
+TEMPLATE_DIR = 'configuration_template'
+TEST_CASES_DIR = 'test_cases'
+
 
 # Daemons
 LOGCOLLECTOR_DAEMON = 'wazuh-logcollector'
@@ -64,12 +70,35 @@ SYSLOG_SIMULATOR = os.path.join(WAZUH_TESTING_PATH, 'scripts', 'syslog_simulator
 ANALYSISD_STATE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
 
 # Timeouts
+T_2 = 2
 T_5 = 5
 T_10 = 10
 T_20 = 20
 T_30 = 30
 T_60 = 60
 
+
+# Local internal options
+WINDOWS_DEBUG = 'windows.debug'
+SYSCHECK_DEBUG = 'syscheck.debug'
+VERBOSE_DEBUG_OUTPUT = 2
+
+# Wazuh Service commands
+WAZUH_SERVICES_STOP = 'stop'
+WAZUH_SERVICES_START = 'start'
+
+
+# Configurations
+DATA = 'data'
+WAZUH_LOG_MONITOR = 'wazuh_log_monitor'
+
+
+# File Types
+FIFO = 'fifo'
+SYMLINK = 'sym_link'
+HARDLINK = 'hard_link'
+SOCKET = 'socket'
+REGULAR = 'regular'
 
 # Protocols
 UDP = 'UDP'

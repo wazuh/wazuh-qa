@@ -58,6 +58,9 @@ import pytest
 import requests
 from wazuh_testing import api
 
+# Marks
+pytestmark = [pytest.mark.server]
+
 
 # Tests
 
@@ -119,7 +122,7 @@ def test_response_postprocessing(restart_api_module, get_api_details, method, en
     headers = api_details['auth_headers'] if use_login_token else api.get_login_headers('wrong_user', 'wrong_password')
 
     # Make an API request
-    response = getattr(requests, method.lower())(f"{api_details['base_url']}/{endpoint_url}", headers=headers,
+    response = getattr(requests, method.lower())(f"{api_details['base_url']}{endpoint_url}", headers=headers,
                                                  verify=False, json=json_body)
 
     assert response.headers['Content-Type'] == 'application/problem+json; charset=utf-8'

@@ -1,5 +1,5 @@
 '''
-copyright: Copyright (C) 2015-2022, Wazuh Inc.
+copyright: Copyright (C) 2015-2023, Wazuh Inc.
 
            Created by Wazuh, Inc. <info@wazuh.com>.
 
@@ -64,53 +64,45 @@ import os
 import sys
 
 import pytest
-from wazuh_testing import logger
-from wazuh_testing.fim import LOG_FILE_PATH, callback_detect_event, create_file, REGULAR, generate_params
-from wazuh_testing.fim_module import CB_IGNORING_DUE_TO_SREGEX, CB_IGNORING_DUE_TO_PATTERN
+from wazuh_testing import LOG_FILE_PATH, REGULAR, T_10
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.modules.fim.event_monitor import CB_IGNORING_DUE_TO_SREGEX, CB_IGNORING_DUE_TO_PATTERN
+from wazuh_testing.tools.configuration import get_test_cases_data, load_configuration_template
+from wazuh_testing.tools.file import create_file
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 
 # Marks
-
-pytestmark = pytest.mark.tier(level=2)
+pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=2)]
 
 # Variables
-
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-conf_path = os.path.join(test_data_path,
-                         'wazuh_conf_ignore_restrict_win32.yaml'if sys.platform == 'win32'
-                         else 'wazuh_conf_ignore_restrict.yaml')
 test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
-testdir1, testdir2 = test_directories
-
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Configurations
+TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_templates')
+TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
-params, metadata = generate_params()
-configurations = load_wazuh_configurations(conf_path, __name__, params=params, metadata=metadata)
+# Configuration and cases data
+test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_ignore_works_over_restrict.yaml')
+config_file = 'configuration_ignore_works_over_restrict_win32.yaml' if sys.platform == 'win32' else \
+              'configuration_ignore_works_over_restrict.yaml'
+configurations_path = os.path.join(CONFIGURATIONS_PATH, config_file)
 
-# Fixtures
+# Test configurations
+configuration_parameters, configuration_metadata, test_case_ids = get_test_cases_data(test_cases_path)
+for count, value in enumerate(configuration_parameters):
+    configuration_parameters[count]['TEST_DIR1'] = test_directories[0]
+    configuration_parameters[count]['TEST_DIR2'] = test_directories[1]
+configurations = load_configuration_template(configurations_path, configuration_parameters, configuration_metadata)
 
-
-@pytest.fixture(scope='module', params=configurations)
-def get_configuration(request):
-    """Get configurations from the module."""
-    return request.param
 
 # Tests
-
-
-@pytest.mark.parametrize('folder, filename, triggers_event, tags_to_apply', [
-    (testdir1, 'testfile', False, {'valid_no_regex'}),
-    (testdir2, 'not_ignored_string', True, {'valid_no_regex'}),
-    (testdir1, 'testfile2', False, {'valid_regex'}),
-    (testdir1, 'ignore_testfile2', False, {'valid_regex'}),
-    (testdir2, 'not_ignored_sregex', True, {'valid_regex'})
-])
-def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_apply, get_configuration,
-                                    configure_environment, restart_syscheckd, wait_for_fim_start):
+@pytest.mark.parametrize('test_folders', [test_directories], ids='')
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
+def test_ignore_works_over_restrict(configuration, metadata, set_wazuh_configuration, test_folders,
+                                    create_monitored_folders, configure_local_internal_options_function,
+                                    restart_syscheck_function, wait_syscheck_start):
     '''
     description: Check if the 'ignore' tag prevails over the 'restrict' one when using both in the same directory.
                  For example, when a directory is ignored and at the same time monitoring is restricted to a file
@@ -118,78 +110,75 @@ def test_ignore_works_over_restrict(folder, filename, triggers_event, tags_to_ap
                  For this purpose, the test case configuration is applied, and it is checked if FIM events
                  are generated when required.
 
+    test_phases:
+        - setup:
+            - Set wazuh configuration and local_internal_options.
+            - Create custom folder for monitoring
+            - Clean logs files and restart wazuh to apply the configuration.
+        - test:
+            - Create file and detect event creation event
+            - Validate ignored event is generated with matching regex
+        - teardown:
+            - Delete custom monitored folder
+            - Restore configuration
+            - Stop Wazuh
+
     wazuh_min_version: 4.2.0
 
     tier: 2
 
     parameters:
-        - folder:
-            type: str
-            brief: Directory where the file is being created.
-        - filename:
-            type: str
-            brief: Name of the file to be created.
-        - triggers_event:
-            type: bool
-            brief: True if an event must be generated, False otherwise.
-        - tags_to_apply:
-            type: set
-            brief: Run test if match with a configuration identifier, skip otherwise.
-        - get_configuration:
+        - configuration:
+            type: dict
+            brief: Configuration values for ossec.conf.
+        - metadata:
+            type: dict
+            brief: Test case data.
+        - test_folders:
+            type: dict
+            brief: List of folders to be created for monitoring.
+        - set_wazuh_configuration:
             type: fixture
-            brief: Get configurations from the module.
-        - configure_environment:
+            brief: Set ossec.conf configuration.
+        - create_monitored_folders_module:
             type: fixture
-            brief: Configure a custom environment for testing.
-        - restart_syscheckd:
+            brief: Create a given list of folders when the module starts. Delete the folders at the end of the module.
+        - configure_local_internal_options_function:
             type: fixture
-            brief: Clear the 'ossec.log' file and start a new monitor.
-        - wait_for_fim_start:
+            brief: Set local_internal_options.conf file.
+        - restart_syscheck_function:
             type: fixture
-            brief: Wait for realtime start, whodata start, or end of initial FIM scan.
+            brief: restart syscheckd daemon, and truncate the ossec.log.
+        - wait_syscheck_start:
+            type: fixture
+            brief: check that the starting FIM scan is detected.
 
     assertions:
         - Verify that when a directory is ignored, the 'restrict' attribute
           is not taken into account to generate FIM events.
 
-    input_description: Two test cases are contained in external YAML file
-                       (wazuh_conf_ignore_restrict.yaml or wazuh_conf_ignore_restrict_win32.yaml)
-                       which includes configuration settings for the 'wazuh-syscheckd' daemon
-                       and testing directories to monitor.
+    input_description: The file 'configuration_works_over_restrict.yaml' provides the configuration
+                       template.
+                       The file 'cases_ignore_works_over_restrict.yaml' provides the tes cases configuration
+                       details for each test case.
 
     expected_output:
-        - r'.*Sending FIM event: (.+)$' (When the FIM event should be generated)
         - r".*Ignoring '.*?' '(.*?)' due to (sregex|pattern)? '.*?'" (When the FIM event should be ignored)
 
     tags:
         - scheduled
     '''
-    logger.info('Applying the test configuration')
-    check_apply_test(tags_to_apply, get_configuration['tags'])
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    folder = test_directories[metadata['folder_index']]
+    filename = metadata['filename']
 
     # Create file that must be ignored
-    logger.info(f'Adding file {os.path.join(testdir1, filename)}, content: ""')
     create_file(REGULAR, folder, filename, content='')
 
-    # Waiting time for the new scan to be generated.
-    timeout = 5  # seconds
-    logger.info(f'Waiting up to {timeout} seconds for the new scan to be detected.')
+    regex = CB_IGNORING_DUE_TO_PATTERN if metadata['is_pattern'] else CB_IGNORING_DUE_TO_SREGEX
+    matching_log = wazuh_log_monitor.start(timeout=T_10, accum_results=2, callback=generate_monitoring_callback(regex),
+                                           error_message=f'Did not receive expected '
+                                                         f'"Ignoring ... due to ..." event for file '
+                                                         f'{os.path.join(folder, filename)}').result()
 
-    if triggers_event:
-        event = wazuh_log_monitor.start(timeout=timeout,
-                                        callback=callback_detect_event,
-                                        error_message=f'Did not receive expected "Sending FIM event" '
-                                                      f'event for file {os.path.join(testdir1, filename)}').result()
-
-        assert event['data']['type'] == 'added', 'Event type not equal'
-        assert event['data']['path'] == os.path.join(folder, filename), 'Event path not equal'
-    else:
-        regex = CB_IGNORING_DUE_TO_PATTERN if 'valid_no_regex' in tags_to_apply else CB_IGNORING_DUE_TO_SREGEX
-        matching_log = wazuh_log_monitor.start(timeout=timeout,
-                                               accum_results=2,
-                                               callback=generate_monitoring_callback(regex),
-                                               error_message=f'Did not receive expected '
-                                                             f'"Ignoring ... due to ..." event for file '
-                                                             f'{os.path.join(testdir1, filename)}').result()
-
-        assert os.path.join(folder, filename) in matching_log, "Ignored file log is not generated."
+    assert os.path.join(folder, filename) in matching_log, "Ignored file log is not generated."

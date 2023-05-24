@@ -1093,20 +1093,6 @@ def callback_detect_integrity_event(line):
     return None
 
 
-def callback_detect_registry_integrity_state_event(line):
-    event = callback_detect_integrity_event(line)
-    if event and event['component'] == 'fim_registry' and event['type'] == 'state':
-        return event['data']
-    return None
-
-
-def callback_detect_registry_integrity_clear_event(line):
-    event = callback_detect_integrity_event(line)
-    if event and event['component'] == 'fim_registry' and event['type'] == 'integrity_clear':
-        return True
-    return None
-
-
 def callback_detect_integrity_state(line):
     event = callback_detect_integrity_event(line)
     if event:
@@ -1115,8 +1101,24 @@ def callback_detect_integrity_state(line):
     return None
 
 
+def callback_start_synchronization(line):
+    """ Callback that detects if a line contains the FIM sync module has started.
+
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    """
+    if 'FIM sync module started' in line:
+        return line
+    return None
+
+
 def callback_detect_synchronization(line):
-    if 'Initializing FIM Integrity Synchronization check' in line:
+    """ Callback that detects if a line contains a FIM sync has started.
+
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    """
+    if 'Executing FIM sync' in line:
         return line
     return None
 
@@ -1144,13 +1146,6 @@ def callback_restricted(line):
 
 def callback_audit_health_check(line):
     if 'Whodata health-check: Success.' in line:
-        return True
-    return None
-
-
-def callback_audit_cannot_start(line):
-    match = re.match(r'.*Who-data engine could not start. Switching who-data to real-time.', line)
-    if match:
         return True
     return None
 
@@ -2504,6 +2499,16 @@ def detect_initial_scan_start(file_monitor):
     """
     file_monitor.start(timeout=60, callback=callback_detect_scan_start,
                        error_message='Did not receive expected "File integrity monitoring scan started" event')
+
+
+def detect_sync_initial_scan_start(file_monitor):
+    """Detect initial sync scan start.
+
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+    """
+    file_monitor.start(timeout=60, callback=callback_start_synchronization,
+                       error_message='Did not receive expected "FIM sync scan started" event')
 
 
 def detect_realtime_start(file_monitor):

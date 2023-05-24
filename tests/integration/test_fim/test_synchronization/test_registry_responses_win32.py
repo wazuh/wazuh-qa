@@ -55,41 +55,37 @@ tags:
     - fim_synchronization
 '''
 import os
+import sys
 import pytest
-from wazuh_testing.fim import (generate_params, create_registry, modify_registry_value, registry_parser,
-                               KEY_WOW64_64KEY, REG_SZ)
+from wazuh_testing import LOG_FILE_PATH, DATA, WAZUH_SERVICES_START
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import control_service
-from wazuh_testing.fim_module.fim_synchronization import find_value_in_event_list, get_sync_msgs
-from wazuh_testing.fim_module.fim_variables import (SCHEDULE_MODE, WINDOWS_REGISTRY, SYNC_INTERVAL, SYNC_INTERVAL_VALUE,
-                                                    YAML_CONF_REGISTRY_RESPONSE, WINDOWS_HKEY_LOCAL_MACHINE,
-                                                    MONITORED_KEY)
-from wazuh_testing.wazuh_variables import DATA, WAZUH_SERVICES_START, WINDOWS_DEBUG, VERBOSE_DEBUG_OUTPUT
-
+from wazuh_testing.modules.fim.utils import (find_value_in_event_list, get_sync_msgs, generate_params, create_registry,
+                                             modify_registry_value)
+from wazuh_testing.modules.fim import (FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS, SCHEDULED_MODE, WINDOWS_REGISTRY,
+                                       SYNC_INTERVAL, SYNC_INTERVAL_VALUE, YAML_CONF_REGISTRY_RESPONSE, REG_SZ,
+                                       WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, registry_parser, KEY_WOW64_64KEY)
+from wazuh_testing.modules.fim.event_monitor import detect_initial_scan
 
 # Marks
-
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
+
 # variables
-
-
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), DATA)
 configurations_path = os.path.join(test_data_path, YAML_CONF_REGISTRY_RESPONSE)
 conf_params = {WINDOWS_REGISTRY: os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY),
-               SYNC_INTERVAL: SYNC_INTERVAL_VALUE}
+               SYNC_INTERVAL: 10}
 
 
 # configurations
-
-conf_params, conf_metadata = generate_params(extra_params=conf_params, modes=[SCHEDULE_MODE])
+conf_params, conf_metadata = generate_params(extra_params=conf_params, modes=[SCHEDULED_MODE])
 configurations = load_wazuh_configurations(configurations_path, __name__, params=conf_params, metadata=conf_metadata)
-local_internal_options = {WINDOWS_DEBUG: VERBOSE_DEBUG_OUTPUT}
+local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 
 
 # fixtures
-
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -97,8 +93,7 @@ def get_configuration(request):
 
 
 # tests
-
-
+@pytest.mark.skip(sys.platform=='win32', reason="Blocked by #4077.")
 @pytest.mark.parametrize('key_name', [':subkey1', 'subkey2:', ':subkey3:'])
 @pytest.mark.parametrize('value_name', [':value1', 'value2:', ':value3:'])
 def test_registry_sync_after_restart(key_name, value_name, configure_local_internal_options_module,
@@ -124,7 +119,7 @@ def test_registry_sync_after_restart(key_name, value_name, configure_local_inter
             brief: Name of the value that will be created in the test.
         - configure_local_internal_options_module:
             type: fixture
-            brief: Configure the local internal options file.    
+            brief: Configure the local internal options file.
         - get_configuration:
             type: fixture
             brief: Get configurations from the module.
@@ -150,7 +145,6 @@ def test_registry_sync_after_restart(key_name, value_name, configure_local_inter
 
     tags:
         - scheduled
-        - time_travel
     '''
     key_path = os.path.join(MONITORED_KEY, key_name)
     value_path = os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, key_path, value_name)
@@ -160,9 +154,9 @@ def test_registry_sync_after_restart(key_name, value_name, configure_local_inter
 
     modify_registry_value(key_handle, value_name, REG_SZ, 'This is a test with syscheckd down.')
     control_service(WAZUH_SERVICES_START)
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    detect_initial_scan(wazuh_log_monitor)
+    events = get_sync_msgs(timeout=SYNC_INTERVAL_VALUE)
 
-    events = get_sync_msgs(SYNC_INTERVAL_VALUE)
-
-    assert find_value_in_event_list(
-            os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, key_path), value_name,
-            events) is not None, f"No sync event was found for {value_path}"
+    assert find_value_in_event_list(os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, key_path), value_name,
+                                    events) is not None, f"No sync event was found for {value_path}"

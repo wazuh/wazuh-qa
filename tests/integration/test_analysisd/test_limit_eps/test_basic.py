@@ -52,7 +52,7 @@ def test_enabled(configuration, metadata, load_wazuh_basic_configuration, set_wa
         - test:
             - Check in the ossec.log that a line has appeared indicating that EPS limiting has been enabled.
             - Check that wazuh-analysisd is running (it has not been crashed).
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
 
@@ -112,7 +112,7 @@ def test_disabled(configuration, metadata, load_wazuh_basic_configuration, set_w
         - test:
             - Look in the ossec.log to see if the EPS limitation activation does not appear.
             - Check that wazuh-analysisd is running (it has not been crashed).
-        - tierdown:
+        - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
 

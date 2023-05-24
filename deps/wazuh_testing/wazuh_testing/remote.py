@@ -10,12 +10,12 @@ import time
 import multiprocessing
 import pytest
 import wazuh_testing.tools.agent_simulator as ag
-from wazuh_testing import UDP, TCP
-from wazuh_testing.tools import ARCHIVES_LOG_FILE_PATH, LOG_FILE_PATH, QUEUE_SOCKETS_PATH, WAZUH_PATH
+from wazuh_testing import UDP, TCP, ARCHIVES_LOG_PATH, LOG_FILE_PATH, QUEUE_SOCKETS_PATH, WAZUH_PATH
 from wazuh_testing.tools.file import bind_unix_socket, truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor, make_callback, ManInTheMiddle, QueueMonitor, \
     REMOTED_DETECTOR_PREFIX
 from wazuh_testing.tools.services import control_service
+
 
 REMOTED_GLOBAL_TIMEOUT = 10
 SYNC_FILES_TIMEOUT = 10
@@ -326,8 +326,8 @@ def create_archives_log_monitor():
         FileMonitor: object to monitor the archives.log.
     """
     # Reset archives.log and start a new monitor
-    truncate_file(ARCHIVES_LOG_FILE_PATH)
-    wazuh_archives_log_monitor = FileMonitor(ARCHIVES_LOG_FILE_PATH)
+    truncate_file(ARCHIVES_LOG_PATH)
+    wazuh_archives_log_monitor = FileMonitor(ARCHIVES_LOG_PATH)
 
     return wazuh_archives_log_monitor
 
@@ -499,7 +499,7 @@ def wait_to_remoted_update_groups(wazuh_log_monitor):
     # The log is truncated to ensure that the information has been loaded after the agent has been registered.
     truncate_file(LOG_FILE_PATH)
 
-    callback_pattern = '.*c_files().*End updating shared files sums.'
+    callback_pattern = '.*c_files().*End updating shared files.'
     error_message = 'Could not find the groups reload log'
 
     check_remoted_log_event(wazuh_log_monitor, callback_pattern, error_message, timeout=SYNC_FILES_TIMEOUT)
@@ -653,7 +653,7 @@ def check_push_shared_config(agent, sender, injector=None):
                                 error_message='The start up message has not been found in the logs')
 
         wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-        
+
         sender.send_event(agent.keep_alive_event)
 
         # Check up file (push start) message
@@ -684,7 +684,7 @@ def check_push_shared_config(agent, sender, injector=None):
                                                    args=(sender,))
         keep_alive_agent.start()
 
-        log_callback = make_callback(pattern=".*End sending file '.+' to agent '\d+'\.", prefix='.*wazuh-remoted.*')
+        log_callback = make_callback(pattern=r".*End sending file '.+' to agent '\d+'\.", prefix=r'.*wazuh-remoted.*')
         log_monitor = FileMonitor(LOG_FILE_PATH)
         log_monitor.start(timeout=REMOTED_GLOBAL_TIMEOUT, callback=log_callback,
                           error_message="New shared configuration was not sent")

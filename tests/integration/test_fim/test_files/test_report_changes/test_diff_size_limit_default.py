@@ -30,7 +30,7 @@ os_platform:
     - linux
     - windows
     - macos
-    - solaris  
+    - solaris
 
 os_version:
     - Arch Linux
@@ -70,18 +70,15 @@ tags:
 import os
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params
+from wazuh_testing import global_parameters, DATA, LOG_FILE_PATH
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.wazuh_variables import DATA
-from wazuh_testing.fim_module.fim_variables import (DIFF_DEFAULT_LIMIT_VALUE, CB_MAXIMUM_FILE_SIZE,
-                                                    REPORT_CHANGES, TEST_DIR_1, TEST_DIRECTORIES,
-                                                    YAML_CONF_DIFF, ERR_MSG_MAXIMUM_FILE_SIZE,
-                                                    ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE)
-from wazuh_testing.wazuh_variables import SYSCHECK_DEBUG, VERBOSE_DEBUG_OUTPUT
-
+from wazuh_testing.modules.fim import DIFF_DEFAULT_LIMIT_VALUE, REPORT_CHANGES, TEST_DIR_1, TEST_DIRECTORIES
+from wazuh_testing.modules.fim.event_monitor import (CB_MAXIMUM_FILE_SIZE, ERR_MSG_MAXIMUM_FILE_SIZE,
+                                                     ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE)
+from wazuh_testing.modules.fim.utils import generate_params
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 # Marks
 
 pytestmark = [pytest.mark.tier(level=1)]
@@ -91,7 +88,7 @@ pytestmark = [pytest.mark.tier(level=1)]
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_directory = os.path.join(PREFIX, TEST_DIR_1)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), DATA)
-configurations_path = os.path.join(test_data_path, YAML_CONF_DIFF)
+configurations_path = os.path.join(test_data_path, 'wazuh_conf_diff.yaml')
 
 
 # Configurations
@@ -100,7 +97,6 @@ parameters, metadata = generate_params(extra_params={REPORT_CHANGES.upper(): {RE
                                                      TEST_DIRECTORIES: test_directory})
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
-local_internal_options = {SYSCHECK_DEBUG: VERBOSE_DEBUG_OUTPUT}
 
 # Fixtures
 
@@ -113,9 +109,8 @@ def get_configuration(request):
 
 # Tests
 
-
-def test_diff_size_limit_default(configure_local_internal_options_module, get_configuration,
-                                 configure_environment, restart_syscheckd):
+def test_diff_size_limit_default(configure_local_internal_options_module, get_configuration, configure_environment,
+                                 restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon limits the size of 'diff' information to generate from
                  the default value of the 'diff_size_limit' attribute. For this purpose, the test will monitor
@@ -123,7 +118,7 @@ def test_diff_size_limit_default(configure_local_internal_options_module, get_co
                  file size to generate 'diff' information. Finally, the test will verify that the value gotten
                  from that FIM event corresponds with the default value of the 'diff_size_limit' attribute (50MB).
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.5.0
 
     tier: 1
 
@@ -160,10 +155,8 @@ def test_diff_size_limit_default(configure_local_internal_options_module, get_co
         - who_data
     '''
 
-    diff_size_value = wazuh_log_monitor.start(
-        timeout=global_parameters.default_timeout,
-        callback=generate_monitoring_callback(CB_MAXIMUM_FILE_SIZE),
-        error_message=ERR_MSG_MAXIMUM_FILE_SIZE
-                                              ).result()
+    diff_size_value = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+                                              callback=generate_monitoring_callback(CB_MAXIMUM_FILE_SIZE),
+                                              error_message=ERR_MSG_MAXIMUM_FILE_SIZE).result()
 
     assert diff_size_value == str(DIFF_DEFAULT_LIMIT_VALUE), ERR_MSG_WRONG_VALUE_MAXIMUM_FILE_SIZE

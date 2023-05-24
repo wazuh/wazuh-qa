@@ -10,7 +10,7 @@ from typing import Union
 import testinfra
 import yaml
 
-from wazuh_testing.tools import WAZUH_CONF, WAZUH_API_CONF, API_LOG_FILE_PATH
+from wazuh_testing.tools import WAZUH_CONF, WAZUH_API_CONF, API_LOG_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import set_section_wazuh_conf
 
 
@@ -26,6 +26,19 @@ class HostManager:
             inventory_path (str): Ansible inventory path
         """
         self.inventory_path = inventory_path
+        try:
+            with open(self.inventory_path, "r") as inventory:
+                self.inventory = yaml.safe_load(inventory.read())
+        except (OSError, yaml.YAMLError) as inventory_err:
+            raise ValueError(f"Could not open/load Ansible inventory '{self.inventory_path}': {inventory_err}")
+
+    def get_inventory(self) -> dict:
+        """Get the loaded Ansible inventory.
+
+        Returns:
+            self.inventory: Ansible inventory
+        """
+        return self.inventory
 
     def get_host(self, host: str):
         """Get the Ansible object for communicating with the specified host.
@@ -281,19 +294,21 @@ class HostManager:
         """
         return self.get_host(host).interface(interface).addresses
 
-    def find_file(self, host: str, path: str, pattern: str, recurse: bool = False, use_regex: bool = False):
+    def find_file(self, host: str, path: str, pattern: str = '*', use_regex: bool = False, recurse: bool = False,
+                  file_type: str = 'file'):
         """Search and return information of a file inside a path.
         Args:
             host (str): Hostname
             path (str): Path in which to search for the file that matches the pattern.
             pattern (str): Restrict the files to be returned to those whose basenames match the pattern specified.
-            recurse (bool): If target is a directory, recursively descend into the directory looking for files.
             use_regex (bool): If no, the patterns are file globs (shell), if yes, they are python regexes.
+            recurse (bool): If target is a directory, recursively descend into the directory looking for files.
+            file_type (str): Type of file to select. Choices are 'any', 'directory', 'file', 'link'.
         Returns:
             Files (list): List of found files.
         """
         return self.get_host(host).ansible("find", f"paths={path} patterns={pattern} recurse={recurse} "
-                                                   f"use_regex={use_regex}")
+                                                   f"use_regex={use_regex} file_type={file_type}")
 
     def get_stats(self, host: str, path: str):
         """Retrieve file or file system status.
@@ -306,6 +321,22 @@ class HostManager:
             Dictionary containing all the stat data.
         """
         return self.get_host(host).ansible("stat", f"path={path}")
+
+    def configure_local_internal_options(self, local_internal_options: dict):
+        """Add internal options in local_internal_options.conf
+
+        Args:
+            local_internal_options (dict): dictionary with hosts and internal options.
+        """
+        for target_host in local_internal_options:
+            internal_options_data = []
+            backup_local_internal_options = self.get_file_content(target_host, WAZUH_LOCAL_INTERNAL_OPTIONS)
+            for internal_options in local_internal_options[target_host]:
+                internal_options_data.append(f"{internal_options['name']}={internal_options['value']}\n")
+            replace = backup_local_internal_options
+            for internal_option in internal_options_data:
+                replace = replace + internal_option
+            self.modify_file_content(target_host, WAZUH_LOCAL_INTERNAL_OPTIONS, replace)
 
 
 def clean_environment(host_manager, target_files):

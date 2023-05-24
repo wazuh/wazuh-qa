@@ -54,9 +54,10 @@ tags:
     - fim_registry_ignore
 '''
 import os
+import sys
 
 import pytest
-from wazuh_testing import global_parameters, fim
+from wazuh_testing import T_20, fim
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -190,17 +191,15 @@ def test_ignore_registry_key(root_key, registry, arch, subkey, triggers_event, t
         - time_travel
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
 
     fim.registry_ignore_path = os.path.join(root_key, registry)
 
     # Create registry
     fim.create_registry(fim.registry_parser[root_key], os.path.join(registry, subkey), arch)
-    # Go ahead in time to let syscheck perform a new scan
-    fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
+    # Let syscheck perform a new scan
     if triggers_event:
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+        event = wazuh_log_monitor.start(timeout=T_20,
                                         callback=fim.callback_key_event,
                                         error_message='Did not receive expected '
                                                       '"Sending FIM event: ..." event').result()
@@ -210,7 +209,7 @@ def test_ignore_registry_key(root_key, registry, arch, subkey, triggers_event, t
 
     else:
         with pytest.raises(TimeoutError):
-            event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
+            event = wazuh_log_monitor.start(timeout=T_20,
                                             callback=fim.callback_key_event,
                                             error_message='Did not receive expected '
                                                           '"Sending FIM event: ..." event').result()
@@ -293,19 +292,16 @@ def test_ignore_registry_value(root_key, registry, arch, value, triggers_event, 
         - time_travel
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    scheduled = get_configuration['metadata']['fim_mode'] == 'scheduled'
+
     # Open the key (this shouldn't create an alert)
     key_h = fim.create_registry(fim.registry_parser[root_key], registry, arch)
     # Create values
     fim.modify_registry_value(key_h, value, fim.REG_SZ, "test_value")
-    # Go ahead in time to let syscheck perform a new scan
-    fim.check_time_travel(scheduled, monitor=wazuh_log_monitor)
 
+    # Let syscheck perform a new scan
     if triggers_event:
-        event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                        callback=fim.callback_value_event,
-                                        error_message='Did not receive expected '
-                                                      '"Sending FIM event: ..." event').result()
+        event = wazuh_log_monitor.start(timeout=T_20, callback=fim.callback_value_event,
+                                        error_message='Did not receive expected "Sending FIM event:.." event').result()
 
         assert event['data']['type'] == 'added', 'Wrong event type.'
         assert event['data']['path'] == os.path.join(root_key, registry), 'Wrong value path.'
@@ -314,7 +310,6 @@ def test_ignore_registry_value(root_key, registry, arch, value, triggers_event, 
 
     else:
         with pytest.raises(TimeoutError):
-            event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
-                                            callback=fim.callback_value_event,
+            event = wazuh_log_monitor.start(timeout=T_20, callback=fim.callback_value_event,
                                             error_message='Did not receive expected '
                                                           '"Sending FIM event: ..." event').result()

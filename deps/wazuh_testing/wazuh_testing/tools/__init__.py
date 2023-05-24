@@ -34,6 +34,7 @@ if sys.platform == 'win32':
     WAZUH_UNIX_USER = 'wazuh'
     WAZUH_UNIX_GROUP = 'wazuh'
     GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
+    ARCHIVES_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'archives', 'archives.log')
     ACTIVE_RESPONSE_BINARY_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
 else:
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
@@ -72,6 +73,7 @@ else:
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
     ANALYSISD_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'wazuh-analysisd')
     ACTIVE_RESPONSE_BINARY_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
+    AGENT_GROUPS_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent_groups')
 
     if sys.platform == 'sunos5':
         HOSTS_FILE_PATH = os.path.join('/', 'etc', 'inet', 'hosts')

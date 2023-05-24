@@ -55,15 +55,15 @@ tags:
     - fim_registry_report_changes
 '''
 import os
+import sys
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, registry_value_create, registry_value_update, registry_value_delete,
-                               KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params, calculate_registry_diff_paths,
-                               create_values_content)
-from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
-                                                    SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
-                                                    ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
+from wazuh_testing import LOG_FILE_PATH, global_parameters
+from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
+                                       KEY_WOW64_32KEY, KEY_WOW64_64KEY, SIZE_LIMIT_CONFIGURED_VALUE)
+from wazuh_testing.modules.fim.event_monitor import ERR_MSG_CONTENT_CHANGES_EMPTY, ERR_MSG_CONTENT_CHANGES_NOT_EMPTY
+from wazuh_testing.modules.fim.utils import (registry_value_create, registry_value_update, registry_value_delete,
+                                             generate_params, calculate_registry_diff_paths, create_values_content)
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 
@@ -99,6 +99,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by #4077.")
 @pytest.mark.parametrize('size', [(4096), (16384)])
 @pytest.mark.parametrize('key, subkey, arch, value_name', [
     (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_64KEY, 'some_value'),
