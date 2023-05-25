@@ -105,6 +105,7 @@ def start_agent(request, get_configuration):
     Args:
         get_configuration (fixture): Get configurations from the module.
     """
+    agent_restart_failure = False
     metadata = get_configuration['metadata']
     authd_simulator = AuthdSimulator(server_address=SERVER_ADDRESS,
                                      enrollment_port=1515,
