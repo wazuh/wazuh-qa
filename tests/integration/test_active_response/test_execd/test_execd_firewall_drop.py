@@ -110,6 +110,7 @@ def start_agent(request, get_configuration):
     Args:
         get_configuration (fixture): Get configurations from the module.
     """
+    agent_restart_failure = False
     metadata = get_configuration['metadata']
     authd_simulator = AuthdSimulator(server_address=SERVER_ADDRESS,
                                      enrollment_port=1515,
@@ -130,12 +131,17 @@ def start_agent(request, get_configuration):
     truncate_file(CLIENT_KEYS_PATH)
     time.sleep(1)
 
-    control_service('stop')
-    agent_auth_pat = 'bin' if platform.system() == 'Linux' else ''
-    call([f'{WAZUH_PATH}/{agent_auth_pat}/agent-auth', '-m', SERVER_ADDRESS])
-    control_service('start')
+    try: 
+        control_service('stop')
+        agent_auth_pat = 'bin' if platform.system() == 'Linux' else ''
+        call([f'{WAZUH_PATH}/{agent_auth_pat}/agent-auth', '-m', SERVER_ADDRESS])
+        control_service('start')
 
-    yield
+    except Exception:
+        print("Expected exception occurred")
+        agent_restart_failure = True
+
+    yield agent_restart_failure
 
     remoted_simulator.stop()
     authd_simulator.shutdown()
@@ -279,6 +285,9 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
     tags:
         - simulator
     '''
+    # Check if the agent is restarted properly"
+    assert not start_agent
+
     metadata = get_configuration['metadata']
     expected = metadata['results']
     ossec_log_monitor = FileMonitor(LOG_FILE_PATH)

@@ -232,10 +232,16 @@ def get_configuration(request):
 @pytest.fixture(scope="function")
 def restart_service():
     """Restart the Wazuh manager and clean the ossec.log file."""
-    control_service('stop')
-    clean_logs()
-    control_service('start')
-    yield
+    manager_restart_failure = False
+    try:
+        control_service('stop')
+        clean_logs()
+        control_service('start')
+    except Exception:
+        print("Expected exception occurred")
+        manager_restart_failure = True
+
+    yield manager_restart_failure
 
 
 @pytest.fixture(scope="function")
@@ -435,6 +441,10 @@ def test_os_exec(set_debug_mode, get_configuration, configure_environment, resta
     tags:
         - simulator
     '''
+
+    # Check if the manager is restarted properly"
+    assert not restart_service
+
     metadata = get_configuration.get('metadata')
     protocol = metadata['protocol']
     extra_args = metadata['extra_args']

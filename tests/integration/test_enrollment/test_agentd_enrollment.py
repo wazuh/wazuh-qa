@@ -87,15 +87,17 @@ def restart_agentd(get_current_test_case):
     """
     Restart Agentd and control if it is expected to fail or not.
     """
+    agent_restart_failure = False
     if 'wazuh-agentd' in get_current_test_case.get('skips', []):
         pytest.skip("This test does not apply to agentd")
 
     try:
         control_service('restart', daemon='wazuh-agentd')
     except Exception:
-        pass
+        print("Expected exception occurred")
+        agent_restart_failure = True
 
-    yield
+    yield agent_restart_failure
     control_service('stop', daemon='wazuh-agentd')
 
 
@@ -153,6 +155,9 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
             - Enrollment request message on Authd socket
             - Error logs related to the wrong configuration block
     """
+
+    # Check if the agent is stopped properly"
+    assert not restart_agentd
 
     if 'expected_error' in get_current_test_case:
         log_monitor = request.module.log_monitor
