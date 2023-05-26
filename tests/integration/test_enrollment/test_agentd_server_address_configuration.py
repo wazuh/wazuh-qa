@@ -184,6 +184,9 @@ def test_agentd_server_address_configuration(configure_local_internal_options_mo
         - agentd
     '''
 
+    # Check if socket listener is opened
+    assert configure_socket_listener
+
     cfg = get_configuration['metadata']
     manager_address = cfg['server_address']
 

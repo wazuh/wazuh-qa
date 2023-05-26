@@ -77,18 +77,12 @@ def get_current_test_case(request):
 
 @pytest.fixture(scope='module')
 def shutdown_agentd():
-    agent_stop_failure = False
     """
     Shutdown agentd to avoid interferences with agent-auth test
     """
-    try:
-        control_service('stop', daemon='wazuh-agentd')
-    except Exception:
-        print("Expected exception occurred")
-        agent_stop_failure = True
+    control_service('stop', daemon='wazuh-agentd')
 
-    yield agent_stop_failure
-    
+
 def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_current_test_case, create_certificates,
                                set_keys, set_password, file_monitoring, configure_socket_listener, request):
     """
@@ -147,8 +141,8 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
         - Error logs related to the wrong configuration block
     """
 
-    # Check if the agent is stopped properly"
-    assert not shutdown_agentd
+    # Check if socket listener is opened
+    assert configure_socket_listener
 
     if 'agent-auth' in get_current_test_case.get('skips', []):
         pytest.skip('This test does not apply to agent-auth')
