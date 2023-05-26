@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+### Feature
+- Change test_python_flaws.py to accept branch or commit in the same argument. ([#4207](https://github.com/wazuh/wazuh-qa/pull/4207)) (Tests)
+
 ## [4.4.3] - 25-06-2023
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/f7080df56081adaeaad94529522233e2f0bbd577
