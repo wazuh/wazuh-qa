@@ -56,7 +56,7 @@ def clone_wazuh_repository(pytestconfig):
                             repository_path,
                             depth=1,
                             branch=reference)
-        except repo.exc.GitCommandError:
+        except:
             repo = Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
                                    repository_path, branch='master', no_single_branch=True)
 
