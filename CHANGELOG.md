@@ -2,7 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.4.2] - TBD
+## [4.4.3] - 25-06-2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/f7080df56081adaeaad94529522233e2f0bbd577
+Release report: https://github.com/wazuh/wazuh/issues/17198
+
+## [4.4.2] - 18-05-2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/b2901d5086e7a073d89f4f72827e070ce3abd8e8
+Release report: https://github.com/wazuh/wazuh/issues/17004
+
 
 ### Added
 
