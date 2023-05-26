@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: https://github.com/wazuh/wazuh/commit/f7080df56081adaeaad94529522233e2f0bbd577
 Release report: https://github.com/wazuh/wazuh/issues/17198
 
+### Fixed
+- Fix missing comma in setup.py. ([#4180](https://github.com/wazuh/wazuh-qa/pull/4180)) (Framework)
+
 ## [4.4.2] - 18-05-2023
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/b2901d5086e7a073d89f4f72827e070ce3abd8e8
