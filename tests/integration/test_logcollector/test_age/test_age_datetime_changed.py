@@ -82,7 +82,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_age.yaml')
 
 DAEMON_NAME = "wazuh-logcollector"
 
-local_internal_options = {'logcollector.vcheck_files': '0', 'logcollector.debug': '2', 'monitord.rotate_log': '0', 
+local_internal_options = {'logcollector.vcheck_files': '0', 'logcollector.debug': '2', 'monitord.rotate_log': '0',
                           'windows.debug': '2'}
 
 timeout_logcollector_read = 10
@@ -136,7 +136,7 @@ def restart_logcollector_function():
 
 
 @pytest.mark.parametrize('new_datetime', new_host_datetime)
-@pytest.mark.skipif(sys.platform == 'win32', reason='It will be blocked by https://github.com/wazuh/wazuh-qa/issues/2174.')
+@pytest.mark.skip("Skipped by Issue #3218")
 def test_configuration_age_datetime(get_configuration, configure_environment, configure_local_internal_options_module,
                                     restart_monitord, restart_logcollector_function, file_monitoring,
                                     new_datetime, get_files_list, create_file_structure_function):

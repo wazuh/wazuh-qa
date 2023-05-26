@@ -44,20 +44,35 @@ All notable changes to this project will be documented in this file.
 - Fix an error in the cluster performance tests related to CSV parser ([#2999](https://github.com/wazuh/wazuh-qa/pull/2999)) \- (Framework + Tests)
 - Fix bug in the framework on migration tool ([#2999](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
 
-## [4.4.2] - TBD
+## [4.4.3] - 25-06-2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/f7080df56081adaeaad94529522233e2f0bbd577
+Release report: https://github.com/wazuh/wazuh/issues/17198
+
+## [4.4.2] - 18-05-2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/b2901d5086e7a073d89f4f72827e070ce3abd8e8
+Release report: https://github.com/wazuh/wazuh/issues/17004
+
 
 ### Added
 
+- Add package support for system tests ([#3965](https://github.com/wazuh/wazuh-qa/pull/3966)) \- (Framework)
 - Add test to check the Syscollector configuration. ([#3584](https://github.com/wazuh/wazuh-qa/pull/3584)) \- (Framework + Tests)
 - Add system tests for groups deletion ([#4057](https://github.com/wazuh/wazuh-qa/pull/4057)) \- (Tests)
 
 ### Fixed
 
+- Skip test_age_datetime_changed ([#4182](https://github.com/wazuh/wazuh-qa/pull/4182)) \- (Tests)
 - Limit urllib3 major required version ([#4162](https://github.com/wazuh/wazuh-qa/pull/4162)) \- (Framework)
 - Fix daemons_handler fixture (fix GCP IT) ([#4134](https://github.com/wazuh/wazuh-qa/pull/4134)) \- (Tests)
 - Fix wazuhdb IT. ([#3584](https://github.com/wazuh/wazuh-qa/pull/3584)) \- (Framework + Tests)
 - Fix agentd IT for python3.10 AMI ([#3973](https://github.com/wazuh/wazuh-qa/pull/3973)) \- (Tests)
 - Fix unstable system tests ([#4080](https://github.com/wazuh/wazuh-qa/pull/4080)) \- (Tests)
+
+### Changed
+
+- Modify authd ITs test_authd_valid_name_ip to avoid flackyness. ([#4164](https://github.com/wazuh/wazuh-qa/pull/4164)) \- (Tests)
 
 ## [4.4.1] - 12-04-2023
 
