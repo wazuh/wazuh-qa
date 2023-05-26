@@ -9,12 +9,12 @@ Release report: https://github.com/wazuh/wazuh/issues/17198
 
 ### Fixed
 - Fix missing comma in setup.py. ([#4180](https://github.com/wazuh/wazuh-qa/pull/4180)) (Framework)
+- Changed the last uses of 4.4.2 in setup.py and schema.yaml. ([#4172](https://github.com/wazuh/wazuh-qa/pull/4172)) \- (Framework)
 
 ## [4.4.2] - 18-05-2023
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/b2901d5086e7a073d89f4f72827e070ce3abd8e8
 Release report: https://github.com/wazuh/wazuh/issues/17004
-
 
 ### Added
 

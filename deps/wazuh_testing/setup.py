@@ -1,6 +1,7 @@
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+import json
 from setuptools import setup, find_packages
 import os
 
@@ -56,11 +57,21 @@ def get_files_from_directory(directory):
     return paths
 
 
+def get_version():
+    script_path = os.path.dirname(__file__)
+    rel_path = "../../version.json"
+    abs_file_path = os.path.join(script_path, rel_path)
+    f = open(abs_file_path)
+    data = json.load(f)
+    version = data['version']
+    return version
+
+
 package_data_list.extend(get_files_from_directory('wazuh_testing/qa_docs/search_ui'))
 
 setup(
     name='wazuh_testing',
-    version='4.4.3',
+    version=get_version(),
     description='Wazuh testing utilities to help programmers automate tests',
     url='https://github.com/wazuh',
     author='Wazuh',
