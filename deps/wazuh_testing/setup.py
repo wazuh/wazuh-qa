@@ -56,6 +56,7 @@ def get_files_from_directory(directory):
             paths.append(os.path.join('..', path, filename))
     return paths
 
+
 def get_version():
     script_path = os.path.dirname(__file__)
     rel_path = "../../version.json"
