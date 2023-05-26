@@ -47,8 +47,6 @@ def clone_wazuh_repository(pytestconfig):
     repository_path = tempfile.mkdtemp()
 
     try:
-
-
         # Clone into temporary dir
         # depth=1 creates a shallow clone with a history truncated to 1 commit. Implies single_branch=True.
         try:
