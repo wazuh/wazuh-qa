@@ -286,7 +286,7 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
         - simulator
     '''
     # Check if the agent is restarted properly"
-    assert not start_agent
+    assert not start_agent, 'The agent failed to restart successfully after enrolling the authentication simulator.'
 
     metadata = get_configuration['metadata']
     expected = metadata['results']
