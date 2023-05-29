@@ -28,6 +28,7 @@ Release report: https://github.com/wazuh/wazuh/issues/17004
 
 ### Fixed
 
+- Mark VD download feeds test as xfail ([#4197](https://github.com/wazuh/wazuh-qa/pull/4197)) \- (Tests)
 - Skip test_age_datetime_changed ([#4182](https://github.com/wazuh/wazuh-qa/pull/4182)) \- (Tests)
 - Limit urllib3 major required version ([#4162](https://github.com/wazuh/wazuh-qa/pull/4162)) \- (Framework)
 - Fix daemons_handler fixture (fix GCP IT) ([#4134](https://github.com/wazuh/wazuh-qa/pull/4134)) \- (Tests)
