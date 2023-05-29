@@ -733,9 +733,9 @@ def get_test_cases_data(data_file_path):
             if test_case['metadata']['fim_mode'] not in fim_modes:
                 continue
             else:
-                set_test_case_data():
+                set_test_case_data()
         else:
-            set_test_case_data():
+            set_test_case_data()
 
     return configuration_parameters, configuration_metadata, test_cases_ids
 
