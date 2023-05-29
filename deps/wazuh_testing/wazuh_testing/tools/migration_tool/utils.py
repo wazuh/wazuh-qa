@@ -1,8 +1,8 @@
-'''
+"""
 Copyright (C) 2015-2023, Wazuh Inc.
 Created by Wazuh, Inc. <info@wazuh.com>.
 This program is free software; you can redistribute it and/or modify it under the terms
-'''
+"""
 import glob
 import json
 import os
@@ -13,85 +13,65 @@ from jsonschema.exceptions import ValidationError
 from mysql.connector import errorcode
 
 import wazuh_testing.tools.migration_tool as migration_tool
-from wazuh_testing.tools.file import delete_all_files_in_folder, read_json_file, truncate_file
+from wazuh_testing.tools.file import read_json_file, truncate_file
 from wazuh_testing.tools.logging import Logging
 
 
 logger = Logging('migration_tool')
-vendors = ('alas', 'arch', 'almalinux', 'canonical', 'cve', 'debian', 'nvd', 'redhat', 'suse')
 
 
-def run_content_migration_tool(args='', config_files=None):
-    '''Run the Content Migration Tool with specified parameters and get the output.
+def run_content_migration_tool(configuration_file_path, args=''):
+    """Run the Content Migration Tool with specified parameters and get the output.
 
     Args:
+        configuration_file_path (PurePath): Path to configuration file.
         args (str): Arguments to be passed to the tool. For instance: '--debug' or '-w /tmp/workdir'
-        config_files (list): List of configuration files to be executed.
+
     Returns:
         output (str): Result of the tool execution if no error was thrown.
-        errors (str): Error output if the execution fails.
-    '''
-    errors = ''
+        error (str): Error output if the execution fails.
+    """
 
-    def run_tool(cmd):
-        proc = sbp.Popen(cmd, shell=True, stdout=sbp.PIPE, stderr=sbp.PIPE)
-        out, err = proc.communicate()
+    truncate_file(migration_tool.MIGRATION_TOOL_LOG_PATH)
+    command = ' '.join([migration_tool.MIGRATION_TOOL_PATH, '-i', str(configuration_file_path), args])
+    proc = sbp.Popen(command, shell=True, stdout=sbp.PIPE, stderr=sbp.PIPE)
+    out, error = proc.communicate()
+    output = out.decode()
+    error_checker = [True for msg in migration_tool.ERROR_MESSAGES if msg in output]
+    if len(error_checker) > 0:
+        error = output
+    else:
+        error = ''
 
-        return out, err
-
-    for file_path in config_files:
-        truncate_file(migration_tool.MIGRATION_TOOL_LOG_PATH)
-        command = ' '.join([migration_tool.MIGRATION_TOOL_PATH, '-i', file_path, args])
-        output, _ = run_tool(command)
-        output = output.decode()
-        error_checker = [True for msg in migration_tool.ERROR_MESSAGES if msg in output]
-        if len(error_checker) > 0:
-            errors += f"\n{output}"
-
-    return output, errors
+    return output, error
 
 
 def get_latest_delta_file(deltas_filepath):
-    '''Select the newest delta file generated (where the results are) from the list of all files.
+    """Select the newest delta file generated (where the results are) from the list of all files.
 
     Args:
         deltas_filepath (str): Path where the files are located.
+
     Returns:
         newest_file (str): Path of the newest file.
-    '''
+    """
     all_files = glob.glob(os.path.join(deltas_filepath, '*.delta.*'))
     newest_file = max(all_files, key=os.path.getctime)
 
     return newest_file
 
 
-def sanitize_configuration(configuration):
-    '''Normalize the configuration for it to be correctly processed and compatible.
-
-    Args:
-        configuration (list): Test case configuration to be sanitized.
-    Returns:
-        configuration (list): Configuration normalized.
-    '''
-    for configurations_obj in configuration:
-        configurations_list = configurations_obj['configurations']
-        for config_obj in configurations_list:
-            for key in config_obj:
-                config_obj[key.lower()] = config_obj.pop(key)
-
-    return configuration
-
-
 def validate_json_against_schema(json_document, schema):
-    '''Validate a JSON document under the given schema.
+    """Validate a JSON document under the given schema.
 
     Args:
         json_document (str): Path of the JSON document to be validated
         schema (str): Path of the CVE5 Schema by default.
+
     Returns:
         result (bool): False if the validation thrown an error, True if not.
         error (str): Error in the JSON document.
-    '''
+    """
     schema = read_json_file(schema)
 
     try:
@@ -103,11 +83,11 @@ def validate_json_against_schema(json_document, schema):
 
 
 def validate_against_delta_schema(_elements):
-    '''Wrapper function. Validate a file with deltas under the Delta schema.
+    """Wrapper function. Validate a file with deltas under the Delta schema.
 
     Args:
         _elements (dict): Python dictionary containing the data to be validated against the Delta schema.
-    '''
+    """
     _result = True
     _errors = []
     for cve in _elements:
@@ -119,11 +99,11 @@ def validate_against_delta_schema(_elements):
 
 
 def validate_against_cve5_schema(_elements):
-    '''Wrapper function. Validate a file with deltas under the CVE5 schema.
+    """Wrapper function. Validate a file with deltas under the CVE5 schema.
 
     Args:
         _elements (dict): Python dictionary containing the data to be validated against the CVE5 schema.
-    '''
+    """
     _result = True
     _errors = []
 
@@ -137,20 +117,23 @@ def validate_against_cve5_schema(_elements):
 
 
 def query_publisher_db(query):
-    '''Function to query the DB created by Content Migration Tool.
+    """Function to query the DB created by Content Migration Tool.
+
     Args:
         query (str): Query to send to the DB.
+
     Returns:
         result (list): Query results, empty if no query was executed or no results were returned.
-    '''
+    """
     result = []
+    credentials = migration_tool.ENVIRONMENT_CONFIG['migration_tool']
 
     try:
         connection = mysql.connector.connect(
-            host=migration_tool.MYSQL_CREDENTIALS['host'],
-            user=migration_tool.MYSQL_CREDENTIALS['user'],
-            password=migration_tool.MYSQL_CREDENTIALS['password'],
-            database=migration_tool.MYSQL_CREDENTIALS['database']
+            host=credentials['mysql_host'],
+            user=credentials['mysql_user'],
+            password=credentials['mysql_password'],
+            database=credentials['mysql_database']
             )
     except mysql.connector.Error as error:
         connection = None
@@ -170,21 +153,8 @@ def query_publisher_db(query):
     return result
 
 
-def clean_migration_tool_output_files():
-    '''Remove all files generated by Content Migration Tool.
-    '''
-    output_folders = [migration_tool.SNAPSHOTS_DIR, migration_tool.DOWNLOADS_DIR, migration_tool.UNCOMPRESSED_DIR]
-
-    for output_folder in output_folders:
-        for folder in vendors:
-            folder = os.path.join(output_folder, folder)
-            if os.path.exists(folder):
-                delete_all_files_in_folder(folder)
-
-
 def drop_migration_tool_tables():
-    '''Remove the tables created by CMT.
-    '''
+    """Remove the tables created by CMT."""
     tables = query_publisher_db('SHOW tables;')
     for table in tables:
         # `table` is a tuple with 1 element, so this one is selected
