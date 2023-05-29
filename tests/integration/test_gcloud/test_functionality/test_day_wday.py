@@ -125,7 +125,7 @@ def get_configuration(request):
     ({'ossec_time_conf'})
 ])
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_day_wday(tags_to_apply, get_configuration, configure_environment, reset_ossec_log, daemons_handler,
+def test_day_wday(tags_to_apply, get_configuration, configure_environment, reset_ossec_log, daemons_handler_module,
                   wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module starts to pull logs according to the day of the week,
@@ -202,8 +202,8 @@ def test_day_wday(tags_to_apply, get_configuration, configure_environment, reset
 ])
 @pytest.mark.xfail(reason="Blocked by wazuh/wazuh#15255")
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environment, reset_ossec_log, daemons_handler,
-                           wait_for_gcp_start):
+def test_day_wday_multiple(tags_to_apply, get_configuration, configure_environment, reset_ossec_log,
+                           daemons_handler_module, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module calculates the next scan correctly using time intervals
                  greater than one month, one week, or one day. For this purpose, the test will use different

@@ -95,6 +95,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 truncate_file(LOG_FILE_PATH)
 
+
 # fixtures
 
 @pytest.fixture(scope='module', params=configurations)
@@ -107,7 +108,7 @@ def get_configuration(request):
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_rules(get_configuration, configure_environment,
-               daemons_handler, wait_for_gcp_start):
+               daemons_handler_module, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module gets messages matching the GCP rules. It also checks
                  if the triggered alerts contain the proper rule ID. For this purpose, the test will

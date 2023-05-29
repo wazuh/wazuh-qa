@@ -903,10 +903,8 @@ def create_file_structure_function(get_files_list):
     delete_file_structure(get_files_list)
 
 
-@pytest.fixture(scope='module')
-def daemons_handler(get_configuration, request):
-    """Handler of Wazuh daemons.
-
+def daemons_handler_impl(request):
+    """Helper function to handle Wazuh daemons.
     It uses `daemons_handler_configuration` of each module in order to configure the behavior of the fixture.
     The  `daemons_handler_configuration` should be a dictionary with the following keys:
         daemons (list, optional): List with every daemon to be used by the module. In case of empty a ValueError
@@ -916,7 +914,6 @@ def daemons_handler(get_configuration, request):
         in order to use this fixture along with invalid configuration. Default `False`
 
     Args:
-        get_configuration (fixture): Get configurations from the module. Allows this fixture to be used for each param.
         request (fixture): Provide information on the executing test function.
     """
     daemons = []
@@ -974,8 +971,25 @@ def daemons_handler(get_configuration, request):
             control_service('stop', daemon=daemon)
 
 
-# Wrapper of `daemons_handler` function to change its scope from `module` to `function`
-daemons_handler_function = pytest.fixture(daemons_handler.__wrapped__, scope='function')
+@pytest.fixture(scope='module')
+def daemons_handler_module(get_configuration, request):
+    """Wrapper of `daemons_handler_impl` which contains the general implementation.
+
+    Args:
+        get_configuration (fixture): Get configurations from the module. Allows this fixture to be used for each param.
+        request (fixture): Provide information on the executing test function.
+    """
+    yield from daemons_handler_impl(request)
+
+
+@pytest.fixture(scope='function')
+def daemons_handler_function(request):
+    """Wrapper of `daemons_handler_impl` which contains the general implementation.
+
+    Args:
+        request (fixture): Provide information on the executing test function.
+    """
+    yield from daemons_handler_impl(request)
 
 
 @pytest.fixture(scope='function')
