@@ -1,4 +1,3 @@
-
 - name: '"CIS CentOS 8 osregex" policy'
   description: Run a SCA scan and check regex engine used and results
   configuration_parameters:

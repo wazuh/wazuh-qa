@@ -1,4 +1,3 @@
-
 - name: SCA Rule Check Fails - Apply remediation.
   description: A given rule check fails in SCA scan. After applying remediation, it passes in next scan.
   configuration_parameters:
