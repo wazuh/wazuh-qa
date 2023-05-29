@@ -31,6 +31,7 @@ Release report: https://github.com/wazuh/wazuh/issues/17004
 
 ### Fixed
 
+- Remove old XFail marker (API suite) ([#4177](https://github.com/wazuh/wazuh-qa/pull/4177)) \- (Tests)
 - Mark VD download feeds test as xfail ([#4197](https://github.com/wazuh/wazuh-qa/pull/4197)) \- (Tests)
 - Skip test_age_datetime_changed ([#4182](https://github.com/wazuh/wazuh-qa/pull/4182)) \- (Tests)
 - Limit urllib3 major required version ([#4162](https://github.com/wazuh/wazuh-qa/pull/4162)) \- (Framework)
