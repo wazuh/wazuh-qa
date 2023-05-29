@@ -41,16 +41,17 @@ tags:
     - wazuh_db
 '''
 import os
-import yaml
 import time
 import pytest
 import json
 
 from wazuh_testing.tools import WAZUH_PATH
-from wazuh_testing.wazuh_db import (query_wdb, insert_agent_into_group, clean_agents_from_db,
-                                    clean_groups_from_db, clean_belongs)
+from wazuh_testing.wazuh_db import query_wdb, insert_agent_into_group, clean_agents_from_db
+from wazuh_testing.wazuh_db import clean_groups_from_db, clean_belongs, calculate_global_hash
 from wazuh_testing.modules import TIER0, SERVER, LINUX
 from wazuh_testing.tools.file import get_list_of_content_yml
+from wazuh_testing.tools.services import delete_dbs
+
 
 # Marks
 pytestmark = [LINUX, TIER0, SERVER]
@@ -72,12 +73,20 @@ receiver_sockets = None  # Set in the fixtures
 # Insert agents into DB  and assign them into a group
 @pytest.fixture(scope='function')
 def pre_insert_agents_into_group():
+
     insert_agent_into_group(2)
 
     yield
+
     clean_agents_from_db()
     clean_groups_from_db()
     clean_belongs()
+
+
+@pytest.fixture(scope='module')
+def clean_databases():
+    yield
+    delete_dbs()
 
 
 # Tests
@@ -87,24 +96,24 @@ def pre_insert_agents_into_group():
                               for module_data, module_name in module_tests
                               for case in module_data]
                          )
-def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_module,
-                           test_case, pre_insert_agents_into_group):
+def test_sync_agent_groups(restart_wazuh_daemon, test_case, create_groups, pre_insert_agents_into_group,
+                           clean_databases):
     '''
     description: Check that commands about sync_aget_groups_get works properly.
     wazuh_min_version: 4.4.0
     parameters:
-        - configure_sockets_environment:
+        - restart_wazuh_daemon:
             type: fixture
-            brief: Configure environment for sockets and MITM.
-        - connect_to_sockets_module:
-            type: fixture
-            brief: Module scope version of 'connect_to_sockets' fixture.
+            brief: Truncate ossec.log and restart Wazuh.
         - test_case:
             type: fixture
             brief: List of test_case stages (dicts with input, output and agent_id and expected_groups keys).
         - pre_insert_agents_into_group:
             type: fixture
             brief: fixture in charge of insert agents and groups into DB.
+        - clean_databases:
+            type: fixture
+            brief: Delete all databases after test execution.
     assertions:
         - Verify that the socket response matches the expected output.
     input_description:
@@ -116,23 +125,27 @@ def test_sync_agent_groups(configure_sockets_environment, connect_to_sockets_mod
         - wdb_socket
     '''
     # Set each case
-    case_data = test_case[0]
-    output = case_data["output"]
+    output = test_case["output"]
 
     # Check if it requires any special configuration
-    if 'pre_input' in case_data:
-        for command in case_data['pre_input']:
+    if 'pre_input' in test_case:
+        for command in test_case['pre_input']:
             query_wdb(command)
 
+    # Check if it requires the global hash.
+    if '[GLOBAL_HASH]' in output:
+        global_hash = calculate_global_hash()
+        output = output.replace('[GLOBAL_HASH]', global_hash)
+
     time.sleep(1)
-    response = query_wdb(case_data["input"])
+    response = query_wdb(test_case["input"])
 
     # Validate response
     assert str(response) == output, "Did not get expected response: {output}, recieved: {response}"
 
     # Validate if the status of the group has change
-    if "new_status" in case_data:
-        agent_id = json.loads(case_data["agent_id"])
+    if "new_status" in test_case:
+        agent_id = json.loads(test_case["agent_id"])
         for id in agent_id:
             response = query_wdb(f'global get-agent-info {id}')
-            assert case_data["new_status"] == response[0]['group_sync_status']
+            assert test_case["new_status"] == response[0]['group_sync_status']

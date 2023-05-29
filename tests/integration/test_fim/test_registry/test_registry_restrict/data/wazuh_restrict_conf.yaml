@@ -20,6 +20,8 @@
         attributes:
         - arch: "both"
         - restrict_value: RESTRICT_VALUE
+    - frequency:
+        value: 3
   - section: sca
     elements:
     - enabled:
@@ -55,6 +57,8 @@
         attributes:
         - arch: "both"
         - restrict_key: RESTRICT_KEY
+    - frequency:
+        value: 3
   - section: sca
     elements:
     - enabled:

@@ -47,10 +47,12 @@ import time
 import pytest
 
 from system.test_cluster.test_agent_groups.common import register_agent
-from system import (check_agent_groups, check_agent_status, check_keys_file, delete_group_of_agents,
-                    assign_agent_to_new_group, AGENT_NO_GROUPS, AGENT_STATUS_NEVER_CONNECTED)
+from system import (check_agent_groups, check_agent_status, check_keys_file, create_new_agent_group,
+                    delete_agent_group, assign_agent_to_new_group, AGENT_NO_GROUPS, AGENT_STATUS_NEVER_CONNECTED)
 from wazuh_testing.tools.system import HostManager
 
+
+pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
 
 # Hosts
 test_infra_managers = ["wazuh-master", "wazuh-worker1", "wazuh-worker2"]
@@ -66,12 +68,8 @@ wait_time = 10
 
 
 # Tests
-@pytest.mark.parametrize("test_infra_managers", [test_infra_managers])
-@pytest.mark.parametrize("test_infra_agents", [test_infra_agents])
-@pytest.mark.parametrize("host_manager", [host_manager])
 @pytest.mark.parametrize("agent_target", ['wazuh-master', 'wazuh-worker1'])
-def test_assign_agent_to_a_group_by_tool(agent_target, clean_environment, test_infra_managers,
-                                         test_infra_agents, host_manager):
+def test_assign_agent_to_a_group_by_tool(agent_target, clean_environment):
     '''
     description: Check that when an agent with status never_connected, pointing to a master/worker node is
                  registered using agent-auth and when it is assigned to a group with agent-group, the change is synced
@@ -84,15 +82,6 @@ def test_assign_agent_to_a_group_by_tool(agent_target, clean_environment, test_i
         - clean_enviroment:
             type: fixture
             brief: Reset the wazuh log files at the start of the test. Remove all registered agents from master.
-        - test_infra_managers
-            type: List
-            brief: list of manager hosts in enviroment
-        - test_infra_managers
-            type: List
-            brief: list of agent hosts in enviroment
-        - host_manager
-            type: HostManager object
-            brief: handles connection the enviroment's hosts.
     assertions:
         - Verify that after registering the agent key file exists in all nodes.
         - Verify that after registering the agent appears as never_connected in all nodes.
@@ -116,6 +105,9 @@ def test_assign_agent_to_a_group_by_tool(agent_target, clean_environment, test_i
     check_agent_groups(agent_id, AGENT_NO_GROUPS, test_infra_managers, host_manager)
 
     try:
+        # Create group
+        create_new_agent_group(test_infra_managers[0], group_id, host_manager)
+
         # Add group to agent1
         assign_agent_to_new_group(test_infra_managers[0], group_id, agent_id, host_manager)
 
@@ -125,4 +117,4 @@ def test_assign_agent_to_a_group_by_tool(agent_target, clean_environment, test_i
 
     finally:
         # Delete group of agent
-        delete_group_of_agents(test_infra_managers[0], group_id, host_manager)
+        delete_agent_group(test_infra_managers[0], group_id, host_manager)

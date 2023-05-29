@@ -10,7 +10,7 @@ from typing import Union
 import testinfra
 import yaml
 
-from wazuh_testing.tools import WAZUH_CONF, WAZUH_API_CONF, API_LOG_FILE_PATH
+from wazuh_testing.tools import WAZUH_CONF, WAZUH_API_CONF, API_LOG_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import set_section_wazuh_conf
 
 
@@ -26,6 +26,19 @@ class HostManager:
             inventory_path (str): Ansible inventory path
         """
         self.inventory_path = inventory_path
+        try:
+            with open(self.inventory_path, "r") as inventory:
+                self.inventory = yaml.safe_load(inventory.read())
+        except (OSError, yaml.YAMLError) as inventory_err:
+            raise ValueError(f"Could not open/load Ansible inventory '{self.inventory_path}': {inventory_err}")
+
+    def get_inventory(self) -> dict:
+        """Get the loaded Ansible inventory.
+
+        Returns:
+            self.inventory: Ansible inventory
+        """
+        return self.inventory
 
     def get_host(self, host: str):
         """Get the Ansible object for communicating with the specified host.
@@ -308,6 +321,22 @@ class HostManager:
             Dictionary containing all the stat data.
         """
         return self.get_host(host).ansible("stat", f"path={path}")
+
+    def configure_local_internal_options(self, local_internal_options: dict):
+        """Add internal options in local_internal_options.conf
+
+        Args:
+            local_internal_options (dict): dictionary with hosts and internal options.
+        """
+        for target_host in local_internal_options:
+            internal_options_data = []
+            backup_local_internal_options = self.get_file_content(target_host, WAZUH_LOCAL_INTERNAL_OPTIONS)
+            for internal_options in local_internal_options[target_host]:
+                internal_options_data.append(f"{internal_options['name']}={internal_options['value']}\n")
+            replace = backup_local_internal_options
+            for internal_option in internal_options_data:
+                replace = replace + internal_option
+            self.modify_file_content(target_host, WAZUH_LOCAL_INTERNAL_OPTIONS, replace)
 
 
 def clean_environment(host_manager, target_files):
