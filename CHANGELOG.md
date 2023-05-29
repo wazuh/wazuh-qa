@@ -115,6 +115,7 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 
 ### Fixed
 
+- Fix `Unexpected Windows error during report gathering in Integration test fix` ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
 - Fix `test_assign_agent_group_with_enrollment` ([#3956](https://github.com/wazuh/wazuh-qa/pull/3956)) \- (Tests)
 - Fix `test_file_limit_delete_full` module ([#3990](https://github.com/wazuh/wazuh-qa/pull/3990)) \- (Tests)
 - Fix test_agent_groups system test ([#3955](https://github.com/wazuh/wazuh-qa/pull/3964)) \- (Tests)
