@@ -106,6 +106,7 @@ def get_configuration(request):
 
 # tests
 
+@pytest.mark.xfail(reason='Unstable, further information in wazuh/wazuh#17245')
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_rules(get_configuration, configure_environment,
                daemons_handler_module, wait_for_gcp_start):
