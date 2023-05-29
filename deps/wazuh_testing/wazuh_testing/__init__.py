@@ -105,6 +105,7 @@ UDP = 'UDP'
 TCP = 'TCP'
 TCP_UDP = 'TCP,UDP'
 
+VALID_FIM_MODES = ['scheduled', 'realtime', 'whodata']
 
 def is_udp(protocol):
     return protocol.upper() == UDP

@@ -12,7 +12,7 @@ from copy import deepcopy
 from subprocess import check_call, DEVNULL, check_output
 from typing import List, Any, Set
 
-from wazuh_testing import global_parameters, logger
+from wazuh_testing import global_parameters, logger, VALID_FIM_MODES
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS, AGENT_CONF, \
                                 LOCAL_RULES_PATH
 from wazuh_testing import global_parameters, logger
@@ -721,6 +721,8 @@ def get_test_cases_data(data_file_path):
 
     for test_case in test_cases_data:
         if 'fim_mode' in test_case['metadata']:
+            if test_case['metadata']['fim_mode'] not in VALID_FIM_MODES:
+                raise ValueError(f"Invalid fim_mode: {test_case['metadata']['fim_mode']} detected.")
             if test_case['metadata']['fim_mode'] not in fim_modes:
                 continue
             else:
