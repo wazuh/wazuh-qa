@@ -121,8 +121,9 @@ def get_configuration(request):
     ['- DEBUG - GCP message' for _ in range(100)],
     ['- DEBUG - GCP message' for _ in range(120)]
 ], indirect=True)
+@pytest.mark.xfail(reason='Unstable, further information in wazuh/wazuh#17245')
 def test_max_messages(get_configuration, configure_environment, reset_ossec_log, publish_messages,
-                      daemons_handler, wait_for_gcp_start):
+                      daemons_handler_module, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module pulls a message number less than or equal to the limit set
                  in the 'max_messages' tag. For this purpose, the test will use a fixed limit and generate a

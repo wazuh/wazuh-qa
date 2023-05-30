@@ -12,6 +12,10 @@ Release report: TBD
 - Change test_python_flaws.py to accept branch or commit in the same argument. ([#4209](https://github.com/wazuh/wazuh-qa/pull/4209)) (Tests)
 - Fix test_dependencies.py for the changes in the feature. ([#4210](https://github.com/wazuh/wazuh-qa/pull/4210)) (Tests)
 
+### Fixed
+
+- Fix syscollector tests failure (get_configuration fixture has different scope) ([#4154](https://github.com/wazuh/wazuh-qa/pull/4154)) \- (Framework + Tests)
+
 ## [4.4.3] - 25-06-2023
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/f7080df56081adaeaad94529522233e2f0bbd577
@@ -35,6 +39,8 @@ Release report: https://github.com/wazuh/wazuh/issues/17004
 
 ### Fixed
 
+- Stabilize multiple wday tests (GCloud integration) ([#4176](https://github.com/wazuh/wazuh-qa/pull/4176)) \- (Tests)
+- Remove old XFail marker (API suite) ([#4177](https://github.com/wazuh/wazuh-qa/pull/4177)) \- (Tests)
 - Mark VD download feeds test as xfail ([#4197](https://github.com/wazuh/wazuh-qa/pull/4197)) \- (Tests)
 - Skip test_age_datetime_changed ([#4182](https://github.com/wazuh/wazuh-qa/pull/4182)) \- (Tests)
 - Limit urllib3 major required version ([#4162](https://github.com/wazuh/wazuh-qa/pull/4162)) \- (Framework)
