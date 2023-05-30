@@ -2,10 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-### Feature
+## [4.4.4] - TBD
 
-- Change test_python_flaws.py to accept branch or commit in the same argument. ([#4209](https://github.com/wazuh/wazuh-qa/pull/4207)) (Tests)
+Wazuh commit: TBD
+Release report: TBD
+
+## Added
+
+- Change test_python_flaws.py to accept branch or commit in the same argument. ([#4209](https://github.com/wazuh/wazuh-qa/pull/4209)) (Tests)
 - Fix test_dependencies.py for the changes in the feature. ([#4210](https://github.com/wazuh/wazuh-qa/pull/4210)) (Tests)
+
+### Fixed
+
+- Fix syscollector tests failure (get_configuration fixture has different scope) ([#4154](https://github.com/wazuh/wazuh-qa/pull/4154)) \- (Framework + Tests)
 
 ## [4.4.3] - 25-06-2023
 
@@ -14,7 +23,6 @@ Release report: https://github.com/wazuh/wazuh/issues/17198
 
 ### Fixed
 
-- Fix syscollector tests failure (get_configuration fixture has different scope) ([#4154](https://github.com/wazuh/wazuh-qa/pull/4154)) \- (Framework + Tests)
 - Fix missing comma in setup.py. ([#4180](https://github.com/wazuh/wazuh-qa/pull/4180)) (Framework)
 - Changed the last uses of 4.4.2 in setup.py and schema.yaml. ([#4172](https://github.com/wazuh/wazuh-qa/pull/4172)) \- (Framework)
 
