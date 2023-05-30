@@ -110,7 +110,6 @@ def create_registry(key, subkey, arch):
             logger.warning(f"Registry could not be created: {e}")
         except pywintypes.error as e:
             logger.warning(f"Registry could not be created: {e}")
-            
 
 
 def modify_key_perms(key, subkey, arch, user):
