@@ -44,10 +44,10 @@ def create_key(request):
 
 
 @pytest.fixture()
-def create_files_in_folder(files_number):
+def create_files_in_folder(metadata):
     """Create files in monitored folder and files"""
 
-    for file in range(0, files_number):
+    for file in range(0, metadata['files']):
         create_file(REGULAR, MONITORED_DIR_1, f"test_file_{time.time()}_{file}")
 
     yield
