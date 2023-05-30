@@ -129,7 +129,7 @@ def test_integration_no_option_tag(configuration, metadata, set_wazuh_configurat
             brief: Restart wazuh daemon before starting a test.
         - wait_for_start_module:
             type: fixture
-            brief: Detect the start of the Integratord module in the ossec.log
+            brief: Detect the start of the Integratord module
 
     assertions:
         - Verify the integration is enabled
@@ -208,7 +208,7 @@ def test_slack_options(configuration, metadata, set_wazuh_configuration, truncat
             brief: Restart wazuh daemon before starting a test.
         - wait_for_start_module:
             type: fixture
-            brief: Detect the start of the Integratord module in the ossec.log
+            brief: Detect the start of the Integratord module
 
     assertions:
         - Verify the integration is enabled
@@ -230,7 +230,7 @@ def test_slack_options(configuration, metadata, set_wazuh_configuration, truncat
     '''
     wazuh_monitor = FileMonitor(LOG_FILE_PATH)
 
-    # Read Response in ossec.log
+    # Check integration is enabled
     evm.detect_integration_enabled(integration=metadata['integration'], file_monitor=wazuh_monitor)
 
     if not metadata['sends_message']:
