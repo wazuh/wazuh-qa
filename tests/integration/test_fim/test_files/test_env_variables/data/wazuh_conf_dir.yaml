@@ -3,7 +3,6 @@
     - ossec_conf
   apply_to_modules:
     - test_dir
-    - test_dir_win32
   sections:
     - section: syscheck
       elements:
@@ -13,6 +12,8 @@
             value: TEST_ENV_VARIABLES
             attributes:
               - FIM_MODE
+        - frequency:
+            value: 5
     - section: sca
       elements:
         - enabled:

@@ -53,14 +53,15 @@ tags:
 import os
 
 import pytest
-import re
-from wazuh_testing.fim import generate_params, regular_file_cud, detect_initial_scan, callback_ignore_realtime_flag
+from wazuh_testing import LOG_FILE_PATH
+from wazuh_testing.fim import detect_initial_scan, callback_ignore_realtime_flag
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.fim.utils import generate_params, regular_file_cud
+
 
 # Marks
-
-
 pytestmark = [pytest.mark.darwin, pytest.mark.sunos5, pytest.mark.tier(level=0)]
 
 # variables
@@ -140,5 +141,5 @@ def test_realtime_unsupported(get_configuration, configure_environment, file_mon
 
     detect_initial_scan(log_monitor)
 
-    regular_file_cud(directory_str, log_monitor, file_list=[test_file], time_travel=False, triggers_event=True,
+    regular_file_cud(directory_str, log_monitor, file_list=[test_file], triggers_event=True,
                      event_mode="scheduled", min_timeout=15)
