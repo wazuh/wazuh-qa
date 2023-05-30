@@ -5,8 +5,8 @@ import os
 import subprocess
 import sys
 import time
-
 import psutil
+
 from wazuh_testing.tools import WAZUH_PATH, get_service, WAZUH_SOCKETS, QUEUE_DB_PATH, WAZUH_OPTIONAL_SOCKETS
 from wazuh_testing.tools.configuration import write_wazuh_conf
 from wazuh_testing.modules import WAZUH_SERVICES_START, WAZUH_SERVICES_STOP

@@ -104,7 +104,7 @@ def get_configuration(request):
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_pull_on_start(get_configuration, configure_environment,
-                       daemons_handler, wait_for_gcp_start):
+                       daemons_handler_module, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module pulls messages when starting if the 'pull_on_start' is
                  set to 'yes', or sleeps up to the next interval if that one is set to 'no'. For this
