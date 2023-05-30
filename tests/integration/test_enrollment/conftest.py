@@ -99,7 +99,7 @@ def configure_socket_listener(request, get_current_test_case):
         setattr(request.module, 'socket_listener', socket_listener)
 
     except Exception:
-        print("Expected exception occurred")
+        print("Unexpected exception occurred during Man In the Middle initialization")
         socket_listener_opened = False
 
     yield socket_listener_opened
