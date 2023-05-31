@@ -76,18 +76,6 @@ def install_audit(get_configuration):
         process = subprocess.run(["service", "auditd", "start"], check=True)
 
 
-@pytest.fixture()
-def create_files_in_folder(files_number):
-    """Create files in monitored folder and files"""
-
-    for file in range(0, files_number):
-        create_file(REGULAR, MONITORED_DIR_1, f"test_file_{time.time()}_{file}")
-
-    yield
-
-    delete_path_recursively(MONITORED_DIR_1)
-
-
 @pytest.fixture(scope='module')
 def install_audit(get_configuration):
     """Install auditd before test"""
