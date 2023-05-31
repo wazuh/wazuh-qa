@@ -157,7 +157,7 @@ def test_large_changes(configuration, metadata, set_wazuh_configuration, configu
           the testing platform is Windows.
 
     input_description: The file 'configuration_large_changes.yaml' provides the configuration template.
-                       The file 'cases_large_changes.yaml' provides the tes cases configuration
+                       The file 'cases_large_changes.yaml' provides the test cases configuration
                        details for each test case.
 
     expected_output:
