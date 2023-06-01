@@ -528,7 +528,6 @@ def get_fim_event(file_monitor=None, callback='', error_message=None, update_pos
         accum_results (int): Accumulation of matches.
     Returns:
          returns the value given by the callback used. Default None.
-damarisg marked this conversation as resolved.
     """
     file_monitor = FileMonitor(file_to_monitor) if file_monitor is None else file_monitor
     error_message = f"Could not find this event in {file_to_monitor}: {callback}" if error_message is None else \
