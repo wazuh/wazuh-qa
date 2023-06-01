@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2022, Wazuh Inc.
+# Copyright (C) 2015-2023, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -317,6 +317,20 @@ def transform_registry_list(value_list=['test_value'], value_type=fim.REG_SZ, ca
             raise ValueError('It can only be a list or dictionary')
 
         return aux_dict
+
+
+def transform_registry_key_list(key_list=['test_value'], callback=ev.callback_key_event):
+    if sys.platform == 'win32':
+        aux_dict = {}
+        if isinstance(key_list, list):
+            for elem in key_list:
+                aux_dict[elem] = ('', callback)
+
+        elif isinstance(key_list, dict):
+            for key, elem in key_list.items():
+                aux_dict[key] = (elem, callback)
+        else:
+            raise ValueError('It can only be a list or dictionary')
 
 
 def set_check_options(options):

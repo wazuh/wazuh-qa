@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2022, Wazuh Inc.
+# Copyright (C) 2015-2023, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -7,8 +7,9 @@ import json
 
 from sys import platform
 from datetime import datetime
-from wazuh_testing import LOG_FILE_PATH, logger, T_60
+from wazuh_testing import LOG_FILE_PATH, logger, T_30, T_60
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules.fim import MAX_EVENTS_VALUE
 
 
 # Variables
@@ -43,13 +44,12 @@ CB_SYNC_SKIPPED = r".*Sync still in progress. Skipped next sync and increased in
 CB_SYNC_INTERVAL_RESET = r".*Previous sync was successful. Sync interval is reset to: '(\d+)s'"
 CB_IGNORING_DUE_TO_SREGEX = r".*?Ignoring path '(.*)' due to sregex '(.*)'.*"
 CB_IGNORING_DUE_TO_PATTERN = r".*?Ignoring path '(.*)' due to pattern '(.*)'.*"
-CB_MAXIMUM_FILE_SIZE = r'.*Maximum file size limit to generate diff information configured to \'(\d+) KB\'.*'
-CB_AGENT_CONNECT = r'.* Connected to the server .*'
 CB_REALTIME_WHODATA_ENGINE_STARTED = r'.*File integrity monitoring (real-time Whodata) engine started.*'
 CB_DISK_QUOTA_LIMIT_CONFIGURED_VALUE = r'.*Maximum disk quota size limit configured to \'(\d+) KB\'.*'
 CB_FILE_EXCEEDS_DISK_QUOTA = r'.*The (.*) of the file size \'(.*)\' exceeds the disk_quota.*'
 CB_FILE_SIZE_LIMIT_REACHED = r'.*File \'(.*)\' is too big for configured maximum size to perform diff operation\.'
 CB_DIFF_FOLDER_DELETED = r'.*Folder \'(.*)\' has been deleted.*'
+CB_FIM_WILDCARD_EXPANDING = r".*Expanding entry '.*' to '(.*)' to monitor FIM events."
 CB_FIM_PATH_CONVERTED = r".*fim_adjust_path.*Convert '(.*) to '(.*)' to process the FIM events."
 CB_STARTING_WINDOWS_AUDIT = r'.*state_checker.*(Starting check of Windows Audit Policies and SACLs)'
 CB_SWITCHING_DIRECTORIES_TO_REALTIME = r'.*state_checker.*(Audit policy change detected.\
@@ -225,6 +225,20 @@ def callback_detect_file_integrity_event(line):
     if event and event['component'] == 'fim_file':
         return event
     return None
+
+
+def callback_key_event(line):
+    """ Callback that detects if a line contains a registry integrity event for a registry_key
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    """
+
+    event = callback_detect_event(line)
+
+    if event is None or event['data']['attributes']['type'] != 'registry_key':
+        return None
+
+    return event
 
 
 def callback_value_event(line):
@@ -474,6 +488,46 @@ def detect_whodata_start(file_monitor, timeout=T_60):
     """
     file_monitor.start(timeout=timeout, callback=generate_monitoring_callback(CB_REALTIME_WHODATA_ENGINE_STARTED),
                        error_message=ERR_MSG_WHODATA_ENGINE_EVENT)
+
+
+def get_messages(callback, timeout=T_30):
+    """Look for as many synchronization events as possible.
+    This function will look for the synchronization messages until a Timeout is raised or 'max_events' is reached.
+    Args:
+        timeout (int): Timeout that will be used to get the dbsync_no_data message.
+    Returns:
+        A list with all the events in json format.
+    """
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    events = []
+    for _ in range(0, MAX_EVENTS_VALUE):
+        event = None
+        try:
+            event = wazuh_log_monitor.start(timeout=timeout, accum_results=1,
+                                            callback=callback,
+                                            error_message=f"Did not receive expected {callback} event").result()
+        except TimeoutError:
+            break
+        if event is not None:
+            events.append(event)
+    return events
+
+
+def check_registry_crud_event(callback, path,  timeout=T_30, type='added', arch='x32', value_name=None):
+    """Detect realtime engine start when restarting Wazuh.
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+    """
+    events = get_messages(callback=callback, timeout=timeout)
+    for event in events:
+        if event['data']['type'] == type and arch in event['data']['arch'] and event['data']['path'] == path:
+            if value_name is not None:
+                if 'value_name' in event and event['data']['value_name'] == value_name:
+                    return event
+            else:
+                return event
+
+    return None
 
 
 def detect_windows_sacl_configured(file_monitor, file='.*'):
