@@ -37,6 +37,10 @@ Release report: https://github.com/wazuh/wazuh/issues/17004
 - Add test to check the Syscollector configuration. ([#3584](https://github.com/wazuh/wazuh-qa/pull/3584)) \- (Framework + Tests)
 - Add system tests for groups deletion ([#4057](https://github.com/wazuh/wazuh-qa/pull/4057)) \- (Tests)
 
+### Changed
+
+- Change integratord test to use slack instead of virustotal ([#3540](https://github.com/wazuh/wazuh-qa/pull/3540)) \- (Framework + Tests)
+
 ### Fixed
 
 - Stabilize multiple wday tests (GCloud integration) ([#4176](https://github.com/wazuh/wazuh-qa/pull/4176)) \- (Tests)
