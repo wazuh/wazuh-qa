@@ -170,6 +170,7 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 - Analysisd: Reduce execution time of tests with tier 0 ([#2546](https://github.com/wazuh/wazuh-qa/pull/2546)) \- (Tests)
 - Adapt logtest ITs given the rules skipping ([#2200](https://github.com/wazuh/wazuh-qa/pull/2200)) \- (Tests)
 - Updated the Authd response when a multigroup is too long ([#3746](https://github.com/wazuh/wazuh-qa/pull/3746)) \- (Tests)
+- Refactor ITs related to syscollector deltas alerts ([#3579](https://github.com/wazuh/wazuh-qa/pull/3579)) \- (Tests)
 
 ### Fixed
 
