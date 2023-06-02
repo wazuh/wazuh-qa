@@ -36,6 +36,7 @@ from system import (assign_agent_to_new_group, create_new_agent_group, delete_ag
                     restart_cluster)
 from wazuh_testing.tools.configuration import get_test_cases_data
 from system.test_cluster.test_agent_groups.common import register_agent
+
 pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
 
 test_infra_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2', 'wazuh-agent1', 'wazuh-agent2']
@@ -64,12 +65,11 @@ def group_creation_and_assignation(metadata, target_node):
     agent_ids = []
     for agent in test_infra_agents:
         agent_ip, agent_id, agent_name, manager_ip = register_agent(agent, test_infra_hosts[0], host_manager)
-        time.sleep(T_025)
         agent_ids.append(agent_id)
 
     restart_cluster(test_infra_agents, host_manager)
 
-    time.sleep(T_1)
+    time.sleep(T_10)
     for group in groups:
         create_new_agent_group(target_node, group, host_manager)
 
@@ -94,9 +94,15 @@ def group_creation_and_assignation(metadata, target_node):
 
 @pytest.fixture()
 def wait_end_initial_syncreq():
+
+    time_counter = 0
     result = execute_wdb_query(query, test_infra_hosts[0], host_manager)
+
     while 'syncreq' in result:
         time.sleep(T_1)
+        time_counter += T_1
+        if T_10 - time_counter == 0:
+            pytest.fail('Test failure due to unstable environment, syncreq does not disappear after group management')
         result = execute_wdb_query(query, test_infra_hosts[0], host_manager)
 
 
@@ -151,7 +157,7 @@ def test_group_sync_status(metadata, target_node, clean_environment, group_creat
                 if 'syncreq' == agent1_status  and 'synced' == agent2_status:
                     first_time_check = "syncreq"
 
-        elif metadata['agent_in_group'] == 'agent2': 
+        elif metadata['agent_in_group'] == 'agent2':
                 if 'synced' == agent1_status  and 'syncreq' == agent2_status:
                     first_time_check = "syncreq"
 
@@ -164,8 +170,8 @@ def test_group_sync_status(metadata, target_node, clean_environment, group_creat
     assert metadata['expected_first_check'] == first_time_check
 
     # Check after 5 seconds, sync_status
-    if 'syncreq' in execute_wdb_query(query, test_infra_hosts[0], host_manager): 
-        second_time_check = 'syncreq' 
+    if 'syncreq' in execute_wdb_query(query, test_infra_hosts[0], host_manager):
+        second_time_check = 'syncreq'
     else: second_time_check = 'synced'
 
     assert metadata['expected_second_check'] == second_time_check
