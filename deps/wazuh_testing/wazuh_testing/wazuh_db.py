@@ -48,18 +48,18 @@ def mock_agent(
         os_build="4.18.0-147.8.1.el8_1.x86_64", os_platform="#1 SMP Thu Apr 9 13:49:54 UTC 2020",
         os_uname="x86_64", os_arch="x86_64", version="4.2", config_sum="", merged_sum="",
         manager_host="centos-8", node_name="node01", date_add="1612942494",
-        last_keepalive="253402300799", group="", sync_status="synced", connection_status="active",
+        last_keepalive="253402300799", sync_status="synced", connection_status="active",
         client_key_secret=None):
 
     create_agent_query = f'''global sql INSERT OR REPLACE INTO AGENT
                    (id, name, ip, register_ip, internal_key, os_name, os_version, os_major, os_minor,
                     os_codename, os_build, os_platform, os_uname, os_arch, version, config_sum, merged_sum,
-                    manager_host, node_name, date_add, last_keepalive, "group", sync_status, connection_status)
+                    manager_host, node_name, date_add, last_keepalive, sync_status, connection_status)
                    VALUES
                    ( {agent_id}, "{name}", "{ip}", "{register_ip}", "{internal_key}", "{os_name}", "{os_version}",
                      "{os_major}", "{os_minor}", "{os_codename}", "{os_build}", "{os_platform}", "{os_uname}",
                      "{os_arch}", "{version}", "{config_sum}", "{merged_sum}", "{manager_host}", "{node_name}",
-                     "{date_add}", "{last_keepalive}", "{group}", "{sync_status}", "{connection_status}")
+                     "{date_add}", "{last_keepalive}", "{sync_status}", "{connection_status}")
                    '''
     try:
         query_wdb(create_agent_query)
@@ -239,8 +239,8 @@ def calculate_global_hash():
     Returns:
         str: Actual global groups hash.
     """
-    GET_GROUP_HASH = '''global sql SELECT group_hash FROM agent WHERE
-                     id > 0 AND group_hash IS NOT NULL ORDER BY id'''
+    GET_GROUP_HASH = '''global sql SELECT GROUP_CONCAT(name_group) as group_hash
+                     FROM belongs GROUP BY id_agent ORDER BY id_agent, priority'''
 
     result = query_wdb(GET_GROUP_HASH)
     group_hashes = [item['group_hash'] for item in result]

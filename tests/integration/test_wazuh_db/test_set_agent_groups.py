@@ -151,7 +151,9 @@ def test_set_agent_groups(remove_database, restart_wazuh_daemon, test_case, crea
 
     assert test_case['expected_group_sync_status'] == response[0]['group_sync_status']
 
+    response = query_wdb(f'global select-group-belong {agent_id}')
+
     if test_case["expected_group"] == 'None':
-        assert 'group' not in response[0], "Agent has groups data and it was expecting no group data"
+        assert not response, "Agent has groups data and it was expecting no group data"
     else:
-        assert test_case["expected_group"] == response[0]['group'], "Did not receive the expected groups in the agent."
+        assert test_case["expected_group"] == response, "Did not receive the expected groups in the agent."

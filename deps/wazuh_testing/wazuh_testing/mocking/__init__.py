@@ -183,7 +183,7 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
                         os_build='4.18.0-147.8.1.el8_1.x86_64', os_platform='#1 SMP Thu Apr 9 13:49:54 UTC 2020',
                         os_uname='x64', os_arch='x64', version='Wazuh v4.3.0', config_sum='', merged_sum='',
                         manager_host='centos-8', node_name='node01', date_add='1612942494', hostname='centos-8',
-                        last_keepalive='253402300799', group='', sync_status='synced', connection_status='active',
+                        last_keepalive='253402300799', sync_status='synced', connection_status='active',
                         client_key_secret=None, os_release='', os_patch='', release='', sysname='Linux',
                         checksum='checksum', os_display_version='', triaged='0', reference='', disconnection_time='0',
                         architecture='x64'):
@@ -212,7 +212,6 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
         date_add (str): Date of the added/updated agent.
         hostname (str): Hostname.
         last_keepalive (str): Last keep alive timestamp reported.
-        group (str): Group of the agent.
         sync_status (str): Status of the syncronization.
         connection_status (str): Status of the connection.
         client_key_secret (str): Client secret key.
@@ -244,7 +243,7 @@ def create_mocked_agent(name='centos8-agent', ip='127.0.0.1', register_ip='127.0
                                      os_major=os_major, os_minor=os_minor, os_codename=os_codename, os_build=os_build,
                                      os_platform=os_platform, os_uname=os_uname, os_arch=os_arch, version=version,
                                      config_sum=config_sum, merged_sum=merged_sum, manager_host=manager_host,
-                                     node_name=node_name, date_add=date_add, last_keepalive=last_keepalive, group=group,
+                                     node_name=node_name, date_add=date_add, last_keepalive=last_keepalive,
                                      sync_status=sync_status, connection_status=connection_status,
                                      disconnection_time=disconnection_time)
 
