@@ -12,7 +12,7 @@ from copy import deepcopy
 from subprocess import check_call, DEVNULL, check_output
 from typing import List, Any, Set
 
-from wazuh_testing import global_parameters, logger
+from wazuh_testing import global_parameters, logger, VALID_FIM_MODES, OS_EXCLUDED_FROM_RT_WD
 from wazuh_testing.tools import WAZUH_PATH, GEN_OSSEC, WAZUH_CONF, PREFIX, WAZUH_LOCAL_INTERNAL_OPTIONS, AGENT_CONF, \
                                 LOCAL_RULES_PATH
 from wazuh_testing import global_parameters, logger
