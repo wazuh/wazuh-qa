@@ -123,7 +123,7 @@ def test_large_changes(configuration, metadata, set_wazuh_configuration, configu
     parameters:
         - configuration:
             type: dict
-            brief: Configuration values for ossec.conf.
+            brief: Configuration values.
         - metadata:
             type: dict
             brief: Test case data.
@@ -132,16 +132,16 @@ def test_large_changes(configuration, metadata, set_wazuh_configuration, configu
             brief: List of folders to be created for monitoring.
         - set_wazuh_configuration:
             type: fixture
-            brief: Set ossec.conf configuration.
+            brief: Set wazuh configuration.
         - create_monitored_folders_module:
             type: fixture
             brief: Create a given list of folders when the module starts. Delete the folders at the end of the module.
         - configure_local_internal_options_function:
             type: fixture
-            brief: Set local_internal_options.conf file.
+            brief: Set the local internal options file.
         - restart_syscheck_function:
             type: fixture
-            brief: restart syscheckd daemon, and truncate the ossec.log.
+            brief: restart syscheckd daemon, and truncate the logs file.
         - wait_syscheck_start:
             type: fixture
             brief: check that the starting FIM scan is detected.

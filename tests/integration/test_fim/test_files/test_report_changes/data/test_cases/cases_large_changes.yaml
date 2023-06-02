@@ -38,7 +38,7 @@
     fim_mode: whodata
 
 - name: Test large changes - Same size (Scheduled mode)
-  description: Test that changes are bigger than limit, 'More changes' appears in content_changes
+  description: Test when changes are same size of set limit, 'More changes' appears in content_changes
   configuration_parameters:
     INTERVAL: 4
     REALTIME: 'no'
@@ -51,7 +51,7 @@
     fim_mode: scheduled
 
 - name: Test large changes - Same size (Realtime mode)
-  description: Test that changes are bigger than limit, 'More changes' appears in content_changes
+  description: Test when changes are same size of set limit, 'More changes' appears in content_changes
   configuration_parameters:
     INTERVAL: 10000
     REALTIME: 'yes'
@@ -64,7 +64,7 @@
     fim_mode: realtime
 
 - name: Test large changes - Same size (Whodata mode)
-  description: Test that changes are bigger than limit, 'More changes' appears in content_changes.
+  description: Test when changes are same size of set limit, 'More changes' appears in content_changes.
   configuration_parameters:
     INTERVAL: 10000
     REALTIME: 'no'
@@ -116,7 +116,7 @@
     fim_mode: whodata
 
 - name: Test large changes - File smaller after change (Scheduled mode)
-  description: Test that changes are bigger than limit, 'More changes' appears in content_changes.
+  description: Test when file is smaller after change, 'More changes' appears in content_changes.
   configuration_parameters:
     INTERVAL: 4
     REALTIME: 'no'
@@ -129,7 +129,7 @@
     fim_mode: scheduled
 
 - name: Test large changes - File smaller after change (Realtime mode)
-  description: Test that changes are bigger than limit, 'More changes' appears in content_changes.
+  description: Test when file is smaller after change, 'More changes' appears in content_changes.
   configuration_parameters:
     INTERVAL: 10000
     REALTIME: 'yes'
@@ -142,7 +142,7 @@
     fim_mode: realtime
 
 - name: Test large changes - File smaller after change (Whodata mode)
-  description: Test that changes are bigger than limit, 'More changes' appears in content_changes.
+  description: Test when file is smaller after change, 'More changes' appears in content_changes.
   configuration_parameters:
     INTERVAL: 10000
     REALTIME: 'no'
