@@ -127,26 +127,23 @@ def test_registry_key_wildcards(configuration, metadata, set_wazuh_configuration
     parameters:
         - configuration:
             type: dict
-            brief: Configuration values for ossec.conf.
+            brief: Configuration values for to apply in agentt.
         - metadata:
             type: dict
             brief: Test case data.
         - set_wazuh_configuration:
             type: fixture
-            brief: Set ossec.conf configuration.
+            brief: Set wazuh's configuration.
+        - truncate_monitored_files:
+            type: fixture
+            brief: Truncate the logs and alerts files.
         - configure_local_internal_options_function:
             type: fixture
             brief: Set local_internal_options configuration.
-        - policies_file:
-            type: string
-            brief: path for audit policies file to use on restore_win_whodata_policies fixture
-        - restore_win_whodata_policies
-            type: fixture
-            brief: restores windows audit policies using a given csv file after yield
         - restart_syscheck_function:
             type: fixture
-            brief: restart syscheckd daemon, and truncate the ossec.log.
-        - wait_for_fim_start_function:
+            brief: restart syscheckd daemon, and truncate the logs.
+        - wait_syscheck_start:
             type: fixture
             brief: check that the starting fim scan is detected.
 
@@ -160,7 +157,6 @@ def test_registry_key_wildcards(configuration, metadata, set_wazuh_configuration
         - The file 'configuration_registry_wildcards.yaml' contains the configuration template for the test.
         - The file 'cases_registry_key_wildcards.yaml' contains test case descriptions, configuration values and
           metadata for each case.
-
 
     expected_output:
         - r".*Expanding entry '.*' to '(.*)' to monitor FIM events."
@@ -229,13 +225,13 @@ def test_registry_value_wildcards(configuration, metadata, set_wazuh_configurati
     parameters:
         - configuration:
             type: dict
-            brief: Configuration values for ossec.conf.
+            brief: Configuration values to apply to agent.
         - metadata:
             type: dict
             brief: Test case data.
         - set_wazuh_configuration:
             type: fixture
-            brief: Set ossec.conf configuration.
+            brief: Set wazuh's configuration file.
         - configure_local_internal_options_function:
             type: fixture
             brief: Set local_internal_options configuration.
@@ -247,8 +243,8 @@ def test_registry_value_wildcards(configuration, metadata, set_wazuh_configurati
             brief: restores windows audit policies using a given csv file after yield
         - restart_syscheck_function:
             type: fixture
-            brief: restart syscheckd daemon, and truncate the ossec.log.
-        - wait_for_fim_start_function:
+            brief: restart syscheckd daemon, and truncate the logs.
+        - wait_syscheck_start:
             type: fixture
             brief: check that the starting fim scan is detected.
 
@@ -262,7 +258,6 @@ def test_registry_value_wildcards(configuration, metadata, set_wazuh_configurati
         - The file 'configuration_registry_wildcards.yaml' contains the configuration template for the test.
         - The file 'cases_registry_value_wildcards.yaml' contains test case descriptions, configuration values and
           metadata for each case.
-
 
     expected_output:
         - r".*Expanding entry '.*' to '(.*)' to monitor FIM events."

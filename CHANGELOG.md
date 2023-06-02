@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Add tests with for new FIM registry monitoring wildcards support. ([#3856](https://github.com/wazuh/wazuh-qa/pull/3856)) \- (tests)
+- Add  IT tests FIM registry monitoring using wildcards. ([#3856](https://github.com/wazuh/wazuh-qa/pull/3856)) \- (Framework + Tests)
 - Add integration tests for AWS module. ([#3911](https://github.com/wazuh/wazuh-qa/pull/3911)) \- (Framework + Tests + Documentation)
 - Add tests for msu patches with no associated CVE . ([#4009](https://github.com/wazuh/wazuh-qa/pull/4009)) \- (Framework + Tests)
 - Add tests with new options to avoid FIM synchronization overlapping. ([#3318](https://github.com/wazuh/wazuh-qa/pull/3318)) \- (Framework + tests)

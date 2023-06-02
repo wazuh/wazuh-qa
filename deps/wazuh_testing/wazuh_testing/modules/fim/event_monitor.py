@@ -232,9 +232,7 @@ def callback_key_event(line):
     Args:
         line (String): string line to be checked by callback in File_Monitor.
     """
-
     event = callback_detect_event(line)
-
     if event is None or event['data']['attributes']['type'] != 'registry_key':
         return None
 
