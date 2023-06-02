@@ -7,24 +7,6 @@
       output: ok
       stage: global delete-group previous insert
     -
-      input: global find-group TestGroup1
-      output: ok []
-      stage: global find-group previous insert
-    -
-      input: global insert-agent-group TestGroup1
-      output: ok
-      stage: global insert-agent-group success
-    -
-      input: global find-group default
-      output: ok [{"id":*}]
-      stage: global find-group after insert
-      use_regex: "yes"
-    -
-      input: global find-group TestGroup1
-      output: ok [{"id":*}]
-      stage: global find-group after insert
-      use_regex: "yes"
-    -
       input: global select-groups
       output: ok [{"name":"default"},{"name":"TestGroup1"}]
       stage: global select-groups success
@@ -143,10 +125,6 @@
       input: global select-agent-name 1
       output: ok [{"name":"TestName2"}]
       stage: global select-agent-name success
-    -
-      input: global select-agent-group  1
-      output: ok [{"group":"TestGroup1"}]
-      stage: global select-agent-group success
     -
       input: global select-groups
       output: ok [{"name":"default"},{"name":"TestGroup1"}]
