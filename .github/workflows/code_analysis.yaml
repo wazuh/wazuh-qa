@@ -4,6 +4,7 @@ on:
     types:
       - opened
       - ready_for_review
+      - edited
 jobs:
   Linting:
     if: ${{ !github.event.pull_request.draft }}
