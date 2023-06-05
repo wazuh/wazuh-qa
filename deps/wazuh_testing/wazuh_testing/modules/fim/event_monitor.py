@@ -7,7 +7,7 @@ import json
 
 from sys import platform
 from datetime import datetime
-from wazuh_testing import LOG_FILE_PATH, logger, T_30, T_60, T_10
+from wazuh_testing import LOG_FILE_PATH, logger, T_30, T_60
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules.fim import MAX_EVENTS_VALUE
 
@@ -55,9 +55,6 @@ CB_STARTING_WINDOWS_AUDIT = r'.*state_checker.*(Starting check of Windows Audit 
 CB_SWITCHING_DIRECTORIES_TO_REALTIME = r'.*state_checker.*(Audit policy change detected.\
                                          Switching directories to realtime)'
 CB_RECIEVED_EVENT_4719 = r'.*win_whodata.*(Event 4719).*Switching directories to realtime'
-CB_WHODATA_QUEUE_SIZE = r".*Internal audit queue size set to \'(.*)\'."
-CB_WHODATA_QUEUE_FULL = r".*(Internal audit queue is full). Some events may be lost.*"
-CB_AUDIT_HEALTHCHECK_FAILED = r".*(Audit health check couldn't be completed correctly)."
 CB_FIM_REGISTRY_ENTRIES_COUNT = r".*Fim registry entries count: '(.*)'"
 CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT = r".*Fim registry values entries count: '(.*)'"
 
@@ -113,17 +110,6 @@ ERR_MSG_FILE_LIMIT_REACHED = 'Did not receive "File ... is too big ... to perfor
 ERR_MSG_FOLDER_DELETED = 'Did not receive expected "Folder ... has been deleted." event.'
 ERR_MSG_SACL_CONFIGURED_EVENT = 'Did not receive the expected "The SACL of <file> will be configured" event'
 ERR_MSG_WHODATA_REALTIME_MODE_CHANGE_EVENT = 'Expected "directory starts to monitored in real-time" event not received'
-
-
-def create_error_message(message, source=LOG_FILE_PATH):
-    """
-    Creates an error message from an event.
-    Args:
-        message(str): Message that will be shown in error message
-    Returns:
-        string: A string containing the error message to be shown
-    """
-    return fr'Did not receive the expected "{message}" event in "{source}" file.'
 
 
 # Callback functions
@@ -567,46 +553,3 @@ def detect_windows_whodata_mode_change(file_monitor, file='.*'):
 
     file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(pattern),
                        error_message=ERR_MSG_WHODATA_REALTIME_MODE_CHANGE_EVENT)
-
-
-def detect_audit_queue_full(file_monitor, update_position=True):
-    """Detects the configured value for the whodata queue
-    Args:
-        file_monitor (FileMonitor): file log monitor to detect events
-        update_position (bool, optional): True if we pop items from the queue once they are read. False otherwise.
-                                          Default `True`
-    """
-
-    return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_WHODATA_QUEUE_FULL),
-                              error_message=create_error_message(CB_WHODATA_QUEUE_FULL),
-                              update_position=update_position).result()
-
-
-def detect_invalid_conf_value(file_monitor, element):
-    """Detects the configured value for the whodata queue
-    Args:
-        file_monitor (FileMonitor): file log monitor to detect events
-        element (str): Elementa name that is being detected
-    """
-    pattern = fr".*Invalid value for element (\'{element}\': .*)"
-    return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(pattern),
-                              error_message=create_error_message(pattern)).result()
-
-
-def detect_audit_healthcheck_failed(file_monitor):
-    """Detects if the initial audit healtcheck has failed
-    Args:
-        file_monitor (FileMonitor): file log monitor to detect events
-    """
-    return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_AUDIT_HEALTHCHECK_FAILED),
-                              error_message=create_error_message(CB_AUDIT_HEALTHCHECK_FAILED)).result()
-
-
-def get_configured_whodata_queue_size(file_monitor):
-    """Detects the configured value for the whodata queue
-    Args:
-        file_monitor (FileMonitor): file log monitor to detect events
-    """
-
-    return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_WHODATA_QUEUE_SIZE),
-                              error_message=create_error_message(CB_WHODATA_QUEUE_SIZE)).result()
