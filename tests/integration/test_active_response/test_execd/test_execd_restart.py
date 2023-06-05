@@ -134,7 +134,7 @@ def start_agent(request, get_configuration):
         control_service('start')
 
     except Exception:
-        print("Expected exception occurred")
+        print("Failure to restart the agent")
         agent_restart_failure = True
 
     yield agent_restart_failure
