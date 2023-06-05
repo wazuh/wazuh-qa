@@ -631,6 +631,7 @@ def get_configured_whodata_queue_size(file_monitor):
     return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_WHODATA_QUEUE_SIZE),
                               error_message=create_error_message(CB_WHODATA_QUEUE_SIZE)).result()
 
+
 def get_fim_event(file_monitor=None, callback='', error_message=None, update_position=True,
                   timeout=T_60, accum_results=1, file_to_monitor=LOG_FILE_PATH):
     """ Check if FIM event occurs and return it according to the callback.

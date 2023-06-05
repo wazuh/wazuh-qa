@@ -156,6 +156,7 @@ def test_file_limit_no_limit(configure_local_internal_options_module, get_config
         - realtime
         - who_data
     '''
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
     wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                             callback=generate_monitoring_callback(CB_FILE_LIMIT_DISABLED),
