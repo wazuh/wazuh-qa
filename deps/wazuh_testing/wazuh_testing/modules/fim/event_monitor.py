@@ -7,8 +7,9 @@ import json
 
 from sys import platform
 from datetime import datetime
-from wazuh_testing import LOG_FILE_PATH, logger, T_60, T_30
+from wazuh_testing import LOG_FILE_PATH, logger, T_30, T_60, T_10
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
+from wazuh_testing.modules.fim import MAX_EVENTS_VALUE
 
 
 # Variables
@@ -48,12 +49,16 @@ CB_DISK_QUOTA_LIMIT_CONFIGURED_VALUE = r'.*Maximum disk quota size limit configu
 CB_FILE_EXCEEDS_DISK_QUOTA = r'.*The (.*) of the file size \'(.*)\' exceeds the disk_quota.*'
 CB_FILE_SIZE_LIMIT_REACHED = r'.*File \'(.*)\' is too big for configured maximum size to perform diff operation\.'
 CB_DIFF_FOLDER_DELETED = r'.*Folder \'(.*)\' has been deleted.*'
+CB_FIM_WILDCARD_EXPANDING = r".*Expanding entry '.*' to '(.*)' to monitor FIM events."
 CB_FIM_PATH_CONVERTED = r".*fim_adjust_path.*Convert '(.*) to '(.*)' to process the FIM events."
 CB_STARTING_WINDOWS_AUDIT = r'.*state_checker.*(Starting check of Windows Audit Policies and SACLs)'
 CB_FIM_WILDCARD_EXPANDING = r".*Expanding entry '.*' to '(.*)' to monitor FIM events."
 CB_SWITCHING_DIRECTORIES_TO_REALTIME = r'.*state_checker.*(Audit policy change detected.\
                                          Switching directories to realtime)'
 CB_RECIEVED_EVENT_4719 = r'.*win_whodata.*(Event 4719).*Switching directories to realtime'
+CB_WHODATA_QUEUE_SIZE = r".*Internal audit queue size set to \'(.*)\'."
+CB_WHODATA_QUEUE_FULL = r".*(Internal audit queue is full). Some events may be lost.*"
+CB_AUDIT_HEALTHCHECK_FAILED = r".*(Audit health check couldn't be completed correctly)."
 CB_FIM_REGISTRY_ENTRIES_COUNT = r".*Fim registry entries count: '(.*)'"
 CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT = r".*Fim registry values entries count: '(.*)'"
 
@@ -108,7 +113,17 @@ ERR_MSG_DISK_QUOTA_LIMIT = 'Did not receive "Maximum disk quota size limit confi
 ERR_MSG_FILE_LIMIT_REACHED = 'Did not receive "File ... is too big ... to perform diff operation" event.'
 ERR_MSG_FOLDER_DELETED = 'Did not receive expected "Folder ... has been deleted." event.'
 ERR_MSG_SACL_CONFIGURED_EVENT = 'Did not receive the expected "The SACL of <file> will be configured" event'
-ERR_MSG_WHODATA_REALTIME_MODE_CHANGE_EVENT = 'Expected "directory starts to monitored in real-time" event not received'
+
+
+def create_error_message(message, source=LOG_FILE_PATH):
+    """
+    Creates an error message from an event.
+    Args:
+        message(str): Message that will be shown in error message
+    Returns:
+        string: A string containing the error message to be shown
+    """
+    return fr'Did not receive the expected "{message}" event in "{source}" file.'
 
 
 # Callback functions
@@ -399,19 +414,6 @@ def callback_detect_file_deleted_event(line):
     return None
 
 
-def callback_detect_file_more_changes(line):
-    """ Callback that detects if a line in a log contains 'More changes' in content_changes.
-    Args:
-        line (String): string line to be checked by callback in FileMonitor.
-    Returns:
-        returns JSON string from log.
-    """
-    json_event = callback_detect_event(line)
-    if json_event is not None and 'content_changes' in json_event['data']:
-        if 'More changes' in json_event['data']['content_changes']:
-            return json_event
-
-
 def callback_audit_cannot_start(line):
     """ Callback that detects if a line shows whodata engine could not start and monitoring switched to realtime.
 
@@ -574,23 +576,44 @@ def detect_windows_whodata_mode_change(file_monitor, file='.*'):
                        error_message=ERR_MSG_WHODATA_REALTIME_MODE_CHANGE_EVENT)
 
 
-def get_fim_event(file_monitor=None, callback='', error_message=None, update_position=True,
-                  timeout=T_60, accum_results=1, file_to_monitor=LOG_FILE_PATH):
-    """ Check if FIM event occurs and return it according to the callback.
+def detect_audit_queue_full(file_monitor, update_position=True):
+    """Detects the configured value for the whodata queue
     Args:
-        file_monitor (FileMonitor): FileMonitor object to monitor the file content.
-        callback (str): log regex to check in Wazuh log
-        error_message (str): error message to show in case of expected event does not occur
-        update_position (boolean): filter configuration parameter to search in Wazuh log
-        timeout (str): timeout to check the event in Wazuh log
-        accum_results (int): Accumulation of matches.
-    Returns:
-         returns the value given by the callback used. Default None.
+        file_monitor (FileMonitor): file log monitor to detect events
+        update_position (bool, optional): True if we pop items from the queue once they are read. False otherwise.
+                                          Default `True`
     """
-    file_monitor = FileMonitor(file_to_monitor) if file_monitor is None else file_monitor
-    error_message = f"Could not find this event in {file_to_monitor}: {callback}" if error_message is None else \
-                    error_message
 
-    result = file_monitor.start(timeout=timeout, update_position=update_position, accum_results=accum_results,
-                                callback=callback, error_message=error_message).result()
-    return result
+    return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_WHODATA_QUEUE_FULL),
+                              error_message=create_error_message(CB_WHODATA_QUEUE_FULL),
+                              update_position=update_position).result()
+
+
+def detect_invalid_conf_value(file_monitor, element):
+    """Detects the configured value for the whodata queue
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+        element (str): Elementa name that is being detected
+    """
+    pattern = fr".*Invalid value for element (\'{element}\': .*)"
+    return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(pattern),
+                              error_message=create_error_message(pattern)).result()
+
+
+def detect_audit_healthcheck_failed(file_monitor):
+    """Detects if the initial audit healtcheck has failed
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+    """
+    return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_AUDIT_HEALTHCHECK_FAILED),
+                              error_message=create_error_message(CB_AUDIT_HEALTHCHECK_FAILED)).result()
+
+
+def get_configured_whodata_queue_size(file_monitor):
+    """Detects the configured value for the whodata queue
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+    """
+
+    return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_WHODATA_QUEUE_SIZE),
+                              error_message=create_error_message(CB_WHODATA_QUEUE_SIZE)).result()
