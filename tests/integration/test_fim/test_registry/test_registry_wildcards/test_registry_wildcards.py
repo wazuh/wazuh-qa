@@ -235,12 +235,6 @@ def test_registry_value_wildcards(configuration, metadata, set_wazuh_configurati
         - configure_local_internal_options_function:
             type: fixture
             brief: Set local_internal_options configuration.
-        - policies_file:
-            type: string
-            brief: path for audit policies file to use on restore_win_whodata_policies fixture
-        - restore_win_whodata_policies
-            type: fixture
-            brief: restores windows audit policies using a given csv file after yield
         - restart_syscheck_function:
             type: fixture
             brief: restart syscheckd daemon, and truncate the logs.
