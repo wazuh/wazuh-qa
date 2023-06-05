@@ -99,8 +99,8 @@ def restart_logcollector_function():
 @pytest.mark.parametrize('macos_message', macos_log_messages,
                          ids=[log_message['id'] for log_message in macos_log_messages])
 def test_macos_format_basic(restart_logcollector_required_daemons_package, get_configuration, configure_environment,
-                            configure_local_internal_options_module, macos_message, file_monitoring, daemons_handler,
-                            restart_logcollector_function):
+                            configure_local_internal_options_module, macos_message, file_monitoring,
+                            daemons_handler_module, restart_logcollector_function):
     '''
     description: Check if the 'wazuh-logcollector' gathers properly macOS unified logging system (ULS) events.
                  For this purpose, the test will configure a 'localfile' section using the macOS settings.
@@ -133,7 +133,7 @@ def test_macos_format_basic(restart_logcollector_required_daemons_package, get_c
         - file_monitoring:
             type: fixture
             brief: Handle the monitoring of a specified file.
-        - daemons_handler:
+        - daemons_handler_module:
             type: fixture
             brief: Handler of Wazuh daemons.
         - restart_logcollector_function:

@@ -24,7 +24,6 @@ targets:
     - manager
 
 daemons:
-    - wazuh-analysisd
     - wazuh-monitord
     - wazuh-modulesd
 
@@ -76,7 +75,7 @@ force_restart_after_restoring = False
 
 # configurations
 
-daemons_handler_configuration = {'daemons': ['wazuh-analysisd', 'wazuh-modulesd']}
+daemons_handler_configuration = {'daemons': ['wazuh-modulesd']}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -90,18 +89,18 @@ p, m = generate_params(extra_params=conf_params,
                        modes=monitoring_modes)
 
 configurations = conf.load_wazuh_configurations(configurations_path, __name__,
-                                           params=p, metadata=m)
+                                                params=p, metadata=m)
 
 
 # fixtures
-@pytest.fixture(scope='package', params= [
-    {'wazuh_modules.debug': 0, 'analysisd.debug': 2,
-      'monitord.rotate_log': 0, 'monitord.day_wait': 0,
-      'monitord.keep_log_days': 0, 'monitord.size_rotate': 0},
-    {'wazuh_modules.debug': 1, 'analysisd.debug': 2,
+@pytest.fixture(scope='module', params=[
+    {'wazuh_modules.debug': 0,
      'monitord.rotate_log': 0, 'monitord.day_wait': 0,
      'monitord.keep_log_days': 0, 'monitord.size_rotate': 0},
-    {'wazuh_modules.debug': 2, 'analysisd.debug': 2,
+    {'wazuh_modules.debug': 1,
+     'monitord.rotate_log': 0, 'monitord.day_wait': 0,
+     'monitord.keep_log_days': 0, 'monitord.size_rotate': 0},
+    {'wazuh_modules.debug': 2,
      'monitord.rotate_log': 0, 'monitord.day_wait': 0,
      'monitord.keep_log_days': 0, 'monitord.size_rotate': 0}
 ])
@@ -110,8 +109,8 @@ def get_local_internal_options(request):
     return request.param
 
 
-@pytest.fixture(scope='package')
-def configure_local_internal_options_package(get_local_internal_options):
+@pytest.fixture(scope='module')
+def configure_local_internal_options_module(get_local_internal_options):
     """Fixture to configure the local internal options file.
 
     It uses the test fixture get_local_internal_options. This should be
@@ -125,7 +124,6 @@ def configure_local_internal_options_package(get_local_internal_options):
     conf.set_local_internal_options_dict(local_internal_options)
     import wazuh_testing.tools.services as services
     services.restart_wazuh_daemon('wazuh-modulesd')
-
 
     yield
 
@@ -145,8 +143,8 @@ def get_configuration(request):
     (['{level} GCP'.format(level=log_level) for log_level in log_levels]),
 ], indirect=True)
 def test_logging(get_configuration, configure_environment, reset_ossec_log,
-                 publish_messages, configure_local_internal_options_package,
-                 daemons_handler, wait_for_gcp_start):
+                 publish_messages, configure_local_internal_options_module,
+                 daemons_handler_module, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module generates logs according to the debug level set for wazuh_modules.
                  For this purpose, the test will use different debug levels (depending on the test case) and
@@ -167,7 +165,7 @@ def test_logging(get_configuration, configure_environment, reset_ossec_log,
         - publish_messages:
             type: list
             brief: List of testing GCP logs.
-        - configure_local_internal_options_package:
+        - configure_local_internal_options_module:
             type: fixture
             brief: Fixture to modify the local_internal_options.conf file
                    and restart modulesd.
@@ -196,7 +194,7 @@ def test_logging(get_configuration, configure_environment, reset_ossec_log,
     '''
     str_interval = get_configuration['sections'][0]['elements'][4]['interval']['value']
     logging_opt = int([x[-2] for x in conf.get_wazuh_local_internal_options()
-                   if x.startswith('wazuh_modules.debug')][0])
+                      if x.startswith('wazuh_modules.debug')][0])
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
     mandatory_keywords = {}
     if logging_opt == 0:
