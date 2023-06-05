@@ -8,6 +8,8 @@ Wazuh commit: TBD \
 Release report: TBD
 
 ### Changed
+
+- Add option to run some logcollector tests isolated (without a manager) [#4226](https://github.com/wazuh/wazuh-qa/pull/4226) \- (Tests)
 - Update code analysis and dependencies known flaws. [#3319](https://github.com/wazuh/wazuh-qa/pull/4083) \- (Tests)
 - Update schema database version([#3879](https://github.com/wazuh/wazuh-qa/pull/3879)) \- (Tests)
 
