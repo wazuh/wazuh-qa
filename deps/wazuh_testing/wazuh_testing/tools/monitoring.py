@@ -269,16 +269,16 @@ class SocketController:
             versions_maps = {
                 "ssl_v2_3": ssl.PROTOCOL_SSLv23,
                 "ssl_tls": ssl.PROTOCOL_TLS,
-                "ssl_tlsv1_1": ssl.PROTOCOL_TLSv1_1,
+                "ssl_tlsv1_1": ssl.PROTOCOL_TLSv1,
                 "ssl_tlsv1_2": ssl.PROTOCOL_TLSv1_2,
             }
-            ssl_version = versions_maps.get(self.connection_protocol.lower())
+            ssl_version = versions_maps.get(self.connection_protocol.lower(), None)
             if ssl_version is None:
                 raise TypeError(
                     f'Invalid or unsupported SSL version specified, valid versions are: {list(versions_maps.keys())}')
             # Wrap socket into ssl
-            self.context = ssl.SSLContext(ssl_version)
-            self.sock = self.context.wrap_socket(self.sock,  server_side=False)
+            self.sock = ssl.wrap_socket(self.sock, ssl_version=ssl_version, ciphers=self.ciphers,
+                                        certfile=self.certificate, keyfile=self.keyfile)
             self.ssl = True
 
         # Connect only if protocol is TCP
