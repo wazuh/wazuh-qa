@@ -186,16 +186,16 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
     ciphers = config['ciphers']
     protocol = config['protocol']
     expect = config['expect']
-    
+
     if protocol == 'ssl_tlsv1_1':
         pytest.skip('TLS 1.1 is deprecated and not working on several pyOpenSSL versions.')
-    
+
     override_wazuh_conf(get_configuration)
-    
+
     address, family, connection_protocol = receiver_sockets_params[0]
     SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol,
                                   open_at_start=False)
-    
+
     SSL_socket.set_ssl_configuration(ciphers=ciphers, connection_protocol=protocol)
 
     try:
