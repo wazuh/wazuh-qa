@@ -30,6 +30,7 @@ import json
 import os
 import pytest
 import time
+from time import time as current_time
 from wazuh_testing import T_025, T_1, T_5, T_10
 from wazuh_testing.tools.system import HostManager
 from system import (assign_agent_to_new_group, create_new_agent_group, delete_agent_group, execute_wdb_query,
@@ -94,14 +95,12 @@ def group_creation_and_assignation(metadata, target_node):
 
 @pytest.fixture()
 def wait_end_initial_syncreq():
-
-    time_counter = 0
+    timeout = current_time() + T_10
     result = execute_wdb_query(query, test_infra_hosts[0], host_manager)
 
     while 'syncreq' in result:
         time.sleep(T_1)
-        time_counter += T_1
-        if T_10 - time_counter == 0:
+        if current_time() >= timeout:
             pytest.fail('Test failure due to unstable environment, syncreq does not disappear after group management')
         result = execute_wdb_query(query, test_infra_hosts[0], host_manager)
 
