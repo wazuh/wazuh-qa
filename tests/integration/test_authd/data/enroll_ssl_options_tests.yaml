@@ -25,7 +25,7 @@
     expect: open_error
     error: handshake failure
 -
-  name: SSL - Incompatible ciphers from Manger
+  name: SSL - Incompatible ciphers from Manager
   description: Send a message with low encryption cypher suites
   test_case:
     ciphers: HIGH:!ADH:!EXP:!MD5:!RC4:!3DES:!CAMELLIA:@STRENGTH
@@ -65,7 +65,7 @@
   # Override ossec.conf
   SSL_AUTO_NEGOTIATE: 'yes'
 -
-  name: SSL - Compatible ciphers from Manger
+  name: SSL - Compatible ciphers from Manager
   description: Send a message with a compatible yet not default cypher
   test_case:
     expect: output
