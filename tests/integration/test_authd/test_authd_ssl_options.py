@@ -182,42 +182,35 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
         - ssl
     '''
     current_test = get_current_test()
-    
-    import subprocess
-
-    command = ['openssl version']
-    supported_openssl = [ "1.1.0", "1.0.2", "1.0.0",  "0.9.8"]
-    output_object = subprocess.run(command, shell=True, 
-                            text=True, capture_output=True)
-    openssl_version = output_object.stdout.split()[1]
-    
     config = ssl_configuration_tests[current_test]['test_case']
-    override_wazuh_conf(get_configuration)
-    # print("----- TEST CASE -----\n", test_case)
-    # for config in test_case:
-    address, family, connection_protocol = receiver_sockets_params[0]
-    SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol,
-                                  open_at_start=False)
     ciphers = config['ciphers']
     protocol = config['protocol']
     expect = config['expect']
     
-    if openssl_version not in supported_openssl and protocol == "ssl_tlsv1_1":
-        pytest.skip("Unsuported TLS version")
+    if protocol == 'ssl_tlsv1_1':
+        pytest.skip('TLS 1.1 is deprecated and not working on several pyOpenSSL versions.')
+    
+    override_wazuh_conf(get_configuration)
+    
+    address, family, connection_protocol = receiver_sockets_params[0]
+    SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol,
+                                  open_at_start=False)
+    
     SSL_socket.set_ssl_configuration(ciphers=ciphers, connection_protocol=protocol)
+
     try:
         SSL_socket.open()
     except ssl.SSLError as exception:
         if expect == 'open_error':
-            # We expected the error here, check message
+            # We expected the error here, check message.
             assert config['error'] in exception.strerror, 'Expected message does not match!'
             return
         else:
-            # We did not expect this error, fail test
+            # We did not expect this error, fail test.
             raise
-    if not config.get('input'):
-        return
+
     SSL_socket.send(config['input'], size=False)
+
     if expect == 'output':
         # Output is expected
         expected = config['output']
@@ -226,4 +219,5 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
             assert response, 'Failed connection stage: {}'.format(config['stage'])
             assert response[:len(expected)] == expected, 'Failed test case stage: {}'.format(config['stage'])
 
+    # Finally close the socket. TODO: This must be handled on a fixture.
     SSL_socket.close()
