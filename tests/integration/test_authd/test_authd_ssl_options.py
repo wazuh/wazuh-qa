@@ -141,10 +141,9 @@ def override_wazuh_conf(configuration):
 
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=30, callback=callback_agentd_startup)
-    time.sleep(1)
 
 
-def test_ossec_auth_configurations(get_configuration, configure_environment, configure_sockets_environment_function):
+def test_ossec_auth_configurations(get_configuration, configure_environment, configure_sockets_environment):
     '''
     description:
         Checks if the 'SSL' settings of the 'wazuh-authd' daemon work correctly by enrolling agents
@@ -183,7 +182,15 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
         - ssl
     '''
     current_test = get_current_test()
+    
+    import subprocess
 
+    command = ['openssl version']
+    supported_openssl = [ "1.1.0", "1.0.2", "1.0.0",  "0.9.8"]
+    output_object = subprocess.run(command, shell=True, 
+                            text=True, capture_output=True)
+    openssl_version = output_object.stdout.split()[1]
+    
     config = ssl_configuration_tests[current_test]['test_case']
     override_wazuh_conf(get_configuration)
     # print("----- TEST CASE -----\n", test_case)
@@ -194,6 +201,9 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
     ciphers = config['ciphers']
     protocol = config['protocol']
     expect = config['expect']
+    
+    if openssl_version not in supported_openssl and protocol == "ssl_tlsv1_1":
+        pytest.skip("Unsuported TLS version")
     SSL_socket.set_ssl_configuration(ciphers=ciphers, connection_protocol=protocol)
     try:
         SSL_socket.open()
