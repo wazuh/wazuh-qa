@@ -280,8 +280,7 @@ def test_audit_buffer_overflow(configuration, metadata, test_folders, set_wazuh_
     detect_audit_queue_full(wazuh_log_monitor, update_position=False)
 
     # Get all file added events
-    results = get_messages(callback_detect_file_added_event, timeout=T_10,
-                           error_message=f"Did not receive the expected file added events")
+    results = get_messages(callback_detect_file_added_event, timeout=T_10)
 
     # Check the ammount of added events in whodata mode is equal or more than the expected value
     found_whodata_events = 0
