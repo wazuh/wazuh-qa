@@ -181,7 +181,7 @@ def test_registry_key_wildcards(configuration, metadata, set_wazuh_configuration
     assert event_added is not None, 'Did not find the expected "registry_key added" event'
 
     # Add new value in the key and detect the modification of created monitored key is detected
-    modify_registry_value(reg_handle, value_name, REG_SZ, 'added')
+    modify_registry_value(reg_handle, value_name, REG_SZ, 'new_value')
     event_modified = check_registry_crud_event(callback=callback_key_event, path=path, type='modified', timeout=T_10,
                                                arch='x64')
     assert event_modified is not None, 'Did not find the expected "registry_key modified" event'
