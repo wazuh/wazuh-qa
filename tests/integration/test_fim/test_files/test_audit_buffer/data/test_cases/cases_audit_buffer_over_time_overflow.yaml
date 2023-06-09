@@ -1,4 +1,4 @@
-- name: Audit_Buffer_overflows-New_files_in_whodata
+- name: audit_buffer_overflows_new_files_in_whodata
   description: Verify if files are added over the queue's size, and time passes, new files are detected in whodata mode
   configuration_parameters:
     TEST_DIRECTORIES: /

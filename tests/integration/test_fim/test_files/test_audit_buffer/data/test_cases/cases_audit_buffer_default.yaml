@@ -1,4 +1,4 @@
-- name: Verify_queue_size_default_value
+- name: verify_queue_size_default_value
   description: Verify when not setting queue_size it's default value is set and whodata starts correctly.
   configuration_parameters:
     TEST_DIRECTORIES: /testdir1

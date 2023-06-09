@@ -1,4 +1,4 @@
-- name: Queue_Size_100-value_inside_range_starts_properly
+- name: queue_size_100_value_inside_range_starts_properly
   description: Verify if value set is inside valid range it is configured and whodata starts correctly.
   configuration_parameters:
     QUEUE_SIZE: 100
@@ -7,7 +7,7 @@
     audit_starts: true
     valid_range: true
 
-- name: Queue_Size_10-Lower_limit_starts_properly
+- name: queue_size_10_Lower_limit_starts_properly
   description: Verify if value set is the lower allowed limit, whodata starts correctly
   configuration_parameters:
     QUEUE_SIZE: 10
@@ -16,7 +16,7 @@
     valid_range: true
     audit_starts: true
 
-- name: Queue_Size_1048576-Upper_limit_starts_properly
+- name: queue_size_1048576_Upper_limit_starts_properly
   description: Verify if value set to the upper limit whodata starts correctly.
   configuration_parameters:
     QUEUE_SIZE: 1048576
@@ -25,7 +25,7 @@
     audit_starts: true
     valid_range: true
 
-- name: Queue_Size_Invalid_value_below_minimum
+- name: queue_size_invalid_value_below_minimum
   description: Verify if value set is below allowed minimum, whodata fails to start.
   configuration_parameters:
     QUEUE_SIZE: 9
@@ -35,7 +35,7 @@
     audit_starts: false
     fail_reason: invalid_value
 
-- name: Queue_Size_Invalid_value_above_maximum
+- name: queue_size_invalid_value_above_maximum
   description: Verify if value set is above allowed minimum, whodata fails to start.
   configuration_parameters:
     QUEUE_SIZE: 1048577
@@ -45,7 +45,7 @@
     audit_starts: false
     fail_reason: invalid_value
 
-- name: Queue_Size_Invalid_value_Invalid_characters
+- name: queue_size_invalid_value_Invalid_characters
   description: Verify if value set using characters instead of only numbers, whodata fails to start.
   configuration_parameters:
     QUEUE_SIZE: 100c

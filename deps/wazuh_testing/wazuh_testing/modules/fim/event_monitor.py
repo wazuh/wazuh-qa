@@ -518,6 +518,7 @@ def get_messages(callback, timeout=T_30):
     """Look for as many synchronization events as possible.
     This function will look for the synchronization messages until a Timeout is raised or 'max_events' is reached.
     Args:
+        callback (str): Callback to be used to detect the event.
         timeout (int): Timeout that will be used to get the dbsync_no_data message.
     Returns:
         A list with all the events in json format.
@@ -538,9 +539,14 @@ def get_messages(callback, timeout=T_30):
 
 
 def check_registry_crud_event(callback, path,  timeout=T_30, type='added', arch='x32', value_name=None):
-    """Detect realtime engine start when restarting Wazuh.
+    """Get  all events matching the callback and validate the type, path and architecture of event
     Args:
-        file_monitor (FileMonitor): file log monitor to detect events
+        callback (str): Callback to be used to detect the event.
+        path (str): path to be checked.
+        timeout (int): Timeout that will be used to try and get the expected messages.
+        type (str): type of event to be checked.
+        arch (str): architecture of the event to be checked.
+        value_name (str): name of the value to be checked.
     """
     events = get_messages(callback=callback, timeout=timeout)
     for event in events:
@@ -619,7 +625,6 @@ def get_configured_whodata_queue_size(file_monitor):
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-
     return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_WHODATA_QUEUE_SIZE),
                               error_message=create_error_message(CB_WHODATA_QUEUE_SIZE)).result()
 

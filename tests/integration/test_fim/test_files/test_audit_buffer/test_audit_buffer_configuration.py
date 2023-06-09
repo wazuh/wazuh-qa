@@ -135,7 +135,7 @@ def test_audit_buffer_default(configuration, metadata, test_folders, set_wazuh_c
     parameters:
         - configuration:
             type: dict
-            brief: Configuration values for ossec.conf.
+            brief: Configuration values to apply.
         - metadata:
             type: dict
             brief: Test case data.
@@ -144,16 +144,16 @@ def test_audit_buffer_default(configuration, metadata, test_folders, set_wazuh_c
             brief: List of folders to be created for monitoring.
         - set_wazuh_configuration:
             type: fixture
-            brief: Set ossec.conf configuration.
+            brief: Set wazuh configuration.
         - create_monitored_folders_module:
             type: fixture
             brief: Create a given list of folders when the module starts. Delete the folders at the end of the module.
         - configure_local_internal_options_function:
             type: fixture
-            brief: Set local_internal_options.conf file.
+            brief: Set local_internal_options file.
         - restart_syscheck_function:
             type: fixture
-            brief: restart syscheckd daemon, and truncate the ossec.log.
+            brief: restart syscheckd daemon, and truncate the log files.
 
     assertions:
         - Verify configured queue_size value is default value
@@ -210,7 +210,7 @@ def test_audit_buffer_values(configuration, metadata, test_folders, set_wazuh_co
     parameters:
         - configuration:
             type: dict
-            brief: Configuration values for ossec.conf.
+            brief: Configuration values to apply.
         - metadata:
             type: dict
             brief: Test case data.
@@ -219,16 +219,16 @@ def test_audit_buffer_values(configuration, metadata, test_folders, set_wazuh_co
             brief: List of folders to be created for monitoring.
         - set_wazuh_configuration:
             type: fixture
-            brief: Set ossec.conf configuration.
+            brief: Set wazuh configuration.
         - create_monitored_folders_module:
             type: fixture
             brief: Create a given list of folders when the module starts. Delete the folders at the end of the module.
         - configure_local_internal_options_function:
             type: fixture
-            brief: Set local_internal_options.conf file.
+            brief: Set local internal options file.
         - restart_syscheck_function:
             type: fixture
-            brief: restart syscheckd daemon, and truncate the ossec.log.
+            brief: restart syscheckd daemon, and truncate the log files.
 
     assertions:
         - Verify when queue is full an event informs audit events may be lost
@@ -266,5 +266,5 @@ def test_audit_buffer_values(configuration, metadata, test_folders, set_wazuh_co
             # Detect real-time whodata thread does not start
             detect_whodata_start(wazuh_log_monitor, timeout=T_5)
     else:
-        # Detect real-time whodata thread started correctly
+        # Detect whodata thread started correctly
         detect_whodata_start(wazuh_log_monitor)

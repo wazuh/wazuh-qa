@@ -85,7 +85,7 @@ TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 # Configuration and cases data
 configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_audit_buffer_behavior.yaml')
 t1_test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_audit_buffer_no_overflow.yaml')
-t2_test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_audit_buffer_overflown.yaml')
+t2_test_cases_path = os.path.join(TEST_CASES_PATH, 'cases_audit_buffer_overflow.yaml')
 
 # Test configurations
 t1_configuration_parameters, t1_configuration_metadata, t1_test_case_ids = get_test_cases_data(t1_test_cases_path)
@@ -136,7 +136,7 @@ def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_waz
     parameters:
         - configuration:
             type: dict
-            brief: Configuration values for ossec.conf.
+            brief: Configuration values to apply.
         - metadata:
             type: dict
             brief: Test case data.
@@ -145,16 +145,16 @@ def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_waz
             brief: List of folders to be created for monitoring.
         - set_wazuh_configuration:
             type: fixture
-            brief: Set ossec.conf configuration.
+            brief: Set wazuh configuration.
         - create_monitored_folders:
             type: fixture
             brief: Create a given list of folders when the test starts. Delete the folders at the end of the test.
         - configure_local_internal_options_function:
             type: fixture
-            brief: Set local_internal_options.conf file.
+            brief: Set local_internal_options file.
         - restart_syscheck_function:
             type: fixture
-            brief: restart syscheckd daemon, and truncate the ossec.log.
+            brief: restart syscheckd daemon, and truncate the log files.
         - wait_syscheck_start:
             type: fixture
             brief: check that the starting FIM scan is detected.
@@ -163,8 +163,8 @@ def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_waz
         - Verify the queue does not overflow after inserting files
         - Verify all files are detected in whodata mode
 
-    input_description: The file 'configuration_audit_buffer_values' provides the configuration template.
-                       The file 'cases_audit_buffer_values.yaml' provides the test cases details for each test case.
+    input_description: The file 'configuration_audit_buffer_behavior' provides the configuration template.
+                       The file 'cases_audit_buffer_no_overflow.yaml' provides the test cases details for each test case.
 
     expected_output:
         - r".*(Internal audit queue is full). Some events may be lost. Next scheduled scan will recover lost data."
@@ -233,7 +233,7 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
     parameters:
         - configuration:
             type: dict
-            brief: Configuration values for ossec.conf.
+            brief: Configuration values to apply to wazuh.
         - metadata:
             type: dict
             brief: Test case data.
@@ -242,16 +242,16 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
             brief: List of folders to be created for monitoring.
         - set_wazuh_configuration:
             type: fixture
-            brief: Set ossec.conf configuration.
+            brief: Set wazuh configuration.
         - create_monitored_folders:
             type: fixture
             brief: Create a given list of folders when the test starts. Delete the folders at the end of the test.
         - configure_local_internal_options_function:
             type: fixture
-            brief: Set local_internal_options.conf file.
+            brief: Set local internal options file.
         - restart_syscheck_function:
             type: fixture
-            brief: restart syscheckd daemon, and truncate the ossec.log.
+            brief: restart syscheckd daemon, and truncate the log files.
         - wait_syscheck_start:
             type: fixture
             brief: check that the starting FIM scan is detected.
@@ -261,8 +261,8 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
         - Verify that files detected in whodata mode before it being full are equal or more than the configured value
         - Verify the excess files inserted after queue full are detected in scheduled mode.
 
-    input_description: The file 'configuration_audit_buffer_values' provides the configuration template.
-                       The file 'cases_audit_buffer_values.yaml' provides the tes cases configuration
+    input_description: The file 'configuration_audit_buffer_behavior' provides the configuration template.
+                       The file 'cases_audit_buffer_overflow.yaml' provides the tes cases configuration
                        details for each test case.
 
     expected_output:

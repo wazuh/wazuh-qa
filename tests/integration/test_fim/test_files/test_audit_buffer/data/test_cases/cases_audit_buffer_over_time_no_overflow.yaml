@@ -1,4 +1,4 @@
-- name: Audit_Buffer_full-all_files_detected_in_whodata
+- name: audit_buffer_full_all_files_detected_in_whodata
   description: Verify if files are added below the queue's size, after space is freed, all files appear in whodata mode
   configuration_parameters:
     TEST_DIRECTORIES: /

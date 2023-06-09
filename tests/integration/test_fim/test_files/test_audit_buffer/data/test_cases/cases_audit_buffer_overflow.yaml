@@ -1,4 +1,4 @@
-- name: Audit_buffer_overflowns
+- name: audit_buffer_overflows
   description: Verify if files are added over the queue's size, it overflows and files are detected in scheduled mode.
   configuration_parameters:
     TEST_DIRECTORIES: /
