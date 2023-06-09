@@ -271,8 +271,8 @@ def test_audit_buffer_overflow(configuration, metadata, test_folders, set_wazuh_
         - Verify configured queue_size value
         - Verify real-time whodata thread is started correctly
 
-    input_description: The file 'configuration_audit_buffer_values' provides the configuration template.
-                       The file 'cases_audit_buffer_values.yaml' provides the tes cases configuration
+    input_description: The file 'configuration_audit_buffer_over_time.yaml' provides the configuration template.
+                       The file 'cases_audit_buffer_over_time_overflow.yaml' provides the tes cases configuration
                        details for each test case.
 
     expected_output:
@@ -305,8 +305,7 @@ def test_audit_buffer_overflow(configuration, metadata, test_folders, set_wazuh_
         create_file(REGULAR, test_folders[0], f'test_file_second_insert_{file}', content='')
 
     # Get all file added events
-    results = get_messages(callback_detect_file_added_event, timeout=T_20, max_events=total_files,
-                           error_message=f"Did not receive the expected file added events")
+    results = get_messages(callback_detect_file_added_event, timeout=T_20, max_events=total_files)
 
     second_set_events = 0
     for result in results:

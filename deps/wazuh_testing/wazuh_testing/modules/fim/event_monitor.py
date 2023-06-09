@@ -120,6 +120,7 @@ def create_error_message(message, source=LOG_FILE_PATH):
     Creates an error message from an event.
     Args:
         message(str): Message that will be shown in error message
+        source(str): name of log file where the event was expected from (default: LOG_FILE_PATH).
     Returns:
         string: A string containing the error message to be shown
     """
@@ -484,13 +485,13 @@ def detect_initial_scan(file_monitor):
                        error_message=ERR_MSG_SCHEDULED_SCAN_ENDED)
 
 
-def detect_initial_scan_start(file_monitor):
+def detect_initial_scan_start(file_monitor, timeout=T_60):
     """Detect initial scan start when restarting Wazuh.
 
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    file_monitor.start(timeout=T_60, callback=callback_detect_scan_start,
+    file_monitor.start(timeout=timeout, callback=callback_detect_scan_start,
                        error_message=ERR_MSG_SCHEDULED_SCAN_STARTED)
 
 
@@ -515,19 +516,20 @@ def detect_whodata_start(file_monitor, timeout=T_60):
                        error_message=ERR_MSG_WHODATA_ENGINE_EVENT)
 
 
-def get_messages(callback, timeout=T_30):
+def get_messages(callback, timeout=T_30, max_events=MAX_EVENTS_VALUE):
     """Look for as many synchronization events as possible.
     This function will look for the synchronization messages until a Timeout is raised or 'max_events' is reached.
     Args:
         callback (str): Callback to be used to detect the event.
         timeout (int): Timeout that will be used to get the dbsync_no_data message.
+        max_events (int): Maximum number of events to be returned.
 
     Returns:
         A list with all the events in json format.
     """
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     events = []
-    for _ in range(0, MAX_EVENTS_VALUE):
+    for _ in range(0, max_events):
         event = None
         try:
             event = wazuh_log_monitor.start(timeout=timeout, accum_results=1,
@@ -606,7 +608,7 @@ def detect_invalid_conf_value(file_monitor, element):
     """Detects the configured value for the whodata queue
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
-        element (str): Elementa name that is being detected
+        element (str): Element name that is being detected
     """
     pattern = fr".*Invalid value for element (\'{element}\': .*)"
     return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(pattern),

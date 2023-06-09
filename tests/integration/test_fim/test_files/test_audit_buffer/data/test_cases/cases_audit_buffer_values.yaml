@@ -16,7 +16,7 @@
     valid_range: true
     audit_starts: true
 
-- name: queue_size_1048576_Upper_limit_starts_properly
+- name: queue_size_1048576_upper_limit_starts_properly
   description: Verify if value set to the upper limit whodata starts correctly.
   configuration_parameters:
     QUEUE_SIZE: 1048576
@@ -45,7 +45,7 @@
     audit_starts: false
     fail_reason: invalid_value
 
-- name: queue_size_invalid_value_Invalid_characters
+- name: queue_size_invalid_value_invalid_characters
   description: Verify if value set using characters instead of only numbers, whodata fails to start.
   configuration_parameters:
     QUEUE_SIZE: 100c
