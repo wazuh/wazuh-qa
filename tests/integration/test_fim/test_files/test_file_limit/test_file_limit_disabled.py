@@ -94,7 +94,7 @@ test_directories = [os.path.join(PREFIX, 'testdir1')]
 
 directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf_no_limit.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf_file_limit_disabled.yaml')
 testdir1 = test_directories[0]
 
 
@@ -115,7 +115,7 @@ def get_configuration(request):
 
 
 # Tests
-def test_file_limit_no_limit(configure_local_internal_options_module, get_configuration, configure_environment,
+def test_file_limit_disabled(configure_local_internal_options_module, get_configuration, configure_environment,
                              restart_syscheckd):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects that the 'file_limit' feature of FIM is disabled.
