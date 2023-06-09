@@ -627,7 +627,6 @@ def get_configured_whodata_queue_size(file_monitor):
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-
     return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_WHODATA_QUEUE_SIZE),
                               error_message=create_error_message(CB_WHODATA_QUEUE_SIZE)).result()
 
