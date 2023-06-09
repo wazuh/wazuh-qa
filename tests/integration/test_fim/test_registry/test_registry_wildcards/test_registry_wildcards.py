@@ -264,7 +264,7 @@ def test_registry_value_wildcards(configuration, metadata, set_wazuh_configurati
     assert monitored_keys != [], f"Did not receive expected '{CB_FIM_WILDCARD_EXPANDING}' events"
 
     subkey = monitored_keys[0].replace(f"{WINDOWS_HKEY_LOCAL_MACHINE}\\", "")
-    subkey = subkey+f"\\{key_name}"
+    subkey = subkey + f"\\{key_name}"
     path = monitored_keys[0] + f"\\{key_name}"
 
     # Create custom key and custom value
