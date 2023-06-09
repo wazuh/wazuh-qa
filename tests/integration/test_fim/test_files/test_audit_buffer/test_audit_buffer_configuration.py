@@ -76,7 +76,7 @@ test_folders = [os.path.join(PREFIX, TEST_DIR_1)]
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_templates')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # ---------------------------------------TEST_AUDIT_BUFFER_DEFAULT-------------------------------------------
