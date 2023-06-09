@@ -2,7 +2,7 @@
 - tags:
     - no_file_limit
   apply_to_modules:
-    - test_file_limit_no_limit
+    - test_file_limit_disabled
   sections:
     - section: syscheck
       elements:

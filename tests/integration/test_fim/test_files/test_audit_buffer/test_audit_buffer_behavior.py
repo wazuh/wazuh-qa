@@ -204,7 +204,7 @@ def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_waz
 @pytest.mark.parametrize('test_folders', [test_folders], ids='', scope='module')
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata),
                          ids=t2_test_case_ids)
-def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh_configuration,
+def test_audit_buffer_overflow(configuration, metadata, test_folders, set_wazuh_configuration,
                                 create_monitored_folders_module, configure_local_internal_options_function,
                                 restart_syscheck_function, wait_syscheck_start):
     '''
@@ -295,8 +295,7 @@ def test_audit_buffer_overflown(configuration, metadata, test_folders, set_wazuh
     detect_initial_scan_start(wazuh_log_monitor, timeout=T_10)
 
     # Get all file added events
-    results = get_messages(callback_detect_file_added_event, timeout=T_10,
-                           error_message=f"Did not receive the expected file added events")
+    results = get_messages(callback_detect_file_added_event, timeout=T_10)
 
     # Check the amount of added events in scheduled mode is equal to the amount of files created
     # minus the generated whodata events
