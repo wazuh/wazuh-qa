@@ -40,6 +40,7 @@ API_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.log')
 API_JSON_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'api.json')
 API_LOG_FOLDER = os.path.join(WAZUH_PATH, 'logs', 'api')
 WAZUH_TESTING_PATH = os.path.dirname(os.path.abspath(__file__))
+CIS_RULESET_PATH = os.path.join(WAZUH_PATH, 'ruleset', 'sca')
 WAZUH_TESTING_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 DEFAULT_AUTHD_PASS_PATH = os.path.join(WAZUH_PATH, 'etc', 'authd.pass')
 TEMPLATE_DIR = 'configuration_template'
@@ -79,6 +80,7 @@ T_60 = 60
 
 
 # Local internal options
+MODULESD_DEBUG = 'wazuh_modules.debug'
 WINDOWS_DEBUG = 'windows.debug'
 SYSCHECK_DEBUG = 'syscheck.debug'
 VERBOSE_DEBUG_OUTPUT = 2

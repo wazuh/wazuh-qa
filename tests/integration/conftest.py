@@ -604,7 +604,7 @@ def configure_local_internal_options_module(request):
     conf.set_local_internal_options_dict(backup_local_internal_options)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def configure_local_internal_options_function(request):
     """Fixture to configure the local internal options file.
 

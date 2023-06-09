@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Add  IT tests FIM registry monitoring using wildcards. ([#3856](https://github.com/wazuh/wazuh-qa/pull/3856)) \- (Framework + Tests)
+- New 'SCA' test suite and framework. ([#3566](https://github.com/wazuh/wazuh-qa/pull/3566)) \- (Framework + Tests)
 - Add integration tests for AWS module. ([#3911](https://github.com/wazuh/wazuh-qa/pull/3911)) \- (Framework + Tests + Documentation)
 - Add tests for msu patches with no associated CVE . ([#4009](https://github.com/wazuh/wazuh-qa/pull/4009)) \- (Framework + Tests)
 - Add tests with new options to avoid FIM synchronization overlapping. ([#3318](https://github.com/wazuh/wazuh-qa/pull/3318)) \- (Framework + tests)
@@ -20,6 +21,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Fix FIM test_large_changes test suite ([#3948](https://github.com/wazuh/wazuh-qa/pull/3948)) \- (Tests)
 - Update `get_test_cases_data` function so it handles fim_mode parameter ([#4185](https://github.com/wazuh/wazuh-qa/pull/4185)) \- (Framework)
 - Change FIM `regular_file_cud` and `EventChecker` file modification steps ([#4183](https://github.com/wazuh/wazuh-qa/pull/4183)) \- (Framework + Tests)
 - Refactor library to change the environment ([#4145](https://github.com/wazuh/wazuh-qa/pull/4145)) \- (Framework)
