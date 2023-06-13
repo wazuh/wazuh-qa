@@ -262,7 +262,7 @@ def test_audit_buffer_overflow(configuration, metadata, test_folders, set_wazuh_
         - Verify the excess files inserted after queue full are detected in scheduled mode.
 
     input_description: The file 'configuration_audit_buffer_behavior' provides the configuration template.
-                       The file 'cases_audit_buffer_overflow.yaml' provides the tes cases configuration
+                       The file 'cases_audit_buffer_overflow.yaml' provides the test cases configuration
                        details for each test case.
 
     expected_output:
