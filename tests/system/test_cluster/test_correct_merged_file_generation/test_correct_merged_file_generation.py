@@ -41,10 +41,10 @@ agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                '..', 'provisioning', 'one_manager_agent', 'roles', 'agent-role', 'files', 'ossec.conf')
 data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                              '..', 'provisioning', 'one_manager_agent', 'inventory.yaml')
+                              '..', 'provisioning', 'one_manager_agent', 'inventory.yml')
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
-messages_path = os.path.join(local_path, 'data/messages.yml')
+messages_path = os.path.join(local_path, 'data/messages.yaml')
 test_cases_yaml = read_yaml(os.path.join(data_path, 'cases_correct_merged_file_generation.yaml'))
 tmp_path = os.path.join(local_path, 'tmp')
 
