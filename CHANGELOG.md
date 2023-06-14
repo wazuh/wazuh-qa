@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Add tests for new FIM audit buffer option. ([#3990](https://github.com/wazuh/wazuh-qa/pull/3990)) \- (Framework + tests)
+- Add tests for new FIM audit buffer option. ([#4227](https://github.com/wazuh/wazuh-qa/pull/4227)) \- (Framework + tests)
 - New 'SCA' test suite and framework. ([#3566](https://github.com/wazuh/wazuh-qa/pull/3566)) \- (Framework + Tests)
 - Add integration tests for AWS module. ([#3911](https://github.com/wazuh/wazuh-qa/pull/3911)) \- (Framework + Tests + Documentation)
 - Add tests for msu patches with no associated CVE . ([#4009](https://github.com/wazuh/wazuh-qa/pull/4009)) \- (Framework + Tests)
