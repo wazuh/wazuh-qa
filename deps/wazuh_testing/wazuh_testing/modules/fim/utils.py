@@ -350,6 +350,8 @@ def transform_registry_key_list(key_list=['test_key'], callback=ev.callback_key_
                 aux_dict[key] = (elem, callback)
         else:
             raise ValueError('It can only be a list or dictionary')
+        
+        return aux_dict
 
 
 def set_check_options(options):
