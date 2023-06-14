@@ -190,9 +190,8 @@ def test_correct_merged_file_generation(test_case, environment_setting):
             elif number_files == 1:
                 replace_regex_in_file(['FOLDER', 'FILENAME'], [folder, file_name], messages_path)
                 files_list.append(file_name)
-                HostMonitor(inventory_path=inventory_path, messages_path=messages_path, 
+                HostMonitor(inventory_path=inventory_path, messages_path=messages_path,
                             tmp_path=tmp_path).run(update_position=True)
 
         finally:
             replace_regex_in_file([folder, files_list[-1]], ['FOLDER', 'FILENAME'], messages_path)
-
