@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Added
 
+- Add tests for new FIM audit buffer option. ([#4227](https://github.com/wazuh/wazuh-qa/pull/4227)) \- (Framework + tests)
 - Add callbacks and IT tests for Integratord options tag. ([#4108](https://github.com/wazuh/wazuh-qa/pull/4108)) \- (Framework + tests)
 
 ### Changed
