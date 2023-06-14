@@ -4,7 +4,7 @@ copyright: Copyright (C) 2015-2023, Wazuh Inc.
            This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: system
 brief: Wazuh manager should be able to create merged.mg file in order to share files with group of agents.
-       In order to do it, when new files are present in any directory in /var/ossec/share/, 
+       In order to do it, when new files are present in any directory in /var/ossec/share/,
        those files must be monitored and to be taken in consideration by merged.mg
 tier: 1, 2
 modules:
@@ -32,20 +32,20 @@ from wazuh_testing.tools.file import read_yaml
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.file import replace_regex_in_file
-from system import (assign_agent_to_new_group, clean_cluster_logs, create_new_agent_group, delete_agent_group, 
+from system import (assign_agent_to_new_group, clean_cluster_logs, create_new_agent_group, delete_agent_group,
                     restart_cluster)
 
-#pytestmark = [pytest.mark.cluster, pytest.mark.one_manager_agent_env]
+# pytestmark = [pytest.mark.cluster, pytest.mark.one_manager_agent_env]
 
-agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 
+agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                '..', 'provisioning', 'one_manager_agent', 'roles', 'agent-role', 'files', 'ossec.conf')
 data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                              '..', 'provisioning', 'one_manager_agent', 'inventory.yml')
+                              '..', 'provisioning', 'one_manager_agent', 'inventory.yaml')
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 messages_path = os.path.join(local_path, 'data/messages.yml')
-test_cases_yaml = read_yaml(os.path.join(data_path, 'cases_correct_merged_file_generation.yml'))
+test_cases_yaml = read_yaml(os.path.join(data_path, 'cases_correct_merged_file_generation.yaml'))
 tmp_path = os.path.join(local_path, 'tmp')
 
 reset_files = {
@@ -91,9 +91,9 @@ def test_correct_merged_file_generation(test_case, environment_setting):
                 brief: List of tests to be performed.
             - environment_setting:
                 type: function
-                brief: Clear files, directories and logs, reset initial conditions in /var/ossec/share 
+                brief: Clear files, directories and logs, reset initial conditions in /var/ossec/share
                         (includes agent enrollment).
-                        Also stops the manager if it is required.            
+                        Also stops the manager if it is required.
         assertions:
             - check merged.mg in the selected folder and the created file.
             - check if merged contains the correct information.
@@ -116,21 +116,21 @@ def test_correct_merged_file_generation(test_case, environment_setting):
     if action == "remove":
         host_manager.run_command(testinfra_hosts[0], f'rm {WAZUH_PATH}/etc/shared/default/merged.mg -f')
     elif action == "add_files":
-            if number_files == 1:
-                host_manager.run_command(testinfra_hosts[0], f"touch {WAZUH_PATH}/etc/shared/{folder}/{file_name}.txt")
+        if number_files == 1:
+            host_manager.run_command(testinfra_hosts[0], f"touch {WAZUH_PATH}/etc/shared/{folder}/{file_name}.txt")
+            if file_content != 'zero':
+                host_manager.modify_file_content(host=testinfra_hosts[0],
+                                                 path=f"{WAZUH_PATH}/etc/shared/{folder}/{file_name}.txt",
+                                                 content=file_content)
+        else:
+            for number in range(number_files):
+                files_list.append(f'{file_name}{number + 3}')
+            for file in files_list:
+                host_manager.run_command(testinfra_hosts[0], f"touch {WAZUH_PATH}/etc/shared/{folder}/{file}.txt")
                 if file_content != 'zero':
                     host_manager.modify_file_content(host=testinfra_hosts[0],
-                                                     path=f"{WAZUH_PATH}/etc/shared/{folder}/{file_name}.txt",
+                                                     path=f"{WAZUH_PATH}/etc/shared/{folder}/{file}.txt",
                                                      content=file_content)
-            else:
-                for number in range(number_files):
-                    files_list.append(f'{file_name}{number + 3}')
-                for file in files_list:
-                    host_manager.run_command(testinfra_hosts[0], f"touch {WAZUH_PATH}/etc/shared/{folder}/{file}.txt")
-                    if file_content != 'zero':
-                        host_manager.modify_file_content(host=testinfra_hosts[0],
-                                                         path=f"{WAZUH_PATH}/etc/shared/{folder}/{file}.txt",
-                                                         content=file_content)
 
     elif test_type == 'on_start' and action == 'remove':
 
@@ -176,7 +176,7 @@ def test_correct_merged_file_generation(test_case, environment_setting):
             else:
                 merged_value = f'!0 {file_name}.txt'
         assert merged_value in host_manager.run_command(testinfra_hosts[0],
-                                                            f"cat {WAZUH_PATH}/etc/shared/{folder}/merged.mg")
+                                                        f"cat {WAZUH_PATH}/etc/shared/{folder}/merged.mg")
 
     # Check logs
     if file_content == 'zero':
@@ -185,15 +185,13 @@ def test_correct_merged_file_generation(test_case, environment_setting):
             if number_files > 1:
                 for file in files_list:
                     replace_regex_in_file(['FOLDER', 'FILENAME'], [folder, file], messages_path)
-                    HostMonitor(inventory_path=inventory_path,
-                                    messages_path=messages_path,
-                                    tmp_path=tmp_path).run(update_position=True)
+                    HostMonitor(inventory_path=inventory_path, messages_path=messages_path,
+                                tmp_path=tmp_path).run(update_position=True)
             elif number_files == 1:
                 replace_regex_in_file(['FOLDER', 'FILENAME'], [folder, file_name], messages_path)
                 files_list.append(file_name)
-                HostMonitor(inventory_path=inventory_path,
-                                messages_path=messages_path,
-                                tmp_path=tmp_path).run(update_position=True)
+                HostMonitor(inventory_path=inventory_path, messages_path=messages_path, 
+                            tmp_path=tmp_path).run(update_position=True)
 
         finally:
             replace_regex_in_file([folder, files_list[-1]], ['FOLDER', 'FILENAME'], messages_path)
