@@ -4,6 +4,7 @@ on:
     types:
       - opened
       - ready_for_review
+      - synchronize
     branches:
       - master
       - '[0-9]+.[0-9]+'

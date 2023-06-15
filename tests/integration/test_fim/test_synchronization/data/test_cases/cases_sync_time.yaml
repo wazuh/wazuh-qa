@@ -9,3 +9,4 @@
     response_timeout: 5
     max_interval: 10
     files: 3
+    fim_mode: scheduled

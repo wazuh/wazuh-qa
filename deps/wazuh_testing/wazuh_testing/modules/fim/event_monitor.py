@@ -388,6 +388,19 @@ def callback_detect_file_deleted_event(line):
     return None
 
 
+def callback_detect_file_more_changes(line):
+    """ Callback that detects if a line in a log contains 'More changes' in content_changes.
+    Args:
+        line (String): string line to be checked by callback in FileMonitor.
+    Returns:
+        returns JSON string from log.
+    """
+    json_event = callback_detect_event(line)
+    if json_event is not None and 'content_changes' in json_event['data']:
+        if 'More changes' in json_event['data']['content_changes']:
+            return json_event
+
+
 def callback_audit_cannot_start(line):
     """ Callback that detects if a line shows whodata engine could not start and monitoring switched to realtime.
 
@@ -501,3 +514,25 @@ def detect_windows_whodata_mode_change(file_monitor, file='.*'):
 
     file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(pattern),
                        error_message=ERR_MSG_WHODATA_REALTIME_MODE_CHANGE_EVENT)
+
+
+def get_fim_event(file_monitor=None, callback='', error_message=None, update_position=True,
+                  timeout=T_60, accum_results=1, file_to_monitor=LOG_FILE_PATH):
+    """ Check if FIM event occurs and return it according to the callback.
+    Args:
+        file_monitor (FileMonitor): FileMonitor object to monitor the file content.
+        callback (str): log regex to check in Wazuh log
+        error_message (str): error message to show in case of expected event does not occur
+        update_position (boolean): filter configuration parameter to search in Wazuh log
+        timeout (str): timeout to check the event in Wazuh log
+        accum_results (int): Accumulation of matches.
+    Returns:
+         returns the value given by the callback used. Default None.
+    """
+    file_monitor = FileMonitor(file_to_monitor) if file_monitor is None else file_monitor
+    error_message = f"Could not find this event in {file_to_monitor}: {callback}" if error_message is None else \
+                    error_message
+
+    result = file_monitor.start(timeout=timeout, update_position=update_position, accum_results=accum_results,
+                                callback=callback, error_message=error_message).result()
+    return result
