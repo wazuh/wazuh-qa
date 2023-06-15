@@ -17,7 +17,7 @@ def test_python_dependencies_vuln_scan(pytestconfig):
     Args:
         pytestconfig (fixture): Fixture that returns the :class:`_pytest.config.Config` object.
     """
-    branch = pytestconfig.getoption('--branch')
+    branch = pytestconfig.getoption('--reference')
     repo = pytestconfig.getoption('--repo')
     requirements_path = pytestconfig.getoption('--requirements-path')
     report_path = pytestconfig.getoption('--report-path')

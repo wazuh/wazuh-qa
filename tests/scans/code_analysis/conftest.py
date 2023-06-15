@@ -41,8 +41,7 @@ def clone_wazuh_repository(pytestconfig):
     """
     # Get Wazuh repository and branch
     repository_name = pytestconfig.getoption('repo')
-    branch = pytestconfig.getoption('branch')
-    commit = pytestconfig.getoption('commit')
+    reference = pytestconfig.getoption('reference')
 
     # Create temporary dir
     repository_path = tempfile.mkdtemp()
@@ -50,18 +49,18 @@ def clone_wazuh_repository(pytestconfig):
     try:
         # Clone into temporary dir
         # depth=1 creates a shallow clone with a history truncated to 1 commit. Implies single_branch=True.
-        if not commit:
+        try:
             Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
                             repository_path,
                             depth=1,
-                            branch=branch)
-        else:
+                            branch=reference)
+        except:
             repo = Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
                                    repository_path, branch='master', no_single_branch=True)
 
             # Get all branches that contains the commit
             git_local = Git(repository_path)
-            commit_branch = git_local.branch('-a', '--contains', commit).split('\n')
+            commit_branch = git_local.branch('-a', '--contains', reference).split('\n')
             commit_branch_head = False
 
             for branch in commit_branch:
@@ -69,11 +68,11 @@ def clone_wazuh_repository(pytestconfig):
                 branch_name = branch.replace('*', '').strip()
                 repo.git.checkout(branch_name)
                 # Check if the commit is the head of the branch
-                if(str(repo.head.commit) == commit):
+                if(str(repo.head.commit) == reference):
                     commit_branch_head = True
                     break
             if not commit_branch_head:
-                raise Exception(f"{commit} was not found as any head branch")
+                raise Exception(f"{reference} was not found as any head branch")
 
         yield repository_path
 
