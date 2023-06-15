@@ -89,14 +89,14 @@ p, m = generate_params(extra_params=conf_params,
                        modes=monitoring_modes)
 
 configurations = conf.load_wazuh_configurations(configurations_path, __name__,
-                                           params=p, metadata=m)
+                                                params=p, metadata=m)
 
 
 # fixtures
-@pytest.fixture(scope='module', params= [
+@pytest.fixture(scope='module', params=[
     {'wazuh_modules.debug': 0,
-      'monitord.rotate_log': 0, 'monitord.day_wait': 0,
-      'monitord.keep_log_days': 0, 'monitord.size_rotate': 0},
+     'monitord.rotate_log': 0, 'monitord.day_wait': 0,
+     'monitord.keep_log_days': 0, 'monitord.size_rotate': 0},
     {'wazuh_modules.debug': 1,
      'monitord.rotate_log': 0, 'monitord.day_wait': 0,
      'monitord.keep_log_days': 0, 'monitord.size_rotate': 0},
@@ -125,7 +125,6 @@ def configure_local_internal_options_module(get_local_internal_options):
     import wazuh_testing.tools.services as services
     services.restart_wazuh_daemon('wazuh-modulesd')
 
-
     yield
 
     conf.set_local_internal_options_dict(backup_local_internal_options)
@@ -145,7 +144,7 @@ def get_configuration(request):
 ], indirect=True)
 def test_logging(get_configuration, configure_environment, reset_ossec_log,
                  publish_messages, configure_local_internal_options_module,
-                 daemons_handler, wait_for_gcp_start):
+                 daemons_handler_module, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module generates logs according to the debug level set for wazuh_modules.
                  For this purpose, the test will use different debug levels (depending on the test case) and
@@ -195,7 +194,7 @@ def test_logging(get_configuration, configure_environment, reset_ossec_log,
     '''
     str_interval = get_configuration['sections'][0]['elements'][4]['interval']['value']
     logging_opt = int([x[-2] for x in conf.get_wazuh_local_internal_options()
-                   if x.startswith('wazuh_modules.debug')][0])
+                      if x.startswith('wazuh_modules.debug')][0])
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
     mandatory_keywords = {}
     if logging_opt == 0:

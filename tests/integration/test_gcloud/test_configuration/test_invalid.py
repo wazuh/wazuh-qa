@@ -75,7 +75,7 @@ force_restart_after_restoring = False
 
 # configurations
 
-daemons_handler_configuration = {'daemons': ['wazuh-modulesd'], 'ignore_errors' : True}
+daemons_handler_configuration = {'daemons': ['wazuh-modulesd'], 'ignore_errors': True}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -92,10 +92,11 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_invalid(get_configuration, configure_environment, reset_ossec_log, daemons_handler):
+def test_invalid(get_configuration, configure_environment, reset_ossec_log, daemons_handler_module):
     '''
     description: Check if the 'gcp-pubsub' module detects invalid configurations. For this purpose, the test
                  will configure 'gcp-pubsub' using invalid configuration settings with different attributes.
@@ -115,7 +116,7 @@ def test_invalid(get_configuration, configure_environment, reset_ossec_log, daem
         - reset_ossec_log:
             type: fixture
             brief: Reset the 'ossec.log' file and start a new monitor.
-        - daemons_handler:
+        - daemons_handler_module:
             type: fixture
             brief: Handler of Wazuh daemons.
 
