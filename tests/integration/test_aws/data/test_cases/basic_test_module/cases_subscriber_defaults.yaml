@@ -1,0 +1,9 @@
+- name: security_lake_defaults
+  description: Security Lake default configurations
+  configuration_parameters:
+    SUBSCRIBER_TYPE: security_lake
+    QUEUE: sqs-security-lake-main-queue
+    EXTERNAL_ID: wazuh-qa-integration-tests-external-id
+  metadata:
+    queue: sqs-security-lake-main-queue
+    external_id: wazuh-qa-integration-tests-external-id
