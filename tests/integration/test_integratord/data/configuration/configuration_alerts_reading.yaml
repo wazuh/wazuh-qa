@@ -1,39 +1,35 @@
-- tags:
-    - all
-  apply_to_modules:
-    - test_integratord_read_json_alerts
-    - test_integratord_change_inode_alert
-    - test_integratord_read_json_file_deleted
-  sections:
+- sections:
     - section: integration
       elements:
         - name:
-            value: virustotal
-        - api_key:
-            value: API_KEY
+            value: slack
+        - hook_url:
+            value: WEBHOOK_URL
         - rule_id:
-            value: '554'
+            value: 5712
+        - level:
+            value: 10
         - alert_format:
             value: json
+
     - section: sca
       elements:
         - enabled:
             value: 'no'
-    - section: rootcheck
-      elements:
-        - disabled:
-            value: 'yes'
+
     - section: syscheck
       elements:
         - disabled:
             value: 'yes'
+
     - section: wodle
       attributes:
-        - name: syscollector
+        - name: vulnerability-detector
       elements:
         - disabled:
             value: 'yes'
-    - section: auth
+
+    - section: rootcheck
       elements:
         - disabled:
             value: 'yes'

@@ -111,12 +111,12 @@ file_structure = [
 ]
 
 parameters = [
-    { 'LOCATION': os.path.join(temp_dir, 'wazuh-testing', files[0]), 'LOG_FORMAT': None },
-    { 'LOCATION': None, 'LOG_FORMAT': 'syslog' },
+    {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', files[0]), 'LOG_FORMAT': None},
+    {'LOCATION': None, 'LOG_FORMAT': 'syslog'},
 ]
 metadata = lower_case_key_dictionary_array(parameters)
 
-tcase_ids = [f"location_{'None' if param['LOCATION'] is None else files[0]}_" \
+tcase_ids = [f"location_{'None' if param['LOCATION'] is None else files[0]}_"
              f"logformat_{'None' if param['LOG_FORMAT'] is None else param['LOG_FORMAT']}" for param in parameters]
 configurations_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'invalid_agent_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
@@ -133,10 +133,11 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+
 # Tests
 
 def test_invalid_agent_localfile_config(get_files_list, create_file_structure_module, get_configuration, set_agent_conf,
-                                        daemons_handler):
+                                        daemons_handler_module):
     '''
     description: Check if the expected message is present in the ossec.log when an invalid <localfile> configuration is
                  set and if the Wazuh continues running.
@@ -156,7 +157,7 @@ def test_invalid_agent_localfile_config(get_files_list, create_file_structure_mo
         - set_agent_conf:
             type: fixture
             brief: Set a new configuration in 'agent.conf' file.
-        - daemons_handler:
+        - daemons_handler_module:
             type: fixture
             brief: Handler of Wazuh daemons.
 
