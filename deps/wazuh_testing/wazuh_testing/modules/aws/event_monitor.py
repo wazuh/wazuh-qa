@@ -79,7 +79,7 @@ def callback_detect_aws_module_warning(line):
         Optional[str]: Line if it matches.
     """
 
-    if re.match(r".*WARNING: No buckets or services definitions found at module 'aws-s3'.", line):
+    if re.match(r".*WARNING: No buckets, services or subscribers definitions found at module 'aws-s3'.", line):
         return line
 
 
