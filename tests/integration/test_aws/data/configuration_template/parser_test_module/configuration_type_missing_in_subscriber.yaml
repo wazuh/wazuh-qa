@@ -1,0 +1,15 @@
+- sections:
+    - section: wodle
+      attributes:
+        - name: aws-s3
+      elements:
+        - disabled:
+            value: 'no'
+        - subscriber:
+            elements:
+              - external_id:
+                  value: wazuh-qa-integration-tests-external-id
+              - queue:
+                  value: QUEUE
+              - iam_role_arn:
+                  value: arn:aws:iam::123456789123:role/AmazonSecurityLake-LakeHash

@@ -48,7 +48,7 @@ def callback_detect_aws_error_for_missing_type(line):
     """
 
     if re.match(
-        r".*ERROR: Undefined type for service.", line
+        r".*ERROR: Undefined type for \w+.", line
     ):
         return line
 

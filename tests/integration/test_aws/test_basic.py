@@ -316,19 +316,19 @@ def test_inspector_defaults(
 
 # -------------------------------------------- TEST_SUBSCRIBER_DEFAULTS ---------------------------------------------------
 # Configuration and cases data
-t3_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'service_configuration_defaults.yaml')
-t3_cases_path = os.path.join(TEST_CASES_PATH, 'cases_service_defaults.yaml')
+t4_configurations_path = os.path.join(CONFIGURATIONS_PATH, 'subscriber_configuration_defaults.yaml')
+t4_cases_path = os.path.join(TEST_CASES_PATH, 'cases_subscriber_defaults.yaml')
 
 # Enabled test configurations
-t3_configuration_parameters, t3_configuration_metadata, t3_case_ids = get_test_cases_data(t3_cases_path)
+t4_configuration_parameters, t4_configuration_metadata, t4_case_ids = get_test_cases_data(t4_cases_path)
 configurations = load_configuration_template(
-    t3_configurations_path, t3_configuration_parameters, t3_configuration_metadata
+    t4_configurations_path, t4_configuration_parameters, t4_configuration_metadata
 )
 
 
 @pytest.mark.tier(level=0)
-@pytest.mark.parametrize('configuration, metadata', zip(configurations, t3_configuration_metadata), ids=t3_case_ids)
-def test_service_defaults(
+@pytest.mark.parametrize('configuration, metadata', zip(configurations, t4_configuration_metadata), ids=t4_case_ids)
+def test_subscriber_defaults(
     configuration, metadata, load_wazuh_basic_configuration, set_wazuh_configuration, clean_aws_services_db,
     configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, wazuh_log_monitor
 ):
@@ -383,19 +383,15 @@ def test_service_defaults(
         - The `configuration_defaults` file provides the module configuration for this test.
         - The `cases_defaults` file provides the test cases.
     """
-    log_groups = metadata.get('log_group_name')
 
     parameters = [
         'wodles/aws/aws-s3',
-        '--service', metadata['service_type'],
-        '--aws_profile', 'qa',
-        '--regions', 'us-east-1',
+        '--subscriber', 'security_lake',
+        '--queue', metadata['queue'],
+        '--iam_role_arn', metadata['iam_role_arn'],
+        '--external_id', metadata['external_id'],
         '--debug', '2'
     ]
-
-    if log_groups is not None:
-        parameters.insert(7, log_groups)
-        parameters.insert(7, '--aws_log_groups')
 
     # Check AWS module started
     wazuh_log_monitor.start(

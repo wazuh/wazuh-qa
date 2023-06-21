@@ -1,0 +1,4 @@
+- name: parser_type_missing_in_service
+  description: Parser type missing in subscriber configurations
+  configuration_parameters: []
+  metadata: []
