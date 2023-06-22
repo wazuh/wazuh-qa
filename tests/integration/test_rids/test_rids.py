@@ -204,11 +204,12 @@ def test_rids(get_configuration, configure_environment, restart_service):
 
         assert rids_for_agent_open, f"Agent fd should be open {agent.id}"
 
-    for index, injector in enumerate(injectors):
-        if check_close[index]:
-            injector.stop_receive()
-
     if True in check_close:
+        # Close threads with check close
+        for index, injector in enumerate(injectors):
+            if check_close[index]:
+                injector.stop_receive()
+
         # Wait that the thread close the rids
         time.sleep(120)
 
@@ -228,4 +229,9 @@ def test_rids(get_configuration, configure_environment, restart_service):
                 assert not rids_for_agent_open, f"Agent fd should be close {agents[agent_index].id}"
             else:
                 assert rids_for_agent_open, f"Agent fd should be open {agents[agent_index].id}"
+                # Close thread without check close
                 injectors[agent_index].stop_receive()
+    else:
+        # Close all threads
+        for index, injector in enumerate(injectors):
+            injector.stop_receive()

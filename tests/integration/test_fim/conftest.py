@@ -44,10 +44,10 @@ def create_key(request):
 
 
 @pytest.fixture()
-def create_files_in_folder(files_number):
+def create_files_in_folder(metadata):
     """Create files in monitored folder and files"""
 
-    for file in range(0, files_number):
+    for file in range(0, metadata['files']):
         create_file(REGULAR, MONITORED_DIR_1, f"test_file_{time.time()}_{file}")
 
     yield
@@ -136,12 +136,14 @@ def create_monitored_folders(test_folders):
         test_folders(list): List of folders to create and delete
     """
     for folder in test_folders:
-        os.mkdir(folder, mode=0o0777)
+        if not os.path.exists(folder):
+            os.mkdir(folder, mode=0o0777)
 
     yield
 
     for folder in test_folders:
-        delete_path_recursively(folder)
+        if os.path.exists(folder):
+            delete_path_recursively(folder)
 
 
 @pytest.fixture(scope='module')
@@ -153,12 +155,14 @@ def create_monitored_folders_module(test_folders):
         test_folders(list): List of folders to create and delete
     """
     for folder in test_folders:
-        os.mkdir(folder, mode=0o0777)
+        if not os.path.exists(folder):
+            os.mkdir(folder, mode=0o0777)
 
     yield
 
     for folder in test_folders:
-        delete_path_recursively(folder)
+        if os.path.exists(folder):
+            delete_path_recursively(folder)
 
 
 @pytest.fixture()

@@ -12,17 +12,19 @@ from copy import deepcopy
 from hashlib import sha1
 
 from wazuh_testing import global_parameters, logger, REGULAR, LOG_FILE_PATH, WAZUH_PATH
-from wazuh_testing.tools.file import create_file, modify_file, delete_file, generate_string
+from wazuh_testing.tools.file import create_file, modify_file_content, delete_file, generate_string
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.tools.time import TimeMachine
 from wazuh_testing.modules import fim
 from wazuh_testing.modules.fim import event_monitor as ev
-from wazuh_testing.modules.fim.classes import CustomValidator, EventChecker
+from wazuh_testing.modules.fim.classes import CustomValidator, EventChecker, RegistryEventChecker
 
 
 if sys.platform == 'win32':
     import win32con
     import win32api
+    import win32security as win32sec
+    import ntsecuritycon as ntc
     import pywintypes
 
 
@@ -101,11 +103,9 @@ def create_registry(key, subkey, arch):
 
     if sys.platform == 'win32':
         try:
-            logger.info("Creating registry key " + str(os.path.join(fim.registry_class_name[key], subkey)))
-
-            key = win32api.RegCreateKeyEx(key, subkey, win32con.KEY_ALL_ACCESS | arch)
-
-            return key[0]  # Ignore the flag that RegCreateKeyEx returns
+            new_key = win32api.RegCreateKeyEx(key, subkey, win32con.KEY_ALL_ACCESS | arch)
+            logger.info("Created registry key " + str(os.path.join(fim.registry_class_name[key], subkey)))
+            return new_key[0]  # Ignore the flag that RegCreateKeyEx returns
         except OSError as e:
             logger.warning(f"Registry could not be created: {e}")
         except pywintypes.error as e:
@@ -208,12 +208,13 @@ def modify_registry(key, subkey, arch):
         subkey (str): the subkey (name) of the registry.
         arch (str): architecture of the system.
     """
-    print_arch = '[x64]' if arch == fim.KEY_WOW64_64KEY else '[x32]'
-    logger.info(f"Modifying registry key {print_arch}{os.path.join(fim.registry_class_name[key], subkey)}")
+    if sys.platform == 'win32':
+        print_arch = '[x64]' if arch == fim.KEY_WOW64_64KEY else '[x32]'
+        logger.info(f"Modifying registry key {print_arch}{os.path.join(fim.registry_class_name[key], subkey)}")
 
-    modify_key_perms(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
-    modify_registry_owner(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
-    modify_registry_key_mtime(key, subkey, arch)
+        modify_key_perms(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
+        modify_registry_owner(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
+        modify_registry_key_mtime(key, subkey, arch)
 
 
 def modify_registry_value(key_h, value_name, type, value):
@@ -714,7 +715,7 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1
 
     # Modify previous text files
     for name, content in file_list.items():
-        modify_file(folder, name, is_binary=isinstance(content, bytes))
+        modify_file_content(folder, name, is_binary=isinstance(content, bytes))
 
     event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
                                  custom_validator=custom_validator, encoding=encoding,
