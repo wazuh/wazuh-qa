@@ -1,0 +1,98 @@
+- name: ignore_file_pattern_over_restrict_regex_scheduled
+  description: Check ignore pattern is applied over restrict regex
+  configuration_parameters:
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    folder_index: 0
+    filename: testfile
+    is_pattern: true
+    fim_mode: scheduled
+
+- name: ignore_file_pattern_over_restrict_regex_realtime
+  description: Check ignore pattern is applied over restrict regex
+  configuration_parameters:
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    folder_index: 0
+    filename: testfile
+    is_pattern: true
+    fim_mode: realtime
+
+- name: ignore_file_pattern_over_restrict_regex_whodata
+  description: Check ignore pattern is applied over restrict regex
+  configuration_parameters:
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    folder_index: 0
+    filename: testfile
+    is_pattern: true
+    fim_mode: whodata
+
+- name: ignore_sregex_over_restrict_regex_different_regex_scheduled
+  description: Check ignore with sregex is applied over restrict regex - Regexes are different
+  configuration_parameters:
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    folder_index: 0
+    filename: regex_testfile
+    is_pattern: false
+    fim_mode: scheduled
+
+- name: ignore_sregex_over_restrict_regex_different_regex_realtime
+  description: Check ignore with sregex is applied over restrict regex - Regexes are different
+  configuration_parameters:
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    folder_index: 0
+    filename: regex_testfile
+    is_pattern: false
+    fim_mode: realtime
+
+- name: ignore_sregex_over_restrict_regex_different_regex_whodata
+  description: Check ignore with sregex is applied over restrict regex - Regexes are different
+  configuration_parameters:
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    folder_index: 0
+    filename: regex_testfile
+    is_pattern: false
+    fim_mode: whodata
+
+- name: ignore_sregex_over_restrict_regex_same_regex_scheduled
+  description: Check ignore with sregex is applied over restrict regex - Regexes are the same
+  configuration_parameters:
+    REALTIME: 'no'
+    WHODATA: 'no'
+  metadata:
+    folder_index: 1
+    filename: regex_testfile
+    is_pattern: false
+    fim_mode: scheduled
+
+- name: ignore_sregex_over_restrict_regex_same_regex_realtime
+  description: Check ignore with sregex is applied over restrict regex - Regexes are the same
+  configuration_parameters:
+    REALTIME: 'yes'
+    WHODATA: 'no'
+  metadata:
+    folder_index: 1
+    filename: regex_testfile
+    is_pattern: false
+    fim_mode: realtime
+
+- name: ignore_sregex_over_restrict_regex_same_regex_whodata
+  description: Check ignore with sregex is applied over restrict regex - Regexes are the same
+  configuration_parameters:
+    REALTIME: 'no'
+    WHODATA: 'yes'
+  metadata:
+    folder_index: 1
+    filename: regex_testfile
+    is_pattern: false
+    fim_mode: whodata

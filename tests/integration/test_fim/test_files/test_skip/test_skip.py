@@ -63,27 +63,26 @@ tags:
 import os
 import shutil
 import subprocess
-import uuid
-from datetime import timedelta
 from unittest.mock import patch
 
 import distro
 import pytest
-from wazuh_testing.fim import (LOG_FILE_PATH, regular_file_cud, detect_initial_scan, callback_detect_event,
-                               generate_params, callback_detect_integrity_state, check_time_travel, delete_file)
+from wazuh_testing import LOG_FILE_PATH, T_20
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import set_section_wazuh_conf, load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.file import truncate_file
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.services import restart_wazuh_with_new_conf
-from wazuh_testing.tools.time import TimeMachine
+from wazuh_testing.modules.fim.utils import regular_file_cud, generate_params, check_time_travel
+from wazuh_testing.modules.fim.event_monitor import (detect_initial_scan, callback_detect_event,
+                                                     callback_detect_registry_integrity_state_event)
+
 
 # Marks
-
 pytestmark = [pytest.mark.linux, pytest.mark.tier(level=1)]
 
-# variables
 
+# Variables
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
 testdir = os.path.join(PREFIX, 'testdir1')
@@ -235,17 +234,14 @@ def test_skip_proc(get_configuration, configure_environment, restart_syscheckd, 
 
     else:
         with pytest.raises(TimeoutError):
-            event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_integrity_state)
+            event = wazuh_log_monitor.start(timeout=3, callback=callback_detect_registry_integrity_state_event)
             raise AttributeError(f'Unexpected event {event}')
 
 
-@pytest.mark.parametrize('directory, tags_to_apply', [
-    (os.path.join('/', 'dev'), {'skip_dev'})
-])
+@pytest.mark.parametrize('directory, tags_to_apply', [(os.path.join('/', 'dev'), {'skip_dev'})])
 @patch('wazuh_testing.fim.modify_file_inode')
 def test_skip_dev(modify_inode_mock, directory, tags_to_apply, get_configuration, configure_environment,
-                  restart_syscheckd,
-                  wait_for_fim_start):
+                  restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon skips the Linux '/dev' directory at scanning when the
                  'skip_dev' tag is set to 'yes'. For this purpose, the test will monitor the '/dev' directory.
@@ -297,4 +293,4 @@ def test_skip_dev(modify_inode_mock, directory, tags_to_apply, get_configuration
     check_apply_test(tags_to_apply, get_configuration['tags'])
     trigger = get_configuration['metadata']['skip'] == 'no'
 
-    regular_file_cud(directory, wazuh_log_monitor, time_travel=True, min_timeout=3, triggers_event=trigger)
+    regular_file_cud(directory, wazuh_log_monitor, min_timeout=T_20, triggers_event=trigger)

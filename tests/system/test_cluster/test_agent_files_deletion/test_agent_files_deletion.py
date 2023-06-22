@@ -96,7 +96,7 @@ def test_agent_files_deletion():
     for host in managers_hosts:
         for query in queries:
             result = host_manager.run_command(host,
-                                              f"{WAZUH_PATH}/framework/python/bin/python3.9 "
+                                              f"{WAZUH_PATH}/framework/python/bin/python3 "
                                               f"{script_path} '{query.format(id=agent_id)}'")
             assert result, f"This db query should have returned something in {host}, but it did not: {result}"
 
@@ -122,7 +122,7 @@ def test_agent_files_deletion():
     for host in managers_hosts:
         for query in queries:
             result = host_manager.run_command(host,
-                                              f"{WAZUH_PATH}/framework/python/bin/python3.9 "
+                                              f"{WAZUH_PATH}/framework/python/bin/python3 "
                                               f"{script_path} '{query.format(id=agent_id)}'")
             assert not result, f"This db query should have not returned anything in {host}, but it did: {result}"
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2022, Wazuh Inc.
+# Copyright (C) 2015-2023, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import bz2
@@ -284,6 +284,29 @@ def remove_file(file_path):
             os.remove(file_path)
         elif os.path.isdir(file_path):
             delete_path_recursively(file_path)
+
+
+def copy_files_in_folder(src_folder, dst_folder='/tmp', files_to_move=None):
+    """Copy files from a folder to target folder
+    Args:
+        src_folder (str): directory path from where to copy files.
+        dst_folder (str): directory path where files will be copied to.
+        files_to_move (list): List with files to move copy from a folder.
+    """
+    file_list = []
+    if os.path.isdir(src_folder):
+        if files_to_move is None:
+            for file in os.listdir(src_folder):
+                file_list.append(file)
+                copy(os.path.join(src_folder, file), dst_folder)
+                remove_file(os.path.join(src_folder, file))
+        else:
+            for file in files_to_move:
+                if os.path.isfile(os.path.join(src_folder, file)):
+                    file_list.append(file)
+                    copy(os.path.join(src_folder, file), dst_folder)
+                    remove_file(os.path.join(src_folder, file))
+    return file_list
 
 
 def modify_all_files_in_folder(folder_path, data):
