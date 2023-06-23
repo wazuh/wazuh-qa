@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.6.0] - TBD
+## [4.7.0] - TBD
 
 Wazuh commit: TBD \
 Release report: TBD
