@@ -67,7 +67,7 @@ def test_bucket_without_only_logs_after(
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
             - Delete the uploaded file.
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
     parameters:
         - configuration:
             type: dict
@@ -188,7 +188,7 @@ def test_service_without_only_logs_after(
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
             - Delete the uploaded file.
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
     parameters:
         - configuration:
             type: dict
@@ -302,7 +302,7 @@ def test_bucket_with_only_logs_after(
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
             - Delete the uploaded file.
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
     parameters:
         - configuration:
             type: dict
@@ -422,7 +422,7 @@ def test_cloudwatch_with_only_logs_after(
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
             - Delete the uploaded file.
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
     parameters:
         - configuration:
             type: dict
@@ -540,7 +540,7 @@ def test_inspector_with_only_logs_after(
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
             - Delete the uploaded file.
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
     parameters:
         - configuration:
             type: dict
@@ -657,7 +657,7 @@ def test_bucket_multiple_calls(
         - teardown:
             - Delete the `s3_cloudtrail.db`.
             - Delete the uploaded files.
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
     parameters:
         - metadata:
             type: dict
@@ -761,7 +761,7 @@ def test_inspector_multiple_calls(
               were processed, there were no duplicates.
         - teardown:
             - Delete the `aws_services.db`.
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
     parameters:
         - metadata:
             type: dict
@@ -848,7 +848,7 @@ def test_cloudwatch_multiple_calls(
         - teardown:
             - Delete the `aws_services.db`.
             - Delete the uploaded files.
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
     parameters:
         - metadata:
             type: dict

@@ -129,7 +129,7 @@ def test_max_eps(configure_local_internal_options_module, get_configuration, con
                  the testing files created. Finally, it will verify the limit of events per second (eps)
                  is not exceeded by checking the creation time of the testing files.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

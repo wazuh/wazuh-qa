@@ -117,7 +117,7 @@ def test_sync_overlap(configuration, metadata, set_wazuh_configuration, configur
         - Check that next sync is skipped and interval value is doubled
         - Check that interval value is returned to configured value after successful sync
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 
