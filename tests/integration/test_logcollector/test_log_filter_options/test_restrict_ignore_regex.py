@@ -111,7 +111,7 @@ def test_restrict_ignore_regex_values(configuration, metadata, new_file_path, cr
            - Restore ossec.conf and local_internal_options.conf
            - Stop Wazuh
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

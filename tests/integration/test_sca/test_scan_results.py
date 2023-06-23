@@ -75,7 +75,7 @@ def test_sca_scan_results(configuration, metadata, prepare_cis_policies_file, tr
         - Get the result for each ID check
         - Check that the policy_id from the scan matches with the file used.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 0
 

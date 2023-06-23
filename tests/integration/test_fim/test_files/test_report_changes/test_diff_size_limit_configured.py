@@ -125,7 +125,7 @@ def test_diff_size_limit_configured(configure_local_internal_options_module, get
                  the test will verify that the value gotten from that FIM event corresponds with the one set
                  in the 'diff_size_limit'.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

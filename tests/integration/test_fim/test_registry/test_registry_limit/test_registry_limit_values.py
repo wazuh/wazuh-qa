@@ -122,7 +122,7 @@ def test_registry_limit_values(configure_local_internal_options_module, get_conf
                  the FIM event 'maximum number of entries' is generated and has the correct value. Finally, the test
                  will verify that, in the FIM 'values entries' event, the number of entries and monitored values match.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

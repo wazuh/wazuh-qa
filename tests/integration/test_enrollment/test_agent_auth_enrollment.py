@@ -92,7 +92,7 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
         error log. Agent-auth will be executed using the different parameters and with different keys and password
         files scenarios as described in the test cases."
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 0
 
