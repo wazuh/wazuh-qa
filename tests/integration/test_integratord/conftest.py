@@ -17,10 +17,6 @@ from wazuh_testing.modules.integratord import event_monitor as evm
 def wait_for_start_module(request):
     # Wait for integratord thread to start
     file_monitor = FileMonitor(LOG_FILE_PATH)
-    check_integratord_event(file_monitor=file_monitor, timeout=20,
-                            callback=generate_monitoring_callback(integrator.CB_INTEGRATORD_THREAD_READY),
-                            error_message=integrator.ERR_MSG_VIRUST_TOTAL_ENABLED_NOT_FOUND)
-
     evm.check_integratord_thread_ready(file_monitor=file_monitor)
 
     # Wait for analysisd to start successfully (to detect changes in the alerts.json file)
