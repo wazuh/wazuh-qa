@@ -55,7 +55,8 @@ from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.integratord import event_monitor as evm
 
 
-def replace_webhook_url(ids, configurations):
+@pytest.fixture(scope='function')
+def replace_webhook_url(configuration):
     '''Replace the Webhook URL in each test case configuration parameters.
 
     Args:
@@ -65,10 +66,8 @@ def replace_webhook_url(ids, configurations):
     Returns:
         configurations (list): List of configurations.
     '''
-    for i in range(0, len(ids)):
-        configurations[i]['WEBHOOK_URL'] = global_parameters.slack_webhook_url
-
-    return configurations
+    configuration['WEBHOOK_URL'] = global_parameters.slack_webhook_url
+    return configuration
 
 
 # Marks
@@ -90,11 +89,11 @@ t1_config_params, t1_metadata, t1_cases_ids = get_test_cases_data(t1_cases_path)
 t2_config_params, t2_metadata, t2_cases_ids = get_test_cases_data(t2_cases_path)
 t3_config_params, t3_metadata, t3_cases_ids = get_test_cases_data(t3_cases_path)
 
-t1_config_params = replace_webhook_url(t1_cases_ids, t1_config_params)
-t2_config_params = replace_webhook_url(t2_cases_ids, t2_config_params)
-t3_config_params = replace_webhook_url(t3_cases_ids, t3_config_params)
-
 # Load tests configurations
+# print(len(t1_config_params))
+# print(len(t1_metadata))
+# print(load_configuration_template(configurations_template, t1_config_params, t1_metadata))
+
 t1_config = load_configuration_template(configurations_template, t1_config_params, t1_metadata)
 t2_config = load_configuration_template(configurations_template, t2_config_params, t2_metadata)
 t3_config = load_configuration_template(configurations_template, t3_config_params, t3_metadata)
@@ -108,8 +107,9 @@ local_internal_options = {'integrator.debug': '2', 'analysisd.debug': '1', 'moni
 # Tests
 @pytest.mark.tier(level=1)
 @pytest.mark.parametrize('configuration, metadata', zip(t1_config, t1_metadata), ids=t1_cases_ids)
-def test_integratord_change_json_inode(configuration, metadata, set_wazuh_configuration, truncate_monitored_files,
-                                       configure_local_internal_options_module, daemons_handler_function,
+def test_integratord_change_json_inode(configuration, metadata, replace_webhook_url, set_wazuh_configuration,
+                                       truncate_monitored_files, configure_local_internal_options_module,
+                                       daemons_handler_function,
                                        wait_for_start_module):
     '''
     description: Check that wazuh-integratord detects a change in the inode of the alerts.json and continues reading
