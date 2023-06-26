@@ -98,18 +98,14 @@ def truncate_logs():
     truncate_file(LOG_FILE_PATH)
 
 
-# fixtures
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
 
-# tests
-
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_rules(get_configuration, configure_environment,
-               daemons_handler, wait_for_gcp_start):
+def test_rules(get_configuration, configure_environment, reset_ossec_log, daemons_handler, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module gets messages matching the GCP rules. It also checks
                  if the triggered alerts contain the proper rule ID. For this purpose, the test will
