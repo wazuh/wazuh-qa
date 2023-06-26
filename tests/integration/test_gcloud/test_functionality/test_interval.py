@@ -93,13 +93,9 @@ p, m = generate_params(extra_params=conf_params,
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
-
 # Preparing
-@pytest.fixture(scope='module', autouse=True)
-def truncate_logs():
-    """Truncate the 'ossec.log' file."""
-    truncate_file(LOG_FILE_PATH)
 
+truncate_file(LOG_FILE_PATH)
 
 
 # fixtures
@@ -109,8 +105,6 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
-
-# tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
 def test_interval(get_configuration, configure_environment, reset_ossec_log, daemons_handler_module,
