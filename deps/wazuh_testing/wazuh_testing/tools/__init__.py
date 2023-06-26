@@ -105,15 +105,18 @@ def get_version():
 
 
 def get_service():
-    if platform.system() in ['Windows', 'win32']:
-        service = 'wazuh-agent'
-    else:  # Linux, sunos5, darwin, aix...
-        try:
-            output = subprocess.check_output([f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"],
-                                             stderr=subprocess.PIPE).decode('utf-8').strip()
-            service = 'wazuh-manager' if output == 'server' else 'wazuh-agent'
-        except Exception:
-            service = 'N/A'
+    try:
+        if platform.system() in ['Windows', 'win32']:
+            if os.path.exists(WAZUH_PATH):
+                service = 'wazuh-agent'
+            else:
+                service = 'N/A'
+        else:  # Linux, sunos5, darwin, aix...
+                output = subprocess.check_output([f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"],
+                                                stderr=subprocess.PIPE).decode('utf-8').strip()
+                service = 'wazuh-manager' if output == 'server' else 'wazuh-agent'
+    except Exception:
+        service = 'N/A'
 
     return service
 
