@@ -11,7 +11,7 @@ brief: Active responses perform various countermeasures to address active threat
        to an agent from the threat source when certain criteria are met. These tests will check if
        the 'wazuh-analysisd' daemon processes 'active response' messages correctly.
 
-components: 
+components:
     - active_response
 
 suite: analysisd

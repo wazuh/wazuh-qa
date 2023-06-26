@@ -90,7 +90,7 @@ def get_configuration(request):
 
 # Tests
 def test_realtime_unsupported(get_configuration, configure_environment, file_monitoring,
-                              configure_local_internal_options_module, daemons_handler):
+                              configure_local_internal_options_module, daemons_handler_module):
     '''
     description: Check if the current OS platform falls to the 'scheduled' mode when 'realtime' is not available.
                  For this purpose, the test performs a CUD set of operations to a file with 'realtime' mode set as
@@ -116,7 +116,7 @@ def test_realtime_unsupported(get_configuration, configure_environment, file_mon
         - configure_local_internal_options_module:
             type: fixture
             brief: Configure the local internal options file.
-        - daemons_handler:
+        - daemons_handler_module:
             type: fixture
             brief: Handle the Wazuh daemons.
 
