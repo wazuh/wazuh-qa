@@ -33,7 +33,8 @@ jobs:
         id: set-changed-modules
         run: |
           files_changed="${{ steps.changed-files.outputs.all_changed_files }}"
-          DIRECTORIES=$(echo $files_changed | tr ' ' '\n' |  grep ^tests | grep -v pytest.ini | cut -d/ -f2 | uniq | tr -d ' ')
+          DIRECTORIES=$(echo $files_changed | tr ' ' '\n' |  grep ^tests | grep -v pytest.ini | cut -d/ -f2 | \
+          uniq | tr -d ' ')
           DIRECTORIES=$(echo $DIRECTORIES | tr ' ' ',')
           echo "matrix=$DIRECTORIES" >> $GITHUB_OUTPUT
 
@@ -41,5 +42,5 @@ jobs:
         run: |
           DIRECTORIES=$(echo ${{ steps.set-changed-modules.outputs.matrix }} | tr ',' ' ')
           for directory in $DIRECTORIES; do
-            pytest --collect-only tests/${directory}
+          pytest --collect-only tests/${directory}
           done
