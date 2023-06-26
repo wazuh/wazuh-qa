@@ -24,6 +24,7 @@ def wait_for_start_module(request):
 
 @pytest.fixture(scope='module')
 def get_integration_api_key():
+    """Get the API key from the environment variable."""
     return global_parameters.integration_api_key
 
 
