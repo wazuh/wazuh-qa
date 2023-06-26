@@ -67,9 +67,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 UPGRADE_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'upgrade')
 TASK_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'task')
 SERVER_ADDRESS = 'localhost'
-
 WPK_REPOSITORY_4x = global_parameters.wpk_package_path[0] if global_parameters.wpk_package_path else 'v4.4.0'
-
 CRYPTO = "aes"
 CHUNK_SIZE = 16384
 TASK_TIMEOUT = '15m'
