@@ -116,12 +116,12 @@ file_structure = [
 ]
 
 parameters = [
-    { 'LOCATION': os.path.join(temp_dir, 'wazuh-testing', files[0]), 'LOG_FORMAT': None },
-    { 'LOCATION': None, 'LOG_FORMAT': 'syslog' },
+    {'LOCATION': os.path.join(temp_dir, 'wazuh-testing', files[0]), 'LOG_FORMAT': None},
+    {'LOCATION': None, 'LOG_FORMAT': 'syslog'},
 ]
 metadata = lower_case_key_dictionary_array(parameters)
 
-tcase_ids = [f"location_{'None' if param['LOCATION'] is None else files[0]}_" \
+tcase_ids = [f"location_{'None' if param['LOCATION'] is None else files[0]}_"
              f"logformat_{'None' if param['LOG_FORMAT'] is None else param['LOG_FORMAT']}" for param in parameters]
 configurations_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'invalid_wazuh_conf.yaml')
 configurations = load_wazuh_configurations(configurations_path, __name__, params=parameters, metadata=metadata)
@@ -151,7 +151,7 @@ def remove_empty_options(get_configuration):
 
 
 def test_invalid_wazuh_conf(get_files_list, create_file_structure_module, get_configuration, remove_empty_options,
-                            configure_environment, daemons_handler):
+                            configure_environment, daemons_handler_module):
     '''
     description: Check if the expected message is present in the ossec.log when an invalid <localfile> configuration is
                  set and if Wazuh refuses to restart.
@@ -174,7 +174,7 @@ def test_invalid_wazuh_conf(get_files_list, create_file_structure_module, get_co
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing. Restart Wazuh is needed for applying the configuration.
-        - daemons_handler:
+        - daemons_handler_module:
             type: fixture
             brief: Handler of Wazuh daemons.
 
@@ -191,7 +191,7 @@ def test_invalid_wazuh_conf(get_files_list, create_file_structure_module, get_co
         - logcollector
     '''
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    
+
     check_daemon_status(target_daemon=LOGCOLLECTOR_DAEMON, running_condition=False)
 
     wazuh_log_monitor.start(timeout=LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=callback_missing_element_error,
