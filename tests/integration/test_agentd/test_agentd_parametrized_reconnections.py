@@ -75,7 +75,6 @@ pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), p
 
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
-global timeout
 timeout = '5'
 
 
@@ -266,7 +265,6 @@ def change_timeout():
     The above option sets the maximum number of seconds to wait
     for server response from the TCP client socket.
     """
-    global timeout
     new_timeout = 'agent.recv_timeout=' + timeout
     if platform.system() == 'win32' or platform.system() == 'Windows':
         local_int_conf_path = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
