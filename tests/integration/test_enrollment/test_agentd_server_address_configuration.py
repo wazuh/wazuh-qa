@@ -145,7 +145,7 @@ def clean_client_keys(get_configuration):
 def test_agentd_server_address_configuration(configure_local_internal_options_module, clean_client_keys,
                                              get_configuration, configure_environment,
                                              configure_sockets_environment, configure_socket_listener,
-                                             create_certificates, edit_hosts, daemons_handler, file_monitoring):
+                                             create_certificates, edit_hosts, daemons_handler_module, file_monitoring):
 
     '''
     description: Check the messages produced by the agent when introducing
@@ -166,7 +166,7 @@ def test_agentd_server_address_configuration(configure_local_internal_options_mo
         - edit_hosts:
             type: fixture
             brief: Edit the hosts file to add custom hostnames for testing.
-        - daemons_handler:
+        - daemons_handler_module:
             type: fixture
             brief: Restart the agentd daemon for restarting the agent.
         - file_monitoring:

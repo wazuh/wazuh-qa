@@ -2,13 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.4.4] 
+## [4.4.4] - TBD
+
+Wazuh commit: TBD
+Release report: TBD
+
+## Added
+
+- Change test_python_flaws.py to accept branch or commit in the same argument. ([#4209](https://github.com/wazuh/wazuh-qa/pull/4209)) (Tests)
+- Fix test_dependencies.py for the changes in the feature. ([#4210](https://github.com/wazuh/wazuh-qa/pull/4210)) (Tests)
 
 ### Fixed
 
 - Enhancing the handling of authd and remoted simulators in case of restart failures ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
+- Fix syscollector tests failure (get_configuration fixture has different scope) ([#4154](https://github.com/wazuh/wazuh-qa/pull/4154)) \- (Framework + Tests)
 
-## [4.4.2] - TBD
+## [4.4.3] - 25-06-2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/f7080df56081adaeaad94529522233e2f0bbd577
+Release report: https://github.com/wazuh/wazuh/issues/17198
+
+### Fixed
+
+- Fix missing comma in setup.py. ([#4180](https://github.com/wazuh/wazuh-qa/pull/4180)) (Framework)
+- Changed the last uses of 4.4.2 in setup.py and schema.yaml. ([#4172](https://github.com/wazuh/wazuh-qa/pull/4172)) \- (Framework)
+
+## [4.4.2] - 18-05-2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/b2901d5086e7a073d89f4f72827e070ce3abd8e8
+Release report: https://github.com/wazuh/wazuh/issues/17004
+>>>>>>> 4.4
 
 ### Added
 
@@ -16,8 +39,15 @@ All notable changes to this project will be documented in this file.
 - Add test to check the Syscollector configuration. ([#3584](https://github.com/wazuh/wazuh-qa/pull/3584)) \- (Framework + Tests)
 - Add system tests for groups deletion ([#4057](https://github.com/wazuh/wazuh-qa/pull/4057)) \- (Tests)
 
+### Changed
+
+- Change integratord test to use slack instead of virustotal ([#3540](https://github.com/wazuh/wazuh-qa/pull/3540)) \- (Framework + Tests)
+
 ### Fixed
 
+- Stabilize multiple wday tests (GCloud integration) ([#4176](https://github.com/wazuh/wazuh-qa/pull/4176)) \- (Tests)
+- Remove old XFail marker (API suite) ([#4177](https://github.com/wazuh/wazuh-qa/pull/4177)) \- (Tests)
+- Mark VD download feeds test as xfail ([#4197](https://github.com/wazuh/wazuh-qa/pull/4197)) \- (Tests)
 - Skip test_age_datetime_changed ([#4182](https://github.com/wazuh/wazuh-qa/pull/4182)) \- (Tests)
 - Limit urllib3 major required version ([#4162](https://github.com/wazuh/wazuh-qa/pull/4162)) \- (Framework)
 - Fix daemons_handler fixture (fix GCP IT) ([#4134](https://github.com/wazuh/wazuh-qa/pull/4134)) \- (Tests)
