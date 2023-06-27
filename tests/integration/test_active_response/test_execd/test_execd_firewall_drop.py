@@ -131,7 +131,7 @@ def start_agent(request, get_configuration):
     truncate_file(CLIENT_KEYS_PATH)
     time.sleep(1)
 
-    try: 
+    try:
         control_service('stop')
         agent_auth_pat = 'bin' if platform.system() == 'Linux' else ''
         call([f'{WAZUH_PATH}/{agent_auth_pat}/agent-auth', '-m', SERVER_ADDRESS])
@@ -145,6 +145,7 @@ def start_agent(request, get_configuration):
 
     remoted_simulator.stop()
     authd_simulator.shutdown()
+
 
 @pytest.fixture(scope="function")
 def remove_ip_from_iptables(request, get_configuration):
