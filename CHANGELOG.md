@@ -31,7 +31,6 @@ Release report: https://github.com/wazuh/wazuh/issues/17198
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/b2901d5086e7a073d89f4f72827e070ce3abd8e8
 Release report: https://github.com/wazuh/wazuh/issues/17004
->>>>>>> 4.4
 
 ### Added
 
