@@ -61,7 +61,7 @@ import platform
 import pytest
 from time import sleep
 
-from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.authd_sim import AuthdSimulator
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.file import truncate_file
@@ -115,22 +115,27 @@ def teardown():
         remoted_server.stop()
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="module")
 def set_debug_mode():
     """Set debug2 for agentd in local internal options file."""
+
+    new_timeout = 'agent.recv_timeout=' + timeout
+
     if platform.system() == 'win32' or platform.system() == 'Windows':
-        local_int_conf_path = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
         debug_line = 'windows.debug=2\n'
     else:
-        local_int_conf_path = os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
         debug_line = 'agent.debug=2\n'
-    with open(local_int_conf_path) as local_file_read:
-        lines = local_file_read.readlines()
-        for line in lines:
-            if line == debug_line:
-                return
-    with open(local_int_conf_path, 'a') as local_file_write:
-        local_file_write.write('\n' + debug_line)
+
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'r') as local_file_read:
+        backup_configuration = local_file_read.read()
+
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'w+') as local_file_read:
+        local_file_read.write(debug_line + new_timeout)
+
+    yield
+
+    with open(WAZUH_LOCAL_INTERNAL_OPTIONS, 'w+') as local_file_read:
+        local_file_read.write(backup_configuration)
 
 
 # fixtures
@@ -258,27 +263,6 @@ def wait_unable_to_connect(line):
     return None
 
 
-@pytest.fixture(scope="module")
-def change_timeout():
-    """Set agent.recv_timeout for agentd in local internal options file.
-
-    The above option sets the maximum number of seconds to wait
-    for server response from the TCP client socket.
-    """
-    new_timeout = 'agent.recv_timeout=' + timeout
-    if platform.system() == 'win32' or platform.system() == 'Windows':
-        local_int_conf_path = os.path.join(WAZUH_PATH, 'local_internal_options.conf')
-    else:
-        local_int_conf_path = os.path.join(WAZUH_PATH, 'etc', 'local_internal_options.conf')
-    with open(local_int_conf_path, 'r') as local_file_read:
-        lines = local_file_read.readlines()
-        for line in lines:
-            if line == new_timeout:
-                return
-    with open(local_int_conf_path, 'a') as local_file_write:
-        local_file_write.write('\n' + new_timeout)
-
-
 def parse_time_from_log_line(log_line):
     """Create a datetime object from a date in a string.
 
@@ -306,7 +290,7 @@ This test covers different options of delays between server connection attempts:
 """
 
 
-def test_agentd_parametrized_reconnections(configure_authd_server, start_authd, stop_agent, set_keys,
+def test_agentd_parametrized_reconnections(set_debug_mode, configure_authd_server, start_authd, stop_agent, set_keys,
                                            configure_environment, get_configuration, teardown):
     '''
     description: Check how the agent behaves when there are delays between connection
