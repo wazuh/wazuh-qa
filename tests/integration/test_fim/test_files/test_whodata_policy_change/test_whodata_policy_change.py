@@ -111,7 +111,7 @@ def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration,
             - Delete the monitored folders
             - Restore configuration
             - Stop wazuh
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

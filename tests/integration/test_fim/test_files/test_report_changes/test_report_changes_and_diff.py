@@ -122,7 +122,7 @@ def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuratio
                  'content_changes' field a message indicating that 'diff' is truncated because
                  the 'nodiff' option is used.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

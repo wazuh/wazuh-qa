@@ -123,7 +123,7 @@ def test_file_limit_no_limit(configure_local_internal_options_module, get_config
                  For this purpose, the test will monitor a testing directory, and finally, it will verify
                  that the FIM event 'no limit' is generated.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

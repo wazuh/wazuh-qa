@@ -106,7 +106,7 @@ def test_windows_system_monitoring(configuration, metadata, test_folders, set_wa
             - Restore configuration
             - Stop wazuh
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

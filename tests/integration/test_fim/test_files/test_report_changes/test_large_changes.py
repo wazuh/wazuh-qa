@@ -116,7 +116,7 @@ def test_large_changes(configuration, metadata, set_wazuh_configuration, configu
                  the test will verify that the generated FIM event contains in its 'content_changes' field the proper
                  value depending on the test case.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 
