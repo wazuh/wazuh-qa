@@ -108,7 +108,7 @@ def test_sync_time(configuration, metadata, set_wazuh_configuration, configure_l
         - Get all the integrity state events time.
         - Assert that the time it took for the sync to complete was less than the configured interval and max_interval.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 2
 

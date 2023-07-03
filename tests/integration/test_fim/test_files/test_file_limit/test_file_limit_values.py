@@ -131,7 +131,7 @@ def test_file_limit_values(configure_local_internal_options_module, get_configur
                  is generated and has the correct value. Finally, the test will verify that on the FIM event,
                  inodes and monitored files number match.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

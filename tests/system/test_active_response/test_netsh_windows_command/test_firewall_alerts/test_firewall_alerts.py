@@ -40,7 +40,7 @@ def test_firewall_alerts(configure_environment, metadata, generate_events):
         - teardown:
             - Restore initial configuration, ossec.conf.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 0
 

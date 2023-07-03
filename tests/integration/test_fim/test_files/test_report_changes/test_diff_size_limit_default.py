@@ -118,7 +118,7 @@ def test_diff_size_limit_default(configure_local_internal_options_module, get_co
                  file size to generate 'diff' information. Finally, the test will verify that the value gotten
                  from that FIM event corresponds with the default value of the 'diff_size_limit' attribute (50MB).
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

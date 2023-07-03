@@ -109,7 +109,7 @@ def test_restrict_multiple_regex(configuration, metadata, new_file_path, create_
            - Restore ossec.conf and local_internal_options.conf
            - Stop Wazuh
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

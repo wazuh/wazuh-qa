@@ -122,7 +122,7 @@ def test_registry_key_limit_full(configure_local_internal_options_module, get_co
                  Then, it will try to add a new key and it will check if the FIM event 'full' is generated. Finally, the
                  test will verify that, in the FIM 'entries' event, the number of entries and monitored values match.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     parameters:
         - configure_local_internal_options_module:
