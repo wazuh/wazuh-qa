@@ -3,10 +3,10 @@ copyright: Copyright (C) 2015-2023, Wazuh Inc.
             Created by Wazuh, Inc. <info@wazuh.com>.
             This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 type: system
-brief: Wazuh manager handles agent groups. 
-        If a group is deleted from a master cluster, there will be an instance where the agents require a 
-        resynchronization (syncreq). 
-        If the group is deleted from a worker cluster, the cluster master will take care of reestablishing the 
+brief: Wazuh manager handles agent groups.
+        If a group is deleted from a master cluster, there will be an instance where the agents require a
+        resynchronization (syncreq).
+        If the group is deleted from a worker cluster, the cluster master will take care of reestablishing the
         group structure without the need for resynchronization.
         This test suite tests the correct functioning of the mentioned use case.
 tier: 0
@@ -56,9 +56,10 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 test_cases_yaml = os.path.join(data_path, 'cases_group_sync.yaml')
 wdb_query = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'script/wdb-query.py')
 agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                               '..', '..', 'provisioning', 'enrollment_cluster', 'roles', 'agent-role', 
+                               '..', '..', 'provisioning', 'enrollment_cluster', 'roles', 'agent-role',
                                'files', 'ossec.conf')
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(test_cases_yaml)
+
 
 @pytest.fixture()
 def group_creation_and_assignation(metadata, target_node):
@@ -107,7 +108,7 @@ def wait_end_initial_syncreq():
 
 @pytest.mark.parametrize('target_node', ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2'])
 @pytest.mark.parametrize('metadata', t1_configuration_metadata, ids=t1_case_ids)
-def test_group_sync_status(metadata, target_node, clean_environment, group_creation_and_assignation, 
+def test_group_sync_status(metadata, target_node, clean_environment, group_creation_and_assignation,
                            wait_end_initial_syncreq):
     '''
     description: Delete a group folder in wazuh server cluster and check group_sync status in 2 times.
@@ -115,10 +116,10 @@ def test_group_sync_status(metadata, target_node, clean_environment, group_creat
     metadata:
         - metadata:
             type: list
-            brief: List of tests to be performed.       
+            brief: List of tests to be performed.
         - target_node:
             type: list
-            brief: List of nodes from the groups will be managed.    
+            brief: List of nodes from the groups will be managed.
         - clean_environment:
             type: fixture
             brief: Cleaning logs and resetting environment before testing.
@@ -134,9 +135,9 @@ def test_group_sync_status(metadata, target_node, clean_environment, group_creat
         - Verify same conditions creating and assigning groups from all wazuh-manager clusters (Master and Workers)
     input_description: Different use cases are found in the test module and include parameters.
     expected_output:
-        - If the group-folder is deleted from master cluster, it is expected to find a 
+        - If the group-folder is deleted from master cluster, it is expected to find a
         syncreq group_sync status until it gets synced.
-        - If the group-folder is deletef rom a worker cluster, it is expected that master 
+        - If the group-folder is deletef rom a worker cluster, it is expected that master
         cluster recreates groups without syncreq status.
     '''
     # Delete group folder
@@ -171,6 +172,7 @@ def test_group_sync_status(metadata, target_node, clean_environment, group_creat
     # Check after 5 seconds, sync_status
     if 'syncreq' in execute_wdb_query(query, test_infra_hosts[0], host_manager):
         second_time_check = 'syncreq'
-    else: second_time_check = 'synced'
+    else: 
+        second_time_check = 'synced'
 
     assert metadata['expected_second_check'] == second_time_check
