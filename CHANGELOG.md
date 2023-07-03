@@ -7,12 +7,16 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: TBD
 Release report: TBD
 
+### Added
+
+- Add system test for global group hash ([#4015](https://github.com/wazuh/wazuh-qa/pull/4015)) \- (Tests)
+
 ## [4.4.4] - TBD
 
 Wazuh commit: TBD
 Release report: TBD
 
-## Added
+### Added
 
 - Change test_python_flaws.py to accept branch or commit in the same argument. ([#4209](https://github.com/wazuh/wazuh-qa/pull/4209)) (Tests)
 - Fix test_dependencies.py for the changes in the feature. ([#4210](https://github.com/wazuh/wazuh-qa/pull/4210)) (Tests)
@@ -74,7 +78,6 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 
 ### Added
 
-- Add system test for global group hash ([#4015](https://github.com/wazuh/wazuh-qa/pull/4015)) \- (Tests)
 - Add multigroups tests cases for `test_assign_groups_guess` ([#3979](https://github.com/wazuh/wazuh-qa/pull/3979)) \- (Tests)
 - Add new group_hash case and update the `without condition` case output in `wazuh_db/sync_agent_groups_get` ([#3959](https://github.com/wazuh/wazuh-qa/pull/3959)) \- (Tests)
 - Add markers for each system test environment ([#3961](https://github.com/wazuh/wazuh-qa/pull/3961)) \- (Framework + Tests)
