@@ -7,12 +7,16 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: TBD
 Release report: TBD
 
+### Changed
+
+- Enable Windows Vulnerability Detector E2E. ([#4251](https://github.com/wazuh/wazuh-qa/pull/4251)) (Tests)
+
 ## [4.4.4] - TBD
 
 Wazuh commit: TBD
 Release report: TBD
 
-## Added
+### Added
 
 - Change test_python_flaws.py to accept branch or commit in the same argument. ([#4209](https://github.com/wazuh/wazuh-qa/pull/4209)) (Tests)
 - Fix test_dependencies.py for the changes in the feature. ([#4210](https://github.com/wazuh/wazuh-qa/pull/4210)) (Tests)
