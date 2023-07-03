@@ -41,23 +41,19 @@ testinfra_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
 workers = ['wazuh-worker1', 'wazuh-worker2']
 agents = []
 number_agents = 40
+for number_agent in range(number_agents):
+    agents.append(f'wazuh-agent{number_agent+1}')
 
 pytestmark = [pytest.mark.cluster, pytest.mark.big_cluster_40_agents_env]
 
 
 @pytest.fixture()
 def restart_all_agents():
-    for number_agent in range(number_agents):
-        agents.append(f'wazuh-agent{number_agent+1}')
-
     restart_cluster(testinfra_hosts + agents, host_manager)
-
     time.sleep(T_1)
 
     yield
-
-    for agent in agents:
-        host_manager.run_command(agent, f'{WAZUH_PATH}/bin/wazuh-control restart')
+    restart_cluster(testinfra_hosts + agents, host_manager)
 
 
 @pytest.fixture()
@@ -69,7 +65,7 @@ def stop_gracefully_all_agents():
 def test_shut_down_message_gracefully_stopped_agent(restart_all_agents, stop_gracefully_all_agents):
     '''
         description: Checking shutdown message when socket is closed.
-        wazuh_min_version: 4.5.0
+        wazuh_min_version: 4.6.0
         parameters:
             - restart_all_agents:
                 type: function
@@ -86,7 +82,7 @@ def test_shut_down_message_gracefully_stopped_agent(restart_all_agents, stop_gra
             - Gracefully closed, it is expected to find agents 'Disconected' in agent-manager
     '''
 
-    host_manager.get_host(testinfra_hosts[0]).ansible('command', f'service wazuh-manager restart', check=False)
+    #host_manager.get_host(testinfra_hosts[0]).ansible('command', f'service wazuh-manager restart', check=False)
     time.sleep(T_3)
 
     matches = re.findall(r"Disconnected", host_manager.run_command(testinfra_hosts[0],
