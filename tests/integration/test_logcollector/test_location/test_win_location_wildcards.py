@@ -79,8 +79,8 @@ log_sample = 'Nov 10 12:19:04 localhost sshd: test log'
 @pytest.mark.parametrize('folder_path, file_list', [(folder_path, ['test'])], ids=[''])
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=case_ids)
 def test_win_location_wildcards(configuration, metadata, folder_path, file_list, create_files_in_folder,
-                            truncate_monitored_files, set_wazuh_configuration,
-                            configure_local_internal_options_function, restart_wazuh_function):
+                                truncate_monitored_files, set_wazuh_configuration,
+                                configure_local_internal_options_function, restart_wazuh_function):
     '''
     description: Check logcollector expands wildcards and monitors target file properly.
 
