@@ -28,4 +28,4 @@ jobs:
       - name: Install package
         run: |
           cd deps/wazuh_testing
-          python setup.py install
+          pip install .
