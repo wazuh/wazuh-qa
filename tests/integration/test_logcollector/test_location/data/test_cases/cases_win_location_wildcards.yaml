@@ -1,4 +1,3 @@
-
 - name: test_single_asterisk_wildcard
   description: Test location tag with one asterisk wildcard
   configuration_parameters:

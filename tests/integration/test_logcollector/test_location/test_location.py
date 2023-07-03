@@ -216,8 +216,9 @@ def location_file_date():
     file_structure = ast.literal_eval(file_structure_string_real_paths)
 
 
-def test_location(location_file_date, get_files_list, create_file_structure_module, get_configuration, configure_environment,
-                  configure_local_internal_options_module, file_monitoring, restart_logcollector):
+def test_location(location_file_date, get_files_list, create_file_structure_module, get_configuration,
+                  configure_environment, configure_local_internal_options_module, file_monitoring,
+                  restart_logcollector):
     '''
     description: Check if the 'wazuh-logcollector' monitors the log files specified in the 'location' tag.
                  For this purpose, the test will create a testing log file, configure a 'localfile' section
@@ -281,7 +282,7 @@ def test_location(location_file_date, get_files_list, create_file_structure_modu
         if file_type == 'single_file':
             log_callback = logcollector.callback_analyzing_file(file_location)
             log_monitor.start(timeout=logcollector.LOG_COLLECTOR_GLOBAL_TIMEOUT, callback=log_callback,
-                              error_message=f"The expected 'Analyzing file {file_location}' message has not been produced")
+                              error_message=f"The expected 'Analyzing file {file_location}' message was not found")
         elif file_type == 'wildcard_file':
             pattern = get_configuration['metadata']['location']
             log_callback = logcollector.callback_match_pattern_file(pattern, file_location)
