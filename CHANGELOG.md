@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Changed
 
+- Enable Windows Vulnerability Detector E2E. ([#4251](https://github.com/wazuh/wazuh-qa/pull/4251)) (Tests)
 - Update _wazuh_db_ schema database version ([#4353](https://github.com/wazuh/wazuh-qa/pull/4353)) \- (Tests)
 
 ## [4.7.0] - TBD
