@@ -30,13 +30,6 @@ from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
 from system import restart_cluster
 
-testinfra_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
-workers = ['wazuh-worker1', 'wazuh-worker2']
-agents = []
-number_agents = 40
-
-pytestmark = [pytest.mark.cluster, pytest.mark.big_cluster_40_agents_env]
-
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                               'provisioning', 'big_cluster_40_agents', 'inventory.yml')
 host_manager = HostManager(inventory_path)
@@ -44,12 +37,20 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..',
                                'provisioning', 'big_cluster_40_agents', 'roles', 'agent-role', 'files', 'ossec.conf')
 
-@pytest.fixture  
+testinfra_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
+workers = ['wazuh-worker1', 'wazuh-worker2']
+agents = []
+number_agents = 40
+
+pytestmark = [pytest.mark.cluster, pytest.mark.big_cluster_40_agents_env]
+
+
+@pytest.fixture()
 def restart_all_agents():
     for number_agent in range(number_agents):
         agents.append(f'wazuh-agent{number_agent+1}')
 
-    restart_cluster(testinfra_hosts + agents, host_manager)   
+    restart_cluster(testinfra_hosts + agents, host_manager)
 
     time.sleep(T_1)
 
@@ -59,7 +60,7 @@ def restart_all_agents():
         host_manager.run_command(agent, f'{WAZUH_PATH}/bin/wazuh-control restart')
 
 
-@pytest.fixture
+@pytest.fixture()
 def stop_gracefully_all_agents():
     for agent in agents:
         host_manager.run_command(agent, f'{WAZUH_PATH}/bin/wazuh-control stop')
@@ -72,24 +73,23 @@ def test_shut_down_message_gracefully_stopped_agent(restart_all_agents, stop_gra
         parameters:
             - restart_all_agents:
                 type: function
-                brief: Restart all the agents to manipulate them after.            
+                brief: Restart all the agents to manipulate them after.
             - stop_gracefully_all_agents:
                 type: function
-                brief: Stop agents gracefully             
+                brief: Stop agents gracefully
         assertions:
             - Verify that all agents status became 'Disconnected' after gracefully shutdown.
-        
+
         input_description: Different use cases are found in the test module and include parameters.
-        
+
         expected_output:
             - Gracefully closed, it is expected to find agents 'Disconected' in agent-manager
-        
     '''
 
     host_manager.get_host(testinfra_hosts[0]).ansible('command', f'service wazuh-manager restart', check=False)
     time.sleep(T_3)
 
-    matches = re.findall(r"Disconnected", host_manager.run_command(testinfra_hosts[0], 
+    matches = re.findall(r"Disconnected", host_manager.run_command(testinfra_hosts[0],
                                                                    f'{WAZUH_PATH}/bin/agent_control -l'))
 
-    assert len(matches) == number_agents 
+    assert len(matches) == number_agents
