@@ -19,17 +19,11 @@ from wazuh_testing import ALERTS_JSON_PATH, ARCHIVES_JSON_PATH, ARCHIVES_LOG_PAT
 from wazuh_testing.db_interface.agent_db import update_os_info
 from wazuh_testing.db_interface.global_db import get_system, modify_system
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
-<<<<<<< HEAD
-<<<<<<< HEAD
 from wazuh_testing.tools import (PREFIX, LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH,
                                  WAZUH_LOCAL_INTERNAL_OPTIONS)
-=======
 from wazuh_testing.tools import ALERT_FILE_PATH, LOG_FILE_PATH, WAZUH_CONF, WAZUH_LOCAL_INTERNAL_OPTIONS, get_service
->>>>>>> 947106bebea3ec50b440aad9c442ad47f5653257
-=======
 from wazuh_testing.tools import (PREFIX, LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH,
                                  WAZUH_LOCAL_INTERNAL_OPTIONS)
->>>>>>> 4.6.0
 from wazuh_testing.tools.configuration import get_minimal_configuration, get_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import copy, recursive_directory_creation, remove_file, truncate_file, write_file
 from wazuh_testing.tools.monitoring import FileMonitor, QueueMonitor, SocketController, close_sockets
