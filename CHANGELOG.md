@@ -11,7 +11,7 @@ Release report: TBD
 
 Wazuh commit: TBD \
 Release report: TBD
-- Add Windows location wildcards tests ([#3906](https://github.com/wazuh/wazuh-qa/pull/3906)) \- (Tests + Framework)
+- Add Windows location wildcards tests ([#4263](https://github.com/wazuh/wazuh-qa/pull/4263)) \- (Tests + Framework)
 - Add  IT tests FIM registry monitoring using wildcards. ([#4220](https://github.com/wazuh/wazuh-qa/pull/4220)) \- (Framework + Tests)
 - New 'SCA' test suite and framework. ([#3566](https://github.com/wazuh/wazuh-qa/pull/3566)) \- (Framework + Tests)
 - Add integration tests for AWS module. ([#3911](https://github.com/wazuh/wazuh-qa/pull/3911)) \- (Framework + Tests + Documentation)
