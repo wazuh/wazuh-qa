@@ -143,7 +143,7 @@ def test_group_hash(target_node, group, n_agents, configure_groups, clean_enviro
     if n_agents >= 2:
         # Delete one agent
         remove_cluster_agents(test_infra_managers[0], [test_infra_agents[0]], host_manager, [agents_data[0][1]])
-        time.sleep(fw.T_10)
+        time.sleep(fw.T_20)
 
         # Calculate global hash
         expected_global_hash = calculate_global_hash(test_infra_managers[0], host_manager)
