@@ -1,4 +1,7 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 4.6.0
 '''
 copyright: Copyright (C) 2015-2023, Wazuh Inc.
            Created by Wazuh, Inc. <info@wazuh.com>.
@@ -34,6 +37,7 @@ SERVER = pytest.mark.server
 WINDOWS_DEBUG = 'windows.debug'
 SYSCHECK_DEBUG = 'syscheck.debug'
 VERBOSE_DEBUG_OUTPUT = 2
+<<<<<<< HEAD
 =======
 '''
 copyright: Copyright (C) 2015-2023, Wazuh Inc.
@@ -66,3 +70,5 @@ SOLARIS = pytest.mark.sunos5
 AGENT = pytest.mark.agent
 SERVER = pytest.mark.server
 >>>>>>> 947106bebea3ec50b440aad9c442ad47f5653257
+=======
+>>>>>>> 4.6.0

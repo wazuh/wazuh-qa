@@ -155,7 +155,7 @@ def create_cdb_list(min_length):
     {'test_upload_size'}
 ])
 def test_max_upload_size(tags_to_apply, get_configuration, configure_api_environment, restart_required_api_wazuh,
-                         file_monitoring, daemons_handler, wait_for_start, get_api_details):
+                         file_monitoring, daemons_handler_module, wait_for_start, get_api_details):
     '''
     description: Check if a '413' HTTP status code ('Payload Too Large') is returned if the response body is
                  bigger than the value of the 'max_upload_size' tag. For this purpose, the test will call to
@@ -183,7 +183,7 @@ def test_max_upload_size(tags_to_apply, get_configuration, configure_api_environ
         - file_monitoring:
             type: fixture
             brief: Handle the monitoring of a specified file.
-        - daemons_handler:
+        - daemons_handler_module:
             type: fixture
             brief: Handler of Wazuh daemons.
         - wait_for_start:

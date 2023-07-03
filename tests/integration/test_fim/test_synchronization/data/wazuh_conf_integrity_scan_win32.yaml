@@ -8,7 +8,7 @@
         - disabled:
             value: 'no'
         - frequency:
-            value: 40
+            value: 5
         - directories:
             value: TEST_DIRECTORIES
             attributes:

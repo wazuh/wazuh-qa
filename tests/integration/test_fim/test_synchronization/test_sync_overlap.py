@@ -60,6 +60,7 @@ tags:
     - fim_synchronization
 '''
 import os
+import sys
 import pytest
 
 from wazuh_testing import global_parameters
@@ -99,7 +100,6 @@ local_internal_options = FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS
 
 # Tests
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
-@pytest.mark.parametrize('files_number', [configuration_metadata[0]['files']])
 def test_sync_overlap(configuration, metadata, set_wazuh_configuration, configure_local_internal_options_function,
                       create_files_in_folder, restart_syscheck_function, wait_fim_start):
     '''
@@ -117,7 +117,7 @@ def test_sync_overlap(configuration, metadata, set_wazuh_configuration, configur
         - Check that next sync is skipped and interval value is doubled
         - Check that interval value is returned to configured value after successful sync
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 
@@ -159,6 +159,8 @@ def test_sync_overlap(configuration, metadata, set_wazuh_configuration, configur
     tags:
         - scheduled
     '''
+    if sys.platform == 'win32' and metadata['lower']:
+        pytest.xfail("It will be blocked by wazuh/wazuh-qa#4071")
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 

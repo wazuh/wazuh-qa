@@ -44,7 +44,7 @@ def test_firewall_status(metadata, configure_environment, generate_events):
         - teardown:
             - Restore initial configuration, ossec.conf.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 0
 

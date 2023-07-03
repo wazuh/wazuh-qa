@@ -95,7 +95,6 @@ wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 
 # Tests
 @pytest.mark.parametrize('configuration, metadata', zip(configurations, configuration_metadata), ids=test_case_ids)
-@pytest.mark.parametrize('files_number', [configuration_metadata[0]['files']])
 def test_sync_time(configuration, metadata, set_wazuh_configuration, configure_local_internal_options_function,
                    create_files_in_folder, restart_syscheck_function, wait_fim_start):
     '''
@@ -109,7 +108,7 @@ def test_sync_time(configuration, metadata, set_wazuh_configuration, configure_l
         - Get all the integrity state events time.
         - Assert that the time it took for the sync to complete was less than the configured interval and max_interval.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 2
 

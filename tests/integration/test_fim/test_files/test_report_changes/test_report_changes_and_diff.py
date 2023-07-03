@@ -70,7 +70,7 @@ import sys
 import pytest
 from wazuh_testing.tools import PREFIX, configuration
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing import global_parameters, LOG_FILE_PATH
+from wazuh_testing import T_20, LOG_FILE_PATH
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 from wazuh_testing.modules.fim.utils import regular_file_cud
 from test_fim.common import make_diff_file_path
@@ -122,7 +122,7 @@ def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuratio
                  'content_changes' field a message indicating that 'diff' is truncated because
                  the 'nodiff' option is used.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 
@@ -190,6 +190,6 @@ def test_reports_file_and_nodiff(configuration, metadata, set_wazuh_configuratio
                 f'content_changes is truncated'
 
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, min_timeout=global_parameters.default_timeout*4,
+    regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, min_timeout=T_20,
                      triggers_event=True, validators_after_update=[report_changes_validator, no_diff_validator],
                      escaped=escaped)

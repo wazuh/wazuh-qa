@@ -132,7 +132,7 @@ def test_file_limit_full(configure_local_internal_options_module, get_configurat
                  when a new testing file is added to the monitored directory. Finally, the test will verify that
                  on the FIM event, inodes and monitored files number match.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

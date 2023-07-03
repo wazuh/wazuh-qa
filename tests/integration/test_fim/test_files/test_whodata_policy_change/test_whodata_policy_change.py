@@ -51,7 +51,7 @@ import pytest
 from wazuh_testing.tools import PREFIX, configuration
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.local_actions import run_local_command_returning_output
-from wazuh_testing import T_5, T_20, global_parameters, LOG_FILE_PATH
+from wazuh_testing import T_5, T_20, T_30, LOG_FILE_PATH
 from wazuh_testing.modules import fim
 from wazuh_testing.modules.fim import event_monitor as evm
 from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
@@ -111,7 +111,7 @@ def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration,
             - Delete the monitored folders
             - Restore configuration
             - Stop wazuh
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 
@@ -186,4 +186,4 @@ def test_whodata_policy_change(configuration, metadata, set_wazuh_configuration,
     # Create/Update/Delete file and check events
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     regular_file_cud(folder, wazuh_log_monitor, file_list=file_list, event_mode=fim.REALTIME_MODE,
-                     escaped=True, min_timeout=global_parameters.default_timeout*4, triggers_event=True)
+                     escaped=True, min_timeout=T_30, triggers_event=True)

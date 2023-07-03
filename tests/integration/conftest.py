@@ -20,11 +20,16 @@ from wazuh_testing.db_interface.agent_db import update_os_info
 from wazuh_testing.db_interface.global_db import get_system, modify_system
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 <<<<<<< HEAD
+<<<<<<< HEAD
 from wazuh_testing.tools import (PREFIX, LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH,
                                  WAZUH_LOCAL_INTERNAL_OPTIONS)
 =======
 from wazuh_testing.tools import ALERT_FILE_PATH, LOG_FILE_PATH, WAZUH_CONF, WAZUH_LOCAL_INTERNAL_OPTIONS, get_service
 >>>>>>> 947106bebea3ec50b440aad9c442ad47f5653257
+=======
+from wazuh_testing.tools import (PREFIX, LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH,
+                                 WAZUH_LOCAL_INTERNAL_OPTIONS)
+>>>>>>> 4.6.0
 from wazuh_testing.tools.configuration import get_minimal_configuration, get_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import copy, recursive_directory_creation, remove_file, truncate_file, write_file
 from wazuh_testing.tools.monitoring import FileMonitor, QueueMonitor, SocketController, close_sockets
@@ -128,11 +133,39 @@ def restart_wazuh_daemon_function(daemon=None):
 
 
 @pytest.fixture(scope='function')
-def restart_wazuh_function(daemon=None):
-    """Restart all Wazuh daemons"""
-    control_service("restart", daemon=daemon)
+def restart_wazuh_function(request):
+    """Restart before starting a test, and stop it after finishing.
+
+       Args:
+            request (fixture): Provide information on the executing test function.
+    """
+    # If there is a list of required daemons defined in the test module, restart daemons, else restart all daemons.
+    try:
+        daemons = request.module.REQUIRED_DAEMONS
+    except AttributeError:
+        daemons = []
+
+    if len(daemons) == 0:
+        logger.debug(f"Restarting all daemon")
+        control_service('restart')
+    else:
+        for daemon in daemons:
+            logger.debug(f"Restarting {daemon}")
+            # Restart daemon instead of starting due to legacy used fixture in the test suite.
+            control_service('restart', daemon=daemon)
+
     yield
-    control_service('stop', daemon=daemon)
+
+    # Stop all daemons by default (daemons = None)
+    if len(daemons) == 0:
+        logger.debug(f"Stopping all daemons")
+        control_service('stop')
+    else:
+        # Stop a list daemons in order (as Wazuh does)
+        daemons.reverse()
+        for daemon in daemons:
+            logger.debug(f"Stopping {daemon}")
+            control_service('stop', daemon=daemon)
 
 
 @pytest.fixture(scope='module')
@@ -306,12 +339,12 @@ def pytest_addoption(parser):
         help="run tests using a specific WPK package path"
     )
     parser.addoption(
-        "--integration-api-key",
+        "--slack-webhook-url",
         action="store",
-        metavar="integration_api_key",
+        metavar="slack_webhook_url",
         default=None,
         type=str,
-        help="pass api key required for integratord tests."
+        help="pass webhook url required for integratord tests."
     )
 
 
@@ -370,10 +403,10 @@ def pytest_configure(config):
     # Set WPK package version
     global_parameters.wpk_version = config.getoption("--wpk_version")
 
-    # Set integration_api_key if it is passed through command line args
-    integration_api_key = config.getoption("--integration-api-key")
-    if integration_api_key:
-        global_parameters.integration_api_key = integration_api_key
+    # Set slack_webhook_url if it is passed through command line args
+    slack_webhook_url = config.getoption("--slack-webhook-url")
+    if slack_webhook_url:
+        global_parameters.slack_webhook_url = slack_webhook_url
 
     # Set files to add to the HTML report
     set_report_files(config.getoption("--save-file"))
@@ -608,7 +641,7 @@ def configure_local_internal_options_module(request):
     conf.set_local_internal_options_dict(backup_local_internal_options)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def configure_local_internal_options_function(request):
     """Fixture to configure the local internal options file.
 
@@ -909,10 +942,8 @@ def create_file_structure_function(get_files_list):
     delete_file_structure(get_files_list)
 
 
-@pytest.fixture(scope='module')
-def daemons_handler(get_configuration, request):
-    """Handler of Wazuh daemons.
-
+def daemons_handler_impl(request):
+    """Helper function to handle Wazuh daemons.
     It uses `daemons_handler_configuration` of each module in order to configure the behavior of the fixture.
     The  `daemons_handler_configuration` should be a dictionary with the following keys:
         daemons (list, optional): List with every daemon to be used by the module. In case of empty a ValueError
@@ -922,7 +953,6 @@ def daemons_handler(get_configuration, request):
         in order to use this fixture along with invalid configuration. Default `False`
 
     Args:
-        get_configuration (fixture): Get configurations from the module. Allows this fixture to be used for each param.
         request (fixture): Provide information on the executing test function.
     """
     daemons = []
@@ -980,8 +1010,25 @@ def daemons_handler(get_configuration, request):
             control_service('stop', daemon=daemon)
 
 
-# Wrapper of `daemons_handler` function to change its scope from `module` to `function`
-daemons_handler_function = pytest.fixture(daemons_handler.__wrapped__, scope='function')
+@pytest.fixture(scope='module')
+def daemons_handler_module(get_configuration, request):
+    """Wrapper of `daemons_handler_impl` which contains the general implementation.
+
+    Args:
+        get_configuration (fixture): Get configurations from the module. Allows this fixture to be used for each param.
+        request (fixture): Provide information on the executing test function.
+    """
+    yield from daemons_handler_impl(request)
+
+
+@pytest.fixture(scope='function')
+def daemons_handler_function(request):
+    """Wrapper of `daemons_handler_impl` which contains the general implementation.
+
+    Args:
+        request (fixture): Provide information on the executing test function.
+    """
+    yield from daemons_handler_impl(request)
 
 
 @pytest.fixture(scope='function')

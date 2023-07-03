@@ -16,13 +16,7 @@ GENERATED_FILES_DIR = f"{WORKING_DIR}/incoming"
 SNAPSHOTS_DIR = f"{GENERATED_FILES_DIR}/snapshots"
 DOWNLOADS_DIR = f"{GENERATED_FILES_DIR}/downloads"
 UNCOMPRESSED_DIR = f"{GENERATED_FILES_DIR}/uncompressed"
-MYSQL_CREDENTIALS = {
-    'user': None,
-    'password': None,
-    'host': None,
-    'port': None,
-    'database': None
-}
+ENVIRONMENT_CONFIG = None
 
 # Callback messages
 CB_PROCESS_STARTED = r'.+\[info\]\[Orchestrator - start\]: Starting process'

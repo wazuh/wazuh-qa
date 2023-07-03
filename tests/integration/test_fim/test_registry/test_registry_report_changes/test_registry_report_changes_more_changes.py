@@ -55,6 +55,7 @@ tags:
     - fim_registry_report_changes
 '''
 import os
+import sys
 
 import pytest
 from test_fim.common import generate_string
@@ -103,6 +104,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by #4077.")
 @pytest.mark.parametrize('key, subkey, arch, value_name, tags_to_apply', [
     (key, sub_key_1, KEY_WOW64_64KEY, "some_value", {'test_report_changes'}),
     (key, sub_key_1, KEY_WOW64_32KEY, "some_value", {'test_report_changes'}),

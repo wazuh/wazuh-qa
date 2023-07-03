@@ -111,13 +111,13 @@ def test_agent_info_sync(clean_cluster_logs, remove_labels):
 
     # Obtain the modified agent ID.
     modified_agent_id = host_manager.run_command(master_host,
-                                                 f"{WAZUH_PATH}/framework/python/bin/python3.9 "
+                                                 f"{WAZUH_PATH}/framework/python/bin/python3 "
                                                  f"{script_path} '{queries[0].format(agent=modified_agent)}'")
 
     # Check that the agent label is updated in the master's database.
     sleep(time_to_sync)
     result = host_manager.run_command(master_host,
-                                      f"{WAZUH_PATH}/framework/python/bin/python3.9 "
+                                      f"{WAZUH_PATH}/framework/python/bin/python3 "
                                       f"{script_path} \"{queries[1].format(label=label)}\"")
 
     assert modified_agent_id, \
@@ -139,14 +139,14 @@ def test_agent_info_sync_remove_agent(clean_cluster_logs):
 
     # Ensure the agent to be removed is present in the Worker's socket before attempting the test
     agent_list = host_manager.run_command('wazuh-worker2',
-                                          f"{WAZUH_PATH}/framework/python/bin/python3.9 "
+                                          f"{WAZUH_PATH}/framework/python/bin/python3 "
                                           f"{script_path} \"{queries[2]}\"")
 
     assert deleted_agent in agent_list, f"{deleted_agent} was not found in wazuh-worker2\'s global.db"
 
     # Obtain the deleted agent ID
     deleted_agent_id = host_manager.run_command(master_host,
-                                                f"{WAZUH_PATH}/framework/python/bin/python3.9 "
+                                                f"{WAZUH_PATH}/framework/python/bin/python3 "
                                                 f"{script_path} '{queries[0].format(agent=deleted_agent)}'")
     deleted_agent_id = json.loads(deleted_agent_id.replace('[', '').replace(']', '').replace("'", '"'))
 
