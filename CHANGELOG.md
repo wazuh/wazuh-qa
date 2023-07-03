@@ -9,7 +9,7 @@ Wazuh commit: TBD \
 Release report: TBD
 ## Added
 
-- Added tests for checking agent status upon ungraceful closure.([#3709](https://github.com/wazuh/wazuh-qa/pull/3709)) \- (Tests)
+- Added tests for checking agent status upon ungraceful closure.([#4146](https://github.com/wazuh/wazuh-qa/pull/4146)) \- (Tests)
 
 ## [4.5.0] - TBD
 

@@ -81,8 +81,6 @@ def test_shut_down_message_gracefully_stopped_agent(restart_all_agents, stop_gra
         expected_output:
             - Gracefully closed, it is expected to find agents 'Disconected' in agent-manager
     '''
-
-    #host_manager.get_host(testinfra_hosts[0]).ansible('command', f'service wazuh-manager restart', check=False)
     time.sleep(T_3)
 
     matches = re.findall(r"Disconnected", host_manager.run_command(testinfra_hosts[0],
