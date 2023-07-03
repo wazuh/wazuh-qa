@@ -154,11 +154,11 @@ def test_group_sync_status(metadata, target_node, clean_environment, group_creat
         agent2_status = json.loads(execute_wdb_query(query, test_infra_hosts[0], host_manager))[2]['group_sync_status']
 
         if metadata['agent_in_group'] == 'agent1':
-                if 'syncreq' == agent1_status  and 'synced' == agent2_status:
+            if 'syncreq' == agent1_status  and 'synced' == agent2_status:
                     first_time_check = "syncreq"
 
         elif metadata['agent_in_group'] == 'agent2':
-                if 'synced' == agent1_status  and 'syncreq' == agent2_status:
+            if 'synced' == agent1_status  and 'syncreq' == agent2_status:
                     first_time_check = "syncreq"
 
         else:
@@ -172,7 +172,7 @@ def test_group_sync_status(metadata, target_node, clean_environment, group_creat
     # Check after 5 seconds, sync_status
     if 'syncreq' in execute_wdb_query(query, test_infra_hosts[0], host_manager):
         second_time_check = 'syncreq'
-    else: 
+    else:
         second_time_check = 'synced'
 
     assert metadata['expected_second_check'] == second_time_check
