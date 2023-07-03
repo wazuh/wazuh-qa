@@ -72,6 +72,7 @@ else:
     AGENT_AUTH_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent-auth')
     ANALYSISD_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'wazuh-analysisd')
     ACTIVE_RESPONSE_BINARY_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
+    AGENT_GROUPS_BINARY_PATH = os.path.join(WAZUH_PATH, 'bin', 'agent_groups')
 
     if sys.platform == 'sunos5':
         HOSTS_FILE_PATH = os.path.join('/', 'etc', 'inet', 'hosts')
@@ -176,7 +177,8 @@ WAZUH_SOCKETS = {
                         MODULESD_CONTROL_SOCKET_PATH,
                         MODULESD_KREQUEST_SOCKET_PATH
                       ],
-    'wazuh-clusterd': [MODULESD_C_INTERNAL_SOCKET_PATH]
+    'wazuh-clusterd': [MODULESD_C_INTERNAL_SOCKET_PATH],
+    'wazuh-integratord': []
 }
 
 # These sockets do not exist with default Wazuh configuration

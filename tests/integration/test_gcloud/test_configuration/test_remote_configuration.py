@@ -24,7 +24,6 @@ targets:
     - manager
 
 daemons:
-    - wazuh-analysisd
     - wazuh-monitord
     - wazuh-modulesd
 
@@ -82,7 +81,7 @@ configurations_path = os.path.join(test_data_path, 'wazuh_remote_conf.yaml')
 
 # configurations
 
-daemons_handler_configuration = {'daemons': ['wazuh-modulesd'], 'ignore_errors' : True}
+daemons_handler_configuration = {'daemons': ['wazuh-modulesd'], 'ignore_errors': True}
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -140,7 +139,8 @@ def get_remote_configuration(component_name, config):
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_remote_configuration(get_configuration, configure_environment, reset_ossec_log, daemons_handler, wait_for_gcp_start):
+def test_remote_configuration(get_configuration, configure_environment, reset_ossec_log, daemons_handler_module,
+                              wait_for_gcp_start):
     '''
     description: Check if the remote configuration matches the local configuration of the 'gcp-pubsub' module.
                  For this purpose, the test will use different settings and get the remote configuration applied.

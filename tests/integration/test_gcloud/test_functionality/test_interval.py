@@ -24,7 +24,6 @@ targets:
     - manager
 
 daemons:
-    - wazuh-analysisd
     - wazuh-monitord
     - wazuh-modulesd
 
@@ -98,6 +97,7 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 truncate_file(LOG_FILE_PATH)
 
+
 # fixtures
 
 @pytest.fixture(scope='module', params=configurations)
@@ -109,7 +109,8 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_interval(get_configuration, configure_environment, reset_ossec_log, daemons_handler, wait_for_gcp_start):
+def test_interval(get_configuration, configure_environment, reset_ossec_log, daemons_handler_module,
+                  wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module starts to pull logs at the periods set in the configuration
                  by the 'interval' tag. For this purpose, the test will use different intervals and check if

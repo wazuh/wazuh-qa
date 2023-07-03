@@ -82,7 +82,7 @@ def get_configuration(request):
 
 
 def test_options_state_interval_no_file(configure_local_internal_options_module, get_configuration,
-                                        configure_environment, daemons_handler):
+                                        configure_environment, daemons_handler_module):
     '''
     description: Check if the 'wazuh-logcollector' daemon updates the statistic file 'wazuh-logcollector.state'
                  when using the macOS unified logging system (ULS). For this purpose, the test will configure
@@ -105,7 +105,7 @@ def test_options_state_interval_no_file(configure_local_internal_options_module,
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-        - daemons_handler:
+        - daemons_handler_module:
             type: fixture
             brief: Handler of Wazuh daemons.
 

@@ -24,7 +24,6 @@ targets:
     - manager
 
 daemons:
-    - wazuh-analysisd
     - wazuh-monitord
     - wazuh-modulesd
 
@@ -97,7 +96,7 @@ def get_configuration(request):
 # tests
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_schedule(get_configuration, configure_environment, reset_ossec_log, daemons_handler):
+def test_schedule(get_configuration, configure_environment, reset_ossec_log, daemons_handler_module):
     '''
     description: Check if the 'gcp-pubsub' module is executed in the periods specified in the 'interval' tag.
                  For this purpose, the test will use different values for the 'interval' tag (a positive number
@@ -138,15 +137,15 @@ def test_schedule(get_configuration, configure_environment, reset_ossec_log, dae
     str_interval = get_configuration['sections'][0]['elements'][3]['interval']['value']
     time_interval = int(''.join(filter(str.isdigit, str_interval)))
     tags_to_apply = get_configuration['tags'][0]
-    
+
     # Warning log must appear in log (cause interval is not compatible with <day/month/week>)
     if (tags_to_apply == 'schedule_day' and 'M' not in str_interval) or \
-    (tags_to_apply == 'schedule_wday' and 'w' not in str_interval) or \
-    (tags_to_apply == 'schedule_time' and ('d' not in str_interval and 'w' not in str_interval)):
+       (tags_to_apply == 'schedule_wday' and 'w' not in str_interval) or \
+       (tags_to_apply == 'schedule_time' and ('d' not in str_interval and 'w' not in str_interval)):
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout + time_interval,
                                 callback=callback_detect_schedule_validate_parameters_warn,
                                 error_message='Did not receive expected '
-                                                'at _sched_scan_validate_parameters(): WARNING:').result()
+                                              'at _sched_scan_validate_parameters(): WARNING:').result()
     # Warning is not suppose to appear
     else:
         with pytest.raises(TimeoutError):

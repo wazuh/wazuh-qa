@@ -110,6 +110,9 @@ required an specific testing environment located in `wazuh-qa/tests/system/provi
 | Functionality                                                             | Required environment           |
 |---------------------------------------------------------------------------|--------------------------------|
 | test_cluster/test_agent_enrollment                                        | enrollment_cluster             |
+| test_agent_auth/test_agent_auth                                           | basic_environment              |
+| test_enrollment/test_enrollment                                           | basic_environment              |
+| test_files_cud/test_files_cud                                             | one_manager_agent              |
 | test_cluster/test_agent_info_sync                                         | basic_cluster                  |
 | test_cluster/test_agent_key_polling                                       | basic_cluster                  |
 | test_cluster/test_agent_files_deletion                                    | basic_cluster                  |
@@ -211,6 +214,10 @@ ansible-playbook -i inventory.yml playbook.yml
 If you want to specify a particular branch of the Wazuh repository, you will need to include:
 ```shell script
 ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"wazuh_branch":"v4.3.0-rc1"}'
+```
+You can also specify a package instead using the `package_repository`, `repository`, `package_version`, `package_revision` parameters:
+```shell script
+ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"package_repository":"packages", "repository": "4.x", "package_version": "4.4.0", "package_revision": "1"}'
 ```
 In the **basic cluster**, you also have to specify a branch from the Wazuh QA repository.
 ```shell script

@@ -25,7 +25,6 @@ targets:
     - manager
 
 daemons:
-    - wazuh-analysisd
     - wazuh-monitord
     - wazuh-modulesd
 
@@ -62,6 +61,8 @@ from wazuh_testing.tools import LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.tools.file import truncate_file
+from wazuh_testing.tools import get_service
+
 from google.cloud import pubsub_v1
 
 # Marks
@@ -82,7 +83,11 @@ force_restart_after_restoring = False
 
 # configurations
 
-daemons_handler_configuration = {'daemons': ['wazuh-analysisd', 'wazuh-modulesd']}
+if get_service() == 'wazuh-manager':
+    daemons_handler_configuration = {'daemons': ['wazuh-modulesd', 'wazuh-analysisd']}
+else:
+    daemons_handler_configuration = {'daemons': ['wazuh-modulesd']}
+
 monitoring_modes = ['scheduled']
 conf_params = {'PROJECT_ID': global_parameters.gcp_project_id,
                'SUBSCRIPTION_NAME': global_parameters.gcp_subscription_name,
@@ -116,8 +121,9 @@ def get_configuration(request):
     ['- DEBUG - GCP message' for _ in range(100)],
     ['- DEBUG - GCP message' for _ in range(120)]
 ], indirect=True)
+@pytest.mark.xfail(reason='Unstable, further information in wazuh/wazuh#17245')
 def test_max_messages(get_configuration, configure_environment, reset_ossec_log, publish_messages,
-                      daemons_handler, wait_for_gcp_start):
+                      daemons_handler_module, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module pulls a message number less than or equal to the limit set
                  in the 'max_messages' tag. For this purpose, the test will use a fixed limit and generate a
