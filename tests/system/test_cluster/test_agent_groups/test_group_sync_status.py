@@ -155,11 +155,11 @@ def test_group_sync_status(metadata, target_node, clean_environment, group_creat
 
         if metadata['agent_in_group'] == 'agent1':
             if 'syncreq' == agent1_status  and 'synced' == agent2_status:
-                    first_time_check = "syncreq"
+                first_time_check = "syncreq"
 
         elif metadata['agent_in_group'] == 'agent2':
             if 'synced' == agent1_status  and 'syncreq' == agent2_status:
-                    first_time_check = "syncreq"
+                first_time_check = "syncreq"
 
         else:
             if agent1_status == 'syncreq' and agent2_status == 'syncreq':
