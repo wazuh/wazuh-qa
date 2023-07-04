@@ -213,7 +213,8 @@ def modify_registry(key, subkey, arch):
         logger.info(f"Modifying registry key {print_arch}{os.path.join(fim.registry_class_name[key], subkey)}")
 
         modify_key_perms(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
-        modify_registry_owner(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
+        modify_registry_owner(key, subkey, arch,
+                              win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
         modify_registry_key_mtime(key, subkey, arch)
 
 
