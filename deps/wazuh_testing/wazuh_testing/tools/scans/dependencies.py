@@ -5,6 +5,7 @@
 import json
 import re
 import subprocess
+import sys
 from collections import namedtuple
 from datetime import datetime
 from os import environ
@@ -12,7 +13,11 @@ from os import environ
 from safety.formatter import report
 from safety.safety import check
 
-python_bin = environ['_']
+try:
+    python_bin = environ['_']
+except KeyError:
+    python_bin = sys.executable
+
 package_list = []
 package_tuple = namedtuple('Package', ['key', 'version'])
 
