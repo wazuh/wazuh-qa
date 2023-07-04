@@ -1,0 +1,30 @@
+- sections:
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - frequency:
+            value: FREQUENCY
+        - windows_registry:
+            value: WINDOWS_REGISTRY
+            attributes:
+              - arch: both
+
+    - section: sca
+      elements:
+        - enabled:
+            value: 'no'
+    - section: rootcheck
+      elements:
+        - disabled:
+            value: 'yes'
+    - section: wodle
+      attributes:
+        - name: syscollector
+      elements:
+        - disabled:
+            value: 'yes'
+    - section: active-response
+      elements:
+        - disabled:
+            value: 'yes'
