@@ -335,14 +335,6 @@ def pytest_addoption(parser):
         metavar="slack_webhook_url",
         default=None,
         type=str,
-        help="pass webhook url required for integratord tests."
-    )
-    parser.addoption(
-        "--slack-webhook-url",
-        action="store",
-        metavar="slack_webhook_url",
-        default=None,
-        type=str,
         help="pass web hook url required for slack integratord tests."
     )
     parser.addoption(
@@ -417,11 +409,6 @@ def pytest_configure(config):
 
     # Set WPK package version
     global_parameters.wpk_version = config.getoption("--wpk_version")
-
-    # Set slack_webhook_url if it is passed through command line args
-    slack_webhook_url = config.getoption("--slack-webhook-url")
-    if slack_webhook_url:
-        global_parameters.slack_webhook_url = slack_webhook_url
 
     # Set slack_webhook_url if it is passed through command line args
     slack_webhook_url = config.getoption("--slack-webhook-url")

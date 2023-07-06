@@ -55,7 +55,7 @@ def check_integratord_event(file_monitor=None, callback='', error_message=None, 
         error_message
 
     file_monitor.start(timeout=timeout, update_position=update_position, accum_results=accum_results,
-                       callback=callback, error_message=error_message)
+                       callback=make_integratord_callback(callback, prefix), error_message=error_message)
 
 
 # Event checkers
@@ -66,7 +66,7 @@ def detect_integration_enabled(integration, file_monitor=None):
         file_monitor (FileMonitor): file log monitor to detect events
     """
     callback = fr".*(Enabling integration for: '{integration}')."
-    check_integratord_event(file_monitor=file_monitor, callback=generate_monitoring_callback(callback),
+    check_integratord_event(file_monitor=file_monitor, callback=callback,
                             error_message="Could not find the expected 'Enabling integration for...' event")
 
 
@@ -77,7 +77,7 @@ def detect_unable_to_run_integration(integration, file_monitor=None):
         file_monitor (FileMonitor): file log monitor to detect events
     """
     callback = fr".*ERROR: Unable to run integration for ({integration}) -> integrations"
-    check_integratord_event(file_monitor=file_monitor, callback=generate_monitoring_callback(callback),
+    check_integratord_event(file_monitor=file_monitor, callback=callback,
                             error_message="Could not find the expected 'Unable to run integration for...' event")
 
 
@@ -86,8 +86,7 @@ def detect_options_json_file_does_not_exist(file_monitor=None):
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
     """
-    check_integratord_event(file_monitor=file_monitor, timeout=T_10,
-                            callback=generate_monitoring_callback(CB_OPTIONS_FILE_DOES_NOT_EXISTENT),
+    check_integratord_event(file_monitor=file_monitor, timeout=T_10, callback=CB_OPTIONS_FILE_DOES_NOT_EXISTENT,
                             error_message="Could not find the expected 'JSON file doesn't exist...' event")
 
 
@@ -98,25 +97,8 @@ def detect_integration_response_code(response='200', file_monitor=None):
         file_monitor (FileMonitor): file log monitor to detect events
     """
     callback = fr'.*Response received.* \[({response})\].*'
-    check_integratord_event(file_monitor=file_monitor, callback=generate_monitoring_callback(callback),
+    check_integratord_event(file_monitor=file_monitor, callback=callback,
                             error_message="Could not find the expected 'Response received...' event")
-
-
-def get_message_sent(integration, file_monitor):
-    """Gets the message that is being sent to the integration.
-    Args:
-        integration (str): The integration that is being checked. Ex: Slack, Pagerduty and Shuffle
-        file_monitor (FileMonitor): file log monitor to detect events
-    Returns:
-        string: Returns the message JSON string that was sent.
-    """
-    callback = fr'.*Sending message (.*) to {integration} server'
-
-    result = file_monitor.start(timeout=T_10, update_position=True, accum_results=1,
-                                callback=generate_monitoring_callback(callback),
-                                error_message="Could not find the expected 'Sending message...' event").result()
-    return result
-                       callback=make_integratord_callback(callback, prefix), error_message=error_message)
 
 
 def check_integratord_thread_ready(file_monitor=None, timeout=T_5):
@@ -140,17 +122,6 @@ def check_file_inode_changed(file_monitor=None, timeout=T_20):
     '''
     check_integratord_event(file_monitor=file_monitor, timeout=timeout, callback=integratord.CB_INODE_CHANGED,
                             error_message='Did not receive the expected "...Alert file inode changed..." event')
-
-
-def check_alert_processing(file_monitor=None, timeout=T_20):
-    '''Check for Processing alert message in the logs.
-
-    Args:
-        log_monitor (FileMonitor): Log monitor.
-        timeout (int): Event timeout.
-    '''
-    check_integratord_event(file_monitor=file_monitor, timeout=timeout, callback=integratord.CB_PROCESSING_ALERT,
-                            error_message='Did not receive the expected Slack alert in alerts.json')
 
 
 def check_third_party_response(file_monitor=None, timeout=T_20):
@@ -186,3 +157,18 @@ def check_file_warning(file_monitor=None, timeout=T_20):
     check_integratord_event(file_monitor=file_monitor, timeout=timeout,
                             callback=integratord.CB_ALERT_JSON_FILE_NOT_FOUND,
                             error_message='Did not receive the expected "...Could not retrieve information/open file"')
+
+
+def get_message_sent(integration, file_monitor):
+    """Gets the message that is being sent to the integration.
+    Args:
+        integration (str): The integration that is being checked. Ex: Slack, Pagerduty and Shuffle
+        file_monitor (FileMonitor): file log monitor to detect events
+    Returns:
+        string: Returns the message JSON string that was sent.
+    """
+    callback = fr'.*Sending message (.*) to {integration} server'
+    result = file_monitor.start(timeout=T_10, update_position=True, accum_results=1,
+                                callback=generate_monitoring_callback(callback),
+                                error_message="Could not find the expected 'Sending message...' event").result()
+    return result

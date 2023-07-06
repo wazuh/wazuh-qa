@@ -78,7 +78,7 @@ for config_params in t2_configuration_parameters:
 t2_configurations = load_configuration_template(t2_configurations_path, t2_configuration_parameters,
                                                 t2_configuration_metadata)
 
-local_internal_options = {'integrator.debug': '2'}
+local_internal_options = {'integrator.debug': '2', 'analysisd.debug': '1', 'monitord.rotate_log': '0'}
 
 
 # Tests
