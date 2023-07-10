@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: TBD \
 Release report: TBD
 
+- Update schema database version ([#4128](https://github.com/wazuh/wazuh-qa/pull/4128)) \- (Tests)
+
 ## [4.5.0] - TBD
 
 Wazuh commit: TBD \
