@@ -4,8 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [4.4.5] - TBD
 
-Wazuh commit: TDB
-Release report: TDB
+Wazuh commit: TBD
+Release report: TBD
 
 ## [4.4.4] - 13-06-2023
 
