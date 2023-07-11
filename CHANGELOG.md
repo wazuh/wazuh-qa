@@ -14,7 +14,7 @@ Release report: https://github.com/wazuh/wazuh/issues/17844
 
 ## [4.4.4] - 13-06-2023
 
-Wazuh commit: https://github.com/wazuh/wazuh/commit/32b9b4684efb7c21ce71f80d845096549a5b4ed5
+Wazuh commit: https://github.com/wazuh/wazuh/commit/32b9b4684efb7c21ce71f80d845096549a5b4ed5  \
 Release report: https://github.com/wazuh/wazuh/issues/17520
 
 ### Added
@@ -28,7 +28,7 @@ Release report: https://github.com/wazuh/wazuh/issues/17520
 
 ## [4.4.3] - 25-06-2023
 
-Wazuh commit: https://github.com/wazuh/wazuh/commit/f7080df56081adaeaad94529522233e2f0bbd577
+Wazuh commit: https://github.com/wazuh/wazuh/commit/f7080df56081adaeaad94529522233e2f0bbd577  \
 Release report: https://github.com/wazuh/wazuh/issues/17198
 
 ### Fixed
@@ -38,7 +38,7 @@ Release report: https://github.com/wazuh/wazuh/issues/17198
 
 ## [4.4.2] - 18-05-2023
 
-Wazuh commit: https://github.com/wazuh/wazuh/commit/b2901d5086e7a073d89f4f72827e070ce3abd8e8
+Wazuh commit: https://github.com/wazuh/wazuh/commit/b2901d5086e7a073d89f4f72827e070ce3abd8e8 \
 Release report: https://github.com/wazuh/wazuh/issues/17004
 
 ### Added
