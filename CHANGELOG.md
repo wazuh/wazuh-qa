@@ -4,15 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [4.5.0] - TBD
 
-Wazuh commit: TBD
+Wazuh commit: TBD \
 Release report: TBD
 
-## [4.4.4] - TBD
+## [4.4.5] - 10-07-2023
 
-Wazuh commit: TBD
-Release report: TBD
+Wazuh commit: https://github.com/wazuh/wazuh/commit/8d17d2c9c11bc10be9a31c83bc7c17dfbac0d2a0 \
+Release report: https://github.com/wazuh/wazuh/issues/17844
 
-## Added
+## [4.4.4] - 13-06-2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/32b9b4684efb7c21ce71f80d845096549a5b4ed5  \
+Release report: https://github.com/wazuh/wazuh/issues/17520
+
+### Added
 
 - Change test_python_flaws.py to accept branch or commit in the same argument. ([#4209](https://github.com/wazuh/wazuh-qa/pull/4209)) (Tests)
 - Fix test_dependencies.py for the changes in the feature. ([#4210](https://github.com/wazuh/wazuh-qa/pull/4210)) (Tests)
@@ -23,7 +28,7 @@ Release report: TBD
 
 ## [4.4.3] - 25-06-2023
 
-Wazuh commit: https://github.com/wazuh/wazuh/commit/f7080df56081adaeaad94529522233e2f0bbd577
+Wazuh commit: https://github.com/wazuh/wazuh/commit/f7080df56081adaeaad94529522233e2f0bbd577  \
 Release report: https://github.com/wazuh/wazuh/issues/17198
 
 ### Fixed
@@ -33,7 +38,7 @@ Release report: https://github.com/wazuh/wazuh/issues/17198
 
 ## [4.4.2] - 18-05-2023
 
-Wazuh commit: https://github.com/wazuh/wazuh/commit/b2901d5086e7a073d89f4f72827e070ce3abd8e8
+Wazuh commit: https://github.com/wazuh/wazuh/commit/b2901d5086e7a073d89f4f72827e070ce3abd8e8 \
 Release report: https://github.com/wazuh/wazuh/issues/17004
 
 ### Added
