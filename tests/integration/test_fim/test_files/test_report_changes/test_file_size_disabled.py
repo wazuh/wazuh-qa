@@ -117,7 +117,7 @@ def test_file_size_disabled(filename, folder, size, get_configuration, configure
                  'file_size' tag. Finally, the test will verify that the FIM event related to the
                  reached file size limit has not been generated.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

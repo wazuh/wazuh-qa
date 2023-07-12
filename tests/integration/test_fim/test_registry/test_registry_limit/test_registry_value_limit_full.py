@@ -125,7 +125,7 @@ def test_registry_value_limit_full(configure_local_internal_options_module, get_
                  when a new testing value is added to the monitored key. Finally, the test will verify that,
                  in the FIM 'entries' event, the number of entries and monitored values match.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

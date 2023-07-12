@@ -112,7 +112,7 @@ def test_disk_quota_default(get_configuration, configure_environment,
                  disk quota to store 'diff' information. Finally, the test will verify that the value gotten from
                  that FIM event corresponds with the default value of the 'disk_quota' tag (1GB).
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

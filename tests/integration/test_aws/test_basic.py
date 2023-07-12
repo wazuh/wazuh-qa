@@ -50,7 +50,7 @@ def test_bucket_defaults(
         - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
     parameters:
         - configuration:
             type: dict
@@ -146,7 +146,7 @@ def test_service_defaults(
         - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
     parameters:
         - configuration:
             type: dict
@@ -248,7 +248,7 @@ def test_inspector_defaults(
         - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
     parameters:
         - configuration:
             type: dict
