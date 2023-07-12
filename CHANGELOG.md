@@ -17,6 +17,19 @@ Release report: TBD
 - Update `get_test_cases_data` function so it handles fim_mode parameter ([#4185](https://github.com/wazuh/wazuh-qa/pull/4185)) \- (Framework)
 - Fix warnings in the rids tests([#4151](https://github.com/wazuh/wazuh-qa/pull/4151)) \- (Framework + Tests)
 
+## [4.6.0] - TBD
+
+Wazuh commit: TBD \
+Release report: TBD
+
+### Fixed
+- Update schema database version ([#4128](https://github.com/wazuh/wazuh-qa/pull/4128)) \- (Tests)
+
+## [4.5.1] - TBD
+
+Wazuh commit: TBD \
+Release report: TBD
+
 ## [4.5.0] - TBD
 
 Wazuh commit: TBD \
@@ -38,6 +51,7 @@ Release report: TBD
 
 ### Changed
 
+- Replace embedded python invocations with generic `python3`. ([#4186](https://github.com/wazuh/wazuh-qa/pull/4186)) - (Tests)
 - Fix FIM test_large_changes test suite ([#3948](https://github.com/wazuh/wazuh-qa/pull/3948)) \- (Tests)
 - Update `get_test_cases_data` function so it handles fim_mode parameter ([#4185](https://github.com/wazuh/wazuh-qa/pull/4185)) \- (Framework)
 - Change FIM `regular_file_cud` and `EventChecker` file modification steps ([#4183](https://github.com/wazuh/wazuh-qa/pull/4183)) \- (Framework + Tests)
@@ -67,17 +81,17 @@ Release report: TBD
 - Fix an error in the cluster performance tests related to CSV parser ([#2999](https://github.com/wazuh/wazuh-qa/pull/2999)) \- (Framework + Tests)
 - Fix bug in the framework on migration tool ([#4027](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
 
-## [4.4.5] - TBD
+## [4.4.5] - 10-07-2023
 
-Wazuh commit: TBD \
-Release report: TBD
+Wazuh commit: https://github.com/wazuh/wazuh/commit/8d17d2c9c11bc10be9a31c83bc7c17dfbac0d2a0 \
+Release report: https://github.com/wazuh/wazuh/issues/17844
 
-## [4.4.4] - TBD
+## [4.4.4] - 13-06-2023
 
-Wazuh commit: TBD \
-Release report: TBD
+Wazuh commit: https://github.com/wazuh/wazuh/commit/32b9b4684efb7c21ce71f80d845096549a5b4ed5  \
+Release report: https://github.com/wazuh/wazuh/issues/17520
 
-## Added
+### Added
 
 - Change test_python_flaws.py to accept branch or commit in the same argument. ([#4209](https://github.com/wazuh/wazuh-qa/pull/4209)) (Tests)
 - Fix test_dependencies.py for the changes in the feature. ([#4210](https://github.com/wazuh/wazuh-qa/pull/4210)) (Tests)

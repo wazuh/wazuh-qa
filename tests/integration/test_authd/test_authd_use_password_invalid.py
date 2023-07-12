@@ -94,8 +94,7 @@ def test_authd_use_password_invalid(metadata, configuration, truncate_monitored_
         to come from the cases yaml, this is done this way to handle easily
         the different error logs that could be raised from different inputs.
 
-    wazuh_min_version:
-        4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

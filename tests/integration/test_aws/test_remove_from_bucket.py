@@ -52,7 +52,7 @@ def test_remove_from_bucket(
         - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
     parameters:
         - configuration:
             type: dict
@@ -156,7 +156,7 @@ def test_remove_log_stream(
         - teardown:
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
     parameters:
         - configuration:
             type: dict

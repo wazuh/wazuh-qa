@@ -87,7 +87,7 @@ def test_sca_enabled(configuration, metadata, prepare_cis_policies_file, truncat
         - Check in the log that the sca module started appears.
         - Check that sca scan starts and finishes
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 0
 
@@ -149,7 +149,7 @@ def test_sca_disabled(configuration, metadata, prepare_cis_policies_file, trunca
         - Restart wazuh.
         - Check that sca module is disabled if enabled tag is set to 'no'
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 0
 

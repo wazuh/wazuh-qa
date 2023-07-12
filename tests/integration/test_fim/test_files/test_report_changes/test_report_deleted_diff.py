@@ -202,7 +202,7 @@ def test_report_when_deleted_directories(path, get_configuration, configure_envi
                  will remove the monitored folder, wait for the FIM 'deleted' event, and verify that
                  the corresponding 'diff' folder is deleted.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 
@@ -268,7 +268,7 @@ def test_report_changes_after_restart(get_configuration, configure_environment,
                  the directories will not be created again. Finally, the test will restore the backed configuration and
                  verify that the initial scan of FIM is made.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 
