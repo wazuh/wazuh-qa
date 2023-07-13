@@ -116,7 +116,7 @@ def test_disk_quota_disabled(filename, folder, size, get_configuration, configur
                  'disk_quota' limit. Finally, the test will verify that the FIM event related
                  to the reached disk quota has not been generated.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 1
 

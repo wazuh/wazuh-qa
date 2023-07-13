@@ -78,7 +78,7 @@ def test_validate_remediation_results(configuration, metadata, prepare_cis_polic
         - Change the folder's permissions
         - Validate the result for a given SCA check change as expected
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     tier: 0
 

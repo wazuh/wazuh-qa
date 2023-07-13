@@ -105,4 +105,4 @@
   command: /var/ossec/bin/wazuh-control restart
 
 - name: "Install necessary dependencies"
-  command: /var/ossec/framework/python/bin/python3.9 -m pip install lockfile filetype certifi testinfra
+  command: /var/ossec/framework/python/bin/python3 -m pip install lockfile filetype certifi testinfra
