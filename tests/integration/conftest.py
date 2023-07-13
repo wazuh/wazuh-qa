@@ -330,6 +330,14 @@ def pytest_addoption(parser):
         help="run tests using a specific WPK package path"
     )
     parser.addoption(
+        "--integration-api-key",
+        action="store",
+        metavar="integration_api_key",
+        default=None,
+        type=str,
+        help="pass api key required for virustotal integratord tests."
+    )
+    parser.addoption(
         "--slack-webhook-url",
         action="store",
         metavar="slack_webhook_url",
