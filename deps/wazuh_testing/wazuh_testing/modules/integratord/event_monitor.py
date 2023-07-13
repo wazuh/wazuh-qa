@@ -90,17 +90,6 @@ def detect_options_json_file_does_not_exist(file_monitor=None):
                             error_message="Could not find the expected 'JSON file doesn't exist...' event")
 
 
-def detect_integration_response_code(response='200', file_monitor=None):
-    """Detects the response code for the integration.
-    Args:
-        response (str): the response code for the integration. Defaults to 200
-        file_monitor (FileMonitor): file log monitor to detect events
-    """
-    callback = fr'.*Response received.* \[({response})\].*'
-    check_integratord_event(file_monitor=file_monitor, callback=callback,
-                            error_message="Could not find the expected 'Response received...' event")
-
-
 def check_integratord_thread_ready(file_monitor=None, timeout=T_5):
     '''Check if a local requests thread ready in the logs.
 

@@ -159,7 +159,7 @@ def test_pagerduty_no_option_tag(configuration, metadata, set_wazuh_configuratio
     evm.get_message_sent(integration='PagerDuty', file_monitor=wazuh_monitor)
 
     # Check the response code from the integration's server
-    evm.detect_integration_response_code(response=metadata['response_code'], file_monitor=wazuh_monitor)
+    evm.check_third_party_response(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout)
 
 
 @pytest.mark.tier(level=1)
@@ -245,4 +245,4 @@ def test_pagerduty_options(configuration, metadata, set_wazuh_configuration, tru
             assert metadata['added_option'] in message, "The configured option is not present in the message sent"
 
         # Check the response code from the integration's server
-        evm.detect_integration_response_code(response=metadata['response_code'], file_monitor=wazuh_monitor)
+        evm.check_third_party_response(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout)

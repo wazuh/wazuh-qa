@@ -16,7 +16,6 @@
     integration: shuffle
     sends_message: true
     added_option:
-    response_code: '200'
 
 - name: shuffle_option_custom_pretext
   description: When a custom value is added to an option, the integration works and the passed value is in the message
@@ -27,7 +26,6 @@
     integration: shuffle
     sends_message: true
     added_option: '"pretext": "Custom Pretext"'
-    response_code: '200'
 
 - name: shuffle_option_invalid_json
   description: When an invalid json is passed, the integration is unable to send the message
@@ -47,4 +45,3 @@
     integration: shuffle
     sends_message: true
     added_option: '"custom_option": "custom value"'
-    response_code: '200'

@@ -16,7 +16,6 @@
     integration: slack
     sends_message: true
     added_option:
-    response_code: '200'
 
 - name: slack_option_custom_pretext
   description: When a custom value is added to an option, the integration works and the passed value is in the message
@@ -27,7 +26,6 @@
     integration: slack
     sends_message: true
     added_option: '"pretext": "Custom Pretext"'
-    response_code: '200'
 
 - name: slack_option_invalid_json
   description: When an invalid json is passed, the integration is unable to send the message
@@ -47,7 +45,6 @@
     integration: slack
     sends_message: true
     added_option: '"title_link": "invalid value - no link"'
-    response_code: '200'
 
 - name: slack_custom_option
   description: When a non existent option is passed, the message is sent to the integration endpoint and works properly
@@ -58,4 +55,3 @@
     integration: slack
     sends_message: true
     added_option: '"custom_option": "custom value"'
-    response_code: '200'

@@ -4,4 +4,3 @@
     API_KEY: Insert using --pagerduty-api-key parameter
   metadata:
     integration: pagerduty
-    response_code: '202'
