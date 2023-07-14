@@ -4,7 +4,7 @@ import pytest
 from git import Git, Repo
 
 DEFAULT_DIRECTORIES_TO_CHECK = 'framework/,api/,wodles/'
-DEFAULT_DIRECTORIES_TO_EXCLUDE = 'tests/,test/'
+DEFAULT_DIRECTORIES_TO_EXCLUDE = 'tests,test'
 DEFAULT_CONFIDENCE_LEVEL = 'MEDIUM'
 DEFAULT_SEVERITY_LEVEL = 'LOW'
 
