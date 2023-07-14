@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: TBD \
 Release report: TBD
 
+### Added
+
+- Add callbacks and IT tests for Integratord options tag. ([#4108](https://github.com/wazuh/wazuh-qa/pull/4108)) \- (Framework + tests)
+
 ### Changed
 
 - Add option to run some logcollector tests isolated (without a manager) [#4226](https://github.com/wazuh/wazuh-qa/pull/4226) \- (Tests + Framework)

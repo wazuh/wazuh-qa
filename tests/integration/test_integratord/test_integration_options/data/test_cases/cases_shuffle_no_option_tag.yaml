@@ -1,0 +1,6 @@
+- name: shuffle_works_with_no_option_tag_present
+  description: When the option tag is missing, the shuffle integration works
+  configuration_parameters:
+    HOOK_URL: Insert using --shuffle-webhook-url parameter
+  metadata:
+    integration: shuffle
