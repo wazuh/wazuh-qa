@@ -91,7 +91,7 @@ def test_integration_no_option_tag(configuration, metadata, set_wazuh_configurat
     description: Check that when the options tag is not present for the Slack integration, the integration works
                  properly.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     test_phases:
         - setup:
@@ -171,7 +171,7 @@ def test_slack_options(configuration, metadata, set_wazuh_configuration, truncat
     description: Check that when configuring the options tag with differents values, the integration works as expected.
                  The test also checks that when it is supposed to fail, it fails.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     test_phases:
         - setup:
