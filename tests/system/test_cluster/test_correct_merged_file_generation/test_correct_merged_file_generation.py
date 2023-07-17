@@ -35,7 +35,7 @@ from wazuh_testing.tools.file import replace_regex_in_file
 from system import (assign_agent_to_new_group, clean_cluster_logs, create_new_agent_group, delete_agent_group,
                     restart_cluster)
 
-# pytestmark = [pytest.mark.cluster, pytest.mark.one_manager_agent_env]
+pytestmark = [pytest.mark.cluster, pytest.mark.one_manager_agent_env]
 
 agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                '..', 'provisioning', 'one_manager_agent', 'roles', 'agent-role', 'files', 'ossec.conf')
@@ -59,6 +59,10 @@ testinfra_hosts = ['wazuh-manager', 'wazuh-agent1']
 
 @pytest.fixture()
 def environment_setting(test_case):
+    create_new_agent_group(testinfra_hosts[0], 'TestGroup1', host_manager)
+    assign_agent_to_new_group(testinfra_hosts[0], 'TestGroup1',
+                              host_manager.run_command('wazuh-manager',
+                                                       f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys'), host_manager)
 
     if test_case['metadata']['test_type'] == 'on_start':
         host_manager.run_command(testinfra_hosts[0], f'{WAZUH_PATH}/bin/wazuh-control stop')
@@ -72,10 +76,6 @@ def environment_setting(test_case):
         host_manager.run_command(testinfra_hosts[0], f'rm {WAZUH_PATH}/etc/shared/TestGroup1/{file}.txt -f')
     delete_agent_group(testinfra_hosts[0], 'TestGroup1', host_manager, 'api')
     host_manager.run_command(testinfra_hosts[0], f'rm -r {WAZUH_PATH}/etc/shared/TestGroup1 -f')
-    create_new_agent_group(testinfra_hosts[0], 'TestGroup1', host_manager)
-    assign_agent_to_new_group(testinfra_hosts[0], 'TestGroup1',
-                              host_manager.run_command('wazuh-manager',
-                                                       f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys'), host_manager)
     clean_cluster_logs(testinfra_hosts, host_manager)
 
 
@@ -84,7 +84,7 @@ def environment_setting(test_case):
 def test_correct_merged_file_generation(test_case, environment_setting):
     '''
         description: Checking correct merged file generation.
-        wazuh_min_version: 4.5.0
+        wazuh_min_version: 4.6.0
         parameters:
             - test_case:
                 type: list
@@ -115,7 +115,7 @@ def test_correct_merged_file_generation(test_case, environment_setting):
     # Main action of the test
     if action == "remove":
         host_manager.run_command(testinfra_hosts[0], f'rm {WAZUH_PATH}/etc/shared/default/merged.mg -f')
-    elif action == "add_files":
+    if action == "add_files":
         if number_files == 1:
             host_manager.run_command(testinfra_hosts[0], f"touch {WAZUH_PATH}/etc/shared/{folder}/{file_name}.txt")
             if file_content != 'zero':
@@ -132,7 +132,7 @@ def test_correct_merged_file_generation(test_case, environment_setting):
                                                      path=f"{WAZUH_PATH}/etc/shared/{folder}/{file}.txt",
                                                      content=file_content)
 
-    elif test_type == 'on_start' and action == 'remove':
+    if test_type == 'on_start' and action == 'remove':
 
         assert 'merged.mg' not in host_manager.run_command(testinfra_hosts[0],
                                                            f'ls {WAZUH_PATH}/etc/shared/default -la | grep merged')
@@ -141,7 +141,7 @@ def test_correct_merged_file_generation(test_case, environment_setting):
     if test_type == 'on_start':
         restart_cluster(testinfra_hosts, host_manager)
         time.sleep(T_1)
-    if test_type == '10s':
+    else:
         time.sleep(T_10)
 
     assert 'merged.mg' in host_manager.run_command(testinfra_hosts[0],
@@ -150,15 +150,13 @@ def test_correct_merged_file_generation(test_case, environment_setting):
     # Check number of files
 
     if file_name is not None:
-        if number_files > 1:
+        if number_files >= 1:
             counter_files = 0
             for file in files_list:
                 if file in host_manager.run_command(testinfra_hosts[0], f"ls {WAZUH_PATH}/etc/shared/{folder}"):
                     counter_files = counter_files + 1
 
             assert counter_files == number_files
-        elif number_files == 1:
-            assert file_name in host_manager.run_command(testinfra_hosts[0], f"ls {WAZUH_PATH}/etc/shared/{folder}")
 
     assert 'merged.mg' in host_manager.run_command(testinfra_hosts[0], f"ls {WAZUH_PATH}/etc/shared/{folder}")
 
