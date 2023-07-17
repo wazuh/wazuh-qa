@@ -35,7 +35,7 @@ from wazuh_testing.tools.file import replace_regex_in_file
 from system import (assign_agent_to_new_group, clean_cluster_logs, create_new_agent_group, delete_agent_group,
                     restart_cluster)
 
-pytestmark = [pytest.mark.cluster, pytest.mark.one_manager_agent_env]
+#pytestmark = [pytest.mark.cluster, pytest.mark.one_manager_agent_env]
 
 agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                '..', 'provisioning', 'one_manager_agent', 'roles', 'agent-role', 'files', 'ossec.conf')
@@ -49,11 +49,11 @@ test_cases_yaml = read_yaml(os.path.join(data_path, 'cases_correct_merged_file_g
 tmp_path = os.path.join(local_path, 'tmp')
 
 reset_files = {
-    'default': ['TestFile', 'TestFile2', 'EmptyFile', 'EmptyFile2', 'EmptyFile3', 'EmptyFile4', 'EmptyFile5',
-                'EmptyFile6', 'EmptyFile7', 'EmptyFile8', 'EmptyFile9', 'EmptyFile10'],
-    'TestGroup1': ['TestFileInTestGroup', 'TestFileInTestGroup2', 'EmptyFileInGroup', 'EmptyFileInGroup2',
-                   'EmptyFileInGroup3', 'EmptyFileInGroup4', 'EmptyFileInGroup5', 'EmptyFileInGroup6',
-                   'EmptyFileInGroup7', 'EmptyFileInGroup8', 'EmptyFileInGroup9', 'EmptyFileInGroup10']}
+    'default': ['TestFile0', 'TestFile20', 'EmptyFile0', 'EmptyFile00', 'EmptyFile1', 'EmptyFile2', 'EmptyFile3',
+                'EmptyFile4', 'EmptyFile5', 'EmptyFile6'],
+    'TestGroup1': ['TestFileInTestGroup0', 'TestFileInTestGroup20', 'EmptyFileInGroup0', 'EmptyFileInGroup00',
+                   'EmptyFileInGroup1', 'EmptyFileInGroup2', 'EmptyFileInGroup3', 'EmptyFileInGroup4',
+                   'EmptyFileInGroup5', 'EmptyFileInGroup6']}
 testinfra_hosts = ['wazuh-manager', 'wazuh-agent1']
 
 
@@ -116,21 +116,14 @@ def test_correct_merged_file_generation(test_case, environment_setting):
     if action == "remove":
         host_manager.run_command(testinfra_hosts[0], f'rm {WAZUH_PATH}/etc/shared/default/merged.mg -f')
     if action == "add_files":
-        if number_files == 1:
-            host_manager.run_command(testinfra_hosts[0], f"touch {WAZUH_PATH}/etc/shared/{folder}/{file_name}.txt")
+        for number in range(number_files):
+            files_list.append(f'{file_name}{number}')
+        for file in files_list:
+            host_manager.run_command(testinfra_hosts[0], f"touch {WAZUH_PATH}/etc/shared/{folder}/{file}.txt")
             if file_content != 'zero':
                 host_manager.modify_file_content(host=testinfra_hosts[0],
-                                                 path=f"{WAZUH_PATH}/etc/shared/{folder}/{file_name}.txt",
+                                                 path=f"{WAZUH_PATH}/etc/shared/{folder}/{file}.txt",
                                                  content=file_content)
-        else:
-            for number in range(number_files):
-                files_list.append(f'{file_name}{number + 3}')
-            for file in files_list:
-                host_manager.run_command(testinfra_hosts[0], f"touch {WAZUH_PATH}/etc/shared/{folder}/{file}.txt")
-                if file_content != 'zero':
-                    host_manager.modify_file_content(host=testinfra_hosts[0],
-                                                     path=f"{WAZUH_PATH}/etc/shared/{folder}/{file}.txt",
-                                                     content=file_content)
 
     if test_type == 'on_start' and action == 'remove':
 
@@ -152,7 +145,9 @@ def test_correct_merged_file_generation(test_case, environment_setting):
     if file_name is not None:
         if number_files >= 1:
             counter_files = 0
+            print(files_list)
             for file in files_list:
+                print(file)
                 if file in host_manager.run_command(testinfra_hosts[0], f"ls {WAZUH_PATH}/etc/shared/{folder}"):
                     counter_files = counter_files + 1
 
@@ -163,18 +158,14 @@ def test_correct_merged_file_generation(test_case, environment_setting):
     # Check content of merged.mg
 
     several_files_content_list = []
-    if number_files > 1:
-        merged_content = host_manager.run_command(testinfra_hosts[0], f"cat {WAZUH_PATH}/etc/shared/{folder}/merged.mg")
+    if number_files >= 1:
         for file in files_list:
-            assert f'!0 {file}' in merged_content
-    elif number_files == 1:
-        if action == 'add_files':
             if file_content != 'zero':
-                merged_value = f'!{len(file_content)} {file_name}.txt'
+                merged_value = f'!{len(file_content)} {file}.txt'
             else:
-                merged_value = f'!0 {file_name}.txt'
-        assert merged_value in host_manager.run_command(testinfra_hosts[0],
-                                                        f"cat {WAZUH_PATH}/etc/shared/{folder}/merged.mg")
+                merged_value = f'!0 {file}.txt'
+            assert merged_value in host_manager.run_command(testinfra_hosts[0],
+                                                            f"cat {WAZUH_PATH}/etc/shared/{folder}/merged.mg")
 
     # Check logs
     if file_content == 'zero':
