@@ -19,8 +19,8 @@ CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, TEMPLATE_DIR, MODULE)
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, TEST_CASES_DIR, MODULE)
 
 # ---------------------------------------------------- TEST_PATH -------------------------------------------------------
-configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_discard_regex.yaml')
-cases_path = os.path.join(TEST_CASES_PATH, 'cases_discard_regex.yaml')
+configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_bucket_discard_regex.yaml')
+cases_path = os.path.join(TEST_CASES_PATH, 'cases_bucket_discard_regex.yaml')
 
 configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
 configurations = load_configuration_template(
@@ -86,8 +86,8 @@ def test_discard_regex(
         - Check the expected number of events were forwarded to analysisd.
         - Check the database was created and updated accordingly.
     input_description:
-        - The `configuration_discard_regex` file provides the module configuration for this test.
-        - The `cases_discard_regex` file provides the test cases.
+        - The `configuration_bucket_discard_regex` file provides the module configuration for this test.
+        - The `cases_bucket_discard_regex` file provides the test cases.
     """
     bucket_name = metadata['bucket_name']
     bucket_type = metadata['bucket_type']
