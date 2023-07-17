@@ -10,6 +10,13 @@ Release report: TBD
 ### Added
 
 - Add IT tests FIM registry monitoring using wildcards. ([#4270](https://github.com/wazuh/wazuh-qa/pull/4270)) \- (Framework + Tests)
+- Update schema database version ([#4128](https://github.com/wazuh/wazuh-qa/pull/4128)) \- (Tests)
+
+## [4.5.1] - TBD
+
+Wazuh commit: TBD \
+Release report: TBD
+
 ## [4.5.0] - TBD
 
 Wazuh commit: TBD \
@@ -59,17 +66,17 @@ Release report: TBD
 - Fix an error in the cluster performance tests related to CSV parser ([#2999](https://github.com/wazuh/wazuh-qa/pull/2999)) \- (Framework + Tests)
 - Fix bug in the framework on migration tool ([#4027](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
 
-## [4.4.5] - TBD
+## [4.4.5] - 10-07-2023
 
-Wazuh commit: TBD \
-Release report: TBD
+Wazuh commit: https://github.com/wazuh/wazuh/commit/8d17d2c9c11bc10be9a31c83bc7c17dfbac0d2a0 \
+Release report: https://github.com/wazuh/wazuh/issues/17844
 
-## [4.4.4] - TBD
+## [4.4.4] - 13-06-2023
 
-Wazuh commit: TBD \
-Release report: TBD
+Wazuh commit: https://github.com/wazuh/wazuh/commit/32b9b4684efb7c21ce71f80d845096549a5b4ed5  \
+Release report: https://github.com/wazuh/wazuh/issues/17520
 
-## Added
+### Added
 
 - Change test_python_flaws.py to accept branch or commit in the same argument. ([#4209](https://github.com/wazuh/wazuh-qa/pull/4209)) (Tests)
 - Fix test_dependencies.py for the changes in the feature. ([#4210](https://github.com/wazuh/wazuh-qa/pull/4210)) (Tests)
