@@ -145,19 +145,15 @@ def test_correct_merged_file_generation(test_case, environment_setting):
     if file_name is not None:
         if number_files >= 1:
             counter_files = 0
-            print(files_list)
             for file in files_list:
-                print(file)
                 if file in host_manager.run_command(testinfra_hosts[0], f"ls {WAZUH_PATH}/etc/shared/{folder}"):
                     counter_files = counter_files + 1
-
             assert counter_files == number_files
 
     assert 'merged.mg' in host_manager.run_command(testinfra_hosts[0], f"ls {WAZUH_PATH}/etc/shared/{folder}")
 
     # Check content of merged.mg
 
-    several_files_content_list = []
     if number_files >= 1:
         for file in files_list:
             if file_content != 'zero':
@@ -171,16 +167,11 @@ def test_correct_merged_file_generation(test_case, environment_setting):
     if file_content == 'zero':
 
         try:
-            if number_files > 1:
+            if number_files >= 1:
                 for file in files_list:
                     replace_regex_in_file(['FOLDER', 'FILENAME'], [folder, file], messages_path)
                     HostMonitor(inventory_path=inventory_path, messages_path=messages_path,
                                 tmp_path=tmp_path).run(update_position=True)
-            elif number_files == 1:
-                replace_regex_in_file(['FOLDER', 'FILENAME'], [folder, file_name], messages_path)
-                files_list.append(file_name)
-                HostMonitor(inventory_path=inventory_path, messages_path=messages_path,
-                            tmp_path=tmp_path).run(update_position=True)
 
         finally:
             replace_regex_in_file([folder, files_list[-1]], ['FOLDER', 'FILENAME'], messages_path)

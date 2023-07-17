@@ -1,4 +1,4 @@
 wazuh-master:
-  - regex: .*etc/shared/'FOLDER'/'FILENAME00'.txt' is empty
+  - regex: .*etc/shared/'FOLDER'/'EmptyFile00000'.txt' is empty
     path: /var/ossec/logs/ossec.log
     time:out: 30
