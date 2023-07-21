@@ -23,7 +23,7 @@ pyOpenSSL==19.1.0
 pytest-html==3.1.1
 pytest==6.2.2 ; python_version <= "3.9"
 pytest==7.1.2 ; python_version >= "3.10"
-pyyaml==5.4
+pyyaml==6.0.1
 requests>=2.23.0
 scipy>=1.0; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
 seaborn>=0.11.1; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
