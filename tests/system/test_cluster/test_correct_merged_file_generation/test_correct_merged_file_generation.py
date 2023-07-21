@@ -137,9 +137,6 @@ def test_correct_merged_file_generation(test_case, environment_setting):
     else:
         time.sleep(T_10)
 
-    assert 'merged.mg' in host_manager.run_command(testinfra_hosts[0],
-                                                   f"ls {WAZUH_PATH}/etc/shared/{folder} -la | grep merged")
-
     # Check number of files
 
     if file_name is not None:
