@@ -12,6 +12,13 @@ Release report: TBD
 - Add IT tests FIM registry monitoring using wildcards. ([#4270](https://github.com/wazuh/wazuh-qa/pull/4270)) \- (Framework + Tests)
 - Update schema database version ([#4128](https://github.com/wazuh/wazuh-qa/pull/4128)) \- (Tests)
 
+
+## [4.5.2] - TBD
+
+Wazuh commit: TBD \
+Release report: TBD
+
+
 ## [4.5.1] - TBD
 
 Wazuh commit: TBD \
@@ -55,6 +62,7 @@ Release report: TBD
 - Update Authd force_insert tests ([#3379](https://github.com/wazuh/wazuh-qa/pull/3379)) \- (Tests)
 - Update cluster logs in reliability tests ([#2772](https://github.com/wazuh/wazuh-qa/pull/2772)) \- (Tests)
 - Use correct version format in agent_simulator tool ([#3198](https://github.com/wazuh/wazuh-qa/pull/3198)) \- (Tools)
+- Upgrade PyYAML to 6.0.1. ([#4326](https://github.com/wazuh/wazuh-qa/pull/4326)) \- (Framework)
 
 ### Fixed
 
