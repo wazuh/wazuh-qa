@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Added
 
+- Add test VDT does not generate alert when updated package is still vulnerable to CVE ([#4359](https://github.com/wazuh/wazuh-qa/pull/4359)) \- (Tests)
 - New 'SCA' test suite and framework. ([#3566](https://github.com/wazuh/wazuh-qa/pull/3566)) \- (Framework + Tests)
 - Add integration tests for AWS module. ([#3911](https://github.com/wazuh/wazuh-qa/pull/3911)) \- (Framework + Tests + Documentation)
 - Add tests for msu patches with no associated CVE . ([#4009](https://github.com/wazuh/wazuh-qa/pull/4009)) \- (Framework + Tests)
