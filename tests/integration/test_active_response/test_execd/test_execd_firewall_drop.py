@@ -140,6 +140,7 @@ def start_agent(request, get_configuration):
     remoted_simulator.stop()
     authd_simulator.shutdown()
 
+
 @pytest.fixture(scope="function")
 def remove_ip_from_iptables(request, get_configuration):
     """Remove the testing IP address from `iptables` if it exists.
