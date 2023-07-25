@@ -213,7 +213,8 @@ def modify_registry(key, subkey, arch):
         logger.info(f"Modifying registry key {print_arch}{os.path.join(fim.registry_class_name[key], subkey)}")
 
         modify_key_perms(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
-        modify_registry_owner(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
+        modify_registry_owner(key, subkey, arch,
+                              win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
         modify_registry_key_mtime(key, subkey, arch)
 
 
@@ -299,12 +300,10 @@ def calculate_registry_diff_paths(reg_key, reg_subkey, arch, value_name):
 
 def transform_registry_list(value_list=['test_value'], value_type=fim.REG_SZ, callback=ev.callback_value_event):
     """Transform a list of registry values into a dictionary.
-
     Args:
         value list (List): list of string value names
         value type (str): type of registry value that is expected.
         Callback (object): Callback to pair with the value to be monitored.
-
     Returns:
         Dict: dictionary with the values and the corresponding callbacks to monitor them.
     """
@@ -331,11 +330,9 @@ def transform_registry_list(value_list=['test_value'], value_type=fim.REG_SZ, ca
 
 def transform_registry_key_list(key_list=['test_key'], callback=ev.callback_key_event):
     """Transform a list of registry keys into a dictionary.
-
     Args:
         key_list list (List): list of strings with the key names names
         Callback (object): Callback to pair with the key to be monitored.
-
     Returns:
         Dict: dictionary with the keys and the corresponding callbacks to monitor them.
     """
@@ -350,7 +347,7 @@ def transform_registry_key_list(key_list=['test_key'], callback=ev.callback_key_
                 aux_dict[key] = (elem, callback)
         else:
             raise ValueError('It can only be a list or dictionary')
-        
+
         return aux_dict
 
 
