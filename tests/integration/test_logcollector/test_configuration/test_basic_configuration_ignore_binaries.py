@@ -85,10 +85,10 @@ if sys.platform == 'win32':
     force_restart_after_restoring = True
     location = r'C:\testing\files*'
     wazuh_configuration = 'ossec.conf'
-    prefix = WINDOWS_AGENT_DETECTOR_PREFIX
+    prefix = WINDOWS_AGENT_PREFIX
 
 else:
-    prefix = LOG_COLLECTOR_DETECTOR_PREFIX
+    prefix = LOG_COLLECTOR_PREFIX
     location = '/tmp/testing/files*'
     wazuh_configuration = 'etc/ossec.conf'
 
