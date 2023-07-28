@@ -2,8 +2,10 @@ name: Tests collection
 
 on:
   pull_request:
-    paths:
-      - tests/**
+    types:
+      - opened
+      - ready_for_review
+      - synchronize
 
 jobs:
   test-collection:
