@@ -1,0 +1,167 @@
+---
+# Configuration for check_all=yes
+- tags:
+  - check_all_yes
+  apply_to_modules:
+  - test_file_checkers
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: DIRECTORY_1
+        attributes:
+        - FIM_MODE
+        - check_all: "yes"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+# Configuration for check_all=no
+- tags:
+  - check_all_no
+  apply_to_modules:
+  - test_file_checkers
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: DIRECTORY_1
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+# Configuration for conjuction
+- tags:
+  - check_just_one_no
+  apply_to_modules:
+  - test_file_checkers
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: DIRECTORY_1
+        attributes:
+        - FIM_MODE
+        - check_all: "yes"
+        - check_sha1sum: "no"
+    - directories:
+        value: DIRECTORY_2
+        attributes:
+        - FIM_MODE
+        - check_all: "yes"
+        - check_md5sum: "no"
+    - directories:
+        value: DIRECTORY_3
+        attributes:
+        - FIM_MODE
+        - check_all: "yes"
+        - check_sha256sum: "no"
+    - directories:
+        value: DIRECTORY_4
+        attributes:
+        - FIM_MODE
+        - check_all: "yes"
+        - check_size: "no"
+    - directories:
+        value: DIRECTORY_5
+        attributes:
+        - FIM_MODE
+        - check_all: "yes"
+        - check_mtime: "no"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
+# Configuration for test checksum all
+- tags:
+  - check_just_one_yes
+  apply_to_modules:
+  - test_file_checkers
+  sections:
+  - section: syscheck
+    elements:
+    - disabled:
+        value: 'no'
+    - directories:
+        value: DIRECTORY_1
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+        - check_sha1sum: "yes"
+    - directories:
+        value: DIRECTORY_2
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+        - check_md5sum: "yes"
+    - directories:
+        value: DIRECTORY_3
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+        - check_sha256sum: "yes"
+    - directories:
+        value: DIRECTORY_4
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+        - check_size: "yes"
+    - directories:
+        value: DIRECTORY_5
+        attributes:
+        - FIM_MODE
+        - check_all: "no"
+        - check_mtime: "yes"
+  - section: sca
+    elements:
+    - enabled:
+        value: 'no'
+  - section: rootcheck
+    elements:
+    - disabled:
+        value: 'yes'
+  - section: wodle
+    attributes:
+      - name: 'syscollector'
+    elements:
+      - disabled:
+          value: 'yes'
