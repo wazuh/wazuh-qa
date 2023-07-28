@@ -1300,13 +1300,3 @@ def truncate_event_logs():
 
     for log_file in log_files:
         truncate_file(log_file)
-
-
-def pytest_deselected(items):
-    if not items:
-        return
-    config = items[0].session.config
-    reporter = config.pluginmanager.getplugin("terminalreporter")
-    reporter.ensure_newline()
-    for item in items:
-        reporter.line(f"deselected: {item.nodeid}", yellow=True, bold=True)
