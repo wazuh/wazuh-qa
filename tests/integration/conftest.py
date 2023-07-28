@@ -57,6 +57,7 @@ def get_report_files():
 def pytest_collection_modifyitems(session, config, items):
     selected_tests = []
     deselected_tests = []
+    # Ignore platform deselection if avoid-platform-based-deselection is used
     if not global_parameters.avoid_platform_based_deselection:
         for item in items:
             supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
