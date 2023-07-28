@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Install dependencies
+      - name: Install the QA framework
         run: python3 setup.py install
         working-directory: deps/wazuh_testing
 
