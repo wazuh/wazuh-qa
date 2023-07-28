@@ -132,6 +132,15 @@ SYSTEM_DATA = {
                'os_uname': 'Linux |localhost|5.3.18-22-default |#1 SMP Wed Jun 3 12:16:43 UTC 2020 (720aeba)|x86_64',
                'os_arch': 'x64', 'config_sum': '', 'merged_sum': '', 'manager_host': 'localhost.localdomain',
                'node_name': 'node01', 'date_add': '1652381429', 'last_keepalive': '253402300799',
+               'sync_status': 'synced', 'connection_status': 'active'},
+    'AlmaLinux-8': {'hostname': 'localhost', 'architecture': 'x64', 'os_name': 'AlmaLinux', 'os_version': '8',
+               'os_codename': '', 'os_major': '8', 'os_minor': '', 'os_patch': '', 'os_build': '',
+               'os_platform': 'almalinux', 'sysname': 'Linux', 'release': '5.3.18-22-default', 'version': 'Wazuh v4.4.0',
+               'os_release': '', 'checksum': '1652388661375945607', 'name': 'ALMALINUX8', 'ip': '127.0.0.1',
+               'register_ip': 'any', 'internal_key': '',
+               'os_uname': 'Linux |localhost|5.3.18-22-default |#1 SMP Wed Jun 3 12:16:43 UTC 2020 (720aeba)|x86_64',
+               'os_arch': 'x64', 'config_sum': '', 'merged_sum': '', 'manager_host': 'localhost.localdomain',
+               'node_name': 'node01', 'date_add': '1652381429', 'last_keepalive': '253402300799',
                'sync_status': 'synced', 'connection_status': 'active'}
 }
 
