@@ -91,6 +91,11 @@ else:
 
 
 def get_version():
+    """Get Wazuh version
+
+    Returns:
+        str: Wazuh version. If it is not possible to get it, it returns 'N/A'
+    """
     try:
         if platform.system() in ['Windows', 'win32']:
             with open(os.path.join(WAZUH_PATH, 'VERSION'), 'r') as f:
@@ -105,6 +110,11 @@ def get_version():
 
 
 def get_service():
+    """Get Wazuh installed component
+
+    Returns:
+        str: Wazuh installed component, wazuh-manager or wazuh-agent. If it is not possible to get it, it returns 'N/A'
+    """
     try:
         if platform.system() in ['Windows', 'win32']:
             if os.path.exists(WAZUH_PATH):
