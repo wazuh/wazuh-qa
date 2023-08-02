@@ -52,7 +52,17 @@
 # The checksum differs
 - log_id: log9
   parent: log2
-  tag: "The master's checksum and the worker's checksum are different. Local checksum:.*| Master checksum:.*."
+  tag: 'The checksum of master (.*) and worker (.*) are different.'
+
+# The checksums differ and the agent_groups_mismatch_limit was not exceeded
+- log_id: log17
+  parent: log9
+  tag: 'Checksum comparison failed.*'
+- log_id: log18
+  parent: log17
+  tag: 'Finished in.*Updated.*chunks.*'
+
+# The checksums differ and the agent_groups_mismatch_limit was exceeded
 - log_id: log10
   parent: log9
   tag: 'Sent request to obtain all agent-groups information from the master node.*'
