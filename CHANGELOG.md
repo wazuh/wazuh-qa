@@ -12,6 +12,10 @@ Release report: TBD
 - Upgrade PyYAML to 6.0.1. ([#4326](https://github.com/wazuh/wazuh-qa/pull/4326)) \- (Framework)
 - Change Vulnerability Detector ITs to support the development of the NVD 2.0 refactor. ([#4327](https://github.com/wazuh/wazuh-qa/pull/4327)) \- (Tests)
 
+### Fixed
+
+- Enhancing the handling of authd and remoted simulators in case of restart failures ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
+
 ## [4.4.5] - 10-07-2023
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/8d17d2c9c11bc10be9a31c83bc7c17dfbac0d2a0 \
@@ -29,7 +33,6 @@ Release report: https://github.com/wazuh/wazuh/issues/17520
 
 ### Fixed
 
-- Enhancing the handling of authd and remoted simulators in case of restart failures ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
 - Fix syscollector tests failure (get_configuration fixture has different scope) ([#4154](https://github.com/wazuh/wazuh-qa/pull/4154)) \- (Framework + Tests)
 
 ## [4.4.3] - 25-06-2023
