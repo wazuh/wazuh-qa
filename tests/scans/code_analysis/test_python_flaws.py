@@ -1,8 +1,11 @@
 import json
 import os
 
-from wazuh_testing.tools.scans.code_analysis import \
-    run_bandit_multiple_directories, update_known_flaws_in_file, get_new_flaws
+from wazuh_testing.tools.scans.code_analysis import (
+    get_new_flaws,
+    run_bandit_multiple_directories,
+    update_known_flaws_in_file,
+)
 
 ACTUAL_PATH = os.getcwd()
 TEST_PYTHON_CODE_PATH = os.path.dirname(__file__)
