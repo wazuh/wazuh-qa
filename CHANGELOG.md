@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.7.0] - TBD
+
+Wazuh commit: TBD \
+Release report: TBD
+
+### Added
+
+- Add callbacks and IT tests for Integratord options tag. ([#4108](https://github.com/wazuh/wazuh-qa/pull/4108)) \- (Framework + tests)
+
+### Changed
+
+- Add option to run some logcollector tests isolated (without a manager) [#4226](https://github.com/wazuh/wazuh-qa/pull/4226) \- (Tests + Framework)
+- Update code analysis and dependencies known flaws. [#3319](https://github.com/wazuh/wazuh-qa/pull/4083) \- (Tests)
+- Update schema database version([#3879](https://github.com/wazuh/wazuh-qa/pull/3879)) \- (Tests)
+
+### Fixed
+- Update `get_test_cases_data` function so it handles fim_mode parameter ([#4185](https://github.com/wazuh/wazuh-qa/pull/4185)) \- (Framework)
+- Fix warnings in the rids tests([#4151](https://github.com/wazuh/wazuh-qa/pull/4151)) \- (Framework + Tests)
+
 ## [4.6.0] - TBD
 
 Wazuh commit: TBD \
@@ -22,7 +41,6 @@ Release report: TBD
 - Add 'Force reconnect' feature to agent_simulator tool. ([#3111](https://github.com/wazuh/wazuh-qa/pull/3111)) \- (Tools)
 - Add new module to support migration tool. ([#3837](https://github.com/wazuh/wazuh-qa/pull/3837))
 - Add IT tests FIM registry monitoring using wildcards. ([#4270](https://github.com/wazuh/wazuh-qa/pull/4270)) \- (Framework + Tests)
-- Update schema database version ([#4128](https://github.com/wazuh/wazuh-qa/pull/4128)) \- (Tests)
 
 ### Changed
 
@@ -46,6 +64,7 @@ Release report: TBD
 - Update cluster logs in reliability tests ([#2772](https://github.com/wazuh/wazuh-qa/pull/2772)) \- (Tests)
 - Use correct version format in agent_simulator tool ([#3198](https://github.com/wazuh/wazuh-qa/pull/3198)) \- (Tools)
 - Upgrade PyYAML to 6.0.1. ([#4326](https://github.com/wazuh/wazuh-qa/pull/4326)) \- (Framework)
+- Update schema database version ([#4128](https://github.com/wazuh/wazuh-qa/pull/4128)) \- (Tests)
 
 ### Fixed
 

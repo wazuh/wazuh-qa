@@ -111,6 +111,7 @@ TCP_UDP = 'TCP,UDP'
 VALID_FIM_MODES = ['scheduled', 'realtime', 'whodata']
 OS_EXCLUDED_FROM_RT_WD = ['darwin', 'sunos5']
 
+
 def is_udp(protocol):
     return protocol.upper() == UDP
 
