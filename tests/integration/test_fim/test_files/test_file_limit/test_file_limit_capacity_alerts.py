@@ -89,7 +89,7 @@ test_directories = [os.path.join(PREFIX, 'testdir1')]
 directory_str = ','.join(test_directories)
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf_file_limit.yaml')
 testdir1 = test_directories[0]
 scan_delay = 10
 

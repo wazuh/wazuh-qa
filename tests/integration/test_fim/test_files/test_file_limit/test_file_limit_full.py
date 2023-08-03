@@ -84,9 +84,8 @@ pytestmark = [pytest.mark.tier(level=1)]
 # Variables
 test_directories = [os.path.join(PREFIX, 'testdir1')]
 directory_str = ','.join(test_directories)
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configurations_path = os.path.join(test_data_path, 'wazuh_conf.yaml')
+configurations_path = os.path.join(test_data_path, 'wazuh_conf_file_limit.yaml')
 testdir1 = test_directories[0]
 NUM_FILES = 10
 monitor_timeout = 40
@@ -170,6 +169,8 @@ def test_file_limit_full(configure_local_internal_options_module, get_configurat
         - who_data
         - realtime
     '''
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+
     # Check that database is full and assert database usage percentage is 100%
     database_state = wazuh_log_monitor.start(timeout=global_parameters.default_timeout,
                                              callback=generate_monitoring_callback(CB_FILE_LIMIT_CAPACITY),

@@ -4,21 +4,12 @@
         - disabled:
             value: 'no'
         - frequency:
-            value: FREQUENCY
-        - windows_registry:
-            value: WINDOWS_REGISTRY
-            attributes:
-              - arch: both
+            value: 5
         - directories:
             value: TEST_DIRECTORIES
             attributes:
-              - FIM_MODE
-        - file_limit:
-            elements:
-              - enabled:
-                  value: 'no'
-              - entries:
-                  value: 10
+              - whodata: 'yes'
+
     - section: sca
       elements:
         - enabled:
@@ -32,10 +23,6 @@
     - section: wodle
       attributes:
         - name: syscollector
-      elements:
-        - disabled:
-            value: 'yes'
-    - section: active-response
       elements:
         - disabled:
             value: 'yes'
