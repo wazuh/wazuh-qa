@@ -20,6 +20,7 @@ Release report: TBD
 ### Fixed
 - Update `get_test_cases_data` function so it handles fim_mode parameter ([#4185](https://github.com/wazuh/wazuh-qa/pull/4185)) \- (Framework)
 - Fix warnings in the rids tests([#4151](https://github.com/wazuh/wazuh-qa/pull/4151)) \- (Framework + Tests)
+- Minor fixes in the `tests_python_flaws.py` scan([#439`](https://github.com/wazuh/wazuh-qa/pull/4393)) \- (Tests)
 
 ## [4.6.0] - TBD
 
