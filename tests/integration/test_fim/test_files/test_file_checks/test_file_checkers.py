@@ -209,4 +209,4 @@ def test_checkers(file_path, file_attrs, tags_to_apply, triggers_modification, c
 
     # Test files checks.
     regular_file_cud(file_path, wazuh_log_monitor, min_timeout=global_parameters.default_timeout,
-                     options=file_attrs, triggers_modified_event=triggers_modification)
+                     options=file_attrs, triggers_modified_event=triggers_modification, escaped=True)
