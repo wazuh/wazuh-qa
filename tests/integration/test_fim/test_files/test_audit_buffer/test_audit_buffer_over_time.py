@@ -209,8 +209,8 @@ def test_audit_buffer_over_time_no_overflow(configuration, metadata, test_folder
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata),
                          ids=t2_test_case_ids)
 def test_audit_buffer_overflow(configuration, metadata, test_folders, set_wazuh_configuration,
-                                create_monitored_folders, configure_local_internal_options_function,
-                                restart_syscheck_function, wait_syscheck_start):
+                               create_monitored_folders, configure_local_internal_options_function,
+                               restart_syscheck_function, wait_syscheck_start):
     '''
     description: This test validates the behavior of "queue_size" in tandem with "max_eps". Check that when files are
                  added causing whodata queue to overflow, and after some files are processed, if new files are added

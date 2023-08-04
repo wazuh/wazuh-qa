@@ -164,7 +164,7 @@ def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_waz
         - Verify all files are detected in whodata mode
 
     input_description: The file 'configuration_audit_buffer_behavior' provides the configuration template.
-                       The file 'cases_audit_buffer_no_overflow.yaml' provides the test cases details for each test case.
+                       The file 'cases_audit_buffer_no_overflow.yaml' provides the test cases details for each case.
 
     expected_output:
         - r".*(Internal audit queue is full). Some events may be lost. Next scheduled scan will recover lost data."
@@ -205,8 +205,8 @@ def test_audit_buffer_no_overflow(configuration, metadata, test_folders, set_waz
 @pytest.mark.parametrize('configuration, metadata', zip(t2_configurations, t2_configuration_metadata),
                          ids=t2_test_case_ids)
 def test_audit_buffer_overflow(configuration, metadata, test_folders, set_wazuh_configuration,
-                                create_monitored_folders_module, configure_local_internal_options_function,
-                                restart_syscheck_function, wait_syscheck_start):
+                               create_monitored_folders_module, configure_local_internal_options_function,
+                               restart_syscheck_function, wait_syscheck_start):
     '''
     description: Check that when files are exceeding the whodata "queue_size" value the queue overflows, and the
                  excess files files are detected in scheduled mode, and after the next scheduled scan.

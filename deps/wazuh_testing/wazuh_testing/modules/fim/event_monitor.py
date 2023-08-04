@@ -115,8 +115,6 @@ ERR_MSG_SACL_CONFIGURED_EVENT = 'Did not receive the expected "The SACL of <file
 ERR_MSG_WHODATA_REALTIME_MODE_CHANGE_EVENT = 'Expected "directory starts to monitored in real-time" event not received'
 
 
-
-
 def create_error_message(message, source=LOG_FILE_PATH):
     """
     Creates an error message from an event.
