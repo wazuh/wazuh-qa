@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: TBD \
 Release report: TBD
 
+### Added
+
+- Add an integration test to check the wazuh-analysisd's decoder parser ([#4286](https://github.com/wazuh/wazuh-qa/pull/4286)) \- (Tests)
+
 ## [4.5.0] - TBD
 
 Wazuh commit: TBD \
