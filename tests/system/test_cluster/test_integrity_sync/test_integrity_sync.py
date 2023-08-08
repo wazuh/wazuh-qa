@@ -22,7 +22,7 @@ pytestmark = [pytest.mark.cluster, pytest.mark.agentless_cluster_env]
 test_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
 worker_hosts = test_hosts[1:]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-configuration = yaml.safe_load(open(os.path.join(test_data_path, 'cluster_json.yml')))
+configuration = yaml.safe_load(open(os.path.join(test_data_path, 'cluster_json.yaml')))
 messages_path = os.path.join(test_data_path, 'messages.yml')
 tmp_path = os.path.join(test_data_path, 'tmp')
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
@@ -262,7 +262,7 @@ def test_zip_size_limit(clean_files, update_cluster_json):
     """
     too_big_size = configuration['max_zip_size'] + 1024
     big_size = configuration['min_zip_size'] - 1024
-    big_filenames = {file_prefix + str(i) for i in range(5)}
+    big_filenames = {file_prefix + str(i) for i in range(10)}
 
     # Create a tmp folder and all files inside in the master node.
     host_manager.run_command(test_hosts[0], f"mkdir {tmp_size_test_path}")
