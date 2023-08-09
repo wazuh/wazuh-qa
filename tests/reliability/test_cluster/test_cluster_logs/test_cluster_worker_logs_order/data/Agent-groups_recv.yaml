@@ -17,7 +17,7 @@
 # No need to synchronize after failed synchronization tries.
 - log_id: log3
   parent: log2
-  tag: The checksum of both databases match.*Reset the attempt counter.
+  tag: The checksum of both databases match.*Counter reset.
 - log_id: log4
   parent: log3
   tag: Finished in.*Updated.*chunks.*
@@ -30,42 +30,26 @@
   parent: log15
   tag: Finished in.*Updated.*chunks.*
 
-# Forced synchronization is required.
-- log_id: log5
-  parent: log2
-  tag: Checksum comparison failed. Attempt 10/10.*
-- log_id: log7
-  parent: log5
-  tag: Sent request to obtain all agent-groups information from the master node.*
-- log_id: log8
-  parent: log7
-  tag: Finished in.*Updated.*chunks.*
-
-# Checksum comparison fails.
-- log_id: log12
-  parent: log2
-  tag: Checksum comparison failed. Attempt .*
-- log_id: log13
-  parent: log12
-  tag: Finished in.*Updated.*chunks.*
-
 # The checksum differs
 - log_id: log9
   parent: log2
   tag: The checksum of master (.*) and worker (.*) are different.
 
-# The checksums differ and the agent_groups_mismatch_limit was not exceeded
-- log_id: log17
+# Checksum comparison fails.
+- log_id: log12
   parent: log9
-  tag: Checksum comparison failed.*
-- log_id: log18
-  parent: log17
+  tag: Checksum comparison failed \([0-4]/5\).
+- log_id: log13
+  parent: log12
   tag: Finished in.*Updated.*chunks.*
 
-# The checksums differ and the agent_groups_mismatch_limit was exceeded
-- log_id: log10
+# Forced synchronization is required.
+- log_id: log5
   parent: log9
+  tag: Checksum comparison failed \(5/5\).
+- log_id: log7
+  parent: log5
   tag: Sent request to obtain all agent-groups information from the master node.*
-- log_id: log11
-  parent: log10
+- log_id: log8
+  parent: log7
   tag: Finished in.*Updated.*chunks.*
