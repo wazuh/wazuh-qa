@@ -140,6 +140,7 @@ def start_agent(request, get_configuration):
     remoted_simulator.stop()
     authd_simulator.shutdown()
 
+
 @pytest.fixture(scope="function")
 def remove_ip_from_iptables(request, get_configuration):
     """Remove the testing IP address from `iptables` if it exists.
@@ -174,31 +175,6 @@ def get_configuration(request):
     yield request.param
 
 
-def validate_ar_message(message, command_id):
-    """Verify that Active Response JSON messages have a "command" field and that it is valid.
-
-    Args:
-        message (str): Serialized JSON message.
-        command_id (int): Integer with command ID.
-    """
-    command = 'add' if command_id == 0 else 'delete'
-
-    json_alert = json.loads(message)  # Alert in JSON
-    assert json_alert['command'], 'Missing command in JSON message'
-    assert json_alert['command'] == command, 'Invalid command in JSON message'
-
-
-def wait_message_line(line):
-    """Callback function to wait for Active Response JSON message.
-
-    Args:
-        line (str): String containing message.
-    """
-    if "{\"version\"" in line:
-        return line.split("active-response/bin/firewall-drop: ", 1)[1]
-    return None
-
-
 def wait_invalid_input_message_line(line):
     """Callback function to wait for error message.
 
@@ -228,7 +204,7 @@ def build_message(metadata, expected):
 
 
 def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, configure_environment,
-                             remove_ip_from_iptables, start_agent, set_ar_conf_mode):
+                             remove_ip_from_iptables, truncate_ar_log, start_agent, set_ar_conf_mode):
     '''
     description: Check if 'firewall-drop' command of 'active response' is executed correctly.
                  For this purpose, a simulated agent is used and the 'active response'
@@ -281,35 +257,35 @@ def test_execd_firewall_drop(set_debug_mode, get_configuration, test_version, co
     '''
     metadata = get_configuration['metadata']
     expected = metadata['results']
+    expected_commands = ('add', 'delete')
     ossec_log_monitor = FileMonitor(LOG_FILE_PATH)
     ar_log_monitor = FileMonitor(execd.AR_LOG_FILE_PATH)
 
     # Checking AR in ossec logs
-    ossec_log_monitor.start(timeout=60, callback=execd.wait_received_message_line)
-
-    # Checking AR in active-response logs
-    ar_log_monitor.start(timeout=60, callback=execd.wait_start_message_line)
+    monitor_result = ossec_log_monitor.start(timeout=5, callback=execd.wait_received_message_line).result()
+    assert monitor_result is not None, 'The expected message was not found in the logs. ' \
+                                       'The AR command was not received'
 
     if expected['success']:
-        for command_id in range(2):
-            ar_log_monitor.start(timeout=60, callback=wait_message_line)
-            last_log = ar_log_monitor.result()
-            validate_ar_message(last_log, command_id)
+        for expected_command in expected_commands:
+            monitor_result = ar_log_monitor.start(timeout=10, callback=execd.wait_start_message_line).result()
+            assert monitor_result is not None, 'The expected message was not found in the logs. ' \
+                                               'The AR was not triggered.'
 
-            ar_log_monitor.start(timeout=60, callback=execd.wait_ended_message_line)
+            monitor_result = ar_log_monitor.start(timeout=10, callback=execd.wait_firewall_drop_msg).result()
+            assert monitor_result is not None, 'The expected message was not found in the logs. ' \
+                                               'The AR command was not run.'
 
-            # Checking if the IP was added/removed in iptables
-            iptables_file = os.popen('iptables -L')
-            flag = False
-            for iptables_line in iptables_file:
-                if metadata['ip'] in iptables_line:
-                    flag = True
+            ar_log_msg = json.loads(monitor_result)
 
-            if not flag and command_id == 0:
-                raise AssertionError("IP was not added to iptable")
-            elif flag and command_id == 1:
-                raise AssertionError("IP was not deleted from iptable")
+            assert ar_log_msg['command'], 'Missing command in active response log.'
+            assert ar_log_msg['command'] == expected_command, 'Invalid command in active response log.\n' \
+                                                              f"Expected: {expected_command}\n" \
+                                                              f"Current: {ar_log_msg}"
 
+            ar_log_monitor.start(timeout=10, callback=execd.wait_ended_message_line)
+
+            # Default timeout of AR after command
             time.sleep(5)
     else:
         ar_log_monitor.start(timeout=60, callback=wait_invalid_input_message_line)

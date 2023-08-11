@@ -1,0 +1,47 @@
+- name: test_single_asterisk_wildcard
+  description: Test location tag with one asterisk wildcard
+  configuration_parameters:
+    LOCATION: c:\testfol*\subfolder\test
+  metadata:
+    matches: true
+    location: c:\testfol*\subfolder\test
+
+- name: test_single_question_mark_wildcard
+  description: Test location tag with one question mark wildcard
+  configuration_parameters:
+    LOCATION: c:\testfolde?\subfolder\test
+  metadata:
+    location: c:\testfolde?\subfolder\test
+    matches: true
+
+- name: test_partial_words_with_asterisk_wildcards
+  description: Test location tag with words completed using asterisk wildcard
+  configuration_parameters:
+    LOCATION: c:\test*\sub*\t*
+  metadata:
+    location: c:\test*\sub*\t*
+    matches: true
+
+- name: test_mixed_wildcards
+  description: Test location tag with mixed asterisk and question mark wildcards
+  configuration_parameters:
+    LOCATION: c:\testf?lder\*\tes?
+  metadata:
+    location: c:\testf?lder\*\tes?
+    matches: true
+
+- name: test_mixed_wildcards_path_asterisk_only
+  description: Test location tag were filepath uses asterisk only
+  configuration_parameters:
+    LOCATION: c:\*\*\?es?
+  metadata:
+    location: c:\*\*\?es?
+    matches: true
+
+- name: test_invalid_wildcards_no_match
+  description: Test location tag where wildcards do not match a valid file
+  configuration_parameters:
+    LOCATION: c:\testfolder\subfolder\tes?.log
+  metadata:
+    matches: false
+    location: c:\testfolder\subfolder\tes?.log
