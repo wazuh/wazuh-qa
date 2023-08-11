@@ -212,7 +212,7 @@ def get_metadata_timestamp(provider_os):
     return result[0]
 
 
-def get_nvd_metadata_timestamp(year):
+def get_nvd_metadata_timestamp():
     """Get the NVD timestamp data for a specific year from nvd_metadata table.
 
     Args:
@@ -221,7 +221,7 @@ def get_nvd_metadata_timestamp(year):
     Returns:
         str: Timestamp data. (example: 2022-03-03T03:00:01-05:00)
     """
-    query_string = f"SELECT timestamp FROM nvd_metadata WHERE year={year}"
+    query_string = f"SELECT timestamp FROM nvd_metadata"
     result = get_sqlite_query_result(CVE_DB_PATH, query_string)
 
     if len(result) == 0:
