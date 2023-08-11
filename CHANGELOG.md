@@ -58,15 +58,30 @@ Release report: TBD
 - Fix an error in the cluster performance tests related to CSV parser ([#2999](https://github.com/wazuh/wazuh-qa/pull/2999)) \- (Framework + Tests)
 - Fix bug in the framework on migration tool ([#4027](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
 
+## [4.5.2] - TBD
+
+Wazuh commit: TBD \
+Release report: TBD
+
 ## [4.5.1] - TBD
 
 Wazuh commit: TBD \
 Release report: TBD
 
+### Added
+
+- Add an integration test to check the wazuh-analysisd's decoder parser ([#4286](https://github.com/wazuh/wazuh-qa/pull/4286)) \- (Tests)
+
 ## [4.5.0] - TBD
 
 Wazuh commit: TBD \
 Release report: TBD
+
+### Changed
+
+- Delete `update_from_year` from system and E2E tests configuration ([#4372](https://github.com/wazuh/wazuh-qa/pull/4372)) \- (Tests)
+- Upgrade PyYAML to 6.0.1. ([#4326](https://github.com/wazuh/wazuh-qa/pull/4326)) \- (Framework)
+- Change Vulnerability Detector ITs to support the development of the NVD 2.0 refactor. ([#4327](https://github.com/wazuh/wazuh-qa/pull/4327)) \- (Tests)
 
 ## [4.4.5] - 10-07-2023
 
