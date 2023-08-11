@@ -11,7 +11,7 @@ from wazuh_testing.event_monitor import check_event
 
 # Define the log messages prefix
 SYSCOLLECTOR_PREFIX = '.+wazuh-modulesd:syscollector.+'
-WMODULES_SYSCOLLECTOR_PREFIX = '.+wmodules_syscollector.+'
+WMODULES_SYSCOLLECTOR_PREFIX = '.+wmodules-syscollector.+'
 
 # Callback messages
 CB_MODULE_STARTING = 'DEBUG: Starting Syscollector.'

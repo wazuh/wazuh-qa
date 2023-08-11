@@ -9,7 +9,7 @@ import json
 from jsonschema import validate
 from collections import Counter
 from wazuh_testing import global_parameters, logger, WAZUH_TESTING_DATA_PATH
-from wazuh_testing.modules.fim import REQUIRED_ATTRIBUTES, REQUIRED_REG_KEY_ATTRIBUTES, REQUIRED_REG_VALUE_ATTRIBUTES
+from wazuh_testing.modules.fim import REQUIRED_ATTRIBUTES, REQUIRED_REG_KEY_ATTRIBUTES, REQUIRED_REG_VALUE_ATTRIBUTES, CHECK_GROUP
 from wazuh_testing.modules.fim.event_monitor import callback_detect_event
 
 if sys.platform == 'linux2' or sys.platform == 'linux':
