@@ -34,7 +34,9 @@ def test_bucket_discard_regex(
         configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, file_monitoring,
 ):
     """
-    description: Fetch logs excluding the ones that match with the regex.
+    description: Check that some bucket logs are excluded when the regex and field defined in <discard_regex>
+                 match an event.
+
     test_phases:
         - setup:
             - Load Wazuh light configuration.
@@ -51,7 +53,9 @@ def test_bucket_discard_regex(
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
             - Delete the uploaded file
+
     wazuh_min_version: 4.6.0
+
     parameters:
         - configuration:
             type: dict
@@ -80,10 +84,12 @@ def test_bucket_discard_regex(
         - file_monitoring:
             type: fixture
             brief: Handle the monitoring of a specified file.
+
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check the expected number of events were forwarded to analysisd.
         - Check the database was created and updated accordingly.
+
     input_description:
         - The `configuration_bucket_discard_regex` file provides the module configuration for this test.
         - The `cases_bucket_discard_regex` file provides the test cases.
@@ -159,7 +165,9 @@ def test_cloudwatch_discard_regex_json(
         configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, file_monitoring,
 ):
     """
-    description: Fetch logs excluding the ones that match with the regex.
+    description: Check that some CloudWatch JSON logs are excluded when the regex and field defined in <discard_regex>
+                 match an event.
+
     test_phases:
         - setup:
             - Load Wazuh light configuration.
@@ -176,7 +184,9 @@ def test_cloudwatch_discard_regex_json(
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
             - Delete the uploaded file
+
     wazuh_min_version: 4.6.0
+
     parameters:
         - configuration:
             type: dict
@@ -205,10 +215,12 @@ def test_cloudwatch_discard_regex_json(
         - file_monitoring:
             type: fixture
             brief: Handle the monitoring of a specified file.
+
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check the expected number of events were forwarded to analysisd.
         - Check the database was created and updated accordingly.
+
     input_description:
         - The `configuration_cloudwatch_discard_regex` file provides the module configuration for this test.
         - The `cases_cloudwatch_discard_regex` file provides the test cases.
@@ -280,7 +292,9 @@ def test_cloudwatch_discard_regex_simple_text(
         configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, file_monitoring,
 ):
     """
-    description: Fetch logs excluding the ones that match with the regex.
+    description: Check that some CloudWatch simple text logs are excluded when the regex defined in <discard_regex>
+                 matches an event.
+
     test_phases:
         - setup:
             - Load Wazuh light configuration.
@@ -297,7 +311,9 @@ def test_cloudwatch_discard_regex_simple_text(
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
             - Delete the uploaded file
+
     wazuh_min_version: 4.6.0
+
     parameters:
         - configuration:
             type: dict
@@ -326,10 +342,12 @@ def test_cloudwatch_discard_regex_simple_text(
         - file_monitoring:
             type: fixture
             brief: Handle the monitoring of a specified file.
+
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check the expected number of events were forwarded to analysisd.
         - Check the database was created and updated accordingly.
+
     input_description:
         - The `configuration_cloudwatch_discard_regex_simple_text` file provides
         the module configuration for this test.
@@ -399,7 +417,9 @@ def test_inspector_discard_regex(
         configure_local_internal_options_function, truncate_monitored_files, restart_wazuh_function, file_monitoring,
 ):
     """
-    description: Fetch logs excluding the ones that match with the regex.
+    description: Check that some Inspector logs are excluded when the regex and field defined in <discard_regex>
+                 match an event.
+
     test_phases:
         - setup:
             - Load Wazuh light configuration.
@@ -416,7 +436,9 @@ def test_inspector_discard_regex(
             - Truncate wazuh logs.
             - Restore initial configuration, both ossec.conf and local_internal_options.conf.
             - Delete the uploaded file
+
     wazuh_min_version: 4.6.0
+
     parameters:
         - configuration:
             type: dict
@@ -445,10 +467,12 @@ def test_inspector_discard_regex(
         - file_monitoring:
             type: fixture
             brief: Handle the monitoring of a specified file.
+
     assertions:
         - Check in the log that the module was called with correct parameters.
         - Check the expected number of events were forwarded to analysisd.
         - Check the database was created and updated accordingly.
+
     input_description:
         - The `configuration_inspector_discard_regex` file provides the module configuration for this test.
         - The `cases_inspector_discard_regex` file provides the test cases.
