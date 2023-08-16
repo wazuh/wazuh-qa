@@ -11,6 +11,10 @@ Release report: TBD
 
 - Add an integration test to check the wazuh-analysisd's decoder parser ([#4286](https://github.com/wazuh/wazuh-qa/pull/4286)) \- (Tests)
 
+### Changed
+
+- Update RHEL5 URL provider for VD test_validate_xml_feed_content ([#4428](https://github.com/wazuh/wazuh-qa/pull/4428)) \- (Tests)
+
 ## [4.5.0] - TBD
 
 Wazuh commit: TBD \
