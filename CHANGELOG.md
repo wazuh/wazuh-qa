@@ -13,7 +13,7 @@ Release report: TBD
 
 ### Changed
 
-- Update RHEL5 URL provider for VD test_validate_xml_feed_content ([#4428](https://github.com/wazuh/wazuh-qa/pull/4428)) \- (Tests)
+- Update vulnerability detector IT outdated URLs ([#4428](https://github.com/wazuh/wazuh-qa/pull/4428)) \- (Tests)
 
 ## [4.5.0] - TBD
 
