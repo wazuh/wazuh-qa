@@ -6,7 +6,7 @@ import tempfile
 from json import loads
 from urllib.request import urlretrieve
 
-from deps.wazuh_testing.wazuh_testing.tools.scans.dependencies import export_report, report_for_pytest
+from wazuh_testing.tools.scans.dependencies import export_report, report_for_pytest
 
 REQUIREMENTS_TEMP_FILE = tempfile.NamedTemporaryFile()
 
