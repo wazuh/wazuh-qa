@@ -13,6 +13,7 @@ Release report: TBD
 
 ### Changed
 
+- Update python integration test dependencies for macOS ([##4427](https://github.com/wazuh/wazuh-qa/pull/4427)) \- (Documentation)
 - Update vulnerability detector IT outdated URLs ([#4428](https://github.com/wazuh/wazuh-qa/pull/4428)) \- (Tests)
 
 ## [4.5.0] - TBD
