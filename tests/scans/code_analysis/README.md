@@ -38,7 +38,7 @@ The workaround for this test will be the following:
   - If the new vulnerability is considered a false positive, we add it to the `false_positives` list of the dictionary in its respective `known_flaws` JSON file.
   - If the new vulnerability is a real vulnerability, we solve the problem reported and remove the flaw from the known flaws file.
 
-The test also updates the known_flaws files automatically. If we have a look to a known_flaws file, we will see that each flaw dictionary contains information like the line number or range. This information si the one updated by the test. The test also removes flaws from the known_flaws file if they don't appear in the Bandit output.
+The test also updates the known_flaws files automatically. If we have a look at a known_flaws file, we will see that each flaw dictionary contains information like the line number or range. This information is the one updated by the test. The test also removes flaws from the known_flaws file if they don't appear in the Bandit output.
 
 #### Parameters
 
