@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: TBD \
 Release report: TBD
 
+### Changed
+- Fix one_manager_agent environment provisioning for system tests ([#4438](https://github.com/wazuh/wazuh-qa/pull/4438)) \- (Tests)
+
 ## [4.5.1] - TBD
 
 Wazuh commit: TBD \
