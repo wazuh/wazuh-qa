@@ -1,14 +1,14 @@
 {
     "false_positives": [
         {
-            "code": "     # Build the request\n     md5_hash = md5(args.la_query.encode()).hexdigest()\n     url = f\"{url_analytics}/v1/workspaces/{args.workspace}/query\"\n",
+            "code": "     # Build the request\n     md5_hash = md5(args.la_query.encode()).hexdigest()\n     url = f\"{URL_ANALYTICS}/v1/workspaces/{args.workspace}/query\"\n",
             "filename": "wodles/azure/azure-logs.py",
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 305,
+            "line_number": 309,
             "line_range": [
-                305
+                309
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
@@ -20,9 +20,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 485,
+            "line_number": 488,
             "line_range": [
-                485
+                488
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
@@ -34,9 +34,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 644,
+            "line_number": 648,
             "line_range": [
-                644
+                648
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
