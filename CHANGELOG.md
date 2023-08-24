@@ -11,10 +11,10 @@ Release report: TBD
 
 - Fix one_manager_agent environment provisioning by packages for system tests ([#4438](https://github.com/wazuh/wazuh-qa/pull/4438)) \- (Framework)
 
-## [4.5.1] - TBD
+## [4.5.1] - 24-08-2023
 
-Wazuh commit: TBD \
-Release report: TBD
+Wazuh commit: https://github.com/wazuh/wazuh/commit/731cdf39a430d2fb6fa02f3721624e07f887b02f
+Release report: https://github.com/wazuh/wazuh/issues/18475
 
 ### Added
 
@@ -25,10 +25,10 @@ Release report: TBD
 - Update python integration test dependencies in the README ([#4427](https://github.com/wazuh/wazuh-qa/pull/4427)) \- (Documentation)
 - Update vulnerability detector IT outdated URLs ([#4428](https://github.com/wazuh/wazuh-qa/pull/4428)) \- (Tests)
 
-## [4.5.0] - TBD
+## [4.5.0] - 11-08-2023
 
-Wazuh commit: TBD \
-Release report: TBD
+Wazuh commit: https://github.com/wazuh/wazuh/commit/f6aba151d08ef065dfc1bdc9b8885c3d4f618fca
+Release report: https://github.com/wazuh/wazuh/issues/18235
 
 ### Changed
 
