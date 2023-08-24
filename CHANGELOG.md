@@ -38,6 +38,7 @@ Release report: TBD
 
 ### Added
 
+- Add new test cases for the `discard_regex` functionality of `CloudWatchLogs` and `Inspector` services. ([#4278](https://github.com/wazuh/wazuh-qa/pull/4278)) \- (Tests)
 - Add Windows location wildcards tests ([#4263](https://github.com/wazuh/wazuh-qa/pull/4263)) \- (Tests + Framework)
 - New 'SCA' test suite and framework. ([#3566](https://github.com/wazuh/wazuh-qa/pull/3566)) \- (Framework + Tests)
 - Add integration tests for AWS module. ([#3911](https://github.com/wazuh/wazuh-qa/pull/3911)) \- (Framework + Tests + Documentation)
@@ -79,6 +80,7 @@ Release report: TBD
 
 ### Fixed
 
+- Fix an error related to logs format in reliability test ([#4387](https://github.com/wazuh/wazuh-qa/pull/4387)) \- (Tests)
 - Fix boto3 version requirement for legacy OS ([#4150](https://github.com/wazuh/wazuh-qa/pull/4150)) \- (Framework)
 - Fix cases yaml of the analysisd windows registry IT ([#4149](https://github.com/wazuh/wazuh-qa/pull/4149)) \- (Tests)
 - Fix a bug in on Migration tool's library ([#4106](https://github.com/wazuh/wazuh-qa/pull/4106)) \- (Framework)
@@ -86,25 +88,35 @@ Release report: TBD
 - Fix a regex error in the FIM integration tests ([#3061](https://github.com/wazuh/wazuh-qa/issues/3061)) \- (Framework + Tests)
 - Fix an error in the cluster performance tests related to CSV parser ([#2999](https://github.com/wazuh/wazuh-qa/pull/2999)) \- (Framework + Tests)
 - Fix bug in the framework on migration tool ([#4027](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
+- Fix test cluster / integrity sync system test and configuration to avoid flaky behavior ([#4406](https://github.com/wazuh/wazuh-qa/pull/4406)) \- (Tests)
 
 ## [4.5.2] - TBD
 
 Wazuh commit: TBD \
 Release report: TBD
 
-## [4.5.1] - TBD
+### Changed
 
-Wazuh commit: TBD \
-Release report: TBD
+- Fix one_manager_agent environment provisioning by packages for system tests ([#4438](https://github.com/wazuh/wazuh-qa/pull/4438)) \- (Framework)
+
+## [4.5.1] - 24-08-2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/731cdf39a430d2fb6fa02f3721624e07f887b02f
+Release report: https://github.com/wazuh/wazuh/issues/18475
 
 ### Added
 
 - Add an integration test to check the wazuh-analysisd's decoder parser ([#4286](https://github.com/wazuh/wazuh-qa/pull/4286)) \- (Tests)
 
-## [4.5.0] - TBD
+### Changed
 
-Wazuh commit: TBD \
-Release report: TBD
+- Update python integration test dependencies in the README ([#4427](https://github.com/wazuh/wazuh-qa/pull/4427)) \- (Documentation)
+- Update vulnerability detector IT outdated URLs ([#4428](https://github.com/wazuh/wazuh-qa/pull/4428)) \- (Tests)
+
+## [4.5.0] - 11-08-2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/f6aba151d08ef065dfc1bdc9b8885c3d4f618fca
+Release report: https://github.com/wazuh/wazuh/issues/18235
 
 ### Changed
 
