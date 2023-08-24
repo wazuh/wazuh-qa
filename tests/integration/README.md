@@ -117,7 +117,7 @@ brew install python3
 brew install autoconf automake libtool
 
 # Install Python libraries
-pip3 install pytest freezegun jq jsonschema pyyaml==5.4 psutil paramiko distro pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
+pip3 install filetype freezegun jq jsonschema lockfile numpydoc psutil pytest-html pytest-testinfra pyyaml
 ```
 
 - Add some internal options and restart
