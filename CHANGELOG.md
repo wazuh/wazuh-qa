@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Changed
 
+- Updated the cluster master logs reliability test to run with python 3.78 [#4445](https://github.com/wazuh/wazuh-qa/pull/4445) \- (Tests)
 - Update _wazuh_db_ schema database version ([#4353](https://github.com/wazuh/wazuh-qa/pull/4353)) \- (Tests)
 - Update the JSON schema with the required fields for the output content of the migration tool ([#4375](https://github.com/wazuh/wazuh-qa/pull/4375)) \- (Tests)
 
