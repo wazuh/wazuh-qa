@@ -9,7 +9,7 @@ from wazuh_testing.tools.wazuh_manager import remove_all_agents
 pytestmark = [TIER0, LINUX, SERVER]
 
 # Variables
-expected_database_version = '11'
+expected_database_version = '12'
 
 
 # Fixtures
