@@ -9,7 +9,7 @@ from wazuh_testing.tools.wazuh_manager import remove_all_agents
 pytestmark = [TIER0, LINUX, SERVER]
 
 # Variables
-expected_database_version = '10'
+expected_database_version = '11'
 
 
 # Fixtures
@@ -34,7 +34,7 @@ def test_agent_database_version(restart_wazuh_daemon, remove_agents):
             - Check that the manager database version is the expected one.
             - Check that the agent database version is the expected one.
 
-    wazuh_min_version: 4.4.0
+    wazuh_min_version: 4.5.2
 
     parameters:
         - restart_wazuh_daemon:
@@ -45,7 +45,7 @@ def test_agent_database_version(restart_wazuh_daemon, remove_agents):
         - Verify that database version is the expected one.
 
     expected_output:
-        - Database version: 10
+        - Database version: 11
 
     tags:
         - wazuh_db
