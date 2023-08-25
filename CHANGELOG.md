@@ -69,7 +69,13 @@ Release report: TBD
 
 ### Changed
 
+- Update enrollment logs in system test ([#4442](https://github.com/wazuh/wazuh-qa/pull/4442)) \- (Tests)
 - Fix one_manager_agent environment provisioning by packages for system tests ([#4438](https://github.com/wazuh/wazuh-qa/pull/4438)) \- (Framework)
+- Update framework known flaws files ([#4379](https://github.com/wazuh/wazuh-qa/pull/4379)) \- (Tests)
+
+### Fixed
+
+- Minor fixes in the `tests_python_flaws.py` scan ([#4439](https://github.com/wazuh/wazuh-qa/pull/4439)) \- (Tests)
 
 ## [4.5.1] - 24-08-2023
 
