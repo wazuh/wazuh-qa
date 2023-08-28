@@ -77,6 +77,7 @@ Release report: TBD
 - Use correct version format in agent_simulator tool ([#3198](https://github.com/wazuh/wazuh-qa/pull/3198)) \- (Tools)
 - Upgrade PyYAML to 6.0.1. ([#4326](https://github.com/wazuh/wazuh-qa/pull/4326)) \- (Framework)
 - Update schema database version ([#4128](https://github.com/wazuh/wazuh-qa/pull/4128)) \- (Tests)
+- Update framework known flaws files ([#4380](https://github.com/wazuh/wazuh-qa/pull/4380)) \- (Tests)
 
 ### Fixed
 
@@ -97,6 +98,12 @@ Release report: TBD
 
 ### Changed
 
+- Update enrollment logs in system test ([#4442](https://github.com/wazuh/wazuh-qa/pull/4442)) \- (Tests)
+- Update framework known flaws files ([#4379](https://github.com/wazuh/wazuh-qa/pull/4379)) \- (Tests)
+
+### Fixed
+
+- Minor fixes in the `tests_python_flaws.py` scan ([#4439](https://github.com/wazuh/wazuh-qa/pull/4439)) \- (Tests)
 - Fix one_manager_agent environment provisioning by packages for system tests ([#4438](https://github.com/wazuh/wazuh-qa/pull/4438)) \- (Framework)
 
 ## [4.5.1] - 24-08-2023
