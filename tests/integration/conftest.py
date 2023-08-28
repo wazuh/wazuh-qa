@@ -22,7 +22,7 @@ from wazuh_testing.logcollector import create_file_structure, delete_file_struct
 from wazuh_testing.tools import (PREFIX, LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH,
                                  WAZUH_LOCAL_INTERNAL_OPTIONS, AGENT_CONF, AGENT_INFO_SOCKET_PATH)
 from wazuh_testing.tools.configuration import get_minimal_configuration, get_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import (copy, recursive_directory_creation, remove_file, truncate_file, write_file,
+from wazuh_testing.tools.file import (truncate_file, recursive_directory_creation, remove_file, copy, write_file,
                                       delete_path_recursively)
 from wazuh_testing.tools.monitoring import FileMonitor, QueueMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import check_daemon_status, control_service, delete_dbs
