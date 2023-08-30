@@ -491,6 +491,7 @@ def detect_initial_scan_start(file_monitor, timeout=T_60):
 
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
+        timeout (str): timeout to check the event in Wazuh log
     """
     file_monitor.start(timeout=timeout, callback=callback_detect_scan_start,
                        error_message=ERR_MSG_SCHEDULED_SCAN_STARTED)
@@ -523,6 +524,7 @@ def get_messages(callback, timeout=T_30, max_events=MAX_EVENTS_VALUE):
     Args:
         callback (str): Callback to be used to detect the event.
         timeout (int): Timeout that will be used to get the dbsync_no_data message.
+        max_events (int): maximum amount of events that will be detected will be detected.
 
     Returns:
         A list with all the events in json format.
@@ -605,7 +607,7 @@ def detect_audit_queue_full(file_monitor, update_position=True):
 
 
 def detect_invalid_conf_value(file_monitor, element):
-    """Detects the configured value for the whodata queue
+    """Detects the error generated when a configuration element has an invalid value.
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
         element (str): Element name that is being detected
