@@ -594,7 +594,7 @@ def detect_windows_whodata_mode_change(file_monitor, file='.*'):
 
 
 def detect_audit_queue_full(file_monitor, update_position=True):
-    """Detects the configured value for the whodata queue
+    """Detects the event generated when the whodata_queue is full
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
         update_position (bool, optional): True if we pop items from the queue once they are read. False otherwise.
