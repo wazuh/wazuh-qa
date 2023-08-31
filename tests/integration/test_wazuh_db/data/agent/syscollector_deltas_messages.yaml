@@ -233,7 +233,7 @@
         "item_id":"caa4868d177fbebc5b145a2a92497ebcf566838a","multiarch":"same",
         "priority":"optional","scan_time":"2021/10/13 15:10:49","size":572,"source":"qtbase-opensource-src",
         "vendor":"Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>","version":"5.12.8+dfsg-0ubuntu1"}
-      output: err
+      output: 'ok '
       stage: insert package without enough fields.
     -
       input: >-
@@ -269,7 +269,7 @@
         "item_id":"caa4868d177fbebc5b145a2a92497ebcf566838a","multiarch":"same","name":"libqt5opengl5",
         "priority":"optional","scan_time":"2021/10/13 15:10:49","size":572,"source":"qtbase-opensource-src",
         "vendor":"Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>"}
-      output: err
+      output: 'ok '
       stage: modify package without enough fields.
     -
       input: >-
