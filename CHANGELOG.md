@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: TBD \
 Release report: TBD
 
+### Added
+
+- Add tests for new FIM audit buffer option. ([#4485](https://github.com/wazuh/wazuh-qa/pull/4485)) \- (Framework + tests)
+
 ### Changed
 
 - Update _wazuh_db_ schema database version ([#4353](https://github.com/wazuh/wazuh-qa/pull/4353)) \- (Tests)
