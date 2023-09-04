@@ -13,6 +13,7 @@ Release report: TBD
 
 ### Fixed
 
+- Update the request method used to call the login API endpoint. ([#4492](https://github.com/wazuh/wazuh-qa/pull/4492)) \- (Tests)
 - Enhancing the handling of authd and remoted simulators in case of restart failures ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
 
 ## [4.5.2] - TBD
