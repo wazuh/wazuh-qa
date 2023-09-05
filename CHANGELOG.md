@@ -28,6 +28,10 @@ Release report: TBD
 - Update schema database version ([#4128](https://github.com/wazuh/wazuh-qa/pull/4128)) \- (Tests)
 - Update framework known flaws files ([#4380](https://github.com/wazuh/wazuh-qa/pull/4380)) \- (Tests)
 
+### Added
+
+- Add tests for Vulnerability Detector: Red Hat 9 support (https://github.com/wazuh/wazuh-qa/pull/4497) \- (Tests)
+
 ### Changed
 
 - `Agentless_cluster` system tests timeout changed in order to reduce EC2 requirements ([#4534](https://github.com/wazuh/wazuh-qa/pull/4534)) \- (Tests)

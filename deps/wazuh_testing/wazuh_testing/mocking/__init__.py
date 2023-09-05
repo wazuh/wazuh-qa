@@ -76,6 +76,8 @@ SYSTEM_DATA = {
                   'config_sum': '', 'merged_sum': '', 'manager_host': 'alas2022',  'node_name': 'node01',
                   'date_add': '1645538646', 'last_keepalive': '253402300799',  'sync_status': 'synced',
                   'connection_status': 'active'},
+    'RHEL9': {'os_name': 'CentOS Linux', 'os_major': '9', 'os_minor': '1', 'os_platform': 'centos',
+              'name': 'centos9', 'connection_status': 'active'},
     'RHEL8': {'os_name': 'CentOS Linux', 'os_major': '8', 'os_minor': '1', 'os_platform': 'centos',
               'name': 'centos8', 'connection_status': 'active'},
     'RHEL7': {'os_name': 'CentOS Linux', 'os_major': '7', 'os_minor': '1', 'os_platform': 'centos', 'os_version': '7.0',
