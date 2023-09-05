@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Changed
 
+- Update ITs URL for Debian OVAL ([#4491](https://github.com/wazuh/wazuh-qa/pull/4491)) \- (Tests)
 - Syscollector package inventory deltas fix ([#4483](https://github.com/wazuh/wazuh-qa/pull/4483)) \- (Tests)
 - Update schema sys_programs table ([#4451](https://github.com/wazuh/wazuh-qa/pull/4451)) \- (Tests)
 - Update enrollment logs in system test ([#4442](https://github.com/wazuh/wazuh-qa/pull/4442)) \- (Tests)
