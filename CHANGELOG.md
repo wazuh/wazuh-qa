@@ -76,6 +76,10 @@ Release report: TBD
 Wazuh commit: https://github.com/wazuh/wazuh/commit/9087982b0c4ae0180bcdcd214a2b243e75cd8416 \
 Release report: https://github.com/wazuh/wazuh/issues/19111
 
+### Added
+
+- Add tests for Vulnerability Detector: Red Hat 9 support (https://github.com/wazuh/wazuh-qa/pull/4497) \- (Tests)
+
 ### Changed
 
 - Update setuptools dependency ([#3788](https://github.com/wazuh/wazuh-qa/pull/3788))
