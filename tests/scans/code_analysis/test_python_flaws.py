@@ -1,8 +1,11 @@
 import json
 import os
 
-from wazuh_testing.tools.scans.code_analysis import \
-    run_bandit_multiple_directories, update_known_flaws_in_file, get_new_flaws
+from wazuh_testing.tools.scans.code_analysis import (
+    get_new_flaws,
+    run_bandit_multiple_directories,
+    update_known_flaws_in_file,
+)
 
 ACTUAL_PATH = os.getcwd()
 TEST_PYTHON_CODE_PATH = os.path.dirname(__file__)
@@ -48,11 +51,10 @@ def test_check_security_flaws(clone_wazuh_repository, get_test_parameters):
 
         bandit_result = bandit_output['results']
 
+        directories = directory.replace('/', '') in DEFAULT_DIRECTORIES_TO_CHECK.replace('/', '').split(',')
         known_flaws = update_known_flaws_in_file(known_flaws_directory=KNOWN_FLAWS_DIRECTORY,
                                                  directory=directory,
-                                                 is_default_check_dir=
-                                                 directory.replace('/', '') in
-                                                 DEFAULT_DIRECTORIES_TO_CHECK.replace('/', '').split(','),
+                                                 is_default_check_dir=directories,
                                                  bandit_results=bandit_result)
 
         flaws_already_found = get_new_flaws(bandit_results=bandit_result,
@@ -61,9 +63,10 @@ def test_check_security_flaws(clone_wazuh_repository, get_test_parameters):
                                             flaws_already_found=flaws_already_found,
                                             new_flaws_output_dir=TEST_PYTHON_CODE_PATH)
 
+    vulnerabilities_found = json.dumps(flaws_already_found, indent=4, sort_keys=True)
     assert not any(
-        flaws_already_found.get(directory, None) for directory in directories_to_check), \
-        f"\nThe following possible vulnerabilities were found: {json.dumps(flaws_already_found, indent=4, sort_keys=True)}"
+        flaws_already_found.get(directory, None) for directory in directories_to_check
+    ), f"\nThe following possible vulnerabilities were found: {vulnerabilities_found}"
 
     # Change again to the path where we first executed the test
     os.chdir(ACTUAL_PATH)

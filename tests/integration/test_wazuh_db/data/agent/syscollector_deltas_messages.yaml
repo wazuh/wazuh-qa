@@ -220,7 +220,7 @@
     -
       input: >-
         agent 001 dbsync packages INSERTED {"checksum":"1c1bf8bbc20caef77010f960461cc20fb9c67568",
-        "architecture":"amd64","description":"Qt 5 OpenGL module","format":"deb","groups":"libs",
+        "architecture":"amd64","description":"Qt 5 OpenGL module","format":"deb","groups":"libs","location":" ",
         "item_id":"caa4868d177fbebc5b145a2a92497ebcf566838a","multiarch":"same","name":"libqt5opengl5",
         "priority":"optional","scan_time":"2021/10/13 15:10:49","size":572,"source":"qtbase-opensource-src",
         "vendor":"Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>","version":"5.12.8+dfsg-0ubuntu1"}
@@ -238,7 +238,7 @@
     -
       input: >-
         agent 001 dbsync packages INSERTED {"checksum":"1c1bf8bbc20caef77010f960461cc20fb9c67568",
-        "architecture":"amd64","description":"Qt 5 OpenGL module","format":"deb","groups":"libs",
+        "architecture":"amd64","description":"Qt 5 OpenGL module","format":"deb","groups":"libs","location":" ",
         "item_id":"caa4868d177fbebc5b145a2a92497ebcf566838a","multiarch":"same","name":"libqt5opengl5",
         "priority":"optional","scan_time":"2021/10/13 15:10:49","size":572,"source":"qtbase-opensource-src",
         "vendor":"Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>","version":"5.12.8+dfsg-0ubuntu1"}
@@ -256,7 +256,7 @@
     -
       input: >-
         agent 001 dbsync packages MODIFIED {"checksum":"1c1bf8bbc20caef77010f960461cc20fb9c67568",
-        "architecture":"amd64","description":"Qt 5 OpenGL module","format":"deb","groups":"extra",
+        "architecture":"amd64","description":"Qt 5 OpenGL module","format":"deb","groups":"extra","location":" ",
         "item_id":"caa4868d177fbebc5b145a2a92497ebcf566838a","multiarch":"same","name":"libqt5opengl5",
         "priority":"optional","scan_time":"2021/10/13 15:10:49","size":572,"source":"qtbase-opensource-src",
         "vendor":"Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>","version":"5.12.8+dfsg-0ubuntu1"}
@@ -274,7 +274,7 @@
     -
       input: >-
         agent 001 dbsync packages MODIFIED {"checksum":"1c1bf8bbc20caef77010f960461cc20fb9c67568",
-        "architecture":"amd64","description":"Qt 5 OpenGL module","format":"deb","groups":"libs",
+        "architecture":"amd64","description":"Qt 5 OpenGL module","format":"deb","groups":"libs","location":" ",
         "item_id":"caa4868d177fbebc5b145a2a92497ebcf566838a","multiarch":"same","name":"libqt5opengl5",
         "priority":"optional","scan_time":"2021/10/13 15:10:49","size":572,"source":"qtbase-opensource-src",
         "vendor":"Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>","version":"5.12.8+dfsg-0ubuntu2"}

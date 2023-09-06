@@ -1,5 +1,6 @@
 import os
 import platform
+import re
 
 from wazuh_testing.tools import LOG_FILE_PATH, WAZUH_PATH
 from wazuh_testing.tools.file import truncate_file
@@ -16,14 +17,38 @@ def clean_logs():
 
 def wait_ended_message_line(line):
     """Callback function to wait for the Ended Active Response message."""
-    return True if "Ended" in line else None
+    regex = r'.*active-response\/bin\/\S+: Ended$'
+    match = re.match(regex, line)
+
+    return None if not match else line
 
 
 def wait_received_message_line(line):
     """Callback function to wait for the Received Active Response message."""
-    return True if "DEBUG: Received message: " in line else None
+    regex = r'.*wazuh-execd.+ExecdStart\(\): DEBUG: Received message: \S+'
+    match = re.match(regex, line)
+
+    return None if not match else line
 
 
 def wait_start_message_line(line):
     """Callback function to wait for the Starting Active Response message."""
-    return True if "Starting" in line else None
+    regex = r'.*active-response\/bin\/\S+: Starting$'
+    match = re.match(regex, line)
+
+    return None if not match else line
+
+
+def wait_firewall_drop_msg(line):
+    """Callback function to wait for a JSON message with the AR command.
+
+    Args:
+        line (str): String containing message.
+
+    Returns:
+        match.group(1): First capturing group which is the JSON message.
+    """
+    regex = r'.*active-response\/bin\/firewall-drop: (.+)'
+    match = re.match(regex, line)
+
+    return None if not match else match.group(1)
