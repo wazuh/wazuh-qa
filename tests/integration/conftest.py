@@ -2,6 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+
 import json
 import os
 import re
@@ -18,9 +19,11 @@ from wazuh_testing import ALERTS_JSON_PATH, ARCHIVES_JSON_PATH, ARCHIVES_LOG_PAT
 from wazuh_testing.db_interface.agent_db import update_os_info
 from wazuh_testing.db_interface.global_db import get_system, modify_system
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
-from wazuh_testing.tools import ALERT_FILE_PATH, LOG_FILE_PATH, WAZUH_CONF, WAZUH_LOCAL_INTERNAL_OPTIONS, get_service
+from wazuh_testing.tools import (PREFIX, LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH,
+                                 WAZUH_LOCAL_INTERNAL_OPTIONS, AGENT_CONF, AGENT_INFO_SOCKET_PATH)
 from wazuh_testing.tools.configuration import get_minimal_configuration, get_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import copy, recursive_directory_creation, remove_file, truncate_file, write_file
+from wazuh_testing.tools.file import (truncate_file, recursive_directory_creation, remove_file, copy, write_file,
+                                      delete_path_recursively)
 from wazuh_testing.tools.monitoring import FileMonitor, QueueMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import check_daemon_status, control_service, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
@@ -328,12 +331,36 @@ def pytest_addoption(parser):
         help="run tests using a specific WPK package path"
     )
     parser.addoption(
+        "--integration-api-key",
+        action="store",
+        metavar="integration_api_key",
+        default=None,
+        type=str,
+        help="pass api key required for virustotal integratord tests."
+    )
+    parser.addoption(
         "--slack-webhook-url",
         action="store",
         metavar="slack_webhook_url",
         default=None,
         type=str,
-        help="pass webhook url required for integratord tests."
+        help="pass web hook url required for slack integratord tests."
+    )
+    parser.addoption(
+        "--pagerduty-api-key",
+        action="store",
+        metavar="pagerduty_api_key",
+        default=None,
+        type=str,
+        help="pass api key required for pagerduty integratord tests."
+    )
+    parser.addoption(
+        "--shuffle-webhook-url",
+        action="store",
+        metavar="shuffle_webhook_url",
+        default=None,
+        type=str,
+        help="pass web hook url required for shuffle integratord tests."
     )
 
 
@@ -396,6 +423,16 @@ def pytest_configure(config):
     slack_webhook_url = config.getoption("--slack-webhook-url")
     if slack_webhook_url:
         global_parameters.slack_webhook_url = slack_webhook_url
+
+    # Set pagerduty_api_key if it is passed through command line args
+    pagerduty_api_key = config.getoption("--pagerduty-api-key")
+    if pagerduty_api_key:
+        global_parameters.pagerduty_api_key = pagerduty_api_key
+
+    # Set shuffle_webhook_url if it is passed through command line args
+    shuffle_webhook_url = config.getoption("--shuffle-webhook-url")
+    if shuffle_webhook_url:
+        global_parameters.shuffle_webhook_url = shuffle_webhook_url
 
     # Set files to add to the HTML report
     set_report_files(config.getoption("--save-file"))
@@ -630,7 +667,7 @@ def configure_local_internal_options_module(request):
     conf.set_local_internal_options_dict(backup_local_internal_options)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def configure_local_internal_options_function(request):
     """Fixture to configure the local internal options file.
 
@@ -764,8 +801,30 @@ def configure_environment(get_configuration, request):
 
 @pytest.fixture(scope="module")
 def set_agent_conf(get_configuration):
-    """Set a new configuration in 'agent.conf' file."""
-    backup_config = conf.get_agent_conf()
+    """Set a new configuration in 'agent.conf' file. Then, restore the file's original content.
+    If the agent is connected to a manager, get the configuration and create a backup. If not, create a default
+    configuration file and make a backup from it.
+    """
+    agent_connected_to_manager = True
+    # Try to get the agent conf (if the agent is connected to a manager, otherwise, create the necessary files)
+    try:
+        backup_config = conf.get_agent_conf()
+        # If the configuration file is empty, raise an exception to create the file with its default configuration
+        if backup_config == []:
+            raise FileNotFoundError
+    except FileNotFoundError:
+        agent_connected_to_manager = False
+        # Write the default content in the `.agent_info` file (mock)
+        if sys.platform != 'win32':
+            agent_info_file_content = ['agent-test\n', '-\n', '001\n', '-\n']
+            with open(AGENT_INFO_SOCKET_PATH, 'w') as f:
+                f.writelines(agent_info_file_content)
+        # Write the default configuration in the `agent.conf` (mock)
+        agent_conf_file_content = ['<agent_config>\n', '</agent_config>\n']
+        conf.write_agent_conf(agent_conf_file_content)
+        # Save the default configuration as backup
+        backup_config = conf.get_agent_conf()
+
     sections = get_configuration.get('sections')
     # Remove elements with 'None' value
     for section in sections:
@@ -779,7 +838,13 @@ def set_agent_conf(get_configuration):
 
     yield
 
-    conf.write_agent_conf(backup_config)
+    if agent_connected_to_manager is True:
+        conf.write_agent_conf(backup_config)
+    else:
+        # Remove mocked files
+        if sys.platform != 'win32':
+            remove_file(AGENT_INFO_SOCKET_PATH)
+        remove_file(AGENT_CONF)
 
 
 @pytest.fixture(scope='module')
@@ -1045,7 +1110,7 @@ def file_monitoring(request):
     logger.debug(f"Trucanted {file_to_monitor}")
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def set_wazuh_configuration(configuration):
     """Set wazuh configuration
 
@@ -1079,15 +1144,17 @@ def truncate_monitored_files():
         log_files = [LOG_FILE_PATH]
 
     for log_file in log_files:
-        truncate_file(log_file)
+        if os.path.isfile(os.path.join(PREFIX, log_file)):
+            truncate_file(log_file)
 
     yield
 
     for log_file in log_files:
-        truncate_file(log_file)
+        if os.path.isfile(os.path.join(PREFIX, log_file)):
+            truncate_file(log_file)
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture()
 def stop_modules_function_after_execution():
     """Stop wazuh modules daemon after finishing a test"""
     yield
@@ -1244,6 +1311,22 @@ def copy_file(source_path, destination_path):
         remove_file(file)
 
 
+@pytest.fixture()
+def create_files_in_folder(folder_path, file_list):
+    """Create a list of files, inside a given path. Deletes it at the end.
+    Args:
+        folder_path (str): folder path to create.
+        file_list (List): list of file names to create
+    """
+    recursive_directory_creation(folder_path)
+    for file in file_list:
+        write_file(os.path.join(folder_path, file))
+
+    yield
+
+    delete_path_recursively(folder_path)
+
+
 @pytest.fixture(scope='function')
 def create_file(new_file_path):
     """Create an empty file.
@@ -1262,18 +1345,18 @@ def create_file(new_file_path):
 def load_wazuh_basic_configuration():
     """Load a new basic configuration to the manager"""
     # Load ossec.conf with all disabled settings
-    minimal_configuration = get_minimal_configuration()
+    minimal_configuration = conf.get_minimal_configuration()
 
     # Make a backup from current configuration
-    backup_ossec_configuration = get_wazuh_conf()
+    backup_ossec_configuration = conf.get_wazuh_conf()
 
     # Write new configuration
-    write_wazuh_conf(minimal_configuration)
+    conf.write_wazuh_conf(minimal_configuration)
 
     yield
 
     # Restore the ossec.conf backup
-    write_wazuh_conf(backup_ossec_configuration)
+    conf.write_wazuh_conf(backup_ossec_configuration)
 
 
 @pytest.fixture(scope='function')

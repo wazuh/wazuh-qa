@@ -23,7 +23,7 @@ pyOpenSSL==19.1.0
 pytest-html==3.1.1
 pytest==6.2.2 ; python_version <= "3.9"
 pytest==7.1.2 ; python_version >= "3.10"
-pyyaml==5.4
+pyyaml==6.0.1
 requests>=2.23.0
 scipy>=1.0; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
 seaborn>=0.11.1; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
@@ -48,3 +48,6 @@ deepdiff==5.6.0; platform_system == "Linux" or platform_system=='Windows'
 libcst==0.3.23 ; python_version <= '3.6'
 treelib==1.6.1
 prettytable; platform_system == "Linux"
+mysql-connector-python==8.0.32; platform_system == 'Linux' and python_version >= '3.7'
+protobuf>=3.11.0,<=3.20.3; platform_system == 'Linux' and python_version >= '3.7'
+boto3>=1.17.85; platform_system == 'Linux'

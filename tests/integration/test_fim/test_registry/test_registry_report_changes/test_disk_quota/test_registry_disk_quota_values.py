@@ -55,17 +55,18 @@ tags:
     - fim_registry_report_changes
 """
 import os
+import sys
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import (LOG_FILE_PATH, KEY_WOW64_32KEY, KEY_WOW64_64KEY, generate_params,
-                               calculate_registry_diff_paths, registry_value_create, registry_value_update,
-                               registry_value_delete, registry_parser, create_values_content)
-from wazuh_testing.fim_module import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
-                                                    SIZE_LIMIT_CONFIGURED_VALUE, ERR_MSG_CONTENT_CHANGES_EMPTY,
-                                                    ERR_MSG_CONTENT_CHANGES_NOT_EMPTY)
+from wazuh_testing import LOG_FILE_PATH, global_parameters
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, MONITORED_KEY_2,
+                                       SIZE_LIMIT_CONFIGURED_VALUE, KEY_WOW64_32KEY, KEY_WOW64_64KEY)
+from wazuh_testing.modules.fim.event_monitor import ERR_MSG_CONTENT_CHANGES_EMPTY, ERR_MSG_CONTENT_CHANGES_NOT_EMPTY
+from wazuh_testing.modules.fim.utils import (generate_params, calculate_registry_diff_paths, registry_value_create,
+                                             registry_value_update, registry_value_delete, create_values_content)
+
 
 # Marks
 
@@ -73,7 +74,7 @@ pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # Variables
 
-test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY), 
+test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY),
              os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2)]
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
 wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
@@ -103,14 +104,14 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by #4077.")
 @pytest.mark.parametrize("size", [(4096), (32768)])
 @pytest.mark.parametrize("key, subkey, arch, value_name",
-    [
-        (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_64KEY, "some_value"),
-        (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_32KEY, "some_value"),
-        (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2, KEY_WOW64_64KEY, "some_value"),
-    ],
-)
+                         [
+                          (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_64KEY, "some_value"),
+                          (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY, KEY_WOW64_32KEY, "some_value"),
+                          (WINDOWS_HKEY_LOCAL_MACHINE, MONITORED_KEY_2, KEY_WOW64_64KEY, "some_value"),
+                         ])
 def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuration, configure_environment,
                            restart_syscheckd, wait_for_fim_start):
     """
@@ -120,7 +121,7 @@ def test_disk_quota_values(key, subkey, arch, value_name, size, get_configuratio
                  limit, and increase its size on each test case. Finally, the test will verify that the
                  compressed file has been created, and the related FIM event includes the 'content_changes'
                  field if the value size does not exceed the specified limit and viceversa.
-                 - Case 1, small file - when compressed it will be less than the disk_quota. The file is generated 
+                 - Case 1, small file - when compressed it will be less than the disk_quota. The file is generated
                  and the logs have content_changes data.
                  - Case 2, big size - when compressed the file would be bigger than the disk_quota. The file is not
                  generated and the logs should not have content_changes data.

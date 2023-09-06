@@ -5,7 +5,7 @@ import pytest
 import ssl
 import socket
 
-from wazuh_testing.tools import WAZUH_PATH, CLIENT_KEYS_PATH
+from wazuh_testing.tools import WAZUH_PATH, CLIENT_KEYS_PATH, get_version
 from wazuh_testing.tools.monitoring import ManInTheMiddle
 from wazuh_testing.tools.security import CertificateController
 from wazuh_testing.tools.utils import get_host_name
@@ -68,7 +68,8 @@ def configure_socket_listener(request, get_current_test_case):
     else:
         response = "".encode()
     if 'message' in get_current_test_case and 'expected' in get_current_test_case['message']:
-        expected = get_current_test_case['message']['expected'].format(host_name=get_host_name()).encode()
+        expected = get_current_test_case['message']['expected'].format(host_name=get_host_name(),
+                                                                       agent_version=get_version()).encode()
     else:
         expected = None
     address_family = 'AF_INET6' if 'ipv6' in get_current_test_case else 'AF_INET'

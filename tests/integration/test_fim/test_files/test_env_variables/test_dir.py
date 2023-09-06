@@ -63,18 +63,17 @@ import os
 import sys
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, generate_params, regular_file_cud
+from wazuh_testing import T_20, LOG_FILE_PATH
 from wazuh_testing.tools import PREFIX
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.monitoring import FileMonitor
+from wazuh_testing.modules.fim.utils import generate_params, regular_file_cud
+
 
 # Marks
 pytestmark = pytest.mark.tier(level=2)
 
 # Variables and configuration
-wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
-
 test_directories = [os.path.join(PREFIX, 'testdir1'),
                     os.path.join(PREFIX, 'testdir2'),
                     os.path.join(PREFIX, 'testdir3'),
@@ -118,8 +117,8 @@ def get_configuration(request):
     dir4
 ])
 @mark_skip_agentWindows
-def test_tag_directories(directory, get_configuration, put_env_variables, configure_environment,
-                         restart_syscheckd, wait_for_fim_start):
+def test_tag_directories(directory, get_configuration, truncate_monitored_files, put_env_variables,
+                         configure_environment, restart_syscheckd, wait_for_fim_start):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects CUD events ('added', 'modified', and 'deleted')
                  when environment variables are used to monitor directories. For this purpose, the test
@@ -163,8 +162,8 @@ def test_tag_directories(directory, get_configuration, put_env_variables, config
 
     tags:
         - scheduled
-        - time_travel
     '''
+    wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
+    
     regular_file_cud(directory, wazuh_log_monitor, file_list=["testing_env_variables"],
-                     min_timeout=global_parameters.default_timeout,
-                     time_travel=get_configuration['metadata']['fim_mode'] == 'scheduled')
+                     min_timeout=T_20)

@@ -1,0 +1,38 @@
+- sections:
+    - section: syscheck
+      elements:
+        - disabled:
+            value: 'no'
+        - frequency:
+            value: 20
+        - directories:
+            value: MONITORED_DIR
+            attributes:
+              - check_all: 'yes'
+        - synchronization:
+            elements:
+              - interval:
+                  value: INTERVAL
+              - response_timeout:
+                  value: RESPONSE_TIMEOUT
+              - max_interval:
+                  value: MAX_INTERVAL
+              - max_eps:
+                  value: 1
+
+    - section: sca
+      elements:
+        - enabled:
+            value: 'no'
+
+    - section: rootcheck
+      elements:
+        - disabled:
+            value: 'yes'
+
+    - section: wodle
+      attributes:
+        - name: syscollector
+      elements:
+        - disabled:
+            value: 'yes'

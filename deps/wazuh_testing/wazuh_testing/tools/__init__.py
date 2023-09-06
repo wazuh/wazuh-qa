@@ -34,6 +34,7 @@ if sys.platform == 'win32':
     WAZUH_UNIX_USER = 'wazuh'
     WAZUH_UNIX_GROUP = 'wazuh'
     GLOBAL_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db', 'global.db')
+    ARCHIVES_LOG_FILE_PATH = os.path.join(WAZUH_PATH, 'logs', 'archives', 'archives.log')
     ACTIVE_RESPONSE_BINARY_PATH = os.path.join(WAZUH_PATH, 'active-response', 'bin')
 else:
     WAZUH_SOURCES = os.path.join('/', 'wazuh')
@@ -137,6 +138,7 @@ QUEUE_DB_PATH = os.path.join(WAZUH_PATH, 'queue', 'db')
 CLUSTER_SOCKET_PATH = os.path.join(WAZUH_PATH, 'queue', 'cluster')
 
 
+AGENT_INFO_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, '.agent_info')
 ANALYSISD_ANALISIS_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'analysis')
 ANALYSISD_QUEUE_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'queue')
 AUTHD_SOCKET_PATH = os.path.join(QUEUE_SOCKETS_PATH, 'auth')

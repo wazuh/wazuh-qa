@@ -212,7 +212,7 @@ def get_metadata_timestamp(provider_os):
     return result[0]
 
 
-def get_nvd_metadata_timestamp(year):
+def get_nvd_metadata_timestamp():
     """Get the NVD timestamp data for a specific year from nvd_metadata table.
 
     Args:
@@ -221,9 +221,33 @@ def get_nvd_metadata_timestamp(year):
     Returns:
         str: Timestamp data. (example: 2022-03-03T03:00:01-05:00)
     """
-    query_string = f"SELECT timestamp FROM nvd_metadata WHERE year={year}"
+    query_string = f"SELECT timestamp FROM nvd_metadata"
     result = get_sqlite_query_result(CVE_DB_PATH, query_string)
 
+    if len(result) == 0:
+        return None
+
+    return result[0]
+
+
+def get_rows_from_table(value, column, table, limit=None):
+    """
+    Args:
+        value (str): value that user wants to find in query
+        column (str): Name of the column where the value will be searched for.
+        table (str): Name of the table where the value will be searched for.
+        limit (int) - Optional: Maximum amount of results to look for. Default None (No Limit used).
+
+    Returns:
+        List (str): List with each instance of the value found
+    """
+
+    query_string = f"SELECT * FROM {table} WHERE {column} LIKE '{value}'"
+
+    if limit is not None:
+        query_string = query_string + f"LIMIT {limit}"
+
+    result = get_sqlite_query_result(CVE_DB_PATH, query_string)
     if len(result) == 0:
         return None
 

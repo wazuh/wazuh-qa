@@ -56,6 +56,7 @@ tags:
     - fim_registry_ambiguous_confs
 '''
 import os
+import sys
 from hashlib import sha1
 
 import pytest
@@ -126,10 +127,8 @@ def get_configuration(request):
 
 
 # Tests
-
-@pytest.mark.parametrize('key', [
-    key
-])
+@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by #4077.")
+@pytest.mark.parametrize('key', [key])
 @pytest.mark.parametrize('subkey, key_checkers', [
     (registry, checkers_key),
     (subkey_1, checkers_subkey1),
@@ -198,9 +197,8 @@ def test_ambiguous_complex_checks(key, subkey, key_checkers,
                        options=key_checkers, time_travel=True)
 
 
-@pytest.mark.parametrize('key', [
-    key
-])
+@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by #4077.")
+@pytest.mark.parametrize('key', [key])
 @pytest.mark.parametrize('subkey, value_list, report,', [
     (registry, ['test_value'], True),
     (subkey_1, ['test_value'], False),
@@ -283,9 +281,8 @@ def test_ambiguous_report_changes(key, subkey, value_list, report,
                        value_list=value_list, time_travel=True, validators_after_update=validator_after_update)
 
 
-@pytest.mark.parametrize('key', [
-    key
-])
+@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by #4077.")
+@pytest.mark.parametrize('key', [key])
 @pytest.mark.parametrize('subkey, tag', [
     (registry, None),
     (subkey_1, tag_1),
@@ -368,11 +365,9 @@ def test_ambiguous_report_tags(key, subkey, tag,
     # Test registry values.
     registry_key_cud(key, subkey, wazuh_log_monitor, min_timeout=global_parameters.default_timeout,
                      time_travel=True, validators_after_create=validator_after_create,
-                     validators_after_update=validator_after_update, validators_after_delete=validator_after_delete
-                     )
+                     validators_after_update=validator_after_update, validators_after_delete=validator_after_delete)
 
     # Test registry values.
     registry_value_cud(key, subkey, wazuh_log_monitor, min_timeout=global_parameters.default_timeout,
                        time_travel=True, validators_after_create=validator_after_create,
-                       validators_after_update=validator_after_update, validators_after_delete=validator_after_delete
-                       )
+                       validators_after_update=validator_after_update, validators_after_delete=validator_after_delete)

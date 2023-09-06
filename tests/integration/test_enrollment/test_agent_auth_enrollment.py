@@ -42,6 +42,7 @@ import pytest
 import os
 import sys
 
+from wazuh_testing.tools import get_version
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import read_yaml
@@ -91,7 +92,7 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
         error log. Agent-auth will be executed using the different parameters and with different keys and password
         files scenarios as described in the test cases."
 
-    wazuh_min_version: 4.2.0
+    wazuh_min_version: 4.6.0
 
     tier: 0
 
@@ -169,7 +170,8 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
                 raise error
 
     else:
-        test_expected = get_current_test_case['message']['expected'].format(host_name=get_host_name()).encode()
+        test_expected = get_current_test_case['message']['expected'].format(host_name=get_host_name(),
+                                                                            agent_version=get_version()).encode()
         test_response = get_current_test_case['message']['response'].format(host_name=get_host_name()).encode()
         # Monitor MITM queue
         socket_monitor = QueueMonitor(request.module.socket_listener.queue)

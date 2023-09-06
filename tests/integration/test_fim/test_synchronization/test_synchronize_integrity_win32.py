@@ -54,38 +54,40 @@ tags:
     - fim_synchronization
 '''
 import os
-from datetime import timedelta
-
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import LOG_FILE_PATH, create_registry, generate_params, \
-    create_file, modify_registry_value, REGULAR, callback_detect_event, callback_real_time_whodata_started, \
-    KEY_WOW64_64KEY, registry_parser, REG_SZ
+
+from wazuh_testing import global_parameters, LOG_FILE_PATH, REGULAR
 from wazuh_testing.tools import PREFIX
-from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
+from wazuh_testing.tools.configuration import load_wazuh_configurations
+from wazuh_testing.tools.file import create_file
 from wazuh_testing.tools.monitoring import FileMonitor
-from wazuh_testing.tools.time import TimeMachine
-
+from wazuh_testing.modules import TIER2, WINDOWS
+from wazuh_testing.modules.fim import (WINDOWS_HKEY_LOCAL_MACHINE, KEY_WOW64_64KEY, registry_parser,
+                                       REG_SZ, MONITORED_KEY)
+from wazuh_testing.modules.fim.event_monitor import (callback_detect_event, callback_detect_file_added_event,
+                                                     callback_real_time_whodata_started, ERR_MSG_INTEGRITY_CHECK_EVENT,
+                                                     callback_detect_synchronization, ERR_MSG_FIM_EVENT_NOT_RECIEVED,
+                                                     ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED)
+from wazuh_testing.modules.fim.utils import create_registry, generate_params, modify_registry_value
+from wazuh_testing.modules.fim import FIM_DEFAULT_LOCAL_INTERNAL_OPTIONS as local_internal_options
 # Marks
+pytestmark = [WINDOWS, TIER2]
 
-pytestmark = [pytest.mark.win32, pytest.mark.tier(level=1)]
 
 # variables
-key = "HKEY_LOCAL_MACHINE"
-subkey = "SOFTWARE\\test_key"
+subkey = MONITORED_KEY
 
 test_directories = [os.path.join(PREFIX, 'testdir1'), os.path.join(PREFIX, 'testdir2')]
-test_regs = [os.path.join(key, subkey)]
+test_regs = [os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, subkey)]
 directory_str = ','.join(test_directories)
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 configurations_path = os.path.join(test_data_path, 'wazuh_conf_integrity_scan_win32.yaml')
-testdir1, testdir2 = test_directories
-conf_params = {'TEST_DIRECTORIES': test_directories,
-               'TEST_REGS': os.path.join(key, subkey)}
+conf_params = {'TEST_DIRECTORIES': directory_str,
+               'TEST_REGS': os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, subkey)}
 
 file_list = []
 subkey_list = []
-for i in range(3000):
+for i in range(1000):
     file_list.append(f'regular_{i}')
     subkey_list.append(f'subkey_{i}')
 
@@ -99,7 +101,6 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 
 # fixtures
-
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
     """Get configurations from the module."""
@@ -107,31 +108,23 @@ def get_configuration(request):
 
 
 def extra_configuration_before_yield():
-    # Create 3000 files before restarting Wazuh to make sure the integrity scan will not finish before testing
+    # Create 1000 files before restarting Wazuh to make sure the integrity scan will not finish before testing
     for testdir in test_directories:
         for file, reg in zip(file_list, subkey_list):
             create_file(REGULAR, testdir, file, content='Sample content')
-            create_registry(registry_parser[key], os.path.join(key, 'SOFTWARE', reg), KEY_WOW64_64KEY)
-
-
-def callback_integrity_synchronization_check(line):
-    if 'Initializing FIM Integrity Synchronization check' in line:
-        return line
-    return None
+            create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], os.path.join(subkey, reg), KEY_WOW64_64KEY)
 
 
 def callback_integrity_or_whodata(line):
-    if callback_integrity_synchronization_check(line):
+    if callback_detect_synchronization(line):
         return 1
     elif callback_real_time_whodata_started(line):
         return 2
 
 
 # tests
-@pytest.mark.parametrize('tags_to_apply', [
-    {'synchronize_events_conf'}
-])
-def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
+def test_events_while_integrity_scan(get_configuration, configure_environment, restart_syscheckd,
+                                     configure_local_internal_options_module):
     '''
     description: Check if the 'wazuh-syscheckd' daemon detects events while the synchronization is performed
                  simultaneously. For this purpose, the test will monitor a testing directory and registry key.
@@ -176,47 +169,40 @@ def test_events_while_integrity_scan(tags_to_apply, get_configuration, configure
         - realtime
         - who_data
     '''
-    check_apply_test(tags_to_apply, get_configuration['tags'])
 
-    folder = testdir1 if get_configuration['metadata']['fim_mode'] == 'realtime' else testdir2
-    key_h = create_registry(registry_parser[key], subkey, KEY_WOW64_64KEY)
+    folder = test_directories[0] if get_configuration['metadata']['fim_mode'] == 'realtime' else test_directories[1]
+    key_h = create_registry(registry_parser[WINDOWS_HKEY_LOCAL_MACHINE], subkey, KEY_WOW64_64KEY)
 
     # Wait for whodata to start and the synchronization check. Since they are different threads, we cannot expect
     # them to come in order every time
     if get_configuration['metadata']['fim_mode'] == 'whodata':
-        value_1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 2,
+        value_1 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 5,
                                           callback=callback_integrity_or_whodata,
-                                          error_message='Did not receive expected "File integrity monitoring '
-                                                        'real-time Whodata engine started" or "Initializing '
-                                                        'FIM Integrity Synchronization check"').result()
+                                          error_message=ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED).result()
 
-        value_2 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 2,
+        value_2 = wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 5,
                                           callback=callback_integrity_or_whodata,
-                                          error_message='Did not receive expected "File integrity monitoring '
-                                                        'real-time Whodata engine started" or "Initializing FIM '
-                                                        'Integrity Synchronization check"').result()
+                                          error_message=ERR_MSG_INTEGRITY_OR_WHODATA_NOT_STARTED).result()
         assert value_1 != value_2, "callback_integrity_or_whodata detected the same message twice"
 
     else:
         # Check the integrity scan has begun
         wazuh_log_monitor.start(timeout=global_parameters.default_timeout * 3,
-                                callback=callback_integrity_synchronization_check,
-                                error_message='Did not receive expected '
-                                              '"Initializing FIM Integrity Synchronization check" event')
+                                callback=callback_detect_synchronization,
+                                error_message=ERR_MSG_INTEGRITY_CHECK_EVENT)
 
     # Create a file and a registry value. Assert syscheckd detects it while doing the integrity scan
     file_name = 'file'
     create_file(REGULAR, folder, file_name, content='')
     modify_registry_value(key_h, "test_value", REG_SZ, 'added')
 
-    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3, callback=callback_detect_event,
-                                            error_message='Did not receive expected '
-                                                          '"Sending FIM event: ..." event').result()
+    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3,
+                                            callback=callback_detect_file_added_event,
+                                            error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
     assert sending_event['data']['path'] == os.path.join(folder, file_name)
 
-    TimeMachine.travel_to_future(timedelta(hours=13))
-    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3, callback=callback_detect_event,
-                                            error_message='Did not receive expected '
-                                                          '"Sending FIM event: ..." event').result()
-    assert sending_event['data']['path'] == os.path.join(key, subkey)
+    sending_event = wazuh_log_monitor.start(timeout=global_parameters.default_timeout*3,
+                                            callback=callback_detect_event,
+                                            error_message=ERR_MSG_FIM_EVENT_NOT_RECIEVED).result()
+    assert sending_event['data']['path'] == os.path.join(WINDOWS_HKEY_LOCAL_MACHINE, subkey)
     assert sending_event['data']['arch'] == '[x64]'

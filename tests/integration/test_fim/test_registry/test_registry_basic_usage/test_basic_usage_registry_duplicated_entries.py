@@ -8,7 +8,6 @@ from wazuh_testing.tools.utils import get_version
 
 
 # Helper functions
-
 def extra_configuration_after_yield():
     fim.delete_registry(fim.registry_parser[key], sub_key_2, fim.KEY_WOW64_64KEY)
 
@@ -24,11 +23,9 @@ def check_event_type_and_path(fim_event, monitored_registry):
 
 
 # Marks
-
 pytestmark = [pytest.mark.win32, pytest.mark.tier(level=0)]
 
 # Variables
-
 key = 'HKEY_LOCAL_MACHINE'
 classes_subkey = os.path.join('SOFTWARE', 'Classes')
 

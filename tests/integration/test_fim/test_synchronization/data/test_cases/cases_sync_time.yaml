@@ -1,0 +1,12 @@
+- name: Short sync
+  description: Check behavior when sync is shorter than interval and max_interval
+  configuration_parameters:
+    INTERVAL: 10
+    RESPONSE_TIMEOUT: 5
+    MAX_INTERVAL: 10
+  metadata:
+    interval: 10
+    response_timeout: 5
+    max_interval: 10
+    files: 3
+    fim_mode: scheduled

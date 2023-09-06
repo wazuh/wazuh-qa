@@ -1093,20 +1093,6 @@ def callback_detect_integrity_event(line):
     return None
 
 
-def callback_detect_registry_integrity_state_event(line):
-    event = callback_detect_integrity_event(line)
-    if event and event['component'] == 'fim_registry' and event['type'] == 'state':
-        return event['data']
-    return None
-
-
-def callback_detect_registry_integrity_clear_event(line):
-    event = callback_detect_integrity_event(line)
-    if event and event['component'] == 'fim_registry' and event['type'] == 'integrity_clear':
-        return True
-    return None
-
-
 def callback_detect_integrity_state(line):
     event = callback_detect_integrity_event(line)
     if event:
@@ -1115,8 +1101,24 @@ def callback_detect_integrity_state(line):
     return None
 
 
+def callback_start_synchronization(line):
+    """ Callback that detects if a line contains the FIM sync module has started.
+
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    """
+    if 'FIM sync module started' in line:
+        return line
+    return None
+
+
 def callback_detect_synchronization(line):
-    if 'Initializing FIM Integrity Synchronization check' in line:
+    """ Callback that detects if a line contains a FIM sync has started.
+
+    Args:
+        line (String): string line to be checked by callback in File_Monitor.
+    """
+    if 'Executing FIM sync' in line:
         return line
     return None
 
@@ -1144,13 +1146,6 @@ def callback_restricted(line):
 
 def callback_audit_health_check(line):
     if 'Whodata health-check: Success.' in line:
-        return True
-    return None
-
-
-def callback_audit_cannot_start(line):
-    match = re.match(r'.*Who-data engine could not start. Switching who-data to real-time.', line)
-    if match:
         return True
     return None
 
@@ -1447,166 +1442,6 @@ def callback_delete_watch(line):
 
     if match:
         return match.group(1)
-
-
-class EventChecker:
-    """Utility to allow fetch events and validate them."""
-
-    def __init__(self, log_monitor, folder, file_list=['testfile0'], options=None, custom_validator=None, encoding=None,
-                 callback=callback_detect_event):
-        self.log_monitor = log_monitor
-        self.folder = folder
-        self.file_list = file_list
-        self.custom_validator = custom_validator
-        self.options = options
-        self.encoding = encoding
-        self.events = None
-        self.callback = callback
-
-    def fetch_and_check(self, event_type, min_timeout=1, triggers_event=True, extra_timeout=0, event_mode=None):
-        """Call both 'fetch_events' and 'check_events'.
-
-        Args:
-            event_type (str): Expected type of the raised event {'added', 'modified', 'deleted'}.
-            event_mode (str, optional): Specifies the scan mode to check in the events
-            min_timeout (int, optional): seconds to wait until an event is raised when trying to fetch. Defaults `1`
-            triggers_event (boolean, optional): True if the event should be raised. False otherwise. Defaults `True`
-            extra_timeout (int, optional): Additional time to wait after the min_timeout
-        """
-        num_files = len(self.file_list)
-        error_msg = "TimeoutError was raised because "
-        error_msg += str(num_files) if num_files > 1 else "a single"
-        error_msg += " '" + str(event_type) + "' "
-        error_msg += "events were " if num_files > 1 else "event was "
-        error_msg += "expected for " + str(self._get_file_list())
-        error_msg += " but were not detected." if len(self.file_list) > 1 else " but was not detected."
-
-        self.events = self.fetch_events(min_timeout, triggers_event, extra_timeout, error_message=error_msg)
-        self.check_events(event_type, mode=event_mode)
-
-    def fetch_events(self, min_timeout=1, triggers_event=True, extra_timeout=0, error_message=''):
-        """Try to fetch events on a given log monitor. Will return a list with the events detected.
-
-        Args:
-            min_timeout (int, optional): seconds to wait until an event is raised when trying to fetch. Defaults `1`
-            triggers_event (boolean, optional): True if the event should be raised. False otherwise. Defaults `True`
-            extra_timeout (int, optional): Additional time to wait after the min_timeout
-            error_message (str): Message to explain a possible timeout error
-        """
-
-        def clean_results(event_list):
-            """Iterate the event_list provided and check if the 'modified' events contained should be merged to fix
-            whodata's bug that raise more than one modification event when a file is modified. If some 'modified' event
-            shares 'path' and 'timestamp' we assume that belongs to the same modification.
-            """
-            if not isinstance(event_list, list):
-                return event_list
-            result_list = list()
-            previous = None
-            while len(event_list) > 0:
-                current = event_list.pop(0)
-                if current['data']['type'] == "modified":
-                    if not previous:
-                        previous = current
-                    elif (previous['data']['path'] == current['data']['path'] and
-                          current['data']['timestamp'] in [previous['data']['timestamp'],
-                                                           previous['data']['timestamp'] + 1]):
-                        previous['data']['changed_attributes'] = list(set(previous['data']['changed_attributes']
-                                                                          + current['data']['changed_attributes']))
-                        previous['data']['attributes'] = current['data']['attributes']
-                    else:
-                        result_list.append(previous)
-                        previous = current
-                else:
-                    result_list.append(current)
-            if previous:
-                result_list.append(previous)
-            return result_list
-
-        try:
-            result = self.log_monitor.start(timeout=max(len(self.file_list) * 0.01, min_timeout),
-                                            callback=self.callback,
-                                            accum_results=len(self.file_list),
-                                            timeout_extra=extra_timeout,
-                                            encoding=self.encoding,
-                                            error_message=error_message).result()
-            assert triggers_event, f'No events should be detected.'
-            if extra_timeout > 0:
-                result = clean_results(result)
-            return result if isinstance(result, list) else [result]
-        except TimeoutError:
-            if triggers_event:
-                raise
-            logger.info("TimeoutError was expected and correctly caught.")
-
-    def check_events(self, event_type, mode=None):
-        """Check and validate all events in the 'events' list.
-
-        Args:
-            event_type (str): Expected type of the raised event {'added', 'modified', 'deleted'}.
-            mode (str, optional): Specifies the FIM scan mode to check in the events
-        """
-
-        def validate_checkers_per_event(events, options, mode):
-            """Check if each event is properly formatted according to some checks.
-
-            Args:
-                events (list): event list to be checked.
-                options (set): set of XML CHECK_* options. Default `{CHECK_ALL}`
-                mode (str): represents the FIM mode expected for the event to validate.
-            """
-            for ev in events:
-                validate_event(ev, options, mode)
-
-        def check_events_type(events, ev_type, file_list=['testfile0']):
-            event_types = Counter(filter_events(events, ".[].data.type"))
-            msg = f"Non expected number of events. {event_types[ev_type]} != {len(file_list)}"
-            assert (event_types[ev_type] == len(file_list)), msg
-
-        def check_events_path(events, folder, file_list=['testfile0'], mode=None):
-            mode = global_parameters.current_configuration['metadata']['fim_mode'] if mode is None else mode
-            data_path = filter_events(events, ".[].data.path")
-            for file_name in file_list:
-                expected_path = os.path.join(folder, file_name)
-                if self.encoding is not None:
-                    for index, item in enumerate(data_path):
-                        data_path[index] = item.encode(encoding=self.encoding)
-                if sys.platform == 'darwin' and self.encoding and self.encoding != 'utf-8':
-                    logger.info(f"Not asserting {expected_path} in event.data.path. "
-                                f'Reason: using non-utf-8 encoding in darwin.')
-                else:
-                    error_msg = f"Expected data path was '{expected_path}' but event data path is '{data_path}'"
-                    assert (expected_path in data_path), error_msg
-
-        def filter_events(events, mask):
-            """Returns a list of elements matching a specified mask in the events list using jq module."""
-            if sys.platform in ("win32", 'sunos5', 'darwin'):
-                stdout = subprocess.check_output(["jq", "-r", mask], input=json.dumps(events).encode())
-                return stdout.decode("utf8").strip().split(os.linesep)
-            else:
-                return jq(mask).transform(events, multiple_output=True)
-
-        if self.events is not None:
-            validate_checkers_per_event(self.events, self.options, mode)
-            check_events_type(self.events, event_type, self.file_list)
-            check_events_path(self.events, self.folder, file_list=self.file_list, mode=mode)
-
-            if self.custom_validator is not None:
-                self.custom_validator.validate_after_cud(self.events)
-                if event_type == "added":
-                    self.custom_validator.validate_after_create(self.events)
-                elif event_type == "modified":
-                    self.custom_validator.validate_after_update(self.events)
-                elif event_type == "deleted":
-                    self.custom_validator.validate_after_delete(self.events)
-
-    def _get_file_list(self):
-        result_list = []
-        for file_name in self.file_list:
-            expected_file_path = os.path.join(self.folder, file_name)
-            expected_file_path = expected_file_path[:1].lower() + expected_file_path[1:]
-            result_list.append(expected_file_path)
-        return result_list
 
 
 def wait_for_scheduled_scan(wait_for_scan=False, interval: timedelta = timedelta(seconds=20),
@@ -2372,100 +2207,6 @@ class CustomValidator:
                     validator(event)
 
 
-def regular_file_cud(folder, log_monitor, file_list=['testfile0'], time_travel=False, min_timeout=1, options=None,
-                     triggers_event=True, encoding=None, callback=callback_detect_event, validators_after_create=None,
-                     validators_after_update=None, validators_after_delete=None, validators_after_cud=None,
-                     event_mode=None):
-    """Check if creation, update and delete events are detected by syscheck.
-
-    This function provides multiple tools to validate events with custom validators.
-
-    Args:
-        folder (str): Path where the files will be created.
-        log_monitor (FileMonitor): File event monitor.
-        file_list (list(str) or dict, optional): If it is a list, it will be transformed to a dict with
-            empty strings in each value. Default `['testfile0']`
-        time_travel (boolean, optional): Boolean to determine if there will be time travels or not. Default `False`
-        min_timeout (int, optional): Minimum timeout. Default `1`
-        options (set, optional): Set with all the checkers. Default `None`
-        triggers_event (boolean, optional): Boolean to determine if the event should be raised or not. Default `True`
-        encoding (str, optional): String to determine the encoding of the file name. Default `None`
-        callback (callable, optional): Callback to use with the log monitor. Default `callback_detect_event`
-        validators_after_create (list, optional): List of functions that validates an event triggered when a new file
-            is created. Each function must accept a param to receive the event to be validated. Default `None`
-        validators_after_update (list, optional): List of functions that validates an event triggered when a new file
-            is modified. Each function must accept a param to receive the event to be validated. Default `None`
-        validators_after_delete (list, optional): List of functions that validates an event triggered when a new file
-            is deleted. Each function must accept a param to receive the event to be validated. Default `None`
-        validators_after_cud (list, optional): List of functions that validates an event triggered when a new file
-            is created, modified or deleted. Each function must accept a param to receive
-            the event to be validated. Default `None`
-        event_mode (str, optional): Specifies the FIM scan mode to check in the events
-    """
-
-    # Transform file list
-    if not isinstance(file_list, list) and not isinstance(file_list, dict):
-        raise ValueError('Value error. It can only be list or dict')
-    elif isinstance(file_list, list):
-        file_list = {i: '' for i in file_list}
-
-    custom_validator = CustomValidator(validators_after_create, validators_after_update,
-                                       validators_after_delete, validators_after_cud)
-    event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
-                                 custom_validator=custom_validator, encoding=encoding, callback=callback)
-
-    # Create text files
-    for name, content in file_list.items():
-        create_file(REGULAR, folder, name, content=content)
-
-    check_time_travel(time_travel, monitor=log_monitor)
-
-    event_checker.fetch_and_check('added', min_timeout=min_timeout, triggers_event=triggers_event,
-                                  event_mode=event_mode)
-    if triggers_event:
-        logger.info("'added' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
-
-        if time_travel:
-            log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
-                              update_position=True,
-                              error_message=f"End of scheduled scan not detected after "
-                              f"{global_parameters.default_timeout} seconds")
-
-    # Modify previous text files
-    for name, content in file_list.items():
-        modify_file(folder, name, is_binary=isinstance(content, bytes))
-
-    check_time_travel(time_travel, monitor=log_monitor)
-
-    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event,
-                                  event_mode=event_mode)
-    if triggers_event:
-        logger.info("'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
-
-        if time_travel:
-            log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
-                              update_position=True,
-                              error_message=f"End of scheduled scan not detected after "
-                              f"{global_parameters.default_timeout} seconds")
-
-    # Delete previous text files
-    for name in file_list:
-        delete_file(folder, name)
-
-    check_time_travel(time_travel, monitor=log_monitor)
-
-    event_checker.fetch_and_check('deleted', min_timeout=min_timeout, triggers_event=triggers_event,
-                                  event_mode=event_mode)
-    if triggers_event:
-        logger.info("'deleted' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
-
-        if time_travel:
-            log_monitor.start(timeout=global_parameters.default_timeout, callback=callback_detect_end_scan,
-                              update_position=True,
-                              error_message=f"End of scheduled scan not detected after "
-                              f"{global_parameters.default_timeout} seconds")
-
-
 def calculate_registry_diff_paths(reg_key, reg_subkey, arch, value_name):
     """Calculate the diff folder path of a value.
 
@@ -2504,6 +2245,16 @@ def detect_initial_scan_start(file_monitor):
     """
     file_monitor.start(timeout=60, callback=callback_detect_scan_start,
                        error_message='Did not receive expected "File integrity monitoring scan started" event')
+
+
+def detect_sync_initial_scan_start(file_monitor):
+    """Detect initial sync scan start.
+
+    Args:
+        file_monitor (FileMonitor): file log monitor to detect events
+    """
+    file_monitor.start(timeout=60, callback=callback_start_synchronization,
+                       error_message='Did not receive expected "FIM sync scan started" event')
 
 
 def detect_realtime_start(file_monitor):

@@ -13,6 +13,8 @@
         value: TEST_DIRECTORIES
         attributes:
         - FIM_MODE
+    - frequency:
+        value: 5
   - section: sca
     elements:
     - enabled:
