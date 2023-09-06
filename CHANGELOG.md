@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: TBD \
 Release report: TBD
 
+### Fixed
+
+- Enhancing the handling of authd and remoted simulators in case of restart failures ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
+
 ## [4.5.2] - TBD
 
 Wazuh commit: TBD \
@@ -46,10 +50,6 @@ Release report: https://github.com/wazuh/wazuh/issues/18235
 - Delete `update_from_year` from system and E2E tests configuration ([#4372](https://github.com/wazuh/wazuh-qa/pull/4372)) \- (Tests)
 - Upgrade PyYAML to 6.0.1. ([#4326](https://github.com/wazuh/wazuh-qa/pull/4326)) \- (Framework)
 - Change Vulnerability Detector ITs to support the development of the NVD 2.0 refactor. ([#4327](https://github.com/wazuh/wazuh-qa/pull/4327)) \- (Tests)
-
-### Fixed
-
-- Enhancing the handling of authd and remoted simulators in case of restart failures ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
 
 ## [4.4.5] - 10-07-2023
 
