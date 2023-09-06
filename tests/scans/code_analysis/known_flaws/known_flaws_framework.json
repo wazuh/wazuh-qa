@@ -20,38 +20,10 @@
             "issue_confidence": "HIGH",
             "issue_severity": "LOW",
             "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 710,
+            "line_number": 713,
             "line_range": [
-                710,
-                711
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
-            "test_id": "B603",
-            "test_name": "subprocess_without_shell_equals_true"
-        },
-        {
-            "code": " import struct\n import subprocess\n import sys\n",
-            "filename": "framework/scripts/wazuh_logtest.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Consider possible security implications associated with subprocess module.",
-            "line_number": 14,
-            "line_range": [
-                14
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
-            "test_id": "B404",
-            "test_name": "blacklist"
-        },
-        {
-            "code": "         try:\n             proc = subprocess.Popen([wazuh_control, \"info\"], stdout=subprocess.PIPE)\n             (stdout, stderr) = proc.communicate()\n",
-            "filename": "framework/scripts/wazuh_logtest.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 452,
-            "line_range": [
-                452
+                713,
+                714
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
             "test_id": "B603",
@@ -150,9 +122,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of possibly insecure function - consider using safer ast.literal_eval.",
-            "line_number": 1650,
+            "line_number": 1590,
             "line_range": [
-                1650
+                1590
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b307-eval",
             "test_id": "B307",

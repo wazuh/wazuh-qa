@@ -2,13 +2,48 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.5.0] - TBD
+## [4.5.3] - TBD
+
+Wazuh commit: TBD \
+Release report: TBD
+
+## [4.5.2] - TBD
 
 Wazuh commit: TBD \
 Release report: TBD
 
 ### Changed
 
+- Update enrollment logs in system test ([#4442](https://github.com/wazuh/wazuh-qa/pull/4442)) \- (Tests)
+- Fix one_manager_agent environment provisioning by packages for system tests ([#4438](https://github.com/wazuh/wazuh-qa/pull/4438)) \- (Framework)
+- Update framework known flaws files ([#4379](https://github.com/wazuh/wazuh-qa/pull/4379)) \- (Tests)
+
+### Fixed
+
+- Minor fixes in the `tests_python_flaws.py` scan ([#4439](https://github.com/wazuh/wazuh-qa/pull/4439)) \- (Tests)
+
+## [4.5.1] - 24-08-2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/731cdf39a430d2fb6fa02f3721624e07f887b02f
+Release report: https://github.com/wazuh/wazuh/issues/18475
+
+### Added
+
+- Add an integration test to check the wazuh-analysisd's decoder parser ([#4286](https://github.com/wazuh/wazuh-qa/pull/4286)) \- (Tests)
+
+### Changed
+
+- Update python integration test dependencies in the README ([#4427](https://github.com/wazuh/wazuh-qa/pull/4427)) \- (Documentation)
+- Update vulnerability detector IT outdated URLs ([#4428](https://github.com/wazuh/wazuh-qa/pull/4428)) \- (Tests)
+
+## [4.5.0] - 11-08-2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/f6aba151d08ef065dfc1bdc9b8885c3d4f618fca
+Release report: https://github.com/wazuh/wazuh/issues/18235
+
+### Changed
+
+- Delete `update_from_year` from system and E2E tests configuration ([#4372](https://github.com/wazuh/wazuh-qa/pull/4372)) \- (Tests)
 - Upgrade PyYAML to 6.0.1. ([#4326](https://github.com/wazuh/wazuh-qa/pull/4326)) \- (Framework)
 - Change Vulnerability Detector ITs to support the development of the NVD 2.0 refactor. ([#4327](https://github.com/wazuh/wazuh-qa/pull/4327)) \- (Tests)
 
