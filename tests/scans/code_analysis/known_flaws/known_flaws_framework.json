@@ -6,9 +6,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 630,
+            "line_number": 737,
             "line_range": [
-                630
+                737
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
@@ -20,38 +20,10 @@
             "issue_confidence": "HIGH",
             "issue_severity": "LOW",
             "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 710,
+            "line_number": 1001,
             "line_range": [
-                710,
-                711
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
-            "test_id": "B603",
-            "test_name": "subprocess_without_shell_equals_true"
-        },
-        {
-            "code": " import struct\n import subprocess\n import sys\n",
-            "filename": "framework/scripts/wazuh_logtest.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Consider possible security implications associated with subprocess module.",
-            "line_number": 14,
-            "line_range": [
-                14
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
-            "test_id": "B404",
-            "test_name": "blacklist"
-        },
-        {
-            "code": "         try:\n             proc = subprocess.Popen([wazuh_control, \"info\"], stdout=subprocess.PIPE)\n             (stdout, stderr) = proc.communicate()\n",
-            "filename": "framework/scripts/wazuh_logtest.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 452,
-            "line_range": [
-                452
+                1001,
+                1002
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
             "test_id": "B603",
@@ -77,9 +49,9 @@
             "issue_confidence": "MEDIUM",
             "issue_severity": "MEDIUM",
             "issue_text": "Possible SQL injection vector through string-based query construction.",
-            "line_number": 97,
+            "line_number": 156,
             "line_range": [
-                97
+                156
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html",
             "test_id": "B608",
@@ -105,9 +77,9 @@
             "issue_confidence": "MEDIUM",
             "issue_severity": "MEDIUM",
             "issue_text": "Possible SQL injection vector through string-based query construction.",
-            "line_number": 103,
+            "line_number": 162,
             "line_range": [
-                103
+                162
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html",
             "test_id": "B608",
@@ -141,6 +113,20 @@
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b104_hardcoded_bind_all_interfaces.html",
             "test_id": "B104",
             "test_name": "hardcoded_bind_all_interfaces"
+        },
+        {
+            "code": "         new_password = getpass(f\"New password for '{username}' (skip): \")\n         if new_password == \"\":\n             continue\n",
+            "filename": "framework/scripts/rbac_control.py",
+            "issue_confidence": "MEDIUM",
+            "issue_severity": "LOW",
+            "issue_text": "Possible hardcoded password: ''",
+            "line_number": 39,
+            "line_range": [
+                39
+            ],
+            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b105_hardcoded_password_string.html",
+            "test_id": "B105",
+            "test_name": "hardcoded_password_string"
         }
     ],
     "to_fix": [
@@ -150,9 +136,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of possibly insecure function - consider using safer ast.literal_eval.",
-            "line_number": 1650,
+            "line_number": 1793,
             "line_range": [
-                1650
+                1793
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b307-eval",
             "test_id": "B307",

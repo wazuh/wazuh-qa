@@ -67,8 +67,8 @@ from wazuh_testing.tools.monitoring import FileMonitor
 pytestmark = pytest.mark.tier(level=0)
 
 # Configuration
-test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'configuration')
-configurations_path = os.path.join(test_data_path, 'wazuh_location.yaml')
+test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'configuration_template')
+configurations_path = os.path.join(test_data_path, 'configuration_location.yaml')
 
 temp_dir = tempfile.gettempdir()
 

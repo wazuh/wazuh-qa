@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2022, Wazuh Inc.
+# Copyright (C) 2015-2023, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
@@ -213,7 +213,8 @@ def modify_registry(key, subkey, arch):
         logger.info(f"Modifying registry key {print_arch}{os.path.join(fim.registry_class_name[key], subkey)}")
 
         modify_key_perms(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
-        modify_registry_owner(key, subkey, arch, win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
+        modify_registry_owner(key, subkey, arch,
+                              win32sec.LookupAccountName(None, f"{platform.node()}\\{os.getlogin()}")[0])
         modify_registry_key_mtime(key, subkey, arch)
 
 
@@ -298,6 +299,14 @@ def calculate_registry_diff_paths(reg_key, reg_subkey, arch, value_name):
 
 
 def transform_registry_list(value_list=['test_value'], value_type=fim.REG_SZ, callback=ev.callback_value_event):
+    """Transform a list of registry values into a dictionary.
+    Args:
+        value list (List): list of string value names
+        value type (str): type of registry value that is expected.
+        Callback (object): Callback to pair with the value to be monitored.
+    Returns:
+        Dict: dictionary with the values and the corresponding callbacks to monitor them.
+    """
     if sys.platform == 'win32':
         if value_type in [win32con.REG_SZ, win32con.REG_MULTI_SZ]:
             value_default_content = ''
@@ -313,6 +322,29 @@ def transform_registry_list(value_list=['test_value'], value_type=fim.REG_SZ, ca
             for key, elem in value_list.items():
                 aux_dict[key] = (elem, callback)
 
+        else:
+            raise ValueError('It can only be a list or dictionary')
+
+        return aux_dict
+
+
+def transform_registry_key_list(key_list=['test_key'], callback=ev.callback_key_event):
+    """Transform a list of registry keys into a dictionary.
+    Args:
+        key_list list (List): list of strings with the key names names
+        Callback (object): Callback to pair with the key to be monitored.
+    Returns:
+        Dict: dictionary with the keys and the corresponding callbacks to monitor them.
+    """
+    if sys.platform == 'win32':
+        aux_dict = {}
+        if isinstance(key_list, list):
+            for elem in key_list:
+                aux_dict[elem] = ('', callback)
+
+        elif isinstance(key_list, dict):
+            for key, elem in key_list.items():
+                aux_dict[key] = (elem, callback)
         else:
             raise ValueError('It can only be a list or dictionary')
 
@@ -664,8 +696,8 @@ def get_fim_mode_param(mode, key='FIM_MODE'):
         return None, None
 
 
-def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1, options=None,
-                     triggers_event=True, encoding=None, validators_after_create=None, validators_after_update=None,
+def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1, options=None, triggers_event=True,
+                     triggers_modified_event=True, encoding=None, validators_after_create=None, validators_after_update=None,
                      validators_after_delete=None, validators_after_cud=None, event_mode=None, escaped=False):
     """Check if creation, update and delete events are detected by syscheck.
 
@@ -714,16 +746,17 @@ def regular_file_cud(folder, log_monitor, file_list=['testfile0'], min_timeout=1
         logger.info("'added' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
     # Modify previous text files
-    for name, content in file_list.items():
-        modify_file_content(folder, name, is_binary=isinstance(content, bytes))
-
-    event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
-                                 custom_validator=custom_validator, encoding=encoding,
-                                 callback=ev.callback_detect_file_modified_event)
-    event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event,
-                                  event_mode=event_mode, escaped=escaped)
-    if triggers_event:
-        logger.info("'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
+    if triggers_modified_event:
+        for name, content in file_list.items():
+            modify_file_content(folder, name, is_binary=isinstance(content, bytes))
+    
+        event_checker = EventChecker(log_monitor=log_monitor, folder=folder, file_list=file_list, options=options,
+                                     custom_validator=custom_validator, encoding=encoding,
+                                     callback=ev.callback_detect_file_modified_event)
+        event_checker.fetch_and_check('modified', min_timeout=min_timeout, triggers_event=triggers_event,
+                                      event_mode=event_mode, escaped=escaped)
+        if triggers_event:
+            logger.info("'modified' {} detected as expected.\n".format("events" if len(file_list) > 1 else "event"))
 
     # Delete previous text files
     for name in file_list:

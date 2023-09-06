@@ -1,10 +1,11 @@
 import shutil
 import tempfile
+
 import pytest
-from git import Git, Repo
+from git import Git, GitCommandError, Repo
 
 DEFAULT_DIRECTORIES_TO_CHECK = 'framework/,api/,wodles/'
-DEFAULT_DIRECTORIES_TO_EXCLUDE = 'tests/,test/'
+DEFAULT_DIRECTORIES_TO_EXCLUDE = 'tests,test'
 DEFAULT_CONFIDENCE_LEVEL = 'MEDIUM'
 DEFAULT_SEVERITY_LEVEL = 'LOW'
 
@@ -54,7 +55,7 @@ def clone_wazuh_repository(pytestconfig):
                             repository_path,
                             depth=1,
                             branch=reference)
-        except:
+        except GitCommandError:
             repo = Repo.clone_from(f"https://github.com/wazuh/{repository_name}.git",
                                    repository_path, branch='master', no_single_branch=True)
 

@@ -25,7 +25,8 @@ from wazuh_testing.tools import ALERT_FILE_PATH, LOG_FILE_PATH, WAZUH_CONF, WAZU
 from wazuh_testing.tools import (PREFIX, LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH,
                                  WAZUH_LOCAL_INTERNAL_OPTIONS)
 from wazuh_testing.tools.configuration import get_minimal_configuration, get_wazuh_conf, write_wazuh_conf
-from wazuh_testing.tools.file import copy, recursive_directory_creation, remove_file, truncate_file, write_file
+from wazuh_testing.tools.file import (truncate_file, recursive_directory_creation, remove_file, copy, write_file,
+                                      delete_path_recursively)
 from wazuh_testing.tools.monitoring import FileMonitor, QueueMonitor, SocketController, close_sockets
 from wazuh_testing.tools.services import check_daemon_status, control_service, delete_dbs
 from wazuh_testing.tools.time import TimeMachine
@@ -1251,6 +1252,22 @@ def copy_file(source_path, destination_path):
         remove_file(file)
 
 
+@pytest.fixture()
+def create_files_in_folder(folder_path, file_list):
+    """Create a list of files, inside a given path. Deletes it at the end.
+    Args:
+        folder_path (str): folder path to create.
+        file_list (List): list of file names to create
+    """
+    recursive_directory_creation(folder_path)
+    for file in file_list:
+        write_file(os.path.join(folder_path, file))
+
+    yield
+
+    delete_path_recursively(folder_path)
+
+
 @pytest.fixture(scope='function')
 def create_file(new_file_path):
     """Create an empty file.
@@ -1269,18 +1286,18 @@ def create_file(new_file_path):
 def load_wazuh_basic_configuration():
     """Load a new basic configuration to the manager"""
     # Load ossec.conf with all disabled settings
-    minimal_configuration = get_minimal_configuration()
+    minimal_configuration = conf.get_minimal_configuration()
 
     # Make a backup from current configuration
-    backup_ossec_configuration = get_wazuh_conf()
+    backup_ossec_configuration = conf.get_wazuh_conf()
 
     # Write new configuration
-    write_wazuh_conf(minimal_configuration)
+    conf.write_wazuh_conf(minimal_configuration)
 
     yield
 
     # Restore the ossec.conf backup
-    write_wazuh_conf(backup_ossec_configuration)
+    conf.write_wazuh_conf(backup_ossec_configuration)
 
 
 @pytest.fixture(scope='function')
