@@ -230,7 +230,7 @@ class QAProvisioning():
             for runner_thread in provision_threads:
                 runner_thread.join()
 
-            QAProvisioning.LOGGER.info('The instances have been provisioned sucessfully')
+            QAProvisioning.LOGGER.info('The instances have been provisioned successfully')
 
     def destroy(self):
         """Destroy all the temporary files created by an instance of this object"""

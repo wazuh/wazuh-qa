@@ -122,13 +122,13 @@ class QAInfraestructure:
         """Run the instances deployment when the local host is UNIX."""
         QAInfraestructure.LOGGER.info(f"Starting {len(self.instances)} instances deployment")
         self.__threads_runner([ThreadExecutor(instance.run) for instance in self.instances])
-        QAInfraestructure.LOGGER.info('The instances deployment has finished sucessfully')
+        QAInfraestructure.LOGGER.info('The instances deployment has finished successfully')
 
     def halt(self):
         """Execute the 'halt' method on every configured instance."""
         QAInfraestructure.LOGGER.info(f"Stopping {len(self.instances)} instances")
         self.__threads_runner([ThreadExecutor(instance.halt) for instance in self.instances])
-        QAInfraestructure.LOGGER.info('The instances have been stopped sucessfully')
+        QAInfraestructure.LOGGER.info('The instances have been stopped successfully')
 
     def restart(self):
         """Execute the 'restart' method on every configured instance."""
@@ -139,13 +139,13 @@ class QAInfraestructure:
         """Execute the 'destroy' method on every configured instance."""
         QAInfraestructure.LOGGER.info(f"Destroying {len(self.instances)} instances")
         self.__threads_runner([ThreadExecutor(instance.destroy) for instance in self.instances])
-        QAInfraestructure.LOGGER.info(f"The instances have been destroyed sucessfully")
+        QAInfraestructure.LOGGER.info(f"The instances have been destroyed successfully")
 
         if self.docker_network:
             QAInfraestructure.LOGGER.info('Removing docker network')
             try:
                 self.docker_network.remove()
-                QAInfraestructure.LOGGER.info('Docker network has been removed sucessfully')
+                QAInfraestructure.LOGGER.info('Docker network has been removed successfully')
             except docker.errors.NotFound:
                 QAInfraestructure.LOGGER.error('Could not remove docker network')
                 pass
@@ -160,7 +160,7 @@ class QAInfraestructure:
         QAInfraestructure.LOGGER.debug('Getting instances status')
         for instance in self.instances:
             status[instance.get_name()] = instance.status()
-        QAInfraestructure.LOGGER.debug('Instances status info was obtained sucessfully')
+        QAInfraestructure.LOGGER.debug('Instances status info was obtained successfully')
 
         return status
 
@@ -174,6 +174,6 @@ class QAInfraestructure:
         QAInfraestructure.LOGGER.debug('Getting instances info')
         for instance in self.instances:
             info[instance.get_name()] = instance.get_instance_info()
-        QAInfraestructure.LOGGER.debug('Instances info was obtained sucessfully')
+        QAInfraestructure.LOGGER.debug('Instances info was obtained successfully')
 
         return info
