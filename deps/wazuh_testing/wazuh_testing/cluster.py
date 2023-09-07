@@ -26,7 +26,7 @@ def callback_detect_master_serving(line):
 
 
 def callback_detect_worker_connected(line):
-    match = re.match(r'.*Sucessfully connected to master', line)
+    match = re.match(r'.*Successfully connected to master', line)
     if match:
         return line
 
