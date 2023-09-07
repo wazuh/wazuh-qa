@@ -45,7 +45,11 @@ def test_agent_database_version(restart_wazuh_daemon, remove_agents):
         - Verify that database version is the expected one.
 
     expected_output:
+<<<<<<< HEAD
         - Database version: 13
+=======
+        - Database version: 12
+>>>>>>> cb2c4de55094c0658247067c289ced26b0022bd1
 
     tags:
         - wazuh_db
