@@ -91,28 +91,33 @@ else:
 
 
 def get_version():
+    try:
+        if platform.system() in ['Windows', 'win32']:
+            with open(os.path.join(WAZUH_PATH, 'VERSION'), 'r') as f:
+                version = f.read()
+                return version[:version.rfind('\n')]
 
-    if platform.system() in ['Windows', 'win32']:
-        with open(os.path.join(WAZUH_PATH, 'VERSION'), 'r') as f:
-            version = f.read()
-            return version[:version.rfind('\n')]
-
-    else:  # Linux, sunos5, darwin, aix...
-        return subprocess.check_output([
-          f"{WAZUH_PATH}/bin/wazuh-control", "info", "-v"
-        ], stderr=subprocess.PIPE).decode('utf-8').rstrip()
+        else:  # Linux, sunos5, darwin, aix...
+            return subprocess.check_output([
+            f"{WAZUH_PATH}/bin/wazuh-control", "info", "-v"
+            ], stderr=subprocess.PIPE).decode('utf-8').rstrip()
+    except Exception:
+        return 'N/A'
 
 
 def get_service():
     if platform.system() in ['Windows', 'win32']:
-        return 'wazuh-agent'
-
+        service = 'wazuh-agent'
     else:  # Linux, sunos5, darwin, aix...
-        service = subprocess.check_output([
-          f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"
-        ], stderr=subprocess.PIPE).decode('utf-8').strip()
+        try:
+            output = subprocess.check_output([
+            f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"
+            ], stderr=subprocess.PIPE).decode('utf-8').strip()
+            service = 'wazuh-manager' if service == 'server' else 'wazuh-agent'
+        except Exception:
+            service = ''
 
-    return 'wazuh-manager' if service == 'server' else 'wazuh-agent'
+    return service
 
 
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')

@@ -72,7 +72,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 UPGRADE_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'upgrade')
 TASK_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'task')
 SERVER_ADDRESS = 'localhost'
-WPK_REPOSITORY_4x = global_parameters.wpk_package_path[0]
+WPK_REPOSITORY_4x = global_parameters.wpk_package_path[0] if global_parameters.wpk_package_path else 'v4.4.0'
 WPK_REPOSITORY_3x = 'packages.wazuh.com/wpk/'
 CRYPTO = "aes"
 CHUNK_SIZE = 16384
@@ -88,12 +88,8 @@ time_until_ask_upgrade_result = 30
 max_upgrade_result_status_retries = 30
 
 
-if global_parameters.wpk_version is None:
-    raise ValueError("The WPK package version must be defined by parameter. See README.md")
-if global_parameters.wpk_package_path is None:
-    raise ValueError("The WPK package path must be defined by parameter. See README.md")
 
-version_to_upgrade = global_parameters.wpk_version[0]
+version_to_upgrade = global_parameters.wpk_version[0] if global_parameters.wpk_version else 'v4.4.0'
 
 MANAGER_VERSION = get_version()
 

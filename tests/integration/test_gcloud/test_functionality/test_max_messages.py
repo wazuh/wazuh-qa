@@ -102,7 +102,10 @@ configurations = load_wazuh_configurations(configurations_path, __name__, params
 
 # Preparing
 
-truncate_file(LOG_FILE_PATH)
+@pytest.fixture(scope='module', autouse=True)
+def truncate_logs():
+    """Truncate the 'ossec.log' file."""
+    truncate_file(LOG_FILE_PATH)
 
 # fixtures
 
