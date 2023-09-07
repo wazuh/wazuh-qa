@@ -67,6 +67,7 @@ Release report: https://github.com/wazuh/wazuh/issues/17520
 
 - Change test_python_flaws.py to accept branch or commit in the same argument. ([#4209](https://github.com/wazuh/wazuh-qa/pull/4209)) (Tests)
 - Fix test_dependencies.py for the changes in the feature. ([#4210](https://github.com/wazuh/wazuh-qa/pull/4210)) (Tests)
+- Update setuptools dependency ([#3788](https://github.com/wazuh/wazuh-qa/pull/3788))
 
 ### Fixed
 
