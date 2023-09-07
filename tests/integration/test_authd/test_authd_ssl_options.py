@@ -141,7 +141,6 @@ def override_wazuh_conf(configuration):
 
     log_monitor = FileMonitor(LOG_FILE_PATH)
     log_monitor.start(timeout=30, callback=callback_agentd_startup)
-    time.sleep(1)
 
 
 def test_ossec_auth_configurations(get_configuration, configure_environment, configure_sockets_environment):
@@ -183,35 +182,42 @@ def test_ossec_auth_configurations(get_configuration, configure_environment, con
         - ssl
     '''
     current_test = get_current_test()
+    config = ssl_configuration_tests[current_test]['test_case']
+    ciphers = config['ciphers']
+    protocol = config['protocol']
+    expect = config['expect']
 
-    test_case = ssl_configuration_tests[current_test]['test_case']
+    if protocol == 'ssl_tlsv1_1':
+        pytest.skip('TLS 1.1 is deprecated and not working on several pyOpenSSL versions.')
+
     override_wazuh_conf(get_configuration)
-    for config in test_case:
-        address, family, connection_protocol = receiver_sockets_params[0]
-        SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol,
-                                      open_at_start=False)
-        ciphers = config['ciphers']
-        protocol = config['protocol']
-        SSL_socket.set_ssl_configuration(ciphers=ciphers, connection_protocol=protocol)
-        expect = config['expect']
-        try:
-            SSL_socket.open()
-        except ssl.SSLError as exception:
-            if expect == 'open_error':
-                # We expected the error here, check message
-                assert config['error'] in str(exception), 'Expected message does not match!'
-                continue
-            else:
-                # We did not expect this error, fail test
-                raise
-        SSL_socket.send(config['input'], size=False)
-        if expect == 'output':
-            # Output is expected
-            expected = config['output']
-            if expected:
-                response = SSL_socket.receive().decode()
-                assert response, 'Failed connection stage {}: {}'.format(test_case.index(config) + 1, config['stage'])
-                assert response[:len(expected)] == expected, \
-                    'Failed test case stage {}: {}'.format(test_case.index(config) + 1, config['stage'])
 
-    return
+    address, family, connection_protocol = receiver_sockets_params[0]
+    SSL_socket = SocketController(address, family=family, connection_protocol=connection_protocol,
+                                  open_at_start=False)
+
+    SSL_socket.set_ssl_configuration(ciphers=ciphers, connection_protocol=protocol)
+
+    try:
+        SSL_socket.open()
+    except ssl.SSLError as exception:
+        if expect == 'open_error':
+            # We expected the error here, check message.
+            assert config['error'] in exception.strerror, 'Expected message does not match!'
+            return
+        else:
+            # We did not expect this error, fail test.
+            raise
+
+    SSL_socket.send(config['input'], size=False)
+
+    if expect == 'output':
+        # Output is expected
+        expected = config['output']
+        if expected:
+            response = SSL_socket.receive().decode()
+            assert response, 'Failed connection stage: {}'.format(config['stage'])
+            assert response[:len(expected)] == expected, 'Failed test case stage: {}'.format(config['stage'])
+
+    # Finally close the socket. TODO: This must be handled on a fixture.
+    SSL_socket.close()
