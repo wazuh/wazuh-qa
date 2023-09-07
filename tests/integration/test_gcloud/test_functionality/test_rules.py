@@ -101,8 +101,7 @@ def get_configuration(request):
 
 @pytest.mark.xfail(reason='Unstable, further information in wazuh/wazuh#17245')
 @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not have support for Google Cloud integration.")
-def test_rules(get_configuration, configure_environment,
-               daemons_handler_module, wait_for_gcp_start):
+def test_rules(get_configuration, configure_environment, daemons_handler_module, wait_for_gcp_start):
     '''
     description: Check if the 'gcp-pubsub' module gets messages matching the GCP rules. It also checks
                  if the triggered alerts contain the proper rule ID. For this purpose, the test will

@@ -93,12 +93,6 @@ p, m = generate_params(extra_params=conf_params,
 
 configurations = load_wazuh_configurations(configurations_path, __name__, params=p, metadata=m)
 
-# Preparing
-
-truncate_file(LOG_FILE_PATH)
-
-
-# fixtures
 
 @pytest.fixture(scope='module', params=configurations)
 def get_configuration(request):
