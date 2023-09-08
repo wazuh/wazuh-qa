@@ -11,6 +11,7 @@ from wazuh_testing import LOG_FILE_PATH, logger, T_60, T_30, T_10
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
 from wazuh_testing.modules.fim import MAX_EVENTS_VALUE
 
+
 # Variables
 file_monitor = FileMonitor(LOG_FILE_PATH)
 
@@ -121,6 +122,7 @@ def create_error_message(message, source=LOG_FILE_PATH):
     Args:
         message(str): Message that will be shown in error message
         source(str): name of log file where the event was expected from (default: LOG_FILE_PATH).
+
     Returns:
         string: A string containing the error message to be shown
     """
@@ -492,7 +494,7 @@ def detect_initial_scan_start(file_monitor, timeout=T_60):
         file_monitor (FileMonitor): file log monitor to detect events
         timeout (str): timeout to check the event in Wazuh log
     """
-    file_monitor.start(timeout=T_60, callback=callback_detect_scan_start,
+    file_monitor.start(timeout=timeout, callback=callback_detect_scan_start,
                        error_message=ERR_MSG_SCHEDULED_SCAN_STARTED)
 
 
