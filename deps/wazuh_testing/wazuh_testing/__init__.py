@@ -71,7 +71,11 @@ SYSLOG_SIMULATOR = os.path.join(WAZUH_TESTING_PATH, 'scripts', 'syslog_simulator
 ANALYSISD_STATE = os.path.join(WAZUH_PATH, 'var', 'run', 'wazuh-analysisd.state')
 
 # Timeouts
+
+T_025 = 0.25
+T_1 = 1
 T_2 = 2
+T_3 = 3
 T_5 = 5
 T_10 = 10
 T_20 = 20
@@ -110,6 +114,7 @@ TCP_UDP = 'TCP,UDP'
 # FIM Constants
 VALID_FIM_MODES = ['scheduled', 'realtime', 'whodata']
 OS_EXCLUDED_FROM_RT_WD = ['darwin', 'sunos5']
+
 
 def is_udp(protocol):
     return protocol.upper() == UDP

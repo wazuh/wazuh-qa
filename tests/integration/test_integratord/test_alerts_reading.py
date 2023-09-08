@@ -201,8 +201,6 @@ def test_integratord_change_json_inode(configuration, metadata, set_wazuh_config
     # Insert a new alert
     run_local_command_returning_output(command)
 
-    evm.check_alert_processing(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout)
-
     # Check if the alert was correctly sent to Slack
     evm.check_third_party_response(file_monitor=wazuh_monitor, timeout=global_parameters.default_timeout)
 

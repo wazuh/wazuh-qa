@@ -6,6 +6,13 @@
             "package_affected_version": ">0",
             "vuln_description": "Lib/zipfile.py in Python allows remote attackers to cause a denial of service (resource consumption) via a ZIP bomb.\r\nhttps://bugs.python.org/issue36260",
             "safety_id": "45621"
+        },
+        {
+            "package_name": "aiohttp",
+            "package_version": "3.8.1",
+            "package_affected_version": ">=0",
+            "vuln_description": "## Withdrawn\nThis advisory has been withdrawn because the maintainers of aiohttp and multiple third parties disputed the validity of the issue. There is not sufficient evidence for the claims in the original report.\n\n## Original Description\naiohttp v3.8.1 was discovered to contain an invalid IPv6 URL which can lead to a Denial of Service (DoS).",
+            "safety_id": "54318"
         }
     ],
     "to_fix": [
@@ -43,6 +50,90 @@
             "package_affected_version": ">=3.9.0a0,<3.9.14",
             "vuln_description": "A flaw was found in python. In algorithms with quadratic time complexity using non-binary bases, when using int(\"text\"), a system could take 50ms to parse an int string with 100,000 digits and 5s for 1,000,000 digits (float, decimal, int.from_bytes(), and int() for binary bases 2, 4, 8, 16, and 32 are not affected). The highest threat from this vulnerability is to system availability.",
             "safety_id": "50958"
+        },
+        {
+            "package_name": "cryptography",
+            "package_version": "3.3.2",
+            "package_affected_version": "<39.0.1",
+            "vuln_description": "Cryptography 39.0.1 updates its dependency 'OpenSSL' to v3.0.8 to include security fixes.\r\nhttps://github.com/pyca/cryptography/issues/8229",
+            "safety_id": "53307"
+        },
+        {
+            "package_name": "cryptography",
+            "package_version": "3.3.2",
+            "package_affected_version": "<39.0.1",
+            "vuln_description": "Cryptography 39.0.1 updates its dependency 'OpenSSL' to v3.0.8 to include security fixes.\r\nhttps://github.com/pyca/cryptography/issues/8229",
+            "safety_id": "53303"
+        },
+        {
+            "package_name": "cryptography",
+            "package_version": "3.3.2",
+            "package_affected_version": "<39.0.1",
+            "vuln_description": "Cryptography 39.0.1 updates its dependency 'OpenSSL' to v3.0.8 to include security fixes.\r\nhttps://github.com/pyca/cryptography/issues/8229",
+            "safety_id": "53302"
+        },
+        {
+            "package_name": "cryptography",
+            "package_version": "3.3.2",
+            "package_affected_version": "<39.0.1",
+            "vuln_description": "Cryptography 39.0.1 updates its dependency 'OpenSSL' to v3.0.8 to include security fixes.\r\nhttps://github.com/pyca/cryptography/issues/8229",
+            "safety_id": "53301"
+        },
+        {
+            "package_name": "cryptography",
+            "package_version": "3.3.2",
+            "package_affected_version": "<39.0.1",
+            "vuln_description": "Cryptography 39.0.1 updates its dependency 'OpenSSL' to v3.0.8 to include security fixes.\r\nhttps://github.com/pyca/cryptography/issues/8229",
+            "safety_id": "53299"
+        },
+        {
+            "package_name": "cryptography",
+            "package_version": "3.3.2",
+            "package_affected_version": "<39.0.1",
+            "vuln_description": "Cryptography 39.0.1 updates its dependency 'OpenSSL' to v3.0.8 to include security fixes.\r\nhttps://github.com/pyca/cryptography/issues/8229",
+            "safety_id": "53304"
+        },
+        {
+            "package_name": "cryptography",
+            "package_version": "3.3.2",
+            "package_affected_version": "<39.0.1",
+            "vuln_description": "Cryptography 39.0.1 updates its dependency 'OpenSSL' to v3.0.8 to include security fixes.\r\nhttps://github.com/pyca/cryptography/issues/8229",
+            "safety_id": "53306"
+        },
+        {
+            "package_name": "cryptography",
+            "package_version": "3.3.2",
+            "package_affected_version": "<39.0.1",
+            "vuln_description": "Cryptography 39.0.1 updates its dependency 'OpenSSL' to v3.0.8 to include security fixes.\r\nhttps://github.com/pyca/cryptography/issues/8229",
+            "safety_id": "53305"
+        },
+        {
+            "package_name": "cryptography",
+            "package_version": "3.3.2",
+            "package_affected_version": "<39.0.1",
+            "vuln_description": "Cryptography 39.0.1 includes a fix for CVE-2022-3996, a DoS vulnerability affecting openssl.\r\nhttps://github.com/pyca/cryptography/issues/7940",
+            "safety_id": "53298"
+        },
+        {
+            "package_name": "cryptography",
+            "package_version": "3.3.2",
+            "package_affected_version": ">=1.8,<39.0.1",
+            "vuln_description": "Cryptography 39.0.1 includes a fix for CVE-2023-23931: In affected versions 'Cipher.update_into' would accept Python objects which implement the buffer protocol, but provide only immutable buffers. This would allow immutable objects (such as 'bytes') to be mutated, thus violating fundamental rules of Python and resulting in corrupted output. This issue has been present since 'update_into' was originally introduced in cryptography 1.8.\r\nhttps://github.com/pyca/cryptography/security/advisories/GHSA-w7pp-m8wf-vj6r",
+            "safety_id": "53048"
+        },
+        {
+            "package_name": "sqlalchemy",
+            "package_version": "1.3.11",
+            "package_affected_version": "<2.0.0b1",
+            "vuln_description": "Sqlalchemy 2.0.0b1 avoids leaking cleartext passwords to the open for careless uses of str(engine.URL()) in logs and prints.\r\nhttps://github.com/sqlalchemy/sqlalchemy/pull/8563",
+            "safety_id": "51668"
+        },
+        {
+            "package_name": "hiredis",
+            "package_version": "1.1.0",
+            "package_affected_version": "<2.1.0",
+            "vuln_description": "Hiredis (python wrapper for hiredis) 2.1.0 supports hiredis 1.1.0, that includes a security fix.\r\nhttps://github.com/redis/hiredis-py/pull/135",
+            "safety_id": "53276"
         }
     ]
 }

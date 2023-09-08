@@ -1,0 +1,6 @@
+- name: pagerduty_works_with_no_option_tag_present
+  description: When the option tag is missing, the pagerduty integration works
+  configuration_parameters:
+    API_KEY: Insert using --pagerduty-api-key parameter
+  metadata:
+    integration: pagerduty

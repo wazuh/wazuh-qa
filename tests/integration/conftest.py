@@ -20,7 +20,11 @@ from wazuh_testing.db_interface.agent_db import update_os_info
 from wazuh_testing.db_interface.global_db import get_system, modify_system
 from wazuh_testing.logcollector import create_file_structure, delete_file_structure
 from wazuh_testing.tools import (PREFIX, LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH,
+                                 WAZUH_LOCAL_INTERNAL_OPTIONS, AGENT_CONF, AGENT_INFO_SOCKET_PATH)
+from wazuh_testing.tools import ALERT_FILE_PATH, LOG_FILE_PATH, WAZUH_CONF, WAZUH_LOCAL_INTERNAL_OPTIONS, get_service
+from wazuh_testing.tools import (PREFIX, LOG_FILE_PATH, WAZUH_CONF, get_service, ALERT_FILE_PATH,
                                  WAZUH_LOCAL_INTERNAL_OPTIONS)
+from wazuh_testing.tools.configuration import get_minimal_configuration, get_wazuh_conf, write_wazuh_conf
 from wazuh_testing.tools.file import (truncate_file, recursive_directory_creation, remove_file, copy, write_file,
                                       delete_path_recursively)
 from wazuh_testing.tools.monitoring import FileMonitor, QueueMonitor, SocketController, close_sockets
@@ -330,12 +334,36 @@ def pytest_addoption(parser):
         help="run tests using a specific WPK package path"
     )
     parser.addoption(
+        "--integration-api-key",
+        action="store",
+        metavar="integration_api_key",
+        default=None,
+        type=str,
+        help="pass api key required for virustotal integratord tests."
+    )
+    parser.addoption(
         "--slack-webhook-url",
         action="store",
         metavar="slack_webhook_url",
         default=None,
         type=str,
-        help="pass webhook url required for integratord tests."
+        help="pass web hook url required for slack integratord tests."
+    )
+    parser.addoption(
+        "--pagerduty-api-key",
+        action="store",
+        metavar="pagerduty_api_key",
+        default=None,
+        type=str,
+        help="pass api key required for pagerduty integratord tests."
+    )
+    parser.addoption(
+        "--shuffle-webhook-url",
+        action="store",
+        metavar="shuffle_webhook_url",
+        default=None,
+        type=str,
+        help="pass web hook url required for shuffle integratord tests."
     )
 
 
@@ -398,6 +426,16 @@ def pytest_configure(config):
     slack_webhook_url = config.getoption("--slack-webhook-url")
     if slack_webhook_url:
         global_parameters.slack_webhook_url = slack_webhook_url
+
+    # Set pagerduty_api_key if it is passed through command line args
+    pagerduty_api_key = config.getoption("--pagerduty-api-key")
+    if pagerduty_api_key:
+        global_parameters.pagerduty_api_key = pagerduty_api_key
+
+    # Set shuffle_webhook_url if it is passed through command line args
+    shuffle_webhook_url = config.getoption("--shuffle-webhook-url")
+    if shuffle_webhook_url:
+        global_parameters.shuffle_webhook_url = shuffle_webhook_url
 
     # Set files to add to the HTML report
     set_report_files(config.getoption("--save-file"))
@@ -766,8 +804,30 @@ def configure_environment(get_configuration, request):
 
 @pytest.fixture(scope="module")
 def set_agent_conf(get_configuration):
-    """Set a new configuration in 'agent.conf' file."""
-    backup_config = conf.get_agent_conf()
+    """Set a new configuration in 'agent.conf' file. Then, restore the file's original content.
+    If the agent is connected to a manager, get the configuration and create a backup. If not, create a default
+    configuration file and make a backup from it.
+    """
+    agent_connected_to_manager = True
+    # Try to get the agent conf (if the agent is connected to a manager, otherwise, create the necessary files)
+    try:
+        backup_config = conf.get_agent_conf()
+        # If the configuration file is empty, raise an exception to create the file with its default configuration
+        if backup_config == []:
+            raise FileNotFoundError
+    except FileNotFoundError:
+        agent_connected_to_manager = False
+        # Write the default content in the `.agent_info` file (mock)
+        if sys.platform != 'win32':
+            agent_info_file_content = ['agent-test\n', '-\n', '001\n', '-\n']
+            with open(AGENT_INFO_SOCKET_PATH, 'w') as f:
+                f.writelines(agent_info_file_content)
+        # Write the default configuration in the `agent.conf` (mock)
+        agent_conf_file_content = ['<agent_config>\n', '</agent_config>\n']
+        conf.write_agent_conf(agent_conf_file_content)
+        # Save the default configuration as backup
+        backup_config = conf.get_agent_conf()
+
     sections = get_configuration.get('sections')
     # Remove elements with 'None' value
     for section in sections:
@@ -781,7 +841,13 @@ def set_agent_conf(get_configuration):
 
     yield
 
-    conf.write_agent_conf(backup_config)
+    if agent_connected_to_manager is True:
+        conf.write_agent_conf(backup_config)
+    else:
+        # Remove mocked files
+        if sys.platform != 'win32':
+            remove_file(AGENT_INFO_SOCKET_PATH)
+        remove_file(AGENT_CONF)
 
 
 @pytest.fixture(scope='module')

@@ -718,6 +718,7 @@ def get_test_cases_data(data_file_path):
     configuration_parameters = []
     configuration_metadata = []
     test_cases_ids = []
+    
     def set_test_case_data():
         configuration_parameters.append(test_case['configuration_parameters'])
         metadata_parameters = {'name': test_case['name'], 'description': test_case['description']}

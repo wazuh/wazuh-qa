@@ -98,7 +98,7 @@ class DockerWrapper(Instance):
         try:
             DockerWrapper.LOGGER.debug(f"Restarting {self.name} cointainer")
             self.get_container().restart()
-            DockerWrapper.LOGGER.debug(f"The {self.name} cointainer has been restarted sucessfully")
+            DockerWrapper.LOGGER.debug(f"The {self.name} cointainer has been restarted successfully")
         except docker.errors.NotFound:
             pass
 
@@ -111,7 +111,7 @@ class DockerWrapper(Instance):
         try:
             DockerWrapper.LOGGER.debug(f"Stopping {self.name} cointainer")
             self.get_container().stop()
-            DockerWrapper.LOGGER.debug(f"The {self.name} cointainer has been stopped sucessfully")
+            DockerWrapper.LOGGER.debug(f"The {self.name} cointainer has been stopped successfully")
         except docker.errors.NotFound:
             pass
 
@@ -132,14 +132,14 @@ class DockerWrapper(Instance):
         try:
             DockerWrapper.LOGGER.debug(f"Removing {self.name} cointainer")
             self.get_container().remove()
-            DockerWrapper.LOGGER.debug(f"The {self.name} cointainer has been removed sucessfully")
+            DockerWrapper.LOGGER.debug(f"The {self.name} cointainer has been removed successfully")
         except docker.errors.NotFound:
             pass
 
         if remove_image:
             DockerWrapper.LOGGER.debug(f"Removing {self.image.id} docker image")
             self.docker_client.images.remove(image=self.image.id, force=True)
-            DockerWrapper.LOGGER.debug(f"The {self.image.id} image has been removed sucessfully")
+            DockerWrapper.LOGGER.debug(f"The {self.image.id} image has been removed successfully")
 
     def get_instance_info(self):
         """Get the parameters information.
