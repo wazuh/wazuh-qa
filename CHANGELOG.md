@@ -8,7 +8,10 @@ Wazuh commit: TBD \
 Release report: TBD
 
 ### Added
+
+- Added tests for checking agent status upon ungraceful closure.([#4146](https://github.com/wazuh/wazuh-qa/pull/4146)) \- (Tests)
 - Agent syncronization testing after group deleting ([#3953](https://github.com/wazuh/wazuh-qa/pull/4143)) \- (Tests)
+
 
 ### Changed
 
