@@ -237,7 +237,7 @@ class Agent:
     def _register_helper(self):
         """Helper function to enroll an agent."""
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
         try:
@@ -1516,7 +1516,7 @@ class Injector:
     def run(self):
         """Start the daemon to send and receive messages for all the threads."""
         for thread in range(self.thread_number):
-            self.threads[thread].setDaemon(True)
+            self.threads[thread].daemon = True
             self.threads[thread].start()
 
     def stop_receive(self):

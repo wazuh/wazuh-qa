@@ -2,14 +2,45 @@
 
 All notable changes to this project will be documented in this file.
 
+=======
+## [4.8.0] - TBD
+
+Wazuh commit: TBD \
+Release report: TBD
+
+### Changed
+
+- Enable Ubuntu Vulnerability Detector E2E. ([#4252](https://github.com/wazuh/wazuh-qa/pull/4252)) \- (Tests)
+- Update _wazuh_db_ schema database version ([#4353](https://github.com/wazuh/wazuh-qa/pull/4353)) \- (Tests)
+- Update the JSON schema with the required fields for the output content of the migration tool ([#4375](https://github.com/wazuh/wazuh-qa/pull/4375)) \- (Tests)
+- Update framework known flaws file ([#4443](https://github.com/wazuh/wazuh-qa/pull/4443)) \- (Tests)
+- Added tests for checking agent status upon ungraceful closure.([#4146](https://github.com/wazuh/wazuh-qa/pull/4146)) \- (Tests)
+
+## [4.7.0] - TBD
+
+Wazuh commit: TBD \
+Release report: TBD
+
+### Added
+
+- Add tests for new FIM audit buffer option. ([#4399](https://github.com/wazuh/wazuh-qa/pull/4399)) \- (Framework + tests)
+- Add callbacks and IT tests for Integratord options tag. ([#4108](https://github.com/wazuh/wazuh-qa/pull/4108)) \- (Framework + tests)
+
+### Changed
+
+- Add option to run some logcollector tests isolated (without a manager) [#4226](https://github.com/wazuh/wazuh-qa/pull/4226) \- (Tests + Framework)
+- Update code analysis and dependencies known flaws. [#3319](https://github.com/wazuh/wazuh-qa/pull/4083) \- (Tests)
+- Update _wazuh_db_ schema database version([#4405](https://github.com/wazuh/wazuh-qa/pull/4405)) \- (Tests)
+- Update framework known flaws file ([#4313](https://github.com/wazuh/wazuh-qa/pull/4313)) \- (Tests)
+
+### Fixed
+- Update `get_test_cases_data` function so it handles fim_mode parameter ([#4185](https://github.com/wazuh/wazuh-qa/pull/4185)) \- (Framework)
+- Fix warnings in the rids tests([#4151](https://github.com/wazuh/wazuh-qa/pull/4151)) \- (Framework + Tests)
 
 ## [4.6.0] - TBD
 
 Wazuh commit: TBD \
 Release report: TBD
-## Added
-
-- Added tests for checking agent status upon ungraceful closure.([#4146](https://github.com/wazuh/wazuh-qa/pull/4146)) \- (Tests)
 
 ### Added
 
@@ -33,6 +64,7 @@ Release report: TBD
 
 ### Changed
 
+- Skip `test_authd_ssl_options` cases that use TLS 1.1 causing errors on several OpenSSL versions. ([#4229](https://github.com/wazuh/wazuh-qa/pull/4229)) \- (Tests)
 - Update database version ([#4467](https://github.com/wazuh/wazuh-qa/pull/4467)) \- (Tests)
 - Remove versionStartIncluding from NVD custom feed ([#4441](https://github.com/wazuh/wazuh-qa/pull/4441)) \- (Tests)
 - Updated syscollector wmodules prefix ([#4384](https://github.com/wazuh/wazuh-qa/pull/4384)) \- (Framework)
@@ -56,6 +88,8 @@ Release report: TBD
 - Update cluster logs in reliability tests ([#2772](https://github.com/wazuh/wazuh-qa/pull/2772)) \- (Tests)
 - Use correct version format in agent_simulator tool ([#3198](https://github.com/wazuh/wazuh-qa/pull/3198)) \- (Tools)
 - Upgrade PyYAML to 6.0.1. ([#4326](https://github.com/wazuh/wazuh-qa/pull/4326)) \- (Framework)
+- Update schema database version ([#4128](https://github.com/wazuh/wazuh-qa/pull/4128)) \- (Tests)
+- Update framework known flaws files ([#4380](https://github.com/wazuh/wazuh-qa/pull/4380)) \- (Tests)
 
 ### Fixed
 
@@ -70,6 +104,11 @@ Release report: TBD
 - Fix bug in the framework on migration tool ([#4027](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
 - Fix test cluster / integrity sync system test and configuration to avoid flaky behavior ([#4406](https://github.com/wazuh/wazuh-qa/pull/4406)) \- (Tests)
 
+## [4.5.3] - TBD
+
+Wazuh commit: TBD \
+Release report: TBD
+
 ## [4.5.2] - TBD
 
 Wazuh commit: TBD \
@@ -77,6 +116,9 @@ Release report: TBD
 
 ### Changed
 
+- Update ITs URL for Debian OVAL ([#4491](https://github.com/wazuh/wazuh-qa/pull/4491)) \- (Tests)
+- Syscollector package inventory deltas fix ([#4483](https://github.com/wazuh/wazuh-qa/pull/4483)) \- (Tests)
+- Update schema sys_programs table ([#4451](https://github.com/wazuh/wazuh-qa/pull/4451)) \- (Tests)
 - Update enrollment logs in system test ([#4442](https://github.com/wazuh/wazuh-qa/pull/4442)) \- (Tests)
 - Fix one_manager_agent environment provisioning by packages for system tests ([#4438](https://github.com/wazuh/wazuh-qa/pull/4438)) \- (Framework)
 - Update framework known flaws files ([#4379](https://github.com/wazuh/wazuh-qa/pull/4379)) \- (Tests)
