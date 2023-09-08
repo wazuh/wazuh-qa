@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: TBD \
 Release report: TBD
 
+### Added
+- Agent syncronization testing after group deleting ([#3953](https://github.com/wazuh/wazuh-qa/pull/4143)) \- (Tests)
+
 ### Changed
 
 - Enable Ubuntu Vulnerability Detector E2E. ([#4252](https://github.com/wazuh/wazuh-qa/pull/4252)) \- (Tests)
