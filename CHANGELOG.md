@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: TBD \
 Release report: TBD
 
+### Fixed
+
+- Enhancing the handling of authd and remoted simulators in case of restart failures ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
+
 ## [4.5.2] - TBD
 
 Wazuh commit: TBD \
