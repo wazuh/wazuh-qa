@@ -2,6 +2,7 @@ import os
 import platform
 import pytest
 
+import wazuh_testing.execd as execd
 from wazuh_testing.tools import WAZUH_PATH, get_version
 
 
@@ -41,3 +42,13 @@ def test_version():
     """Validate Wazuh version."""
     if get_version() < "v4.2.0":
         raise AssertionError("The version of the agent is < 4.2.0")
+
+
+@pytest.fixture
+def truncate_ar_log():
+    """Truncate the logs related with Active Response."""
+    execd.clean_logs()
+
+    yield
+
+    execd.clean_logs()

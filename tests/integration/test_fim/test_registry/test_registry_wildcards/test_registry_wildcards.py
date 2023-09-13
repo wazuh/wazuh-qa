@@ -72,7 +72,7 @@ pytestmark = [WINDOWS, TIER1]
 
 # Reference paths
 TEST_DATA_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_templates')
+CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Configuration and cases data
@@ -104,7 +104,7 @@ def test_registry_key_wildcards(configuration, metadata, set_wazuh_configuration
     description: Check the behavior of FIM when using wildcards to configure the path of registry keys, and validate
                  the keys creation, modification and deletion is detected correctly.
 
-    wazuh_min_version: 4.5.0
+    wazuh_min_version: 4.6.0
 
     test_phases:
         - setup:

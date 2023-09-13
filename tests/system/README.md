@@ -135,6 +135,7 @@ required an specific testing environment located in `wazuh-qa/tests/system/provi
 | test_cluster/test_agent_groups/test_group_hash                            | enrollment_cluster             |
 | test_cluster/test_agent_groups/test_groups_sync_default                   | big_cluster_40_agents          |
 | test_cluster/test_agent_groups/test_groups_sync_time                      | big_cluster_40_agents          |
+| test_shutdown_message/test_shutdown_message                               | big_cluster_40_agents          |
 
 ### Test structure
 
