@@ -10,6 +10,7 @@ Release report: TBD
 ### Added
 
 - Add tests for new FIM audit buffer option. ([#4485](https://github.com/wazuh/wazuh-qa/pull/4485)) \- (Framework + tests)
+- Add tests for merged.mg file generation. ([#4129](https://github.com/wazuh/wazuh-qa/pull/4129)) \- (Tests)
 - Added tests for checking agent status upon ungraceful closure.([#4146](https://github.com/wazuh/wazuh-qa/pull/4146)) \- (Tests)
 - Agent syncronization testing after group deleting ([#3953](https://github.com/wazuh/wazuh-qa/pull/4143)) \- (Tests)
 
