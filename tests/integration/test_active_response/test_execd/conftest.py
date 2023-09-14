@@ -14,7 +14,7 @@ def set_ar_conf_mode():
     debug_line = "restart-wazuh0 - restart-wazuh - 0\nrestart-wazuh0 - restart-wazuh.exe - 0\n" \
                  "firewall-drop0 - firewall-drop - 0\nfirewall-drop5 - firewall-drop - 5\n"
     with open(local_int_conf_path, 'w') as local_file_write:
-        local_file_write.write('\n'+debug_line)
+        local_file_write.write(debug_line)
     with open(local_int_conf_path, 'r') as local_file_read:
         lines = local_file_read.readlines()
         for line in lines:
