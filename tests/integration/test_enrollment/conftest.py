@@ -63,6 +63,7 @@ def configure_socket_listener(request, get_current_test_case):
     """
     Configures the socket listener to start listening on the socket.
     """
+    socket_listener_opened = True
     if 'message' in get_current_test_case and 'response' in get_current_test_case['message']:
         response = get_current_test_case['message']['response'].format(host_name=get_host_name()).encode()
     else:
@@ -80,22 +81,28 @@ def configure_socket_listener(request, get_current_test_case):
     def receiver_callback(received_event):
         return response if not expected or expected == received_event else "".encode()
 
-    socket_listener = ManInTheMiddle(address=(manager_address, MANAGER_PORT), family=address_family,
-                                     connection_protocol='SSL', func=receiver_callback)
-    socket_listener.start()
-    socket_listener.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2,
-                                                   certificate=AGENT_CERT_PATH,
-                                                   keyfile=AGENT_KEY_PATH,
-                                                   options=None,
-                                                   cert_reqs=ssl.CERT_OPTIONAL)
+    try:
+        socket_listener = ManInTheMiddle(address=(manager_address, MANAGER_PORT), family=address_family,
+                                         connection_protocol='SSL', func=receiver_callback)
 
-    while not socket_listener.queue.empty():
-        socket_listener.queue.get_nowait()
-    socket_listener.event.clear()
+        socket_listener.start()
+        socket_listener.listener.set_ssl_configuration(connection_protocol=ssl.PROTOCOL_TLSv1_2,
+                                                       certificate=AGENT_CERT_PATH,
+                                                       keyfile=AGENT_KEY_PATH,
+                                                       options=None,
+                                                       cert_reqs=ssl.CERT_OPTIONAL)
 
-    setattr(request.module, 'socket_listener', socket_listener)
+        while not socket_listener.queue.empty():
+            socket_listener.queue.get_nowait()
+        socket_listener.event.clear()
 
-    yield
+        setattr(request.module, 'socket_listener', socket_listener)
+
+    except Exception:
+        print("Unexpected exception occurred during Man In the Middle initialization")
+        socket_listener_opened = False
+
+    yield socket_listener_opened
 
     socket_listener.shutdown()
 
