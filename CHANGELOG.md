@@ -10,6 +10,13 @@ Release report: TBD
 ### Fixed
 
 - Fix pytest test collection errors ([#3969](https://github.com/wazuh/wazuh-qa/pull/3969)) \- (Framework + Tests)
+### Changed
+
+- Updated the cluster master logs reliability test to run with python 3.7 [#4445](https://github.com/wazuh/wazuh-qa/pull/4478) \- (Tests)
+
+### Fixed
+
+- Enhancing the handling of authd and remoted simulators in case of restart failures ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
 
 ## [4.5.2] - TBD
 
