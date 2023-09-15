@@ -56,6 +56,7 @@ Release report: TBD
 ### Fixed
 
 - Fix invalid AR conf in integration tests ([#4521](https://github.com/wazuh/wazuh-qa/pull/4521)) \- (Tests)
+- Fix an error in AR library and test ([#4511](https://github.com/wazuh/wazuh-qa/pull/4511)) \- (Framework + Tests)
 - Fix provisioned pytest failure fixed ([#4520](https://github.com/wazuh/wazuh-qa/pull/4520)) \- (Framework)
 - Fix FIM framework to validate path in event correctly ([#4390](https://github.com/wazuh/wazuh-qa/pull/4390)) \- (Framework)
 - Fix an error related to logs format in reliability test ([#4387](https://github.com/wazuh/wazuh-qa/pull/4387)) \- (Tests)
