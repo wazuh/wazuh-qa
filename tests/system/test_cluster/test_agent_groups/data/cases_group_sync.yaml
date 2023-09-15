@@ -1,0 +1,89 @@
+- name: delete_folder_master_agent_all
+  description: all agents in all groups, deleting folder group_master from wazuh-master, check sync_status
+  configuration_parameters: null
+  metadata:
+    delete_target: wazuh-master
+    agent_in_group: all
+    group_folder_deleted: group_master
+    expected_first_check: syncreq
+    expected_second_check: synced
+
+- name: delete_folder_worker1_agent_all
+  description: all agents in all groups, deleting folder group_worker1 from wazuh-worker1, check sync_status
+  configuration_parameters: null
+  metadata:
+    delete_target: wazuh-worker1
+    agent_in_group: all
+    group_folder_deleted: group_worker1
+    expected_first_check: synced
+    expected_second_check: synced
+
+- name: delete_folder_worker2_agent_all
+  description: all agents in all groups, deleting folder group_worker2 from wazuh-worker2, check sync_status
+  configuration_parameters: null
+  metadata:
+    delete_target: wazuh-worker2
+    agent_in_group: all
+    group_folder_deleted: group_worker2
+    expected_first_check: synced
+    expected_second_check: synced
+
+- name: delete_folder_master_agent_agent1
+  description: agent1 in all groups, deleting folder group_master from wazuh-master, check sync_status
+  configuration_parameters: null
+  metadata:
+    delete_target: wazuh-master
+    agent_in_group: agent1
+    group_folder_deleted: group_master
+    expected_first_check: syncreq
+    expected_second_check: synced
+
+- name: delete_folder_worker1_agent1
+  description: agent1 in all groups, deleting folder group_worker1 from wazuh-worker1, check sync_status
+  configuration_parameters: null
+  metadata:
+    delete_target: wazuh-worker1
+    agent_in_group: agent1
+    group_folder_deleted: group_worker1
+    expected_first_check: synced
+    expected_second_check: synced
+
+- name: delete_folder_worker2_agent1
+  description: agent1 in all groups, deleting folder group_worker2 from wazuh-worker2, check sync_status
+  configuration_parameters: null
+  metadata:
+    delete_target: wazuh-worker2
+    agent_in_group: agent1
+    group_folder_deleted: group_worker2
+    expected_first_check: synced
+    expected_second_check: synced
+
+- name: delete_folder_master_agent_agent2
+  description: agent2 in all groups, deleting folder group_master from wazuh-master, check sync_status
+  configuration_parameters: null
+  metadata:
+    delete_target: wazuh-master
+    agent_in_group: agent2
+    group_folder_deleted: group_master
+    expected_first_check: syncreq
+    expected_second_check: synced
+
+- name: delete_folder_worker1_agent2
+  description: agent2 in all groups, deleting folder group_worker1 from wazuh-worker1, check sync_status
+  configuration_parameters: null
+  metadata:
+    delete_target: wazuh-worker1
+    agent_in_group: agent2
+    group_folder_deleted: group_worker1
+    expected_first_check: synced
+    expected_second_check: synced
+
+- name: delete_folder_worker2_agent2
+  description: agent2 in all groups, deleting folder group_worker2 from wazuh-worker2, check sync_status
+  configuration_parameters: null
+  metadata:
+    delete_target: wazuh-worker2
+    agent_in_group: agent2
+    group_folder_deleted: group_worker2
+    expected_first_check: synced
+    expected_second_check: synced

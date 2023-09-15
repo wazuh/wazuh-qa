@@ -1,0 +1,119 @@
+- name: Doubled sync_interval smaller than max_interval
+  description: Detect that sync_interval is doubled when a new sync tries to start before sync has ended
+  configuration_parameters:
+    INTERVAL: 3
+    RESPONSE_TIMEOUT: 3
+    MAX_INTERVAL: 20
+  metadata:
+    interval: 3
+    response_timeout: 3
+    doubled_times: 1
+    max_interval: 20
+    files: 5
+    lower: false
+    fim_mode: scheduled
+
+- name: Doubled sync_interval capped at max_interval
+  description: Detect that when doubled sync_interval will not exceed max_interval
+  configuration_parameters:
+    INTERVAL: 5
+    RESPONSE_TIMEOUT: 5
+    MAX_INTERVAL: 8
+  metadata:
+    interval: 5
+    response_timeout: 5
+    doubled_times: 1
+    max_interval: 8
+    files: 10
+    lower: false
+    fim_mode: scheduled
+
+- name: response_timeout lower than interval
+  description: Detect behavior when response_timeout is lower than interval
+  configuration_parameters:
+    INTERVAL: 5
+    RESPONSE_TIMEOUT: 3
+    MAX_INTERVAL: 8
+  metadata:
+    interval: 5
+    response_timeout: 3
+    doubled_times: 1
+    max_interval: 8
+    files: 10
+    lower: false
+    fim_mode: scheduled
+
+- name: Invalid response_timeout value
+  description: Check behavior when invalid (string) value is configured for response_timeout
+  configuration_parameters:
+    INTERVAL: 3
+    RESPONSE_TIMEOUT: invalid
+    MAX_INTERVAL: 20
+  metadata:
+    interval: 3
+    response_timeout: invalid
+    doubled_times: 3
+    max_interval: 20
+    files: 5
+    lower: false
+    fim_mode: scheduled
+
+- name: Invalid response_timeout value (negative)
+  description: Check behavior when invalid (negative) value is configured for response_timeout
+  configuration_parameters:
+    INTERVAL: 3
+    RESPONSE_TIMEOUT: -1
+    MAX_INTERVAL: 20
+  metadata:
+    interval: 3
+    response_timeout: -1
+    doubled_times: 3
+    max_interval: 20
+    files: 5
+    lower: false
+    fim_mode: scheduled
+
+- name: Invalid max_interval value (String)
+  description: Check behavior when invalid (string) value is configured for max_interval
+  configuration_parameters:
+    INTERVAL: 3
+    RESPONSE_TIMEOUT: 5
+    MAX_INTERVAL: invalid
+  metadata:
+    interval: 3
+    response_timeout: 5
+    doubled_times: 1
+    max_interval: invalid
+    files: 5
+    lower: false
+    fim_mode: scheduled
+
+- name: Invalid max_interval value (Lower than interval)
+  description: Detect when max_interval is lower than interval, the value is set to be equal to interval
+  configuration_parameters:
+    INTERVAL: 5
+    RESPONSE_TIMEOUT: 3
+    MAX_INTERVAL: 3
+  metadata:
+    interval: 5
+    response_timeout: 3
+    doubled_times: 1
+    max_interval: 3
+    files: 5
+    lower: true
+    fim_mode: scheduled
+
+- name: Invalid max_interval value (negative value)
+  description: Detect when max_interval is negative, max interval is not set
+  configuration_parameters:
+    INTERVAL: 5
+    RESPONSE_TIMEOUT: 3
+    MAX_INTERVAL: -1
+  metadata:
+    interval: 5
+    response_timeout: 3
+    doubled_times: 1
+    max_interval: invalid
+    files: 5
+    lower: false
+    fim_mode: scheduled

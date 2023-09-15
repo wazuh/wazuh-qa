@@ -55,9 +55,10 @@ tags:
     - fim_registry_report_changes
 '''
 import os
+import sys
 
 import pytest
-from test_fim.test_files.test_report_changes.common import generate_string
+from test_fim.common import generate_string
 from wazuh_testing import global_parameters
 from wazuh_testing.fim import LOG_FILE_PATH, calculate_registry_diff_paths, registry_value_cud, KEY_WOW64_32KEY, \
     KEY_WOW64_64KEY, generate_params
@@ -103,6 +104,7 @@ def get_configuration(request):
     return request.param
 
 
+@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by #4077.")
 @pytest.mark.parametrize('key, subkey, arch, value_name, tags_to_apply', [
     (key, sub_key_1, KEY_WOW64_64KEY, "some_value", {'test_report_changes'}),
     (key, sub_key_1, KEY_WOW64_32KEY, "some_value", {'test_report_changes'}),

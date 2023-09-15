@@ -1,0 +1,6 @@
+- name: Get ossec.log
+  fetch:
+    src: "{{ source_path }}"
+    dest: /tmp/{{ dest_path }}
+    flat: true
+    validate_checksum: false

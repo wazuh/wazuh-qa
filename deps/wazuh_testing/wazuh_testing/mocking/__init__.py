@@ -68,6 +68,14 @@ SYSTEM_DATA = {
               'os_arch': 'x86_64', 'config_sum': '', 'merged_sum': '', 'manager_host': 'alas2', 'node_name': 'node01',
               'date_add': '1645538646', 'last_keepalive': '253402300799', 'sync_status': 'synced',
               'connection_status': 'active'},
+    'ALAS_2022': {'hostname': 'alas2022', 'architecture': 'x86_64', 'os_name': 'Amazon Linux', 'os_version': '2022',
+                  'os_codename': '', 'os_major': '2022', 'os_minor': '', 'os_patch': '', 'os_build': '',
+                  'os_platform': 'amzn', 'sysname': 'Linux', 'release': '5.15.29-16.111.amzn2022.x86_64',
+                  'version': 'Wazuh v4.4.0', 'os_release': '', 'checksum': '1645538649327530789', 'name': 'alas2022',
+                  'ip': '127.0.0.1', 'register_ip': '127.0.0.1', 'internal_key': '', 'os_arch': 'x86_64',
+                  'config_sum': '', 'merged_sum': '', 'manager_host': 'alas2022',  'node_name': 'node01',
+                  'date_add': '1645538646', 'last_keepalive': '253402300799',  'sync_status': 'synced',
+                  'connection_status': 'active'},
     'RHEL8': {'os_name': 'CentOS Linux', 'os_major': '8', 'os_minor': '1', 'os_platform': 'centos',
               'name': 'centos8', 'connection_status': 'active'},
     'RHEL7': {'os_name': 'CentOS Linux', 'os_major': '7', 'os_minor': '1', 'os_platform': 'centos', 'os_version': '7.0',
@@ -93,6 +101,15 @@ SYSTEM_DATA = {
                'name': 'Ubuntu-xenial'},
     'TRUSTY': {'os_name': 'Ubuntu', 'os_major': '14', 'os_minor': '04', 'os_platform': 'ubuntu',
                'name': 'Ubuntu-trusty'},
+    'BOOKWORM': {'hostname': 'bookworm', 'architecture': 'x86_64', 'os_name': 'Debian GNU/Linux', 'os_version': '12',
+                 'os_codename': 'bookworm', 'os_major': '12', 'os_minor': '', 'os_patch': '', 'os_build': '',
+                 'os_platform': 'debian', 'sysname': 'Linux', 'release': '6.1.0-10-amd64', 'version': 'Wazuh v4.5.0',
+                 'os_release': '', 'checksum': '1692739317269125720', 'name': 'bookworm', 'ip': '127.0.0.1',
+                 'register_ip': '127.0.0.1', 'internal_key': '',
+                 'os_uname': 'Linux |bookworm |6.1.0-10-amd64 |#1 SMP Debian 6.1.38-1 (2023-07-14) |x86_64',
+                 'os_arch': 'x86_64', 'config_sum': '', 'merged_sum': '', 'manager_host': 'bookworm',
+                 'node_name': 'node01', 'date_add': '1645537986', 'last_keepalive': '253402300799',
+                 'sync_status': 'synced', 'connection_status': 'active'},
     'BULLSEYE': {'hostname': 'bullseye', 'architecture': 'x86_64', 'os_name': 'Debian GNU/Linux', 'os_version': '11',
                  'os_codename': 'bullseye', 'os_major': '11', 'os_minor': '', 'os_patch': '', 'os_build': '',
                  'os_platform': 'debian', 'sysname': 'Linux', 'release': '5.10.0-10-amd64', 'version': 'Wazuh v4.3.0',
@@ -124,7 +141,15 @@ SYSTEM_DATA = {
                'os_uname': 'Linux |localhost|5.3.18-22-default |#1 SMP Wed Jun 3 12:16:43 UTC 2020 (720aeba)|x86_64',
                'os_arch': 'x64', 'config_sum': '', 'merged_sum': '', 'manager_host': 'localhost.localdomain',
                'node_name': 'node01', 'date_add': '1652381429', 'last_keepalive': '253402300799',
-               'sync_status': 'synced', 'connection_status': 'active'}
+               'sync_status': 'synced', 'connection_status': 'active'},
+    'AlmaLinux-8': {'hostname': 'localhost', 'architecture': 'x64', 'os_name': 'AlmaLinux', 'os_version': '8',
+                    'os_codename': '', 'os_major': '8', 'os_minor': '', 'os_patch': '', 'os_build': '',
+                    'os_platform': 'almalinux', 'sysname': 'Linux', 'release': '5.3.18-22-default',
+                    'version': 'Wazuh v4.4.0', 'os_release': '', 'checksum': '1652388661375945607',
+                    'name': 'ALMALINUX8', 'ip': '127.0.0.1', 'register_ip': 'any', 'internal_key': '',
+                    'os_arch': 'x64', 'config_sum': '', 'merged_sum': '', 'manager_host': 'localhost.localdomain',
+                    'node_name': 'node01', 'date_add': '1652381429', 'last_keepalive': '253402300799',
+                    'sync_status': 'synced', 'connection_status': 'active'}
 }
 
 
@@ -239,7 +264,7 @@ def delete_mocked_agent(agent_id):
     global_db.delete_agent(agent_id)
 
     # Remove agent id DB file if exists
-    remove_file(os.path.join(wazuh_testing.DB_PATH, f"{agent_id}.db"))
+    remove_file(os.path.join(wazuh_testing.QUEUE_DB_PATH, f"{agent_id}.db"))
 
     # Remove entry from client keys
     client_keys.delete_client_keys_entry(agent_id)

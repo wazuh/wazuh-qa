@@ -2,6 +2,113 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.8.0] - TBD
+
+Wazuh commit: TBD \
+Release report: TBD
+
+### Added
+
+- Add tests for merged.mg file generation. ([#4129](https://github.com/wazuh/wazuh-qa/pull/4129)) \- (Tests)
+- Added tests for checking agent status upon ungraceful closure.([#4146](https://github.com/wazuh/wazuh-qa/pull/4146)) \- (Tests)
+- Agent syncronization testing after group deleting ([#3953](https://github.com/wazuh/wazuh-qa/pull/4143)) \- (Tests)
+
+
+### Changed
+
+- Enable Ubuntu Vulnerability Detector E2E. ([#4252](https://github.com/wazuh/wazuh-qa/pull/4252)) \- (Tests)
+- Update _wazuh_db_ schema database version ([#4353](https://github.com/wazuh/wazuh-qa/pull/4353)) \- (Tests)
+- Update the JSON schema with the required fields for the output content of the migration tool ([#4375](https://github.com/wazuh/wazuh-qa/pull/4375)) \- (Tests)
+- Update framework known flaws file ([#4443](https://github.com/wazuh/wazuh-qa/pull/4443)) \- (Tests)
+
+## [4.7.0] - TBD
+
+Wazuh commit: TBD \
+Release report: TBD
+
+### Added
+
+- Add tests for new FIM audit buffer option. ([#4399](https://github.com/wazuh/wazuh-qa/pull/4399)) \- (Framework + tests)
+- Add callbacks and IT tests for Integratord options tag. ([#4108](https://github.com/wazuh/wazuh-qa/pull/4108)) \- (Framework + tests)
+
+### Changed
+
+- Add option to run some logcollector tests isolated (without a manager) [#4226](https://github.com/wazuh/wazuh-qa/pull/4226) \- (Tests + Framework)
+- Update code analysis and dependencies known flaws. [#3319](https://github.com/wazuh/wazuh-qa/pull/4083) \- (Tests)
+- Update _wazuh_db_ schema database version([#4405](https://github.com/wazuh/wazuh-qa/pull/4405)) \- (Tests)
+- Update framework known flaws file ([#4313](https://github.com/wazuh/wazuh-qa/pull/4313)) \- (Tests)
+
+### Fixed
+- Update `get_test_cases_data` function so it handles fim_mode parameter ([#4185](https://github.com/wazuh/wazuh-qa/pull/4185)) \- (Framework)
+- Fix warnings in the rids tests([#4151](https://github.com/wazuh/wazuh-qa/pull/4151)) \- (Framework + Tests)
+
+## [4.6.0] - TBD
+
+Wazuh commit: TBD \
+Release report: TBD
+
+### Added
+
+- Add Debian Bookworm VDT IT support. ([#4463](https://github.com/wazuh/wazuh-qa/pull/4463)) \- (Tests)
+- Add new test cases for the `discard_regex` functionality of `CloudWatchLogs` and `Inspector` services. ([#4278](https://github.com/wazuh/wazuh-qa/pull/4278)) \- (Tests)
+- Add Windows location wildcards tests ([#4263](https://github.com/wazuh/wazuh-qa/pull/4263)) \- (Tests + Framework)
+- New 'SCA' test suite and framework. ([#3566](https://github.com/wazuh/wazuh-qa/pull/3566)) \- (Framework + Tests)
+- Add integration tests for AWS module. ([#3911](https://github.com/wazuh/wazuh-qa/pull/3911)) \- (Framework + Tests + Documentation)
+- Add tests for msu patches with no associated CVE . ([#4009](https://github.com/wazuh/wazuh-qa/pull/4009)) \- (Framework + Tests)
+- Add tests with new options to avoid FIM synchronization overlapping. ([#3318](https://github.com/wazuh/wazuh-qa/pull/3318)) \- (Framework + tests)
+- Add Logcollector millisecond granularity support test case ([#3910](https://github.com/wazuh/wazuh-qa/pull/3910)) \- (Tests)
+- Add Windows System folders FIM monitoring tests ([#3720](https://github.com/wazuh/wazuh-qa/pull/3720)) \- (Tests)
+- Add 'test_whodata_policy_changes' tests ([#3627](https://github.com/wazuh/wazuh-qa/pull/3627)) \- (Framework + Tests)
+- Add test to check if active-response netsh generates alerts when firewall is disabled. ([#3787](https://github.com/wazuh/wazuh-qa/pull/3787)) \- (Framework + Tests)
+- Add new tests for logcollector 'ignore' and 'restrict' options ([#3582](https://github.com/wazuh/wazuh-qa/pull/3582)) \- (Tests)
+- Add 'Force reconnect' feature to agent_simulator tool. ([#3111](https://github.com/wazuh/wazuh-qa/pull/3111)) \- (Tools)
+- Add new module to support migration tool. ([#3837](https://github.com/wazuh/wazuh-qa/pull/3837))
+- Add IT tests FIM registry monitoring using wildcards. ([#4270](https://github.com/wazuh/wazuh-qa/pull/4270)) \- (Framework + Tests)
+- Update schema database version ([#4128](https://github.com/wazuh/wazuh-qa/pull/4128)) \- (Tests)
+- Update framework known flaws files ([#4380](https://github.com/wazuh/wazuh-qa/pull/4380)) \- (Tests)
+
+### Changed
+
+- Skip `test_authd_ssl_options` cases that use TLS 1.1 causing errors on several OpenSSL versions. ([#4229](https://github.com/wazuh/wazuh-qa/pull/4229)) \- (Tests)
+- Update database version ([#4467](https://github.com/wazuh/wazuh-qa/pull/4467)) \- (Tests)
+- Remove versionStartIncluding from NVD custom feed ([#4441](https://github.com/wazuh/wazuh-qa/pull/4441)) \- (Tests)
+- Updated syscollector wmodules prefix ([#4384](https://github.com/wazuh/wazuh-qa/pull/4384)) \- (Framework)
+- Replace embedded python invocations with generic `python3`. ([#4186](https://github.com/wazuh/wazuh-qa/pull/4186)) - (Tests)
+- Fix FIM test_large_changes test suite ([#3948](https://github.com/wazuh/wazuh-qa/pull/3948)) \- (Tests)
+- Update `get_test_cases_data` function so it handles fim_mode parameter ([#4185](https://github.com/wazuh/wazuh-qa/pull/4185)) \- (Framework)
+- Change FIM `regular_file_cud` and `EventChecker` file modification steps ([#4183](https://github.com/wazuh/wazuh-qa/pull/4183)) \- (Framework + Tests)
+- Refactor library to change the environment ([#4145](https://github.com/wazuh/wazuh-qa/pull/4145)) \- (Framework)
+- Improve the way that environment data is managed ([#4059](https://github.com/wazuh/wazuh-qa/pull/4059)) \- (Framework)
+- Update FIM test_ambiguous_confs IT to new framework ([#4121](https://github.com/wazuh/wazuh-qa/pull/4121)) \- (Tests + Framework)
+- Update `test_logcollector` invalid configs log level ([#4094](https://github.com/wazuh/wazuh-qa/pull/4094)) \- (Tests)
+- Update `test_office365` to support the new tag `API_TYPE` ([#4065](https://github.com/wazuh/wazuh-qa/pull/4065)) \- (Framework + Tests)
+- Update `test_wazuh_db` & `test_enrollment` to support new column `status_code` and new value on the enrollment `payload`. ([#4021](https://github.com/wazuh/wazuh-qa/pull/4021)) \- (Tests)
+- Update FIM `test_audit` tests to new framework ([#3939](https://github.com/wazuh/wazuh-qa/pull/3939)) \- (Framework + Tests)
+- Update FIM test to new FIM DBSync process  ([#2728](https://github.com/wazuh/wazuh-qa/pull/2728)) \- (Framework + Tests)
+- Update file_limit and registry_limit tests ([#3280](https://github.com/wazuh/wazuh-qa/pull/3280)) \- (Tests)
+- Change expected timestamp for proftpd analysisd test predecoder test case ([#3900](https://github.com/wazuh/wazuh-qa/pull/3900)) \- (Tests)
+- Skip test_large_changes test module ([#3783](https://github.com/wazuh/wazuh-qa/pull/3783)) \- (Tests)
+- Update report_changes tests ([#3405](https://github.com/wazuh/wazuh-qa/pull/3405)) \- (Tests)
+- Update Authd force_insert tests ([#3379](https://github.com/wazuh/wazuh-qa/pull/3379)) \- (Tests)
+- Update cluster logs in reliability tests ([#2772](https://github.com/wazuh/wazuh-qa/pull/2772)) \- (Tests)
+- Use correct version format in agent_simulator tool ([#3198](https://github.com/wazuh/wazuh-qa/pull/3198)) \- (Tools)
+- Upgrade PyYAML to 6.0.1. ([#4326](https://github.com/wazuh/wazuh-qa/pull/4326)) \- (Framework)
+- Update schema database version ([#4128](https://github.com/wazuh/wazuh-qa/pull/4128)) \- (Tests)
+- Update framework known flaws files ([#4380](https://github.com/wazuh/wazuh-qa/pull/4380)) \- (Tests)
+
+### Fixed
+
+- Fix FIM framework to validate path in event correctly ([#4390](https://github.com/wazuh/wazuh-qa/pull/4390)) \- (Framework)
+- Fix an error related to logs format in reliability test ([#4387](https://github.com/wazuh/wazuh-qa/pull/4387)) \- (Tests)
+- Fix boto3 version requirement for legacy OS ([#4150](https://github.com/wazuh/wazuh-qa/pull/4150)) \- (Framework)
+- Fix cases yaml of the analysisd windows registry IT ([#4149](https://github.com/wazuh/wazuh-qa/pull/4149)) \- (Tests)
+- Fix a bug in on Migration tool's library ([#4106](https://github.com/wazuh/wazuh-qa/pull/4106)) \- (Framework)
+- Fix imports and add windows support for test_report_changes_and_diff IT ([#3548](https://github.com/wazuh/wazuh-qa/issues/3548)) \- (Framework + Tests)
+- Fix a regex error in the FIM integration tests ([#3061](https://github.com/wazuh/wazuh-qa/issues/3061)) \- (Framework + Tests)
+- Fix an error in the cluster performance tests related to CSV parser ([#2999](https://github.com/wazuh/wazuh-qa/pull/2999)) \- (Framework + Tests)
+- Fix bug in the framework on migration tool ([#4027](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
+- Fix test cluster / integrity sync system test and configuration to avoid flaky behavior ([#4406](https://github.com/wazuh/wazuh-qa/pull/4406)) \- (Tests)
+
 ## [4.5.3] - TBD
 
 Wazuh commit: TBD \
@@ -86,7 +193,7 @@ Release report: https://github.com/wazuh/wazuh/issues/17520
 
 ## [4.4.3] - 25-06-2023
 
-Wazuh commit: https://github.com/wazuh/wazuh/commit/f7080df56081adaeaad94529522233e2f0bbd577  \
+Wazuh commit: https://github.com/wazuh/wazuh/commit/f7080df56081adaeaad94529522233e2f0bbd577 \
 Release report: https://github.com/wazuh/wazuh/issues/17198
 
 ### Fixed
@@ -137,6 +244,8 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 
 ### Added
 
+- Add new integration test for `authd` to validate error when `authd.pass` is empty ([#3721](https://github.com/wazuh/wazuh-qa/pull/3721)) \- (Framework + Tests)
+- Add new test to check missing fields in `cpe_helper.json` file ([#3766](https://github.com/wazuh/wazuh-qa/pull/3766)) \- (Framework + Tests)
 - Add multigroups tests cases for `test_assign_groups_guess` ([#3979](https://github.com/wazuh/wazuh-qa/pull/3979)) \- (Tests)
 - Add new group_hash case and update the `without condition` case output in `wazuh_db/sync_agent_groups_get` ([#3959](https://github.com/wazuh/wazuh-qa/pull/3959)) \- (Tests)
 - Add markers for each system test environment ([#3961](https://github.com/wazuh/wazuh-qa/pull/3961)) \- (Framework + Tests)
@@ -185,6 +294,7 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 - Add `monitord.rotate_log` to `local_internal_options` file for `test_macos_format_query` ([#3602](https://github.com/wazuh/wazuh-qa/pull/3602)) \- (Tests)
 - Adapt analysisd integration tests for EPS ([#3559](https://github.com/wazuh/wazuh-qa/issues/3559)) \- (Tests)
 - Improve `test_remove_audit` FIM test to retry install and remove command ([#3562](https://github.com/wazuh/wazuh-qa/pull/3562)) \- (Tests)
+- Update pattern and expected condition for multi_groups tests ([#3565](https://github.com/wazuh/wazuh-qa/pull/3565)) \- (Tests)
 - Skip unstable integration tests for gcloud ([#3531](https://github.com/wazuh/wazuh-qa/pull/3531)) \- (Tests)
 - Skip unstable integration test for agentd ([#3538](https://github.com/wazuh/wazuh-qa/pull/3538))
 - Update wazuhdb_getconfig and EPS limit integration tests ([#3146](https://github.com/wazuh/wazuh-qa/pull/3146)) \- (Tests)
@@ -214,6 +324,7 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 - Analysisd: Reduce execution time of tests with tier 0 ([#2546](https://github.com/wazuh/wazuh-qa/pull/2546)) \- (Tests)
 - Adapt logtest ITs given the rules skipping ([#2200](https://github.com/wazuh/wazuh-qa/pull/2200)) \- (Tests)
 - Updated the Authd response when a multigroup is too long ([#3746](https://github.com/wazuh/wazuh-qa/pull/3746)) \- (Tests)
+- Refactor ITs related to syscollector deltas alerts ([#3579](https://github.com/wazuh/wazuh-qa/pull/3579)) \- (Tests)
 
 ### Fixed
 

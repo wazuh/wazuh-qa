@@ -237,7 +237,7 @@ class Agent:
     def _register_helper(self):
         """Helper function to enroll an agent."""
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
         try:
@@ -462,6 +462,8 @@ class Agent:
             kind, checksum, name = msg_decoded_list[1:4]
             if kind == 'file' and "merged.mg" in name:
                 self.update_checksum(checksum)
+        elif '#!-force_reconnect' in msg_decoded_list[0]:
+            sender.reconnect(self.startup_msg)
 
     def process_command(self, sender, message_list):
         """Process agent received commands through the socket.
@@ -1441,11 +1443,23 @@ class Sender:
         self.manager_address = manager_address
         self.manager_port = manager_port
         self.protocol = protocol.upper()
+        self.socket = None
+        self.connect()
+
+    def connect(self):
         if is_tcp(self.protocol):
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect((self.manager_address, int(self.manager_port)))
         if is_udp(self.protocol):
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    def reconnect(self, event):
+        if is_tcp(self.protocol):
+            self.socket.shutdown(socket.SHUT_RDWR)
+            self.socket.close()
+            self.connect()
+            if event:
+                self.send_event(event)
 
     def send_event(self, event):
         if is_tcp(self.protocol):
@@ -1502,7 +1516,7 @@ class Injector:
     def run(self):
         """Start the daemon to send and receive messages for all the threads."""
         for thread in range(self.thread_number):
-            self.threads[thread].setDaemon(True)
+            self.threads[thread].daemon = True
             self.threads[thread].start()
 
     def stop_receive(self):

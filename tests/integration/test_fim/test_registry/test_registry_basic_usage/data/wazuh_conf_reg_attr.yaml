@@ -16,6 +16,8 @@
         attributes:
           - ATTRIBUTE
           - arch: "64bit"
+    - frequency:
+        value: 3
   - section: sca
     elements:
     - enabled:

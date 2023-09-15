@@ -115,6 +115,15 @@ def get_random_ip():
     return fr"{randint(0,255)}.{randint(0,255)}.{randint(0,255)}.{randint(0,255)}"
 
 
+def get_random_port() -> str:
+    """Create a port number.
+
+    Return:
+        String: Random port number.
+    """
+    return f"{randint(0, 10000)}"
+
+
 def get_random_string(string_length, digits=True):
     """Create a random string with specified length.
 
@@ -162,7 +171,7 @@ def get_host_name():
 
 def validate_interval_format(interval):
     """Validate that the interval passed has the format in which the last digit is a letter from those passed and
-       the other characters are between 0-9"""
+       the other characters are between 0-9."""
     if interval == '':
         return False
     if interval[-1] not in ['s', 'm', 'h', 'd', 'w', 'y'] or not isinstance(int(interval[0:-1]), numbers.Number):

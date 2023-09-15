@@ -1,0 +1,79 @@
+- name: Configure manager environment
+  hosts: manager
+  become: true
+  tasks:
+
+    - name: Configure the active-response module
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
+          <active-response>
+          <command>netsh</command>
+          <location>local</location>
+          <rules_id>5716</rules_id>
+          <timeout>5</timeout>
+          </active-response>
+        os: linux
+
+    - name: Truncate alert.json
+      include_role:
+        name: manage_alerts
+        tasks_from: truncate_alert_json.yaml
+
+    - name: Restart wazuh-manager
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: linux
+
+- name: Configure Windows agent environment
+  hosts: windows-agent
+  tasks:
+
+    - name: Create temp folder
+      win_file:
+        path: C:\temp\
+        state: directory
+
+    - name: Make a backup of ossec.conf
+      ansible.windows.win_copy:
+        src: C:\Program Files (x86)\ossec-agent\ossec.conf
+        dest: C:\temp
+        remote_src: true
+
+    - name: Add active-response configuration
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<ossec_config>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<active-response>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<disabled>no</disabled>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</active-response>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
+        os: windows
+
+    - name: Add localfile configuration
+      include_role:
+        name: manage_wazuh_configurations
+        tasks_from: write_wazuh_config.yaml
+      vars:
+        config_block: |
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<ossec_config>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<localfile>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<location>C:\temp\test.txt</location>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n<log_format>syslog</log_format>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</localfile>"
+          Add-Content 'C:\Program Files (x86)\ossec-agent\ossec.conf' "`n</ossec_config>"
+        os: windows
+
+    - name: Restart wazuh-agent
+      include_role:
+        name: manage_wazuh
+        tasks_from: restart_wazuh.yaml
+      vars:
+        os: windows

@@ -44,6 +44,7 @@ import os
 import sys
 import subprocess
 
+from wazuh_testing.tools import get_version
 from wazuh_testing.tools.services import control_service
 from wazuh_testing.tools.file import read_yaml
 from wazuh_testing.tools.monitoring import QueueMonitor, make_callback
@@ -181,7 +182,8 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
                 raise error
 
     else:
-        test_expected = get_current_test_case['message']['expected'].format(host_name=get_host_name()).encode()
+        test_expected = get_current_test_case['message']['expected'].format(host_name=get_host_name(),
+                                                                            agent_version=get_version()).encode()
         test_response = get_current_test_case['message']['response'].format(host_name=get_host_name()).encode()
 
         # Monitor MITM queue

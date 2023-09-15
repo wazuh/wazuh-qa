@@ -65,8 +65,8 @@ import sys
 import time
 
 import pytest
-from wazuh_testing import global_parameters
-from wazuh_testing.fim import generate_params, regular_file_cud
+from wazuh_testing import T_10
+from wazuh_testing.modules.fim.utils import generate_params, regular_file_cud
 from wazuh_testing.tools import PREFIX, LOG_FILE_PATH
 from wazuh_testing.tools.configuration import load_wazuh_configurations, check_apply_test
 from wazuh_testing.tools.monitoring import FileMonitor
@@ -157,7 +157,7 @@ def test_create_after_delete(tags_to_apply, get_configuration, configure_environ
 
     # Create the monitored directory with files and check that events are not raised
     regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file1', 'file2', 'file3'],
-                     min_timeout=global_parameters.default_timeout, triggers_event=True)
+                     min_timeout=T_10, triggers_event=True)
 
     # Delete the directory
     os.rename(directory_str, f'{directory_str}_delete')
@@ -170,4 +170,4 @@ def test_create_after_delete(tags_to_apply, get_configuration, configure_environ
 
     # Assert that events of new CUD actions are raised after next scheduled scan
     regular_file_cud(directory_str, wazuh_log_monitor, file_list=['file4', 'file5', 'file6'],
-                     min_timeout=global_parameters.default_timeout, triggers_event=True)
+                     min_timeout=T_10, triggers_event=True)
