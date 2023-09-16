@@ -10,6 +10,7 @@ Release report: TBD
 ### Added
 
 - Add callbacks and IT tests for Integratord options tag. ([#4108](https://github.com/wazuh/wazuh-qa/pull/4108)) \- (Framework + tests)
+- Add vulnerability Detector integration tests for Amazon Linux 2023 ([#4482](https://github.com/wazuh/wazuh-qa/pull/4482)) \- (Core)
 
 ### Changed
 
