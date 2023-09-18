@@ -17,18 +17,18 @@ numpy>=1.18.1
 pandas>=1.1.5
 pillow>=6.2.0; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
 psutil>=5.6.6
-py~=1.10.0; platform_system != "Windows" or python_version <= "3.10"
-py==1.11.0; platform_system == "Windows" and python_version >= "3.11"
+py~=1.10.0; python_version <= "3.9"
+py==1.11.0; python_version >= "3.10"
 pycryptodome>=3.9.8
 pyOpenSSL==19.1.0
 pytest-html==3.1.1
 pytest==6.2.2 ; python_version <= "3.9"
-pytest==7.1.2 ; python_version >= "3.10"
+pytest==7.4.0 ; python_version >= "3.10"
 pyyaml==6.0.1
 requests>=2.23.0
 scipy>=1.0; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
 seaborn>=0.11.1; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
-setuptools~=56.0.0
+setuptools==68.0.0
 testinfra==5.0.0
 jq==1.1.2 ; (platform_system == "Linux" or platform_system == "Darwin") and python_version <= "3.9"
 jq==1.2.2 ; (platform_system == "Linux" or platform_system == "Darwin") and python_version >= "3.10"

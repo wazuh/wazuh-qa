@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Changed
 
+- Update setuptools dependency ([#3788](https://github.com/wazuh/wazuh-qa/pull/3788))
 - Updated the cluster master logs reliability test to run with python 3.7 [#4445](https://github.com/wazuh/wazuh-qa/pull/4478) \- (Tests)
 
 ### Fixed
@@ -137,8 +138,6 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 - Adapt binary performance module to wazuh-cluster script renaming ([#3944](https://github.com/wazuh/wazuh-qa/pull/3944)) \- (Framework)
 - Add an option to store logs in system tests ([#2445](https://github.com/wazuh/wazuh-qa/pull/2445)) \- (Framework + Tests)
 - Add new test to check cpe_helper.json file ([#3731](https://github.com/wazuh/wazuh-qa/pull/3731))
-- Add new tests analysid handling of invalid/empty rule signature IDs ([#3649]
-(https://github.com/wazuh/wazuh-qa/pull/3649)) \- (Framework + Tests)
 - Add integration test to check statistics format ([#3813](https://github.com/wazuh/wazuh-qa/pull/3813)) \- (Framework + Tests)
 - Add new test to check vulnerable packages with triaged null([#3587](https://github.com/wazuh/wazuh-qa/pull/3587)) \- (Framework + Tests)
 - Add new tests analysid handling of invalid/empty rule signature IDs ([#3649](https://github.com/wazuh/wazuh-qa/pull/3649)) \- (Framework + Tests)
