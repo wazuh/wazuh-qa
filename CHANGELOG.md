@@ -7,6 +7,9 @@ All notable changes to this project will be documented in this file.
 Wazuh commit: TBD \
 Release report: TBD
 
+## Fixed
+- Fix py dependency version to install for Windows after the change to Python 3.11([#4523](https://github.com/wazuh/wazuh-qa/pull/4523/files)) \- (Framework)
+
 ### Fixed
 
 - Enhancing the handling of authd and remoted simulators in case of restart failures ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
