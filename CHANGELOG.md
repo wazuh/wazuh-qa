@@ -8,7 +8,12 @@ Wazuh commit: TBD \
 Release report: TBD
 
 ## Fixed
+
 - Fix py dependency version to install for Windows after the change to Python 3.11([#4523](https://github.com/wazuh/wazuh-qa/pull/4523/files)) \- (Framework)
+
+### Changed
+
+- Updated the cluster master logs reliability test to run with python 3.7 [#4445](https://github.com/wazuh/wazuh-qa/pull/4478) \- (Tests)
 
 ### Fixed
 
