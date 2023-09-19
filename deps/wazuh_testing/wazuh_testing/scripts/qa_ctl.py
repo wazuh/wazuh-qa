@@ -437,7 +437,7 @@ def main():
         config_generator.run()
         launched['config_generator'] = True
         configuration_file = config_generator.config_file_path
-        qactl_logger.debug(f"Configuration file has been created sucessfully in {configuration_file}")
+        qactl_logger.debug(f"Configuration file has been created successfully in {configuration_file}")
 
         # If dry-run mode, then exit after generating the configuration file
         if arguments.dry_run:
