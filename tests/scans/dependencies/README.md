@@ -17,6 +17,9 @@ Parameters:
     --report-path: output file path. Default: 'dependencies/report_file.json'.
 ```
 ### Scanning wazuh-qa requirements file:
+
+> The script does not support pyenv version changes because it doesn't expect system variables to be modified
+
 ```
 ↪ ~/git/wazuh-qa/tests/scans ⊶ feature/1612-package-vuln-scanner ⨘ python3 -m pytest -vv -x --disable-warnings dependencies/ --repo wazuh-qa --reference master --requirements-path requirements.txt
 ==================================================================================== test session starts =====================================================================================
