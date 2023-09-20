@@ -29,6 +29,7 @@ Release report: TBD
 
 ### Changed
 
+- `Agentless_cluster` system tests timeout changed in order to reduce EC2 requirements ([#4534](https://github.com/wazuh/wazuh-qa/pull/4534)) \- (Tests)
 - Skip `test_authd_ssl_options` cases that use TLS 1.1 causing errors on several OpenSSL versions. ([#4229](https://github.com/wazuh/wazuh-qa/pull/4229)) \- (Tests)
 - Update database version ([#4467](https://github.com/wazuh/wazuh-qa/pull/4467)) \- (Tests)
 - Remove versionStartIncluding from NVD custom feed ([#4441](https://github.com/wazuh/wazuh-qa/pull/4441)) \- (Tests)
