@@ -4,22 +4,22 @@ Wazuh - System quality assurance automation templates
 
 ## Setting up a test environment
 
-To run these tests we need to use a **Linux** machine.
+To run these tests it will be required to use a **Linux** machine.
 
 In the event that the tests are to be executed using AWS EC2 instances:
 
-### EC2 requirements for system testing.
+### EC2 requirements for system testing
 
 | Environment                  | EC2                                       |
 |------------------------------|-------------------------------------------|
-|Basic_cluster                 |Ubuntu 22.04.2 LTS `C5`.`XLarge` `15GB` HD |
-|Big_cluster_40_agents         |Ubuntu 22.04.2 LTS T3.Large `60GB` HD      |
-|Agentless_cluster             |Ubuntu 22.04.2 LTS T3.Large 30GB HD        |
-|Four_manager_disconnected_node|Ubuntu 22.04.2 LTS T3.Large 30GB HD        |
-|One_manager_agent             |Ubuntu 22.04.2 LTS T3.Large 30GB HD        |
-|Manager_agent                 |Ubuntu 22.04.2 LTS T3.Large 30GB HD        |
-|Enrollment_cluster            |Ubuntu 22.04.2 LTS T3.Large 30GB HD        | 
-| Basic_environment            |Ubuntu 22.04.2 LTS T3.Large 30GB HD        |
+|Basic_cluster                 |Ubuntu 22.04.2 LTS C5.XLarge 15GB SSD      |
+|Big_cluster_40_agents         |Ubuntu 22.04.2 LTS T3.Large 60GB SSD       |
+|Agentless_cluster             |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
+|Four_manager_disconnected_node|Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
+|One_manager_agent             |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
+|Manager_agent                 |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
+|Enrollment_cluster            |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       | 
+|Basic_environment             |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
 
 
 Now it will be needed to install the following tools:
