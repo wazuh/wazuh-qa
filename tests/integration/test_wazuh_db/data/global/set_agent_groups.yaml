@@ -162,24 +162,24 @@
     expected_group: [TestGroup1]
     expected_group_sync_status: synced
 
-- name: Wrong sync_status - Assign a group using and invalid Sync_Status
+- name: Wrong sync_status - Assign a group using and invalid Sync_Status (rollback)
   test_case:
     pre_required_group: TestGroup1
     input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"wrong_status\",\"data\":[{\"id\":016,\
             \"groups\":[\"TestGroup1\"]}]}"
     output: err An error occurred during the set of the groups
     agent_id: 16
-    expected_group: [TestGroup1]
+    expected_group: []
     expected_group_sync_status: synced
 
-- name: No sync_status - Assign a group using and empty Sync_Status field
+- name: No sync_status - Assign a group using and empty Sync_Status field (rollback)
   test_case:
     pre_required_group: TestGroup1
     input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"\",\"data\":[{\"id\":017,\"groups\":\
             [\"TestGroup1\"]}]}"
     output: err An error occurred during the set of the groups
     agent_id: 17
-    expected_group: [TestGroup1]
+    expected_group: []
     expected_group_sync_status: synced
 
 - name: Missing Fields - Assign a group using without data field - agent has no group assigned
