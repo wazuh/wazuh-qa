@@ -4,7 +4,7 @@ Wazuh - System quality assurance automation templates
 
 ## Setting up a test environment
 
-To run these tests it will be required to use a **Linux** machine.
+To run these tests a **Linux** machine will be required.
 
 In the event that the tests are to be executed using AWS EC2 instances:
 
