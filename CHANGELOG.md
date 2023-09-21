@@ -2,15 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.5.3] - TBD
+## [4.5.3] - 28/09/2023
 
-Wazuh commit: TBD \
-Release report: TBD
+Wazuh commit: https://github.com/wazuh/wazuh/commit/9087982b0c4ae0180bcdcd214a2b243e75cd8416 \
+Release report: https://github.com/wazuh/wazuh/issues/19111
 
 ### Changed
 
 - Update setuptools dependency ([#3788](https://github.com/wazuh/wazuh-qa/pull/3788))
-- Updated the cluster master logs reliability test to run with python 3.7 [#4445](https://github.com/wazuh/wazuh-qa/pull/4478) \- (Tests)
+- Update the cluster master logs reliability test to run with python 3.7 [#4445](https://github.com/wazuh/wazuh-qa/pull/4478) \- (Tests)
+- Update ITs URL for SUSE OVAL ([#4496](https://github.com/wazuh/wazuh-qa/pull/4496/))
 
 ### Fixed
 
@@ -18,10 +19,10 @@ Release report: TBD
 - Enhancing the handling of authd and remoted simulators in case of restart failures ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
 - Fix py dependency version to install for Windows after the change to Python 3.11([#4523](https://github.com/wazuh/wazuh-qa/pull/4523)) \- (Framework)
 
-## [4.5.2] - TBD
+## [4.5.2] - 06-08-2023
 
-Wazuh commit: TBD \
-Release report: TBD
+Wazuh commit: https://github.com/wazuh/wazuh/commit/2efea7428ad34bce8ea0bd32d56b5faccad114a6 \
+Release report: https://github.com/wazuh/wazuh/issues/18794
 
 ### Changed
 
