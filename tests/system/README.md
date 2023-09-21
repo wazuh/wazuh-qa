@@ -22,7 +22,7 @@ In the event that the tests are to be executed using AWS EC2 instances:
 |Basic_environment             |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
 
 
-Now it will be needed to install the following tools:
+Now, the following tools will need to be installed:
 
 - [Docker](https://docs.docker.com/install/)
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
