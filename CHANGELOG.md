@@ -9,6 +9,7 @@ Release report: TBD
 
 ### Added
 
+- Add EC2 information for system tests. ([#4536](https://github.com/wazuh/wazuh-qa/pull/4536)) \- (Documentation)
 - Add Debian Bookworm VDT IT support. ([#4463](https://github.com/wazuh/wazuh-qa/pull/4463)) \- (Tests)
 - Add new test cases for the `discard_regex` functionality of `CloudWatchLogs` and `Inspector` services. ([#4278](https://github.com/wazuh/wazuh-qa/pull/4278)) \- (Tests)
 - Add Windows location wildcards tests ([#4263](https://github.com/wazuh/wazuh-qa/pull/4263)) \- (Tests + Framework)
