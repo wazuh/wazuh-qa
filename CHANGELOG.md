@@ -30,6 +30,7 @@ Release report: TBD
 
 ### Added
 
+- Add EC2 information for system tests. ([#4536](https://github.com/wazuh/wazuh-qa/pull/4536)) \- (Documentation)
 - Add Debian Bookworm VDT IT support. ([#4463](https://github.com/wazuh/wazuh-qa/pull/4463)) \- (Tests)
 - Add new test cases for the `discard_regex` functionality of `CloudWatchLogs` and `Inspector` services. ([#4278](https://github.com/wazuh/wazuh-qa/pull/4278)) \- (Tests)
 - Add Windows location wildcards tests ([#4263](https://github.com/wazuh/wazuh-qa/pull/4263)) \- (Tests + Framework)
@@ -50,6 +51,7 @@ Release report: TBD
 
 ### Changed
 
+- `Agentless_cluster` system tests timeout changed in order to reduce EC2 requirements ([#4534](https://github.com/wazuh/wazuh-qa/pull/4534)) \- (Tests)
 - Skip `test_authd_ssl_options` cases that use TLS 1.1 causing errors on several OpenSSL versions. ([#4229](https://github.com/wazuh/wazuh-qa/pull/4229)) \- (Tests)
 - Update database version ([#4467](https://github.com/wazuh/wazuh-qa/pull/4467)) \- (Tests)
 - Remove versionStartIncluding from NVD custom feed ([#4441](https://github.com/wazuh/wazuh-qa/pull/4441)) \- (Tests)
@@ -76,6 +78,9 @@ Release report: TBD
 
 ### Fixed
 
+- Fix invalid AR conf in integration tests ([#4521](https://github.com/wazuh/wazuh-qa/pull/4521)) \- (Tests)
+- Fix an error in AR library and test ([#4511](https://github.com/wazuh/wazuh-qa/pull/4511)) \- (Framework + Tests)
+- Fix provisioned pytest failure fixed ([#4520](https://github.com/wazuh/wazuh-qa/pull/4520)) \- (Framework)
 - Fix FIM framework to validate path in event correctly ([#4390](https://github.com/wazuh/wazuh-qa/pull/4390)) \- (Framework)
 - Fix an error related to logs format in reliability test ([#4387](https://github.com/wazuh/wazuh-qa/pull/4387)) \- (Tests)
 - Fix boto3 version requirement for legacy OS ([#4150](https://github.com/wazuh/wazuh-qa/pull/4150)) \- (Framework)
@@ -87,15 +92,27 @@ Release report: TBD
 - Fix bug in the framework on migration tool ([#4027](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
 - Fix test cluster / integrity sync system test and configuration to avoid flaky behavior ([#4406](https://github.com/wazuh/wazuh-qa/pull/4406)) \- (Tests)
 
-## [4.5.3] - TBD
+## [4.5.3] - 28/09/2023
 
-Wazuh commit: TBD \
-Release report: TBD
+Wazuh commit: https://github.com/wazuh/wazuh/commit/9087982b0c4ae0180bcdcd214a2b243e75cd8416 \
+Release report: https://github.com/wazuh/wazuh/issues/19111
 
-## [4.5.2] - TBD
+### Changed
 
-Wazuh commit: TBD \
-Release report: TBD
+- Update setuptools dependency ([#3788](https://github.com/wazuh/wazuh-qa/pull/3788))
+- Update the cluster master logs reliability test to run with python 3.7 [#4445](https://github.com/wazuh/wazuh-qa/pull/4478) \- (Tests)
+- Update ITs URL for SUSE OVAL ([#4496](https://github.com/wazuh/wazuh-qa/pull/4496/))
+
+### Fixed
+
+- Update the request method used to call the login API endpoint. ([#4492](https://github.com/wazuh/wazuh-qa/pull/4492)) \- (Tests)
+- Enhancing the handling of authd and remoted simulators in case of restart failures ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
+- Fix py dependency version to install for Windows after the change to Python 3.11([#4523](https://github.com/wazuh/wazuh-qa/pull/4523)) \- (Framework)
+
+## [4.5.2] - 06-08-2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/2efea7428ad34bce8ea0bd32d56b5faccad114a6 \
+Release report: https://github.com/wazuh/wazuh/issues/18794
 
 ### Changed
 
@@ -215,8 +232,6 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 - Adapt binary performance module to wazuh-cluster script renaming ([#3944](https://github.com/wazuh/wazuh-qa/pull/3944)) \- (Framework)
 - Add an option to store logs in system tests ([#2445](https://github.com/wazuh/wazuh-qa/pull/2445)) \- (Framework + Tests)
 - Add new test to check cpe_helper.json file ([#3731](https://github.com/wazuh/wazuh-qa/pull/3731))
-- Add new tests analysid handling of invalid/empty rule signature IDs ([#3649]
-(https://github.com/wazuh/wazuh-qa/pull/3649)) \- (Framework + Tests)
 - Add integration test to check statistics format ([#3813](https://github.com/wazuh/wazuh-qa/pull/3813)) \- (Framework + Tests)
 - Add new test to check vulnerable packages with triaged null([#3587](https://github.com/wazuh/wazuh-qa/pull/3587)) \- (Framework + Tests)
 - Add new tests analysid handling of invalid/empty rule signature IDs ([#3649](https://github.com/wazuh/wazuh-qa/pull/3649)) \- (Framework + Tests)

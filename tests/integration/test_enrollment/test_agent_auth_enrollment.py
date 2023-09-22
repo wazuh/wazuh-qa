@@ -142,6 +142,9 @@ def test_agent_auth_enrollment(configure_environment, shutdown_agentd, get_curre
         - Error logs related to the wrong configuration block
     """
 
+    # Check if socket listener is opened
+    assert configure_socket_listener, 'The agent failed configuring socket listener to start listening on the socket.'
+
     if 'agent-auth' in get_current_test_case.get('skips', []):
         pytest.skip('This test does not apply to agent-auth')
 
