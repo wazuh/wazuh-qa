@@ -16,7 +16,6 @@
       - automake
       - autoconf
       - libtool
-      - python3-pytest
       - libssl-dev
     force_apt_get: yes
     state: present
