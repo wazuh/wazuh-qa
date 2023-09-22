@@ -85,6 +85,7 @@ predefined_values:
   os_version:
     - Amazon Linux 1
     - Amazon Linux 2
+    - Amazon Linux 2023
     - Arch Linux
     - Debian Buster
     - Debian Stretch
