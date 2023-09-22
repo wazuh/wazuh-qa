@@ -1,5 +1,5 @@
 configobj==5.0.6
-certifi==2020.12.5
+certifi==2023.7.22
 cffi>=1.14.0; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
 cycler>=0.10; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
 bcrypt==3.2.0; platform_system == "Linux" or platform_system == "Darwin" or platform_system=='Windows'
