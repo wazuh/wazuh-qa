@@ -63,7 +63,8 @@ artifacts_path = '/docs/agent_groups'
     
         with open(cluster_log_files) as file:
             for line in file.readlines():
-                if result := logs_format.search(line):
+                result = logs_format.search(line)
+                if result:
                     if 'Worker' in result.group(1):
                         name = re.search('.*Worker (.*?)]', result.group(1)).group(1)
                         if name not in all_managers:

@@ -68,7 +68,8 @@ def test_check_logs_order_master(artifacts_path):
 
     with open(cluster_log_files) as file:
         for line in file.readlines():
-            if result := logs_format.search(line):
+            result = logs_format.search(line)
+            if result:
                 node_name = result.group(1)
                 if 'Worker' in node_name:
                     name = re.search('.*Worker (.*?)]', node_name).group(1)
