@@ -9,17 +9,18 @@ Release report: TBD
 
 ### Added
 
-- Add callbacks and IT tests for Integratord options tag. ([#4108](https://github.com/wazuh/wazuh-qa/pull/4108)) \- (Framework + tests)
+- Add callbacks and IT tests for Integratord options tag. ([#4166](https://github.com/wazuh/wazuh-qa/pull/4166)) \- (Framework + tests)
 - Add vulnerability Detector integration tests for Amazon Linux 2023 ([#4482](https://github.com/wazuh/wazuh-qa/pull/4482)) \- (Core)
 
 ### Changed
 
 - Add option to run some logcollector tests isolated (without a manager) [#4226](https://github.com/wazuh/wazuh-qa/pull/4226) \- (Tests + Framework)
-- Update code analysis and dependencies known flaws. [#3319](https://github.com/wazuh/wazuh-qa/pull/4083) \- (Tests)
+- Update code analysis and dependencies known flaws. [#4083](https://github.com/wazuh/wazuh-qa/pull/4083) \- (Tests)
 - Update _wazuh_db_ schema database version([#4405](https://github.com/wazuh/wazuh-qa/pull/4405)) \- (Tests)
 - Update framework known flaws file ([#4313](https://github.com/wazuh/wazuh-qa/pull/4313)) \- (Tests)
 
 ### Fixed
+- Fix registry wildcards path ([#4400](https://github.com/wazuh/wazuh-qa/pull/4400)) \- (Tests)
 - Update `get_test_cases_data` function so it handles fim_mode parameter ([#4185](https://github.com/wazuh/wazuh-qa/pull/4185)) \- (Framework)
 - Fix warnings in the rids tests([#4151](https://github.com/wazuh/wazuh-qa/pull/4151)) \- (Framework + Tests)
 
