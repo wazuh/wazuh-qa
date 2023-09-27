@@ -100,7 +100,6 @@ Release report: https://github.com/wazuh/wazuh/issues/19111
 
 ### Changed
 
-- Update setuptools dependency ([#3788](https://github.com/wazuh/wazuh-qa/pull/3788))
 - Update the cluster master logs reliability test to run with python 3.7 [#4445](https://github.com/wazuh/wazuh-qa/pull/4478) \- (Tests)
 - Update ITs URL for SUSE OVAL ([#4496](https://github.com/wazuh/wazuh-qa/pull/4496/))
 
