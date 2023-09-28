@@ -14,6 +14,7 @@ Release report: https://github.com/wazuh/wazuh/issues/19111
 
 ### Fixed
 
+- Fix enrollment system tests ([#4562](https://github.com/wazuh/wazuh-qa/pull/4562/)) \- (Tests)
 - Update the request method used to call the login API endpoint. ([#4492](https://github.com/wazuh/wazuh-qa/pull/4492)) \- (Tests)
 - Enhancing the handling of authd and remoted simulators in case of restart failures ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
 - Fix py dependency version to install for Windows after the change to Python 3.11([#4523](https://github.com/wazuh/wazuh-qa/pull/4523)) \- (Framework)
