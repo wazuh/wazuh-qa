@@ -39,6 +39,7 @@ time_to_sync = 21
 time_to_agent_reconnect = 180
 queries = ['sql select * from "group" where name="test_group"']
 
+
 @pytest.fixture(scope='module')
 def delete_group():
     yield
