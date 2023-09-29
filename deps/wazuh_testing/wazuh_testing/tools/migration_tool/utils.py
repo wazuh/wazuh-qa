@@ -32,7 +32,9 @@ def run_content_migration_tool(configuration_file_path, args=''):
         error (str): Error output if the execution fails.
     """
 
-    truncate_file(migration_tool.MIGRATION_TOOL_LOG_PATH)
+    if os.path.exists(migration_tool.MIGRATION_TOOL_LOG_PATH):
+        truncate_file(migration_tool.MIGRATION_TOOL_LOG_PATH)
+
     command = ' '.join([migration_tool.MIGRATION_TOOL_PATH, '-i', str(configuration_file_path), args])
     proc = sbp.Popen(command, shell=True, stdout=sbp.PIPE, stderr=sbp.PIPE)
     out, error = proc.communicate()
