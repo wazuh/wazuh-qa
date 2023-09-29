@@ -27,6 +27,7 @@ Release report: TBD
 - Add IT tests FIM registry monitoring using wildcards. ([#4270](https://github.com/wazuh/wazuh-qa/pull/4270)) \- (Framework + Tests)
 - Update schema database version ([#4128](https://github.com/wazuh/wazuh-qa/pull/4128)) \- (Tests)
 - Update framework known flaws files ([#4380](https://github.com/wazuh/wazuh-qa/pull/4380)) \- (Tests)
+- Add tests for Vulnerability Detector: Red Hat 9 support (https://github.com/wazuh/wazuh-qa/pull/4497) \- (Tests)
 
 ### Changed
 
@@ -75,10 +76,6 @@ Release report: TBD
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/9087982b0c4ae0180bcdcd214a2b243e75cd8416 \
 Release report: https://github.com/wazuh/wazuh/issues/19111
-
-### Added
-
-- Add tests for Vulnerability Detector: Red Hat 9 support (https://github.com/wazuh/wazuh-qa/pull/4497) \- (Tests)
 
 ### Changed
 
