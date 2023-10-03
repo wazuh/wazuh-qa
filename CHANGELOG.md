@@ -57,6 +57,7 @@ Release report: TBD
 
 ### Fixed
 
+- Fix Integration Test FIM tests skip marks changed ([#4569] (https://github.com/wazuh/wazuh-qa/pull/4569)) \- (Tests)
 - Fix invalid AR conf in integration tests ([#4521](https://github.com/wazuh/wazuh-qa/pull/4521)) \- (Tests)
 - Fix an error in AR library and test ([#4511](https://github.com/wazuh/wazuh-qa/pull/4511)) \- (Framework + Tests)
 - Fix provisioned pytest failure fixed ([#4520](https://github.com/wazuh/wazuh-qa/pull/4520)) \- (Framework)
