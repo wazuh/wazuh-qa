@@ -7,9 +7,8 @@ import json
 
 from sys import platform
 from datetime import datetime
-from wazuh_testing import LOG_FILE_PATH, logger, T_60, T_30, T_10
+from wazuh_testing import LOG_FILE_PATH, logger, T_60, T_30
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
-from wazuh_testing.modules.fim import MAX_EVENTS_VALUE
 
 
 # Variables
@@ -57,9 +56,7 @@ CB_SWITCHING_DIRECTORIES_TO_REALTIME = r'.*state_checker.*(Audit policy change d
 CB_RECIEVED_EVENT_4719 = r'.*win_whodata.*(Event 4719).*Switching directories to realtime'
 CB_FIM_REGISTRY_ENTRIES_COUNT = r".*Fim registry entries count: '(.*)'"
 CB_FIM_REGISTRY_VALUES_ENTRIES_COUNT = r".*Fim registry values entries count: '(.*)'"
-CB_WHODATA_QUEUE_SIZE = r".*Internal audit queue size set to \'(.*)\'."
-CB_WHODATA_QUEUE_FULL = r".*(Internal audit queue is full). Some events may be lost.*"
-CB_AUDIT_HEALTHCHECK_FAILED = r".*(Audit health check couldn't be completed correctly)."
+
 
 # Error message
 ERR_MSG_REALTIME_FOLDERS_EVENT = 'Did not receive expected "Folders monitored with real-time engine" event'
@@ -113,19 +110,6 @@ ERR_MSG_FILE_LIMIT_REACHED = 'Did not receive "File ... is too big ... to perfor
 ERR_MSG_FOLDER_DELETED = 'Did not receive expected "Folder ... has been deleted." event.'
 ERR_MSG_SACL_CONFIGURED_EVENT = 'Did not receive the expected "The SACL of <file> will be configured" event'
 ERR_MSG_WHODATA_REALTIME_MODE_CHANGE_EVENT = 'Expected "directory starts to monitored in real-time" event not received'
-
-
-def create_error_message(message, source=LOG_FILE_PATH):
-    """
-    Creates an error message from an event.
-    Args:
-        message(str): Message that will be shown in error message
-        source(str): name of log file where the event was expected from (default: LOG_FILE_PATH).
-
-    Returns:
-        string: A string containing the error message to be shown
-    """
-    return fr'Did not receive the expected "{message}" event in "{source}" file.'
 
 
 # Callback functions
@@ -486,14 +470,13 @@ def detect_initial_scan(file_monitor):
                        error_message=ERR_MSG_SCHEDULED_SCAN_ENDED)
 
 
-def detect_initial_scan_start(file_monitor, timeout=T_60):
+def detect_initial_scan_start(file_monitor):
     """Detect initial scan start when restarting Wazuh.
 
     Args:
         file_monitor (FileMonitor): file log monitor to detect events
-        timeout (str): timeout to check the event in Wazuh log
     """
-    file_monitor.start(timeout=timeout, callback=callback_detect_scan_start,
+    file_monitor.start(timeout=T_60, callback=callback_detect_scan_start,
                        error_message=ERR_MSG_SCHEDULED_SCAN_STARTED)
 
 
@@ -518,20 +501,19 @@ def detect_whodata_start(file_monitor, timeout=T_60):
                        error_message=ERR_MSG_WHODATA_ENGINE_EVENT)
 
 
-def get_messages(callback, timeout=T_30, max_events=MAX_EVENTS_VALUE):
+def get_messages(callback, timeout=T_30):
     """Look for as many synchronization events as possible.
     This function will look for the synchronization messages until a Timeout is raised or 'max_events' is reached.
     Args:
         callback (str): Callback to be used to detect the event.
         timeout (int): Timeout that will be used to get the dbsync_no_data message.
-        max_events (int): maximum amount of events that will be detected will be detected.
 
     Returns:
         A list with all the events in json format.
     """
     wazuh_log_monitor = FileMonitor(LOG_FILE_PATH)
     events = []
-    for _ in range(0, max_events):
+    for _ in range(0, MAX_EVENTS_VALUE):
         event = None
         try:
             event = wazuh_log_monitor.start(timeout=timeout, accum_results=1,
@@ -591,48 +573,6 @@ def detect_windows_whodata_mode_change(file_monitor, file='.*'):
 
     file_monitor.start(timeout=T_60, callback=generate_monitoring_callback(pattern),
                        error_message=ERR_MSG_WHODATA_REALTIME_MODE_CHANGE_EVENT)
-
-
-def detect_audit_queue_full(file_monitor, update_position=True):
-    """Detects the event generated when the whodata_queue is full
-    Args:
-        file_monitor (FileMonitor): file log monitor to detect events
-        update_position (bool, optional): True if we pop items from the queue once they are read. False otherwise.
-                                          Default `True`
-    """
-
-    return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_WHODATA_QUEUE_FULL),
-                              error_message=create_error_message(CB_WHODATA_QUEUE_FULL),
-                              update_position=update_position).result()
-
-
-def detect_invalid_conf_value(file_monitor, element):
-    """Detects the error generated when a configuration element has an invalid value.
-    Args:
-        file_monitor (FileMonitor): file log monitor to detect events
-        element (str): Element name that is being detected
-    """
-    pattern = fr".*Invalid value for element (\'{element}\': .*)"
-    return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(pattern),
-                              error_message=create_error_message(pattern)).result()
-
-
-def detect_audit_healthcheck_failed(file_monitor):
-    """Detects if the initial audit healtcheck has failed
-    Args:
-        file_monitor (FileMonitor): file log monitor to detect events
-    """
-    return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_AUDIT_HEALTHCHECK_FAILED),
-                              error_message=create_error_message(CB_AUDIT_HEALTHCHECK_FAILED)).result()
-
-
-def get_configured_whodata_queue_size(file_monitor):
-    """Detects the configured value for the whodata queue
-    Args:
-        file_monitor (FileMonitor): file log monitor to detect events
-    """
-    return file_monitor.start(timeout=T_10, callback=generate_monitoring_callback(CB_WHODATA_QUEUE_SIZE),
-                              error_message=create_error_message(CB_WHODATA_QUEUE_SIZE)).result()
 
 
 def get_fim_event(file_monitor=None, callback='', error_message=None, update_position=True,
