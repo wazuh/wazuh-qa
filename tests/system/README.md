@@ -4,7 +4,25 @@ Wazuh - System quality assurance automation templates
 
 ## Setting up a test environment
 
-To run these tests we need to use a **Linux** machine and install the following tools:
+To run these tests a **Linux** machine will be required.
+
+In the event that the tests are to be executed using AWS EC2 instances:
+
+### EC2 requirements for system testing
+
+| Environment                  | EC2                                       |
+|------------------------------|-------------------------------------------|
+|Basic_cluster                 |Ubuntu 22.04.2 LTS C5.XLarge 15GB SSD      |
+|Big_cluster_40_agents         |Ubuntu 22.04.2 LTS T3.Large 60GB SSD       |
+|Agentless_cluster             |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
+|Four_manager_disconnected_node|Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
+|One_manager_agent             |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
+|Manager_agent                 |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
+|Enrollment_cluster            |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       | 
+|Basic_environment             |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
+
+
+Now, the following tools will need to be installed:
 
 - [Docker](https://docs.docker.com/install/)
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
@@ -121,6 +139,7 @@ required an specific testing environment located in `wazuh-qa/tests/system/provi
 | test_jwt_invalidation                                                     | agentless_cluster              |
 | test_active_response_log_format                                           | manager_agent                  |
 | test_fim/test_synchronization                                             | one_manager_agent              |
+| test_cluster/test_correct_merged_file_generation                          | one_manager_agent              |
 | test_multigroups/test_multigroups                                         | basic_cluster                  |
 | test_cluster/test_agent_groups/test_agent_groups_forced_change            | basic_cluster                  |
 | test_cluster/test_agent_groups/test_agent_default_group_added             | enrollment_cluster             |
@@ -132,8 +151,10 @@ required an specific testing environment located in `wazuh-qa/tests/system/provi
 | test_cluster/test_agent_groups/test_assign_agent_to_a_group_by_tool       | enrollment_cluster             |
 | test_cluster/test_agent_groups/test_assign_agent_to_a_group               | enrollment_cluster             |
 | test_cluster/test_agent_groups/test_assign_groups_guess                   | enrollment_cluster             |
+| test_cluster/test_agent_groups/test_group_hash                            | enrollment_cluster             |
 | test_cluster/test_agent_groups/test_groups_sync_default                   | big_cluster_40_agents          |
 | test_cluster/test_agent_groups/test_groups_sync_time                      | big_cluster_40_agents          |
+| test_shutdown_message/test_shutdown_message                               | big_cluster_40_agents          |
 
 ### Test structure
 

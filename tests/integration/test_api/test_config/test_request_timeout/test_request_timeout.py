@@ -123,8 +123,8 @@ def test_request_timeout(tags_to_apply, get_configuration, configure_api_environ
         - r'3021' ('timeout error' in the response body)
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
-    get_response = requests.get(f'{api.API_PROTOCOL}://{api.API_HOST}:{api.API_PORT}{api.API_LOGIN_ENDPOINT}',
-                                headers=api.get_login_headers(api.API_USER, api.API_PASS), verify=False)
+    get_response = requests.post(f'{api.API_PROTOCOL}://{api.API_HOST}:{api.API_PORT}{api.API_LOGIN_ENDPOINT}',
+                                 headers=api.get_login_headers(api.API_USER, api.API_PASS), verify=False)
 
     assert get_response.status_code == 500, f'Expected status code was 500, ' \
                                             f'but {get_response.status_code} was returned. \n' \

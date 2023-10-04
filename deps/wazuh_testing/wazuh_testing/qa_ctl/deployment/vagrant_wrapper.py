@@ -60,25 +60,25 @@ class VagrantWrapper(Instance):
             VagrantWrapper.LOGGER.info(f"{self.vm_box} vagrant box not found in local repository. Downloading and "
                                        'running')
         self.vagrant.up()
-        VagrantWrapper.LOGGER.debug(f"Instance {self.vm_name} has been created sucessfully")
+        VagrantWrapper.LOGGER.debug(f"Instance {self.vm_name} has been created successfully")
 
     def halt(self):
         """Stop the VM specified in the vagrantfile."""
         VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant halt")
         self.vagrant.halt()
-        VagrantWrapper.LOGGER.debug(f"Instance {self.vm_name} has been off sucessfully")
+        VagrantWrapper.LOGGER.debug(f"Instance {self.vm_name} has been off successfully")
 
     def restart(self):
         """Restart the VM specified in the vagrantfile."""
         VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant restart")
         self.vagrant.restart()
-        VagrantWrapper.LOGGER.debug(f"Instance {self.vm_name} has been restarted sucessfully")
+        VagrantWrapper.LOGGER.debug(f"Instance {self.vm_name} has been restarted successfully")
 
     def destroy(self):
         """Destroy the VM specified in the vagrantfile and remove the vagrantfile."""
         VagrantWrapper.LOGGER.debug(f"Running {self.vm_name} vagrant destroy")
         self.vagrant.destroy()
-        VagrantWrapper.LOGGER.debug(f"{self.vm_name} instance has been destroyed sucessfully")
+        VagrantWrapper.LOGGER.debug(f"{self.vm_name} instance has been destroyed successfully")
         self.vagrantfile.remove_vagrantfile()
         rmtree(self.box_folder)
 

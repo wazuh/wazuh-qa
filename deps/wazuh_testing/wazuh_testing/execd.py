@@ -25,7 +25,7 @@ def wait_ended_message_line(line):
 
 def wait_received_message_line(line):
     """Callback function to wait for the Received Active Response message."""
-    regex = r'.*wazuh-execd.+ExecdStart\(\): DEBUG: Received message: \S+'
+    regex = r'.*DEBUG: Received message: .+'
     match = re.match(regex, line)
 
     return None if not match else line
