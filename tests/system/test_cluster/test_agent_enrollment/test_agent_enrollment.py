@@ -32,6 +32,7 @@ def clean_environment():
                                                   check=False)
     host_manager.control_service(host='wazuh-agent1', service='wazuh', state="stopped")
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
+    host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
 
 
 def test_agent_enrollment(clean_environment):
@@ -40,7 +41,6 @@ def test_agent_enrollment(clean_environment):
     # Clean ossec.log and cluster.log
     host_manager.clear_file(host='wazuh-master', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
     host_manager.clear_file(host='wazuh-worker1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
-    host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
     host_manager.clear_file(host='wazuh-master', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
     host_manager.clear_file(host='wazuh-worker1', file_path=os.path.join(WAZUH_LOGS_PATH, 'cluster.log'))
 
