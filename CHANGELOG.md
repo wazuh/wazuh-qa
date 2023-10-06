@@ -73,19 +73,19 @@ Release report: TBD
 - Fix bug in the framework on migration tool ([#4027](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
 - Fix test cluster / integrity sync system test and configuration to avoid flaky behavior ([#4406](https://github.com/wazuh/wazuh-qa/pull/4406)) \- (Tests)
 
-## [4.5.3] - 28/09/2023
+## [4.5.3] - 10/10/2023
 
-Wazuh commit: https://github.com/wazuh/wazuh/commit/9087982b0c4ae0180bcdcd214a2b243e75cd8416 \
-Release report: https://github.com/wazuh/wazuh/issues/19111
+Wazuh commit: https://github.com/wazuh/wazuh/commit/388ce54b704d7b6aa2dda1b30258ad1642b26a2d \
+Release report: https://github.com/wazuh/wazuh/issues/19446
 
 ### Changed
 
-- Update setuptools dependency ([#3788](https://github.com/wazuh/wazuh-qa/pull/3788))
 - Update the cluster master logs reliability test to run with python 3.7 [#4445](https://github.com/wazuh/wazuh-qa/pull/4478) \- (Tests)
 - Update ITs URL for SUSE OVAL ([#4496](https://github.com/wazuh/wazuh-qa/pull/4496/))
 
 ### Fixed
 
+- Fix enrollment system tests ([#4562](https://github.com/wazuh/wazuh-qa/pull/4562/)) \- (Tests)
 - Update the request method used to call the login API endpoint. ([#4492](https://github.com/wazuh/wazuh-qa/pull/4492)) \- (Tests)
 - Enhancing the handling of authd and remoted simulators in case of restart failures ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
 - Fix py dependency version to install for Windows after the change to Python 3.11([#4523](https://github.com/wazuh/wazuh-qa/pull/4523)) \- (Framework)
