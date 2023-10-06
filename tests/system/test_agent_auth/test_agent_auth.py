@@ -64,6 +64,7 @@ def clean_environment():
     host_manager.run_command('wazuh-manager', f"{WAZUH_PATH}/bin/manage_agents -r {agent_id}")
     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
+    host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
 
 
 # IPV6 fixtures
@@ -234,7 +235,6 @@ def test_agent_auth(test_case, get_ip_directions, configure_network, modify_ip_a
     '''
     # Clean ossec.log and cluster.log
     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
-    host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
     host_manager.control_service(host='wazuh-manager', service='wazuh', state="restarted")
 
     # Start the agent enrollment process using agent-auth

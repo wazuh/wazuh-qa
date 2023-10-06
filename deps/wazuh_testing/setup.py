@@ -2,8 +2,8 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 import json
+from setuptools import setup, find_packages
 import os
-from setuptools import setup, find_namespace_packages
 
 package_data_list = [
     'data/agent.conf',
@@ -79,7 +79,7 @@ setup(
     author='Wazuh',
     author_email='hello@wazuh.com',
     license='GPLv2',
-    packages=find_namespace_packages(),
+    packages=find_packages(),
     package_data={'wazuh_testing': package_data_list},
     entry_points={'console_scripts': scripts_list},
     include_package_data=True,
