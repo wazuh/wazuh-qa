@@ -93,7 +93,7 @@ def get_configuration(request):
 
 
 # tests
-@pytest.mark.skip(sys.platform=='win32', reason="Blocked by #4077.")
+@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked by #4077.")
 @pytest.mark.parametrize('key_name', [':subkey1', 'subkey2:', ':subkey3:'])
 @pytest.mark.parametrize('value_name', [':value1', 'value2:', ':value3:'])
 def test_registry_sync_after_restart(key_name, value_name, configure_local_internal_options_module,

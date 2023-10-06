@@ -54,6 +54,7 @@ Release report: TBD
 - Add IT tests FIM registry monitoring using wildcards. ([#4270](https://github.com/wazuh/wazuh-qa/pull/4270)) \- (Framework + Tests)
 - Update schema database version ([#4128](https://github.com/wazuh/wazuh-qa/pull/4128)) \- (Tests)
 - Update framework known flaws files ([#4380](https://github.com/wazuh/wazuh-qa/pull/4380)) \- (Tests)
+- Add tests for Vulnerability Detector: Red Hat 9 support (https://github.com/wazuh/wazuh-qa/pull/4497) \- (Tests)
 
 ### Changed
 
@@ -84,6 +85,7 @@ Release report: TBD
 
 ### Fixed
 
+- Fix Integration Test FIM tests skip marks changed ([#4569] (https://github.com/wazuh/wazuh-qa/pull/4569)) \- (Tests)
 - Fix invalid AR conf in integration tests ([#4521](https://github.com/wazuh/wazuh-qa/pull/4521)) \- (Tests)
 - Fix an error in AR library and test ([#4511](https://github.com/wazuh/wazuh-qa/pull/4511)) \- (Framework + Tests)
 - Fix provisioned pytest failure fixed ([#4520](https://github.com/wazuh/wazuh-qa/pull/4520)) \- (Framework)
@@ -98,10 +100,10 @@ Release report: TBD
 - Fix bug in the framework on migration tool ([#4027](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
 - Fix test cluster / integrity sync system test and configuration to avoid flaky behavior ([#4406](https://github.com/wazuh/wazuh-qa/pull/4406)) \- (Tests)
 
-## [4.5.3] - 28/09/2023
+## [4.5.3] - 10/10/2023
 
-Wazuh commit: https://github.com/wazuh/wazuh/commit/9087982b0c4ae0180bcdcd214a2b243e75cd8416 \
-Release report: https://github.com/wazuh/wazuh/issues/19111
+Wazuh commit: https://github.com/wazuh/wazuh/commit/388ce54b704d7b6aa2dda1b30258ad1642b26a2d \
+Release report: https://github.com/wazuh/wazuh/issues/19446
 
 ### Changed
 
@@ -110,6 +112,7 @@ Release report: https://github.com/wazuh/wazuh/issues/19111
 
 ### Fixed
 
+- Fix enrollment system tests ([#4562](https://github.com/wazuh/wazuh-qa/pull/4562/)) \- (Tests)
 - Update the request method used to call the login API endpoint. ([#4492](https://github.com/wazuh/wazuh-qa/pull/4492)) \- (Tests)
 - Enhancing the handling of authd and remoted simulators in case of restart failures ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
 - Fix py dependency version to install for Windows after the change to Python 3.11([#4523](https://github.com/wazuh/wazuh-qa/pull/4523)) \- (Framework)
