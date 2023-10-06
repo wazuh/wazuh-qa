@@ -155,6 +155,9 @@ def test_agentd_enrollment(configure_environment, override_wazuh_conf, get_curre
             - Error logs related to the wrong configuration block
     """
 
+    # Check if socket listener is opened
+    assert configure_socket_listener, 'The agent failed configuring socket listener to start listening on the socket.'
+
     if 'expected_error' in get_current_test_case:
         log_monitor = request.module.log_monitor
         expected_error_dict = get_current_test_case['expected_error']

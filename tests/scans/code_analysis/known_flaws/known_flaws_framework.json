@@ -6,9 +6,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-            "line_number": 724,
+            "line_number": 737,
             "line_range": [
-                724
+                737
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
             "test_id": "B303",
@@ -20,38 +20,10 @@
             "issue_confidence": "HIGH",
             "issue_severity": "LOW",
             "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 991,
+            "line_number": 1001,
             "line_range": [
-                991,
-                992
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
-            "test_id": "B603",
-            "test_name": "subprocess_without_shell_equals_true"
-        },
-        {
-            "code": " import struct\n import subprocess\n import sys\n",
-            "filename": "framework/scripts/wazuh_logtest.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "Consider possible security implications associated with subprocess module.",
-            "line_number": 14,
-            "line_range": [
-                14
-            ],
-            "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_imports.html#b404-import-subprocess",
-            "test_id": "B404",
-            "test_name": "blacklist"
-        },
-        {
-            "code": "         try:\n             proc = subprocess.Popen([wazuh_control, \"info\"], stdout=subprocess.PIPE)\n             (stdout, stderr) = proc.communicate()\n",
-            "filename": "framework/scripts/wazuh_logtest.py",
-            "issue_confidence": "HIGH",
-            "issue_severity": "LOW",
-            "issue_text": "subprocess call - check for execution of untrusted input.",
-            "line_number": 521,
-            "line_range": [
-                521
+                1001,
+                1002
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/plugins/b603_subprocess_without_shell_equals_true.html",
             "test_id": "B603",
@@ -164,9 +136,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of possibly insecure function - consider using safer ast.literal_eval.",
-            "line_number": 1793,
+            "line_number": 1796,
             "line_range": [
-                1793
+                1796
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b307-eval",
             "test_id": "B307",

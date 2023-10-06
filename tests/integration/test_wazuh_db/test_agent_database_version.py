@@ -34,7 +34,7 @@ def test_agent_database_version(restart_wazuh_daemon, remove_agents):
             - Check that the manager database version is the expected one.
             - Check that the agent database version is the expected one.
 
-    wazuh_min_version: 4.8.0
+    wazuh_min_version: 4.4.0
 
     parameters:
         - restart_wazuh_daemon:

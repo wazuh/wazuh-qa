@@ -1,0 +1,133 @@
+- name: merged_created_on_start
+  description: merged file is created when starts
+  configuration_parameters: null
+  metadata:
+    test_type: on_start
+    action: remove
+    number_files: 0
+    shared_folder: default
+    file_name: null
+    file_content: null
+    merged_value: null
+
+- name: merged_updated_10_sec
+  description: merged file is updated after 10 seconds
+  configuration_parameters: null
+  metadata:
+    test_type: 10s
+    action: remove
+    number_files: 0
+    shared_folder: default
+    file_name: null
+    file_content: null
+    merged_value: null
+
+- name: add_non_zero_file_default_folder_check_merged_created_starts
+  description: merged file is created when starts and shared file is not empty
+  configuration_parameters: null
+  metadata:
+    test_type: on_start
+    action: add_files
+    number_files: 1
+    shared_folder: default
+    file_name: TestFile
+    file_content: Data in file
+
+- name: add_zero_file_default_folder_check_merged_created_starts
+  description: merged file is created when starts and shared file is empty
+  configuration_parameters: null
+  metadata:
+    test_type: on_start
+    action: add_files
+    number_files: 1
+    shared_folder: default
+    file_name: EmptyFile
+    file_content: zero
+
+- name: add_non_zero_size_file_default_folder_check_merged_updated_10_sec
+  description: merged file is updated after 10s after adding non zero file to default folder
+  configuration_parameters: null
+  metadata:
+    test_type: 10s
+    action: add_files
+    number_files: 1
+    shared_folder: default
+    file_name: TestFile2
+    file_content: Data in file
+
+- name: add_non_zero_size_file_TestGroup1_folder_check_merged_updated_manager_starts
+  description: merged file is created after restart adding non zero file to TestGroup1 folder
+  configuration_parameters: null
+  metadata:
+    test_type: on_start
+    action: add_files
+    number_files: 1
+    shared_folder: TestGroup1
+    file_name: TestFileInTestGroup2
+    file_content: Data in file
+
+- name: add_non_zero_size_file_TestGroup1_folder_check_merged_updated_10_sec
+  description: merged file is updated after 10s adding non zero file to TestGroup1 folder
+  configuration_parameters: null
+  metadata:
+    test_type: 10s
+    action: add_files
+    number_files: 1
+    shared_folder: TestGroup1
+    file_name: TestFileInTestGroup
+    file_content: Data in file
+
+- name: add_non_zero_size_file_default_folder_check_merged_updated_10_sec
+  description: merged file is updated after 10s adding non zero file to default folder
+  configuration_parameters: null
+  metadata:
+    test_type: 10s
+    action: add_files
+    number_files: 1
+    shared_folder: default
+    file_name: EmptyFile2
+    file_content: Data in file
+
+- name: add_zero_size_file_TestGroup1_folder_check_merged_updated_manager_starts
+  description: merged file is created after restart adding non zero file to TestGroup1 folder
+  configuration_parameters: null
+  metadata:
+    test_type: on_start
+    action: add_files
+    number_files: 1
+    shared_folder: TestGroup1
+    file_name: EmptyFileInGroup2
+    file_content: zero
+
+- name: add_zero_size_file_TestGroup1_folder_check_merged_updated_10_sec
+  description: merged file is updated after 10s adding zero file to TestGroup1 folder
+  configuration_parameters: null
+  metadata:
+    test_type: 10s
+    action: add_files
+    number_files: 1
+    shared_folder: TestGroup1
+    file_name: EmptyFileInGroup
+    file_content: zero
+
+- name: add_serveral_zero_size_file_default_folder_check_merged_updated_manager_starts
+  description: merged file is updated after restart adding several zero files to default folder
+  configuration_parameters: null
+  metadata:
+    test_type: on_start
+    action: add_files
+    number_files: 7
+    shared_folder: default
+    file_name: EmptyFile
+    file_content: zero
+
+- name: add_serveral_zero_size_file_TestGroup1_folder_check_merged_updated_manager_start
+  description: merged file is updated after restart adding several zero files to TestGroup1 folder
+  configuration_parameters: null
+  metadata:
+    test_type: on_start
+    action: add_files
+    number_files: 7
+    shared_folder: TestGroup1
+    file_name: EmptyFileGroup
+    file_content: zero

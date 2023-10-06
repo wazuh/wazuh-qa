@@ -15,7 +15,6 @@
       - automake
       - autoconf
       - libtool
-      - python3-pytest
       - libssl-dev
     force_apt_get: yes
     state: present
@@ -52,7 +51,7 @@
 - name: "Get agent package"
   ansible.builtin.get_url:
     url: "https://{{package_repository}}.wazuh.com/{{repository}}/apt/pool/main/w/wazuh-agent/wazuh-agent_{{package_version}}-{{package_revision}}_amd64.deb"
-    dest: /tmp/wazuh-manager.deb
+    dest: /tmp/wazuh-agent.deb
   when: wazuh_branch is not defined
 
 - name: "Install agent package"
