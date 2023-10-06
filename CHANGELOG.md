@@ -17,6 +17,7 @@ Release report: TBD
 
 ### Changed
 
+- Enable Windows Vulnerability Detector E2E. ([#4251](https://github.com/wazuh/wazuh-qa/pull/4251)) (Tests)
 - Update certifi library due to a vulnerability. ([#4486](https://github.com/wazuh/wazuh-qa/pull/4486)) \- (Tests)
 - Enable Ubuntu Vulnerability Detector E2E. ([#4252](https://github.com/wazuh/wazuh-qa/pull/4252)) \- (Tests)
 - Update _wazuh_db_ schema database version ([#4353](https://github.com/wazuh/wazuh-qa/pull/4353)) \- (Tests)
@@ -194,8 +195,8 @@ Release report: https://github.com/wazuh/wazuh/issues/17520
 
 ### Added
 
-- Change test_python_flaws.py to accept branch or commit in the same argument. ([#4209](https://github.com/wazuh/wazuh-qa/pull/4209)) (Tests)
-- Fix test_dependencies.py for the changes in the feature. ([#4210](https://github.com/wazuh/wazuh-qa/pull/4210)) (Tests)
+- Change test_python_flaws.py to accept branch or commit in the same argument. ([#4209](https://github.com/wazuh/wazuh-qa/pull/4209)) \- (Tests)
+- Fix test_dependencies.py for the changes in the feature. ([#4210](https://github.com/wazuh/wazuh-qa/pull/4210)) \- (Tests)
 
 ### Fixed
 
