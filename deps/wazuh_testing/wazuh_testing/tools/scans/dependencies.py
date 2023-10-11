@@ -63,7 +63,7 @@ def prepare_input(pip_mode, input_file_path):
         with open(input_file_path, mode='r') as input_file:
             lines = input_file.readlines()
             for line in lines:
-                if line.startswith('\n') or line.startswith('#'):
+                if line.strip().startswith('#') or not line.strip():
                     continue
                 line = re.sub('[<>~]', '=', line)
                 if ',' in line:
