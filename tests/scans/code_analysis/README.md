@@ -15,7 +15,7 @@ The contents of this directory are:
 
 ## Usage
 
-- Run the test.
+- Run the test: `pytest tests/scans/code_analysis/test_python_flaws.py`
 - If the test passes without failures, everything is correct, and no action is needed.
 - If the test fails, `wazuh-qa/tests/scans/code_analysis/new_flaws_{module}.json` file will report the new code vulnerabilities found.
 You should analyze the new vulnerabilities found in the module and report them in GitHub issues.
@@ -32,25 +32,16 @@ You can also use more parameters to customize the test functionality. The test w
 
 > By default, the test checks the `framework`, `wodles` and `api` directories in the [wazuh/wazuh](https://github.com/wazuh/wazuh) repository's master branch.
 
-- `--repo`: the repository used. 
+| Parameter             | Description                                           | Default Value     |
+|-----------------------|-------------------------------------------------------|-------------------|
+| `--repo`              | The repository to test.                               | `wazuh`           |
+| `--reference`         | The repository branch.                                | `master`          |
+| `--check_directories` | The directories to check (comma-separated).           | `framework/,api/,wodles/` |
+| `--exclude_directories`| The directories to exclude (comma-separated).        | `test/,tests/`    |
+| `--confidence`        | Minimum confidence level for Bandit scan.             | `MEDIUM`           |
+| `--severity`          | Minimum severity level for Bandit scan.               | `LOW`             |
 
-    Default: `wazuh`
-- `--reference`: the repository branch. 
-
-    Default: `master`
-- `--check_directories`: the directories names to check. This parameter accepts multiple directories separated by commas.
-
-    Default: `framework/,api/,wodles/`
-- `--exclude_directories`: the directories names to exclude. This parameter accepts multiple directories separated by commas. 
-
-    Default: `test/,tests/`
-- `--confidence`: the minimum value of confidence of the Bandit scan. This value must be 'UNDEFINED', 'LOW', 'MEDIUM' or 'HIGH'.
-
-    Default: `MEDIUM`
-- `--severity`: the minimum value of severity of the Bandit scan. This value must be 'UNDEFINED', 'LOW', 'MEDIUM' or 'HIGH'.
-
-    Default: `LOW`
-
+> The values accepted by the flags `--confidence` and `--security` are `UNDEFINED`, `LOW`, `MEDIUM` or `HIGH`.
 
 #### Example
 
