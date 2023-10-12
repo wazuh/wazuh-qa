@@ -25,6 +25,7 @@ Release report: TBD
 - Update the JSON schema with the required fields for the output content of the migration tool ([#4375](https://github.com/wazuh/wazuh-qa/pull/4375)) \- (Tests)
 - Update framework known flaws file ([#4443](https://github.com/wazuh/wazuh-qa/pull/4443)) \- (Tests)
 - Align migration tool system tests to the tool's new output directory structure ([#4561](https://github.com/wazuh/wazuh-qa/pull/4561)) \- (Tests)
+- Update the migration tool's system tests to match the new log file structure([#4618](https://github.com/wazuh/wazuh-qa/pull/4618)) \- (Tests)
 
 ## [4.7.1] - TBD
 
