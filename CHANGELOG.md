@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.5.4] - TBD
+
 ## [4.5.3] - 10/10/2023
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/388ce54b704d7b6aa2dda1b30258ad1642b26a2d \
