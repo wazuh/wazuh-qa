@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.5.4] - TBD
+## [4.5.4] - 24/10/2023
 
 ## [4.5.3] - 10/10/2023
 
