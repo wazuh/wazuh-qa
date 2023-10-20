@@ -73,6 +73,11 @@ Release report: TBD
 - Fix bug in the framework on migration tool ([#4027](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
 - Fix test cluster / integrity sync system test and configuration to avoid flaky behavior ([#4406](https://github.com/wazuh/wazuh-qa/pull/4406)) \- (Tests)
 
+## [4.5.4] - 24/10/2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/48870c11207b1f0ba20ae29688d75564bfc04489 \
+Release report: https://github.com/wazuh/wazuh/issues/19764
+
 ## [4.5.3] - 10/10/2023
 
 Wazuh commit: https://github.com/wazuh/wazuh/commit/388ce54b704d7b6aa2dda1b30258ad1642b26a2d \
