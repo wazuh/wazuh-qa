@@ -9,6 +9,9 @@ Release report: TBD
 
 ## [4.7.0] - TBD
 
+Wazuh commit: TBD \
+Release report: TBD
+
 ### Added
 
 - Add callbacks and IT tests for Integratord options tag. ([#4166](https://github.com/wazuh/wazuh-qa/pull/4166)) \- (Framework + tests)
