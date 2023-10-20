@@ -50,7 +50,6 @@ Release report: TBD
 
 ### Fixed
 - Fix registry wildcards path ([#4400](https://github.com/wazuh/wazuh-qa/pull/4400)) \- (Tests)
-- Update `get_test_cases_data` function so it handles fim_mode parameter ([#4185](https://github.com/wazuh/wazuh-qa/pull/4185)) \- (Framework)
 - Fix warnings in the rids tests([#4151](https://github.com/wazuh/wazuh-qa/pull/4151)) \- (Framework + Tests)
 
 ## [4.6.0] - TBD
@@ -126,6 +125,11 @@ Release report: TBD
 - Fix an error in the cluster performance tests related to CSV parser ([#2999](https://github.com/wazuh/wazuh-qa/pull/2999)) \- (Framework + Tests)
 - Fix bug in the framework on migration tool ([#4027](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
 - Fix test cluster / integrity sync system test and configuration to avoid flaky behavior ([#4406](https://github.com/wazuh/wazuh-qa/pull/4406)) \- (Tests)
+
+## [4.5.4] - 24/10/2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/48870c11207b1f0ba20ae29688d75564bfc04489 \
+Release report: https://github.com/wazuh/wazuh/issues/19764
 
 ## [4.5.3] - 10/10/2023
 
