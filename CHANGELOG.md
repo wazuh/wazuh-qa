@@ -77,7 +77,7 @@ Release report: TBD
 - Fix misspelling regex and error in test_cluster_connection ([#4392](https://github.com/wazuh/wazuh-qa/pull/4392)) \- (Tests)
 - Fix test validate feed content - Canonical ([#4381](https://github.com/wazuh/wazuh-qa/pull/4381)) \- (Tests)
 - Fix flaky test in AR suite (excecd) ([#4360](https://github.com/wazuh/wazuh-qa/pull/4360)) \- (Tests)
-- Fix registry wildcards path ([#4357](https://github.com/wazuh/wazuh-qa/pull/4357/files)) \- (Tests)
+- Fix registry wildcards path ([#4357](https://github.com/wazuh/wazuh-qa/pull/4357)) \- (Tests)
 
 ## [4.5.4] - 24/10/2023
 
