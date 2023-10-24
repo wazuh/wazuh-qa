@@ -67,3 +67,12 @@ wazuh-worker1:
       - queue_size:
           value: 131072
 
+wazuh-agent2:
+  description: Set manager address
+  sections:
+  - section: client
+    elements:
+      - server:
+          elements:
+          - address:
+              value: wazuh-worker1
