@@ -1,0 +1,28 @@
+# Ansible stucks with this playbook for some reason
+
+- hosts: Agent*
+  become: true
+  tasks:
+    - name: Clear
+      shell: "{{ item }}"
+      with_items:
+        - "apt remove --purge wazuh-agent"
+
+
+- hosts: Manager*
+  become: true
+  tasks:
+    - name: Clear
+      shell: "{{ item }}"
+      with_items:
+        - "apt remove --purge wazuh-manager"
+
+- hosts: all
+  become: true
+  tasks:
+    - name: Clear
+      shell: "{{ item }}"
+      with_items:
+        - "rm -rf /tmp/dist-detect.sh /tmp/tests/"
+        - "rm -rf /etc/apt/sources.list.d/wazuh.list"
+        - "apt update"

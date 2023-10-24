@@ -1,0 +1,36 @@
+- hosts: all
+  become: true
+  vars:
+    path: '/tmp'
+    test_directory: 'tests'
+    test_agent_test: 'test_agent.py'
+    test_manager_test: 'test_manager.py'
+    curl_path: /usr/bin/curl
+
+  tasks:
+
+    - name: Download dist-detect.sh
+      command: "{{ curl_path }} -kL http://raw.githubusercontent.com/wazuh/wazuh/{{ branch_version }}/src/init/dist-detect.sh -o {{ path }}/dist-detect.sh"
+
+    - name: Get operating system name
+      shell: '. {{ path }}/dist-detect.sh && echo $DIST_NAME $DIST_VER'
+      register: os
+      args:
+        executable: /bin/bash
+
+    - name: Get Wazuh target
+      shell: "/var/ossec/bin/wazuh-control info | grep -E -o 'agent|server'"
+      register: target
+
+    - name: Run tests
+      command: "pytest {{ test_agent_test }} --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target.stdout|quote }} -v"
+      args:
+        chdir: "{{ path }}/{{ test_directory }}"
+      when: target.stdout == 'agent'
+
+    - name: Run tests
+      command: "pytest {{ test_manager_test }} --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target.stdout|quote }} -v"
+      args:
+        chdir: "{{ path }}/{{ test_directory }}"
+      when: target.stdout == 'server'
+

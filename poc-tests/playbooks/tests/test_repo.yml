@@ -1,0 +1,23 @@
+- hosts: all
+  become: true
+  vars:
+    path: '/tmp'
+    test_directory: 'tests'
+    test_repo_test: 'test_repo'
+
+  tasks:
+
+    - name: Run block tests
+      block:
+        - name: Run tests
+          command: "pytest {{ test_repo_test }}.py -v"
+          args:
+            chdir: "{{ path }}/{{ test_directory }}"
+          register: pytest_log
+
+      always:
+        - name: Save pytest output to a file
+          copy:
+            remote_src: yes
+            content: "{{ pytest_log.stdout }}"
+            dest: "{{ path }}/{{ test_directory }}/{{ test_repo_test }}.log"

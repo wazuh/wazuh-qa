@@ -1,0 +1,11 @@
+- hosts: Manager*
+  become: true
+  tasks:
+    - name: Install the Wazuh manager
+      shell: "apt-get install wazuh-manager"
+
+- hosts: Agent*
+  become: true
+  tasks:
+    - name: Install the Wazuh agent
+      shell: "apt-get install wazuh-agent"

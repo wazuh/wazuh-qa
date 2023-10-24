@@ -1,0 +1,46 @@
+import yaml
+import ansible_runner
+
+
+class Ansible:
+
+    # -------------------------------------
+    #   Variables
+    # -------------------------------------
+
+    inventory = None
+    path = ""
+
+    # -------------------------------------
+    #   Constructor
+    # -------------------------------------
+
+    def __init__(self, playbook_path):
+        self.path = playbook_path
+
+    # -------------------------------------
+    #   Setters and Getters
+    # -------------------------------------
+
+    def set_inventory(self, inventory):
+        with open(inventory, 'r') as file:
+            inv = yaml.safe_load(file)
+        file.close()
+        self.inventory = inv
+
+    def get_inventory(self):
+        return self.inventory
+
+    # -------------------------------------
+    #   Methods
+    # -------------------------------------
+
+    # https://ansible.readthedocs.io/projects/runner/en/1.1.0/ansible_runner.html
+    def run_playbook(self, playbook=None, extravars=None, verbosity=1):
+        r = ansible_runner.run(
+            inventory=self.inventory,
+            playbook=self.path + "/" + playbook,
+            verbosity=verbosity,
+            extravars=extravars
+        )
+
