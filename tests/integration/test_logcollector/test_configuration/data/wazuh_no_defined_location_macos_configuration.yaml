@@ -1,9 +1,0 @@
-- tags:
-  - test_basic_configuration_log_format
-  apply_to_modules:
-  - test_basic_configuration_log_format
-  sections:
-  - section: localfile
-    elements:
-    - log_format:
-         value: LOG_FORMAT

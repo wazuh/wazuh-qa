@@ -1,6 +1,0 @@
-- name: inspector_defaults
-  description: Inspector default configurations
-  configuration_parameters:
-    SERVICE_TYPE: inspector
-  metadata:
-    service_type: inspector

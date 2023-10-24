@@ -1,7 +1,0 @@
----
-- tags:
-  - test_upload_size
-  apply_to_modules:
-  - test_max_upload_size
-  configuration:
-    max_upload_size: MAX_UPLOAD_SIZE

@@ -1,6 +1,0 @@
-- name: Get alerts.json
-  fetch:
-    src: /var/ossec/logs/alerts/alerts.json
-    dest: /tmp/
-    flat: true
-  become: true

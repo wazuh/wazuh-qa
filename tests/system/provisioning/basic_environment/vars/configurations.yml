@@ -1,7 +1,0 @@
-manager_hostname: "wazuh-manager"
-
-agent1_hostname: "wazuh-agent1"
-
-docker_network: "basic_environment_net"
-
-image: "dontpanicat/debian:buster"

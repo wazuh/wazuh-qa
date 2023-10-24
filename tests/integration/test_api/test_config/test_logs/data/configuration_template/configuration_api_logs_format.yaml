@@ -1,7 +1,0 @@
----
-- configuration:
-    intervals:
-      request_timeout: REQUEST_TIMEOUT
-    logs:
-      level: LEVEL
-      format: FORMAT

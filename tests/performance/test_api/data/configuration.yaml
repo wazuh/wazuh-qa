@@ -1,4 +1,0 @@
-configuration:
-  host: 'localhost'
-  port: 55000
-  restart_delay: 30

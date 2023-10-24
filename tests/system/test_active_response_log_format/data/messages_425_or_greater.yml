@@ -1,8 +1,0 @@
----
-wazuh-agent3:
-  - regex: "(wazuh-agent3).*('\\$token': `132`!)"
-    path: "/var/ossec/logs/active-responses.log"
-    timeout: 60
-  - regex: "(wazuh-agent3).*('\\$token': `132`!)"
-    path: "/var/ossec/logs/ossec.log"
-    timeout: 60

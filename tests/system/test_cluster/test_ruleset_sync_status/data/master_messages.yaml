@@ -1,7 +1,0 @@
-wazuh-master:
-  - regex: .*\[Local integrity\] Starting.*
-    path: /var/ossec/logs/cluster.log
-    timeout: 120
-  - regex: .*\[Local integrity\] Finished in .*
-    path: /var/ossec/logs/cluster.log
-    timeout: 10

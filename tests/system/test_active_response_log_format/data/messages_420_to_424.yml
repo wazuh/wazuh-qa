@@ -1,8 +1,0 @@
----
-wazuh-agent2:
-  - regex: '\\\\x27\\\\x24token\\\\x27: \\\\x60132\\\\x60\\\\x21'
-    path: '/var/ossec/logs/active-responses.log'
-    timeout: 60
-  - regex: '\\\\x27\\\\x24token\\\\x27: \\\\x60132\\\\x60\\\\x21'
-    path: '/var/ossec/logs/ossec.log'
-    timeout: 60

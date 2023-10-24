@@ -1,1 +1,0 @@
-QACTL_LOGGER = 'qactl'

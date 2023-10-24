@@ -1,6 +1,0 @@
----
-- tags:
-  - config1
-  configuration:
-    intervals:
-      request_timeout: 0

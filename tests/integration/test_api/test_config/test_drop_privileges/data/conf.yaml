@@ -1,9 +1,0 @@
----
-- tags:
-  - drop_privileges_enabled
-  configuration:
-    drop_privileges: yes
-- tags:
-  - drop_privileges_disabled
-  configuration:
-    drop_privileges: no

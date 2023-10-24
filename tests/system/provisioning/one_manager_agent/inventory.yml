@@ -1,8 +1,0 @@
-all:
-  hosts:
-    wazuh-manager:
-      ansible_connection: docker
-      ansible_python_interpreter: python
-    wazuh-agent1:
-      ansible_connection: docker
-      ansible_python_interpreter: python

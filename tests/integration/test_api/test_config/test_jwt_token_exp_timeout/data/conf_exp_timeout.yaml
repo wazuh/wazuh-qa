@@ -1,9 +1,0 @@
----
-- tags:
-  - short_exp_time
-  security_config:
-    auth_token_exp_timeout: 8
-- tags:
-  - long_exp_time
-  security_config:
-    auth_token_exp_timeout: 800

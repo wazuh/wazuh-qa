@@ -1,9 +1,0 @@
-- name: General validation phase
-  hosts: {{ target_hosts }}
-  gather_facts: false
-  roles:
-    - role: host_checker
-      vars:
-        os: "{% raw %}{{ hostvars[inventory_hostname]['os_name'] }}{% endraw %}"
-        manager_distros: {{ manager_distros }}
-        agent_distros: {{ agent_distros }}

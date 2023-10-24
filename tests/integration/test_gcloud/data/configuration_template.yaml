@@ -1,9 +1,0 @@
----
-project_id: "your_project_id_here"
-topic: "your_topic_name_here"
-subscription: "your_subscription_name_here"
-credential_path: 'gcp_credentials.json'
-credentials: |
-  {
-  "credentials": "Your GCP credentials go here"
-  }

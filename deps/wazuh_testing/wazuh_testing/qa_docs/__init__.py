@@ -1,1 +1,0 @@
-QADOCS_LOGGER = 'qadocs'

@@ -1,3 +1,0 @@
-- name: Truncate file
-  shell: echo "" > /var/ossec/logs/alerts/alerts.json
-  become: true

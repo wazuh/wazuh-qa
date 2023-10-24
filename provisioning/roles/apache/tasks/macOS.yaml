@@ -1,7 +1,0 @@
-- name: Install {{ program }} with brew | MacOS
-  homebrew:
-    name: "{{ program }}"
-    update_homebrew: true
-
-- name: Start {{ program }} with brew | MacOS
-  shell: /usr/local/bin/brew services start {{ program }}

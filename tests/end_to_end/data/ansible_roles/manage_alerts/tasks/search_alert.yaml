@@ -1,6 +1,0 @@
-- name: Search alert in alerts log
-  become: true
-  wait_for:
-    path: /var/ossec/logs/alerts/alerts.json
-    search_regex: "{{ custom_regex }}"
-    timeout: "{{ timeout }}"

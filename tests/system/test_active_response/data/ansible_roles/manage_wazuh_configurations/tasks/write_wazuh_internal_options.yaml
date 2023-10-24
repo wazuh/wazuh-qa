@@ -1,3 +1,0 @@
-- name: Configure local_internal_options.conf windows
-  ansible.windows.win_shell: "{{ config_block }}"
-  when: os == 'windows'
