@@ -1,19 +1,19 @@
----
-- name: Create our container (Manager)
+- name: Create System Test Docker image (Master)
   hosts: localhost
   vars_files:
     - ./vars/configurations.yml
   tasks:
-    - name: Create a network
-      docker_network:
-        name: "{{ docker_network }}"
-    - docker_container:
-        name: "{{ manager_hostname }}"
-        image: "{{ image }}"
-        hostname: "{{ manager_hostname }}"
-        networks:
-          - name: "{{ docker_network }}"
-        privileged: yes
+    - name: Warn about source installation
+      debug:
+        msg: "Please consider using package installation instead of building from source to expedite the deployment process. For more detailed information, refer to the 'Pytest' section in the Readme"
+      when: wazuh_branch is defined
+
+    - name: Create docker image for system tests
+      docker_image:
+        build:
+          path: "../Docker/"
+        name: "{{ image }}"
+        source: build
 
 - name: Create our container (Agent1)
   hosts: localhost
@@ -77,7 +77,7 @@
     - ./vars/configurations.yml
   roles:
     - name: "roles/agent-role"
-    
+
 - name: Wazuh Agent2
   hosts: wazuh-agent2
   vars:
