@@ -55,16 +55,16 @@ wazuh-master:
 wazuh-worker1:
   description: Enable remoted agent_key_polling at worker side
   sections:
-  - section: remote
-      elements:
-        - connection:
-            value: secure
-        - port:
-            value: 1514
-        - protocol:
-            value: tcp
-        - queue_size:
-            value: 131072
+    - section: remote
+        elements:
+          - connection:
+              value: secure
+          - port:
+              value: 1514
+          - protocol:
+              value: tcp
+          - queue_size:
+              value: 131072
 
 wazuh-agent2:
   description: Set manager address
