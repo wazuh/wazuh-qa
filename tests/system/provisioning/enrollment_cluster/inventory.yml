@@ -2,48 +2,48 @@ all:
   hosts:
     wazuh-master:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
     wazuh-worker1:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
     wazuh-worker2:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
     wazuh-agent1:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
     wazuh-agent2:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
 managers:
   hosts:
     wazuh-master:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
     wazuh-worker1:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
     wazuh-worker2:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
 master:
   hosts:
     wazuh-master:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
 workers:
   hosts:
     wazuh-worker1:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
     wazuh-worker2:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
 agents:
   hosts:
     wazuh-agent1:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
     wazuh-agent2:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3

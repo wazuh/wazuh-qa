@@ -2,17 +2,17 @@ all:
   hosts:
     wazuh-manager:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
     wazuh-agent1:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
 managers:
   hosts:
     wazuh-manager:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
 agents:
   hosts:
     wazuh-agent1:
       ansible_connection: docker
-      ansible_python_interpreter: python
+      ansible_python_interpreter: python3
