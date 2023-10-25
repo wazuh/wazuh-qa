@@ -60,7 +60,6 @@ def clean_cluster_logs():
         host_manager.get_host(agent).ansible('command', 'service wazuh-agent restart', check=False)
 
 
-
 @pytest.fixture(scope='function')
 def remove_labels():
     """Remove any label set to the modified wazuh-agent and restart it to apply the new config."""

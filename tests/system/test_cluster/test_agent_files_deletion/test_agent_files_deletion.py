@@ -61,7 +61,9 @@ def test_agent_files_deletion(clean_environment):
                                           endpoint=f"/agents?select=id,name&q=manager={worker_host}")
 
     assert response['status'] == 200, f"Failed when trying to obtain agent ID: {response}"
-    assert response['json']['data']['affected_items'][0]['id'] == agent_id and response['json']['data']['affected_items'][0]['name'] == agent_name
+    assert (response['json']['data']['affected_items'][0]['id'] == agent_id and
+           response['json']['data']['affected_items'][0]['name'] == agent_name), f"Agent {agent_id} {agent_name}" \
+                                                                                 'is not active'
 
     # Check that expected files exist in each node before removing the agent.
     for file in files:
