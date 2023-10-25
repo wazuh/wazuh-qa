@@ -65,8 +65,8 @@ host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 timeout = 10
 
-# Fixtures
 
+# Fixtures
 @pytest.fixture(scope='module')
 def delete_group():
     yield

@@ -10,7 +10,7 @@ from time import sleep
 
 import pytest
 
-from system import restart_cluster
+from system import restart_cluster, remove_cluster_agents
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
 
@@ -111,6 +111,7 @@ def start_agents():
     """Start agents."""
     restart_cluster(test_infra_agents, host_manager)
 
+
 @pytest.fixture(scope='function')
 def agent_healthcheck():
     """Check if expected agents are active."""
@@ -128,10 +129,10 @@ def agent_healthcheck():
 
 @pytest.fixture(scope='function')
 def clean_environment():
-    """Remove test groups and multigroups before and after running a test."""
-    delete_groups()
+    """Remove test groups and multigroups after running a test."""
     yield
     delete_groups()
+    remove_cluster_agents(test_hosts[0], test_infra_agents, host_manager)
 
 
 @pytest.fixture(scope='function')
