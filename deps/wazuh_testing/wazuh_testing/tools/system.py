@@ -6,13 +6,15 @@ import json
 import tempfile
 import xml.dom.minidom as minidom
 from typing import Union
-
+import base64
 import testinfra
 import yaml
 
 from wazuh_testing.tools import WAZUH_CONF, WAZUH_API_CONF, API_LOG_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import set_section_wazuh_conf
-
+from ansible.inventory.manager import InventoryManager
+from ansible.parsing.dataloader import DataLoader
+from ansible.vars.manager import VariableManager
 
 class HostManager:
     """This class is an extensible remote host management interface. Within this we have multiple functions to modify
@@ -32,6 +34,17 @@ class HostManager:
         except (OSError, yaml.YAMLError) as inventory_err:
             raise ValueError(f"Could not open/load Ansible inventory '{self.inventory_path}': {inventory_err}")
 
+
+        data_loader = DataLoader()
+        self.inventory_manager = InventoryManager(loader=data_loader, sources=inventory_path)
+        self.hosts_variables = {}
+
+        variable_manager = VariableManager(loader=data_loader, inventory=self.inventory_manager)
+
+        for host in self.inventory_manager.get_hosts():
+            self.hosts_variables[host] = variable_manager.get_vars(host=self.inventory_manager.get_host(str(host)))
+
+
     def get_inventory(self) -> dict:
         """Get the loaded Ansible inventory.
 
@@ -39,6 +52,34 @@ class HostManager:
             self.inventory: Ansible inventory
         """
         return self.inventory
+
+
+    def get_group_hosts(self, pattern=None):
+        """Get all hosts from inventory that belong to a group.
+
+        Args:
+            group (str): Group name
+
+        Returns:
+            list: List of hosts
+        """
+        if pattern:
+            return [str(host) for host in self.inventory_manager.get_hosts(pattern=pattern)]
+        else:
+            return [str(host) for host in self.inventory_manager.get_hosts()]
+
+    def get_host_variables(self, host):
+        """Get the variables of the specified host.
+
+        Args:
+            host (str): Hostname
+
+        Returns:
+            testinfra.modules.base.Ansible: Host instance from hostspec
+        """
+        inventory_manager_host = self.inventory_manager.get_host(host)
+
+        return self.hosts_variables[inventory_manager_host]
 
     def get_host(self, host: str):
         """Get the Ansible object for communicating with the specified host.
@@ -61,7 +102,7 @@ class HostManager:
         check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be applied.
         """
         self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=wazuh group=wazuh mode=0775",
-                                    check=check)
+                                    check=check, become=True)
 
     def add_block_to_file(self, host: str, path: str, replace: str, before: str, after, check: bool = False):
         """Add text block to desired file.
@@ -136,7 +177,12 @@ class HostManager:
             host (str): Hostname
             file_path (str) : Path of the file
         """
-        return self.get_host(host).file(file_path).content_string
+
+        # return self.get_host(host).file(file_path).content_string
+        testinfra_host = self.get_host(host)
+        result = testinfra_host.ansible("slurp", f"src='{file_path}'", check=False)
+        return base64.b64decode(result['content']).decode('utf-8')
+
 
     def apply_config(self, config_yml_path: str, dest_path: str = WAZUH_CONF, clear_files: list = None,
                      restart_services: list = None):
@@ -337,6 +383,52 @@ class HostManager:
             for internal_option in internal_options_data:
                 replace = replace + internal_option
             self.modify_file_content(target_host, WAZUH_LOCAL_INTERNAL_OPTIONS, replace)
+
+    def download_file(self, host, url, dest_path, mode='755'):
+        """
+        - name: Download foo.conf
+            ansible.builtin.get_url:
+            url: http://example.com/path/file.conf
+            dest: /etc/foo.conf
+            mode: '0440'
+        """
+        a = self.get_host(host).ansible("get_url", f"url={url} dest={dest_path} mode={mode}", check=False)
+        return a
+
+    def install_package(self, host, url, package_manager):
+        result = False
+        if package_manager == 'apt':
+            a = self.get_host(host).ansible("apt", f"deb={url}", check=False)
+            if a['changed'] == True and a['stderr'] == '':
+                result = True
+        elif package_manager == 'yum':
+            a = self.get_host(host).ansible("yum", f"name={url} state=present sslverify=false disable_gpg_check=True", check=False)
+            if 'rc' in a and a['rc'] == 0 and a['changed'] == True:
+                result = True
+
+    def remove_package(self, host, package_name, package_manager):
+        result = False
+        if package_manager == 'apt':
+            a = self.get_host(host).ansible("apt", f"name={package_name} state=absent", check=False)
+            if a['changed'] == True and a['stderr'] == '':
+                result = True
+        elif package_manager == 'yum':
+            a = self.get_host(host).ansible("yum", f"name={package_name} state=absent", check=False)
+            if 'rc' in a and a['rc'] == 0 and a['changed'] == True:
+                result = True
+        return result
+
+    def handle_wazuh_services(self, host, operation):
+        os = self.get_host_variables(host)['os_name']
+        binary_path = None
+        if os == 'windows':
+            self.get_host(host).ansible('ansible.windows.win_command', f"cmd=NET {operation} Wazuh", check=False)
+        else:
+            if os == 'linux':
+                binary_path = f"/var/ossec/bin/wazuh-control"
+            elif os == 'macos':
+                binary_path = f"/Library/Ossec/bin/wazuh-control"
+            self.get_host(host).ansible('ansible.builtin.command', f'cmd="{binary_path} {operation}"', check=False)
 
 
 def clean_environment(host_manager, target_files):

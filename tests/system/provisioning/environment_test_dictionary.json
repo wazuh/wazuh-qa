@@ -65,5 +65,8 @@
         "end_to_end/test_basic_cases/test_vulnerability_detector/test_vulnerability_detector_windows/test_vulnerability_detection_windows.py",
         "end_to_end/test_basic_cases/test_windows_defender/test_windows_defender.py",
         "end_to_end/test_basic_cases/test_yara_integration/test_yara_integration.py",
+    ],
+    "e2e_vulnerability_detector": [
+        "end_to_end/test_vulnerability_detector/test_scans.py"
     ]
 }
