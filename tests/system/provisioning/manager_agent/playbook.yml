@@ -1,4 +1,4 @@
-- name: Create System Test Docker image (Master)
+- name: Create System Test Docker image
   hosts: localhost
   vars_files:
     - ./vars/configurations.yml
@@ -14,6 +14,21 @@
           path: "../Docker/"
         name: "{{ image }}"
         source: build
+
+- name: Create our container (Master)
+  hosts: localhost
+  vars_files:
+    - ./vars/configurations.yml
+  tasks:
+    - name: Create a network
+      docker_network:
+        name: "{{ docker_network }}"
+    - docker_container:
+        name: "{{ master_hostname }}"
+        image: "{{ image }}"
+        hostname: "{{ master_hostname }}"
+        networks:
+          - name: "{{ docker_network }}"
 
 - name: Create our container (Agent1)
   hosts: localhost

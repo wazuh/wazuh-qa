@@ -1,4 +1,4 @@
-- name: Create System Test Docker image (Master)
+- name: Create System Test Docker image
   hosts: localhost
   vars_files:
     - ./vars/configurations.yml

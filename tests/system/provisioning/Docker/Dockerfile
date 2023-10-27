@@ -1,10 +1,14 @@
-FROM ubuntu:jammy
+# Use dontpanicat/debian image to bypass https://github.com/wazuh/wazuh/issues/19829
+FROM dontpanicat/debian:latest
 
-# Update the package repositories and install essential packages
+# Set environment variables for non-interactive package installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update --allow-releaseinfo-change
+
+# Update the package repositories and install essential packages in one step
 RUN apt-get update && apt-get install -y \
-    python3 \
-    gcc \
-    g++ \
+    git \
     make \
     cmake \
     libc6-dev \
@@ -13,18 +17,29 @@ RUN apt-get update && apt-get install -y \
     automake \
     autoconf \
     libtool \
-    sqlite3 \
     libssl-dev \
-    apt-utils \
-    apt-transport-https \
-    openssh-server \
-    vim \
-    git \
-    wget \
-    unzip \
-    binutils \
-    gnupg \
-    lsb-release
+    build-essential \
+    libgmp-dev \
+    libmpfr-dev \
+    libmpc-dev
+
+# Download and build GCC 10.3.0
+WORKDIR /tmp
+RUN curl -s https://ftp.gnu.org/gnu/gcc/gcc-10.3.0/gcc-10.3.0.tar.xz | tar -xJ
+RUN mkdir build && cd build
+RUN ./gcc-10.3.0/configure --prefix=/usr/local \
+                        --disable-dependency-tracking \
+                        --disable-nls \
+                        --disable-multilib \
+                        --enable-default-pie \
+                        --enable-languages=c,c++
+RUN make -j$(nproc)
+RUN make install
+
+# Cleanup unnecessary files and links
+RUN rm -rf /usr/bin/gcc && rm /usr/bin/g++
+RUN ln -s /usr/local/bin/gcc /usr/bin/gcc && ln -s /usr/local/bin/g++ /usr/bin/g++
+
 
 # Set up an entry point to keep the container running
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+CMD ["tail", "-f", "/dev/null"]
