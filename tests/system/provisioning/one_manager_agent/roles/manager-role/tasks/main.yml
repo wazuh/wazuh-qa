@@ -22,7 +22,7 @@
     USER_WHITE_LIST: "n"
     USER_ENABLE_SYSLOG: "y"
     USER_ENABLE_AUTHD: "y"
-    USER_AUTO_START: "n"
+    USER_AUTO_START: "y"
     USER_UPDATE: "n"
   shell: "./install.sh"
   when: wazuh_branch is defined
