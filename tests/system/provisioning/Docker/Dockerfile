@@ -40,6 +40,5 @@ RUN make install
 RUN rm -rf /usr/bin/gcc && rm /usr/bin/g++
 RUN ln -s /usr/local/bin/gcc /usr/bin/gcc && ln -s /usr/local/bin/g++ /usr/bin/g++
 
-
 # Set up an entry point to keep the container running
 CMD ["tail", "-f", "/dev/null"]
