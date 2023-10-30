@@ -1,7 +1,7 @@
 - name: Create System Test Docker image
   hosts: localhost
   vars_files:
-    - ./vars/configurations.yml
+    - ./vars/configurations.yaml
   tasks:
     - name: Warn about source installation
       debug:
