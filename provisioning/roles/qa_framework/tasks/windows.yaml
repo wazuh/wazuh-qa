@@ -12,12 +12,12 @@
       {{ build_dir }}/tmp; move tmp/* ./
 
 - name: Install python requirements | Windows
-  win_command: "{{ python_executable }} -m pip install -r {{ qa_requirements_file }} \
+  win_command: "{{ ansible_python_interpreter }} -m pip install -r {{ qa_requirements_file }} \
                 --no-cache-dir --only-binary=:cryptography,grpcio:"
   args:
     chdir: "{{ build_dir }}"
 
 - name: Install setup.py | Windows
-  win_command: "{{ python_executable }} {{ setup_installer }} install"
+  win_command: "{{ ansible_python_interpreter }} {{ setup_installer }} install"
   args:
     chdir: "{{ build_dir }}\\{{ test_setup_qa_path }}"
