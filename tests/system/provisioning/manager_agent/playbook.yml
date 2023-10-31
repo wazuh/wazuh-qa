@@ -15,7 +15,7 @@
         name: "{{ image }}"
         source: build
 
-- name: Create our container (Master)
+- name: Create our container (Manager)
   hosts: localhost
   vars_files:
     - ./vars/configurations.yml
@@ -24,11 +24,12 @@
       docker_network:
         name: "{{ docker_network }}"
     - docker_container:
-        name: "{{ master_hostname }}"
+        name: "{{ manager_hostname }}"
         image: "{{ image }}"
-        hostname: "{{ master_hostname }}"
+        hostname: "{{ manager_hostname }}"
         networks:
           - name: "{{ docker_network }}"
+        privileged: yes
 
 - name: Create our container (Agent1)
   hosts: localhost
