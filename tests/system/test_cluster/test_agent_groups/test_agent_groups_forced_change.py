@@ -66,9 +66,19 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 timeout = 10
 
 
+# Fixtures
+@pytest.fixture(scope='module')
+def delete_group():
+    yield
+    master_token = host_manager.get_api_token(test_infra_managers[0])
+    # Remove groups
+    host_manager.make_api_call(host=test_infra_managers[0], method='DELETE', token=master_token,
+                               endpoint=f"/groups?groups_list={agent_groups}")
+
+
 # Tests
 @pytest.mark.parametrize("agent_host", test_infra_managers[0:2])
-def test_sync_when_forced_to_change_a_group(agent_host, clean_environment):
+def test_sync_when_forced_to_change_a_group(agent_host, clean_environment, delete_group):
     '''
     description: Check that having an agent with a group assigned,
                  when the change is forced with a wdb command, the new group
@@ -119,7 +129,7 @@ def test_sync_when_forced_to_change_a_group(agent_host, clean_environment):
 
 
 # Tests
-def test_force_group_change_during_sync(clean_environment):
+def test_force_group_change_during_sync(clean_environment, delete_group):
     '''
     description: Check that having an agent with a group assigned, when the change is forced with a wdb command,
                  and the agent's group is changed again during the sync timeframe, the agent has the correct group
