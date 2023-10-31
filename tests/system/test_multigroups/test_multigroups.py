@@ -10,6 +10,7 @@ from time import sleep
 
 import pytest
 
+from system import restart_cluster, remove_cluster_agents
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
 
@@ -21,6 +22,7 @@ pytestmark = [pytest.mark.basic_cluster_env]
 test_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
 agent_groups = {'wazuh-agent1': ['default', 'test_mg_0'],
                 'wazuh-agent2': ['default', 'test_mg_1']}
+test_infra_agents = ['wazuh-agent1', 'wazuh-agent2']
 
 shared_folder_path = os.path.join(WAZUH_PATH, 'etc', 'shared')
 mg_folder_path = os.path.join(WAZUH_PATH, 'var', 'multigroups')
@@ -104,6 +106,11 @@ def delete_groups():
 
 
 # Fixtures
+@pytest.fixture(scope='function')
+def start_agents():
+    """Start agents."""
+    restart_cluster(test_infra_agents, host_manager)
+
 
 @pytest.fixture(scope='function')
 def agent_healthcheck():
@@ -122,10 +129,10 @@ def agent_healthcheck():
 
 @pytest.fixture(scope='function')
 def clean_environment():
-    """Remove test groups and multigroups before and after running a test."""
-    delete_groups()
+    """Remove test groups and multigroups after running a test."""
     yield
     delete_groups()
+    remove_cluster_agents(test_hosts[0], test_infra_agents, host_manager)
 
 
 @pytest.fixture(scope='function')
@@ -161,7 +168,7 @@ def create_multigroups():
 
 # Tests
 
-def test_multigroups_not_reloaded(clean_environment, agent_healthcheck, create_multigroups):
+def test_multigroups_not_reloaded(clean_environment, start_agents, agent_healthcheck, create_multigroups):
     """Check that the files are not regenerated when there are no changes.
 
     Check and store the modification time of all group and multigroup files. Wait 10 seconds
@@ -188,7 +195,7 @@ def test_multigroups_not_reloaded(clean_environment, agent_healthcheck, create_m
     agent_groups['wazuh-agent1'][1],
     'default'
 ])
-def test_multigroups_updated(clean_environment, agent_healthcheck, create_multigroups, target_group):
+def test_multigroups_updated(clean_environment, start_agents, agent_healthcheck, create_multigroups, target_group):
     """Check that only the appropriate multi-groups are regenerated when a group file is created.
 
     Check and store the modification time of all group and multigroup files. Create a new file inside
@@ -234,7 +241,7 @@ def test_multigroups_updated(clean_environment, agent_healthcheck, create_multig
                 assert mtime == host_files[host][file], f"This file changed its modification time in {host}: {file}"
 
 
-def test_multigroups_deleted(clean_environment, agent_healthcheck, create_multigroups):
+def test_multigroups_deleted(clean_environment, start_agents, agent_healthcheck, create_multigroups):
     """Check that multigroups are removed when expected.
 
     Unassign an agent from their groups or delete the groups. Check that the associated multigroup disappears
