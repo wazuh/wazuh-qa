@@ -50,3 +50,8 @@
     regexp: '<address>(.*)</address>'
     line: "<address>{{ manager_hostname }}</address>"
     backrefs: yes
+
+- name: Delete content of /wazuh directory
+  file:
+    path: /wazuh
+    state: absent
