@@ -3,13 +3,12 @@
     path: "{{ build_dir }}"
     state: directory
 
-- name: Clone Wazuh-QA repo | Windows
-  win_command: powershell.exe -
-  args:
-    chdir: "{{ build_dir }}"
-    stdin: >
-      git clone {{ qa_repository_url }} -b {{ qa_repository_reference }} --depth=1"
-      {{ build_dir }}/tmp; move tmp/* ./
+- name: Clone a repo with separate git directory
+  ansible.builtin.git:
+    repo: "{{ qa_repository_url }}"
+    dest: "{{ build_dir }}"
+    single_branch: yes
+    version: "{{ qa_repository_reference }}"
 
 - name: Install python requirements | Windows
   win_command: "{{ ansible_python_interpreter }} -m pip install -r {{ qa_requirements_file }} \
