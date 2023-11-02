@@ -1,24 +1,3 @@
-# Unix
-- name: Include Unix custom vars
-  include_vars: linux.yaml
-  when:
-    - customize == false
-    - ansible_os_family != "Windows"
-
-# Solaris
-- name: Include Solaris custom vars
-  include_vars: solaris.yaml
-  when:
-    - customize == false
-    - ansible_os_family == "Solaris"
-
-# macOS
-- name: Include macOS custom vars
-  include_vars: macos.yaml
-  when:
-    - customize == false
-    - ansible_os_family == "Darwin"
-
 # Windows
 - name: Include Windows custom vars
   include_vars: windows.yaml
