@@ -63,6 +63,8 @@ def prepare_input(pip_mode, input_file_path):
         with open(input_file_path, mode='r') as input_file:
             lines = input_file.readlines()
             for line in lines:
+                if line.strip().startswith('#') or not line.strip():
+                    continue
                 line = re.sub('[<>~]', '=', line)
                 if ',' in line:
                     package_version = max(re.findall(r'\d+\.+\d*\.*\d', line))

@@ -1,64 +1,47 @@
-
 # Code Analysis
 
-The `code_analysis` directory contains Python tests used to verify possible vulnerabilities in the Wazuh Python code.
+The `code_analysis` directory contains Python tests to verify potential vulnerabilities in the Wazuh Python code.
 
-## Test Python Flaws
+## Description
 
-### Description
+`test_python_flaws.py` is a Pytest test used to look for new possible vulnerabilities in directories containing Python code. It uses [Bandit](https://github.com/PyCQA/bandit) to search for these potential flaws.
 
-`test_python_flaws.py` is a Pytest test used to look for new possible vulnerabilities in directories containing Python code.
+The test checks the `framework/`, `api/` and `wodles/` directories of the [Wazuh](https://github.com/wazuh/wazuh) repository by default, comparing the *Bandit* output with the vulnerabilities identified as false positives or vulnerabilities to fix. It saves the results in three JSON files (one JSON file for each module).
 
-The test uses `Bandit` to look for these possible flaws.
+The contents of this directory are:
+- `known_flaws`: The directory contains three JSON files, one for each module (`api`, `framework` and `wodles`). Each file has a dictionary with two keys: **false_positives** and **to_fix**. These values are the list of vulnerabilities considered false positives and the list of vulnerabilities you must fix (with issues), respectively. After running the test and analyzing the new vulnerabilities, you must edit these files.
+- `conftest.py`: The Pytest configuration file. It adds the possibility to use specific parameters when running the test.
+- `test_python_flaws.py`: The test itself. You should run this test using the same Python virtual environment used in the Wazuh framework and API unit tests. If the test fails, a new JSON file will be created inside this directory, showing information about the possible new vulnerabilities found.
 
-In order to find new vulnerabilities, the test compares the Bandit output with vulnerabilities that we consider false positives or vulnerabilities to fix and that we save in three JSON files. By default, the directories we are checking are the `framework/`, `api/` and `wodles/` directories of the **Wazuh** repository.
+## Usage
 
-This test is located at `wazuh-qa/tests/scans/code_analysis`.
-In this directory, we can find the test itself, called `test_python_flaws.py`, this `README.md`, a pytest configuration file (`conftest.py`); and a folder called `known_flaws`.
+- Run the test: `pytest tests/scans/code_analysis/test_python_flaws.py`
+- If the test passes without failures, everything is correct, and no action is needed.
+- If the test fails, `wazuh-qa/tests/scans/code_analysis/new_flaws_{module}.json` file will report the new code vulnerabilities found.
+You should analyze the new vulnerabilities found in the module and report them in GitHub issues.
 
-- `known_flaws`: contains three JSON files. Each file contains a dictionary with two keys: false_positives and to_fix. The values are a list of vulnerabilities considered false positives and a list of vulnerabilities we must fix (with issues), respectively.
-These files must be edited after analyzing new vulnerabilities when passing the test.
+If you need to fix a new vulnerability, add it to the **to_fix** key module's JSON file entry found in the **known_flaws** directory. 
+If the new vulnerability is a false positive, add it to the **false_positives** key module's JSON file entry found in the **known_flaws** directory. 
 
-- `conftest.py`: pytest configuration file. It adds the possibility to use specific parameters when passing the test.
+The test updates the files inside **known_flaws** automatically with information like the line number or range of the flaws in the **to_fix** dictionary. The test also removes flaws from the **known_flaws** files if Bandit did not report them.
 
-- `test_python_flaws.py`: the test itself. This test will be passed using the same Python virtual environment used in the Wazuh framework and API unittests.
-If the test fails, a new JSON file will be created in `wazuh-qa/tests/scans/code_analysis` showing information about the possible new vulnerabilities found.
+## Parameters
 
-### Usage
+You can set the directories, repository, and branch parameters to test any directory containing Python code inside the Wazuh organization.
+You can also use more parameters to customize the test functionality. The test will only succeed if you check different directories and repositories, as we don't have **known_flaws** files for non-default directories.
 
-The workaround for this test will be the following:
+> By default, the test checks the `framework`, `wodles` and `api` directories in the [wazuh/wazuh](https://github.com/wazuh/wazuh) repository's master branch.
 
-- Pass the test.
+| Parameter             | Description                                           | Default Value     |
+|-----------------------|-------------------------------------------------------|-------------------|
+| `--repo`              | The repository to test.                               | `wazuh`           |
+| `--reference`         | The repository branch.                                | `master`          |
+| `--check_directories` | The directories to check (comma-separated).           | `framework/,api/,wodles/` |
+| `--exclude_directories`| The directories to exclude (comma-separated).        | `test/,tests/`    |
+| `--confidence`        | Minimum confidence level for Bandit scan.             | `MEDIUM`           |
+| `--severity`          | Minimum severity level for Bandit scan.               | `LOW`             |
 
-- If the test passes, no actions are needed, everything is correct.
-
-- If the test fails, new code vulnerabilities will be found in `wazuh-qa/tests/scans/code_analysis/new_flaws_{module}.json`.
-  - We analyze the new vulnerabilities found in the module and report them in GitHub issues.
-  - We move the vulnerabilities to the `to_fix` key of the known flaws JSON file.
-  - If the new vulnerability is considered a false positive, we add it to the `false_positives` list of the dictionary in its respective `known_flaws` JSON file.
-  - If the new vulnerability is a real vulnerability, we solve the problem reported and remove the flaw from the known flaws file.
-
-The test also updates the known_flaws files automatically. If we have a look at a known_flaws file, we will see that each flaw dictionary contains information like the line number or range. This information is the one updated by the test. The test also removes flaws from the known_flaws file if they don't appear in the Bandit output.
-
-#### Parameters
-
-As said in the description, the test uses `Bandit` to look for possible Python flaws. By default, the tests checks the framework, wodles and api directories in the Wazuh repository, in its master branch.
-
-These directories, repository and branch can be passed to the test as parameters so it is possible to run the test in any directory containing Python code inside the Wazuh organization.
-
-Apart from this parameters, there are more that can be used to customize the test functionality. Note that the test will fail if we check different directories and/or repository as we don't have known_flaws files for non-default directories.
-
-- **--repo**: set the repository used. Default: `wazuh`
-- **--reference**: set the repository branch or tag. Default: `master`
-- **--check_directories**: set the directories to check, this must be a string with the directory name.
-If more than one is indicated, they must be separated with comma. Default: `framework/,api/,wodles/`.
-- **--exclude_directories**: set the directories to exclude, this must be a string with the directory name.
-If more than one is indicated, they must be separated with comma. Default: `test/,tests/`.
-- **--confidence**: set the minimum value of confidence of the Bandit scan.
-This value must be 'UNDEFINED', 'LOW', 'MEDIUM' or 'HIGH'. Default: `MEDIUM`
-- **--severity**: set the minimum value of severity of the Bandit scan.
-This value must be 'UNDEFINED', 'LOW', 'MEDIUM' or 'HIGH'. Default: `LOW`
-
+> The values accepted by the flags `--confidence` and `--security` are `UNDEFINED`, `LOW`, `MEDIUM` or `HIGH`.
 
 #### Example
 
