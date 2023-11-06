@@ -26,6 +26,10 @@ Release report: TBD
 - Update framework known flaws file ([#4443](https://github.com/wazuh/wazuh-qa/pull/4443)) \- (Tests)
 - Align migration tool system tests to the tool's new output directory structure ([#4561](https://github.com/wazuh/wazuh-qa/pull/4561)) \- (Tests)
 
+### Fixed
+
+- Fix duplicated jq dependency ([#4678](https://github.com/wazuh/wazuh-qa/pull/4678)) \- (Framework)
+
 ## [4.7.1] - TBD
 
 Wazuh commit: TBD \
@@ -50,7 +54,6 @@ Release report: TBD
 
 ### Fixed
 - Fix registry wildcards path ([#4400](https://github.com/wazuh/wazuh-qa/pull/4400)) \- (Tests)
-- Update `get_test_cases_data` function so it handles fim_mode parameter ([#4185](https://github.com/wazuh/wazuh-qa/pull/4185)) \- (Framework)
 - Fix warnings in the rids tests([#4151](https://github.com/wazuh/wazuh-qa/pull/4151)) \- (Framework + Tests)
 
 ## [4.6.0] - TBD
@@ -78,7 +81,9 @@ Release report: TBD
 - Add IT tests FIM registry monitoring using wildcards. ([#4270](https://github.com/wazuh/wazuh-qa/pull/4270)) \- (Framework + Tests)
 - Update schema database version ([#4128](https://github.com/wazuh/wazuh-qa/pull/4128)) \- (Tests)
 - Update framework known flaws files ([#4380](https://github.com/wazuh/wazuh-qa/pull/4380)) \- (Tests)
-- Add tests for Vulnerability Detector: Red Hat 9 support (https://github.com/wazuh/wazuh-qa/pull/4497) \- (Tests)
+- Add tests for Vulnerability Detector: Red Hat 9 support ([#4497](https://github.com/wazuh/wazuh-qa/pull/4497)) \- (Tests)
+- Add AlmaLinux VDT IT support ([#4376](https://github.com/wazuh/wazuh-qa/pull/4376)) \- (Tests)
+- Add new FIM test to verify checks in configuration ([#4373](https://github.com/wazuh/wazuh-qa/pull/4373)) \- (Tests)
 
 ### Changed
 
@@ -126,6 +131,15 @@ Release report: TBD
 - Fix an error in the cluster performance tests related to CSV parser ([#2999](https://github.com/wazuh/wazuh-qa/pull/2999)) \- (Framework + Tests)
 - Fix bug in the framework on migration tool ([#4027](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
 - Fix test cluster / integrity sync system test and configuration to avoid flaky behavior ([#4406](https://github.com/wazuh/wazuh-qa/pull/4406)) \- (Tests)
+- Fix misspelling regex and error in test_cluster_connection ([#4392](https://github.com/wazuh/wazuh-qa/pull/4392)) \- (Tests)
+- Fix test validate feed content - Canonical ([#4381](https://github.com/wazuh/wazuh-qa/pull/4381)) \- (Tests)
+- Fix flaky test in AR suite (excecd) ([#4360](https://github.com/wazuh/wazuh-qa/pull/4360)) \- (Tests)
+- Fix registry wildcards path ([#4357](https://github.com/wazuh/wazuh-qa/pull/4357)) \- (Tests)
+
+## [4.5.4] - 24/10/2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/48870c11207b1f0ba20ae29688d75564bfc04489 \
+Release report: https://github.com/wazuh/wazuh/issues/19764
 
 ## [4.5.3] - 10/10/2023
 
