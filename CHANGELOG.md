@@ -29,6 +29,7 @@ Release report: TBD
 ### Fixed
 
 - Fix Wazuh roles provision playbook path ([#4681](https://github.com/wazuh/wazuh-qa/pull/4681)) \- (Framework)
+- Fix duplicated jq dependency ([#4678](https://github.com/wazuh/wazuh-qa/pull/4678)) \- (Framework)
 
 ## [4.7.1] - TBD
 
