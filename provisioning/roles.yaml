@@ -12,7 +12,7 @@ apache:
   service: ANY
 
 agent:
-  playbook: ./playbooks/wazuh_environment.yaml
+  playbook: ./playbooks/wazuh/wazuh_environment.yaml
   os: ANY
   service: ANY
   vars:
@@ -23,7 +23,7 @@ agent:
       manager: MANAGER_HOST
 
 manager:
-  playbook: ./playbooks/wazuh_environment.yaml
+  playbook: ./playbooks/wazuh/wazuh_environment.yaml
   os: LINUX_BASED_OS
   service: ANY
   resources:
@@ -39,7 +39,7 @@ manager:
       type: master
 
 indexer:
-  playbook: ./playbooks/wazuh_environment.yaml
+  playbook: ./playbooks/wazuh/wazuh_environment.yaml
   os: LINUX_BASED_OS
   service: ANY
   resources:
@@ -53,7 +53,7 @@ indexer:
       repository: REPOSITORY
 
 dashboard:
-  playbook: ./playbooks/wazuh_environment.yaml
+  playbook: ./playbooks/wazuh/wazuh_environment.yaml
   os: LINUX_BASED_OS
   service: ANY
   resources:
@@ -68,7 +68,7 @@ dashboard:
 
 filebeat:
   depends: manager
-  playbook: ./playbooks/wazuh_environment.yaml
+  playbook: ./playbooks/wazuh/wazuh_environment.yaml
   service: ANY
   os: LINUX_BASED_OS
   resources:
