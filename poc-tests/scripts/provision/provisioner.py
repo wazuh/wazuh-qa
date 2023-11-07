@@ -1,8 +1,14 @@
-import src.classes.Ansible as Ansible
-import argparse
 import sys
+import os
+import argparse
 
-sys.path.append('./src')
+# Obtén la ruta al directorio raíz del proyecto 'poc-test'
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+
+# Agrega la ruta del directorio raíz al PYTHONPATH
+sys.path.append(project_root)
+
+import src.classes.Ansible as Ansible
 
 def main(inventory_file):
 
