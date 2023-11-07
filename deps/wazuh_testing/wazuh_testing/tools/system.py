@@ -181,6 +181,9 @@ class HostManager:
         # return self.get_host(host).file(file_path).content_string
         testinfra_host = self.get_host(host)
         result = testinfra_host.ansible("slurp", f"src='{file_path}'", check=False)
+        if 'content' not in result:
+            raise Exception(f"No content value in {result}")
+
         return base64.b64decode(result['content']).decode('utf-8')
 
 
