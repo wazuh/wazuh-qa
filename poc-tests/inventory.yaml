@@ -3,11 +3,20 @@ all:
     Agent1:
       ansible_host: 192.168.56.34
       ansible_port: 22
+      ansible_user: 'vagrant'
+      ansible_ssh_private_key_file: '/home/nonsatus/Documents/Wazuh/Repositories/wazuh-qa/4524/utils/key'
+      install:
+       - wazuh-agent
+       - curl
+       - nano
+
     Manager:
       ansible_host: 192.168.56.35
       ansible_port: 22
+      install:
+        - wazuh-manager
+        - wazuh-indexer
+        - wazuh-dashboard
 
   vars:
-    ansible_user: 'vagrant'
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
-    ansible_ssh_private_key_file: '/home/nonsatus/Documents/Wazuh/Repositories/wazuh-qa/4524/utils/key'
