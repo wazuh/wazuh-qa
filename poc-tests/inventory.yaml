@@ -6,6 +6,7 @@ all:
       ansible_user: 'vagrant'
       ansible_ssh_private_key_file: '/home/nonsatus/Documents/Wazuh/Repositories/wazuh-qa/4524/utils/key'
       install:
+       #- ansible
        - wazuh-agent
        - curl
        - nano
@@ -14,6 +15,7 @@ all:
       ansible_host: 172.16.1.1
       ansible_port: 22
       install:
+        #- ansible
         - wazuh-manager
         - wazuh-indexer
         - wazuh-dashboard

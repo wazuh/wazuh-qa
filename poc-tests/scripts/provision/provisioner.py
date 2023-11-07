@@ -1,8 +1,8 @@
-# provisioner.py
-
 import src.classes.Ansible as Ansible
-import yaml
 import argparse
+import sys
+
+sys.path.append('./src')
 
 def main(inventory_file):
 
