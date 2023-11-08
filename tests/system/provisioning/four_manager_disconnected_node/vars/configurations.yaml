@@ -20,4 +20,4 @@ restart_command: /var/ossec/bin/wazuh-control restart
 
 docker_network: "cluster_net"
 
-image: "dontpanicat/debian:buster"
+image: "wazuh/ubuntu_jammy_system_tests:1"
