@@ -104,6 +104,7 @@ class HostManager:
         self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=wazuh group=wazuh mode=0775",
                                     check=check)
 
+
     def add_block_to_file(self, host: str, path: str, replace: str, before: str, after, check: bool = False):
         """Add text block to desired file.
 
@@ -112,7 +113,7 @@ class HostManager:
             path (str): Path of the file
             replace (str): Text to be inserted in the file
             before (str): Lower stop of the block to be replaced
-            after (str): Upper stop of the block to be replaced
+            after (str): Upper stop of172.31.6.71 the block to be replaced
             check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
                 applied. Default `False`.
         """
@@ -132,6 +133,7 @@ class HostManager:
         tmp_file.write(content if isinstance(content, bytes) else content.encode())
         tmp_file.seek(0)
         self.move_file(host, src_path=tmp_file.name, dest_path=path)
+
         tmp_file.close()
 
     def control_service(self, host: str, service: str = 'wazuh', state: str = "started", check: bool = False):
