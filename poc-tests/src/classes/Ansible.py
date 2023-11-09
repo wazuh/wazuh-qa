@@ -9,15 +9,10 @@ class Ansible:
     # -------------------------------------
 
     inventory = None
-    path = ""
 
     # -------------------------------------
     #   Constructor
     # -------------------------------------
-
-    #def __init__(self, playbook_path,inventory):
-    #    self.path = playbook_path
-    #    self.inventory = self.set_inventory(inventory)
 
     def __init__(self,inventory):
         self.inventory = self.set_inventory(inventory)
@@ -29,8 +24,7 @@ class Ansible:
     def set_inventory(self, inventory):
         with open(inventory, 'r') as file:
             inv = yaml.safe_load(file)
-        file.close()
-        self.inventory = inv
+        return inv
 
     def get_inventory(self):
         return self.inventory
@@ -43,7 +37,7 @@ class Ansible:
     def run_playbook(self, playbook=None, extravars=None, verbosity=1):
         result = ansible_runner.run(
             inventory=self.inventory,
-            playbook=self.path + "/" + playbook,
+            playbook=playbook,
             verbosity=verbosity,
             extravars=extravars
         )

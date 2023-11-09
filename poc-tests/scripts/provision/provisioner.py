@@ -9,37 +9,96 @@ def run(ansible, inventory):
   for host in inventory['all']['hosts']:
 
     packages = inventory['all']['hosts'][host].get('install')
+    distribution = inventory['all']['hosts'][host].get('distribution')
     remote_user = inventory['all']['hosts'][host].get('ansible_user')
     private_key = inventory['all']['hosts'][host].get('ansible_ssh_private_key_file')
     remote_port = inventory['all']['hosts'][host].get('ansible_port')
 
-    if host == 'debian':
-      pkg_manager = 'apt'
-    elif host == 'alpine':
-      pkg_manager = 'apk'
-    else:
-      pkg_manager = 'apt'
+    for package in packages:
+      install_playbook = {
+        'name': 'Install packages on '+host,
+        'hosts': host,
+        'remote_user': remote_user,
+        'port': remote_port,
+        'vars': {
+          'ansible_ssh_private_key_file': private_key
+        },
+        'tasks': []
+      }
 
-    install_playbook = {
-      'name': 'Install packages on '+host,
-      'hosts': host,
-      'remote_user': remote_user,
-      'port': remote_port,
-      'vars': {
-        'ansible_ssh_private_key_file': private_key
-      },
-      'tasks': [
+      tasks = getTask(package, distribution)
+
+      install_playbook['tasks'].extend(tasks)
+
+      results = ansible.run_playbook(install_playbook)
+      print(results.stats)
+
+# ----------------------------------------------
+
+def getTask(package, distribution):
+  tasks = []
+  pkg_manager
+
+  if distribution == 'debian':
+    pkg_manager = 'apt'
+  if distribution == 'rpm':
+    pkg_manager = 'yum'
+
+  if "wazuh" in package:
+    if distribution == 'debian':
+      tasks.extend([
         {
-          pkg_manager: {
-            'name': packages,
-            'state': 'present'
+            'name': 'Install gnupg and apt-transport-https',
+            'apt': {
+                'name': 'gnupg,apt-transport-https',
+                'state': 'present'
+            }
+        },
+        {
+            'name': 'Import GPG key',
+            'command': 'curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && chmod 644 /usr/share/keyrings/wazuh.gpg'
+        },
+        {
+            'name': 'Add Wazuh repository',
+            'lineinfile': {
+                'dest': '/etc/apt/sources.list.d/wazuh.list',
+                'line': 'deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main'
+            }
+        },
+        {
+            'name': 'Update packages information',
+            'apt': {
+                'update_cache': 'yes'
             }
         }
-      ]
-    }
+      ])
+    if distribution == 'rpm':
+      tasks.extend([
+        {
+            'name': 'Import GPG key',
+            'command': 'rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH'
+        },
+        {
+            'name': 'Add Wazuh repository',
+            'copy': {
+                'src': 'files/wazuh.repo',
+                'dest': '/etc/yum.repos.d/wazuh.repo'
+            }
+        }
+      ])
 
-    results = ansible.run_playbook(install_playbook)
-    print(results.stats)
+  tasks.extend([
+    {
+        'name': 'Install' + package,
+        pkg_manager: {
+            'name': package,
+            'state': 'present'
+        }
+    }
+  ])
+
+  return tasks
+
 
 # ----------------------------------------------
 
@@ -51,7 +110,7 @@ def install_dependencies():
   activate_command = f"source {activate_script}" if sys.platform != 'win32' else f"call {activate_script}"
   subprocess.run(activate_command, shell=True)
   subprocess.run(['python3', '-m', 'pip', 'install', '--upgrade', 'pip'], check=True)
-  subprocess.run(['pip', 'install', '-r', 'requirements.txt'], check=True)
+  subprocess.run(['pip', 'install', '-r', 'utils/requirements.txt'], check=True)
 
 
 # ----------------------------------------------
@@ -66,7 +125,7 @@ def main(inventory_file):
   import src.classes.Ansible as Ansible
 
   ansible = Ansible.Ansible(inventory_file)
-  inventory = Ansible.get_inventory(ansible, inventory)
+  inventory = ansible.get_inventory()
 
   run(ansible, inventory)
 
