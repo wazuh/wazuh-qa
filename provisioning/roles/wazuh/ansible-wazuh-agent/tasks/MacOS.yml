@@ -51,10 +51,3 @@
     - authd_pass | length > 0
   tags:
     - config
-
-- name: macOS | Ensure Wazuh Agent service is started and enabled
-  service:
-    name: wazuh-agent
-    enabled: true
-    state: started
-  tags: config
