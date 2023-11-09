@@ -46,11 +46,11 @@ def run(ansible, inventory):
 def install_dependencies():
   venv_path = 'venv'
   if not os.path.exists(venv_path):
-      subprocess.run(['python', '-m', 'venv', venv_path], check=True)
+      subprocess.run(['python3', '-m', 'venv', venv_path], check=True)
   activate_script = os.path.join(venv_path, 'bin', 'activate')
   activate_command = f"source {activate_script}" if sys.platform != 'win32' else f"call {activate_script}"
   subprocess.run(activate_command, shell=True)
-  subprocess.run(['python', '-m', 'pip', 'install', '--upgrade', 'pip'], check=True)
+  subprocess.run(['python3', '-m', 'pip', 'install', '--upgrade', 'pip'], check=True)
   subprocess.run(['pip', 'install', '-r', 'requirements.txt'], check=True)
 
 
