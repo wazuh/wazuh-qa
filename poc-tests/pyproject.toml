@@ -1,0 +1,10 @@
+[tool.poetry.dependencies]
+python = "^3.8"
+ansible = "^2.9"
+ansible-runner = "^1.4.6"
+
+[tool.poetry.scripts]
+provision = "scripts.provisioner:main"
+
+[tool.poetry.plugins."myplugin"]
+src = "src/classes"

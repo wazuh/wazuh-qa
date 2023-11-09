@@ -1,12 +1,24 @@
 import sys
 import os
 import argparse
+import subprocess
+
+try:
+  import poetry
+except ImportError:
+  subprocess.check_call(['curl', '-sSL', 'https://install.python-poetry.org', '|', 'python3', '-'])
+else:
+  import poetry
+  poetry.core.menv.install()
+
+  import poetry.plugins
+  poetry.plugins.activate('myplugin')
 
 # Obtén la ruta al directorio raíz del proyecto 'poc-test'
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+#project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 # Agrega la ruta del directorio raíz al PYTHONPATH
-sys.path.append(project_root)
+#sys.path.append(project_root)
 
 import src.classes.Ansible as Ansible
 
@@ -23,6 +35,13 @@ def main(inventory_file):
     private_key = inventory['all']['hosts'][host].get('ansible_ssh_private_key_file')
     remote_port = inventory['all']['hosts'][host].get('ansible_port')
 
+    if host == 'debian':
+      pkg_manager = 'apt'
+    elif host == 'alpine':
+      pkg_manager = 'apk'
+    else:
+      pkg_manager = 'apt'
+
     install_playbook = {
       'name': 'Install packages on '+host,
       'hosts': host,
@@ -33,7 +52,7 @@ def main(inventory_file):
       },
       'tasks': [
         {
-          'apt': {
+          pkg_manager: {
             'name': packages,
             'state': 'present'
             }
