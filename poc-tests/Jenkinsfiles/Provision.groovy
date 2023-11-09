@@ -19,4 +19,11 @@ node {
     sh "python3 ${provision_path}/${provision_script} -i ${inventory}"
   }
 
+  post {
+      always {
+          sh 'deactivate || true'
+          sh 'rm -rf venv'
+      }
+  }
+
 }

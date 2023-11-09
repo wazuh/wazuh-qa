@@ -1,24 +1,10 @@
 import argparse
 import subprocess
-import json
+import os
+import sys
 
-try:
-  import poetry
-except ImportError:
-  subprocess.check_call(['curl', '-sSL', 'https://install.python-poetry.org', '>', 'install.py'])
-  subprocess.check_call(['python3', 'install.py'])
-else:
-  import poetry
-  poetry.core.menv.install()
-
-  import poetry.plugins
-  poetry.plugins.activate('myplugin')
-
-# Obtén la ruta al directorio raíz del proyecto 'poc-test'
-#project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-
-# Agrega la ruta del directorio raíz al PYTHONPATH
-#sys.path.append(project_root)
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(project_root)
 
 import src.classes.Ansible as Ansible
 
@@ -62,38 +48,23 @@ def run(ansible, inventory):
 
 # ----------------------------------------------
 
-def provisionNode():
+def install_dependencies():
+  venv_path = 'venv'
+  if not os.path.exists(venv_path):
+      subprocess.run(['python', '-m', 'venv', venv_path], check=True)
+  activate_script = os.path.join(venv_path, 'bin', 'activate')
+  activate_command = f"source {activate_script}" if sys.platform != 'win32' else f"call {activate_script}"
+  subprocess.run(activate_command, shell=True)
+  subprocess.run(['python', '-m', 'pip', 'install', '--upgrade', 'pip'], check=True)
+  subprocess.run(['pip', 'install', '-r', 'requirements.txt'], check=True)
 
-  if is_ansible_installed():
-    result = subprocess.check_call(['cat /etc/os-release'])
-    os_info = result.stdout.decode('utf-8').lower()
-
-    if 'ubuntu' in os_info:
-      subprocess.check_call(['sudo apt-get update && apt-get install -y ansible'])
-    elif 'centos' in os_info:
-      subprocess.check_call(['sudo yum -y install epel-release && yum -y install ansible'])
-    elif 'debian' in os_info:
-      subprocess.check_call(['sudo apt-get update && apt-get install -y ansible'])
-    elif 'alpine' in os_info:
-      subprocess.check_call(['sudo apk update && apk add ansible'])
-    else:
-      print("Unsupported operating system")
-
-# ----------------------------------------------
-
-def is_ansible_installed():
-    try:
-        subprocess.check_output(['ansible', '--version'], stderr=subprocess.STDOUT, text=True)
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
-        return False
 
 # ----------------------------------------------
 
 def main(inventory_file):
 
-  provisionNode()
+  # Instalar dependencias
+  install_dependencies()
 
   ansible = Ansible.Ansible(inventory_file)
   inventory = Ansible.get_inventory(ansible, inventory)
