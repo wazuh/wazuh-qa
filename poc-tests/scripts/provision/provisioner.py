@@ -6,7 +6,7 @@ import subprocess
 try:
   import poetry
 except ImportError:
-  subprocess.check_call(['curl', '-sSL', 'https://install.python-poetry.org', '|', 'python3', '-'])
+  subprocess.check_call(['curl -sSL https://install.python-poetry.org | python3 -'])
 else:
   import poetry
   poetry.core.menv.install()
