@@ -1,12 +1,12 @@
-import sys
-import os
 import argparse
 import subprocess
+import json
 
 try:
   import poetry
 except ImportError:
-  subprocess.check_call(['curl -sSL https://install.python-poetry.org | python3 -'])
+  subprocess.check_call(['curl', '-sSL', 'https://install.python-poetry.org', '>', 'install.py'])
+  subprocess.check_call(['python3', 'install.py'])
 else:
   import poetry
   poetry.core.menv.install()
@@ -22,12 +22,9 @@ else:
 
 import src.classes.Ansible as Ansible
 
-def main(inventory_file):
+# ---------------- Methods ---------------------
 
-  ansible = Ansible.Ansible(inventory_file)
-
-  inventory = Ansible.get_inventory()
-
+def run(ansible, inventory):
   for host in inventory['all']['hosts']:
 
     packages = inventory['all']['hosts'][host].get('install')
@@ -63,9 +60,47 @@ def main(inventory_file):
     results = ansible.run_playbook(install_playbook)
     print(results.stats)
 
-# -------------------------------------
-#   Main
-# -------------------------------------
+# ----------------------------------------------
+
+def provisionNode():
+
+  if is_ansible_installed():
+    result = subprocess.check_call(['cat /etc/os-release'])
+    os_info = result.stdout.decode('utf-8').lower()
+
+    if 'ubuntu' in os_info:
+      subprocess.check_call(['sudo apt-get update && apt-get install -y ansible'])
+    elif 'centos' in os_info:
+      subprocess.check_call(['sudo yum -y install epel-release && yum -y install ansible'])
+    elif 'debian' in os_info:
+      subprocess.check_call(['sudo apt-get update && apt-get install -y ansible'])
+    elif 'alpine' in os_info:
+      subprocess.check_call(['sudo apk update && apk add ansible'])
+    else:
+      print("Unsupported operating system")
+
+# ----------------------------------------------
+
+def is_ansible_installed():
+    try:
+        subprocess.check_output(['ansible', '--version'], stderr=subprocess.STDOUT, text=True)
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"Error: {e}")
+        return False
+
+# ----------------------------------------------
+
+def main(inventory_file):
+
+  provisionNode()
+
+  ansible = Ansible.Ansible(inventory_file)
+  inventory = Ansible.get_inventory(ansible, inventory)
+
+  run(ansible, inventory)
+
+# ---------------- Main ---------------------
 
 if __name__ == '__main__':
 
