@@ -1,4 +1,4 @@
-# Image based in dontpanicat/debian image to bypass https://github.com/wazuh/wazuh/issues/19829
+# Image based on dontpanicat/debian image to bypass https://github.com/wazuh/wazuh/issues/19829
 FROM debian:11.8
 
 # Adding backports to debian
