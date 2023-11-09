@@ -3,11 +3,6 @@ import subprocess
 import os
 import sys
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-sys.path.append(project_root)
-
-import src.classes.Ansible as Ansible
-
 # ---------------- Methods ---------------------
 
 def run(ansible, inventory):
@@ -63,8 +58,12 @@ def install_dependencies():
 
 def main(inventory_file):
 
-  # Instalar dependencias
   install_dependencies()
+
+  project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+  sys.path.append(project_root)
+
+  import src.classes.Ansible as Ansible
 
   ansible = Ansible.Ansible(inventory_file)
   inventory = Ansible.get_inventory(ansible, inventory)
