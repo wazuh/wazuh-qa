@@ -1,46 +1,55 @@
-# Use dontpanicat/debian image to bypass https://github.com/wazuh/wazuh/issues/19829
-FROM dontpanicat/debian:latest
+# Image based in dontpanicat/debian image to bypass https://github.com/wazuh/wazuh/issues/19829
+FROM debian:11.8
 
-# Set environment variables for non-interactive package installation
-ENV DEBIAN_FRONTEND=noninteractive
+# Adding backports to debian
+RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/sources.list
 
-RUN apt-get update --allow-releaseinfo-change
+# Installing libraries
+RUN apt-get update -y && \
+    apt-get install -y \
+        apt-transport-https \
+        bash-completion \
+        build-essential \
+        cron \
+        curl \
+        git \
+        libbz2-dev \
+        libdb5.3-dev \
+        libgcc1 \
+        libstdc++6 \
+        libexpat1-dev \
+        libffi-dev \
+        libgdbm-dev \
+        liblzma-dev \
+        libncurses5-dev \
+        libncursesw5-dev \
+        libreadline-dev \
+        libssl-dev \
+        libsqlite3-dev \
+        locales \
+        logrotate \
+        openssh-server \
+        rsyslog \
+        vim \
+        cmake \
+        wget \
+        zlib1g-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Update the package repositories and install essential packages in one step
-RUN apt-get update && apt-get install -y \
-    git \
-    make \
-    cmake \
-    libc6-dev \
-    curl \
-    policycoreutils \
-    automake \
-    autoconf \
-    libtool \
-    libssl-dev \
-    build-essential \
-    libgmp-dev \
-    libmpfr-dev \
-    libmpc-dev
+# Installing Python
+RUN wget https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz && \
+    tar xzf Python-3.10.0.tgz && \
+    cd Python-3.10.0 && \
+    ./configure --enable-optimizations && \
+    make -j && \
+    make altinstall && \
+    cd .. && \
+    ln -s /usr/local/bin/python3.10 /usr/local/bin/python && \
+    ln -s /usr/local/bin/pip3.10 /usr/local/bin/pip
 
-# Download and build GCC 10.3.0
-WORKDIR /tmp
-RUN curl -s https://ftp.gnu.org/gnu/gcc/gcc-10.3.0/gcc-10.3.0.tar.xz | tar -xJ
-RUN mkdir build && cd build
-RUN ./gcc-10.3.0/configure --prefix=/usr/local \
-                        --disable-dependency-tracking \
-                        --disable-nls \
-                        --disable-multilib \
-                        --enable-default-pie \
-                        --enable-languages=c,c++
-RUN make -j$(nproc)
-RUN make install
-
-# Cleanup unnecessary files and links
-RUN rm -rf /usr/bin/gcc && rm /usr/bin/g++
-RUN ln -s /usr/local/bin/gcc /usr/bin/gcc && ln -s /usr/local/bin/g++ /usr/bin/g++
-
-RUN rm -rf /tmp/*
+RUN rm -rf /Python-3.10.0.tgz && \
+    rm -rf /Python-3.10.0
 
 # Set up an entry point to keep the container running
 CMD ["tail", "-f", "/dev/null"]
