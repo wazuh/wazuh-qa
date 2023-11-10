@@ -1,8 +1,7 @@
 import pwd
 import grp
 
-from pathlib import Path
-from helpers import constants
+from helpers import constants, utils
 
 
 def test_wazuh_user():
@@ -23,3 +22,15 @@ def test_wazuh_configuration():
 def test_wazuh_control():
     assert constants.BINARIES_DIR.exists(), "Binaries directory not found."
     assert constants.WAZUH_CONTROL.exists(), "Wazuh control binary not found."
+
+
+def test_wazuh_daemons():
+    actual_daemons = utils.get_daemons_status()
+
+    if utils.get_service == "agent":
+        expected_daemons = constants.AGENT_DAEMONS
+    else:
+        expected_daemons = constants.MANAGER_DAEMONS
+
+    for daemon in expected_daemons:
+        assert daemon in actual_daemons, f"{daemon} not found."
