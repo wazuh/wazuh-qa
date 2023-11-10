@@ -7,4 +7,4 @@ worker2_hostname: "wazuh-worker2"
 
 docker_network: "agentless_cluster_net"
 
-image: "wazuh/ubuntu_jammy_system_tests:1"
+image: "dontpanicat/debian:buster"

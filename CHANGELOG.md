@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix of system test instability ([#4686](https://github.com/wazuh/wazuh-qa/pull/4686)) \- (Tests)
 - Update default vacuum settings in IT ([#4671](https://github.com/wazuh/wazuh-qa/pull/4671)) \- (Tests)
 - Fix registry wildcards path ([#4400](https://github.com/wazuh/wazuh-qa/pull/4400)) \- (Tests)
 - Fix warnings in the rids tests([#4151](https://github.com/wazuh/wazuh-qa/pull/4151)) \- (Framework + Tests)

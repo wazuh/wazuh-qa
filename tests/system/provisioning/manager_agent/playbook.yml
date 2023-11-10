@@ -1,20 +1,4 @@
-- name: Create System Test Docker image
-  hosts: localhost
-  vars_files:
-    - ./vars/configurations.yml
-  tasks:
-    - name: Warn about source installation
-      debug:
-        msg: "Please consider using package installation instead of building from source to expedite the deployment process. For more detailed information, refer to the 'Pytest' section in the Readme"
-      when: wazuh_branch is defined
-
-    - name: Create docker image for system tests
-      docker_image:
-        build:
-          path: "../Docker/"
-        name: "{{ image }}"
-        source: build
-
+---
 - name: Create our container (Manager)
   hosts: localhost
   vars_files:
@@ -93,7 +77,7 @@
     - ./vars/configurations.yml
   roles:
     - name: "roles/agent-role"
-
+    
 - name: Wazuh Agent2
   hosts: wazuh-agent2
   vars:
