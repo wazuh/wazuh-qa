@@ -5,7 +5,8 @@ import json
 import hashlib
 import sys
 import re
-import tools
+
+from helpers import tools
 from subprocess import Popen, PIPE, check_output
 
 # /////////////////////////////////////   TEST VARS  //////////////////////////////////////////
