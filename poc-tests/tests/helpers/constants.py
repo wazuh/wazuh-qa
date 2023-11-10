@@ -12,7 +12,7 @@ WAZUH_CONTROL = Path(BINARIES_DIR, "wazuh-control")
 WAZUH_USER = "wazuh"
 WAZUH_GROUP = "wazuh"
 
-# Services
+# Daemons
 AGENTD = 'wazuh-agentd'
 AGENTLESSD = 'wazuh-agentlessd'
 ANALYSISDD = 'wazuh-analysisd'
@@ -29,13 +29,13 @@ REMOTED = 'wazuh-remoted'
 SYSCHECKD = 'wazuh-syscheckd'
 WAZUH_DBD = 'wazuh-db'
 
-AGENT_SERVICES = [AGENTD,
+AGENT_DAEMONS = [AGENTD,
                   EXECD,
                   MODULESD,
                   LOGCOLLECTORD,
                   SYSCHECKD]
 
-MANAGER_SERVICES = [AGENTLESSD,
+MANAGER_DAEMONS = [AGENTLESSD,
                     ANALYSISDD,
                     APID,
                     CLUSTERD,
