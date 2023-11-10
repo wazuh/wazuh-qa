@@ -41,10 +41,10 @@ def main():
 
     # Provision stage
 
-    #ansible.run_playbook(playbook_provision_repo)
-    #ansible.run_playbook(playbook_provision_install)
-    #ansible.run_playbook(playbook_provision_register)
-    #ansible.run_playbook(playbook_provision_service)
+    ansible.run_playbook(playbook_provision_repo)
+    ansible.run_playbook(playbook_provision_install)
+    ansible.run_playbook(playbook_provision_register)
+    ansible.run_playbook(playbook_provision_service)
 
     time.sleep(20) # Agent must connect to manager. Remove in PR
 

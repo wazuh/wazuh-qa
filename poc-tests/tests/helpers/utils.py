@@ -25,7 +25,8 @@ def get_daemons_status() -> dict:
     """
     daemons_status = {}
 
-    control_output = subprocess.run([WAZUH_CONTROL, "status"], stdout=subprocess.PIPE)
+    control_output = subprocess.run(
+        [WAZUH_CONTROL, "status"], stdout=subprocess.PIPE)
     control_output_decoded = control_output.stdout.decode('utf-8')
 
     for line in control_output_decoded.split('\n'):
@@ -46,7 +47,8 @@ def get_registered_agents():
     """
     registered_agents = []
 
-    control_output = subprocess.run([AGENT_CONTROL, "-l"], stdout=subprocess.PIPE)
+    control_output = subprocess.run(
+        [AGENT_CONTROL, "-l"], stdout=subprocess.PIPE)
     control_output_decoded = control_output.stdout.decode('utf-8')
 
     for line in control_output_decoded.split('\n'):
@@ -70,7 +72,7 @@ def find_string_in_file(file_path: str, target: str) -> bool:
     Args:
         file_path (str): The path of the file to read.
         target (str): The expected string.
-        
+
     Returns:
         bool: True if the line is found, False otherwise.
     """
