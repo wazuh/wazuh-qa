@@ -20,13 +20,13 @@
       shell: "/var/ossec/bin/wazuh-control info | grep -E -o 'agent|server'"
       register: target
 
-    - name: Run tests on wazuh-agent
+    - name: Run tests on Wazuh agent
       command: "pytest {{ test_install_file }} --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target.stdout|quote }} -v"
       args:
         chdir: "{{ path }}/{{ test_directory }}"
       when: target.stdout == 'agent'
 
-    - name: Run tests on wazuh-manager
+    - name: Run tests on Wazuh manager
       command: "pytest {{ test_install_file }} --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target.stdout|quote }} -v"
       args:
         chdir: "{{ path }}/{{ test_directory }}"
