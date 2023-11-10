@@ -8,8 +8,8 @@ all:
       distribution: debian
       install:
        #- ansible
-       - wazuh-agent
        - curl
+       - wazuh-agent
        - nano
 
     Manager:

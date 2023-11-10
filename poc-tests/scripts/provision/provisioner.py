@@ -6,6 +6,7 @@ import sys
 # ---------------- Methods ---------------------
 
 def run(ansible, inventory):
+  status = {}
   for host in inventory['all']['hosts']:
 
     packages = inventory['all']['hosts'][host].get('install')
@@ -15,8 +16,12 @@ def run(ansible, inventory):
     remote_port = inventory['all']['hosts'][host].get('ansible_port')
 
     for package in packages:
+      host_manager = ""
+      if "agent" in package and "Manager" in inventory['all']['hosts']:
+        host_manager = inventory['all']['hosts']['Manager'].get('ansible_host')
+
       install_playbook = {
-        'name': 'Install packages on '+host,
+        'name': 'Install packages on ' + host,
         'hosts': host,
         'remote_user': remote_user,
         'port': remote_port,
@@ -26,18 +31,21 @@ def run(ansible, inventory):
         'tasks': []
       }
 
-      tasks = getTask(package, distribution)
+      tasks = getTask(package, distribution, host_manager)
 
       install_playbook['tasks'].extend(tasks)
 
       results = ansible.run_playbook(install_playbook)
-      print(results.stats)
+      status.update(results.stats)
+
+  print("Resume")
+  print(status)
 
 # ----------------------------------------------
 
-def getTask(package, distribution):
+def getTask(package, distribution, host_manager):
   tasks = []
-  pkg_manager
+  pkg_manager = ""
 
   if distribution == 'debian':
     pkg_manager = 'apt'
@@ -49,53 +57,83 @@ def getTask(package, distribution):
       tasks.extend([
         {
             'name': 'Install gnupg and apt-transport-https',
-            'apt': {
+            pkg_manager: {
                 'name': 'gnupg,apt-transport-https',
                 'state': 'present'
-            }
+            },
+            'become': True
         },
         {
             'name': 'Import GPG key',
-            'command': 'curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && chmod 644 /usr/share/keyrings/wazuh.gpg'
+            'shell': 'curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && chmod 644 /usr/share/keyrings/wazuh.gpg',
+            'become': True
         },
         {
             'name': 'Add Wazuh repository',
-            'lineinfile': {
-                'dest': '/etc/apt/sources.list.d/wazuh.list',
-                'line': 'deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main'
-            }
+            'shell': 'echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main" | tee -a /etc/apt/sources.list.d/wazuh.list',
+            'become': True
         },
         {
             'name': 'Update packages information',
-            'apt': {
+            pkg_manager: {
                 'update_cache': 'yes'
-            }
+            },
+            'become': True
         }
       ])
     if distribution == 'rpm':
       tasks.extend([
         {
             'name': 'Import GPG key',
-            'command': 'rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH'
+            'command': 'rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH',
+            'become': True
         },
         {
             'name': 'Add Wazuh repository',
-            'copy': {
-                'src': 'files/wazuh.repo',
-                'dest': '/etc/yum.repos.d/wazuh.repo'
-            }
+            'shell': 'echo -e \'[wazuh]\ngpgcheck=1\ngpgkey=https://packages.wazuh.com/key/GPG-KEY-WAZUH\nenabled=1\nname=EL-$releasever - Wazuh\nbaseurl=https://packages.wazuh.com/4.x/yum/\nprotect=1\' | tee /etc/yum.repos.d/wazuh.repo',
+            'become': True
         }
       ])
 
-  tasks.extend([
-    {
-        'name': 'Install' + package,
-        pkg_manager: {
-            'name': package,
-            'state': 'present'
-        }
-    }
-  ])
+    # Validate if agent and manager exists into iventory set manager host
+    if host_manager:
+      install = 'WAZUH_MANAGER="' + host_manager + '" ' + pkg_manager
+    else:
+      install = pkg_manager
+
+    tasks.extend([
+      {
+          'name': 'Install' + package,
+          'shell': install + ' install ' + package,
+          'become': True
+      },
+      {
+          'name': 'Reload systemd ' + package + ' configuration',
+          'shell': 'systemctl daemon-reload',
+          'become': True
+      },
+      {
+          'name': 'Enable ' + package + ' on boot',
+          'shell': 'systemctl enable ' + package,
+          'become': True
+      },
+      {
+          'name': 'Start ' + package,
+          'shell': 'systemctl start ' + package,
+          'become': True
+      }
+    ])
+  else:
+    tasks.extend([
+      {
+          'name': 'Install' + package,
+          pkg_manager: {
+              'name': package,
+              'state': 'present'
+          },
+          'become': True
+      }
+    ])
 
   return tasks
 
