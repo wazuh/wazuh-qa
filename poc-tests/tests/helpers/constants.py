@@ -4,13 +4,21 @@ from pathlib import Path
 # Paths
 WAZUH_ROOT = Path("/var", "ossec")
 CONFIGURATIONS_DIR = Path(WAZUH_ROOT, "etc")
-BINARIES_DIR = Path(WAZUH_ROOT, "bin")
 WAZUH_CONF = Path(CONFIGURATIONS_DIR, "ossec.conf")
+CLIENT_KEYS = Path(CONFIGURATIONS_DIR, "client.keys")
+
+BINARIES_DIR = Path(WAZUH_ROOT, "bin")
 WAZUH_CONTROL = Path(BINARIES_DIR, "wazuh-control")
+AGENT_CONTROL = Path(BINARIES_DIR, "agent_control")
+
+LOGS_DIR = Path(WAZUH_ROOT, "logs")
+WAZUH_LOG = Path(LOGS_DIR, "ossec.log")
+
 
 # Unix users and groups
 WAZUH_USER = "wazuh"
 WAZUH_GROUP = "wazuh"
+
 
 # Daemons
 AGENTD = 'wazuh-agentd'
