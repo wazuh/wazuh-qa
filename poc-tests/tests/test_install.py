@@ -33,4 +33,4 @@ def test_wazuh_daemons():
         expected_daemons = constants.MANAGER_DAEMONS
 
     for daemon in expected_daemons:
-        assert daemon in actual_daemons, f"{daemon} not found."
+        assert daemon in actual_daemons.keys(), f"{daemon} not found."
