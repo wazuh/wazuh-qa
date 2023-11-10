@@ -1,5 +1,6 @@
-import pwd
 import grp
+import os
+import pwd
 
 from helpers import constants, utils
 
@@ -24,10 +25,15 @@ def test_wazuh_control():
     assert constants.WAZUH_CONTROL.exists(), "Wazuh control binary not found."
 
 
+def test_wazuh_service():
+    expected_service = os.environ['target']
+    assert utils.get_service() == expected_service, f"Installed service is not the expected."
+
+
 def test_wazuh_daemons():
     actual_daemons = utils.get_daemons_status()
 
-    if utils.get_service() == "agent":
+    if os.environ['target'] == "agent":
         expected_daemons = constants.AGENT_DAEMONS
     else:
         expected_daemons = constants.MANAGER_DAEMONS
