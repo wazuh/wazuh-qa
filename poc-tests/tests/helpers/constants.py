@@ -30,22 +30,22 @@ SYSCHECKD = 'wazuh-syscheckd'
 WAZUH_DBD = 'wazuh-db'
 
 AGENT_DAEMONS = [AGENTD,
-                  EXECD,
-                  MODULESD,
-                  LOGCOLLECTORD,
-                  SYSCHECKD]
+                 EXECD,
+                 MODULESD,
+                 LOGCOLLECTORD,
+                 SYSCHECKD]
 
 MANAGER_DAEMONS = [AGENTLESSD,
-                    ANALYSISDD,
-                    APID,
-                    CLUSTERD,
-                    CSYSLOGD,
-                    EXECD,
-                    INTEGRATORD,
-                    LOGCOLLECTORD,
-                    MAILD,
-                    MODULESD,
-                    MONITORD,
-                    REMOTED,
-                    SYSCHECKD,
-                    WAZUH_DBD]
+                   ANALYSISDD,
+                   APID,
+                   CLUSTERD,
+                   CSYSLOGD,
+                   EXECD,
+                   INTEGRATORD,
+                   LOGCOLLECTORD,
+                   MAILD,
+                   MODULESD,
+                   MONITORD,
+                   REMOTED,
+                   SYSCHECKD,
+                   WAZUH_DBD]

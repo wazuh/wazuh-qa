@@ -1,2 +1,2 @@
-python3-pip
+# python3-pip
 pytest==7.4.2

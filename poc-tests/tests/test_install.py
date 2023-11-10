@@ -27,7 +27,7 @@ def test_wazuh_control():
 def test_wazuh_daemons():
     actual_daemons = utils.get_daemons_status()
 
-    if utils.get_service == "agent":
+    if utils.get_service() == "agent":
         expected_daemons = constants.AGENT_DAEMONS
     else:
         expected_daemons = constants.MANAGER_DAEMONS

@@ -1,19 +1,17 @@
 - hosts: all
   become: true
   vars:
-    path: '/tmp'
-    test_directory: 'tests'
-    test_agent_test: 'test_install.py'
-    test_manager_test: 'test_manager.py'
+    path: "/tmp"
+    test_directory: "tests"
+    test_install_file: "test_install.py"
     curl_path: /usr/bin/curl
 
   tasks:
-
     - name: Download dist-detect.sh
       command: "{{ curl_path }} -kL http://raw.githubusercontent.com/wazuh/wazuh/{{ branch_version }}/src/init/dist-detect.sh -o {{ path }}/dist-detect.sh"
 
     - name: Get operating system name
-      shell: '. {{ path }}/dist-detect.sh && echo $DIST_NAME $DIST_VER'
+      shell: ". {{ path }}/dist-detect.sh && echo $DIST_NAME $DIST_VER"
       register: os
       args:
         executable: /bin/bash
@@ -22,15 +20,14 @@
       shell: "/var/ossec/bin/wazuh-control info | grep -E -o 'agent|server'"
       register: target
 
-    - name: Run tests
-      command: "pytest {{ test_agent_test }} --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target.stdout|quote }} -v"
+    - name: Run tests on wazuh-agent
+      command: "pytest {{ test_install_file }} --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target.stdout|quote }} -v"
       args:
         chdir: "{{ path }}/{{ test_directory }}"
       when: target.stdout == 'agent'
 
-    - name: Run tests
-      command: "pytest {{ test_manager_test }} --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target.stdout|quote }} -v"
+    - name: Run tests on wazuh-manager
+      command: "pytest {{ test_install_file }} --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target.stdout|quote }} -v"
       args:
         chdir: "{{ path }}/{{ test_directory }}"
       when: target.stdout == 'server'
-

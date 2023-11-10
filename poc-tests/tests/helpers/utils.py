@@ -1,6 +1,6 @@
 import subprocess
 
-from constants import WAZUH_CONTROL
+from .constants import WAZUH_CONTROL
 
 
 def get_service() -> str:
