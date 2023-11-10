@@ -67,7 +67,8 @@ def check_eps_disabled():
 
 def check_eps_missing_maximum():
     """Check if the eps block has the maximum tag"""
-    check_analysisd_event(callback=r".*WARNING: The EPS maximum value is missing in the configuration block.*",
+    check_analysisd_event(callback=r".*WARNING: EPS limit disabled. "
+                                   "The maximum value is missing in the configuration block.*",
                           timeout=T_10)
 
 
