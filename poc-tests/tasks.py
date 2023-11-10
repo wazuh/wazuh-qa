@@ -1,4 +1,4 @@
-import src.classes.Ansible as Ansible
+from src.classes import Ansible
 import time # Remove in PR
 
 def main():
@@ -9,7 +9,7 @@ def main():
 
     # General
     inventory = "inventory.yaml"
-    playbook_path = "/home/nonsatus/Documents/Wazuh/Repositories/wazuh-qa/4524/playbooks"
+    playbook_path = "/wazuh-qa/poc-tests/playbooks"
 
     # Provision
     playbook_provision_repo = "provision/set_repo.yml"
@@ -24,7 +24,7 @@ def main():
 
     # Extra data
     live = True
-    version = '4.5.2'
+    version = '4.6.0'
     if live:
         branch_version = "v" + version
     extra_vars = {
