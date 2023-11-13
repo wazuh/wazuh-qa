@@ -2,7 +2,7 @@ import time
 import chardet
 import subprocess
 
-from .constants import WAZUH_CONTROL, AGENT_CONTROL
+from .constants import RUN_AGENTD_STATE, WAZUH_CONTROL, AGENT_CONTROL
 
 
 def get_service() -> str:
@@ -65,6 +65,27 @@ def get_registered_agents():
             registered_agents.append(agent_dict)
 
     return registered_agents
+
+
+def get_agent_connection_status(agent_id: str = None) -> str:
+    if get_service() == "server" and not agent_id:
+        raise ValueError("Agent id is required for server service.")
+
+    if get_service() == "server":
+        agent = [a for a in get_registered_agents() if a.get('ID') == agent_id]
+
+        if not agent:
+            raise ValueError("Agent not found.")
+
+        status = agent[0].get('Status')
+    else:
+        agentd_output = subprocess.run(
+            ["sudo", "grep", "^status", RUN_AGENTD_STATE], stdout=subprocess.PIPE)
+        agentd_output_decoded = agentd_output.stdout.decode('utf-8')
+        status = agentd_output_decoded.split('=')[1].replace("'", "").strip()
+        
+    return status
+
 
 
 def get_file_encoding(file_path: str) -> str:
