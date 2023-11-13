@@ -1,0 +1,68 @@
+2023/11/13 11:30:22 wazuh-db[44588] wdb_parser.c:849 at wdb_parse(): DEBUG: Global query: get-agents-by-connection-status 0 active wazuh-master -1
+2023/11/13 11:30:22 wazuh-db[44588] main.c:324 at run_dealer(): DEBUG: New client connected (43).
+2023/11/13 11:30:22 wazuh-db[44588] wdb_parser.c:849 at wdb_parse(): DEBUG: Global query: get-distinct-groups 
+2023/11/13 11:30:22 wazuh-db[44588] main.c:386 at run_worker(): DEBUG: Client 43 disconnected.
+2023/11/13 11:30:23 wazuh-db[44588] wdb_parser.c:849 at wdb_parse(): DEBUG: Global query: get-agents-by-connection-status 0 active wazuh-master -1
+2023/11/13 11:30:27 wazuh-db[44588] wdb_parser.c:849 at wdb_parse(): DEBUG: Global query: get-agents-by-connection-status 0 active wazuh-master -1
+2023/11/13 11:30:28 wazuh-db[44588] wdb_parser.c:849 at wdb_parse(): DEBUG: Global query: get-agents-by-connection-status 0 active wazuh-master -1
+2023/11/13 11:30:28 wazuh-db[44588] wdb_parser.c:849 at wdb_parse(): DEBUG: Global query: update-connection-status {"id":1,"connection_status":"disconnected","sync_status":"synced","status_code":3}
+2023/11/13 11:30:28 wazuh-db[44588] wdb_parser.c:849 at wdb_parse(): DEBUG: Global query: get-labels 1
+2023/11/13 11:30:29 wazuh-db[44588] wdb_parser.c:849 at wdb_parse(): DEBUG: Global query: update-keepalive {"id":1,"connection_status":"pending","sync_status":"synced"}
+2023/11/13 11:30:29 wazuh-db[44588] wdb_parser.c:849 at wdb_parse(): DEBUG: Global query: select-agent-group 1
+2023/11/13 11:30:29 wazuh-db[44588] wdb_parser.c:849 at wdb_parse(): DEBUG: Global query: update-agent-data {"id":1,"version":"Wazuh v4.7.0","config_sum":"ab73af41699f13fdd81903b5f23d8d00","merged_sum":"4a8724b20dee0124ff9656783c490c4e","manager_host":"wazuh-manager","node_name":"wazuh-master","agent_ip":"172.29.0.3","labels":"#\"_manager_hostname\":wazuh-manager\n#\"_agent_ip\":172.29.0.3\n#\"_node_name\":wazuh-master\n#\"_wazuh_version\":Wazuh v4.7.0","connection_status":"active","sync_status":"synced","group_config_status":"synced","os_name":"Debian GNU/Linux","os_version":"10","os_major":"10","os_codename":"buster","os_platform":"debian","os_uname":"Linux |wazuh-agent1 |6.2.0-36-generic |#37~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Mon Oct  9 15:34:04 UTC 2 |x86_64","os_arch":"x86_64"}
+2023/11/13 11:30:29 wazuh-db[44588] wdb.c:1089 at wdb_commit_old(): DEBUG: Agent '001' database commited. Time: 11.638 ms.
+2023/11/13 11:30:30 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: syscheck scan_info_update start_scan 1699871430
+2023/11/13 11:30:31 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: syscheck scan_info_update end_scan 1699871431
+2023/11/13 11:30:31 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_global {"begin":"/bin/bash","checksum":"4056e8dbc0851dacc0ed0124fbcfe9896c901e04","end":"/usr/sbin/zic","id":1699871431}
+2023/11/13 11:30:31 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.634 ms.
+2023/11/13 11:30:31 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_left {"begin":"/bin/bash","checksum":"ca37af8d975ca0a69d9b39c888455fbe2aed666d","end":"/sbin/devlink","id":1699871431,"tail":"/sbin/dmsetup"}
+2023/11/13 11:30:31 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.382 ms.
+2023/11/13 11:30:31 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_right {"begin":"/sbin/dmsetup","checksum":"9a41e40b739cc548426f414342ee0878bc60c0c4","end":"/usr/sbin/zic","id":1699871431}
+2023/11/13 11:30:31 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.618 ms.
+2023/11/13 11:30:31 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_left {"begin":"/sbin/dmsetup","checksum":"fa2b6ba4304ab4b225cdb98f8407ef8c82568054","end":"/usr/bin/pdb","id":1699871431,"tail":"/usr/bin/pdb2"}
+2023/11/13 11:30:31 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.485 ms.
+2023/11/13 11:30:31 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_right {"begin":"/usr/bin/pdb2","checksum":"0897444bb4a9abe998c98a4538d04ed3b5a7a4be","end":"/usr/sbin/zic","id":1699871431}
+2023/11/13 11:30:31 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.465 ms.
+2023/11/13 11:30:31 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_right {"begin":"/usr/bin/dpkg-gencontrol","checksum":"b82eeaa73a319437ccf4798207923bb785c95799","end":"/usr/bin/pdb","id":1699871431}
+2023/11/13 11:30:31 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_left {"begin":"/sbin/dmsetup","checksum":"a09ad2364813238370b24f5c9d805eab270c6cc4","end":"/usr/bin/dpkg-genchanges","id":1699871431,"tail":"/usr/bin/dpkg-gencontrol"}
+2023/11/13 11:30:31 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.298 ms.
+2023/11/13 11:30:31 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.283 ms.
+2023/11/13 11:30:31 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_left {"begin":"/sbin/dmsetup","checksum":"643e1a9e65eca19b5c60065c9129e52cb49fedbe","end":"/usr/bin/apt-key","id":1699871431,"tail":"/usr/bin/apt-mark"}
+2023/11/13 11:30:31 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.183 ms.
+2023/11/13 11:30:31 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_right {"begin":"/usr/bin/apt-mark","checksum":"cf73b448adade54e4bbd289f9e47261fb7a60d8f","end":"/usr/bin/dpkg-genchanges","id":1699871431}
+2023/11/13 11:30:31 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.277 ms.
+2023/11/13 11:30:31 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_left {"begin":"/sbin/dmsetup","checksum":"816989ff69de5fa7ea58b5ced60c9d9c2b31ad85","end":"/sbin/pam_tally","id":1699871431,"tail":"/sbin/pam_tally2"}
+2023/11/13 11:30:31 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.188 ms.
+2023/11/13 11:30:32 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_right {"begin":"/sbin/pam_tally2","checksum":"04c6ab31209e62515359d66e9cc3d8af72699d63","end":"/usr/bin/apt-key","id":1699871431}
+2023/11/13 11:30:32 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.146 ms.
+2023/11/13 11:30:32 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_left {"begin":"/sbin/pam_tally2","checksum":"19c3090ec33d731f50b44d39fefdaec25f5ff5e1","end":"/sbin/swapoff","id":1699871431,"tail":"/sbin/swapon"}
+2023/11/13 11:30:32 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.117 ms.
+2023/11/13 11:30:32 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_right {"begin":"/sbin/swapon","checksum":"c4944f790d04e3e7a798675b1f0a6b6964e59d6a","end":"/usr/bin/apt-key","id":1699871431}
+2023/11/13 11:30:32 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.170 ms.
+2023/11/13 11:30:32 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_left {"begin":"/sbin/swapon","checksum":"1e5c21a309448dbbe486a9f0856d49291bb45e8c","end":"/usr/bin/2to3-2.7","id":1699871431,"tail":"/usr/bin/["}
+2023/11/13 11:30:32 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.153 ms.
+2023/11/13 11:30:32 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_right {"begin":"/usr/bin/[","checksum":"5054a5c5a9fb895638698c28897c1ec300fb174d","end":"/usr/bin/apt-key","id":1699871431}
+2023/11/13 11:30:32 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.182 ms.
+2023/11/13 11:30:32 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_right {"begin":"/sbin/tune2fs","checksum":"15a95a9b0eaba28d62088ce12aa0fba3691cf12d","end":"/usr/bin/2to3-2.7","id":1699871431}
+2023/11/13 11:30:32 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_left {"begin":"/sbin/swapon","checksum":"060a15bbd0a3d86853185780b5b039a832a47d01","end":"/sbin/tipc","id":1699871431,"tail":"/sbin/tune2fs"}
+2023/11/13 11:30:32 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.161 ms.
+2023/11/13 11:30:32 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.120 ms.
+2023/11/13 11:30:32 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_left {"begin":"/sbin/tune2fs","checksum":"00f669a21b3aced4e35d52f77fc7722b4d583700","end":"/sbin/unix_update","id":1699871431,"tail":"/sbin/wipefs"}
+2023/11/13 11:30:32 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.126 ms.
+2023/11/13 11:30:32 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_right {"begin":"/sbin/wipefs","checksum":"a79b1f6f55acba2a50a0fa7a4775c6c5c33dafba","end":"/usr/bin/2to3-2.7","id":1699871431}
+2023/11/13 11:30:32 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.133 ms.
+2023/11/13 11:30:32 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_left {"begin":"/sbin/wipefs","checksum":"aba05c41895a100b32a4494940b75e4c363626e3","end":"/sbin/zramctl","id":1699871431,"tail":"/testdir2/testdir2.txt"}
+2023/11/13 11:30:32 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.132 ms.
+2023/11/13 11:30:32 wazuh-db[44588] wdb_parser.c:849 at wdb_parse(): DEBUG: Global query: get-agents-by-connection-status 0 active wazuh-master -1
+2023/11/13 11:30:33 wazuh-db[44588] main.c:324 at run_dealer(): DEBUG: New client connected (42).
+2023/11/13 11:30:33 wazuh-db[44588] wdb_parser.c:849 at wdb_parse(): DEBUG: Global query: get-distinct-groups 
+2023/11/13 11:30:33 wazuh-db[44588] main.c:386 at run_worker(): DEBUG: Client 42 disconnected.
+2023/11/13 11:30:33 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_right {"begin":"/testdir2/testdir2.txt","checksum":"e51d774fe12c9c57edadaf3234089c0bd462aec9","end":"/usr/bin/2to3-2.7","id":1699871431}
+2023/11/13 11:30:33 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.091 ms.
+2023/11/13 11:30:33 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_left {"begin":"/testdir2/testdir2.txt","checksum":"dda3bac195c047f4f13b38a16ed9afdc78bd8f63","end":"/testdir2/testdir2.txt","id":1699871431,"tail":"/usr/bin/2to3-2.7"}
+2023/11/13 11:30:33 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file integrity_check_right {"begin":"/usr/bin/2to3-2.7","checksum":"cc42dcdc6df0e19ffe97e890d749c97047cda31b","end":"/usr/bin/2to3-2.7","id":1699871431}
+2023/11/13 11:30:33 wazuh-db[44588] wdb_integrity.c:445 at wdbi_query_checksum(): DEBUG: Agent '001' fim_file range checksum: Time: 0.090 ms.
+2023/11/13 11:30:33 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: fim_file save2 {"attributes":{"attributes":"","checksum":"ac630822075216f0b8be95b148ac8cc84bec9ac0","gid":"0","group_name":"root","hash_md5":"d41d8cd98f00b204e9800998ecf8427e","hash_sha1":"da39a3ee5e6b4b0d3255bfef95601890afd80709","hash_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","inode":5546178,"mtime":1699871425,"perm":"rw-r--r--","size":0,"type":"file","uid":"0","user_name":"root"},"index":"/testdir2/testdir2.txt","timestamp":1699871430}
+2023/11/13 11:30:33 wazuh-db[44588] wdb_parser.c:849 at wdb_parse(): DEBUG: Global query: get-agents-by-connection-status 0 active wazuh-master -1
+2023/11/13 11:30:36 wazuh-db[44588] wdb_parser.c:263 at wdb_parse(): DEBUG: Agent 001 query: syscheck save2 {"attributes":{"checksum":"5d671c85a7f5cf176e0df13ad1921fbf47ce8431","gid":"109","group_name":"wazuh","hash_md5":"fb4e1b0bd3ed16116f34533b9966e561","hash_sha1":"6dfbc82a745ed51fef88bd07edacc6e37519572c","hash_sha256":"5d1606c523d12b093ef0fca39f3bae32b597fd9ea73fe1c4fcc76d2a627d6bd6","inode":5546163,"mtime":1699871436,"perm":"rwxrwxr-x","size":8,"type":"file","uid":"107","user_name":"wazuh"},"path":"/testdir2/tmp0263rxp6","timestamp":1699871436,"version":"2.0"}
+2023/11/13 11:30:37 wazuh-db[44588] wdb_parser.c:849 at wdb_parse(): DEBUG: Global query: get-agents-by-connection-status 0 active wazuh-master -1
