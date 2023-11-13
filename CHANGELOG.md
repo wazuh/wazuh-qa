@@ -11,8 +11,9 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Revert a pattern log in analysisd test ([#4688](https://github.com/wazuh/wazuh-qa/pull/4688)) \- (Framework)
 - Clean environment between basic_cluster tests ([#4656](https://github.com/wazuh/wazuh-qa/pull/4656)) \- (Tests)
-- Upgrade gcc version in system tests image ([#4592](https://github.com/wazuh/wazuh-qa/pull/4655)) \- (Framework)
+- Upgrade gcc version in system tests image ([#4655](https://github.com/wazuh/wazuh-qa/pull/4655)) \- (Framework)
 - Add option to run some logcollector tests isolated (without a manager) ([#4226](https://github.com/wazuh/wazuh-qa/pull/4226)) \- (Tests + Framework)
 - Update code analysis and dependencies known flaws. ([#4083](https://github.com/wazuh/wazuh-qa/pull/4083)) \- (Tests)
 - Update _wazuh_db_ schema database version([#4405](https://github.com/wazuh/wazuh-qa/pull/4405)) \- (Tests)
