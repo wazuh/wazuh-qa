@@ -233,6 +233,12 @@ You can specify a package as `package_repository`, `repository`, `package_versio
 ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"package_repository":"packages", "repository": "4.x", "package_version": "4.4.0", "package_revision": "1"}'
 ```
 
+In the basic cluster, you also have to specify a branch from the Wazuh QA repository.
+
+```shell script
+ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"package_repository":"packages", "repository": "4.x", "package_version": "4.4.0", "package_revision": "1", "wazuh_qa_branch":"v4.3.0-rc1"}'
+```
+
 We use [pytest](https://docs.pytest.org/en/latest/contents.html) to run our cluster system tests. Pytest will
 recursively look for the closest `conftest` to import all the variables and fixtures needed for every test. If something
 is lacking from the closest one, it will look for the next one (if possible) until reaching the current directory. This
