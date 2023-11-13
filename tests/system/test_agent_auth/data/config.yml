@@ -19,7 +19,7 @@ wazuh-manager:
       - disabled:
           value: 'no'
       - ipv6:
-          value: 'yes'
+          value: IPV6_ENABLED
       - use_source_ip:
           value: 'no'
       - purge:
