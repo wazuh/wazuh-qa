@@ -20,12 +20,11 @@ ALERTS_JSON = Path(ALERTS_DIR, "alerts.json")
 DAEMONS_DIR = Path(WAZUH_ROOT, "var", "run")
 AGENTD_STATE = Path(DAEMONS_DIR, "wazuh-agentd.state")
 
-# Unix users and groups
+# --- Users & Groups ---
 WAZUH_USER = "wazuh"
 WAZUH_GROUP = "wazuh"
 
-
-# Daemons
+# --- Daemons ---
 AGENTD = 'wazuh-agentd'
 AGENTLESSD = 'wazuh-agentlessd'
 ANALYSISDD = 'wazuh-analysisd'
@@ -41,13 +40,12 @@ LOGCOLLECTORD = 'wazuh-logcollector'
 REMOTED = 'wazuh-remoted'
 SYSCHECKD = 'wazuh-syscheckd'
 WAZUH_DBD = 'wazuh-db'
-
+# Daemons lists
 AGENT_DAEMONS = [AGENTD,
                  EXECD,
                  MODULESD,
                  LOGCOLLECTORD,
                  SYSCHECKD]
-
 MANAGER_DAEMONS = [AGENTLESSD,
                    ANALYSISDD,
                    APID,
@@ -62,3 +60,10 @@ MANAGER_DAEMONS = [AGENTLESSD,
                    REMOTED,
                    SYSCHECKD,
                    WAZUH_DBD]
+
+# --- Log messages ---
+AGENT_CONNECTED = "New wazuh agent connected"
+CONNECTED_TO_SERVER = "Connected to the server"
+AGENT_REGISTERED = "Agent successfully registered"
+REQUESTING_KEY = "Requesting a key from server"
+RECEIVE_KEY_REQUEST = "Received request for a new agent"
