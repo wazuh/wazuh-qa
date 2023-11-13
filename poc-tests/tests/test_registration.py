@@ -1,7 +1,7 @@
 import pytest
 
 from helpers import utils
-from helpers.constants import WAZUH_LOG, CLIENT_KEYS, REQUESTING_KEY, RECEIVE_KEY_REQUEST
+from helpers.constants import WAZUH_LOG, CLIENT_KEYS, KEY_REQ_AGENT, KEY_REQ_SERVER
 
 
 # Actual running service.
@@ -17,7 +17,7 @@ if service == "manager":
 
 
 def test_register_logs_were_generated():
-    expected_log = REQUESTING_KEY if service == "agent" else RECEIVE_KEY_REQUEST
+    expected_log = KEY_REQ_AGENT if service == "agent" else KEY_REQ_SERVER
 
     assert utils.file_monitor(WAZUH_LOG, expected_log), "Register logs not found."
 

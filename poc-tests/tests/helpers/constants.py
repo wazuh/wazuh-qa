@@ -62,8 +62,7 @@ MANAGER_DAEMONS = [AGENTLESSD,
                    WAZUH_DBD]
 
 # --- Log messages ---
-AGENT_CONNECTED = "New wazuh agent connected"
-CONNECTED_TO_SERVER = "Connected to the server"
-AGENT_REGISTERED = "Agent successfully registered"
-REQUESTING_KEY = "Requesting a key from server"
-RECEIVE_KEY_REQUEST = "Received request for a new agent"
+CONNECTION_SERVER = "New wazuh agent connected"
+CONNECTION_AGENT = "Connected to the server"
+KEY_REQ_AGENT = "Requesting a key from server"
+KEY_REQ_SERVER = "Received request for a new agent"
