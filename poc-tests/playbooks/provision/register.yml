@@ -7,4 +7,4 @@
         regexp: "MANAGER_IP"
         replace: "{{ hostvars['Manager'].ansible_host }}"
     - name: Restart Wazuh agent
-      command: "/var/ossec/bin/ossec-control restart"
+      command: "/var/ossec/bin/wazuh-control restart"

@@ -21,6 +21,7 @@ def main():
     playbook_test_repo = "tests/test_repo.yml"
     playbook_test_provision = "tests/provision_test.yml"
     playbook_test_install = "tests/test_install.yml"
+    playbook_test_registration = "tests/test_registration.yml"
 
     # Extra data
     live = True
@@ -56,7 +57,7 @@ def main():
 
     ansible.run_playbook(playbook_test_repo)
     ansible.run_playbook(playbook_test_install, extra_vars)
-    #ansible.run_playbook(playbook_test_register)
+    ansible.run_playbook(playbook_test_registration)
     #ansible.run_playbook(playbook_test_service)
 
 
