@@ -16,7 +16,7 @@ def test_register_logs_were_generated():
     else:
         expected_log = "Received request for a new agent"
 
-    log_found = utils.find_string_in_file(constants.WAZUH_LOG, expected_log)
+    log_found = utils.file_monitor(constants.WAZUH_LOG, expected_log)
     assert log_found, "Register logs were not generated."
 
 

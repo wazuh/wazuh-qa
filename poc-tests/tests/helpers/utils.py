@@ -1,3 +1,5 @@
+import time
+import chardet
 import subprocess
 
 from .constants import WAZUH_CONTROL, AGENT_CONTROL
@@ -65,19 +67,48 @@ def get_registered_agents():
     return registered_agents
 
 
-def find_string_in_file(file_path: str, target: str) -> bool:
-    """
-    Reads a file and checks if the expected line is there.
+def get_file_encoding(file_path: str) -> str:
+    """Detect and return the file encoding.
 
     Args:
-        file_path (str): The path of the file to read.
-        target (str): The expected string.
+        file_path (str): File path to check.
 
     Returns:
-        bool: True if the line is found, False otherwise.
+        encoding (str): File encoding.
     """
-    with open(file_path, 'r') as file:
-        for line in file:
-            if target in line:
-                return True
-    return False
+    with open(file_path, 'rb') as f:
+        data = f.read()
+        if len(data) == 0:
+            return 'utf-8'
+        result = chardet.detect(data)
+    return result['encoding']
+
+
+def file_monitor(monitored_file: str, target_string: str, timeout: int = 30) -> None:
+    encoding = get_file_encoding(monitored_file)
+
+    # Check in the current file content for the string.
+    with open(monitored_file, encoding=encoding) as _file:
+        for line in _file:
+            if target_string in line:
+                return line
+
+    # Start count to set the timeout.
+    start_time = time.time()
+
+    # Start the file monitoring for future lines.
+    with open(monitored_file, encoding=encoding) as _file:
+        # Go to the end of the file.
+        _file.seek(0, 2)
+        while time.time() - start_time < timeout:
+            current_position = _file.tell()
+            line = _file.readline()
+
+            if not line:
+                # No new line, wait for nex try.
+                _file.seek(current_position)
+                time.sleep(0.1)
+            else:
+                # New line, check if the string matches.
+                if target_string in line:
+                    return line
