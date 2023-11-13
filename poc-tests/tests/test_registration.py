@@ -3,8 +3,9 @@ import pytest
 from helpers import constants, utils
 
 
-@pytest.mark.server
 def test_agent_is_registered_in_server():
+    if utils.get_service() == "agent":
+        pytest.skip("Skipping test for agent installations.")
     registered_agents = utils.get_registered_agents()
     assert [a for a in registered_agents if a.get('ID') == '001'], "Agent is not registered."
 
