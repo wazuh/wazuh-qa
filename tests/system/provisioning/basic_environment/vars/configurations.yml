@@ -4,4 +4,4 @@ agent1_hostname: "wazuh-agent1"
 
 docker_network: "basic_environment_net"
 
-image: "wazuh/ubuntu_jammy_system_tests:1"
+image: "dontpanicat/debian:buster"

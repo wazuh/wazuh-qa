@@ -10,4 +10,4 @@ agent2_hostname: wazuh-agent2
 
 docker_network: cluster_net
 
-image: "wazuh/ubuntu_jammy_system_tests:1"
+image: dontpanicat/debian:buster
