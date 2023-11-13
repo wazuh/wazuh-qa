@@ -2,7 +2,7 @@ import time
 import chardet
 import subprocess
 
-from .constants import RUN_AGENTD_STATE, WAZUH_CONTROL, AGENT_CONTROL
+from .constants import AGENTD_STATE, WAZUH_CONTROL, AGENT_CONTROL
 
 
 def get_service() -> str:
@@ -80,7 +80,7 @@ def get_agent_connection_status(agent_id: str = None) -> str:
         status = agent[0].get('Status')
     else:
         agentd_output = subprocess.run(
-            ["sudo", "grep", "^status", RUN_AGENTD_STATE], stdout=subprocess.PIPE)
+            ["sudo", "grep", "^status", AGENTD_STATE], stdout=subprocess.PIPE)
         agentd_output_decoded = agentd_output.stdout.decode('utf-8')
         status = agentd_output_decoded.split('=')[1].replace("'", "").strip()
         
