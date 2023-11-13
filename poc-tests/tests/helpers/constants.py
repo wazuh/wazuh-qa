@@ -13,7 +13,11 @@ AGENT_CONTROL = Path(BINARIES_DIR, "agent_control")
 
 LOGS_DIR = Path(WAZUH_ROOT, "logs")
 WAZUH_LOG = Path(LOGS_DIR, "ossec.log")
+ALERTS_DIR = Path(LOGS_DIR, "alerts")
+ALERTS_JSON = Path(ALERTS_DIR, "alerts.json")
 
+RUN_DAEMONS_DIR = Path(WAZUH_ROOT, "var", "run")
+RUN_AGENTD_STATE = Path(RUN_DAEMONS_DIR, "wazuh-agentd.state")
 
 # Unix users and groups
 WAZUH_USER = "wazuh"
