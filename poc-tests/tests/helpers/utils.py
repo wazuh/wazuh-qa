@@ -12,6 +12,9 @@ def run_wazuh_binary(binary: str, args: list = None) -> None:
     Args:
         binary (str): The binary to run.
         args (list): The arguments to pass to the binary.
+    
+    Returns:
+        str: The output of the binary execution.
     """
     if not args:
         args = []
@@ -29,6 +32,28 @@ def get_service() -> str:
 
     """
     return run_wazuh_binary(WAZUH_CONTROL, ["info", "-t"]).strip()
+
+
+def get_version() -> str:
+    """
+    Retrieves the version of the Wazuh installation on the current platform.
+
+    Returns:
+        str: The version of Wazuh installed.
+
+    """
+    return run_wazuh_binary(WAZUH_CONTROL, ["info", "-v"]).strip()
+
+
+def get_revision() -> str:
+    """
+    Retrieves the version of the Wazuh installation on the current platform.
+
+    Returns:
+        str: The version of Wazuh installed.
+
+    """
+    return run_wazuh_binary(WAZUH_CONTROL, ["info", "-r"]).strip()
 
 
 def get_daemons_status() -> dict:
@@ -77,6 +102,19 @@ def get_registered_agents():
 
 
 def get_agent_connection_status(agent_id: str = None) -> str:
+    """
+    Get the connection status of an agent.
+
+    Args:
+        agent_id (str, optional): The ID of the agent. Defaults to None.
+
+    Raises:
+        ValueError: If the service is "server" and no agent_id is provided.
+        ValueError: If the agent is not found.
+
+    Returns:
+        str: The connection status of the agent.
+    """
     if get_service() == "server" and not agent_id:
         raise ValueError("Agent id is required for server service.")
 
@@ -114,6 +152,18 @@ def get_file_encoding(file_path: str) -> str:
 
 
 def file_monitor(monitored_file: str, target_string: str, timeout: int = 30) -> None:
+    """
+    Monitor a file for a specific string.
+
+    Args:
+        monitored_file (str): The file to monitor.
+        target_string (str): The string to look for in the file.
+        timeout (int, optional): The time to wait for the string to appear in the file. Defaults to 30.
+
+    Returns:
+        None: Returns None if the string is not found within the timeout.
+        str: Returns the line containing the target string if found within the timeout.
+    """
     encoding = get_file_encoding(monitored_file)
 
     # Check in the current file content for the string.
