@@ -4,9 +4,6 @@ All notable changes to this project will be documented in this file.
 
 ## [4.9.0] - TBD
 
-Wazuh commit: TBD \
-Release report: TBD
-
 ## [4.8.0] - TBD
 
 ### Added
