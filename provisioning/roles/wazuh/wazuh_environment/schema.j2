@@ -220,7 +220,6 @@ manager:
       master:
         {{ expand_ansible_connection_attributes(manager['master']) | indent(8) }}
         private_ip:  {{ manager['master']['ip'] }}
-        public_ip: {{ manager['master']['public_ip'] }}
         {{ expand_custom_package('manager', manager['master']) | indent(8)  }}
         wazuh_manager_config:
           cluster:
@@ -276,12 +275,8 @@ agent:
       {{ expand_custom_package('agent', agent_value) | indent(6)  }}
       {{ expand_ansible_connection_attributes(agent_value) | indent(6) }}
       wazuh_managers:
-      {% if agent["architecture"] == "amd64" %}
-        - address: {{ agent_value['manager_ip'] }}
-      {% else %}
-        - address: {{ agent_value['manager_public_ip'] }}
-      {% endif %}
-      - port: 1514
+      - address: {{ agent_value['manager_ip'] }}
+        port: 1514
         protocol: tcp
         api_port: 55000
         api_proto: 'http'
