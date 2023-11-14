@@ -4,9 +4,6 @@ All notable changes to this project will be documented in this file.
 
 ## [4.8.0] - TBD
 
-Wazuh commit: TBD \
-Release report: TBD
-
 ### Added
 
 - Add scans environment setup documentation. ([#4444](https://github.com/wazuh/wazuh-qa/pull/4444)) \- (Tests)
