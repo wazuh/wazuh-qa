@@ -4,11 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## [4.8.0] - TBD
 
-Wazuh commit: TBD \
-Release report: TBD
-
 ### Added
 
+- Migrate Wazuh Ansibles Roles. ([#4642](https://github.com/wazuh/wazuh-qa/pull/4642)) \- (Framework)
 - Add scans environment setup documentation. ([#4444](https://github.com/wazuh/wazuh-qa/pull/4444)) \- (Tests)
 - Add system test for global group hash ([#4015](https://github.com/wazuh/wazuh-qa/pull/4015)) \- (Tests)
 - Add tests for new FIM audit buffer option. ([#4485](https://githubhttps://github.com/wazuh/wazuh-qa/pull/4497#pullrequestreview-1654748331.com/wazuh/wazuh-qa/pull/4485)) \- (Framework + tests)
@@ -19,7 +17,8 @@ Release report: TBD
 
 ### Changed
 
-- Enable Windows Vulnerability Detector E2E. ([#4251](https://github.com/wazuh/wazuh-qa/pull/4251)) (Tests)
+- Change database v13 to v12. ([#4677](https://github.com/wazuh/wazuh-qa/pull/4677)) \- (Tests)
+- Enable Windows Vulnerability Detector E2E. ([#4251](https://github.com/wazuh/wazuh-qa/pull/4251)) \- (Tests)
 - Update certifi library due to a vulnerability. ([#4486](https://github.com/wazuh/wazuh-qa/pull/4486)) \- (Tests)
 - Enable Ubuntu Vulnerability Detector E2E. ([#4252](https://github.com/wazuh/wazuh-qa/pull/4252)) \- (Tests)
 - Update _wazuh_db_ schema database version ([#4353](https://github.com/wazuh/wazuh-qa/pull/4353)) \- (Tests)
@@ -29,6 +28,7 @@ Release report: TBD
 
 ### Fixed
 
+- Fix hardcoded python interpreter in qa_framework role. ([#4658](https://github.com/wazuh/wazuh-qa/pull/4658)) \- (Framework)
 - Fix duplicated jq dependency ([#4678](https://github.com/wazuh/wazuh-qa/pull/4678)) \- (Framework)
 
 ## [4.7.1] - TBD
