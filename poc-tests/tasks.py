@@ -23,15 +23,18 @@ def main():
     playbook_test_install = "tests/test_install.yml"
     playbook_test_registration = "tests/test_registration.yml"
     playbook_test_connection = "tests/test_connection.yml"
+    playbook_test_basic_info = "tests/test_basic_info.yml"
 
     # Extra data
     live = True
     version = '4.6.0'
+    revision = '40603'
     if live:
         branch_version = "v" + version
     extra_vars = {
         'version': version,
-        'branch_version': branch_version
+        'revision': revision,
+        'branch_version': branch_version,
     }
 
     # -------------------
@@ -60,6 +63,7 @@ def main():
     ansible.run_playbook(playbook_test_install, extra_vars)
     ansible.run_playbook(playbook_test_registration)
     ansible.run_playbook(playbook_test_connection)
+    ansible.run_playbook(playbook_test_basic_info, extra_vars)
     #ansible.run_playbook(playbook_test_service)
 
 

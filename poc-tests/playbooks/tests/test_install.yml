@@ -21,13 +21,13 @@
       register: target
 
     - name: Run tests on Wazuh agent
-      command: "pytest {{ test_install_file }} --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target.stdout|quote }} -v"
+      command: "pytest {{ test_install_file }} --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target=agent -v"
       args:
         chdir: "{{ path }}/{{ test_directory }}"
-      when: target.stdout == 'agent'
+      when: "'Agent' in inventory_hostname"
 
     - name: Run tests on Wazuh manager
-      command: "pytest {{ test_install_file }} --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target.stdout|quote }} -v"
+      command: "pytest {{ test_install_file }} --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target=server -v"
       args:
         chdir: "{{ path }}/{{ test_directory }}"
-      when: target.stdout == 'server'
+      when: "'Manager' in inventory_hostname"

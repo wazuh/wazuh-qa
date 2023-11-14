@@ -15,10 +15,10 @@
       command: "pytest {{ test_file }} --target={{ target.stdout|quote }} -vs"
       args:
         chdir: "{{ path }}/{{ test_directory }}"
-      when: target.stdout == 'agent'
+      when: "'Agent' in inventory_hostname"
 
     - name: Run tests on Wazuh manager
       command: "pytest {{ test_file }} --target={{ target.stdout|quote }} -vs"
       args:
         chdir: "{{ path }}/{{ test_directory }}"
-      when: target.stdout == 'server'
+      when: "'Manager' in inventory_hostname"
