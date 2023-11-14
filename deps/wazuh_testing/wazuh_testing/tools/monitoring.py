@@ -916,7 +916,12 @@ class HostMonitor:
             if len(monitored_files) == 0:
                 raise AttributeError('There is no path to monitor. Exiting...')
             for path in monitored_files:
-                output_path = f'{host}_{path.split("/")[-1]}.tmp'
+                if '\\' in path:
+                    first_path_element = path.split("\\")[-1]
+                else:
+                    first_path_element = path.split("/")[-1]
+
+                output_path = f'{host}_{first_path_element}.tmp'
                 self._file_content_collectors.append(self.file_composer(host=host, path=path, output_path=output_path))
                 logger.debug(f'Add new file composer process for {host} and path: {path}')
                 self._file_monitors.append(self._start(host=host,

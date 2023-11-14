@@ -44,7 +44,7 @@
       <manager_address>{{ wazuh_agent_config.enrollment.manager_address }}</manager_address>
       {% endif %}
       {% if wazuh_agent_config.enrollment.agent_name | length > 0 %}
-      <agent_name>{{ wazuh_agent_config.enrollment.agent_name }}</agent_name>
+      <agent_name>{{ ansible_hostname }}</agent_name>
       {% endif %}
       {% if wazuh_agent_config.enrollment.port is defined > 0 %}
       <port>{{ wazuh_agent_config.enrollment.port }}</port>

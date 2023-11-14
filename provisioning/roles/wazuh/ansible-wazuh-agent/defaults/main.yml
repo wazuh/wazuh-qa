@@ -60,6 +60,7 @@ wazuh_winagent_config_url: https://packages.wazuh.com/4.x/windows/wazuh-agent-4.
 wazuh_winagent_package_name: wazuh-agent-4.8.0-1.msi
 wazuh_winagent_package_name_generic: wazuh-agent.msi
 wazuh_dir: "/var/ossec"
+wazuh_macos_dir: "/Library/Ossec"
 
 # This is deprecated, see: wazuh_agent_address
 wazuh_agent_nat: false

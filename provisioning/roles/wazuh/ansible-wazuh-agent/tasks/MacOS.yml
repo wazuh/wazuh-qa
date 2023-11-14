@@ -6,3 +6,15 @@
 
 - include_tasks: "installation_from_custom_packages.yml"
   when: wazuh_custom_packages_installation_agent_enabled
+
+- name: MacOS | Installing agent configuration (ossec.conf)
+  template:
+    src: var-ossec-etc-ossec-agent.conf.j2
+    dest: "{{ wazuh_macos_dir }}/etc/ossec.conf"
+    owner: root
+    group: wazuh
+    mode: 0644
+  notify: restart wazuh-agent
+  tags:
+    - init
+    - config

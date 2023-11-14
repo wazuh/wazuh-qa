@@ -53,8 +53,15 @@ class HostManager:
         """
         return self.inventory
 
+    def get_inventory_path(self) -> str:
+        """Get the loaded Ansible inventory.
 
-    def get_group_hosts(self, pattern=None):
+        Returns:
+            self.inventory: Ansible inventory
+        """
+        return self.inventory_path
+
+    def get_group_hosts(self, pattern='None'):
         """Get all hosts from inventory that belong to a group.
 
         Args:
@@ -67,6 +74,13 @@ class HostManager:
             return [str(host) for host in self.inventory_manager.get_hosts(pattern=pattern)]
         else:
             return [str(host) for host in self.inventory_manager.get_hosts()]
+
+
+    def get_host_groups(self, host):
+        """
+        """
+        group_list = self.inventory_manager.get_host(host).get_groups()
+        return [str(group) for group in group_list]
 
     def get_host_variables(self, host):
         """Get the variables of the specified host.
@@ -92,6 +106,10 @@ class HostManager:
         """
         return testinfra.get_host(f"ansible://{host}?ansible_inventory={self.inventory_path}")
 
+    def truncate_file(self, host: str, filepath: str):
+        self.get_host(host).ansible("command", f"truncate -s 0 {filepath}", check=False)
+
+
     def move_file(self, host: str, src_path: str, dest_path: str = '/var/ossec/etc/ossec.conf', check: bool = False):
         """Move from src_path to the desired location dest_path for the specified host.
 
@@ -101,9 +119,18 @@ class HostManager:
         dest_path (str): Destination path
         check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be applied.
         """
-        self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=wazuh group=wazuh mode=0775",
-                                    check=check)
+        system = 'linux'
+        if 'os_name' in self.get_host_variables(host):
+            host_os_name = self.get_host_variables(host)['os_name']
+            if host_os_name == 'windows':
+                system = 'windows'
 
+        if system == 'linux':
+            a = self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=wazuh group=wazuh mode=0644",
+                                        check=check)
+            print(a)
+        else:
+            self.get_host(host).ansible("ansible.windows.win_copy", f"src='{src_path}' dest='{dest_path}'", check=check)
 
     def add_block_to_file(self, host: str, path: str, replace: str, before: str, after, check: bool = False):
         """Add text block to desired file.
@@ -400,24 +427,30 @@ class HostManager:
         a = self.get_host(host).ansible("get_url", f"url={url} dest={dest_path} mode={mode}", check=False)
         return a
 
-    def install_package(self, host, url, package_manager):
+    def install_package(self, host, url, system='ubuntu'):
         result = False
-        if package_manager == 'apt':
+        if system =='windows':
+            a = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
+            print(a)
+        elif system == 'ubuntu':
             a = self.get_host(host).ansible("apt", f"deb={url}", check=False)
             if a['changed'] == True and a['stderr'] == '':
                 result = True
-        elif package_manager == 'yum':
+        elif system == 'centos':
             a = self.get_host(host).ansible("yum", f"name={url} state=present sslverify=false disable_gpg_check=True", check=False)
             if 'rc' in a and a['rc'] == 0 and a['changed'] == True:
                 result = True
 
-    def remove_package(self, host, package_name, package_manager):
+
+    def remove_package(self, host, package_name, system):
         result = False
-        if package_manager == 'apt':
+        if system == 'windows':
+            a = self.get_host(host).ansible("win_package", f"path={package_name} state=absent arguments=/S", check=False)
+        elif system == 'ubuntu':
             a = self.get_host(host).ansible("apt", f"name={package_name} state=absent", check=False)
             if a['changed'] == True and a['stderr'] == '':
                 result = True
-        elif package_manager == 'yum':
+        elif system == 'centos':
             a = self.get_host(host).ansible("yum", f"name={package_name} state=absent", check=False)
             if 'rc' in a and a['rc'] == 0 and a['changed'] == True:
                 result = True
@@ -427,13 +460,21 @@ class HostManager:
         os = self.get_host_variables(host)['os_name']
         binary_path = None
         if os == 'windows':
-            self.get_host(host).ansible('ansible.windows.win_command', f"cmd=NET {operation} Wazuh", check=False)
+            if operation == 'restart':
+                a = self.get_host(host).ansible('ansible.windows.win_shell', f'NET stop Wazuh', check=False)
+                b = self.get_host(host).ansible('ansible.windows.win_shell', f'NET start Wazuh', check=False)
+
+                print(a)
+                print(b)
+            else:
+                a = self.get_host(host).ansible('ansible.windows.win_shell', f'NET {operation} Wazuh', check=False)
+                print(a)
         else:
             if os == 'linux':
                 binary_path = f"/var/ossec/bin/wazuh-control"
             elif os == 'macos':
                 binary_path = f"/Library/Ossec/bin/wazuh-control"
-            self.get_host(host).ansible('ansible.builtin.command', f'cmd="{binary_path} {operation}"', check=False)
+            self.get_host(host).ansible('shell', f"{binary_path} {operation}", check=False)
 
 
 def clean_environment(host_manager, target_files):
