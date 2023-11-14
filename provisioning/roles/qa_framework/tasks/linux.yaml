@@ -25,12 +25,12 @@
   when: ansible_os_family == "Solaris"
 
 - name: Install python requirements | UNIX
-  command: "{{ python_executable }} -m pip install -r {{ qa_requirements_file }} --no-cache-dir \
+  command: "{{ ansible_python_interpreter }} -m pip install -r {{ qa_requirements_file }} --no-cache-dir \
             --only-binary=:cryptography,grpcio: --user"
   args:
     chdir: "{{ build_dir }}"
 
 - name: Install setup.py | UNIX
-  command: "{{ python_executable }} {{ setup_installer }} install --user"
+  command: "{{ ansible_python_interpreter }} {{ setup_installer }} install --user"
   args:
     chdir: "{{ build_dir }}/{{ test_setup_qa_path }}"
