@@ -7,6 +7,7 @@ import sys
 
 def run(ansible, inventory):
   status = {}
+  tasks = []
   for host in inventory['all']['hosts']:
 
     packages = inventory['all']['hosts'][host].get('install')
@@ -15,28 +16,74 @@ def run(ansible, inventory):
     private_key = inventory['all']['hosts'][host].get('ansible_ssh_private_key_file')
     remote_port = inventory['all']['hosts'][host].get('ansible_port')
 
-    for package in packages:
-      host_manager = ""
-      if "agent" in package and "Manager" in inventory['all']['hosts']:
-        host_manager = inventory['all']['hosts']['Manager'].get('ansible_host')
+    for type, package in packages:
+      if "wazuh" in package and type is not None:
+        extraVars = ""
+        if "wazuh-agent" in package:
+          if inventory['all']['hosts'][host].get('manager') is not None:
+            extraVars = {
+              "manager_ip": {inventory['all']['hosts'][host].get('manager')}
+            }
+        if "package" in type or "wazuh-agent" in package:
+          if distribution == 'debian':
+            path = "playbooks/provision/package/deb"
+            ansible.set_path(path)
+          if distribution == 'rpm':
+            path = "playbooks/provision/package/rpm"
+            ansible.set_path(path)
 
-      install_playbook = {
-        'name': 'Install packages on ' + host,
-        'hosts': host,
-        'remote_user': remote_user,
-        'port': remote_port,
-        'vars': {
-          'ansible_ssh_private_key_file': private_key
-        },
-        'tasks': []
-      }
+          results = ansible.run_playbook("set_repo.yml")
+          status.update(results.stats)
+          results = ansible.run_playbook("install.yml")
+          status.update(results.stats)
+          results = ansible.run_playbook("register.yml", extraVars)
+          status.update(results.stats)
+          results = ansible.run_playbook("service.yml")
+          status.update(results.stats)
+        elif "aio" in type:
+          path = "playbooks/provision/aio"
+          ansible.set_path(path)
+          extraVars = {
+            "version": "4.6",
+            "name": host,
+            "component": package
+          }
 
-      tasks = getTask(package, distribution, host_manager)
+          results = ansible.run_playbook("download.yml", extraVars)
+          status.update(results.stats)
+          results = ansible.run_playbook("install.yml", extraVars)
+          status.update(results.stats)
 
-      install_playbook['tasks'].extend(tasks)
+      else:
+        pkg_manager = ""
 
-      results = ansible.run_playbook(install_playbook)
-      status.update(results.stats)
+        if distribution == 'debian':
+          pkg_manager = 'apt'
+        if distribution == 'rpm':
+          pkg_manager = 'yum'
+
+        install_playbook = {
+          'name': 'Install packages on ' + host,
+          'hosts': host,
+          'remote_user': remote_user,
+          'port': remote_port,
+          'vars': {
+            'ansible_ssh_private_key_file': private_key
+          },
+          'tasks': [
+            {
+                'name': 'Install' + package,
+                pkg_manager: {
+                    'name': package,
+                    'state': 'present'
+                },
+                'become': True
+            }
+          ]
+        }
+
+        results = ansible.run_playbook(install_playbook)
+        status.update(results.stats)
 
   print("Resume")
   print(status)
@@ -124,16 +171,7 @@ def getTask(package, distribution, host_manager):
       }
     ])
   else:
-    tasks.extend([
-      {
-          'name': 'Install' + package,
-          pkg_manager: {
-              'name': package,
-              'state': 'present'
-          },
-          'become': True
-      }
-    ])
+    tasks.extend()
 
   return tasks
 

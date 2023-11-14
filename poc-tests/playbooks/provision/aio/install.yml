@@ -1,0 +1,5 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Enable and start Wazuh service
+      shell: "bash wazuh-install.sh --{{ component }} {{ name }}"
