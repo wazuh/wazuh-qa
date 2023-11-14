@@ -5,6 +5,21 @@ import subprocess
 from .constants import AGENTD_STATE, WAZUH_CONTROL, AGENT_CONTROL
 
 
+def run_wazuh_binary(binary: str, args: list = None) -> None:
+    """
+    Run a Wazuh binary with the given arguments.
+
+    Args:
+        binary (str): The binary to run.
+        args (list): The arguments to pass to the binary.
+    """
+    if not args:
+        args = []
+
+    output = subprocess.run([binary] + args, stdout=subprocess.PIPE)
+    return output.stdout.decode('utf-8')
+
+
 def get_service() -> str:
     """
     Retrieves the name of the Wazuh service running on the current platform.
@@ -13,9 +28,7 @@ def get_service() -> str:
         str: The name of the Wazuh service.
 
     """
-    control_output = subprocess.check_output(
-        [WAZUH_CONTROL, "info", "-t"], stderr=subprocess.PIPE)
-    return control_output.decode('utf-8').strip()
+    return run_wazuh_binary(WAZUH_CONTROL, ["info", "-t"]).strip()
 
 
 def get_daemons_status() -> dict:
@@ -27,11 +40,9 @@ def get_daemons_status() -> dict:
     """
     daemons_status = {}
 
-    control_output = subprocess.run(
-        [WAZUH_CONTROL, "status"], stdout=subprocess.PIPE)
-    control_output_decoded = control_output.stdout.decode('utf-8')
+    control_output = run_wazuh_binary(WAZUH_CONTROL, ["status"])
 
-    for line in control_output_decoded.split('\n'):
+    for line in control_output.split('\n'):
         if "running" in line:
             daemon_name = line.split(' ')[0]
             status = line.replace(daemon_name, '').replace('.', '').lstrip()
@@ -49,11 +60,9 @@ def get_registered_agents():
     """
     registered_agents = []
 
-    control_output = subprocess.run(
-        [AGENT_CONTROL, "-l"], stdout=subprocess.PIPE)
-    control_output_decoded = control_output.stdout.decode('utf-8')
+    control_output = run_wazuh_binary(AGENT_CONTROL, ["-l"])
 
-    for line in control_output_decoded.split('\n'):
+    for line in control_output.split('\n'):
         if "ID:" in line:
             agent_info = line.split(',')
             agent_dict = {
@@ -83,9 +92,8 @@ def get_agent_connection_status(agent_id: str = None) -> str:
             ["sudo", "grep", "^status", AGENTD_STATE], stdout=subprocess.PIPE)
         agentd_output_decoded = agentd_output.stdout.decode('utf-8')
         status = agentd_output_decoded.split('=')[1].replace("'", "").strip()
-        
-    return status
 
+    return status
 
 
 def get_file_encoding(file_path: str) -> str:
