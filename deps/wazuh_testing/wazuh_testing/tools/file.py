@@ -924,3 +924,10 @@ def modify_file(path, name, new_content=None, is_binary=False):
     modify_file_group(path, name)
     modify_file_permission(path, name)
     modify_file_win_attributes(path, name)
+
+
+def create_temp_file(content):
+    fd, temp_file_path = tempfile.mkstemp(text=True)  # 'text=True' specifies text mode
+    with open(temp_file_path, 'w', newline='\n') as temp_file:
+        temp_file.write(content)
+    return temp_file_path

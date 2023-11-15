@@ -441,6 +441,16 @@ class HostManager:
             if 'rc' in a and a['rc'] == 0 and a['changed'] == True:
                 result = True
 
+    def get_master_ip(self):
+        """
+
+        """
+        master_ip = None
+        for manager in self.get_group_hosts('manager'):
+            if 'type' in self.get_host_variables(manager) and \
+                self.get_host_variables(manager)['type'] == 'master':
+                master_ip = self.get_host_variables(manager)['ip']
+        return master_ip
 
     def remove_package(self, host, package_name, system):
         result = False
