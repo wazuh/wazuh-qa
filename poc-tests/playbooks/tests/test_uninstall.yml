@@ -1,0 +1,13 @@
+- hosts: all
+  become: true
+  vars:
+    path: "/tmp"
+    test_directory: "tests"
+    test_file: "test_uninstall.py"
+    curl_path: /usr/bin/curl
+
+  tasks:
+    - name: Test uninstall - {{ inventory_hostname }}
+      command: "pytest {{ test_file }} -v"
+      args:
+        chdir: "{{ path }}/{{ test_directory }}"

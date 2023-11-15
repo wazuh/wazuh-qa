@@ -1,0 +1,11 @@
+- hosts: Manager*
+  become: true
+  tasks:
+    - name: Uninstall the Wazuh manager
+      shell: "apt-get purge wazuh-manager -y"
+
+- hosts: Agent*
+  become: true
+  tasks:
+    - name: Uninstall the Wazuh agent
+      shell: "apt-get purge wazuh-agent -y"
