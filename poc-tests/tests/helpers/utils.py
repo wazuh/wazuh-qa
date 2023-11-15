@@ -5,14 +5,14 @@ import subprocess
 from .constants import AGENTD_STATE, WAZUH_CONTROL, AGENT_CONTROL
 
 
-def run_wazuh_binary(binary: str, args: list = None) -> None:
+def run_command(binary: str, args: list = None) -> None:
     """
     Run a Wazuh binary with the given arguments.
 
     Args:
         binary (str): The binary to run.
         args (list): The arguments to pass to the binary.
-    
+
     Returns:
         str: The output of the binary execution.
     """
@@ -31,7 +31,7 @@ def get_service() -> str:
         str: The name of the Wazuh service.
 
     """
-    return run_wazuh_binary(WAZUH_CONTROL, ["info", "-t"]).strip()
+    return run_command(WAZUH_CONTROL, ["info", "-t"]).strip()
 
 
 def get_version() -> str:
@@ -42,7 +42,7 @@ def get_version() -> str:
         str: The version of Wazuh installed.
 
     """
-    return run_wazuh_binary(WAZUH_CONTROL, ["info", "-v"]).strip()
+    return run_command(WAZUH_CONTROL, ["info", "-v"]).strip()
 
 
 def get_revision() -> str:
@@ -53,7 +53,21 @@ def get_revision() -> str:
         str: The version of Wazuh installed.
 
     """
-    return run_wazuh_binary(WAZUH_CONTROL, ["info", "-r"]).strip()
+    return run_command(WAZUH_CONTROL, ["info", "-r"]).strip()
+
+
+def get_service_status() -> str:
+    """
+    Get the status of the Wazuh service.
+
+    Returns:
+        str: The status of the Wazuh service.
+    """
+    if get_service() == "agent":
+        service_name = "wazuh-agent"
+    else:
+        service_name = "wazuh-manager"
+    return run_command(" systemctl", ["is-active", service_name]).strip()
 
 
 def get_daemons_status() -> dict:
@@ -65,7 +79,7 @@ def get_daemons_status() -> dict:
     """
     daemons_status = {}
 
-    control_output = run_wazuh_binary(WAZUH_CONTROL, ["status"])
+    control_output = run_command(WAZUH_CONTROL, ["status"])
 
     for line in control_output.split('\n'):
         if "running" in line:
@@ -85,7 +99,7 @@ def get_registered_agents():
     """
     registered_agents = []
 
-    control_output = run_wazuh_binary(AGENT_CONTROL, ["-l"])
+    control_output = run_command(AGENT_CONTROL, ["-l"])
 
     for line in control_output.split('\n'):
         if "ID:" in line:
