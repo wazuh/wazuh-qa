@@ -67,7 +67,7 @@ def get_service_status() -> str:
         service_name = "wazuh-agent"
     else:
         service_name = "wazuh-manager"
-    return run_command(" systemctl", ["is-active", service_name]).strip()
+    return run_command("systemctl", ["is-active", service_name]).strip()
 
 
 def get_daemons_status() -> dict:

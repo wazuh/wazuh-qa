@@ -19,4 +19,4 @@ def test_start_log_raised():
 
 
 def test_service_started():
-    assert utils.get_service_status == "active", "Service is not active after restart."
+    assert utils.get_service_status() == "active", "Service is not active after restart."

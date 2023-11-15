@@ -25,7 +25,7 @@ def main():
     playbook_test_registration = "tests/test_registration.yml"
     playbook_test_connection = "tests/test_connection.yml"
     playbook_test_basic_info = "tests/test_basic_info.yml"
-    playbook_test_restart = "tests/restart.yml"
+    playbook_test_restart = "tests/test_restart.yml"
 
     # Extra data
     live = True
