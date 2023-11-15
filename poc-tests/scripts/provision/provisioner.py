@@ -16,7 +16,14 @@ def run(ansible, inventory):
     private_key = inventory['all']['hosts'][host].get('ansible_ssh_private_key_file')
     remote_port = inventory['all']['hosts'][host].get('ansible_port')
 
-    for type, package in packages:
+    for item in packages:
+      if isinstance(item, dict):
+          type = item.get('type')
+          package = item.get('component')
+      else:
+          type = None
+          package = item
+
       if "wazuh" in package and type is not None:
         extraVars = ""
         if "wazuh-agent" in package:
