@@ -66,3 +66,6 @@ CONNECTION_SERVER = "New wazuh agent connected"
 CONNECTION_AGENT = "Connected to the server"
 KEY_REQ_AGENT = "Requesting a key from server"
 KEY_REQ_SERVER = "Received request for a new agent"
+RELEASING_RESOURCES = "Shutdown received. Releasing resources"
+DELETING_RESPONSES = "Shutdown received. Deleting responses"
+STARTED = 'INFO: Started'
