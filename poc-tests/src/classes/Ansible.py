@@ -43,11 +43,11 @@ class Ansible:
 
     # https://ansible.readthedocs.io/projects/runner/en/1.1.0/ansible_runner.html
     def run_playbook(self, playbook=None, extravars=None, verbosity=1):
-        result = ansible_runner.run(
-            inventory=self.inventory,
-            playbook=playbook,
-            verbosity=verbosity,
-            extravars=extravars
-        )
-        return result
+      result = ansible_runner.run(
+          inventory=self.inventory,
+          playbook=playbook,
+          verbosity=verbosity,
+          extravars=extravars
+      )
+      return result
 
