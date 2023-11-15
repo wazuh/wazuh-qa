@@ -45,7 +45,7 @@ class Ansible:
     def run_playbook(self, playbook=None, extravars=None, verbosity=1):
       result = ansible_runner.run(
           inventory=self.inventory,
-          playbook=playbook,
+          playbook=self.path + "/" + playbook,
           verbosity=verbosity,
           extravars=extravars
       )

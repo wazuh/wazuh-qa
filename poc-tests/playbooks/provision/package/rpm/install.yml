@@ -2,10 +2,10 @@
   become: true
   tasks:
     - name: Install the Wazuh manager
-      shell: "yum -y install wazuh-manager"
+      command: "yum -y install wazuh-manager"
 
 - hosts: Agent*
   become: true
   tasks:
     - name: Install the Wazuh agent
-      shell: "yum -y install wazuh-agent"
+      command: "yum -y install wazuh-agent"

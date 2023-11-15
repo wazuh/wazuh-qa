@@ -7,7 +7,7 @@ import sys
 
 def run(ansible, inventory):
   status = {}
-  tasks = []
+  current_dir = os.path.abspath(os.getcwd())
   for host in inventory['all']['hosts']:
 
     packages = inventory['all']['hosts'][host].get('install')
@@ -33,10 +33,10 @@ def run(ansible, inventory):
             }
         if "package" in type or "wazuh-agent" in package:
           if distribution == 'debian':
-            path = "playbooks/provision/package/deb"
+            path = current_dir + "/playbooks/provision/package/deb"
             ansible.set_path(path)
           if distribution == 'rpm':
-            path = "playbooks/provision/package/rpm"
+            path = current_dir + "/playbooks/provision/package/rpm"
             ansible.set_path(path)
 
           results = ansible.run_playbook("set_repo.yml")
