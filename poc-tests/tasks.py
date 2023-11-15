@@ -17,6 +17,8 @@ def main():
     playbook_provision_register = "provision/register.yml"
     playbook_provision_service = "provision/service.yml"
     playbook_provision_restart = "provision/restart.yml"
+    playbook_provision_stop = "provision/stop.yml"
+    playbook_provision_uninstall = "provision/uninstall.yml"
 
     # Test
     playbook_test_repo = "tests/test_repo.yml"
@@ -26,6 +28,8 @@ def main():
     playbook_test_connection = "tests/test_connection.yml"
     playbook_test_basic_info = "tests/test_basic_info.yml"
     playbook_test_restart = "tests/test_restart.yml"
+    playbook_test_stop = "tests/test_stop.yml"
+    playbook_test_uninstall = "tests/test_uninstall.yml"
 
     # Extra data
     live = True
@@ -68,9 +72,19 @@ def main():
     ansible.run_playbook(playbook_test_basic_info, extra_vars)
     #ansible.run_playbook(playbook_test_service)
 
-    time.sleep(20) # Agent must connect to manager. Remove in PR
+    time.sleep(5) # Agent must connect to manager. Remove in PR
     ansible.run_playbook(playbook_provision_restart)
     ansible.run_playbook(playbook_test_restart)
+    
+    
+    time.sleep(5) # Agent must connect to manager. Remove in PR
+    ansible.run_playbook(playbook_provision_stop)
+    time.sleep(5) # Agent must connect to manager. Remove in PR
+    ansible.run_playbook(playbook_test_stop)
+    time.sleep(5) # Agent must connect to manager. Remove in PR
+    ansible.run_playbook(playbook_provision_uninstall)
+    time.sleep(5) # Agent must connect to manager. Remove in PR
+    ansible.run_playbook(playbook_test_uninstall)
 
     #ansible.run_playbook(playbook_test_install, 'Agent*', extra_vars)
     #ansible.run_playbook(playbook_test_install, 'Manager*', extra_vars)

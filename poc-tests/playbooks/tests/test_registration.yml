@@ -7,13 +7,13 @@
     curl_path: /usr/bin/curl
 
   tasks:
-    - name: Run tests on Wazuh agent
+    - name: Test registration - Wazuh agent
       command: "pytest {{ test_file }} --target=agent -v"
       args:
         chdir: "{{ path }}/{{ test_directory }}"
       when: "'Agent' in inventory_hostname"
 
-    - name: Run tests on Wazuh manager
+    - name: Test registration - Wazuh manager
       command: "pytest {{ test_file }} --target=server -v"
       args:
         chdir: "{{ path }}/{{ test_directory }}"

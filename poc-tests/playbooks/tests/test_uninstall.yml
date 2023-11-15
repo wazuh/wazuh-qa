@@ -7,7 +7,7 @@
     curl_path: /usr/bin/curl
 
   tasks:
-    - name: Test uninstall - {{ inventory_hostname }}
+    - name: Test uninstall
       command: "pytest {{ test_file }} -v"
       args:
         chdir: "{{ path }}/{{ test_directory }}"

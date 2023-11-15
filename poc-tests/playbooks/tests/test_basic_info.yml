@@ -7,14 +7,8 @@
     curl_path: /usr/bin/curl
 
   tasks:
-    - name: Run tests on Wazuh agent
-      command: "pytest {{ test_file }} --to_version={{ version|quote }} --revision={{ revision|quote }}  -v"
-      args:
-        chdir: "{{ path }}/{{ test_directory }}"
-      when: "'Agent' in inventory_hostname"
-
-    - name: Run tests on Wazuh manager
-      command: "pytest {{ test_file }} --to_version={{ version|quote }} --revision={{ revision|quote }}  -v"
-      args:
-        chdir: "{{ path }}/{{ test_directory }}"
-      when: "'Manager' in inventory_hostname"
+    - name: Test basic info
+      block:
+        command: "pytest {{ test_file }} --to_version={{ version|quote }} --revision={{ revision|quote }}  -v"
+        args:
+          chdir: "{{ path }}/{{ test_directory }}"

@@ -16,14 +16,14 @@
       args:
         executable: /bin/bash
 
-    - name: Run tests on Wazuh agent
-      command: "pytest {{ test_install_file }} --to_version=agent --os={{ os.stdout|quote }} --target=agent -v"
+    - name: Test install - Wazuh agent
+      command: "pytest {{ test_install_file }} --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target=agent -v"
       args:
         chdir: "{{ path }}/{{ test_directory }}"
       when: "'Agent' in inventory_hostname"
 
-    - name: Run tests on Wazuh manager
-      command: "pytest {{ test_install_file }} --to_version=server --os={{ os.stdout|quote }} --target=server -v"
+    - name: Test install - Wazuh manager
+      command: "pytest {{ test_install_file }} --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target=server -v"
       args:
         chdir: "{{ path }}/{{ test_directory }}"
       when: "'Manager' in inventory_hostname"

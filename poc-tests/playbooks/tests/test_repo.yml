@@ -7,7 +7,7 @@
 
   tasks:
 
-    - name: Run block tests
+    - name: Test repository
       block:
         - name: Run tests
           command: "pytest {{ test_repo_test }}.py -v"
