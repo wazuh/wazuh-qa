@@ -7,18 +7,14 @@
     curl_path: /usr/bin/curl
 
   tasks:
-    - name: Get Wazuh target
-      shell: "/var/ossec/bin/wazuh-control info | grep -E -o 'agent|server'"
-      register: target
-
     - name: Run tests on Wazuh agent
-      command: "pytest {{ test_file }} --target={{ target.stdout|quote }} -v"
+      command: "pytest {{ test_file }} --target=agent -v"
       args:
         chdir: "{{ path }}/{{ test_directory }}"
       when: "'Agent' in inventory_hostname"
 
     - name: Run tests on Wazuh manager
-      command: "pytest {{ test_file }} --target={{ target.stdout|quote }} -v"
+      command: "pytest {{ test_file }} --target=server -v"
       args:
         chdir: "{{ path }}/{{ test_directory }}"
       when: "'Manager' in inventory_hostname"
