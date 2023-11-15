@@ -1,0 +1,11 @@
+- hosts: Manager*
+  become: true
+  tasks:
+    - name: Stop the Wazuh manager
+      shell: "systemctl stop wazuh-manager"
+
+- hosts: Agent*
+  become: true
+  tasks:
+    - name: Stop the Wazuh agent
+      shell: "systemctl stop wazuh-agent"

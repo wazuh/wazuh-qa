@@ -1,0 +1,20 @@
+- hosts: all
+  become: true
+  vars:
+    path: "/tmp"
+    test_directory: "tests"
+    test_file: "test_stop.py"
+    curl_path: /usr/bin/curl
+
+  tasks:
+    - name: Test stop - Wazuh agent
+      command: "pytest {{ test_file }} --target=agent -v"
+      args:
+        chdir: "{{ path }}/{{ test_directory }}"
+      when: "'Agent' in inventory_hostname"
+
+    - name: Test stop - Wazuh manager
+      command: "pytest {{ test_file }} --target=server -v"
+      args:
+        chdir: "{{ path }}/{{ test_directory }}"
+      when: "'Manager' in inventory_hostname"
