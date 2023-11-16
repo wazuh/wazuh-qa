@@ -3,14 +3,14 @@
   vars:
     path: "/tmp"
     test_directory: "tests"
-    test_file: "test_basic_info.py"
+    test_file: "test_basic_info"
     curl_path: /usr/bin/curl
 
   tasks:
     - name: Test basic info
       block:
         - name: Execute tests
-          command: "pytest {{ test_file }} --to_version={{ version|quote }} --revision={{ revision|quote }}  -v"
+          command: "pytest {{ test_file }}.py --to_version={{ version|quote }} --revision={{ revision|quote }}  -v"
           args:
             chdir: "{{ path }}/{{ test_directory }}"
           register: pytest_log

@@ -3,14 +3,14 @@
   vars:
     path: "/tmp"
     test_directory: "tests"
-    test_file: "test_restart.py"
+    test_file: "test_restart"
     curl_path: /usr/bin/curl
 
   tasks:
     - name: Test restart
       block:
         - name: Execute tests
-          command: "pytest {{ test_file }} --target={{ target }} -vl"
+          command: "pytest {{ test_file }}.py --target={{ target }} -vl"
           args:
             chdir: "{{ path }}/{{ test_directory }}"
           vars:

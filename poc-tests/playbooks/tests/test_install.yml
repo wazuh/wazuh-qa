@@ -3,7 +3,7 @@
   vars:
     path: "/tmp"
     test_directory: "tests"
-    test_file: "test_install.py"
+    test_file: "test_install"
     curl_path: /usr/bin/curl
 
   tasks:
@@ -19,7 +19,7 @@
     - name: Test install
       block:
         - name: Execute tests
-          command: "pytest {{ test_file }} --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target }} -vl"
+          command: "pytest {{ test_file }}.py --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target }} -vl"
           args:
             chdir: "{{ path }}/{{ test_directory }}"
           vars:
