@@ -7,14 +7,19 @@
     curl_path: /usr/bin/curl
 
   tasks:
-    - name: Test connection - Wazuh agent
-      command: "pytest {{ test_file }} --target=agent -vs"
-      args:
-        chdir: "{{ path }}/{{ test_directory }}"
-      when: "'Agent' in inventory_hostname"
+    - name: Test connection
+      block:
+        - name: Execute tests
+          command: "pytest {{ test_file }} --target={{ target }} -vl"
+          args:
+            chdir: "{{ path }}/{{ test_directory }}"
+          vars:
+            target: "{% if 'Agent' in inventory_hostname %}agent{% elif 'Manager' in inventory_hostname %}server{% endif %}"
+          register: pytest_log
 
-    - name: Test connection - Wazuh manager
-      command: "pytest {{ test_file }} --target=server -vs"
-      args:
-        chdir: "{{ path }}/{{ test_directory }}"
-      when: "'Manager' in inventory_hostname"
+      always:
+        - name: Save pytest output to a file
+          copy:
+            remote_src: yes
+            content: "{{ pytest_log.stdout }}"
+            dest: "{{ path }}/{{ test_directory }}/{{ test_file }}.log"

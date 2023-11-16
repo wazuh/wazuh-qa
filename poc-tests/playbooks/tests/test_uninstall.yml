@@ -8,6 +8,18 @@
 
   tasks:
     - name: Test uninstall
-      command: "pytest {{ test_file }} -v"
-      args:
-        chdir: "{{ path }}/{{ test_directory }}"
+      block:
+        - name: Execute tests
+          command: "pytest {{ test_file }} --target={{ target }} -vl"
+          args:
+            chdir: "{{ path }}/{{ test_directory }}"
+          vars:
+            target: "{% if 'Agent' in inventory_hostname %}agent{% elif 'Manager' in inventory_hostname %}server{% endif %}"
+          register: pytest_log
+
+      always:
+        - name: Save pytest output to a file
+          copy:
+            remote_src: yes
+            content: "{{ pytest_log.stdout }}"
+            dest: "{{ path }}/{{ test_directory }}/{{ test_file }}.log"

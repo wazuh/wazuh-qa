@@ -1,11 +1,7 @@
-- hosts: Manager*
+- hosts: all
   become: true
   tasks:
     - name: Uninstall the Wazuh manager
-      shell: "apt-get purge wazuh-manager -y"
-
-- hosts: Agent*
-  become: true
-  tasks:
-    - name: Uninstall the Wazuh agent
-      shell: "apt-get purge wazuh-agent -y"
+      shell: "apt-get purge wazuh-{{ target }} -y"
+      vars:
+        target: "{% if 'Agent' in inventory_hostname %}agent{% elif 'Manager' in inventory_hostname %}manager{% endif %}"

@@ -57,7 +57,7 @@ def main():
     ansible.run_playbook(playbook_provision_register)
     ansible.run_playbook(playbook_provision_service)
 
-    time.sleep(20) # Agent must connect to manager. Remove in PR
+    time.sleep(20)
 
     # Test stage
 
@@ -72,18 +72,18 @@ def main():
     ansible.run_playbook(playbook_test_basic_info, extra_vars)
     #ansible.run_playbook(playbook_test_service)
 
-    time.sleep(5) # Agent must connect to manager. Remove in PR
+    time.sleep(5)
     ansible.run_playbook(playbook_provision_restart)
     ansible.run_playbook(playbook_test_restart)
     
     
-    time.sleep(5) # Agent must connect to manager. Remove in PR
+    time.sleep(5)
     ansible.run_playbook(playbook_provision_stop)
-    time.sleep(5) # Agent must connect to manager. Remove in PR
+    time.sleep(5)
     ansible.run_playbook(playbook_test_stop)
-    time.sleep(5) # Agent must connect to manager. Remove in PR
+    time.sleep(5)
     ansible.run_playbook(playbook_provision_uninstall)
-    time.sleep(5) # Agent must connect to manager. Remove in PR
+    time.sleep(5)
     ansible.run_playbook(playbook_test_uninstall)
 
     #ansible.run_playbook(playbook_test_install, 'Agent*', extra_vars)

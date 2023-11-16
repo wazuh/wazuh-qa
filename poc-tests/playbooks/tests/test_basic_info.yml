@@ -9,6 +9,15 @@
   tasks:
     - name: Test basic info
       block:
-        command: "pytest {{ test_file }} --to_version={{ version|quote }} --revision={{ revision|quote }}  -v"
-        args:
-          chdir: "{{ path }}/{{ test_directory }}"
+        - name: Execute tests
+          command: "pytest {{ test_file }} --to_version={{ version|quote }} --revision={{ revision|quote }}  -v"
+          args:
+            chdir: "{{ path }}/{{ test_directory }}"
+          register: pytest_log
+
+      always:
+        - name: Save pytest output to a file
+          copy:
+            remote_src: yes
+            content: "{{ pytest_log.stdout }}"
+            dest: "{{ path }}/{{ test_directory }}/{{ test_file }}.log"
