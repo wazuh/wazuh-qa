@@ -1,6 +1,5 @@
-- name: Enable and start {{ component }} service
-  command: "{{ item }}"
-  with_items:
-    - "systemctl daemon-reload"
-    - "systemctl enable {{ component }}"
-    - "systemctl start {{ component }}"
+- name: Enable {{ component }} service
+  command: "systemctl daemon-reload & systemctl enable {{ component }}"
+
+- name: Start {{ component }} service
+  command: "systemctl start {{ component }}"
