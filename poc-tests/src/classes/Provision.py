@@ -36,17 +36,17 @@ class Provision:
     def handle_package(self, host, host_info, install_info):
       status = {}
 
-      if install_info.install_type is None:
+      if install_info.get('install_type') is None:
         print("Installing external package")
-        install_info.install_type = "external"
+        install_info['install_type'] = "external"
         status = self.install(host, host_info, install_info, self.GENERIC_TASKS)
-      elif "wazuh" in install_info.component:
+      elif "wazuh" in install_info.get('component'):
         print("Installing Wazuh package")
-        install_info.install_type = "wazuh/" + install_info.install_type
-        if "package" in install_info.install_type or "wazuh-agent" in install_info.component:
+        install_info['install_type'] = "wazuh/" + install_info.get('install_type')
+        if "package" in install_info.get('install_type') or "wazuh-agent" in install_info.get('component'):
           print("Installing with package manager")
           status = self.install(host, host_info, install_info, self.LIST_TASKS)
-        elif "aio" in install_info.install_type:
+        elif "aio" in install_info.get('install_type'):
           print("Installing with AIO")
           status = self.install(host, host_info, install_info, self.LIST_AIO_TASKS)
 
@@ -58,7 +58,7 @@ class Provision:
       status = {}
       tasks = []
 
-      playbook_path = os.path.join(self.current_dir, "playbooks", "provision", install_info.install_type)
+      playbook_path = os.path.join(self.current_dir, "playbooks", "provision", install_info.get('install_type'))
       template_loader = jinja2.FileSystemLoader(searchpath=playbook_path)
       template_env = jinja2.Environment(loader=template_loader)
       variables_values = self.set_extra_variables(host_info, install_info)
@@ -82,28 +82,28 @@ class Provision:
 
     def set_extra_variables(host_info, install_info):
       variables_values = {}
-      variables_values.update({"component": install_info.component})
+      variables_values.update({"component": install_info.get('component')})
 
-      if install_info.component_type == "package":
-        if "wazuh-agent" in install_info.component and host_info.get('manager_ip'):
+      if install_info.get('component_type') == "package":
+        if "wazuh-agent" in install_info.get('component') and host_info.get('manager_ip'):
           variables_values.update({
             "manager_ip": host_info.get('manager_ip')})
 
-        if "wazuh-server" in install_info.component:
+        if "wazuh-server" in install_info.get('component'):
           pass # For future configurations
 
-      if install_info.component_type == "aio":
+      if install_info.get('component_type') == "aio":
         variables_values.update({
-          "version": install_info.version,
-          "name": install_info.component,
-          "component": install_info.component})
+          "version": install_info.get('version'),
+          "name": install_info.get('component'),
+          "component": install_info.get('component')})
 
       # Fix name variable with iterator
-      if install_info.component_type == "aio":
+      if install_info.get('component_type') == "aio":
         variables_values.update({
-          "version": install_info.version,
-          "name": install_info.component,
-          "component": install_info.component})
+          "version": install_info.get('version'),
+          "name": install_info.get('component'),
+          "component": install_info.get('component')})
 
       return variables_values
 
