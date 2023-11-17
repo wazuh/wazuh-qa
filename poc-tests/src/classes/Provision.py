@@ -80,7 +80,7 @@ class Provision:
 
     # -------------------------------------
 
-    def set_extra_variables(host_info, install_info):
+    def set_extra_variables(self, host_info, install_info):
       variables_values = {}
       variables_values.update({"component": install_info.get('component')})
 
