@@ -29,7 +29,7 @@ def main(inventory_file):
 
 def run(provision):
     inventory = provision.get_inventory()
-    inventory.set_directory(CURRENT_DIR)
+    provision.set_directory(CURRENT_DIR)
 
     for host, host_info in inventory['all']['hosts'].items():
         components = host_info.get('install', [])
