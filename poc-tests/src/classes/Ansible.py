@@ -18,8 +18,9 @@ class Ansible:
     #    self.path = playbook_path
     #    self.inventory = self.set_inventory(inventory)
 
-    def __init__(self,inventory):
+    def __init__(self,inventory, path=None):
         self.inventory = self.set_inventory(inventory)
+        self.path = path
 
     # -------------------------------------
     #   Setters and Getters
