@@ -1,4 +1,4 @@
-{% if ansible_os_family == 'Debian' %}
+{% if host['ansible_os_family'] == 'Debian' %}
 
 - name: Install packages
   command: apt-get -y install gnupg apt-transport-https
@@ -12,7 +12,7 @@
 - name: Update package information
   command: "apt-get update"
 
-{% elif ansible_os_family == 'RedHat' %}
+{% elif host['ansible_os_family'] == 'RedHat' %}
 
 - name: Import the GPG key
   command: "rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH"

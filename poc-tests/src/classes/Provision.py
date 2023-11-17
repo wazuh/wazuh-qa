@@ -8,9 +8,9 @@ class Provision:
     #   Variables
     # -------------------------------------
 
-    LIST_TASKS = ["set_repo.yml.j2", "install.yml.j2", "register.yml.j2", "service.yml.j2"]
-    LIST_AIO_TASKS = ["download.yml.j2", "install.yml.j2"]
-    GENERIC_TASKS = ["install.yml.j2"]
+    LIST_TASKS = ["set_repo.j2", "install.j2", "register.j2", "service.j2"]
+    LIST_AIO_TASKS = ["download.j2", "install.j2"]
+    GENERIC_TASKS = ["install.j2"]
 
     # -------------------------------------
     #   Constructor
