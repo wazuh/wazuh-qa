@@ -1,7 +1,7 @@
 
 
 String provision_path = "${WORKSPACE}/scripts/provision"
-String provision_script = "provisioner.py"
+String provision_script = "provision.py"
 String inventory = "inventory.yaml"
 String jenkins_reference = params.getOrDefault('JENKINS_REFERENCE', 'enhancement/4665-dtt1-poc')
 

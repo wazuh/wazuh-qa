@@ -1,5 +1,0 @@
-- hosts: all
-  become: true
-  tasks:
-    - name: Download the Wazuh installation assistant
-      shell: "curl -sO https://packages.wazuh.com/{{ version }}/wazuh-install.sh"

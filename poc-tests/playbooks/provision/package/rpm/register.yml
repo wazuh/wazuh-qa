@@ -1,8 +1,0 @@
-- hosts: Agent*
-  become: true
-  tasks:
-    - name: Modify Wazuh manager IP in Wazuh agent
-      replace:
-        path: "/var/ossec/etc/ossec.conf"
-        regexp: "MANAGER_IP"
-        replace: "{{ manager_ip }}"

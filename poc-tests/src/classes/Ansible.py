@@ -9,7 +9,6 @@ class Ansible:
     # -------------------------------------
 
     inventory = None
-    path = ""
 
     # -------------------------------------
     #   Constructor
@@ -43,9 +42,11 @@ class Ansible:
 
     # https://ansible.readthedocs.io/projects/runner/en/1.1.0/ansible_runner.html
     def run_playbook(self, playbook=None, extravars=None, verbosity=1):
+      if self.path:
+          playbook = self.path + "/" + playbook
       result = ansible_runner.run(
           inventory=self.inventory,
-          playbook=self.path + "/" + playbook,
+          playbook=playbook,
           verbosity=verbosity,
           extravars=extravars
       )
