@@ -21,7 +21,7 @@ all:
       ansible_os_family: Debian
       install:
         - type: aio
-          componente: wazuh-server
+          component: wazuh-server
           version: 4.6
 
   vars:

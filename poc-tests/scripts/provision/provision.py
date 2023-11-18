@@ -65,7 +65,7 @@ def install_dependencies():
 # ----------------------------------------------
 
 def update_status(status):
-    SUMMARY.update(status)
+    SUMMARY.update(status.stats)
 
 # ---------------- Main ---------------------
 

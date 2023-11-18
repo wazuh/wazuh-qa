@@ -40,15 +40,14 @@ class Provision:
         print("Installing external package")
         install_info['install_type'] = "external"
         status = self.install(host, host_info, install_info, self.GENERIC_TASKS)
-      elif "wazuh" in install_info.get('component'):
-        print("Installing Wazuh package")
+      elif "package" in install_info.get('install_type') or "wazuh-agent" in install_info.get('component'):
+        print("Installing Wazuh package with package manager")
         install_info['install_type'] = "wazuh/" + install_info.get('install_type')
-        if "package" in install_info.get('install_type') or "wazuh-agent" in install_info.get('component'):
-          print("Installing with package manager")
-          status = self.install(host, host_info, install_info, self.LIST_TASKS)
-        elif "aio" in install_info.get('install_type'):
-          print("Installing with AIO")
-          status = self.install(host, host_info, install_info, self.LIST_AIO_TASKS)
+        status = self.install(host, host_info, install_info, self.LIST_TASKS)
+      elif "aio" in install_info.get('install_type'):
+        print("Installing Wazuh package with AIO")
+        install_info['install_type'] = "wazuh/" + install_info.get('install_type')
+        status = self.install(host, host_info, install_info, self.LIST_AIO_TASKS)
 
       return status
 
@@ -84,7 +83,7 @@ class Provision:
       variables_values = {}
       variables_values.update({"component": install_info.get('component')})
 
-      if install_info.get('install_type') == "package":
+      if "package" in install_info.get('install_type'):
         if "wazuh-agent" in install_info.get('component') and host_info.get('manager_ip'):
           variables_values.update({
             "manager_ip": host_info.get('manager_ip')})
@@ -99,7 +98,7 @@ class Provision:
           "component": install_info.get('component')})
 
       # Fix name variable with iterator
-      if install_info.get('install_type') == "aio":
+      if "aio" in install_info.get('install_type'):
         variables_values.update({
           "version": install_info.get('version'),
           "name": install_info.get('component'),
