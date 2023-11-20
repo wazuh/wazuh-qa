@@ -1,57 +1,98 @@
+"""
+Module Name: configuration.py
+
+Description:
+    This module provides functions for configuring and managing host configurations using the HostManager class
+    and related tools.
+
+Functions:
+    1. backup_configurations(host_manager: HostManager) -> dict:
+        Backup configurations for all hosts in the specified host manager.
+
+    2. restore_backup(host_manager: HostManager, backup_configurations: dict) -> None:
+        Restore configurations for all hosts in the specified host manager.
+
+    3. configure_environment(host_manager: HostManager, configurations: dict) -> None:
+        Configure the environment for all hosts in the specified host manager.
+        This function uses ThreadPool to parallelize the configuration process.
+
+Module Usage:
+    This module can be used to manage configurations for a distributed system, with functions for
+    backup, restore, and parallelized environment configuration.
+"""
 from multiprocessing.pool import ThreadPool
 import xml.dom.minidom
-from ansible.parsing.dataloader import DataLoader
 
 from wazuh_testing.end_to_end import configuration_filepath_os
 from wazuh_testing.tools.configuration import set_section_wazuh_conf
+from wazuh_testing.tools.system import HostManager
 
 
-# Configuration methods
-def backup_configurations(host_manager):
-    backup_configurations = {}
-    for host in host_manager.get_group_hosts('all'):
-        host_variables = host_manager.get_host_variables(host)
-        host_os = host_variables['os_name']
-        configuration_file_path = configuration_filepath_os[host_os]
-        current_configuration = host_manager.get_file_content(str(host), configuration_file_path)
-        backup_configurations[str(host)] = current_configuration
-    return backup_configurations
+
+def backup_configurations(host_manager: HostManager) -> dict:
+    """
+    Backup configurations for all hosts in the specified host manager.
+
+    Args:
+        host_manager: An instance of the HostManager class containing information about hosts.
+
+    Returns:
+        dict: A dictionary mapping host names to their configurations.
+    """
+    return {
+        str(host): host_manager.get_file_content(str(host), configuration_filepath_os[host_manager.get_host_variables(host)['os_name']])
+        for host in host_manager.get_group_hosts('all')
+    }
 
 
-def restore_backup(host_manager, backup_configurations):
-    for host in host_manager.get_group_hosts('all'):
-        host_variables = host_manager.get_host_variables(host)
-        host_os = host_variables['os_name']
-        configuration_file_path = configuration_filepath_os[host_os]
-        host_manager.modify_file_content(str(host), configuration_file_path, backup_configurations[str(host)])
+def restore_backup(host_manager: HostManager, backup_configurations: dict) -> None:
+    """
+    Restore configurations for all hosts in the specified host manager.
+
+    Args:
+        host_manager: An instance of the HostManager class containing information about hosts.
+        backup_configurations: A dictionary mapping host names to their configurations.
+    """
+    [host_manager.modify_file_content(str(host), configuration_filepath_os[host_manager.get_host_variables(host)['os_name']], backup_configurations[str(host)])
+     for host in host_manager.get_group_hosts('all')]
 
 
-def configure_environment(host_manager, configurations):
-    def configure_host(host, host_configuration_role):
-        print(f"Configure {host}")
-        host_os = host_manager.get_host_variables(host)['os_name']
-        configuration_file_path = configuration_filepath_os[host_os]
+def configure_host(host: str, host_configuration_role: dict, host_manager: HostManager) -> None:
+    """
+    Configure a specific host.
 
-        host_groups = host_manager.get_host_groups(host)
-        host_configuration = None
-        if 'manager' in host_groups:
-            host_configuration = host_configuration_role['manager']
-        elif 'agent' in host_groups:
-            host_configuration = host_configuration_role['agent']
+    Args:
+        host: The name of the host to be configured.
+        host_configuration_role: Role of the configured host for the host.
+        host_manager: An instance of the HostManager class containing information about hosts.
+    """
 
-        current_configuration = host_manager.get_file_content(str(host), configuration_file_path)
-        print(current_configuration)
-        new_configuration = set_section_wazuh_conf(host_configuration[0].get('sections'), current_configuration.split("\n"))
+    host_os = host_manager.get_host_variables(host)['os_name']
+    config_file_path = configuration_filepath_os[host_os]
 
-        new_configuration = [line for line in new_configuration if line.strip() != ""]
-        dom = xml.dom.minidom.parseString(''.join(new_configuration))
-        new_configuration = "\n".join(dom.toprettyxml().split("\n")[1:])
+    host_groups = host_manager.get_host_groups(host)
+    host_config = host_configuration_role.get('manager' if 'manager' in host_groups else 'agent', None)
+    
+    if not host_config:
+        raise TypeError(f"Host {host} configuration does not include a valid role (manager or agent): {host_configuration_role}")
 
-        host_manager.modify_file_content(str(host), configuration_file_path, new_configuration)
+    current_config = host_manager.get_file_content(str(host), config_file_path)
+    new_config = set_section_wazuh_conf(host_config[0].get('sections'), current_config.split("\n"))
+    new_config = "\n".join(xml.dom.minidom.parseString(''.join(new_config)).toprettyxml().split("\n")[1:])
+
+    host_manager.modify_file_content(str(host), config_file_path, new_config)
 
 
-    loader = DataLoader()
-    configure_environment_parallel_map = [ (host, configurations) for host in host_manager.get_group_hosts('all')]
+def configure_environment(host_manager: HostManager, configurations: dict) -> None:
+    """
+    Configure the environment for all hosts in the specified host manager.
+
+    Args:
+        host_manager: An instance of the HostManager class containing information about hosts.
+        configurations: A dictionary mapping host roles to their configuration details.
+    """
+    configure_environment_parallel_map = [(host, configurations) for host in host_manager.get_group_hosts('all')]
 
     with ThreadPool() as pool:
-        pool.starmap(configure_host, configure_environment_parallel_map)
+        pool.starmap(configure_host, [(host, config, host_manager) for host, config in configure_environment_parallel_map])
+
