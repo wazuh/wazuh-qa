@@ -13,28 +13,6 @@ Functions:
 
 Parameters:
 - host_manager (HostManager): An instance of the HostManager class representing the Wazuh environment.
-
-Usage Example:
-```python
-from host_manager_module import HostManager
-from wazuh_api_module import get_api_parameters, get_api_token, get_agents_id, get_agents_vulnerabilities
-
-# Create an instance of HostManager
-host_manager = HostManager()
-
-# Retrieve API parameters
-api_params = get_api_parameters(host_manager)
-
-# Obtain API token
-api_token = get_api_token(host_manager)
-
-# Retrieve Wazuh agents IDs
-agents_ids = get_agents_id(host_manager)
-
-# Retrieve vulnerability information for agents
-agents_vuln = get_agents_vulnerabilities(host_manager)
-
-Note: Make sure to replace 'host_manager_module' and 'wazuh_api_module' with the actual module names in your project.
 """
 from wazuh_testing.api import make_api_call, get_token_login_api
 
