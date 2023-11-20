@@ -12,7 +12,10 @@ def truncate_managers_logs(host_manager):
         host_manager.truncate_file(agent, logs_filepath_os[host_os_name])
 
 def truncate_logs(host_manager):
-    # for manager in host_manager.get_group_hosts('manager'):
-    #     host_manager.truncate_file(manager, '/var/ossec/logs/alerts/alerts.json')
     truncate_managers_logs(host_manager)
     truncate_agents_logs(host_manager)
+
+
+def truncate_alerts(host_manager):
+    for manager in host_manager.get_group_hosts('manager'):
+        host_manager.truncate_file(manager, '/var/ossec/logs/alerts/alerts.json')

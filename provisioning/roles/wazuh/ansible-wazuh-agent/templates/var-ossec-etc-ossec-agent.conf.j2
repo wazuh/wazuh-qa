@@ -77,6 +77,11 @@
       <use_source_ip>{{ wazuh_agent_config.enrollment.use_source_ip }}</use_source_ip>
       {% endif %}
     </enrollment>
+  {% else %}
+    <enrollment>
+      <agent_name>{{ ansible_hostname }}</agent_name>
+    </enrollment>
+
   {% endif %}
 
   </client>

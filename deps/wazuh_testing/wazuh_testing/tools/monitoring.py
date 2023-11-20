@@ -432,6 +432,7 @@ class QueueMonitor:
                 else:
                     msg = self._queue.peek(position=position, block=True, timeout=self._time_step)
                     position += 1
+                print(f"Monitoring line {msg}")
                 item = callback(msg)
                 logging.debug(msg)
                 if item is not None and item:
@@ -936,7 +937,7 @@ class HostMonitor:
                 for file_collector in self._file_content_collectors:
                     file_collector.terminate()
                     file_collector.join()
-                self.clean_tmp_files()
+                # self.clean_tmp_files()
                 break
             time.sleep(self._time_step)
         self.check_result()

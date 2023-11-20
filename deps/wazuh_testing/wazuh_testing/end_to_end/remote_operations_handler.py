@@ -1,13 +1,16 @@
 from wazuh_testing.end_to_end.regex import get_event_regex
-from wazuh_testing.end_to_end.monitoring import monitoring_events
+from wazuh_testing.end_to_end.monitoring import monitoring_events_multihost
+from wazuh_testing.end_to_end.indexer_api import get_indexer_values, STATE_INDEX_NAME
+
 from multiprocessing.pool import ThreadPool
 
 
-def launch_remote_operation(host, operation, operation_data, host_manager):
+def launch_remote_operation(host, operation_data, host_manager):
     host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
     host_os_arch = host_manager.get_host_variables(host)['arch']
-
     system = host_manager.get_host_variables(host)['os_name']
+    operation = operation_data['operation']
+
     if system == 'linux':
         system = host_manager.get_host_variables(host)['os'].split('_')[0]
 
@@ -23,24 +26,34 @@ def launch_remote_operation(host, operation, operation_data, host_manager):
         host_manager.remove_package(host, package_name, system)
 
     elif operation == 'check_agent_vulnerability':
+
         if operation_data['parameters']['alert_indexed']:
-            check_vuln_indexer(host_manager, operation_data['vulnerability_data'])
+            check_vuln_alert_indexer(host_manager, operation_data['vulnerability_data'])
+
         if operation_data['parameters']['alert']:
             check_vuln_alert(host_manager, operation_data['vulnerability_data'])
+
         if operation_data['parameters']['api']:
             check_vuln_alert_api(host_manager, operation_data['vulnerability_data'])
+
         if operation_data['parameters']['state_indice']:
             check_vuln_state_index(host_manager, operation_data['vulnerability_data'])
 
 
 def check_vuln_state_index(host_manager, vulnerability_data):
-    pass
+    # Check Index values
+    # Retry 3 times, 10 timestamp
+    index_vuln_state_content = get_indexer_values(host_manager)
+    # Process alerts
 
-def check_vuln_indexer(host_manager, vulnerability_data):
-    pass
+def check_vuln_alert_indexer(host_manager, vulnerability_data):
+    indexer_alerts = get_indexer_values(host_manager, index='wazuh-alerts*')
+    return indexer_alerts
+
 
 def check_vuln_alert_api(host_manager, vulnerability_data):
     pass
+
 
 def check_vuln_alert(host_manager, vulnerability_data):
     monitoring_data = {}
@@ -52,28 +65,32 @@ def check_vuln_alert(host_manager, vulnerability_data):
         agent_vulnerability_data_parameters = vulnerability_data[host_os_name][host_os_arch]
         agent_vulnerability_data_parameters['HOST_NAME'] = agent
 
-        agent_vulnerability_data = {
-            'event': 'vulnerability_alert',
-            'parameters': agent_vulnerability_data_parameters
-        }
+        for cve in agent_vulnerability_data_parameters['CVE']:
+            parameters = agent_vulnerability_data_parameters.copy()
+            parameters['CVE'] = cve
+            agent_vulnerability_data = {
+                'event': 'vulnerability_alert',
+                'parameters': parameters
+            }
 
-        regex = get_event_regex(agent_vulnerability_data)
+            regex = get_event_regex(agent_vulnerability_data)
 
-        monitoring_element = {
-            'regex': regex,
-            'path': '/var/ossec/logs/alerts/alerts.json',
-            'timeout': 30,
-        }
+            monitoring_element = {
+                'regex': regex,
+                'file': '/var/ossec/logs/alerts/alerts.json',
+                'timeout': 30,
+            }
 
-        if host_manager.get_host_variables(agent)['manager'] not in monitoring_data:
-            monitoring_data[host_manager.get_host_variables(agent)['manager']] = []
+            if host_manager.get_host_variables(agent)['manager'] not in monitoring_data:
+                monitoring_data[host_manager.get_host_variables(agent)['manager']] = []
 
-        monitoring_data[host_manager.get_host_variables(agent)['manager']].append(monitoring_element)
+            monitoring_data[host_manager.get_host_variables(agent)['manager']].append(monitoring_element)
 
-    monitoring_events(host_manager, monitoring_data)
+    monitoring_events_multihost(host_manager, monitoring_data)
 
 
 def launch_remote_sequential_operation_on_agent(agent, task_list, host_manager):
+    print(task_list)
     if task_list:
         for task in task_list:
             task_keys = list(task.keys())
@@ -82,9 +99,16 @@ def launch_remote_sequential_operation_on_agent(agent, task_list, host_manager):
             launch_remote_operation(agent, operation, operation_data, host_manager)
 
 
-def launch_parallel_operations(task_list, host_manager, group='agent'):
-    agents = host_manager.get_group_hosts('agent')
-    parallel_configuration = [(agent, task_list, host_manager) for agent in agents]
-    with ThreadPool() as pool:
-        # Use the pool to map the function to the list of hosts
-        pool.starmap(launch_remote_sequential_operation_on_agent, parallel_configuration)
+def launch_parallel_operations(task_list, host_manager):
+    print("Launch parallel operations")
+    for task in task_list:
+        parallel_configuration = []
+        target = task['target']
+
+        for host in host_manager.get_group_hosts(target):
+            print(f"Append {host} {task_list} {host_manager}")
+            parallel_configuration.append((host, task, host_manager))
+
+        with ThreadPool() as pool:
+            # Use the pool to map the function to the list of hosts
+            pool.starmap(launch_remote_operation, parallel_configuration)

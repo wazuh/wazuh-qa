@@ -107,7 +107,12 @@ class HostManager:
         return testinfra.get_host(f"ansible://{host}?ansible_inventory={self.inventory_path}")
 
     def truncate_file(self, host: str, filepath: str):
-        self.get_host(host).ansible("command", f"truncate -s 0 {filepath}", check=False)
+        ansible_command = 'file'
+        if 'os_name' in self.get_host_variables(host):
+            host_os_name = self.get_host_variables(host)['os_name']
+            ansible_command = 'win_copy' if self.get_host_variables(host)['os_name'] == 'windows' else 'copy'
+
+        result = self.get_host(host).ansible(ansible_command, f"dest='{filepath}' content=''", check=False)
 
 
     def move_file(self, host: str, src_path: str, dest_path: str = '/var/ossec/etc/ossec.conf', check: bool = False):
@@ -206,14 +211,26 @@ class HostManager:
             host (str): Hostname
             file_path (str) : Path of the file
         """
-
         # return self.get_host(host).file(file_path).content_string
-        testinfra_host = self.get_host(host)
-        result = testinfra_host.ansible("slurp", f"src='{file_path}'", check=False)
-        if 'content' not in result:
-            raise Exception(f"No content value in {result}")
+        ansible_method = 'command'
+        command = 'cat'
+        if 'os_name' in self.get_host_variables(host) and self.get_host_variables(host)['os_name'] == 'windows':
+            ansible_method = 'win_shell'
+            command = 'type'
 
-        return base64.b64decode(result['content']).decode('utf-8')
+        result = self.get_host(host).ansible(ansible_method, f"{command} '{file_path}'", check=False)
+
+        return result['stdout']
+
+
+        # testinfra_host = self.get_host(host)
+        # result = testinfra_host.ansible("slurp", f"src='{file_path}'", check=False)
+        # print(result)
+        # if 'content' not in result:
+        #     raise Exception(f"No content value in {result}")
+
+        # decoded = base64.b64decode(result['content']).decode('utf-8')
+        # return decoded
 
 
     def apply_config(self, config_yml_path: str, dest_path: str = WAZUH_CONF, clear_files: list = None,
@@ -436,10 +453,12 @@ class HostManager:
             a = self.get_host(host).ansible("apt", f"deb={url}", check=False)
             if a['changed'] == True and a['stderr'] == '':
                 result = True
+            print(a)
         elif system == 'centos':
             a = self.get_host(host).ansible("yum", f"name={url} state=present sslverify=false disable_gpg_check=True", check=False)
             if 'rc' in a and a['rc'] == 0 and a['changed'] == True:
                 result = True
+            print(a)
 
     def get_master_ip(self):
         """

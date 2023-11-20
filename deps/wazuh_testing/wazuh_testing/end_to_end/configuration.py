@@ -28,6 +28,7 @@ def restore_backup(host_manager, backup_configurations):
 
 def configure_environment(host_manager, configurations):
     def configure_host(host, host_configuration_role):
+        print(f"Configure {host}")
         host_os = host_manager.get_host_variables(host)['os_name']
         configuration_file_path = configuration_filepath_os[host_os]
 
@@ -39,6 +40,7 @@ def configure_environment(host_manager, configurations):
             host_configuration = host_configuration_role['agent']
 
         current_configuration = host_manager.get_file_content(str(host), configuration_file_path)
+        print(current_configuration)
         new_configuration = set_section_wazuh_conf(host_configuration[0].get('sections'), current_configuration.split("\n"))
 
         new_configuration = [line for line in new_configuration if line.strip() != ""]

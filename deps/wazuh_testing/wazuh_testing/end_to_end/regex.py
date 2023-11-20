@@ -19,7 +19,7 @@ regex = {
         'parameters': ['PACKAGE_NAME', 'PACKAGE_VERSION', 'HOST_NAME']
     },
     'vulnerability_alert':{
-        'regex': '.*HOST_NAME.*package:.*name":"PACKAGE_NAME".*version":"PACKAGE_VERSION".*"architecture":"ARCHITECTURE.*"cve":"CVE"',
+        'regex': '.*HOST_NAME.*package":.*name":"PACKAGE_NAME".*version":"PACKAGE_VERSION".*"architecture":"ARCHITECTURE.*"cve":"CVE"',
         'parameters': ['HOST_NAME', 'CVE', 'PACKAGE_NAME', 'PACKAGE_VERSION', 'ARCHITECTURE']
     }
 }
