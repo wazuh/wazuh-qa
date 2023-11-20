@@ -1,16 +1,56 @@
-import os
+"""
+Module Name: wazuh_monitoring
+
+Description:
+    This module provides functions for monitoring events, files, and alerts in a Wazuh environment.
+
+Imports:
+    - os
+    - tempfile
+    - re
+    - sleep
+    - requests
+    - ThreadPool
+
+Functions:
+    1. monitoring_events_host_monitoring(host_manager: HostManager, monitoring_data: dict) -> dict:
+        Monitor events on hosts using the HostMonitor.
+
+    2. monitoring_events_multihost(host_manager: HostManager, monitoring_data: dict) -> None:
+        Monitor events on multiple hosts concurrently.
+
+    3. generate_monitoring_logs_all_agent(host_manager: HostManager, regex_list: list, timeout_list: list) -> dict:
+        Generate monitoring data for logs on all agent hosts.
+
+    4. generate_monitoring_logs_manager(host_manager: HostManager, manager: str, regex: str, timeout: int) -> dict:
+        Generate monitoring data for logs on a specific manager host.
+
+    5. generate_monitoring_alerts_all_agent(host_manager: HostManager, events_metadata: dict) -> dict:
+        Generate monitoring data for alerts on all agent hosts.
+"""
+
 import tempfile
 import re
 from time import sleep
-
+from multiprocessing.pool import ThreadPool
 from wazuh_testing.end_to_end import logs_filepath_os
 from wazuh_testing.tools.file import create_temp_file
 from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.end_to_end.regex import get_event_regex
-from multiprocessing.pool import ThreadPool
+from wazuh_testing.tools.system import HostManager
 
 
-def monitoring_events_host_monitoring(host_manager, monitoring_data):
+def monitoring_events_host_monitoring(host_manager: HostManager, monitoring_data: dict) -> dict:
+    """
+    Monitor events on hosts using the HostMonitor class.
+
+    Args:
+        host_manager: An instance of the HostManager class containing information about hosts.
+        monitoring_data: A dictionary containing monitoring data for each host.
+
+    Returns:
+        dict: Results of the monitoring process.
+    """
     monitoring_file_content = ''
     results = {}
 
@@ -33,19 +73,23 @@ def monitoring_events_host_monitoring(host_manager, monitoring_data):
     return results
 
 
-def monitoring_events_multihost(host_manager, monitoring_data):
+def monitoring_events_multihost(host_manager: HostManager, monitoring_data: dict) -> None:
+    """
+    Monitor events on multiple hosts concurrently.
+
+    Args:
+        host_manager: An instance of the HostManager class containing information about hosts.
+        monitoring_data: A dictionary containing monitoring data for each host.
+    """
     def monitoring_event(host_manager, host, monitoring_elements):
         """
         Monitor the specified elements on a host.
-
         Parameters:
         - host_manager: An object managing hosts.
         - host: The target host.
         - monitoring_elements: A list of dictionaries containing regex, timeout, and file.
-
         Returns:
         - The first match found in the file content.
-
         Raises:
         - TimeoutError if no match is found within the specified timeout.
         """
@@ -54,8 +98,6 @@ def monitoring_events_multihost(host_manager, monitoring_data):
             current_timeout = 0
             regex_match = None
             while current_timeout < timeout:
-                # Get file content
-                print(timeout)
                 file_content = host_manager.get_file_content(host, monitoring_file)
                 regex_match = re.search(regex, file_content)
                 if regex_match:
@@ -72,7 +114,18 @@ def monitoring_events_multihost(host_manager, monitoring_data):
         pool.starmap(monitoring_event, [(host_manager, host, data) for host, data in monitoring_data.items()])
 
 
-def generate_monitoring_logs_all_agent(host_manager, regex_list, timeout_list):
+def generate_monitoring_logs_all_agent(host_manager: HostManager, regex_list: list, timeout_list: list) -> dict:
+    """
+    Generate monitoring data for logs on all agent hosts.
+
+    Args:
+        host_manager: An instance of the HostManager class containing information about hosts.
+        regex_list: A list of regular expressions for monitoring.
+        timeout_list: A list of timeout values for monitoring.
+
+    Returns:
+        dict: Monitoring data for logs on all agent hosts.
+    """
     monitoring_data = {}
     for agent in host_manager.get_group_hosts('agent'):
         monitoring_data[agent] = []
@@ -82,25 +135,44 @@ def generate_monitoring_logs_all_agent(host_manager, regex_list, timeout_list):
                 'regex': regex_index,
                 'file': logs_filepath_os[os_name],
                 'timeout': timeout_list[index]
-
             })
     return monitoring_data
 
 
-def generate_monitoring_logs_manager(host_manager, manager, regex, timeout):
+def generate_monitoring_logs_manager(host_manager: HostManager, manager: str, regex: str, timeout: int) -> dict:
+    """
+    Generate monitoring data for logs on a specific manager host.
+
+    Args:
+        host_manager: An instance of the HostManager class containing information about hosts.
+        manager: The target manager host.
+        regex: The regular expression for monitoring.
+        timeout: The timeout value for monitoring.
+
+    Returns:
+        dict: Monitoring data for logs on the specified manager host.
+    """
     monitoring_data = {}
     os_name = host_manager.get_host_variables(manager)['os_name']
     monitoring_data[manager] = [{
         'regex': regex,
         'file': logs_filepath_os[os_name],
         'timeout': timeout
-
     }]
-
     return monitoring_data
 
 
-def generate_monitoring_alerts_all_agent(host_manager, events_metadata):
+def generate_monitoring_alerts_all_agent(host_manager: HostManager, events_metadata: dict) -> dict:
+    """
+    Generate monitoring data for alerts on all agent hosts.
+
+    Args:
+        host_manager: An instance of the HostManager class containing information about hosts.
+        events_metadata: Metadata containing information about events.
+
+    Returns:
+        dict: Monitoring data for alerts on all agent hosts.
+    """
     monitoring_data = {}
 
     for agent in host_manager.get_group_hosts('agent'):
@@ -110,7 +182,7 @@ def generate_monitoring_alerts_all_agent(host_manager, events_metadata):
         if not host_manager.get_host_variables(agent)['manager'] in monitoring_data:
             monitoring_data[host_manager.get_host_variables(agent)['manager']] = []
 
-        for event in metadata_agent[agent.get_host_variables(agent)['arch']]:
+        for event in metadata_agent[host_manager.get_host_variables(agent)['arch']]:
             event['parameters']['HOST_NAME'] = agent
             monitoring_element = {
                 'regex': get_event_regex(event),
@@ -121,3 +193,5 @@ def generate_monitoring_alerts_all_agent(host_manager, events_metadata):
                 monitoring_element['parameters'] = metadata_agent['parameters']
 
             monitoring_data[host_manager.get_host_variables(agent)['manager']].append(monitoring_element)
+
+    return monitoring_data
