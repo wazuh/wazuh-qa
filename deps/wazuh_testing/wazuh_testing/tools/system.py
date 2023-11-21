@@ -53,21 +53,27 @@ class HostManager:
         return self.inventory
 
     def get_inventory_path(self) -> str:
-        """Get the loaded Ansible inventory.
+        """Get the path of the loaded Ansible inventory.
 
         Returns:
-            self.inventory: Ansible inventory
+            str: Path to the Ansible inventory file.
+
+        Example:
+            inventory_path = get_inventory_path()
         """
         return self.inventory_path
 
     def get_group_hosts(self, pattern='None'):
-        """Get all hosts from inventory that belong to a group.
+        """Get all hosts from the inventory that belong to a specified group pattern.
 
         Args:
-            group (str): Group name
+            pattern (str, optional): Group name or pattern. Defaults to 'None'.
 
         Returns:
-            list: List of hosts
+            list: List of host names belonging to the specified group pattern.
+
+        Example:
+            hosts = get_group_hosts('my_group')
         """
         if pattern:
             return [str(host) for host in self.inventory_manager.get_hosts(pattern=pattern)]
@@ -76,20 +82,34 @@ class HostManager:
 
 
     def get_host_groups(self, host):
-        """
+        """Get the list of groups to which the specified host belongs.
+
+        Args:
+            host (str): Hostname.
+
+        Returns:
+            list: List of group names to which the host belongs.
+
+        Example:
+            groups = get_host_groups('my_host')
         """
         group_list = self.inventory_manager.get_host(host).get_groups()
+
         return [str(group) for group in group_list]
 
     def get_host_variables(self, host):
         """Get the variables of the specified host.
 
         Args:
-            host (str): Hostname
+            host (str): Hostname.
 
         Returns:
-            testinfra.modules.base.Ansible: Host instance from hostspec
+            testinfra.modules.base.Ansible: Host instance from hostspec.
+
+        Example:
+            variables = get_host_variables('my_host')
         """
+
         inventory_manager_host = self.inventory_manager.get_host(host)
 
         return self.hosts_variables[inventory_manager_host]
@@ -108,10 +128,11 @@ class HostManager:
     def truncate_file(self, host: str, filepath: str):
         ansible_command = 'file'
         if 'os_name' in self.get_host_variables(host):
-            host_os_name = self.get_host_variables(host)['os_name']
             ansible_command = 'win_copy' if self.get_host_variables(host)['os_name'] == 'windows' else 'copy'
 
         result = self.get_host(host).ansible(ansible_command, f"dest='{filepath}' content=''", check=False)
+
+        return result
 
 
     def move_file(self, host: str, src_path: str, dest_path: str = '/var/ossec/etc/ossec.conf', check: bool = False):
@@ -124,17 +145,20 @@ class HostManager:
         check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be applied.
         """
         system = 'linux'
+        result = None
+
         if 'os_name' in self.get_host_variables(host):
             host_os_name = self.get_host_variables(host)['os_name']
             if host_os_name == 'windows':
                 system = 'windows'
 
         if system == 'linux':
-            a = self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=wazuh group=wazuh mode=0644",
+            result = self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=wazuh group=wazuh mode=0644",
                                         check=check)
-            print(a)
         else:
-            self.get_host(host).ansible("ansible.windows.win_copy", f"src='{src_path}' dest='{dest_path}'", check=check)
+            result = self.get_host(host).ansible("ansible.windows.win_copy", f"src='{src_path}' dest='{dest_path}'", check=check)
+
+        return result
 
     def add_block_to_file(self, host: str, path: str, replace: str, before: str, after, check: bool = False):
         """Add text block to desired file.
@@ -144,7 +168,7 @@ class HostManager:
             path (str): Path of the file
             replace (str): Text to be inserted in the file
             before (str): Lower stop of the block to be replaced
-            after (str): Upper stop of172.31.6.71 the block to be replaced
+            after (str): Upper stop of the block to be replaced
             check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
                 applied. Default `False`.
         """
@@ -164,7 +188,6 @@ class HostManager:
         tmp_file.write(content if isinstance(content, bytes) else content.encode())
         tmp_file.seek(0)
         self.move_file(host, src_path=tmp_file.name, dest_path=path)
-
         tmp_file.close()
 
     def control_service(self, host: str, service: str = 'wazuh', state: str = "started", check: bool = False):
@@ -210,7 +233,6 @@ class HostManager:
             host (str): Hostname
             file_path (str) : Path of the file
         """
-        # return self.get_host(host).file(file_path).content_string
         ansible_method = 'command'
         command = 'cat'
         if 'os_name' in self.get_host_variables(host) and self.get_host_variables(host)['os_name'] == 'windows':
@@ -220,16 +242,6 @@ class HostManager:
         result = self.get_host(host).ansible(ansible_method, f"{command} '{file_path}'", check=False)
 
         return result['stdout']
-
-
-        # testinfra_host = self.get_host(host)
-        # result = testinfra_host.ansible("slurp", f"src='{file_path}'", check=False)
-        # print(result)
-        # if 'content' not in result:
-        #     raise Exception(f"No content value in {result}")
-
-        # decoded = base64.b64decode(result['content']).decode('utf-8')
-        # return decoded
 
 
     def apply_config(self, config_yml_path: str, dest_path: str = WAZUH_CONF, clear_files: list = None,
