@@ -4,7 +4,7 @@ all:
       ansible_host: 172.16.1.2
       ansible_port: 22
       ansible_user: 'vagrant'
-      ansible_ssh_private_key_file: '/home/vagrant/.ssh/id_rsa'
+      ansible_ssh_private_key_file: '/var/lib/jenkins/.ssh/id_rsa'
       ansible_os_family: Debian
       manager_ip: 172.16.1.3
       install:
@@ -17,7 +17,7 @@ all:
       ansible_host: 172.16.1.3
       ansible_port: 22
       ansible_user: 'vagrant'
-      ansible_ssh_private_key_file: '/home/vagrant/.ssh/id_rsa'
+      ansible_ssh_private_key_file: '/var/lib/jenkins/.ssh/id_rsa'
       ansible_os_family: Debian
       install:
         - type: aio
