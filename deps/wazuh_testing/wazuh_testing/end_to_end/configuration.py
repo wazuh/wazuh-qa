@@ -1,23 +1,18 @@
-# Copyright (C) 2015, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
-Module Name: configuration.py
+Configurations handler for remote hosts.
+----------------------------------------
 
-Description:
-    This module provides functions for configuring and managing host configurations using the HostManager class
-    and related tools.
+This module provides functions for configuring and managing host configurations using the HostManager class and related tools.
 
 Functions:
-    - backup_configurations(host_manager: HostManager) -> dict:
-        Backup configurations for all hosts in the specified host manager.
+    - backup_configurations: Backup configurations for all hosts in the specified host manager.
+    - restore_backup: Restore configurations for all hosts in the specified host manager.
+    - configure_environment: Configure the environment for all hosts in the specified host manager.
+ 
 
-    - restore_backup(host_manager: HostManager, backup_configurations: dict) -> None:
-        Restore configurations for all hosts in the specified host manager.
-
-    - configure_environment(host_manager: HostManager, configurations: dict) -> None:
-        Configure the environment for all hosts in the specified host manager.
-        This function uses ThreadPool to parallelize the configuration process.
+Copyright (C) 2015, Wazuh Inc.
+Created by Wazuh, Inc. <info@wazuh.com>.
+This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
 from multiprocessing.pool import ThreadPool
 import xml.dom.minidom

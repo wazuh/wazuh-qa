@@ -1,3 +1,24 @@
+"""
+Vulnerability Data Update and Scan Monitoring Module.
+-----------------------------------------------------
+
+This module provides functions for waiting until vulnerability data is updated for all manager hosts and until vulnerability scans for all agents are finished.
+
+Functions:
+    - wait_until_vd_is_updated: Wait until the vulnerability data is updated for all manager hosts.
+    - wait_until_vuln_scan_agents_finished: Wait until vulnerability scans for all agents are finished.
+
+Dependencies:
+    - wazuh_testing.end_to_end.monitoring: Module containing functions for generating monitoring logs and handling events.
+    - wazuh_testing.end_to_end.wazuh_api: Module containing functions for retrieving agent IDs.
+    - wazuh_testing.tools.system: Module providing the HostManager class for handling the environment.
+
+
+Copyright (C) 2015, Wazuh Inc.
+Created by Wazuh, Inc. <info@wazuh.com>.
+This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+"""
+
 from wazuh_testing.end_to_end.monitoring import (
     generate_monitoring_logs_manager,
     monitoring_events_multihost

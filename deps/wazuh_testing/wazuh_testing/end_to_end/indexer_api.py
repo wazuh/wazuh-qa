@@ -7,17 +7,6 @@ This module provides functions to interact with the Wazuh Elasticsearch indexer 
 Functions:
     - get_indexer_values: Retrieves values from the Elasticsearch indexer API.
 
-Usage Example:
-    import requests
-    from typing import Dict
-    from wazuh_testing.tools.system import HostManager
-
-    # Usage of get_indexer_values
-    host_manager = HostManager()
-    credentials = {'user': 'admin', 'password': 'changeme'}
-    index = 'wazuh-alerts*'
-    response_data = get_indexer_values(host_manager, credentials, index)
-
 
 Copyright (C) 2015, Wazuh Inc.
 Created by Wazuh, Inc. <info@wazuh.com>.

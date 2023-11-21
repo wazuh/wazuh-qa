@@ -1,24 +1,21 @@
 """
-Module Name: monitoring
+Monitoring remote host files module.
+------------------------------------
 
 Description:
     This module provides functions for monitoring events, files, and alerts in a Wazuh environment.
 
 Functions:
-    - monitoring_events_host_monitoring(host_manager: HostManager, monitoring_data: dict) -> dict:
-        Monitor events on hosts using the HostMonitor.
+    - monitoring_events_host_monitoring: Monitor events on hosts using the HostMonitor.
+    - monitoring_events_multihost: Monitor events on multiple hosts concurrently.
+    - generate_monitoring_logs_all_agent: Generate monitoring data for logs on all agent hosts.
+    - generate_monitoring_logs_manager: Generate monitoring data for logs on a specific manager host.
+    - generate_monitoring_alerts_all_agent: Generate monitoring data for alerts on all agent hosts.
 
-    - monitoring_events_multihost(host_manager: HostManager, monitoring_data: dict) -> None:
-        Monitor events on multiple hosts concurrently.
 
-    - generate_monitoring_logs_all_agent(host_manager: HostManager, regex_list: list, timeout_list: list) -> dict:
-        Generate monitoring data for logs on all agent hosts.
-
-    - generate_monitoring_logs_manager(host_manager: HostManager, manager: str, regex: str, timeout: int) -> dict:
-        Generate monitoring data for logs on a specific manager host.
-
-    - generate_monitoring_alerts_all_agent(host_manager: HostManager, events_metadata: dict) -> dict:
-        Generate monitoring data for alerts on all agent hosts.
+Copyright (C) 2015, Wazuh Inc.
+Created by Wazuh, Inc. <info@wazuh.com>.
+This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
 
 import tempfile

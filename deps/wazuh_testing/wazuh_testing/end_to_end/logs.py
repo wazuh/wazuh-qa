@@ -1,33 +1,20 @@
 """
-Module Name: logs
+Logs management module for remote hosts.
+---------------------------------------
 
 Description:
     This module provides functions for truncating logs and alerts for Wazuh agents and managers.
 
 Functions:
-    - truncate_agents_logs(host_manager: HostManager) -> None:
-        Truncate logs for Wazuh agents.
+    - truncate_agents_logs: Truncate logs for Wazuh agents.
+    - truncate_managers_logs: Truncate logs for Wazuh managers.
+    - truncate_logs: Truncate logs for both Wazuh agents and managers.
+    - truncate_alerts: Truncate Wazuh alerts.
 
-        Args:
-            host_manager: An instance of the HostManager class containing information about hosts.
 
-    - truncate_managers_logs(host_manager: HostManager) -> None:
-        Truncate logs for Wazuh managers.
-
-        Args:
-            host_manager: An instance of the HostManager class containing information about hosts.
-
-    - truncate_logs(host_manager: HostManager) -> None:
-        Truncate logs for both Wazuh agents and managers.
-
-        Args:
-            host_manager: An instance of the HostManager class containing information about hosts.
-
-    - truncate_alerts(host_manager: HostManager) -> None:
-        Truncate Wazuh alerts.
-
-        Args:
-            host_manager: An instance of the HostManager class containing information about hosts.
+Copyright (C) 2015, Wazuh Inc.
+Created by Wazuh, Inc. <info@wazuh.com>.
+This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
 
 from wazuh_testing.end_to_end import logs_filepath_os

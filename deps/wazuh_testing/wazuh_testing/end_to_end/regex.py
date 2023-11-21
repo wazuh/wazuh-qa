@@ -1,3 +1,22 @@
+"""
+Regex Patterns for Syscollector Events.
+---------------------------------------
+
+This module defines regular expression patterns for various events related to Syscollector. The patterns are used to extract information from log messages.
+
+Constants:
+    REGEX_PATTERNS (dict): A dictionary mapping event names to their respective regex patterns and parameters.
+
+Functions:
+    get_event_regex: Get the regex pattern for a specific event.
+
+
+Copyright (C) 2015, Wazuh Inc.
+Created by Wazuh, Inc. <info@wazuh.com>.
+This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+"""
+
+
 from typing import Dict
 
 

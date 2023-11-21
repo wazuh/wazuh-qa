@@ -1,19 +1,20 @@
 """
-Wazuh API Operations Module
+Wazuh API Methods Module.
+-------------------------
 
-This module provides functions for handling Wazuh API operations in a HostManager environment.
-It includes methods for retrieving API parameters, obtaining authentication tokens,
-and retrieving information about Wazuh agents and their vulnerabilities.
+This module provides functions for interacting with the Wazuh API, including retrieving API parameters, obtaining an API token for authentication, and fetching information about Wazuh agents and their vulnerabilities.
 
 Functions:
-- get_api_parameters(host_manager): Retrieves Wazuh API parameters.
-- get_api_token(host_manager): Retrieves the API token for authentication.
-- get_agents_id(host_manager): Retrieves the IDs of Wazuh agents.
-- get_agents_vulnerabilities(host_manager): Retrieves vulnerability information for Wazuh agents.
+    - get_api_parameters: Retrieves the Wazuh API parameters.
+    - get_api_token: Retrieves the API token for authentication.
+    - get_agents_id: Retrieves the IDs of Wazuh agents.
+    - get_agents_vulnerabilities: Retrieves vulnerability information for Wazuh agents.
 
-Parameters:
-- host_manager (HostManager): An instance of the HostManager class representing the Wazuh environment.
+Copyright (C) 2015, Wazuh Inc.
+Created by Wazuh, Inc. <info@wazuh.com>.
+This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
+
 from wazuh_testing.api import make_api_call, get_token_login_api
 
 # Wazuh API Methods
