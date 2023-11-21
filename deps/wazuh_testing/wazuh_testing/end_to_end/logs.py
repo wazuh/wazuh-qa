@@ -5,32 +5,29 @@ Description:
     This module provides functions for truncating logs and alerts for Wazuh agents and managers.
 
 Functions:
-    1. truncate_agents_logs(host_manager: HostManager) -> None:
+    - truncate_agents_logs(host_manager: HostManager) -> None:
         Truncate logs for Wazuh agents.
 
         Args:
             host_manager: An instance of the HostManager class containing information about hosts.
 
-    2. truncate_managers_logs(host_manager: HostManager) -> None:
+    - truncate_managers_logs(host_manager: HostManager) -> None:
         Truncate logs for Wazuh managers.
 
         Args:
             host_manager: An instance of the HostManager class containing information about hosts.
 
-    3. truncate_logs(host_manager: HostManager) -> None:
+    - truncate_logs(host_manager: HostManager) -> None:
         Truncate logs for both Wazuh agents and managers.
 
         Args:
             host_manager: An instance of the HostManager class containing information about hosts.
 
-    4. truncate_alerts(host_manager: HostManager) -> None:
+    - truncate_alerts(host_manager: HostManager) -> None:
         Truncate Wazuh alerts.
 
         Args:
             host_manager: An instance of the HostManager class containing information about hosts.
-
-Module Usage:
-    This module can be used to truncate logs and alerts for Wazuh agents and managers.
 """
 
 from wazuh_testing.end_to_end import logs_filepath_os

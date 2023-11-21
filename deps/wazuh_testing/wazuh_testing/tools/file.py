@@ -926,8 +926,22 @@ def modify_file(path, name, new_content=None, is_binary=False):
     modify_file_win_attributes(path, name)
 
 
-def create_temp_file(content):
-    fd, temp_file_path = tempfile.mkstemp(text=True)  # 'text=True' specifies text mode
-    with open(temp_file_path, 'w', newline='\n') as temp_file:
-        temp_file.write(content)
-    return temp_file_path
+def create_temp_file(content: str) -> str:
+    """
+    Create a temporary file with the specified content.
+
+    Args:
+        content (str): The content to be written to the temporary file.
+
+    Returns:
+        str: The path to the created temporary file.
+    """
+    try:
+        fd, temp_file_path = tempfile.mkstemp(text=True)
+        with os.fdopen(fd, 'w', newline='\n') as temp_file:
+            temp_file.write(content)
+        return temp_file_path
+    except Exception as e:
+        print(f"Error creating temporary file: {e}")
+        raise
+

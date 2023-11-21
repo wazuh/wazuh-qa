@@ -1,3 +1,7 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 """
 Module Name: indexer_api
 
@@ -26,6 +30,7 @@ Module Usage:
     vulnerability states.
 """
 import requests
+from typing import Dict
 
 from wazuh_testing.tools.system import HostManager
 
@@ -33,7 +38,7 @@ from wazuh_testing.tools.system import HostManager
 STATE_INDEX_NAME = 'wazuh-vulnerabilities-states'
 
 
-def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'}, index: str = 'wazuh-alerts*') -> str:
+def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'}, index: str = 'wazuh-alerts*') -> Dict:
     """
     Get values from the Wazuh Elasticsearch indexer API.
 
@@ -54,5 +59,5 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
     }
     response = requests.get(url=url, params={'pretty': 'true'}, json=query, verify=False,
                             auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']))
-    return response.text
+    return response.json()
 

@@ -432,7 +432,6 @@ class QueueMonitor:
                 else:
                     msg = self._queue.peek(position=position, block=True, timeout=self._time_step)
                     position += 1
-                print(f"Monitoring line {msg}")
                 item = callback(msg)
                 logging.debug(msg)
                 if item is not None and item:
@@ -917,12 +916,7 @@ class HostMonitor:
             if len(monitored_files) == 0:
                 raise AttributeError('There is no path to monitor. Exiting...')
             for path in monitored_files:
-                if '\\' in path:
-                    first_path_element = path.split("\\")[-1]
-                else:
-                    first_path_element = path.split("/")[-1]
-
-                output_path = f'{host}_{first_path_element}.tmp'
+                output_path = f'{host}_{path.split("/")[-1]}.tmp'
                 self._file_content_collectors.append(self.file_composer(host=host, path=path, output_path=output_path))
                 logger.debug(f'Add new file composer process for {host} and path: {path}')
                 self._file_monitors.append(self._start(host=host,
@@ -937,7 +931,7 @@ class HostMonitor:
                 for file_collector in self._file_content_collectors:
                     file_collector.terminate()
                     file_collector.join()
-                # self.clean_tmp_files()
+                self.clean_tmp_files()
                 break
             time.sleep(self._time_step)
         self.check_result()

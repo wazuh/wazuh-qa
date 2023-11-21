@@ -1,38 +1,32 @@
 """
-Module Name: wazuh_monitoring
+Module Name: monitoring
 
 Description:
     This module provides functions for monitoring events, files, and alerts in a Wazuh environment.
 
-Imports:
-    - os
-    - tempfile
-    - re
-    - sleep
-    - requests
-    - ThreadPool
-
 Functions:
-    1. monitoring_events_host_monitoring(host_manager: HostManager, monitoring_data: dict) -> dict:
+    - monitoring_events_host_monitoring(host_manager: HostManager, monitoring_data: dict) -> dict:
         Monitor events on hosts using the HostMonitor.
 
-    2. monitoring_events_multihost(host_manager: HostManager, monitoring_data: dict) -> None:
+    - monitoring_events_multihost(host_manager: HostManager, monitoring_data: dict) -> None:
         Monitor events on multiple hosts concurrently.
 
-    3. generate_monitoring_logs_all_agent(host_manager: HostManager, regex_list: list, timeout_list: list) -> dict:
+    - generate_monitoring_logs_all_agent(host_manager: HostManager, regex_list: list, timeout_list: list) -> dict:
         Generate monitoring data for logs on all agent hosts.
 
-    4. generate_monitoring_logs_manager(host_manager: HostManager, manager: str, regex: str, timeout: int) -> dict:
+    - generate_monitoring_logs_manager(host_manager: HostManager, manager: str, regex: str, timeout: int) -> dict:
         Generate monitoring data for logs on a specific manager host.
 
-    5. generate_monitoring_alerts_all_agent(host_manager: HostManager, events_metadata: dict) -> dict:
+    - generate_monitoring_alerts_all_agent(host_manager: HostManager, events_metadata: dict) -> dict:
         Generate monitoring data for alerts on all agent hosts.
 """
 
 import tempfile
 import re
 from time import sleep
+from typing import Dict, List
 from multiprocessing.pool import ThreadPool
+
 from wazuh_testing.end_to_end import logs_filepath_os
 from wazuh_testing.tools.file import create_temp_file
 from wazuh_testing.tools.monitoring import HostMonitor
@@ -40,9 +34,8 @@ from wazuh_testing.end_to_end.regex import get_event_regex
 from wazuh_testing.tools.system import HostManager
 
 
-def monitoring_events_host_monitoring(host_manager: HostManager, monitoring_data: dict) -> dict:
-    """
-    Monitor events on hosts using the HostMonitor class.
+def monitoring_events_host_monitoring(host_manager: HostManager, monitoring_data: Dict) -> Dict:
+    """Monitor events on hosts using the HostMonitor class.
 
     Args:
         host_manager: An instance of the HostManager class containing information about hosts.
@@ -73,7 +66,7 @@ def monitoring_events_host_monitoring(host_manager: HostManager, monitoring_data
     return results
 
 
-def monitoring_events_multihost(host_manager: HostManager, monitoring_data: dict) -> None:
+def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict) -> None:
     """
     Monitor events on multiple hosts concurrently.
 
@@ -81,17 +74,17 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: dict
         host_manager: An instance of the HostManager class containing information about hosts.
         monitoring_data: A dictionary containing monitoring data for each host.
     """
-    def monitoring_event(host_manager, host, monitoring_elements):
+    def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict]):
         """
         Monitor the specified elements on a host.
-        Parameters:
-        - host_manager: An object managing hosts.
-        - host: The target host.
-        - monitoring_elements: A list of dictionaries containing regex, timeout, and file.
-        Returns:
-        - The first match found in the file content.
+        
+        Args:
+            host_manager (HostManager): Host Manager to handle the environment
+            host (str): The target host.
+            monitoring_elements(List): A list of dictionaries containing regex, timeout, and file.
+
         Raises:
-        - TimeoutError if no match is found within the specified timeout.
+            TimeoutError: If no match is found within the specified timeout.
         """
         for element in monitoring_elements:
             regex, timeout, monitoring_file = element['regex'], element['timeout'], element['file']

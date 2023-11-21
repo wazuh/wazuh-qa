@@ -6,7 +6,6 @@ import json
 import tempfile
 import xml.dom.minidom as minidom
 from typing import Union
-import base64
 import testinfra
 import yaml
 

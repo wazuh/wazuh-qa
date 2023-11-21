@@ -1,3 +1,6 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
 Module Name: configuration.py
 
@@ -6,19 +9,15 @@ Description:
     and related tools.
 
 Functions:
-    1. backup_configurations(host_manager: HostManager) -> dict:
+    - backup_configurations(host_manager: HostManager) -> dict:
         Backup configurations for all hosts in the specified host manager.
 
-    2. restore_backup(host_manager: HostManager, backup_configurations: dict) -> None:
+    - restore_backup(host_manager: HostManager, backup_configurations: dict) -> None:
         Restore configurations for all hosts in the specified host manager.
 
-    3. configure_environment(host_manager: HostManager, configurations: dict) -> None:
+    - configure_environment(host_manager: HostManager, configurations: dict) -> None:
         Configure the environment for all hosts in the specified host manager.
         This function uses ThreadPool to parallelize the configuration process.
-
-Module Usage:
-    This module can be used to manage configurations for a distributed system, with functions for
-    backup, restore, and parallelized environment configuration.
 """
 from multiprocessing.pool import ThreadPool
 import xml.dom.minidom
