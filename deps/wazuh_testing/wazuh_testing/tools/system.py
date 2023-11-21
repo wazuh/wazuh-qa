@@ -434,77 +434,147 @@ class HostManager:
 
     def download_file(self, host, url, dest_path, mode='755'):
         """
-        - name: Download foo.conf
-            ansible.builtin.get_url:
-            url: http://example.com/path/file.conf
-            dest: /etc/foo.conf
-            mode: '0440'
+        Downloads a file from the specified URL to the destination path on the specified host.
+
+        Args:
+            host (str): The target host on which to download the file.
+            url (str): The URL of the file to be downloaded.
+            dest_path (str): The destination path where the file will be saved on the host.
+            mode (str, optional): The file permissions mode. Defaults to '755'.
+
+        Returns:
+            dict: Ansible result of the download operation.
+
+        Example:
+            host_manager.download_file('my_host', 'http://example.com/path/file.conf', '/etc/foo.conf', mode='0440')
         """
-        a = self.get_host(host).ansible("get_url", f"url={url} dest={dest_path} mode={mode}", check=False)
-        return a
+        result = self.get_host(host).ansible("get_url", f"url={url} dest={dest_path} mode={mode}", check=False)
+
+        return result
 
     def install_package(self, host, url, system='ubuntu'):
+        """
+        Installs a package on the specified host.
+
+        Args:
+            host (str): The target host on which to install the package.
+            url (str): The URL or name of the package to be installed.
+            system (str, optional): The operating system type. Defaults to 'ubuntu'.
+                Supported values: 'windows', 'ubuntu', 'centos'.
+
+        Returns:
+            Dict: Testinfra Ansible Response of the operation 
+
+        Example:
+            host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
+        """
         result = False
+
         if system =='windows':
-            a = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
-            print(a)
+            result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
         elif system == 'ubuntu':
-            a = self.get_host(host).ansible("apt", f"deb={url}", check=False)
-            if a['changed'] == True and a['stderr'] == '':
+            result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
+            if result['changed'] == True and result['stderr'] == '':
                 result = True
-            print(a)
         elif system == 'centos':
-            a = self.get_host(host).ansible("yum", f"name={url} state=present sslverify=false disable_gpg_check=True", check=False)
-            if 'rc' in a and a['rc'] == 0 and a['changed'] == True:
+            result = self.get_host(host).ansible("yum", f"name={url} state=present sslverify=false disable_gpg_check=True", check=False)
+            if 'rc' in result and result['rc'] == 0 and result['changed'] == True:
                 result = True
-            print(a)
+
+        return result
 
     def get_master_ip(self):
         """
+        Retrieves the IP address of the master node from the inventory.
 
+        Returns:
+            str: The IP address of the master node, or None if not found.
+
+        Example:
+            master_ip = host_manager.get_master_ip()
         """
         master_ip = None
+
         for manager in self.get_group_hosts('manager'):
             if 'type' in self.get_host_variables(manager) and \
                 self.get_host_variables(manager)['type'] == 'master':
                 master_ip = self.get_host_variables(manager)['ip']
+
         return master_ip
 
     def remove_package(self, host, package_name, system):
+        """
+        Removes a package from the specified host.
+
+        Args:
+            host (str): The target host from which to remove the package.
+            package_name (str): The name of the package to be removed.
+            system (str): The operating system type.
+                Supported values: 'windows', 'ubuntu', 'centos'.
+
+        Returns:
+            Dict: Testinfra Ansible Response of the operation 
+
+        Example:
+            host_manager.remove_package('my_host', 'my_package', system='ubuntu')
+        """
         result = False
+
         if system == 'windows':
-            a = self.get_host(host).ansible("win_package", f"path={package_name} state=absent arguments=/S", check=False)
+            result = self.get_host(host).ansible("win_package", f"path={package_name} state=absent arguments=/S", check=False)
         elif system == 'ubuntu':
-            a = self.get_host(host).ansible("apt", f"name={package_name} state=absent", check=False)
-            if a['changed'] == True and a['stderr'] == '':
+            result = self.get_host(host).ansible("apt", f"name={package_name} state=absent", check=False)
+            if result['changed'] == True and result['stderr'] == '':
                 result = True
         elif system == 'centos':
-            a = self.get_host(host).ansible("yum", f"name={package_name} state=absent", check=False)
-            if 'rc' in a and a['rc'] == 0 and a['changed'] == True:
+            result = self.get_host(host).ansible("yum", f"name={package_name} state=absent", check=False)
+            if 'rc' in result and result['rc'] == 0 and result['changed'] == True:
                 result = True
+
         return result
 
     def handle_wazuh_services(self, host, operation):
+        """
+        Handles Wazuh services on the specified host.
+
+        Args:
+            host (str): The target host on which to handle Wazuh services.
+            operation (str): The operation to perform ('start', 'stop', 'restart').
+
+        Example:
+            host_manager.handle_wazuh_services('my_host', 'restart')
+        """
         os = self.get_host_variables(host)['os_name']
         binary_path = None
+        result = None
+
         if os == 'windows':
             if operation == 'restart':
-                a = self.get_host(host).ansible('ansible.windows.win_shell', f'NET stop Wazuh', check=False)
-                b = self.get_host(host).ansible('ansible.windows.win_shell', f'NET start Wazuh', check=False)
-
-                print(a)
-                print(b)
+                self.get_host(host).ansible('ansible.windows.win_shell', f'NET stop Wazuh', check=False)
+                self.get_host(host).ansible('ansible.windows.win_shell', f'NET start Wazuh', check=False)
             else:
-                a = self.get_host(host).ansible('ansible.windows.win_shell', f'NET {operation} Wazuh', check=False)
-                print(a)
+                result = self.get_host(host).ansible('ansible.windows.win_shell', f'NET {operation} Wazuh', check=False)
         else:
             if os == 'linux':
-                binary_path = f"/var/ossec/bin/wazuh-control"
+                result = binary_path = f"/var/ossec/bin/wazuh-control"
             elif os == 'macos':
-                binary_path = f"/Library/Ossec/bin/wazuh-control"
-            self.get_host(host).ansible('shell', f"{binary_path} {operation}", check=False)
+                result= binary_path = f"/Library/Ossec/bin/wazuh-control"
+
+            result = self.get_host(host).ansible('shell', f"{binary_path} {operation}", check=False)
+
+        return result
 
     def control_environment(self, operation, group_list):
+        """
+        Controls the Wazuh services on hosts in the specified groups.
+
+        Args:
+            operation (str): The operation to perform on Wazuh services ('start', 'stop', 'restart').
+            group_list (list): A list of group names whose hosts' Wazuh services should be controlled.
+
+        Example:
+            control_environment('restart', ['group1', 'group2'])
+        """
         for group in group_list:
             for host in self.get_group_hosts(group):
                 self.handle_wazuh_services(host, operation)
@@ -518,5 +588,4 @@ def clean_environment(host_manager, target_files):
     """
     for target in target_files:
         host_manager.clear_file(host=target[0], file_path=target[1])
-
 
