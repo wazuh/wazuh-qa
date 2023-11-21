@@ -1,33 +1,27 @@
-# Copyright (C) 2015, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
-
 """
-Module Name: indexer_api
+Wazuh Elasticsearch Indexer Module.
+-----------------------------------
 
-Description:
-    This module provides functions for interacting with the Wazuh Elasticsearch indexer API,
-    specifically for retrieving vulnerability state information.
-
-Constants:
-    - STATE_INDEX_NAME: The name of the index used for storing Wazuh vulnerabilities states.
+This module provides functions to interact with the Wazuh Elasticsearch indexer API.
 
 Functions:
-    1. get_indexer_values(host_manager, credentials={'user': 'admin', 'password': 'changeme'}, index='wazuh-alerts*') -> str:
-        Get values from the Wazuh Elasticsearch indexer API.
+    - get_indexer_values: Retrieves values from the Elasticsearch indexer API.
 
-        Args:
-            host_manager: An instance of the HostManager class containing information about hosts.
-            credentials (Optional): A dictionary containing the Elasticsearch credentials. Defaults to
-                                     {'user': 'admin', 'password': 'changeme'}.
-            index (Optional): The Elasticsearch index name. Defaults to 'wazuh-alerts*'.
+Usage Example:
+    import requests
+    from typing import Dict
+    from wazuh_testing.tools.system import HostManager
 
-        Returns:
-            str: The response text from the indexer API.
+    # Usage of get_indexer_values
+    host_manager = HostManager()
+    credentials = {'user': 'admin', 'password': 'changeme'}
+    index = 'wazuh-alerts*'
+    response_data = get_indexer_values(host_manager, credentials, index)
 
-Module Usage:
-    This module can be used to retrieve information from the Wazuh Elasticsearch indexer API, specifically for
-    vulnerability states.
+
+Copyright (C) 2015, Wazuh Inc.
+Created by Wazuh, Inc. <info@wazuh.com>.
+This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
 import requests
 from typing import Dict
