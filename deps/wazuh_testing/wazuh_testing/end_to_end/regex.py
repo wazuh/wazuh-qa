@@ -25,7 +25,7 @@ REGEX_PATTERNS = {
         'regex': '.*INFO: Starting evaluation.'
     },
     'syscollector_scan_end': {
-        'regex': '.*INFO: Ending evaluation.'
+        'regex': '.*INFO: Evaluation finished.'
     },
     'syscollector_install_package_alert_yum': {
         'regex': '.*installed.*agent".*"name":"(\S+)".*Installed: (\S+).*?(\S+)',

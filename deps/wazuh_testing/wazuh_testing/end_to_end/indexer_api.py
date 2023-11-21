@@ -20,7 +20,6 @@ from wazuh_testing.tools.system import HostManager
 
 STATE_INDEX_NAME = 'wazuh-vulnerabilities-states'
 
-
 def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'}, index: str = 'wazuh-alerts*') -> Dict:
     """
     Get values from the Wazuh Elasticsearch indexer API.
