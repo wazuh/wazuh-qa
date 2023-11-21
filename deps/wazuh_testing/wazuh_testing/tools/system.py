@@ -504,6 +504,11 @@ class HostManager:
                 binary_path = f"/Library/Ossec/bin/wazuh-control"
             self.get_host(host).ansible('shell', f"{binary_path} {operation}", check=False)
 
+    def control_environment(self, operation, group_list):
+        for group in group_list:
+            for host in self.get_group_hosts(group):
+                self.handle_wazuh_services(host, operation)
+
 
 def clean_environment(host_manager, target_files):
     """Clears a series of files on target hosts managed by a host manager
@@ -513,3 +518,5 @@ def clean_environment(host_manager, target_files):
     """
     for target in target_files:
         host_manager.clear_file(host=target[0], file_path=target[1])
+
+
