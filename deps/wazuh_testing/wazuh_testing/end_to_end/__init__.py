@@ -11,15 +11,23 @@ from wazuh_testing.tools.utils import retry
 
 fetched_alerts_json_path = os.path.join(gettempdir(), 'alerts.json')
 
-configuration_filepath_os = {
-    'linux': '/var/ossec/etc/ossec.conf',
-    'windows': r'C:\\Program Files (x86)\\ossec-agent\\ossec.conf',
-    'macos': '/Library/Ossec/etc/ossec.conf'
+
+base_path = {
+    'linux': '/var/ossec',
+    'windows': r'C:\Program Files (x86)\ossec-agent',
+    'macos': '/Library/Ossec'
 }
+
+configuration_filepath_os = {
+    'linux': os.path.join(base_path['linux'], 'etc', 'ossec.conf'),
+    'windows': os.path.join(base_path['windows'], 'ossec.conf'),
+    'macos': os.path.join(base_path['macos'], 'etc', 'ossec.conf')
+}
+
 logs_filepath_os = {
-    'linux': '/var/ossec/logs/ossec.log',
-    'windows': r'C:\\Program Files (x86)\\ossec-agent\\ossec.log',
-    'macos': '/Library/Ossec/logs/ossec.log'
+    'linux': os.path.join(base_path['linux'], 'logs', 'ossec.log'),
+    'windows': os.path.join(base_path['windows'], 'ossec.log'),
+    'macos': os.path.join(base_path['macos'], 'logs', 'ossec.log')
 }
 
 
