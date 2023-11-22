@@ -183,6 +183,25 @@ def test_agentd_state(configure_environment, test_case):
         check_fields(expected_output)
 
 
+def test_state_delete(restart_wazuh_daemon_after_finishing):
+    '''
+    description: Check that the statistics file 'wazuh-agentd.state' is deleted automatically
+                 when the agent stops.
+
+    wazuh_min_version: 4.2.0
+
+    tier: 0
+
+    assertions:
+        - Verify that the 'wazuh-agentd.state' statistics file has been deleted.
+    '''
+
+    # Stop service
+    control_service('stop')
+
+    assert not os.path.exists(state_file_path)
+
+
 def parse_state_file():
     """Parse state file
 
