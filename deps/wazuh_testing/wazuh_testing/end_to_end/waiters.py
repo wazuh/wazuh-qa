@@ -56,7 +56,7 @@ def wait_until_vuln_scan_agents_finished(host_manager: HostManager) -> None:
         agents_id = get_agents_id(host_manager)
         agent_id = agents_id.get(agent, '')
         finished_scan_pattern = rf"Finished vulnerability assessment for agent '{agent_id}'"
-        
+
         monitoring_data = generate_monitoring_logs_manager(
             host_manager, manager_host, finished_scan_pattern, 700
         )
