@@ -51,6 +51,12 @@ def wait_until_vuln_scan_agents_finished(host_manager: HostManager) -> None:
     Args:
         host_manager (HostManager): Host manager instance to handle the environment.
     """
+    # The order of agents may not be guaranteed.
+    # The Vulnerability Detector scans are ordered based on the agent ID.
+    # We are currently awaiting completion of all scans globally,
+    # with a timeout set to 5 minutes for each agent.
+    final_timeout = 300 * len(host_manager.get_group_hosts('agent'))
+
     for agent in host_manager.get_group_hosts('agent'):
         manager_host = host_manager.get_host_variables(agent)['manager']
         agents_id = get_agents_id(host_manager)
@@ -58,7 +64,7 @@ def wait_until_vuln_scan_agents_finished(host_manager: HostManager) -> None:
         finished_scan_pattern = rf"Finished vulnerability assessment for agent '{agent_id}'"
 
         monitoring_data = generate_monitoring_logs_manager(
-            host_manager, manager_host, finished_scan_pattern, 700
+            host_manager, manager_host, finished_scan_pattern, final_timeout
         )
 
         monitoring_events_multihost(host_manager, monitoring_data)
