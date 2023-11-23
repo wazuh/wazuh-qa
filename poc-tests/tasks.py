@@ -22,7 +22,6 @@ def main():
 
     # Test
     playbook_test_repo = "tests/test_repo.yml"
-    playbook_test_provision = "tests/provision_test.yml"
     playbook_test_install = "tests/test_install.yml"
     playbook_test_registration = "tests/test_registration.yml"
     playbook_test_connection = "tests/test_connection.yml"
@@ -35,17 +34,27 @@ def main():
     live = True
     version = '4.6.0'
     revision = '40603'
+    # Tiny bird
+    tinybird_token = ''
+    tinybird_datasource = 'testing_wazuh'
+    tinybird_url = 'https://api.us-east.tinybird.co'
+
     if live:
         branch_version = "v" + version
+
     extra_vars = {
         'version': version,
         'revision': revision,
         'branch_version': branch_version,
+        'tinybird_token': tinybird_token,
+        'tinybird_datasource': tinybird_datasource,
+        'tinybird_url': tinybird_url
     }
 
     # -------------------
     # Tasks
     # -------------------
+
 
     ansible = Ansible.Ansible(playbook_path)
     ansible.set_inventory(inventory)
@@ -63,28 +72,26 @@ def main():
 
     # Run tests in endpoints
 
-    ansible.run_playbook(playbook_test_provision)
-
-    ansible.run_playbook(playbook_test_repo)
+    ansible.run_playbook(playbook_test_repo, extra_vars)
     ansible.run_playbook(playbook_test_install, extra_vars)
-    ansible.run_playbook(playbook_test_registration)
-    ansible.run_playbook(playbook_test_connection)
+    ansible.run_playbook(playbook_test_registration, extra_vars)
+    ansible.run_playbook(playbook_test_connection, extra_vars)
     ansible.run_playbook(playbook_test_basic_info, extra_vars)
     #ansible.run_playbook(playbook_test_service)
 
     time.sleep(5)
     ansible.run_playbook(playbook_provision_restart)
-    ansible.run_playbook(playbook_test_restart)
+    ansible.run_playbook(playbook_test_restart, extra_vars)
     
     
     time.sleep(5)
     ansible.run_playbook(playbook_provision_stop)
     time.sleep(5)
-    ansible.run_playbook(playbook_test_stop)
+    ansible.run_playbook(playbook_test_stop, extra_vars)
     time.sleep(5)
     ansible.run_playbook(playbook_provision_uninstall)
     time.sleep(5)
-    ansible.run_playbook(playbook_test_uninstall)
+    ansible.run_playbook(playbook_test_uninstall, extra_vars)
 
     #ansible.run_playbook(playbook_test_install, 'Agent*', extra_vars)
     #ansible.run_playbook(playbook_test_install, 'Manager*', extra_vars)
