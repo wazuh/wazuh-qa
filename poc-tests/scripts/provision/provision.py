@@ -32,20 +32,22 @@ def run(provision):
     provision.set_directory(CURRENT_DIR)
 
     for host, host_info in inventory['all']['hosts'].items():
-        components = host_info.get('install', [])
+      install_host_dependencies(host, host_info, provision)
 
-        for item in components:
-            component, install_type, version = (item.get('component'), item.get('type'), item.get('version')) if isinstance(item, dict) else (item, None, None)
+      components = host_info.get('install', [])
 
-            install_info = {
-                'component': component,
-                'install_type': install_type,
-                'version': version
-            }
+      for item in components:
+        component, install_type, version = (item.get('component'), item.get('type'), item.get('version')) if isinstance(item, dict) else (item, None, None)
 
-            status = provision.handle_package(host, host_info, install_info)
+        install_info = {
+          'component': component,
+          'install_type': install_type,
+          'version': version
+        }
 
-            update_status(status)
+        status = provision.handle_package(host, host_info, install_info)
+
+        update_status(status)
 
     print("summary")
     print(SUMMARY)
@@ -61,6 +63,19 @@ def install_dependencies():
   subprocess.run(activate_command, shell=True)
   subprocess.run(['python3', '-m', 'pip', 'install', '--upgrade', 'pip'], check=True)
   subprocess.run(['pip', 'install', '-r', 'utils/requirements.txt'], check=True)
+
+# ----------------------------------------------
+
+def install_host_dependencies(host, host_info, provision):
+  task = ["dependencies.j2"]
+  install_info = {
+    'component': os.path.join(CURRENT_DIR, "utils", "remote_requirements.txt"),
+    'install_type': "deps"
+  }
+
+  status = provision.install(host, host_info, install_info, task)
+
+  update_status(status)
 
 # ----------------------------------------------
 

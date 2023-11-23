@@ -1,8 +1,0 @@
-- hosts: all
-  become: true
-  tasks:
-    - name: Import the GPG key
-      command: "rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH"
-
-    - name: Add Wazuh repository
-      shell: "echo -e '[wazuh]\ngpgcheck=1\ngpgkey=https://packages.wazuh.com/key/GPG-KEY-WAZUH\nenabled=1\nname=EL-$releasever - Wazuh\nbaseurl=https://packages.wazuh.com/4.x/yum/\nprotect=1' | tee /etc/yum.repos.d/wazuh.repo"

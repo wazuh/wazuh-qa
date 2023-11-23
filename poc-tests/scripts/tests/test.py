@@ -1,5 +1,10 @@
-from src.classes import Ansible
 import time # Remove in PR
+import sys, os
+
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(project_root)
+
+from src.classes import Ansible, Provision
 
 def main():
 
@@ -58,6 +63,7 @@ def main():
 
     ansible = Ansible.Ansible(playbook_path)
     ansible.set_inventory(inventory)
+    provision = Provision.Provision(ansible)
 
     # Provision stage
 
@@ -82,8 +88,8 @@ def main():
     time.sleep(5)
     ansible.run_playbook(playbook_provision_restart)
     ansible.run_playbook(playbook_test_restart, extra_vars)
-    
-    
+
+
     time.sleep(5)
     ansible.run_playbook(playbook_provision_stop)
     time.sleep(5)
