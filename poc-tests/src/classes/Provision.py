@@ -91,12 +91,6 @@ class Provision:
         if "wazuh-server" in install_info.get('component'):
           pass # For future configurations
 
-      if install_info.get('install_type') == "aio":
-        variables_values.update({
-          "version": install_info.get('version'),
-          "name": install_info.get('component'),
-          "component": install_info.get('component')})
-
       # Fix name variable with iterator
       if "aio" in install_info.get('install_type'):
         variables_values.update({

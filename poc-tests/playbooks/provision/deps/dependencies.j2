@@ -8,7 +8,7 @@
 
 - name: Copy requirements.txt
   copy:
-    src: {{ file }}
+    src: {{ component }}
     dest: /tmp/requirements.txt
 
 - name: Install pip packages
