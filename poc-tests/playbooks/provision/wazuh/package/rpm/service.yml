@@ -1,19 +1,11 @@
-- hosts: Manager*
+- hosts: all
   become: true
   tasks:
     - name: Enable and start Wazuh service
       command: "{{ item }}"
       with_items:
         - "systemctl daemon-reload"
-        - "systemctl enable wazuh-manager"
-        - "systemctl start wazuh-manager"
-
-- hosts: Agent*
-  become: true
-  tasks:
-    - name: Enable and start Wazuh service
-      command: "{{ item }}"
-      with_items:
-        - "systemctl daemon-reload"
-        - "systemctl enable wazuh-agent"
-        - "systemctl start wazuh-agent"
+        - "systemctl enable wazuh-{{ target }}"
+        - "systemctl start wazuh-{{ target }}"
+      vars:
+        target: "{% if 'Agent' in inventory_hostname %}agent{% elif 'Manager' in inventory_hostname %}manager{% endif %}"

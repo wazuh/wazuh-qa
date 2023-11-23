@@ -64,3 +64,6 @@ tests/integration/test_gcloud/data/configuration.yaml
 
 # System test
 ansible.log
+
+# Ssh keys
+key

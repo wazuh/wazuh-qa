@@ -1,4 +1,4 @@
-import src.classes.Ansible as Ansible
+from src.classes import Ansible
 import time # Remove in PR
 
 def main():
@@ -9,56 +9,89 @@ def main():
 
     # General
     inventory = "inventory.yaml"
-    playbook_path = "/home/nonsatus/Documents/Wazuh/Repositories/wazuh-qa/4524/playbooks"
+    playbook_path = "/wazuh-qa/poc-tests/playbooks"
 
     # Provision
     playbook_provision_repo = "provision/set_repo.yml"
     playbook_provision_install = "provision/install.yml"
     playbook_provision_register = "provision/register.yml"
     playbook_provision_service = "provision/service.yml"
+    playbook_provision_restart = "provision/restart.yml"
+    playbook_provision_stop = "provision/stop.yml"
+    playbook_provision_uninstall = "provision/uninstall.yml"
 
     # Test
     playbook_test_repo = "tests/test_repo.yml"
-    playbook_test_provision = "tests/provision_test.yml"
     playbook_test_install = "tests/test_install.yml"
+    playbook_test_registration = "tests/test_registration.yml"
+    playbook_test_connection = "tests/test_connection.yml"
+    playbook_test_basic_info = "tests/test_basic_info.yml"
+    playbook_test_restart = "tests/test_restart.yml"
+    playbook_test_stop = "tests/test_stop.yml"
+    playbook_test_uninstall = "tests/test_uninstall.yml"
 
     # Extra data
     live = True
-    version = '4.5.2'
+    version = '4.6.0'
+    revision = '40603'
+    # Tiny bird
+    tinybird_token = ''
+    tinybird_datasource = 'testing_wazuh'
+    tinybird_url = 'https://api.us-east.tinybird.co'
+
     if live:
         branch_version = "v" + version
+
     extra_vars = {
         'version': version,
-        'branch_version': branch_version
+        'revision': revision,
+        'branch_version': branch_version,
+        'tinybird_token': tinybird_token,
+        'tinybird_datasource': tinybird_datasource,
+        'tinybird_url': tinybird_url
     }
 
     # -------------------
     # Tasks
     # -------------------
 
+
     ansible = Ansible.Ansible(playbook_path)
     ansible.set_inventory(inventory)
 
     # Provision stage
 
-    #ansible.run_playbook(playbook_provision_repo)
-    #ansible.run_playbook(playbook_provision_install)
-    #ansible.run_playbook(playbook_provision_register)
-    #ansible.run_playbook(playbook_provision_service)
+    ansible.run_playbook(playbook_provision_repo)
+    ansible.run_playbook(playbook_provision_install)
+    ansible.run_playbook(playbook_provision_register)
+    ansible.run_playbook(playbook_provision_service)
 
-    time.sleep(20) # Agent must connect to manager. Remove in PR
+    time.sleep(20)
 
     # Test stage
 
     # Run tests in endpoints
 
-    ansible.run_playbook(playbook_test_provision)
-
-    ansible.run_playbook(playbook_test_repo)
+    ansible.run_playbook(playbook_test_repo, extra_vars)
     ansible.run_playbook(playbook_test_install, extra_vars)
-    #ansible.run_playbook(playbook_test_register)
+    ansible.run_playbook(playbook_test_registration, extra_vars)
+    ansible.run_playbook(playbook_test_connection, extra_vars)
+    ansible.run_playbook(playbook_test_basic_info, extra_vars)
     #ansible.run_playbook(playbook_test_service)
 
+    time.sleep(5)
+    ansible.run_playbook(playbook_provision_restart)
+    ansible.run_playbook(playbook_test_restart, extra_vars)
+    
+    
+    time.sleep(5)
+    ansible.run_playbook(playbook_provision_stop)
+    time.sleep(5)
+    ansible.run_playbook(playbook_test_stop, extra_vars)
+    time.sleep(5)
+    ansible.run_playbook(playbook_provision_uninstall)
+    time.sleep(5)
+    ansible.run_playbook(playbook_test_uninstall, extra_vars)
 
     #ansible.run_playbook(playbook_test_install, 'Agent*', extra_vars)
     #ansible.run_playbook(playbook_test_install, 'Manager*', extra_vars)

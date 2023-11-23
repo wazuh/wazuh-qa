@@ -1,0 +1,29 @@
+- hosts: all
+  become: true
+  vars:
+    path: "/tmp"
+    test_directory: "tests"
+    test_file: "test_stop"
+    curl_path: /usr/bin/curl
+
+  tasks:
+    - name: Test stop
+      environment:
+        TINYBIRD_URL: "{{ tinybird_url|quote }}"  # depends on your region
+        TINYBIRD_DATASOURCE: "{{ tinybird_datasource|quote }}"  # will be created with first results posted
+        TINYBIRD_TOKEN: "{{ tinybird_token|quote }}"
+      block:
+        - name: Execute tests
+          command: "pytest {{ test_file }}.py --target={{ target }} -vl --report-to-tinybird"
+          args:
+            chdir: "{{ path }}/{{ test_directory }}"
+          vars:
+            target: "{% if 'Agent' in inventory_hostname %}agent{% elif 'Manager' in inventory_hostname %}server{% endif %}"
+          register: pytest_log
+
+      always:
+        - name: Save pytest output to a file
+          copy:
+            remote_src: yes
+            content: "{{ pytest_log.stdout }}"
+            dest: "{{ path }}/{{ test_directory }}/{{ test_file }}.log"

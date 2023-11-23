@@ -3,27 +3,18 @@
   vars:
     path: "/tmp"
     test_directory: "tests"
-    test_file: "test_install"
+    test_file: "test_registration"
     curl_path: /usr/bin/curl
 
   tasks:
-    - name: Download dist-detect.sh
-      command: "{{ curl_path }} -kL http://raw.githubusercontent.com/wazuh/wazuh/{{ branch_version }}/src/init/dist-detect.sh -o {{ path }}/dist-detect.sh"
-
-    - name: Get operating system name
-      shell: ". {{ path }}/dist-detect.sh && echo $DIST_NAME $DIST_VER"
-      register: os
-      args:
-        executable: /bin/bash
-
-    - name: Test install
+    - name: Test registration
       environment:
         TINYBIRD_URL: "{{ tinybird_url|quote }}"  # depends on your region
         TINYBIRD_DATASOURCE: "{{ tinybird_datasource|quote }}"  # will be created with first results posted
         TINYBIRD_TOKEN: "{{ tinybird_token|quote }}"
       block:
         - name: Execute tests
-          command: "pytest {{ test_file }}.py --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target }} -vl --report-to-tinybird"
+          command: "pytest {{ test_file }}.py --target={{ target }} -vl --report-to-tinybird"
           args:
             chdir: "{{ path }}/{{ test_directory }}"
           vars:

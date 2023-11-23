@@ -1,16 +1,19 @@
 - hosts: all
   become: true
   vars:
-    path: '/tmp'
-    test_directory: 'tests'
-    test_repo_test: 'test_repo'
+    path: "/tmp"
+    test_directory: "tests"
+    test_file: "test_repo"
 
   tasks:
-
-    - name: Run block tests
+    - name: Test repository
+      environment:
+        TINYBIRD_URL: "{{ tinybird_url|quote }}"  # depends on your region
+        TINYBIRD_DATASOURCE: "{{ tinybird_datasource|quote }}"  # will be created with first results posted
+        TINYBIRD_TOKEN: "{{ tinybird_token|quote }}"
       block:
-        - name: Run tests
-          command: "pytest {{ test_repo_test }}.py -v"
+        - name: Execute tests
+          command: "pytest {{ test_file }}.py -vl --report-to-tinybird"
           args:
             chdir: "{{ path }}/{{ test_directory }}"
           register: pytest_log
@@ -20,4 +23,4 @@
           copy:
             remote_src: yes
             content: "{{ pytest_log.stdout }}"
-            dest: "{{ path }}/{{ test_directory }}/{{ test_repo_test }}.log"
+            dest: "{{ path }}/{{ test_directory }}/{{ test_file }}.log"
