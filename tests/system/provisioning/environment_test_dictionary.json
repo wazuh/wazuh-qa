@@ -67,6 +67,6 @@
         "test_basic_cases/test_yara_integration/test_yara_integration.py"
     ],
     "e2e_vulnerability_detector": [
-        "test_vulnerability_detector/test_scans.py"
+        "test_vulnerability_detector/test_vulnerability_detector.py"
     ]
 }
