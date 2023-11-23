@@ -1,3 +1,4 @@
 # python3-pip
 pytest==7.4.2
 charted==5.2.0
+pytest-tinybird==0.2.0
