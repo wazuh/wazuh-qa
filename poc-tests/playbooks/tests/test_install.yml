@@ -17,9 +17,13 @@
         executable: /bin/bash
 
     - name: Test install
+      environment:
+        TINYBIRD_URL: "{{ tinybird_url|quote }}"  # depends on your region
+        TINYBIRD_DATASOURCE: "{{ tinybird_datasource|quote }}"  # will be created with first results posted
+        TINYBIRD_TOKEN: "{{ tinybird_token|quote }}"
       block:
         - name: Execute tests
-          command: "pytest {{ test_file }}.py --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target }} -vl"
+          command: "pytest {{ test_file }}.py --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target }} -vl --report-to-tinybird"
           args:
             chdir: "{{ path }}/{{ test_directory }}"
           vars:

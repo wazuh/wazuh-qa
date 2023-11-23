@@ -8,9 +8,13 @@
 
   tasks:
     - name: Test basic info
+      environment:
+        TINYBIRD_URL: "{{ tinybird_url|quote }}"  # depends on your region
+        TINYBIRD_DATASOURCE: "{{ tinybird_datasource|quote }}"  # will be created with first results posted
+        TINYBIRD_TOKEN: "{{ tinybird_token|quote }}"
       block:
         - name: Execute tests
-          command: "pytest {{ test_file }}.py --to_version={{ version|quote }} --revision={{ revision|quote }}  -v"
+          command: "pytest {{ test_file }}.py --to_version={{ version|quote }} --revision={{ revision|quote }} -vl --report-to-tinybird"
           args:
             chdir: "{{ path }}/{{ test_directory }}"
           register: pytest_log
