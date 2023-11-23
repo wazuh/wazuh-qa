@@ -1,7 +1,0 @@
-- hosts: all
-  become: true
-  tasks:
-    - name: Install Wazuh component
-      shell: "apt-get install wazuh-{{ target }}"
-      vars:
-        target: "{% if 'Agent' in inventory_hostname %}agent{% elif 'Manager' in inventory_hostname %}manager{% endif %}"

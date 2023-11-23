@@ -5,6 +5,4 @@
       replace:
         path: "/var/ossec/etc/ossec.conf"
         regexp: "MANAGER_IP"
-        replace: "{{ hostvars['Manager'].ansible_host }}"
-    - name: Restart Wazuh agent
-      command: "/var/ossec/bin/wazuh-control restart"
+        replace: "{{ manager_ip }}"

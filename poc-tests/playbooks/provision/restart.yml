@@ -1,5 +1,0 @@
-- hosts: all
-  become: true
-  tasks:
-    - name: Restart Wazuh component
-      command: "/var/ossec/bin/wazuh-control restart"

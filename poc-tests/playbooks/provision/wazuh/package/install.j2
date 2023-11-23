@@ -1,0 +1,7 @@
+{% if host['ansible_os_family'] == 'Debian' %}
+- name: Install the {{ component }}
+  command: "apt-get -y install {{ component }}"
+{% elif host['ansible_os_family'] == 'RedHat' %}
+- name: Install the {{ component }}
+  command: "yum -y install {{ component }}"
+{% endif %}

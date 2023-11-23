@@ -1,0 +1,5 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Install the {{ component }}
+      command: "yum -y install {{ component }}"

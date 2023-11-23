@@ -1,7 +1,0 @@
-- hosts: all
-  become: true
-  tasks:
-    - name: Stop the Wazuh manager
-      shell: "systemctl stop wazuh-{{ target }}"
-      vars:
-        target: "{% if 'Agent' in inventory_hostname %}agent{% elif 'Manager' in inventory_hostname %}manager{% endif %}"
