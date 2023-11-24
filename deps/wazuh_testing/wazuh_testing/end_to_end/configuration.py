@@ -81,10 +81,23 @@ def configure_host(host: str, host_configuration_role: dict, host_manager: HostM
                         "{host_configuration_role}")
 
     current_config = host_manager.get_file_content(str(host), config_file_path)
-    new_config = set_section_wazuh_conf(host_config[0].get('sections'), current_config.split("\n"))
-    new_config = "\n".join(xml.dom.minidom.parseString(''.join(new_config)).toprettyxml().split("\n")[1:])
 
-    host_manager.modify_file_content(str(host), config_file_path, new_config)
+    # Extract the sections from the first element of host_config
+
+    sections = host_config[0].get('sections')
+
+    # Combine the current hos configuration and the desired configuration
+    new_config_unformatted = set_section_wazuh_conf(sections, current_config.split("\n"))
+
+    # Format new configuration
+    new_config_formatted_xml = xml.dom.minidom.parseString(''.join(new_config_unformatted))
+
+    # Get rid of the first no expected XML version line
+    new_config_formatted_xml = new_config_formatted_xml.toprettyxml().split("\n")[1:]
+
+    final_configuration = "\n".join(new_config_formatted_xml)
+
+    host_manager.modify_file_content(str(host), config_file_path, final_configuration)
 
 
 def configure_environment(host_manager: HostManager, configurations: dict) -> None:
