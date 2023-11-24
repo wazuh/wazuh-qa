@@ -475,13 +475,14 @@ class HostManager:
                 Supported values: 'windows', 'ubuntu', 'centos'.
 
         Returns:
-            Dict: Testinfra Ansible Response of the operation 
+            Dict: Testinfra Ansible Response of the operation
 
         Example:
             host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
         """
         result = False
-
+        print(host)
+        print(url)
         if system =='windows':
             result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
         elif system == 'ubuntu':
@@ -493,6 +494,7 @@ class HostManager:
             if 'rc' in result and result['rc'] == 0 and result['changed'] == True:
                 result = True
 
+        print(result)
         return result
 
     def get_master_ip(self):
@@ -525,24 +527,23 @@ class HostManager:
                 Supported values: 'windows', 'ubuntu', 'centos'.
 
         Returns:
-            Dict: Testinfra Ansible Response of the operation 
+            Dict: Testinfra Ansible Response of the operation
 
         Example:
             host_manager.remove_package('my_host', 'my_package', system='ubuntu')
         """
         result = False
+        os_name = self.get_host_variables(host)['os_name']
+        if os_name == 'windows':
+            result = self.get_host(host).ansible("win_package", f"product_id={package_name} state=absent arguments=/S", check=False)
+        elif os_name == 'linux':
+            os = self.get_host_variables(host)['os'].split('_')[0]
+            if os == 'centos':
+                result = self.get_host(host).ansible("yum", f"name={package_name} state=absent", check=False)
+            elif os == 'ubuntu':
+                result = self.get_host(host).ansible("apt", f"name={package_name} state=absent", check=False)
 
-        if system == 'windows':
-            result = self.get_host(host).ansible("win_package", f"path={package_name} state=absent arguments=/S", check=False)
-        elif system == 'ubuntu':
-            result = self.get_host(host).ansible("apt", f"name={package_name} state=absent", check=False)
-            if result['changed'] == True and result['stderr'] == '':
-                result = True
-        elif system == 'centos':
-            result = self.get_host(host).ansible("yum", f"name={package_name} state=absent", check=False)
-            if 'rc' in result and result['rc'] == 0 and result['changed'] == True:
-                result = True
-
+        print(result)
         return result
 
     def handle_wazuh_services(self, host, operation):
@@ -600,4 +601,3 @@ def clean_environment(host_manager, target_files):
     """
     for target in target_files:
         host_manager.clear_file(host=target[0], file_path=target[1])
-
