@@ -44,21 +44,20 @@ def backup_configurations(host_manager: HostManager) -> dict:
     return backup_configurations
 
 
-def restore_backup(host_manager: HostManager, backup_configurations: dict) -> None:
+def restore_configuration(host_manager: HostManager, configuration: dict) -> None:
     """
     Restore configurations for all hosts in the specified host manager.
 
     Args:
         host_manager: An instance of the HostManager class containing information about hosts.
-        backup_configurations: A dictionary mapping host names to their configurations.
+        configuration: A dictionary mapping host names to their configurations.
     """
-    backup_configurations = {}
 
     for host in host_manager.get_group_hosts('all'):
         host_os_name = host_manager.get_host_variables(host)['os_name']
         configuration_filepath = configuration_filepath_os[host_os_name]
 
-        host_manager.modify_file_content(host, configuration_filepath, backup_configurations[host])
+        host_manager.modify_file_content(host, configuration_filepath, configuration[host])
 
 
 def configure_host(host: str, host_configuration_role: dict, host_manager: HostManager) -> None:
