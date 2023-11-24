@@ -11,6 +11,7 @@ Release report: TBD
 
 Wazuh commit: TBD \
 Release report: TBD
+- Add new behaviour for endpoints marked as xfail in api_endpoints_performance test ([#4657](https://github.com/wazuh/wazuh-qa/pull/4657)) \ (Tests)
 
 ### Added
 
