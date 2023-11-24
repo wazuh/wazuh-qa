@@ -20,8 +20,8 @@ def main(inventory_file):
 
   from src.classes import Ansible, Provision
 
-  ansible = Ansible.Ansible(inventory_file)
-  provision = Provision.Provision(ansible)
+  ansible = Ansible(inventory_file)
+  provision = Provision(ansible)
 
   run(provision)
 

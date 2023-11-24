@@ -61,24 +61,40 @@ def main():
     # -------------------
 
 
-    ansible = Ansible.Ansible(playbook_path)
+
+    # --------------------
+    # Test register
+    # --------------------
+    # set repo
+    # Install
+    # Register
+
+    # Test
+
+    # Uninstall
+
+
+    ansible = Ansible(playbook_path)
     ansible.set_inventory(inventory)
-    provision = Provision.Provision(ansible)
+    provision = Provision(ansible)
+
+
 
     # Provision stage
 
     ansible.run_playbook(playbook_provision_repo)
+    ansible.run_playbook(playbook_test_repo, extra_vars)
+
+    # Install
     ansible.run_playbook(playbook_provision_install)
     ansible.run_playbook(playbook_provision_register)
     ansible.run_playbook(playbook_provision_service)
-
     time.sleep(20)
 
     # Test stage
 
     # Run tests in endpoints
 
-    ansible.run_playbook(playbook_test_repo, extra_vars)
     ansible.run_playbook(playbook_test_install, extra_vars)
     ansible.run_playbook(playbook_test_registration, extra_vars)
     ansible.run_playbook(playbook_test_connection, extra_vars)
@@ -88,6 +104,7 @@ def main():
     time.sleep(5)
     ansible.run_playbook(playbook_provision_restart)
     ansible.run_playbook(playbook_test_restart, extra_vars)
+
 
 
     time.sleep(5)
