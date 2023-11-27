@@ -14,7 +14,7 @@
         TINYBIRD_TOKEN: "{{ tinybird_token|quote }}"
       block:
         - name: Execute tests
-          command: "pytest {{ test_file }}.py --target={{ target }} -vl --report-to-tinybird"
+          command: "pytest {{ test_file }}.py --tb=short --target={{ target }} -vl --report-to-tinybird"
           args:
             chdir: "{{ path }}/{{ test_directory }}"
           vars:

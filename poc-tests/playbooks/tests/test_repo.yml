@@ -13,7 +13,7 @@
         TINYBIRD_TOKEN: "{{ tinybird_token|quote }}"
       block:
         - name: Execute tests
-          command: "pytest {{ test_file }}.py -vl --report-to-tinybird"
+          command: "pytest {{ test_file }}.py --tb=short -vl --report-to-tinybird"
           args:
             chdir: "{{ path }}/{{ test_directory }}"
           register: pytest_log
