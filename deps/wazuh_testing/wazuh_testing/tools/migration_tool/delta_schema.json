@@ -22,5 +22,22 @@
             "enum": ["insert", "update", "delete"]
         }
     },
-    "required": [ "cve_id", "data_blob", "data_hash", "operation"]
+    "anyOf": [
+        {
+          "properties": {
+            "operation": {
+              "enum": ["insert", "update"]
+            }
+          },
+          "required": ["cve_id", "data_hash", "operation", "data_blob"]
+        },
+        {
+          "properties": {
+            "operation": {
+              "const": "delete"
+            }
+          },
+          "required": ["cve_id", "data_hash", "operation"]
+        }
+    ]
 }

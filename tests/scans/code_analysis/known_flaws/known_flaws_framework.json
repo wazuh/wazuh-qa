@@ -136,9 +136,9 @@
             "issue_confidence": "HIGH",
             "issue_severity": "MEDIUM",
             "issue_text": "Use of possibly insecure function - consider using safer ast.literal_eval.",
-            "line_number": 1793,
+            "line_number": 1796,
             "line_range": [
-                1793
+                1796
             ],
             "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b307-eval",
             "test_id": "B307",
