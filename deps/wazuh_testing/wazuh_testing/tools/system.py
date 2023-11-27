@@ -475,7 +475,7 @@ class HostManager:
                 Supported values: 'windows', 'ubuntu', 'centos'.
 
         Returns:
-            Dict: Testinfra Ansible Response of the operation 
+            Dict: Testinfra Ansible Response of the operation
 
         Example:
             host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
@@ -511,6 +511,7 @@ class HostManager:
             if 'type' in self.get_host_variables(manager) and \
                 self.get_host_variables(manager)['type'] == 'master':
                 master_ip = self.get_host_variables(manager)['ip']
+                break
 
         return master_ip
 
@@ -525,7 +526,7 @@ class HostManager:
                 Supported values: 'windows', 'ubuntu', 'centos'.
 
         Returns:
-            Dict: Testinfra Ansible Response of the operation 
+            Dict: Testinfra Ansible Response of the operation
 
         Example:
             host_manager.remove_package('my_host', 'my_package', system='ubuntu')
@@ -600,4 +601,3 @@ def clean_environment(host_manager, target_files):
     """
     for target in target_files:
         host_manager.clear_file(host=target[0], file_path=target[1])
-
