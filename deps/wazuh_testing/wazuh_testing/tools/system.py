@@ -144,7 +144,6 @@ class HostManager:
         dest_path (str): Destination path
         check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be applied.
         """
-        system = 'linux'
         result = None
 
         if self.get_host_variables(host)['os_name'] == 'windows':
