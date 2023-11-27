@@ -28,19 +28,21 @@ REGEX_PATTERNS = {
         'regex': '.*INFO: Evaluation finished.'
     },
     'syscollector_install_package_alert_yum': {
-        'regex': '.*installed.*agent".*"name":"(\S+)".*Installed: (\S+).*?(\S+)',
+        'regex': '.*installed.*agent".*"name":"(\\S+)".*Installed: (\\S+).*?(\\S+)',
         'parameters': ['PACKAGE_NAME', 'PACKAGE_VERSION', 'HOST_NAME']
     },
     'syscollector_install_package_alert_apt': {
-        'regex': '.*New dpkg \(Debian Package\) installed.*.*agent".*"name":"(\S+).*package":"(\S+)","arch":"amd64","version":"(\S+)"',
+        'regex': '.*New dpkg  \\(Debian Package\\) installed.*.*agent".*"name":"(\\S+).*package":"(\\S+)",'
+        '"arch":"amd64","version":"(\\S+)"',
         'parameters': ['HOST_NAME', 'PACKAGE_NAME', 'PACKAGE_VERSION']
     },
     'syscollector_upgrade_package_alert_yum': {
-        'regex': '.*Yum package updated.*agent".*"name":"(\S+)".*Updated: (\S+).*?(\S+)',
+        'regex': '.*Yum package updated.*agent".*"name":"(\\S+)".*Updated: (\\S+).*?(\\S+)',
         'parameters': ['PACKAGE_NAME', 'PACKAGE_VERSION', 'HOST_NAME']
     },
     'vulnerability_alert': {
-        'regex': '.*HOST_NAME.*package":.*name":"PACKAGE_NAME".*version":"PACKAGE_VERSION".*"architecture":"ARCHITECTURE.*"cve":"CVE"',
+        'regex': '.*HOST_NAME.*package":.*name":"PACKAGE_NAME".*version":"PACKAGE_VERSION".*"'
+        'architecture":"ARCHITECTURE.*"cve":"CVE"',
         'parameters': ['HOST_NAME', 'CVE', 'PACKAGE_NAME', 'PACKAGE_VERSION', 'ARCHITECTURE']
     }
 }
@@ -74,5 +76,3 @@ def get_event_regex(event: Dict):
             expected_regex = expected_regex.replace(parameter, event['parameters'].get(parameter, ''))
 
     return expected_regex
-
-
