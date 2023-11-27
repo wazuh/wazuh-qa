@@ -4,14 +4,14 @@ import pwd
 
 import pytest
 
-from helpers import constants, utils
+from .helpers import constants, utils
 
 
 @pytest.fixture(scope='module', autouse=True)
 def uninstall_wazuh():
     service = utils.get_service()
     daemon_name = 'wazuh-agent' if service == 'agent' else 'wazuh-manager'
-    utils.run_command('apt-get', ['purge', daemon_name])
+    utils.run_command('apt-get', ['purge', daemon_name, '-y'])
 
 
 def test_wazuh_user():

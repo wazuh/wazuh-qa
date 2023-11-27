@@ -1,5 +1,5 @@
-from helpers import utils
-from helpers.constants import WAZUH_LOG, CLIENT_KEYS, KEY_REQ_AGENT, KEY_REQ_SERVER
+from .helpers import utils
+from .helpers.constants import WAZUH_LOG, CLIENT_KEYS, KEY_REQ_AGENT, KEY_REQ_SERVER
 
 
 # Actual running service.

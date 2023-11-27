@@ -2,7 +2,7 @@ import grp
 import os
 import pwd
 
-from helpers import constants, utils
+from .helpers import constants, utils
 
 
 def test_wazuh_user():

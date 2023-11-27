@@ -1,0 +1,17 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Clone tests into the endpoint
+      vars:
+        path: '/tmp'
+        test_directory: "tests"
+      block:
+      - name: Create test directory
+        file:
+          path: "{{ path }}/{{ test_directory }}"
+          state: directory
+      - name: Copy files to endpoints
+        copy:
+          src: "{{ item }}"
+          dest: "{{ path }}/{{ test_directory }}"
+        with_items: "../../{{ test_directory }}/"

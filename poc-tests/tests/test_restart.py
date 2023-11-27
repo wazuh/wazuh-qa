@@ -1,6 +1,7 @@
 import pytest
-from helpers import utils
-from helpers.constants import DELETING_RESPONSES, RELEASING_RESOURCES, STARTED, WAZUH_CONTROL, WAZUH_LOG
+
+from .helpers import utils
+from .helpers.constants import DELETING_RESPONSES, RELEASING_RESOURCES, STARTED, WAZUH_CONTROL, WAZUH_LOG
 
 
 # Actual running service.

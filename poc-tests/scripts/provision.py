@@ -18,7 +18,7 @@ def main(inventory_file):
   project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
   sys.path.append(project_root)
 
-  from src.tools import Ansible, Provision
+  from src.classes import Ansible, Provision
 
   ansible = Ansible(inventory_file)
   provision = Provision(ansible)

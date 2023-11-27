@@ -1,5 +1,5 @@
-from helpers import utils
-from helpers.constants import CONNECTION_SERVER, CONNECTION_AGENT, WAZUH_LOG, ALERTS_JSON
+from .helpers import utils
+from .helpers.constants import CONNECTION_SERVER, CONNECTION_AGENT, WAZUH_LOG, ALERTS_JSON
 
 
 # Actual running service.
@@ -16,4 +16,5 @@ def test_agent_connects_to_manager():
 def test_agent_connection_status():
     expected_status = "connected" if service == "agent" else "Active"
 
+    assert utils.check_agent_is_connected("001")
     assert utils.get_agent_connection_status("001") == expected_status

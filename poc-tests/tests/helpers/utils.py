@@ -205,3 +205,24 @@ def file_monitor(monitored_file: str, target_string: str, timeout: int = 30) -> 
                 # New line, check if the string matches.
                 if target_string in line:
                     return line
+
+
+def check_agent_is_connected(agent_id: str, timeout: int = 60) -> bool:
+    """
+    Wait for an agent to connect to the manager, returns true when it does.
+
+    Args:
+        agent_id (str): The ID of the agent to wait for.
+
+    Returns:
+        bool: True if the agent connects within the timeout, False otherwise.
+    """
+    start_time = time.time()
+
+    while time.time() - start_time < timeout:
+        status = get_agent_connection_status(agent_id)
+        if status in ["connected", "Active"]:
+            return True
+        time.sleep(1)
+
+    raise False

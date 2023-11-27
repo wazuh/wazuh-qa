@@ -10,8 +10,6 @@ all:
       install:
         - type: package
           component: wazuh-agent
-        - component: curl
-        - component: nano
 
     Manager:
       ansible_host: 192.168.56.11
@@ -20,9 +18,8 @@ all:
       ansible_ssh_private_key_file: '/wazuh-qa/poc-tests/utils/key'
       ansible_os_family: Debian
       install:
-        - type: aio
-          component: wazuh-server
-          version: 4.6
+        - type: package
+          component: wazuh-manager
 
   vars:
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no'

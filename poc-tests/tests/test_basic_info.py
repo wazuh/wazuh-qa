@@ -1,6 +1,6 @@
 import os
 
-from helpers import utils
+from .helpers import utils
 
 
 def test_wazuh_version():

@@ -65,6 +65,10 @@ class Provision:
       for template in list_tasks:
         loaded_template = template_env.get_template(template)
         rendered = yaml.safe_load(loaded_template.render(host=host_info, **variables_values))
+
+        if not rendered:
+          continue
+
         tasks += rendered
 
       playbook = {

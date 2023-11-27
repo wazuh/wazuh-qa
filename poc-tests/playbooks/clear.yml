@@ -6,7 +6,7 @@
     - name: Clear
       shell: "{{ item }}"
       with_items:
-        - "apt remove --purge wazuh-agent"
+        - "apt remove --purge wazuh-agent -y"
 
 
 - hosts: Manager*
@@ -15,7 +15,7 @@
     - name: Clear
       shell: "{{ item }}"
       with_items:
-        - "apt remove --purge wazuh-manager"
+        - "apt remove --purge wazuh-manager -y"
 
 - hosts: all
   become: true
