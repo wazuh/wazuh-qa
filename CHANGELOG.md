@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.9.0] - TBD
+
+### Added
+
+- Add integration tests for Update field to CPE_Helper. ([#4574](https://github.com/wazuh/wazuh-qa/pull/4574)) \- (Core)
+
 ## [4.8.1] - TBD
 
 ## [4.8.0] - TBD
@@ -28,6 +34,7 @@ All notable changes to this project will be documented in this file.
 - Update the JSON schema with the required fields for the output content of the migration tool ([#4375](https://github.com/wazuh/wazuh-qa/pull/4375)) \- (Tests)
 - Update framework known flaws file ([#4443](https://github.com/wazuh/wazuh-qa/pull/4443)) \- (Tests)
 - Align migration tool system tests to the tool's new output directory structure ([#4561](https://github.com/wazuh/wazuh-qa/pull/4561)) \- (Tests)
+- Update the migration tool's system tests to match the new log file naming convention ([#4618](https://github.com/wazuh/wazuh-qa/pull/4618)) \- (Tests)
 
 ### Fixed
 
