@@ -2,10 +2,10 @@
 Wazuh Elasticsearch Indexer Module.
 -----------------------------------
 
-This module provides functions to interact with the Wazuh Elasticsearch indexer API.
+This module provides functions to interact with the Wazuh Indexer API.
 
 Functions:
-    - get_indexer_values: Retrieves values from the Elasticsearch indexer API.
+    - get_indexer_values: Retrieves values from the Indexer API.
 
 
 Copyright (C) 2015, Wazuh Inc.
@@ -20,7 +20,9 @@ from wazuh_testing.tools.system import HostManager
 
 STATE_INDEX_NAME = 'wazuh-vulnerabilities-states'
 
-def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'}, index: str = 'wazuh-alerts*') -> Dict:
+
+def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'},
+                       index: str = 'wazuh-alerts*') -> Dict:
     """
     Get values from the Wazuh Elasticsearch indexer API.
 
@@ -42,4 +44,3 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
     response = requests.get(url=url, params={'pretty': 'true'}, json=query, verify=False,
                             auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']))
     return response.json()
-
