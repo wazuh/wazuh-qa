@@ -48,7 +48,7 @@ REGEX_PATTERNS = {
 }
 
 
-def get_event_regex(event: Dict):
+def get_event_regex(event: Dict) -> str:
     """
     Get the regex pattern for a specific event.
 
