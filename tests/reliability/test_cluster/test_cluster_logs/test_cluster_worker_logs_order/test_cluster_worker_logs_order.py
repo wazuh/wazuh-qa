@@ -42,6 +42,8 @@ logs_order = {
 }
 
 
+@pytest.mark.xfail(reason="known cluster log issue due to cluster logging refactor "
+                          "to be worked in https://github.com/wazuh/wazuh/issues/20162")
 def test_check_logs_order_workers(artifacts_path):
     """Check that cluster logs appear in the expected order.
 

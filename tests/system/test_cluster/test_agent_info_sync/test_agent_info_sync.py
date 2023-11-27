@@ -17,6 +17,7 @@ pytestmark = [pytest.mark.cluster, pytest.mark.basic_cluster_env]
 
 # Hosts
 testinfra_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
+test_infra_agents = ['wazuh-agent2', 'wazuh-agent3']
 master_host = 'wazuh-master'
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
@@ -54,8 +55,9 @@ def clean_cluster_logs():
         # Its required to restart each node after clearing the log files
         host_manager.get_host(host).ansible('command', 'service wazuh-manager restart', check=False)
 
-    host_manager.clear_file(host='wazuh-agent3', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
-    host_manager.get_host('wazuh-agent3').ansible('command', 'service wazuh-agent restart', check=False)
+    for agent in test_infra_agents:
+        host_manager.clear_file(host=agent, file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
+        host_manager.get_host(agent).ansible('command', 'service wazuh-agent restart', check=False)
 
 
 @pytest.fixture(scope='function')

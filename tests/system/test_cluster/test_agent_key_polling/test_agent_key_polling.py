@@ -32,7 +32,7 @@ def configure_environment(host_manager):
     host_manager.move_file(host='wazuh-master',
                            src_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files/fetch_keys.py'),
                            dest_path='/tmp/fetch_keys.py')
-    host_manager.apply_config(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/config.yml'),
+    host_manager.apply_config(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data/config.yaml'),
                               clear_files=[os.path.join(WAZUH_LOGS_PATH, 'ossec.log')],
                               restart_services=['wazuh'])
     host_manager.add_block_to_file(host='wazuh-master', path='/var/ossec/etc/client.keys', replace='NOTVALIDKEY',
@@ -46,7 +46,7 @@ def configure_environment(host_manager):
 
 def test_agent_key_polling():
     """Check that the agent key polling cycle works correctly. To do this, we use the messages and the hosts defined
-    in data/messages.yml and the hosts inventory.
+    in data/messages.yaml and the hosts inventory.
 
     Parameters
     ----------
@@ -57,6 +57,6 @@ def test_agent_key_polling():
     configure_environment(host_manager)
 
     host_monitor = HostMonitor(inventory_path=inventory_path,
-                               messages_path=os.path.join(actual_path, 'data/messages.yml'),
+                               messages_path=os.path.join(actual_path, 'data/messages.yaml'),
                                tmp_path=os.path.join(actual_path, 'tmp'))
     host_monitor.run()
