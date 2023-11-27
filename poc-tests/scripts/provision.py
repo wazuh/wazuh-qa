@@ -55,7 +55,7 @@ def run(provision):
 # ----------------------------------------------
 
 def install_dependencies():
-  venv_path = CURRENT_DIR + 'venv'
+  venv_path = CURRENT_DIR + '/venv'
   if not os.path.exists(venv_path):
       subprocess.run(['python3', '-m', 'venv', venv_path], check=True)
   activate_script = os.path.join(venv_path, 'bin', 'activate')
