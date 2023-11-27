@@ -19,10 +19,7 @@ Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
 
-from wazuh_testing.end_to_end.monitoring import (
-    generate_monitoring_logs_manager,
-    monitoring_events_multihost
-)
+from wazuh_testing.end_to_end.monitoring import generate_monitoring_logs_manager, monitoring_events_multihost
 from wazuh_testing.end_to_end.wazuh_api import get_agents_id
 from wazuh_testing.tools.system import HostManager
 
