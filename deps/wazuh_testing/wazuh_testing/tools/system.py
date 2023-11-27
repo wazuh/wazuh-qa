@@ -147,16 +147,11 @@ class HostManager:
         system = 'linux'
         result = None
 
-        if 'os_name' in self.get_host_variables(host):
-            host_os_name = self.get_host_variables(host)['os_name']
-            if host_os_name == 'windows':
-                system = 'windows'
-
-        if system == 'linux':
+        if self.get_host_variables(host)['os_name'] == 'windows':
+            result = self.get_host(host).ansible("ansible.windows.win_copy", f"src='{src_path}' dest='{dest_path}'", check=check)
+        else:
             result = self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=wazuh group=wazuh mode=0644",
                                         check=check)
-        else:
-            result = self.get_host(host).ansible("ansible.windows.win_copy", f"src='{src_path}' dest='{dest_path}'", check=check)
 
         return result
 
