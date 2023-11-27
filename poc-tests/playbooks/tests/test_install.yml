@@ -7,15 +7,6 @@
     curl_path: /usr/bin/curl
 
   tasks:
-    - name: Download dist-detect.sh
-      command: "{{ curl_path }} -kL http://raw.githubusercontent.com/wazuh/wazuh/{{ branch_version }}/src/init/dist-detect.sh -o {{ path }}/dist-detect.sh"
-
-    - name: Get operating system name
-      shell: ". {{ path }}/dist-detect.sh && echo $DIST_NAME $DIST_VER"
-      register: os
-      args:
-        executable: /bin/bash
-
     - name: Test install
       environment:
         TINYBIRD_URL: "{{ tinybird_url|quote }}"  # depends on your region
@@ -23,7 +14,7 @@
         TINYBIRD_TOKEN: "{{ tinybird_token|quote }}"
       block:
         - name: Execute tests
-          command: "pytest {{ test_file }}.py --tb=short --to_version={{ version|quote }} --os={{ os.stdout|quote }} --target={{ target }} -vl --report-to-tinybird"
+          command: "pytest {{ test_file }}.py  -v --tb=short --to_version={{ version|quote }} --target={{ target }} --report-to-tinybird"
           args:
             chdir: "{{ path }}/{{ test_directory }}"
           vars:
