@@ -48,7 +48,8 @@ def monitoring_events_host_monitoring(host_manager: HostManager, monitoring_data
         monitoring_file_content += f"{host}:\n"
         for monitoring_event in data:
             string_limiter = "'" if '"' in monitoring_event.get("regex", "") else '"'
-            monitoring_file_content += f'  - regex: {string_limiter}{monitoring_event.get("regex", "")}{string_limiter}\n'
+            monitoring_file_content += f'  - regex: {string_limiter}{monitoring_event.get("regex", "")}{string_limiter}'
+            '\n'
             monitoring_file_content += f'    file: {string_limiter}{monitoring_event.get("file", "")}{string_limiter}\n'
             monitoring_file_content += f'    timeout: {monitoring_event.get("timeout", 0)}\n'
 
@@ -74,7 +75,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
     def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict]):
         """
         Monitor the specified elements on a host.
-        
+
         Args:
             host_manager (HostManager): Host Manager to handle the environment
             host (str): The target host.
