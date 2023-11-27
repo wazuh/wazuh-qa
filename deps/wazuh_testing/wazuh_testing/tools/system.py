@@ -486,11 +486,11 @@ class HostManager:
             result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
         elif system == 'ubuntu':
             result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
-            if result['changed'] == True and result['stderr'] == '':
+            if result['changed'] and result['stderr'] == '':
                 result = True
         elif system == 'centos':
             result = self.get_host(host).ansible("yum", f"name={url} state=present sslverify=false disable_gpg_check=True", check=False)
-            if 'rc' in result and result['rc'] == 0 and result['changed'] == True:
+            if 'rc' in result and result['rc'] == 0 and result['changed']:
                 result = True
 
         return result
