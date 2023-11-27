@@ -2,7 +2,10 @@
 Remote Operations Module.
 -------------------------
 
-This module provides functions for launching remote operations on hosts and managing vulnerability checks. It utilizes the Wazuh testing framework, including the HostManager class for handling remote hosts and various tools for indexer API interactions.
+This module provides functions for launching remote operations on hosts and managing vulnerability checks.
+
+It utilizes the Wazuh testing framework, including the HostManager class for handling
+remote hosts and various tools for indexer API interactions.
 
 Functions:
     - launch_remote_operation: Launch a remote operation on a specified host.
@@ -25,7 +28,7 @@ from wazuh_testing.end_to_end.indexer_api import get_indexer_values
 from wazuh_testing.tools.system import HostManager
 
 
-def launch_remote_operation(host: str, operation_data: Dict[str,Dict], host_manager: HostManager):
+def launch_remote_operation(host: str, operation_data: Dict[str, Dict], host_manager: HostManager):
     """
     Launch a remote operation on the specified host.
 
