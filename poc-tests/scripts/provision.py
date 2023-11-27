@@ -55,6 +55,10 @@ def run(provision):
 # ----------------------------------------------
 
 def install_dependencies():
+  #try:
+  #    subprocess.check_call(["apt-get", "install", "pip", "python3.10-venv", "-y"])
+  #except subprocess.CalledProcessError:
+  #    print(f"Package pip already installed")
   venv_path = 'venv'
   if not os.path.exists(venv_path):
       subprocess.run(['python3', '-m', 'venv', venv_path], check=True)
