@@ -7,3 +7,4 @@
 
 - name: MacOS | restart wazuh-agent
   ansible.builtin.shell: "{{ wazuh_macos_dir }}/bin/wazuh-control restart"
+
