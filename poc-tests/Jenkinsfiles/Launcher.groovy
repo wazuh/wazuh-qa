@@ -1,6 +1,6 @@
 
 
-String script_path = "${WORKSPACE}/scripts"
+String script_path = "${env.WORKSPACE}/scripts"
 String provision_script = "provision.py"
 String test_script = "test.py"
 String inventory = "inventory.yaml"
