@@ -150,7 +150,7 @@ class HostManager:
         if self.get_host_variables(host)['os_name'] == 'windows':
             result = self.get_host(host).ansible("ansible.windows.win_copy", f"src='{src_path}' dest='{dest_path}'", check=check)
         else:
-            result = self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=wazuh group=wazuh mode=0644",
+            result = self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=wazuh group=wazuh mode=preserve",
                                         check=check)
 
         return result
