@@ -55,8 +55,6 @@ def run(provision):
 # ----------------------------------------------
 
 def install_dependencies():
-  subprocess.run(['apt-get','update','&&','apt-get','install','python3-venv'],check=True)
-
   venv_path = 'venv'
   if not os.path.exists(venv_path):
       subprocess.run(['python3', '-m', 'venv', venv_path], check=True)

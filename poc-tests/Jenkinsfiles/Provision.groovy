@@ -22,7 +22,7 @@ node {
   post {
       always {
           sh 'deactivate || true'
-          sh 'rm -rf venv'
+          sh "rm -rf ${WORKSPACE}/venv"
       }
   }
 
