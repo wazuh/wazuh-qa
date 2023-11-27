@@ -19,11 +19,8 @@ node {
     sh "python3 ${provision_path}/${provision_script} -i ${inventory}"
   }
 
-  post {
-      always {
-          sh 'deactivate || true'
-          sh "rm -rf ${WORKSPACE}/venv"
-      }
+  stage('Remove venv') {
+    sh "rm -rf ${env.WORKSPACE}/poc-tests/venv"
   }
 
 }

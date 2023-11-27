@@ -28,8 +28,7 @@ node {
   }
   finally{
     stage('Remove venv') {
-      sh 'deactivate || true'
-      sh 'rm -rf venv'
+      sh "rm -rf ${env.WORKSPACE}/poc-tests/venv"
     }
   }
 }
