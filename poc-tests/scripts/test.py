@@ -13,7 +13,7 @@ def main(version: str,
          revision: str,
          live: bool = True,
          inventory: str = None,
-         provisioned: bool = False,
+         provision: bool = False,
          tinybird_token: str = '',
          tinybird_datasource: str = '',
          tinybird_url: str = ''
@@ -22,7 +22,7 @@ def main(version: str,
     if not inventory:
         inventory = "inventory.yaml"
 
-    if not provisioned:
+    if provision:
         provision.main(inventory)
 
     playbook_path = f"{project_root}/playbooks"
@@ -69,14 +69,14 @@ if __name__ == "__main__":
     parser.add_argument("-r", "--revision", help="Wazuh revision.")
     parser.add_argument("-l", "--is_live", default=True, help="Wazuh version is live or not.")
     parser.add_argument("-i", "--inventory", default=None, help="Archivo YAML de inventario de Ansible.")
-    parser.add_argument("-p", "--provisioned", default=False, help="Bool que indica si los sistemas fueron provisionados.")
+    parser.add_argument("-p", "--provision", default=False, help="Bool que indica si los sistemas se necesitan provisionar.")
     parser.add_argument("-tt", "--tinybird_token", default="", help="TinyBird token to connect with.")
     parser.add_argument("-td", "--tinybird_datasource", default="test", help="TinyBird datasource to send the results to.")
     parser.add_argument("-tu", "--tinybird_url", default="https://api.us-east.tinybird.co", help="TinyBird region url.")
 
     args = parser.parse_args()
 
-    main(args.version, args.revision, args.is_live, args.inventory, args.provisioned, 
+    main(args.version, args.revision, args.is_live, args.inventory, args.provision,
          args.tinybird_token, args.tinybird_datasource, args.tinybird_url)
 
     # live = True
