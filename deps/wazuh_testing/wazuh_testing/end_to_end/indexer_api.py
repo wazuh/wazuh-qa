@@ -24,13 +24,13 @@ STATE_INDEX_NAME = 'wazuh-vulnerabilities-states'
 def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'},
                        index: str = 'wazuh-alerts*') -> Dict:
     """
-    Get values from the Wazuh Elasticsearch indexer API.
+    Get values from the Wazuh Indexer API.
 
     Args:
         host_manager: An instance of the HostManager class containing information about hosts.
-        credentials (Optional): A dictionary containing the Elasticsearch credentials. Defaults to
+        credentials (Optional): A dictionary containing the Indexer credentials. Defaults to
                                  {'user': 'admin', 'password': 'changeme'}.
-        index (Optional): The Elasticsearch index name. Defaults to 'wazuh-alerts*'.
+        index (Optional): The Indexer index name. Defaults to 'wazuh-alerts*'.
 
     Returns:
         str: The response text from the indexer API.
