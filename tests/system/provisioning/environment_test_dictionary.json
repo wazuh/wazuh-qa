@@ -43,7 +43,7 @@
         "system/test_cluster/test_agent_groups/test_groups_sync_default.py",
         "system/test_cluster/test_agent_groups/test_groups_sync_time.py"
     ],
-    "end_to_end_environment": [
+    "e2e_basic_cases": [
         "test_basic_cases/test_audit/test_audit.py",
         "test_basic_cases/test_aws_infrastructure_monitoring/test_aws_infrastructure_monitoring.py",
         "test_basic_cases/test_brute_force/test_brute_force_rdp/test_brute_force_rdp.py",

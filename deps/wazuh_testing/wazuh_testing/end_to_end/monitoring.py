@@ -6,7 +6,6 @@ Description:
     This module provides functions for monitoring events, files, and alerts in a Wazuh environment.
 
 Functions:
-    - monitoring_events_host_monitoring: Monitor events on hosts using the HostMonitor.
     - monitoring_events_multihost: Monitor events on multiple hosts concurrently.
     - generate_monitoring_logs_all_agent: Generate monitoring data for logs on all agent hosts.
     - generate_monitoring_logs_manager: Generate monitoring data for logs on a specific manager host.
@@ -18,49 +17,14 @@ Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
 
-import tempfile
 import re
 from time import sleep
 from typing import Dict, List
 from multiprocessing.pool import ThreadPool
 
 from wazuh_testing.end_to_end import logs_filepath_os
-from wazuh_testing.tools.file import create_temp_file
-from wazuh_testing.tools.monitoring import HostMonitor
 from wazuh_testing.end_to_end.regex import get_event_regex
 from wazuh_testing.tools.system import HostManager
-
-
-def monitoring_events_host_monitoring(host_manager: HostManager, monitoring_data: Dict) -> Dict:
-    """Monitor events on hosts using the HostMonitor class.
-
-    Args:
-        host_manager: An instance of the HostManager class containing information about hosts.
-        monitoring_data: A dictionary containing monitoring data for each host.
-
-    Returns:
-        dict: Results of the monitoring process.
-    """
-    monitoring_file_content = ''
-    results = {}
-
-    for host, data in monitoring_data.items():
-        monitoring_file_content += f"{host}:\n"
-        for monitoring_event in data:
-            string_limiter = "'" if '"' in monitoring_event.get("regex", "") else '"'
-            monitoring_file_content += f'  - regex: {string_limiter}{monitoring_event.get("regex", "")}{string_limiter}\n'
-            monitoring_file_content += f'    file: {string_limiter}{monitoring_event.get("file", "")}{string_limiter}\n'
-            monitoring_file_content += f'    timeout: {monitoring_event.get("timeout", 0)}\n'
-
-            temp_file = create_temp_file(monitoring_file_content)
-
-            temporal_directory = tempfile.TemporaryDirectory()
-
-            HostMonitor(inventory_path=host_manager.get_inventory_path(),
-                        messages_path=temp_file,
-                        tmp_path=temporal_directory.name).run()
-
-    return results
 
 
 def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict) -> None:
@@ -71,10 +35,10 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
         host_manager: An instance of the HostManager class containing information about hosts.
         monitoring_data: A dictionary containing monitoring data for each host.
     """
-    def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict]):
+    def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict], scan_interval: int):
         """
         Monitor the specified elements on a host.
-        
+
         Args:
             host_manager (HostManager): Host Manager to handle the environment
             host (str): The target host.
@@ -83,6 +47,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
         Raises:
             TimeoutError: If no match is found within the specified timeout.
         """
+
         for element in monitoring_elements:
             regex, timeout, monitoring_file = element['regex'], element['timeout'], element['file']
             current_timeout = 0
@@ -93,7 +58,8 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
                 if regex_match:
                     break
 
-                sleep(5)
+                sleep(scan_interval)
+
                 current_timeout += 5
 
             if not regex_match:

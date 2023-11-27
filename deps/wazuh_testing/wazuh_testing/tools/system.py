@@ -144,19 +144,13 @@ class HostManager:
         dest_path (str): Destination path
         check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be applied.
         """
-        system = 'linux'
         result = None
 
-        if 'os_name' in self.get_host_variables(host):
-            host_os_name = self.get_host_variables(host)['os_name']
-            if host_os_name == 'windows':
-                system = 'windows'
-
-        if system == 'linux':
-            result = self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=wazuh group=wazuh mode=0644",
-                                        check=check)
-        else:
+        if self.get_host_variables(host)['os_name'] == 'windows':
             result = self.get_host(host).ansible("ansible.windows.win_copy", f"src='{src_path}' dest='{dest_path}'", check=check)
+        else:
+            result = self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=wazuh group=wazuh mode=preserve",
+                                        check=check)
 
         return result
 
@@ -487,11 +481,11 @@ class HostManager:
             result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
         elif system == 'ubuntu':
             result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
-            if result['changed'] == True and result['stderr'] == '':
+            if result['changed'] and result['stderr'] == '':
                 result = True
         elif system == 'centos':
             result = self.get_host(host).ansible("yum", f"name={url} state=present sslverify=false disable_gpg_check=True", check=False)
-            if 'rc' in result and result['rc'] == 0 and result['changed'] == True:
+            if 'rc' in result and result['rc'] == 0 and result['changed']:
                 result = True
 
         print(result)
@@ -513,6 +507,7 @@ class HostManager:
             if 'type' in self.get_host_variables(manager) and \
                 self.get_host_variables(manager)['type'] == 'master':
                 master_ip = self.get_host_variables(manager)['ip']
+                break
 
         return master_ip
 

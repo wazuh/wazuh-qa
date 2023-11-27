@@ -14,7 +14,7 @@ fetched_alerts_json_path = os.path.join(gettempdir(), 'alerts.json')
 
 base_path = {
     'linux': '/var/ossec',
-    'windows': r'C:\Program Files (x86)\ossec-agent',
+    'windows': 'C:\Program Files (x86)\ossec-agent',
     'macos': '/Library/Ossec'
 }
 
