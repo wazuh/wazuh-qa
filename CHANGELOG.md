@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.7.1] - TBD
 
+### Changed
+
+- Add XFAIL mark to Cluster reliability logs test. ([#4706](https://github.com/wazuh/wazuh-qa/pull/4706)) \- (Tests)
+
 ## [4.7.0] - TBD
 
 ### Added
