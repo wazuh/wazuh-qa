@@ -35,7 +35,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
         host_manager: An instance of the HostManager class containing information about hosts.
         monitoring_data: A dictionary containing monitoring data for each host.
     """
-    def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict]):
+    def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict], scan_interval: int):
         """
         Monitor the specified elements on a host.
 
@@ -47,6 +47,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
         Raises:
             TimeoutError: If no match is found within the specified timeout.
         """
+
         for element in monitoring_elements:
             regex, timeout, monitoring_file = element['regex'], element['timeout'], element['file']
             current_timeout = 0
@@ -57,7 +58,8 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
                 if regex_match:
                     break
 
-                sleep(5)
+                sleep(scan_interval)
+
                 current_timeout += 5
 
             if not regex_match:
