@@ -47,7 +47,6 @@ def main():
             inventory_db.update(infra.dump())
         if args.inventory_file:
             ansible_vars = { 'vars' : {'ansible_ssh_common_args':'-o StrictHostKeyChecking=no'}}
-            ansible_hosts['hosts'].update(inventory['all']['vars'])
             for request in infra_request:
                 if request['role'] == 'agent':
                     ansible_hosts['hosts'][request['alias']]['manager_ip'] = ansible_hosts['hosts']['Manager']['ansible_host']
