@@ -3,7 +3,7 @@
 String script_path = "scripts"
 String provision_script = "provision.py"
 String infra_script = "infra.py"
-String infra_request = "ddt1-poc-infra.yaml"
+String infra_request = "dtt1-poc-infra.yaml"
 String test_script = "test.py"
 String inventory = "inventory.yaml"
 String jenkins_reference = params.getOrDefault('JENKINS_REFERENCE', 'enhancement/4665-dtt1-poc')
@@ -20,7 +20,7 @@ node {
 
     stage('Launch infrastructure') {
       print("Launch infrastructure")
-      sh "cd ${env.WORKSPACE}/poc-tests && python3 ${script_path}/${infra_script} create --input ${infra_request} --inventory-output ${inventory}"
+      sh "cd ${env.WORKSPACE}/poc-tests && python3 ${script_path}/infra/${infra_script} create --input ${infra_request} --inventory-output ${inventory}"
     }
 
     stage('Provision') {

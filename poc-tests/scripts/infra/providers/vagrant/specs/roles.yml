@@ -4,11 +4,10 @@ agent:
   linux-*:
     cpu: 2
     memory: 2048
-    ip: 172.16.1.5
+    ip: 192.168.56.1
 manager:
   linux-*:
     cpu: 2
     memory: 2048
-    ip: 172.16.1.6
+    ip: 192.168.56.2
 
- 
