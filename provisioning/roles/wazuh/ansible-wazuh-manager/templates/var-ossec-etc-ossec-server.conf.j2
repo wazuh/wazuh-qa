@@ -655,4 +655,29 @@
     <hidden>{{ wazuh_manager_config.cluster.hidden }}</hidden>
   </cluster>
 
+  <indexer>
+    <enabled>yes</enabled>
+    <hosts>
+      {% for host in groups['wazuh_indexer'] %}
+        <host>https://{{ host }}:9200</host>
+      {% endfor %}
+    </hosts>
+      <username> {{ indexer_security_user }} </username>
+      <password> {{ indexer_security_password }} </password>
+
+    <ssl>
+      <certificate_authorities>
+      <ca>{{ filebeat_ssl_dir }}/root-ca.pem</ca>
+      </certificate_authorities>
+      <certificate>{{ filebeat_ssl_dir }}/{{ filebeat_node_name }}.pem</certificate>
+      <key>{{ filebeat_ssl_dir }}/{{ filebeat_node_name }}-key.pem</key>
+    </ssl>
+  </indexer>
+
+<vulnerability-detection>
+    <enabled>no</enabled>
+    <index-status>yes</index-status>
+    <feed-update-interval>2h</feed-update-interval>
+</vulnerability-detection>
+
 </ossec_config>
