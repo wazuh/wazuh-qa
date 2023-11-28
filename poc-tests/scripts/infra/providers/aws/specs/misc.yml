@@ -1,0 +1,9 @@
+---
+default:
+  security-group: [ sg-0877d224f9c5b2708 ]
+  key:
+    type: dynamic
+    name: ${uuid}
+  tags:
+    type: qa
+    name: ddt1-{name}
