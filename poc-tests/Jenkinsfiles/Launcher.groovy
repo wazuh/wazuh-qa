@@ -1,6 +1,6 @@
 
 
-String script_path = "${env.WORKSPACE}/scripts"
+String script_path = "scripts"
 String provision_script = "provision.py"
 String infra_script = "infra.py"
 String infra_request = "ddt1-poc-infra.yaml"
@@ -37,7 +37,7 @@ node {
     stage('Remove venv') {
       sh "rm -rf ${env.WORKSPACE}/poc-tests/venv"
     }
-        
+
     stage('Remove infrastructure') {
       print("Launch infrastructure")
       sh "cd ${env.WORKSPACE}/poc-tests && python3 ${script_path}/${infra_script} delete"
