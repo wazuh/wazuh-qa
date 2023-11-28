@@ -1,8 +1,8 @@
 - composite-name: linux-ubuntu-22.04-amd64
-  provider: aws
+  provider: vagrant
   role: agent
-  alias: Agent
+  alias: Agent1
 - composite-name: linux-ubuntu-22.04-amd64
-  provider: aws
+  provider: vagrant
   role: manager
   alias: Manager 

@@ -50,6 +50,10 @@ class VagrantInfra():
         connection['ansible_user'] = self.connection_info['user']
         connection['ansible_port'] = self.connection_info['port']
         connection['ansible_ssh_private_key_file'] = self.connection_info['key']
+        if self.instance_params['role'] == 'manager':
+            connection['install'] = [ {'type':'package', 'component':'wazuh-manager'}]
+        elif self.instance_params['role'] == 'agent':
+            connection['install'] = [ {'type':'package', 'component':'wazuh-agent'}]
         return {self.instance_params['alias']: connection}
 
     def create(self):
@@ -59,6 +63,7 @@ class VagrantInfra():
                 if fnmatch.fnmatch(self.instance_params['composite-name'], pattern):
                     self.provider_specific['cpu'] = specs['cpu']
                     self.provider_specific['memory'] = specs['memory']
+                    self.provider_specific['ip'] = specs['ip']
                     break
         with open(VagrantInfra.OS_SPECS_PATH, "r") as os_file:
             os_specs = yaml.safe_load(os_file)
@@ -71,6 +76,7 @@ class VagrantInfra():
             config.vm.box = "{self.provider_specific['box']}"
             config.vm.box_version = "{self.provider_specific['box_version']}"
             config.vm.provision "file", source: "{self.credential.name}.pub", destination: ".ssh/authorized_keys"
+            config.vm.network "private_network", ip:"{self.provider_specific['ip']}"
             config.vm.provider "virtualbox" do |v|
                 v.memory = {self.provider_specific['memory']}
                 v.cpus = {self.provider_specific['cpu']}
@@ -121,7 +127,7 @@ class VagrantCredentials():
                         "-N", "",
                         "-q"]
         output = subprocess.run(command, check=True)
-        os.chmod(os.path.join(self.working_dir, self.name) + '.pem', 0o600)
+        os.chmod(os.path.join(self.working_dir, self.name), 0o600)
         if output.returncode != 0:
             raise Exception("Error creating key pair")
 

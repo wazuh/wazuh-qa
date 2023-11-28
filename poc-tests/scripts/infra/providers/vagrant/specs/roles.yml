@@ -2,10 +2,13 @@
 # Composite names that are literal have priority over those that are wildcards. In case that there are multiple matches, the first one is used.
 agent:
   linux-*:
-    cpu: 1
-    memory: 512
+    cpu: 2
+    memory: 2048
+    ip: 172.16.1.5
 manager:
   linux-*:
-    cpu: 1
-    memory: 512
+    cpu: 2
+    memory: 2048
+    ip: 172.16.1.6
+
  

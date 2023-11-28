@@ -46,8 +46,14 @@ def main():
             ansible_hosts['hosts'].update(infra.ansible_inventory())
             inventory_db.update(infra.dump())
         if args.inventory_file:
+            ansible_vars = { 'vars' : {'ansible_ssh_common_args':'-o StrictHostKeyChecking=no'}}
+            ansible_hosts['hosts'].update(inventory['all']['vars'])
+            for request in infra_request:
+                if request['role'] == 'agent':
+                    ansible_hosts['hosts'][request['alias']]['manager_ip'] = ansible_hosts['hosts']['Manager']['ansible_host']
+            inventory = { 'all': { **ansible_hosts, **ansible_vars }}
             with open(args.inventory_file, 'w') as inventory_file:
-                yaml.dump({'all':ansible_hosts}, inventory_file)
+                yaml.dump(inventory, inventory_file)
 
         with open(os.path.join(args.working_dir, INFRADB_FILE), 'w') as db_file:
             yaml.dump(inventory_db, db_file)
