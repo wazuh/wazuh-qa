@@ -30,7 +30,7 @@ from wazuh_testing.end_to_end.wazuh_api import  get_agents_vulnerabilities
 from wazuh_testing.end_to_end.monitoring import generate_monitoring_logs_all_agent, monitoring_events_multihost
 from wazuh_testing.end_to_end.waiters import wait_until_vuln_scan_agents_finished
 from wazuh_testing.end_to_end.regex import get_event_regex
-
+from wazuh_testing.end_to_end.logs import truncate_remote_host_group_files
 
 def launch_remote_operation(host: str, operation_data: Dict[str, Dict], host_manager: HostManager):
     """
@@ -60,8 +60,16 @@ def launch_remote_operation(host: str, operation_data: Dict[str, Dict], host_man
         print("Installing package")
         package_data = operation_data['package']
         package_url = package_data[host_os_name][host_os_arch]
-        host_manager.install_package(host, package_url, system)
+
+        if isinstance(package_url, list):
+            for package in package_url:
+                host_manager.install_package(host, package, system)
+        else:
+            host_manager.install_package(host, package_url, system)
+
+
         TIMEOUT_SYSCOLLECTOR_SCAN = 60
+        truncate_remote_host_group_files(host_manager, 'agent', 'logs')
 
         # Wait until syscollector
         monitoring_data = generate_monitoring_logs_all_agent(host_manager,
@@ -71,15 +79,30 @@ def launch_remote_operation(host: str, operation_data: Dict[str, Dict], host_man
 
         monitoring_events_multihost(host_manager, monitoring_data)
 
+        truncate_remote_host_group_files(host_manager, 'manager', 'logs')
         # Wait until VD scan
         wait_until_vuln_scan_agents_finished(host_manager)
 
-
     elif operation == 'remove_package':
-        print("Removing package")
         package_data = operation_data['package']
         package_name = package_data[host_os_name][host_os_arch]
         host_manager.remove_package(host, package_name, system)
+
+        TIMEOUT_SYSCOLLECTOR_SCAN = 60
+
+        truncate_remote_host_group_files(host_manager, 'agent', 'logs')
+        # Wait until syscollector
+        monitoring_data = generate_monitoring_logs_all_agent(host_manager,
+                                                        [get_event_regex({'event': 'syscollector_scan_start'}),
+                                                        get_event_regex({'event': 'syscollector_scan_end'})],
+                                                        [TIMEOUT_SYSCOLLECTOR_SCAN, TIMEOUT_SYSCOLLECTOR_SCAN])
+
+        monitoring_events_multihost(host_manager, monitoring_data)
+
+        truncate_remote_host_group_files(host_manager, 'manager', 'logs')
+
+        # Wait until VD scan
+        wait_until_vuln_scan_agents_finished(host_manager)
 
     elif operation == 'check_agent_vulnerability':
         print("Check agent vuln")
@@ -89,7 +112,8 @@ def launch_remote_operation(host: str, operation_data: Dict[str, Dict], host_man
 
         if operation_data['parameters']['api']:
             print("Check vuln in api response")
-            check_vuln_alert_api(host_manager, operation_data['vulnerability_data'])
+            check_vuln_alert_api(host_manager, operation_data['vulnerability_data'],
+                                 operation_data['parameters'].get('state', True))
 
         if operation_data['parameters']['state_indice']:
             check_vuln_state_index(host_manager, operation_data['vulnerability_data'])
@@ -127,7 +151,7 @@ def check_vuln_alert_indexer(host_manager: HostManager, vulnerability_data: Dict
 
     pass
 
-def check_vuln_alert_api(host_manager: HostManager, vulnerability_data: Dict[str, Dict]):
+def check_vuln_alert_api(host_manager: HostManager, vulnerability_data: Dict[str, Dict], state=True):
     """
     Check vulnerability alerts via API for a host.
 
@@ -141,8 +165,7 @@ def check_vuln_alert_api(host_manager: HostManager, vulnerability_data: Dict[str
 
     api_vulns = get_agents_vulnerabilities(host_manager)
     not_found_vuln = []
-
-
+    found_vuln = []
 
     for agent in host_manager.get_group_hosts('agent'):
         print("\n\n---------------------------------")
@@ -164,6 +187,10 @@ def check_vuln_alert_api(host_manager: HostManager, vulnerability_data: Dict[str
                 if all(current_vulnerability[key] == value for key, value in expected_vuln.items()):
                     found = True
                     print(f"Found {current_vulnerability}")
+                    found_vuln.append({
+                        'agent': agent,
+                        'cve': vulnerability['CVE']
+                    })
 
             if not found:
                 not_found_vuln.append({
@@ -172,14 +199,12 @@ def check_vuln_alert_api(host_manager: HostManager, vulnerability_data: Dict[str
                 })
         print("\n\n---------------------------------")
 
-
-    print(f"No found {not_found_vuln}")
-    assert len(not_found_vuln) == 0
-
-    # Check alerts
-
-
-
+    if state:
+        print(f"No found {not_found_vuln}")
+        assert len(not_found_vuln) == 0
+    else:
+        print(f"Found unexpected vulnerabilities {found_vuln}")
+        assert len(found_vuln) == 0
 
 
 def launch_remote_sequential_operation_on_agent(agent: str, task_list: List[Dict], host_manager: HostManager):

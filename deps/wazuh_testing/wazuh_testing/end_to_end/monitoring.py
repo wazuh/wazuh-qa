@@ -35,7 +35,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
         host_manager: An instance of the HostManager class containing information about hosts.
         monitoring_data: A dictionary containing monitoring data for each host.
     """
-    def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict], scan_interval: int):
+    def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict], scan_interval: int = 5):
         """
         Monitor the specified elements on a host.
 

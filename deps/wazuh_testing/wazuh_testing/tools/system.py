@@ -530,7 +530,7 @@ class HostManager:
         result = False
         os_name = self.get_host_variables(host)['os_name']
         if os_name == 'windows':
-            result = self.get_host(host).ansible("win_package", f"product_id={package_name} state=absent arguments=/S", check=False)
+            result = self.get_host(host).ansible("win_command", f"& '{package_name}' /S", check=False)
         elif os_name == 'linux':
             os = self.get_host_variables(host)['os'].split('_')[0]
             if os == 'centos':
