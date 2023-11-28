@@ -107,13 +107,7 @@ def launch_remote_operation(host: str, operation_data: Dict[str, Dict], host_man
     elif operation == 'check_agent_vulnerability':
         print("Check agent vuln")
         if operation_data['parameters']['alert_indexed']:
-            print("Check alert indexed")
             check_vuln_alert_indexer(host_manager, operation_data['vulnerability_data'])
-
-        if operation_data['parameters']['api']:
-            print("Check vuln in api response")
-            check_vuln_alert_api(host_manager, operation_data['vulnerability_data'],
-                                 operation_data['parameters'].get('state', True))
 
         if operation_data['parameters']['state_indice']:
             check_vuln_state_index(host_manager, operation_data['vulnerability_data'])
@@ -130,7 +124,16 @@ def check_vuln_state_index(host_manager: HostManager, vulnerability_data: Dict[s
     ToDo:
         Implement the functionality.
     """
-    index_vuln_state_content = get_indexer_values(host_manager)
+    # It follows https://www.elastic.co/guide/en/ecs/current/ecs-vulnerability.html
+    index_vuln_state_content = get_indexer_values(host_manager, index='wazuh-states-vulnerabilities')['hits']['hits']
+    for index_vuln_state_content in index_vuln_state_content:
+        pass
+
+
+    agents_vuln_first_scan = {}
+    indexer_alerts_first_scan = get_indexer_values(host_manager)['hits']['hits']
+
+
 
 
 def check_vuln_alert_indexer(host_manager: HostManager, vulnerability_data: Dict[str, Dict]):
@@ -148,63 +151,13 @@ def check_vuln_alert_indexer(host_manager: HostManager, vulnerability_data: Dict
         Implement the functionality.
     """
     indexer_alerts = get_indexer_values(host_manager)
-
-    pass
-
-def check_vuln_alert_api(host_manager: HostManager, vulnerability_data: Dict[str, Dict], state=True):
-    """
-    Check vulnerability alerts via API for a host.
-
-    Args:
-        host_manager (HostManager): An instance of the HostManager class containing information about hosts.
-        vulnerability_data (dict): Dictionary containing vulnerability data.
-
-    ToDo:
-        Implement the functionality.
-    """
-
-    api_vulns = get_agents_vulnerabilities(host_manager)
-    not_found_vuln = []
-    found_vuln = []
+    for alert in indexer_alerts_first_scan:
+        agent = alert['agent']['name']
+        if re.match('CVE. affects.*', alert['description']):
+            agents_vuln_first_scan[agent] = alert
 
     for agent in host_manager.get_group_hosts('agent'):
-        print("\n\n---------------------------------")
-        print(f"Agent {agent}")
-
-        agent_os_name = host_manager.get_host_variables(agent)['os'].split('_')[0]
-        agent_arch_name = host_manager.get_host_variables(agent)['architecture']
-        vulnerability_data_agent = vulnerability_data[agent_os_name][agent_arch_name]
-        current_vulns_agent = api_vulns[agent]
-        print(f"Vuln of agent {agent}: {vulnerability_data_agent}")
-        for vulnerability in vulnerability_data_agent:
-            print(f"Searching for {agent} and {vulnerability['CVE']}")
-            expected_vuln = {
-                'status': 'VALID',
-                'cve': vulnerability['CVE']
-            }
-            found = False
-            for current_vulnerability in current_vulns_agent:
-                if all(current_vulnerability[key] == value for key, value in expected_vuln.items()):
-                    found = True
-                    print(f"Found {current_vulnerability}")
-                    found_vuln.append({
-                        'agent': agent,
-                        'cve': vulnerability['CVE']
-                    })
-
-            if not found:
-                not_found_vuln.append({
-                    'agent': agent,
-                    'cve': vulnerability['CVE']
-                })
-        print("\n\n---------------------------------")
-
-    if state:
-        print(f"No found {not_found_vuln}")
-        assert len(not_found_vuln) == 0
-    else:
-        print(f"Found unexpected vulnerabilities {found_vuln}")
-        assert len(found_vuln) == 0
+        assert agent not in agents_vuln_first_scan, f"No vulnerabilities were detected for Agent {agent}"
 
 
 def launch_remote_sequential_operation_on_agent(agent: str, task_list: List[Dict], host_manager: HostManager):

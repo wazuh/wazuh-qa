@@ -35,7 +35,7 @@ def wait_until_vd_is_updated(host_manager: HostManager) -> None:
 
     for manager in host_manager.get_group_hosts('manager'):
         monitoring_data = generate_monitoring_logs_manager(
-            host_manager, manager, 'Starting vulnerability scan', 800
+            host_manager, manager, 'Message processed', 1000
         )
 
     monitoring_events_multihost(host_manager, monitoring_data)

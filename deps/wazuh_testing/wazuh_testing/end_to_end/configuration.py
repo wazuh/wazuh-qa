@@ -60,25 +60,24 @@ def restore_configuration(host_manager: HostManager, configuration: dict) -> Non
         host_manager.modify_file_content(host, configuration_filepath, configuration[host])
 
 
-def configure_host(host: str, host_configuration_role: dict, host_manager: HostManager) -> None:
+def configure_host(host: str, host_configuration: dict, host_manager: HostManager) -> None:
     """
     Configure a specific host.
 
     Args:
         host: The name of the host to be configured.
-        host_configuration_role: Role of the configured host for the host.
+        host_configuration: Role of the configured host for the host.
         host_manager: An instance of the HostManager class containing information about hosts.
     """
 
     host_os = host_manager.get_host_variables(host)['os_name']
     config_file_path = configuration_filepath_os[host_os]
 
-    host_groups = host_manager.get_host_groups(host)
-    host_config = host_configuration_role.get('manager' if 'manager' in host_groups else 'agent', None)
+    host_config = host_configuration.get(host)
 
     if not host_config:
         raise TypeError(f"Host {host} configuration does not include a valid role (manager or agent):"
-                        "{host_configuration_role}")
+                        f"{host_configuration}")
 
     current_config = host_manager.get_file_content(str(host), config_file_path)
 
