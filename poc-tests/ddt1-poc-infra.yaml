@@ -1,0 +1,8 @@
+- composite-name: linux-ubuntu-22.04-amd64
+  provider: aws
+  role: agent
+  alias: Agent
+- composite-name: linux-ubuntu-22.04-amd64
+  provider: aws
+  role: manager
+  alias: Manager 

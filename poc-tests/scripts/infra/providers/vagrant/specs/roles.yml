@@ -1,0 +1,11 @@
+# Roles define the resources (CPU, RAM) that are required to run a service
+# Composite names that are literal have priority over those that are wildcards. In case that there are multiple matches, the first one is used.
+agent:
+  linux-*:
+    cpu: 1
+    memory: 512
+manager:
+  linux-*:
+    cpu: 1
+    memory: 512
+ 

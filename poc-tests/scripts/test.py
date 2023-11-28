@@ -47,7 +47,8 @@ def main(version: str,
         'branch_version': branch_version,
         'tinybird_token': tinybird_token,
         'tinybird_datasource': tinybird_datasource,
-        'tinybird_url': tinybird_url
+        'tinybird_url': tinybird_url,
+        'ansible_stdout_callback': 'yaml'
     }
 
     ansible = Ansible(inventory, playbook_path)
