@@ -25,6 +25,9 @@ def main(version: str,
     if provision:
         provisioner.main(inventory)
 
+    if live:
+        branch_version = "v" + version
+
     playbook_path = f"{project_root}/playbooks"
 
     test_playbooks = [
@@ -37,11 +40,6 @@ def main(version: str,
         "tests/test_stop.yml",
         "tests/test_uninstall.yml"
     ]
-
-    # Tiny bird
-
-    if live:
-        branch_version = "v" + version
 
     extra_vars = {
         'version': version,
