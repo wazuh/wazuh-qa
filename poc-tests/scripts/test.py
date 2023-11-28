@@ -6,7 +6,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(project_root)
 
 from src.classes import Ansible
-import provision
+import provision as provisioner
 
 
 def main(version: str,
@@ -23,7 +23,7 @@ def main(version: str,
         inventory = "inventory.yaml"
 
     if provision:
-        provision.main(inventory)
+        provisioner.main(inventory)
 
     playbook_path = f"{project_root}/playbooks"
 

@@ -1,4 +1,4 @@
-- hosts: all
+- hosts: Agent*
   become: true
   vars:
     path: "/tmp"
@@ -14,11 +14,9 @@
         TINYBIRD_TOKEN: "{{ tinybird_token|quote }}"
       block:
         - name: Execute tests
-          command: "pytest {{ test_file }}.py --target={{ target }} -vl --tb=short --report-to-tinybird"
+          command: "pytest {{ test_file }}.py --target=agent -vl --tb=short --report-to-tinybird"
           args:
             chdir: "{{ path }}/{{ test_directory }}"
-          vars:
-            target: "{% if 'Agent' in inventory_hostname %}agent{% elif 'Manager' in inventory_hostname %}server{% endif %}"
           register: pytest_log
 
       always:

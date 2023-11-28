@@ -29,3 +29,10 @@ def test_start_log_raised():
 
 def test_service_started():
     assert utils.get_service_status() == "active", "Service is not active after restart."
+
+
+def test_agent_connection_status():
+    expected_status = "connected" if service == "agent" else "Active"
+
+    assert utils.check_agent_is_connected("001")
+    assert utils.get_agent_connection_status("001") == expected_status

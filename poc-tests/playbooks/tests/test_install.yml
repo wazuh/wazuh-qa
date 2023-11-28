@@ -1,4 +1,4 @@
-- hosts: all
+- hosts: Agent*
   become: true
   vars:
     path: "/tmp"
