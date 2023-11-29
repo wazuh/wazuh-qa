@@ -6,3 +6,49 @@
 
 - include_tasks: "installation_from_custom_packages.yml"
   when: wazuh_custom_packages_installation_agent_enabled
+
+- name: macOS | Set agent configuration (ossec.conf)
+  template:
+    src: var-ossec-etc-ossec-agent.conf.j2
+    dest: "{{ macos_wazuh_dir }}/etc/ossec.conf"
+    owner: root
+    group: wazuh
+    mode: 0644
+  notify: restart wazuh-agent
+  tags:
+    - init
+    - config
+
+- name: macOS | Check if client.keys exists
+  stat:
+    path: "{{ macos_wazuh_dir }}/etc/client.keys"
+  register: client_keys_file
+  tags:
+    - config
+
+- name: macOS | Set local_internal_options.conf
+  template:
+    src: var-ossec-etc-local-internal-options.conf.j2
+    dest: "{{ macos_wazuh_dir }}/etc/local_internal_options.conf"
+    owner: root
+    group: wazuh
+    mode: 0640
+  notify: restart wazuh-agent
+  tags:
+    - init
+    - config
+
+- name: Create auto-enrollment password file
+  template:
+    src: authd_pass.j2
+    dest: "{{ macos_wazuh_dir }}/etc/authd.pass"
+    owner: wazuh
+    group: wazuh
+    mode: 0640
+  when:
+    - wazuh_agent_config.enrollment.enabled == 'yes'
+    - wazuh_agent_config.enrollment.authorization_pass_path | length > 0
+    - authd_pass | length > 0
+  tags:
+    - config
+
