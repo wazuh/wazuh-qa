@@ -35,8 +35,24 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
     Returns:
         str: The response text from the indexer API.
     """
+
     url = f"https://{host_manager.get_master_ip()}:9200/{index}/_search"
-    response = requests.get(url=url, params={'pretty': 'true'}, verify=False,
-                            auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']))
+    headers = {
+        'Content-Type': 'application/json',
+    }
+
+    data = {
+        "query": {
+            "match_all": {}
+        }
+    }
+    param = {
+        'pretty': 'true',
+        'size': 10000,
+    }
+
+    response = requests.get(url=url, params=param, verify=False,
+                            auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']), headers=headers,
+                            json=data)
 
     return response.json()
