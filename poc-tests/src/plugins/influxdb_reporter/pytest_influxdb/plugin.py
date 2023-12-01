@@ -4,6 +4,12 @@ from . import reporter
 
 
 def pytest_addoption(parser):
+    """
+    Add options for the pytest command line.
+
+    Args:
+        parser (argparsing.Parser): The parser for command line arguments and ini-file values.
+    """
     group = parser.getgroup('influxdb', 'reporting test results to influxdb')
     group.addoption('--influxdb-report', default=False, action='store_true', help='send report to influxdb.')
     group.addoption('--influxdb-url', default="http://localhost:8086", help='Influxdb host url.')
@@ -13,6 +19,15 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
+    """
+    Allows plugins and conftest files to perform initial configuration.
+
+    This hook is called for every plugin and initial conftest
+    file after command line options have been parsed.
+
+    Args:
+        config (pytest.Config): The pytest config object.
+    """
     if not config.getoption("--influxdb-report"):
         return
     plugin = reporter.InfluxDBReporter(config)
@@ -21,6 +36,14 @@ def pytest_configure(config):
 
 
 def pytest_unconfigure(config):
+    """
+    Allows plugins and conftest files to perform cleanup activities.
+
+    This hook is called before test process is exited.
+
+    Args:
+        config (pytest.Config): The pytest config object.
+    """
     plugin = getattr(config, '_influxdb', None)
     if plugin is not None:
         del config._influxdb
