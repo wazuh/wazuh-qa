@@ -5,14 +5,11 @@ from . import reporter
 
 def pytest_addoption(parser):
     group = parser.getgroup('influxdb', 'reporting test results to influxdb')
-    group.addoption('--influxdb-report', default=False, action='store_true',
-                    help='send report to influxdb.')
-    group.addoption('--influxdb-url', default="http://localhost:8086", action='store_true',
-                    help='Influxdb host url.')
-    group.addoption('--influxdb-token', default=None, action='store_true',
-                    help='Token to use for influxdb connection.')
-    group.addoption('--influxdb-bucket', default=None, action='store_true',
-                    help='Influxdb bucket to store the data in.')
+    group.addoption('--influxdb-report', default=False, action='store_true', help='send report to influxdb.')
+    group.addoption('--influxdb-url', default="http://localhost:8086", help='Influxdb host url.')
+    group.addoption('--influxdb-token', default=None, help='Token to use for influxdb connection.')
+    group.addoption('--influxdb-bucket', default=None, help='Influxdb bucket to store the data in.')
+    group.addoption('--influxdb-org', default=None, help='Influxdb organization name.')
 
 
 def pytest_configure(config):
