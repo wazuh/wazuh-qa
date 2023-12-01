@@ -89,14 +89,18 @@ def control_service(action, daemon=None, debug_mode=False):
                 command = subprocess.run(["net", action, "WazuhSvc"], stderr=subprocess.PIPE)
                 result = command.returncode
                 if result != 0:
-                    if action == 'stop' and 'The Wazuh service is not started.' in command.stderr.decode():
+                    error = command.stderr.decode()
+                    if 'The service is starting or stopping' in error:
+                        time.sleep(1)
                         result = 0
                         break
-                    if action == 'start' and 'The requested service has already been started.' \
-                       in command.stderr.decode():
+                    if action == 'stop' and 'The Wazuh service is not started.' in error:
                         result = 0
                         break
-                    elif "System error 109 has occurred" not in command.stderr.decode():
+                    if action == 'start' and 'The requested service has already been started.' in error:
+                        result = 0
+                        break
+                    elif "System error 109 has occurred" not in error:
                         break
     else:  # Default Unix
         if daemon is None:
