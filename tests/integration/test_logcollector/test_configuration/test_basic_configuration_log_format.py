@@ -294,7 +294,7 @@ def check_log_file_duplicated():
 
 @pytest.mark.filterwarnings('ignore::urllib3.exceptions.InsecureRequestWarning')
 def test_log_format(configure_local_internal_options_module, get_configuration,
-                    configure_environment, restart_logcollector_after_test):
+                    configure_environment):
     '''
     description: Check if the 'wazuh-logcollector' daemon detects invalid configurations for the 'log_format' tag.
                  It also checks some special aspects when using macOS. For this purpose, the test will set a
@@ -321,9 +321,6 @@ def test_log_format(configure_local_internal_options_module, get_configuration,
         - configure_environment:
             type: fixture
             brief: Configure a custom environment for testing.
-        - restart_logcollector_after_test
-            type: fixture
-            brief: Restarts logcollector after the test to restore configuration after the last test in module.
 
     assertions:
         - Verify that the logcollector generates error events when using invalid values for the 'log_format' tag.

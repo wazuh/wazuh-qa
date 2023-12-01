@@ -34,13 +34,6 @@ def restart_logcollector(get_configuration, request):
 
 
 @pytest.fixture(scope='module')
-def restart_logcollector_after_test(get_configuration, request):
-    """Retart logcollector at the end of the test to restore configuration"""
-    yield
-    control_service('restart', daemon="wazuh-logcollector")
-
-
-@pytest.fixture(scope='module')
 def init_authd_remote_simulator(get_connection_configuration, request):
     """Initialize authd and remoted simulator
 
