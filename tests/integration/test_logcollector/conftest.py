@@ -34,7 +34,7 @@ def restart_logcollector(get_configuration, request):
 
 
 @pytest.fixture(scope='module')
-def restart_logcollector_after_test(get_configuration, request):
+def restart_logcollector_after_test(get_configuration, request, daemon=DAEMON_NAME):
     """Retart logcollector at the end of the test to restore configuration"""
     yield
     control_service('restart', daemon=DAEMON_NAME)
