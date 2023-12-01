@@ -92,8 +92,7 @@ def control_service(action, daemon=None, debug_mode=False):
                     error = command.stderr.decode()
                     if 'The service is starting or stopping' in error:
                         time.sleep(1)
-                        result = 0
-                        break
+                        continue
                     if action == 'stop' and 'The Wazuh service is not started.' in error:
                         result = 0
                         break
@@ -101,6 +100,7 @@ def control_service(action, daemon=None, debug_mode=False):
                         result = 0
                         break
                     elif "System error 109 has occurred" not in error:
+                        print(f"Unexpected error when control_service failed with the following error: {error}")
                         break
     else:  # Default Unix
         if daemon is None:
@@ -148,7 +148,7 @@ def control_service(action, daemon=None, debug_mode=False):
             result = 0
 
     if result != 0:
-        raise ValueError(f"Error when executing {action} in daemon {daemon}. Exit status: {result}")
+        raise ValueError(f"Error when executing {action} in daemon {daemon}. Exit status: {result}.")
 
 
 def restart_wazuh_function():
