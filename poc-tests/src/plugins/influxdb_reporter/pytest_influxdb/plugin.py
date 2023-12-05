@@ -16,6 +16,7 @@ def pytest_addoption(parser):
     group.addoption('--influxdb-token', default=None, help='Token to use for influxdb connection.')
     group.addoption('--influxdb-bucket', default=None, help='Influxdb bucket to store the data in.')
     group.addoption('--influxdb-org', default=None, help='Influxdb organization name.')
+    group.addoption('--influxdb-config-file', default=None, help='File with the influxdb configuration.')
 
 
 def pytest_configure(config):
@@ -30,7 +31,12 @@ def pytest_configure(config):
     """
     if not config.getoption("--influxdb-report"):
         return
-    plugin = reporter.InfluxDBReporter(config)
+
+    if config_file := config.getoption("--influxdb-config-file"):
+        plugin = reporter.InfluxDBReporter(config, config_file)
+    else:
+        plugin = reporter.InfluxDBReporter(config)
+
     config._influxdb = plugin
     config.pluginmanager.register(plugin)
 
