@@ -22,7 +22,7 @@ STATE_INDEX_NAME = 'wazuh-vulnerabilities-states'
 
 
 def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'},
-                       index: str = 'wazuh-alerts*') -> Dict:
+                       index: str = 'wazuh-alerts*', greater_than_timestamp=None) -> Dict:
     """
     Get values from the Wazuh Indexer API.
 
@@ -46,6 +46,15 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
             "match_all": {}
         }
     }
+    if greater_than_timestamp:
+        data['query'].update(
+            {
+                'range': {
+                    "@timestamp": {
+                        "gte": greater_than_timestamp
+                    }
+                }
+            })
     param = {
         'pretty': 'true',
         'size': 10000,
