@@ -1,0 +1,14 @@
+- vagrant:
+  linux-ubuntu-22.04-amd64:
+    box: ubuntu/jammy64
+    box_version: 20231027.0.0
+
+- aws:
+  linux-ubuntu-22.04-amd64:
+    ami: ami-0fc5d935ebf8bc3bc
+    zone: us-east-1
+    user: ubuntu
+  linux-ubuntu-22.04-arm64:
+    ami: ami-016485166ec7fa705
+    zone: us-east-1
+    user: ubuntu

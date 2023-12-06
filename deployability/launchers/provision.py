@@ -62,14 +62,14 @@ def install_dependencies():
   activate_command = f"source {activate_script}" if sys.platform != 'win32' else f"call {activate_script}"
   subprocess.run(activate_command, shell=True, executable="/bin/bash")
   subprocess.run(['python3', '-m', 'pip', 'install', '--upgrade', 'pip'], check=True)
-  subprocess.run(['pip', 'install', '-r', 'utils/requirements.txt'], check=True)
+  subprocess.run(['pip', 'install', '-r', 'deps/requirements.txt'], check=True)
 
 # ----------------------------------------------
 
 def install_host_dependencies(host, host_info, provision):
   task = ["dependencies.j2"]
   install_info = {
-    'component': os.path.join(CURRENT_DIR, "utils", "remote_requirements.txt"),
+    'component': os.path.join(CURRENT_DIR, "deps", "remote_requirements.txt"),
     'install_type': "deps"
   }
 
