@@ -44,6 +44,7 @@ Temporary Items
 
 ### VisualStudioCode ###
 .vscode/*
+.vscode/
 .mypy_cache/
 .vs/*
 
