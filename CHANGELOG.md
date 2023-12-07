@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Enhance control_service error handling on windows agents. ([#4733](https://github.com/wazuh/wazuh-qa/pull/4733)) \- (Framework)
 - Add XFAIL mark to Cluster reliability logs test. ([#4706](https://github.com/wazuh/wazuh-qa/pull/4706)) \- (Tests)
 
 ## [4.7.0] - 27/11/2023
