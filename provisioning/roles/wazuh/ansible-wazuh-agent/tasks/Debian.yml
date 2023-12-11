@@ -8,6 +8,10 @@
   register: wazuh_agent_ca_package_install
   until: wazuh_agent_ca_package_install is succeeded
 
+- name: Debian/Ubuntu | Update APT repository
+  apt:
+    update_cache: true
+
 - name: Debian/Ubuntu | Install apt-transport-https and acl
   apt:
     name:
