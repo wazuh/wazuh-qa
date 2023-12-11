@@ -8,6 +8,12 @@
   register: wazuh_agent_ca_package_install
   until: wazuh_agent_ca_package_install is succeeded
 
+- name: Update apt-get repo and cache
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+    cache_valid_time: 3600
+
 - name: Debian/Ubuntu | Install apt-transport-https and acl
   apt:
     name:
