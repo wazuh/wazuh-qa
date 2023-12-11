@@ -4,3 +4,6 @@
 
 - name: Windows | Restart Wazuh Agent
   win_service: name=WazuhSvc start_mode=auto state=restarted
+
+- name: MacOS | restart wazuh-agent
+  ansible.builtin.shell: "{{ wazuh_macos_dir }}/bin/wazuh-control restart"
