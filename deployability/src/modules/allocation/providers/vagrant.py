@@ -15,58 +15,56 @@ class VagrantProvider(Provider):
     def __init__(self, instance_params: InstanceParams, working_dir: str):
         super().__init__(instance_params, working_dir=working_dir)
 
-    def create(self):
-        if self.instance:
-            return
-        self.instance = self.generate_instance(self.instance_params, self.path)
-        vagrantfile = self.__render_vagrantfile(
-            self.instance.provider_config, self.instance.credential)
+    def create(self, instance_params: InstanceParams, working_dir: str):
+        credential = self._generate_credentials(instance_params, working_dir)
+        config = self._get_config(instance_params)
+        vagrantfile = self._render_vagrantfile(config, credential)
 
-        if not self.path.exists():
-            self.path.mkdir(parents=True, exist_ok=True)
+        self.instance = self._generate_instance(instance_params, working_dir, credential, config)
 
-        with open(self.path / 'Vagrantfile', 'w') as f:
+        if not self.working_dir.exists():
+            self.working_dir.mkdir(parents=True, exist_ok=True)
+
+        with open(self.working_dir / 'Vagrantfile', 'w') as f:
             f.write(vagrantfile)
 
     def start(self):
         if not self.instance:
             return
-        self.__run_vagrant_command('up')
-        ssh_config = self.__run_vagrant_command('ssh-config')
-        connection_info = self.__get_connection_info(ssh_config)
+        self._run_vagrant_command('up')
+        ssh_config = self._run_vagrant_command('ssh-config')
+        connection_info = self._get_connection_info(ssh_config)
         self.instance.connection_info = connection_info
 
     def stop(self):
         if not self.instance:
             return
-        self.__run_vagrant_command('halt')
+        self._run_vagrant_command('halt')
 
     def delete(self):
         if not self.instance:
             return
-        self.__run_vagrant_command('destroy -f')
+        self._run_vagrant_command('destroy -f')
 
     def status(self):
         if not self.instance:
             return
-        self.__run_vagrant_command('status')
+        self._run_vagrant_command('status')
 
     def generate_inventory(self):
         pass
 
-    def generate_instance(self, instance_params: InstanceParams, working_dir: str) -> Instance:
-        if self.instance:
-            return
+    def _generate_instance(self, instance_params: InstanceParams, path: str, credential: str, config: dict) -> Instance:
         instance = Instance(name=instance_params.name,
                             params=instance_params,
-                            path=working_dir,
+                            path=path,
                             provider='vagrant',
-                            credential=self.__generate_credentials(),
+                            credential=credential,
                             connection_info=None,
-                            provider_config=self.__get_config(instance_params))
+                            provider_config=config)
         return instance
 
-    # def __get_connection_info(self, connection_config: str, credential: str) -> dict:
+    # def _get_connection_info(self, connection_config: str, credential: str) -> dict:
     #     connection_info = {}
     #     for line in connection_config.splitlines():
     #         if line.startswith("  HostName "):
@@ -79,7 +77,7 @@ class VagrantProvider(Provider):
 
     #     return connection_info
 
-    def __get_connection_info(self, connection_config: str, credential: str) -> dict:
+    def _get_connection_info(self, connection_config: str, credential: str) -> dict:
         connection_info = {}
         patterns = {'hostname': r'HostName (.*)',
                     'user': r'User (.*)',
@@ -96,20 +94,20 @@ class VagrantProvider(Provider):
 
         return connection_info
 
-    def __generate_credentials(self, name: str, working_dir: str):
-        credential = VagrantCredential(name, working_dir)
+    def _generate_credentials(self, name: str, path: str):
+        credential = VagrantCredential(name, path)
         credential.create()
         return credential.name
 
-    def __run_vagrant_command(self, command: str):
+    def _run_vagrant_command(self, command: str):
         output = subprocess.run(["vagrant", command],
-                                cwd=self.path,
+                                cwd=self.working_dir,
                                 check=True,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
         return output.stdout.decode("utf-8")
 
-    def __get_config(self, instance_params: InstanceParams) -> VagrantConfig:
+    def _get_config(self, instance_params: InstanceParams) -> VagrantConfig:
         config = {}
 
         composite_name = instance_params.composite_name
@@ -127,7 +125,7 @@ class VagrantProvider(Provider):
 
         return VagrantConfig(**config)
 
-    def __render_vagrantfile(self, config: dict, credential: str) -> str:
+    def _render_vagrantfile(self, config: dict, credential: str) -> str:
         template_path = TEMPLATES_DIR / 'vagrant'
         template_loader = jinja2.FileSystemLoader(searchpath=template_path)
         template_env = jinja2.Environment(loader=template_loader)

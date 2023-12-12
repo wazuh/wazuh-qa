@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 import yaml
 
-from ..credentials.interface import Credentials
+from ..credentials.base import Credentials
 from ..models import Instance, InstanceParams
 
 TEMPLATES_DIR = Path(__file__).parent / 'templates'
@@ -13,10 +13,9 @@ ROLES_PATH = SPECS_DIR / 'roles.yml'
 
 class Provider():
 
-    def __init__(self, instance_params: InstanceParams, working_dir: str):
+    def __init__(self):
         # self.credential = None
-        self.instance_params = instance_params
-        self.path = Path(working_dir, instance_params.name)
+        self.working_dir = Path()
         self.instance: Instance = None
 
     @abstractmethod
