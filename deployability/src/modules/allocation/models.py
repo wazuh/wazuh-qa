@@ -8,6 +8,7 @@ class VagrantConfig(BaseModel):
     box: str
     box_version: str
 
+
 class AWSConfig(BaseModel):
     pass
 
@@ -21,11 +22,18 @@ class InstanceParams(BaseModel):
 
 class Instance(BaseModel):
     name: str
-    status: str
-    params: dict
+    params: InstanceParams
     path: str
-    id: str
-    credential: str
-    connection_info: dict
     provider: str
+    credential: str | None
+    connection_info: dict | None
     provider_config: VagrantConfig | AWSConfig
+
+
+class Inventory(BaseModel):
+    name: str
+    ansible_host: str
+    ansible_user: str
+    ansible_port: int
+    ansible_ssh_private_key_file: str
+    install: list[dict] | None
