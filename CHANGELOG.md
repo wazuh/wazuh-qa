@@ -17,6 +17,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Include ATP repository update before the installation of Ubuntu E2E agent installation ([#4761](https://github.com/wazuh/wazuh-qa/pull/4761)) \- (Framework)
+- Enhance macOS deployment ansible taks ([#4685](https://github.com/wazuh/wazuh-qa/pull/4685)) \- (Framework)
 - Updated Filebeat module to 0.3 ([#4700](https://github.com/wazuh/wazuh-qa/pull/4700)) \- (Framework)
 - Change database v13 to v12. ([#4677](https://github.com/wazuh/wazuh-qa/pull/4677)) \- (Tests)
 - Enable Windows Vulnerability Detector E2E. ([#4251](https://github.com/wazuh/wazuh-qa/pull/4251)) \- (Tests)
@@ -34,7 +36,11 @@ All notable changes to this project will be documented in this file.
 
 ## [4.7.1] - TBD
 
-## [4.7.0] - TBD
+### Changed
+
+- Add XFAIL mark to Cluster reliability logs test. ([#4706](https://github.com/wazuh/wazuh-qa/pull/4706)) \- (Tests)
+
+## [4.7.0] - 27/11/2023
 
 ### Added
 
