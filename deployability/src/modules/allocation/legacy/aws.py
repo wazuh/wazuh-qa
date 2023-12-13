@@ -10,25 +10,25 @@ class AWSInfra():
     OS_SPECS_PATH = os.path.join(SPECS_DIR, 'os.yml')
     ROLE_SPECS_PATH = os.path.join(SPECS_DIR, 'roles.yml')
 
-    def init(self, instance_params: dict, working_dir: str, name: str):
+    def init(self, instance_params: dict, base_dir: str, name: str):
         self.ec2 = boto3.resource('ec2')
         self.name = name
         self.instance_params = instance_params
-        self.instance_dir = os.path.join(working_dir, name)
+        self.instance_dir = os.path.join(base_dir, name)
         if not os.path.exists(self.instance_dir):
             os.makedirs(self.instance_dir)
-        self.credential = AWSCredential(self.name,working_dir)
+        self.credential = AWSCredential(self.name,base_dir)
         self.credential.create()
         self.connection_info = dict()
         self.provider_specific = dict()
 
     
-    def from_db(self, db: dict, working_dir: str):
+    def from_db(self, db: dict, base_dir: str):
         self.ec2 = boto3.resource('ec2')
         self.name = db['name']
         self.instance_params = db['instance_params']
         self.instance_dir = db['instance_dir']
-        self.credential = AWSCredential(self.name, working_dir)
+        self.credential = AWSCredential(self.name, base_dir)
         self.connection_info = db['connection_info']
         self.provider_specific = db['provider_specific']
 
@@ -105,18 +105,18 @@ class AWSInfra():
         shutil.rmtree(self.instance_dir)
 
 class AWSCredential():
-    def __init__(self, name, working_dir):
+    def __init__(self, name, base_dir):
         self.name = name
         self.ec2 = boto3.resource('ec2')
-        self.working_dir = os.path.join(working_dir, name)
+        self.base_dir = os.path.join(base_dir, name)
 
     def create(self):
         response = self.ec2.create_key_pair(KeyName=str(self.name))
-        with open(os.path.join(self.working_dir, self.name) + '.pem', 'w') as key_file:
+        with open(os.path.join(self.base_dir, self.name) + '.pem', 'w') as key_file:
             key_file.write(response.key_material)
-        os.chmod(os.path.join(self.working_dir, self.name) + '.pem', 0o600)
+        os.chmod(os.path.join(self.base_dir, self.name) + '.pem', 0o600)
 
     def delete(self):
         self.ec2.KeyPair(self.name).delete()
-        os.remove(os.path.join(self.working_dir, self.name) + '.pem')
+        os.remove(os.path.join(self.base_dir, self.name) + '.pem')
         

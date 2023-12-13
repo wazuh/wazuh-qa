@@ -12,19 +12,19 @@ class VagrantInfra():
     OS_SPECS_PATH = os.path.join(SPECS_DIR, 'os.yml')
     ROLE_SPECS_PATH = os.path.join(SPECS_DIR, 'roles.yml')
 
-    def init(self, instance_params: dict, working_dir: str, name: str):
+    def init(self, instance_params: dict, base_dir: str, name: str):
         self.name = name
         self.instance_params = instance_params
-        self.instance_dir = os.path.join(working_dir, name)
+        self.instance_dir = os.path.join(base_dir, name)
         if not os.path.exists(self.instance_dir):
             os.makedirs(self.instance_dir)
-        self.credential = VagrantCredentials(self.name, working_dir)
+        self.credential = VagrantCredentials(self.name, base_dir)
         self.credential.create()
         self.connection_info = dict()
         self.provider_specific = dict()
 
     
-    def from_db(self, db: dict, working_dir: str):
+    def from_db(self, db: dict, base_dir: str):
         self.name = db['name']
         self.instance_params = db['instance_params']
         self.instance_dir = db['instance_dir']
@@ -115,19 +115,19 @@ class VagrantInfra():
         stderr=subprocess.PIPE)
 
 class VagrantCredentials():
-    def __init__(self, name, working_dir):
+    def __init__(self, name, base_dir):
         self.name = name
-        self.working_dir = os.path.join(working_dir, name)
+        self.base_dir = os.path.join(base_dir, name)
 
     def create(self):
         command = ["ssh-keygen",
-                        "-f", os.path.join(self.working_dir, self.name),
+                        "-f", os.path.join(self.base_dir, self.name),
                         "-m", "PEM",
                         "-t", "rsa",
                         "-N", "",
                         "-q"]
         output = subprocess.run(command, check=True)
-        os.chmod(os.path.join(self.working_dir, self.name), 0o600)
+        os.chmod(os.path.join(self.base_dir, self.name), 0o600)
         if output.returncode != 0:
             raise Exception("Error creating key pair")
 

@@ -1,16 +1,5 @@
+from pathlib import Path
 from pydantic import BaseModel
-
-
-class VagrantConfig(BaseModel):
-    cpu: int
-    memory: int
-    ip: str
-    box: str
-    box_version: str
-
-
-class AWSConfig(BaseModel):
-    pass
 
 
 class InstanceParams(BaseModel):
@@ -20,14 +9,18 @@ class InstanceParams(BaseModel):
     composite_name: str
 
 
+class ProviderConfig(BaseModel):
+    pass
+
+
 class Instance(BaseModel):
     name: str
     params: InstanceParams
     path: str
     provider: str
-    credential: str | None
+    credential: str | Path
     connection_info: dict | None
-    provider_config: VagrantConfig | AWSConfig
+    provider_config: ProviderConfig
 
 
 class Inventory(BaseModel):
@@ -37,3 +30,15 @@ class Inventory(BaseModel):
     ansible_port: int
     ansible_ssh_private_key_file: str
     install: list[dict] | None
+
+
+class VagrantConfig(ProviderConfig):
+    cpu: int
+    memory: int
+    ip: str
+    box: str
+    box_version: str
+
+
+class AWSConfig(ProviderConfig):
+    pass

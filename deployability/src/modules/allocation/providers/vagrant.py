@@ -1,39 +1,45 @@
 from pathlib import Path
 import re
 import subprocess
+import uuid
 import jinja2
-import yaml
+
 from fnmatch import fnmatch
 
 from ..credentials.vagrant import VagrantCredential
-from ..models import Instance, InstanceParams, VagrantConfig
+from ..models import Instance, InstanceParams, Inventory, VagrantConfig
 from .base import Provider, TEMPLATES_DIR
 
 
 class VagrantProvider(Provider):
 
-    def __init__(self, instance_params: InstanceParams, working_dir: str):
-        super().__init__(instance_params, working_dir=working_dir)
+    def __init__(self, base_dir: Path | str, name: str, instance_params: InstanceParams) -> None:
+        super().__init__(base_dir, name, instance_params)
 
-    def create(self, instance_params: InstanceParams, working_dir: str):
-        credential = self._generate_credentials(instance_params, working_dir)
-        config = self._get_config(instance_params)
-        vagrantfile = self._render_vagrantfile(config, credential)
-
-        self.instance = self._generate_instance(instance_params, working_dir, credential, config)
-
+    def create(self) -> Instance:
+        if self.instance:
+            return self.instance
         if not self.working_dir.exists():
             self.working_dir.mkdir(parents=True, exist_ok=True)
 
-        with open(self.working_dir / 'Vagrantfile', 'w') as f:
-            f.write(vagrantfile)
+        priv = self.key_pair.get('private')
+        pub = self.key_pair.get('public')
+        self.config = self._parse_config()
+        self.instance = self._get_instance(priv)
+        # Render and write Vagrantfile
+        vagrantfile = self._render_vagrantfile(pub)
+        self._save_vagrantfile(vagrantfile)
+
+        return self.instance
 
     def start(self):
         if not self.instance:
             return
         self._run_vagrant_command('up')
         ssh_config = self._run_vagrant_command('ssh-config')
-        connection_info = self._get_connection_info(ssh_config)
+        priv = self.key_pair.get('private')
+        # This must be the inventory
+        connection_info = self._get_connection_info(ssh_config, priv)
         self.instance.connection_info = connection_info
 
     def stop(self):
@@ -41,7 +47,7 @@ class VagrantProvider(Provider):
             return
         self._run_vagrant_command('halt')
 
-    def delete(self):
+    def destroy(self):
         if not self.instance:
             return
         self._run_vagrant_command('destroy -f')
@@ -51,31 +57,26 @@ class VagrantProvider(Provider):
             return
         self._run_vagrant_command('status')
 
-    def generate_inventory(self):
+    def delete(self):
+        if not self.instance:
+            return
+        self._run_vagrant_command('destroy -f')
+        self.working_dir.rmdir()
+
+    def get_inventory(self) -> Inventory:
         pass
 
-    def _generate_instance(self, instance_params: InstanceParams, path: str, credential: str, config: dict) -> Instance:
-        instance = Instance(name=instance_params.name,
-                            params=instance_params,
-                            path=path,
+    # Private methods
+
+    def _get_instance(self) -> Instance:
+        instance = Instance(name=self.name,
+                            params=self.instance_params,
+                            path=self.working_dir,
                             provider='vagrant',
-                            credential=credential,
+                            credential=self.key_pair.get('private'),
                             connection_info=None,
-                            provider_config=config)
+                            provider_config=self.config)
         return instance
-
-    # def _get_connection_info(self, connection_config: str, credential: str) -> dict:
-    #     connection_info = {}
-    #     for line in connection_config.splitlines():
-    #         if line.startswith("  HostName "):
-    #             connection_info['hostname'] = line.split()[1]
-    #         elif line.startswith("  User "):
-    #             connection_info['user'] = line.split()[1]
-    #         elif line.startswith("  Port "):
-    #             connection_info['port'] = line.split()[1]
-    #     connection_info['key'] = credential
-
-    #     return connection_info
 
     def _get_connection_info(self, connection_config: str, credential: str) -> dict:
         connection_info = {}
@@ -83,6 +84,7 @@ class VagrantProvider(Provider):
                     'user': r'User (.*)',
                     'port': r'Port (.*)'}
 
+        connection_info['key'] = credential
         for key, pattern in patterns.items():
             match = re.search(pattern, connection_config)
             if match:
@@ -90,33 +92,32 @@ class VagrantProvider(Provider):
             else:
                 raise ValueError(f"Couldn't find {key} in connection_config")
 
-        connection_info['key'] = credential
-
         return connection_info
 
-    def _generate_credentials(self, name: str, path: str):
-        credential = VagrantCredential(name, path)
-        credential.create()
-        return credential.name
+    def _generate_key_pair(self) -> tuple[str, str]:
+        cred = VagrantCredential(self.working_dir, self.name)
+        private, public = cred.generate_key()
+        return {'private': private, 'public': public}
 
     def _run_vagrant_command(self, command: str):
         output = subprocess.run(["vagrant", command],
-                                cwd=self.working_dir,
+                                cwd=self.base_dir,
                                 check=True,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
         return output.stdout.decode("utf-8")
 
-    def _get_config(self, instance_params: InstanceParams) -> VagrantConfig:
+    def _parse_config(self) -> VagrantConfig:
         config = {}
 
-        composite_name = instance_params.composite_name
+        composite_name = self.instance_params.composite_name
         roles = self._get_role_specs('vagrant')
         os_specs = self._get_os_specs('vagrant')
 
+        config['id'] = self.__generate_instance_id()
         config['box'] = os_specs[composite_name]['box']
         config['box_version'] = os_specs[composite_name]['box_version']
-        for pattern, specs in roles[instance_params.role].items():
+        for pattern, specs in roles[self.instance_params.role].items():
             if fnmatch(composite_name, pattern):
                 config['cpu'] = specs['cpu']
                 config['memory'] = specs['memory']
@@ -125,10 +126,18 @@ class VagrantProvider(Provider):
 
         return VagrantConfig(**config)
 
-    def _render_vagrantfile(self, config: dict, credential: str) -> str:
+    def _render_vagrantfile(self, credential: str) -> str:
         template_path = TEMPLATES_DIR / 'vagrant'
         template_loader = jinja2.FileSystemLoader(searchpath=template_path)
         template_env = jinja2.Environment(loader=template_loader)
         loaded_template = template_env.get_template(template_path)
 
-        return loaded_template.render(config=config, credential=credential)
+        return loaded_template.render(config=self.config, credential=credential)
+
+    def _save_vagrantfile(self, vagrantfile: str) -> None:
+        with open(self.working_dir / 'Vagrantfile', 'w') as f:
+            f.write(vagrantfile)
+
+    def __generate_instance_id(self, prefix: str = "VAGRANT") -> str:
+        """Generates a random instance name with the given prefix."""
+        return f"{prefix}-{uuid.uuid4()}"
