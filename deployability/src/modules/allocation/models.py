@@ -24,12 +24,10 @@ class Instance(BaseModel):
 
 
 class Inventory(BaseModel):
-    name: str
     ansible_host: str
     ansible_user: str
     ansible_port: int
     ansible_ssh_private_key_file: str
-    install: list[dict] | None
 
 
 class VagrantConfig(ProviderConfig):

@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 import yaml
 
 # from ..credentials.base import Credentials
-from ..models import Instance, InstanceParams, ProviderConfig
+from ..models import Instance, InstanceParams, Inventory, ProviderConfig
 
 TEMPLATES_DIR = Path(__file__).parent / 'templates'
 SPECS_DIR = Path(__file__).parent / 'specs'
@@ -15,13 +15,14 @@ ROLES_PATH = SPECS_DIR / 'roles.yml'
 class Provider(ABC):
 
     def __init__(self, base_dir: Path | str, name: str, instance_params: InstanceParams):
-        self.name = str(name)
         self.working_dir = Path(base_dir, str(name))
+        self.name = str(name)
         self.instance_params = InstanceParams(**instance_params)
         self.key_pair = self._generate_key_pair()
 
-        self.instance: Instance = None
         self.config: ProviderConfig = None
+        self.instance: Instance = None
+        self.inventory: Inventory = None
 
     @abstractmethod
     def create(self, **kwargs) -> Instance:
@@ -41,10 +42,6 @@ class Provider(ABC):
 
     @abstractmethod
     def status(self):
-        raise NotImplementedError()
-
-    @abstractmethod
-    def get_ansible_inventory(self):
         raise NotImplementedError()
 
     @abstractmethod

@@ -25,22 +25,20 @@ class VagrantProvider(Provider):
         priv = self.key_pair.get('private')
         pub = self.key_pair.get('public')
         self.config = self._parse_config()
-        self.instance = self._get_instance(priv)
+        self.instance = self._generate_instance(priv)
         # Render and write Vagrantfile
         vagrantfile = self._render_vagrantfile(pub)
         self._save_vagrantfile(vagrantfile)
 
         return self.instance
 
-    def start(self):
+    def start(self) -> Inventory:
         if not self.instance:
             return
         self._run_vagrant_command('up')
-        ssh_config = self._run_vagrant_command('ssh-config')
-        priv = self.key_pair.get('private')
-        # This must be the inventory
-        connection_info = self._get_connection_info(ssh_config, priv)
-        self.instance.connection_info = connection_info
+        self.inventory = self._parse_inventory()
+
+        return self.inventory
 
     def stop(self):
         if not self.instance:
@@ -60,52 +58,30 @@ class VagrantProvider(Provider):
     def delete(self):
         if not self.instance:
             return
-        self._run_vagrant_command('destroy -f')
+        self.destroy()
         self.working_dir.rmdir()
-
-    def get_inventory(self) -> Inventory:
-        pass
+        self.inventory = None
+        self.instance = None
 
     # Private methods
 
-    def _get_instance(self) -> Instance:
-        instance = Instance(name=self.name,
-                            params=self.instance_params,
-                            path=self.working_dir,
-                            provider='vagrant',
-                            credential=self.key_pair.get('private'),
-                            connection_info=None,
-                            provider_config=self.config)
-        return instance
+    def _parse_inventory(self) -> Inventory:
+        inventory = {}
+        private_key = self.key_pair.get('private')
+        ssh_config = self._run_vagrant_command('ssh-config')
+        patterns = {'ansible_hostname': r'HostName (.*)',
+                    'ansible_user': r'User (.*)',
+                    'ansible_port': r'Port (.*)'}
 
-    def _get_connection_info(self, connection_config: str, credential: str) -> dict:
-        connection_info = {}
-        patterns = {'hostname': r'HostName (.*)',
-                    'user': r'User (.*)',
-                    'port': r'Port (.*)'}
-
-        connection_info['key'] = credential
+        inventory['ansible_ssh_private_key_file'] = private_key
         for key, pattern in patterns.items():
-            match = re.search(pattern, connection_config)
+            match = re.search(pattern, ssh_config)
             if match:
-                connection_info[key] = match.group(1)
+                inventory[key] = match.group(1)
             else:
-                raise ValueError(f"Couldn't find {key} in connection_config")
+                raise ValueError(f"Couldn't find {key} in vagrant ssh-config")
 
-        return connection_info
-
-    def _generate_key_pair(self) -> tuple[str, str]:
-        cred = VagrantCredential(self.working_dir, self.name)
-        private, public = cred.generate_key()
-        return {'private': private, 'public': public}
-
-    def _run_vagrant_command(self, command: str):
-        output = subprocess.run(["vagrant", command],
-                                cwd=self.base_dir,
-                                check=True,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
-        return output.stdout.decode("utf-8")
+        return Inventory(**inventory)
 
     def _parse_config(self) -> VagrantConfig:
         config = {}
@@ -126,6 +102,33 @@ class VagrantProvider(Provider):
 
         return VagrantConfig(**config)
 
+    def _generate_instance(self) -> Instance:
+        instance = Instance(name=self.name,
+                            params=self.instance_params,
+                            path=self.working_dir,
+                            provider='vagrant',
+                            credential=self.key_pair.get('private'),
+                            connection_info=None,
+                            provider_config=self.config)
+        return instance
+
+    def _generate_key_pair(self) -> tuple[str, str]:
+        cred = VagrantCredential(self.working_dir, self.name)
+        private, public = cred.generate_key()
+        return {'private': private, 'public': public}
+
+    def __generate_instance_id(self, prefix: str = "VAGRANT") -> str:
+        """Generates a random instance name with the given prefix."""
+        return f"{prefix}-{uuid.uuid4()}"
+
+    def _run_vagrant_command(self, command: str):
+        output = subprocess.run(["vagrant", command],
+                                cwd=self.base_dir,
+                                check=True,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        return output.stdout.decode("utf-8")
+
     def _render_vagrantfile(self, credential: str) -> str:
         template_path = TEMPLATES_DIR / 'vagrant'
         template_loader = jinja2.FileSystemLoader(searchpath=template_path)
@@ -137,7 +140,3 @@ class VagrantProvider(Provider):
     def _save_vagrantfile(self, vagrantfile: str) -> None:
         with open(self.working_dir / 'Vagrantfile', 'w') as f:
             f.write(vagrantfile)
-
-    def __generate_instance_id(self, prefix: str = "VAGRANT") -> str:
-        """Generates a random instance name with the given prefix."""
-        return f"{prefix}-{uuid.uuid4()}"
