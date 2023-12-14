@@ -40,16 +40,22 @@ systemctl disable firewalld
 yum install python36 python36-pip python36-devel -y
 ```
 
-- Add some internal options and restart
+- Avoid agent disconnections when travelling in time (only for agents)
 ```shell script
-# Avoid agent disconnections when travelling in time (only for agents)
+
 sed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g" /var/ossec/etc/ossec.conf
 
-# Disable log rotation
-echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
+```
 
-# Restart Wazuh
+- Disable log rotation
+```shell script
+echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
+```
+
+- Restart Wazuh
+```shell script
 /var/ossec/bin/wazuh-control restart
+
 ```
 
 - Install integration tests dependencies
@@ -91,8 +97,8 @@ python -m pip install . -e
 ```
 
 - Add some internal options
-# Disable log rotation
 ```shell script
+# Disable log rotation
 echo 'monitord.rotate_log=0' >> "C:\Program Files (x86)\ossec-agent\local_internal_options.conf"
 ```
 
