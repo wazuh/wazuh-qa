@@ -55,7 +55,6 @@ echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
 - Restart Wazuh
 ```shell script
 /var/ossec/bin/wazuh-control restart
-
 ```
 
 - Install integration tests dependencies
