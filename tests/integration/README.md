@@ -40,6 +40,18 @@ systemctl disable firewalld
 yum install python36 python36-pip python36-devel -y
 ```
 
+- Add some internal options and restart
+```shell script
+# Avoid agent disconnections when travelling in time (only for agents)
+sed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g" /var/ossec/etc/ossec.conf
+
+# Disable log rotation
+echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
+
+# Restart Wazuh
+/var/ossec/bin/wazuh-control restart
+```
+
 - Install integration tests dependencies
 
 ```shell script
@@ -56,8 +68,7 @@ python setup.py install
 
 > [!NOTE]
 > When developing tests, utilize the following command to seamlessly update the framework with each modification.
-
-```
+```shell script
 python -m pip install . -e
 ```
 
@@ -73,6 +84,19 @@ python -m pip install . -e
 
 - Download and install [chocolatey](https://chocolatey.org/docs/installation) to be able to install `jq` using the
   terminal.
+
+- Change `time-reconnect` from `C:\Program Files (x86)\ossec-agent\ossec.conf`
+```xml
+<time-reconnect>99999999999</time-reconnect>
+```
+
+- Add some internal options
+# Disable log rotation
+```shell script
+echo 'monitord.rotate_log=0' >> "C:\Program Files (x86)\ossec-agent\local_internal_options.conf"
+```
+
+- Restart **Wazuh** using the GUI
 
 - Install `jq`:
 
@@ -111,6 +135,19 @@ python -m pip install . -e
 
 ```shell script
 brew install python3
+```
+
+- Add some internal options and restart
+```shell script
+# Avoid agent disconnections when travelling in time
+brew install gnu-sed
+gsed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g" /Library/Ossec/etc/ossec.conf
+
+# Disable log rotation
+echo 'monitord.rotate_log=0' >> /Library/Ossec/etc/local_internal_options.conf
+
+# Restart Wazuh
+/Library/Ossec/bin/wazuh-control restart
 ```
 
 - Install Python and its dependencies
