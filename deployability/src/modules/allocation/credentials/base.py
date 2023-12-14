@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 class Credential(ABC):
-    """Interface for Credentials"""
+    """Base class for Credentials"""
     class KeyCreationError(Exception):
         pass
 
@@ -17,10 +17,10 @@ class Credential(ABC):
 
     @abstractmethod
     def generate_key(self, **kwargs) -> tuple[str, str] | None:
-        """Get credentials"""
-        raise NotImplementedError()
+        """Generate credentials key pair"""
+        pass
 
     @abstractmethod
     def delete(self, **kwargs):
-        """Set credentials"""
-        raise NotImplementedError()
+        """Delete credentials key pair"""
+        pass

@@ -39,7 +39,7 @@ class VagrantCredential(Credential):
             overwrite (bool): Whether to overwrite the existing key pair. Defaults to False.
 
         Returns:
-            A tuple containing the paths to the private and public keys.
+            tuple(str, str): The paths to the private and public keys.
 
         Raises:
             KeyCreationError: An error occurred while creating the key.
