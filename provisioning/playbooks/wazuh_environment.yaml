@@ -64,8 +64,3 @@
           import_role:
             name: "../roles/wazuh/ansible-wazuh-agent"
           when: ansible_os_family != "Windows"
-
-        - name: Install Windows based agents
-          import_role:
-            name: "../roles/wazuh/ansible-wazuh-agent"
-          when: ansible_os_family == "Windows"
