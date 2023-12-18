@@ -53,11 +53,8 @@
         username: wazuh
         password: wazuh
 
-# Agent
 - hosts: agent
-  tasks:
-    - name: Agents
-      block:
-        - name: Install UNIX based agents
-          import_role:
-            name: "../roles/wazuh/ansible-wazuh-agent"
+  roles:
+    - role: "../roles/wazuh/ansible-wazuh-agent"
+      become: "{{ ansible_os_family != 'Windows' }}"
+      become_user: root
