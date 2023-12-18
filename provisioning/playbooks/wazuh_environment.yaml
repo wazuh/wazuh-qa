@@ -59,8 +59,5 @@
     - name: Agents
       block:
         - name: Install UNIX based agents
-          become: true
-          become_user: root
           import_role:
             name: "../roles/wazuh/ansible-wazuh-agent"
-          when: ansible_os_family != "Windows"

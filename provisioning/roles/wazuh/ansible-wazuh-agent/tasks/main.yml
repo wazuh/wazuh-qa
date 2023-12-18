@@ -22,10 +22,13 @@
   when: ansible_os_family == "Windows"
 
 - include_tasks: "Linux.yml"
+  become: true
   when: ansible_system == "Linux"
 
 - include_tasks: "MacOS.yml"
+  become: true
   when: ansible_system == "Darwin"
 
 - include_tasks: "Solaris.yml"
+  become: true
   when: ansible_os_family == "Solaris"
