@@ -18,8 +18,8 @@ class VagrantInfra():
         self.instance_dir = os.path.join(base_dir, name)
         if not os.path.exists(self.instance_dir):
             os.makedirs(self.instance_dir)
-        self.credential = VagrantCredentials(self.name, base_dir)
-        self.credential.create()
+        self.credentials = VagrantCredentialss(self.name, base_dir)
+        self.credentials.create()
         self.connection_info = dict()
         self.provider_specific = dict()
 
@@ -28,7 +28,7 @@ class VagrantInfra():
         self.name = db['name']
         self.instance_params = db['instance_params']
         self.instance_dir = db['instance_dir']
-        self.credential = db['credential']
+        self.credentials = db['credential']
         self.connection_info = db['connection_info']
         self.provider_specific = db['provider_specific']
 
@@ -38,7 +38,7 @@ class VagrantInfra():
             'name': self.name,
             'instance_params': self.instance_params,
             'instance_dir': self.instance_dir,
-            'credential': self.credential.name,
+            'credential': self.credentials.name,
             'connection_info': self.connection_info,
             'provider_specific': self.provider_specific
         }
@@ -75,7 +75,7 @@ class VagrantInfra():
         Vagrant.configure("2") do |config|
             config.vm.box = "{self.provider_specific['box']}"
             config.vm.box_version = "{self.provider_specific['box_version']}"
-            config.vm.provision "file", source: "{self.credential.name}.pub", destination: ".ssh/authorized_keys"
+            config.vm.provision "file", source: "{self.credentials.name}.pub", destination: ".ssh/authorized_keys"
             config.vm.network "private_network", ip:"{self.provider_specific['ip']}"
             config.vm.provider "virtualbox" do |v|
                 v.memory = {self.provider_specific['memory']}
@@ -104,7 +104,7 @@ class VagrantInfra():
                 self.connection_info['user'] = line.split()[1]
             elif line.startswith("  Port "):
                 self.connection_info['port'] = line.split()[1]
-        self.connection_info['key'] = os.path.join(self.instance_dir, self.credential.name)
+        self.connection_info['key'] = os.path.join(self.instance_dir, self.credentials.name)
 
     def stop(self):
         subprocess.run(["vagrant", "halt"], cwd=self.instance_dir, check=True, stdout=subprocess.PIPE,
@@ -114,7 +114,7 @@ class VagrantInfra():
         subprocess.run(["vagrant", "status"], cwd=self.instance_dir, check=True, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
 
-class VagrantCredentials():
+class VagrantCredentialss():
     def __init__(self, name, base_dir):
         self.name = name
         self.base_dir = os.path.join(base_dir, name)

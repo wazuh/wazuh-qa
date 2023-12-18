@@ -3,35 +3,34 @@ import subprocess
 
 from pathlib import Path
 
-from .base import Credential
+from .generic import Credentials, CredentialsKeyPair
 
 
-class VagrantCredential(Credential):
+class VagrantCredentials(Credentials):
     """
     A class for generating and deleting Vagrant credentials.
 
     Attributes:
-        base_dir (Path): The base directory for the credentials.
+        path (Path): The path to store the credentials.
         name (str): The name of the credentials.
-        private_key (Path): The path to the private key.
-        public_key (Path): The path to the public key.
+        key_pair (CredentialsKeyPair): The key pair.
 
     Raises:
         KeyCreationError: An error occurred while creating the key.
 
     """
 
-    def __init__(self, base_dir: str | Path, name: str) -> None:
+    def __init__(self, path: str | Path, name: str) -> None:
         """
-        Initializes the VagrantCredential object.
+        Initializes the VagrantCredentials object.
 
         Args:
-            base_dir (Path): The base directory for the credentials.
+            path (Path): The path to store the credentials.
             name (str): The name of the credentials.
         """
-        super().__init__(base_dir, name)
+        super().__init__(path, name)
 
-    def generate_key(self, overwrite: bool = False) -> tuple[str, str] | None:
+    def generate_key_pair(self, overwrite: bool = False) -> CredentialsKeyPair:
         """
         Generates a new key pair and returns it.
 
@@ -39,39 +38,46 @@ class VagrantCredential(Credential):
             overwrite (bool): Whether to overwrite the existing key pair. Defaults to False.
 
         Returns:
-            tuple(str, str): The paths to the private and public keys.
+            CredentialsKeyPair: The paths of the key pair.
 
         Raises:
             KeyCreationError: An error occurred while creating the key.
 
         """
-        if self.private_key and self.public_key and not overwrite:
-            return str(self.private_key), str(self.public_key)
-        if not self.base_dir.exists():
-            self.base_dir.mkdir(parents=True, exist_ok=True)
+        if self.key_pair and not overwrite:
+            return self.key_pair
 
-        path = self.base_dir / self.name
+        private_key_path = Path(self.path / self.name)
+        public_key_path = private_key_path.with_suffix(".pub")
+        # Create the base directory if it doesn't exist.
+        if not self.path.exists():
+            self.path.mkdir(parents=True, exist_ok=True)
+        # Delete the existing key pair if it exists.
+        if private_key_path.exists():
+            private_key_path.unlink()
+        if public_key_path.exists():
+            public_key_path.unlink()
+
         command = ["ssh-keygen",
-                   "-f", str(path),
+                   "-f", str(private_key_path),
                    "-m", "PEM",
                    "-t", "rsa",
                    "-N", "",
                    "-q"]
-        output = subprocess.run(command, check=True, capture_output=True, text=True)
-        os.chmod(path, 0o600)
+        output = subprocess.run(command, check=True,
+                                capture_output=True, text=True)
+        os.chmod(private_key_path, 0o600)
         if output.returncode != 0:
-            raise self.KeyCreationError(f"Error creating key pair: {output.stderr}")
+            raise self.KeyCreationError(
+                f"Error creating key pair: {output.stderr}")
+        self.key_pair = CredentialsKeyPair(public_key=str(public_key_path),
+                                           private_key=str(private_key_path))
+        return self.key_pair
 
-        self.private_key = path
-        self.public_key = path.with_suffix(".pub")
-
-        return str(self.private_key), str(self.public_key)
-
-    def delete(self) -> None:
+    def delete_key_pair(self) -> None:
         """Deletes the key pair."""
-        if self.private_key:
-            self.private_key.unlink(missing_ok=True)
-            self.private_key = None
-        if self.public_key:
-            self.public_key.unlink(missing_ok=True)
-            self.public_key = None
+        if not self.key_pair:
+            return
+        Path(self.key_pair.private_key).unlink()
+        Path(self.key_pair.public_key).unlink()
+        self.key_pair = None

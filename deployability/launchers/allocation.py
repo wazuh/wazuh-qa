@@ -82,10 +82,27 @@ sys.path.append(project_root)
 from src.modules.allocation import providers, credentials
 
 def main():
-    creds = credentials.VagrantCredential("/tmp", "test")
-    test = creds.generate()
+    creds = credentials.VagrantCredentials("/tmp/test", "test_keys")
+    test = creds.generate_key_pair()
     print(test)
-    creds.delete()
+    # creds.delete_key_pair()
+    
+    # {'name': str,
+    # 'role': str,
+    # 'alias': str,
+    # 'composite_name': str}
+
+    provider = providers.VagrantProvider("/tmp",  {'name': 'test',
+    'role': 'manager',
+    'alias': 'str',
+    'composite_name': 'linux-ubuntu-22.04-amd64'}, test)
+    instance = provider.create()
+    
+    print(instance)
+    provider.start()
+    # CLeanup
+    provider.delete()
+    creds.delete_key_pair()
 
 
 if __name__ == "__main__":

@@ -1,10 +1,38 @@
-from pathlib import Path
-from abc import ABC, abstractmethod
-
 import yaml
 
-from . import OS_PATH, ROLES_PATH
-from ..models import Instance, InstanceParams, Inventory, ProviderConfig
+from abc import ABC, abstractmethod
+from pathlib import Path
+from pydantic import BaseModel
+
+from ..credentials.generic import CredentialsKeyPair
+from .handlers.generic import ConnectionInfo
+
+# Paths to the templates and specs directories.
+ROOT_DIR = Path(__file__).parent / 'static'
+TEMPLATES_DIR = ROOT_DIR / 'templates'
+SPECS_DIR = ROOT_DIR / 'specs'
+OS_PATH = SPECS_DIR / 'os.yml'
+ROLES_PATH = SPECS_DIR / 'roles.yml'
+
+
+class ProviderConfig(BaseModel):
+    pass
+
+
+class InstanceParams(BaseModel):
+    name: str
+    role: str
+    alias: str
+    composite_name: str
+
+
+class InstanceDefinition(BaseModel):
+    name: str
+    params: InstanceParams
+    path: str
+    provider: str
+    credentials: CredentialsKeyPair
+    provider_config: ProviderConfig
 
 
 class Provider(ABC):
@@ -15,30 +43,23 @@ class Provider(ABC):
         provider_name (str): The name of the provider.
         working_dir (Path): The working directory for the provider.
         instance_params (InstanceParams): The instance parameters.
-        key_pair (dict): The key pair for the provider.
+        credentials (CredentialsKeyPair): The credentials key pair paths.
         config (ProviderConfig): The provider configuration.
-        instance (Instance): The instance.
-        inventory (Inventory): The inventory.
 
     """
 
-    def __init__(self, base_dir: Path | str, name: str, instance_params: InstanceParams):
+    _RUNNING = 'running'
+    _STOPPED = 'stopped'
+    _NOT_CREATED = 'not created'
+
+    def __init__(self) -> None:
         """
         Initializes the Provider object.
-
-        Args:
-            base_dir (Path): The base directory for the provider.
-            name (str): The name of the provider.
-            instance_params (InstanceParams): The instance parameters.
         """
-        self.working_dir = Path(base_dir, str(name))
-        self.name = str(name)
-        self.instance_params = InstanceParams(**instance_params)
-        self.key_pair = self._generate_key_pair()
-
-        self.config: ProviderConfig = None
-        self.instance: Instance = None
-        self.inventory: Inventory = None
+        self._working_dir: Path | str = None
+        self._handler = None
+        self.instance: InstanceDefinition = None
+        self.connection_info: ConnectionInfo = None
 
     @property
     @abstractmethod
@@ -47,23 +68,23 @@ class Provider(ABC):
         pass
 
     @abstractmethod
-    def create(self, **kwargs) -> Instance:
-        """
-        Creates a new instance.
-
-        Returns:
-            Instance: The instance specifications.
-        """
+    def create_instance(self, **kwargs) -> None:
+        """Creates a new instance."""
         pass
 
     @abstractmethod
-    def start(self) -> Inventory:
-        """
-        Starts the instance.
+    def load_instance(self, instance: InstanceDefinition) -> None:
+        """Loads an existing instance."""
+        pass
 
-        Returns:
-            Inventory: The ansible inventory of the instance.
-        """
+    @abstractmethod
+    def initialize(self) -> None:
+        """Initializes the instance."""
+        pass
+
+    @abstractmethod
+    def start(self):
+        """Starts the instance."""
         pass
 
     @abstractmethod
@@ -87,14 +108,15 @@ class Provider(ABC):
         pass
 
     @abstractmethod
-    def _generate_key_pair(self) -> tuple[str, str]:
+    def get_connection_info(self) -> ConnectionInfo:
         """
-        Generates a new key pair.
+        Returns the connection info of the instance.
 
         Returns:
-            tuple(str, str): The paths to the private and public keys.
+            ConnectionInfo: The instance's connection info.
         """
         pass
+
 
     def _get_os_specs(self) -> dict:
         """

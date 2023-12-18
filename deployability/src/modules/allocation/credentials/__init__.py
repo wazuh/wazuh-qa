@@ -1,1 +1,1 @@
-from .vagrant import VagrantCredential
+from .vagrant import VagrantCredentials

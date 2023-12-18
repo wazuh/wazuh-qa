@@ -1,15 +1,13 @@
-import jinja2
 import re
 import subprocess
 import uuid
 
-from pathlib import Path
 from fnmatch import fnmatch
+from pathlib import Path
+from jinja2 import Environment, FileSystemLoader
 
-from . import TEMPLATES_DIR
-from .base import Provider
-from ..credentials.vagrant import VagrantCredential
-from ..models import Instance, InstanceParams, Inventory, VagrantConfig
+from .generic import Provider, TEMPLATES_DIR
+from ..models import CredentialsKeyPair, InstanceDefinition, InstanceParams, Inventory, VagrantConfig
 
 
 class VagrantProvider(Provider):
@@ -20,69 +18,58 @@ class VagrantProvider(Provider):
         provider_name (str): The name of the provider.
         working_dir (Path): The working directory for the provider.
         instance_params (InstanceParams): The instance parameters.
-        key_pair (dict): The key pair for the provider.
+        credentials (CredentialsKeyPair): The credentials key pair paths.
         config (ProviderConfig): The provider configuration.
-        instance (Instance): The instance.
-        inventory (Inventory): The inventory.
     """
     provider_name = 'vagrant'
 
-    def __init__(self, base_dir: Path | str, name: str, instance_params: InstanceParams) -> None:
+    def __init__(self, base_dir: Path | str, instance_params: InstanceParams, credentials: CredentialsKeyPair) -> None:
         """Initializes the VagrantProvider object.
 
         Args:
             base_dir (Path): The base directory for the provider.
-            name (str): The name of the provider.
+            credentials (CredentialsKeyPair): The credentials key pair paths.
             instance_params (InstanceParams): The instance parameters.
         """
-        super().__init__(base_dir, name, instance_params)
+        super().__init__(base_dir, instance_params, credentials)
 
-    def create(self) -> Instance:
-        """Creates a new vagrant VM instance.
-
-        Returns:
-            Instance: The instance specifications.
-
-        """
-        if self.instance:
-            return self.instance
+    def create(self) -> None:
+        """Creates a new vagrant VM instance."""
+        if self._instance and self._inventory:
+            return
         if not self.working_dir.exists():
             self.working_dir.mkdir(parents=True, exist_ok=True)
-        self.config = self.__parse_config()
-        self.instance = self.__generate_instance()
+
+        # Get the config and the instance definitions.
+        self._config = self.__parse_config()
+        self._instance = self.__generate_instance()
         # Render and write Vagrantfile
         vagrantfile = self.__render_vagrantfile()
-        self.__save_vagrantfile(vagrantfile)
+        self.vagrantfile = self.__save_vagrantfile(vagrantfile)
+        # Start the VM and parse the inventory.
+        self.__run_vagrant_command('up')
+        self._inventory = self.__parse_inventory()
 
-        return self.instance
-
-    def start(self) -> Inventory:
-        """Starts the vagrant VM.
-
-        Returns:
-            Inventory: The ansible inventory of the instance.
-        """
-        if not self.instance:
+    def start(self) -> None:
+        """Starts the vagrant VM."""
+        if not self._instance:
             return
         self.__run_vagrant_command('up')
-        self.inventory = self.__parse_inventory()
-
-        return self.inventory
 
     def stop(self) -> None:
         """Stops the vagrant VM."""
-        if not self.instance:
+        if not self._instance:
             return
         self.__run_vagrant_command('halt')
 
     def delete(self) -> None:
         """Deletes the vagrant VM and cleans the environment."""
-        if not self.instance:
+        if not self._instance:
             return
         self.__run_vagrant_command('destroy -f')
         self.working_dir.rmdir()
-        self.inventory = None
-        self.instance = None
+        self._inventory = None
+        self._instance = None
 
     def status(self) -> str:
         """Checks the status of the vagrant VM.
@@ -90,23 +77,26 @@ class VagrantProvider(Provider):
         Returns:
             str: The status of the instance.
         """
-        if not self.instance:
+        if not self._instance:
             return
-        self.__run_vagrant_command('status')
+        output = self.__run_vagrant_command('status')
+        return self.__parse_vagrant_status(output)
 
-    # Private methods
-
-    def _generate_key_pair(self) -> tuple[str, str]:
-        """
-        Generates a new key pair and returns it.
+    def get_instance_info(self) -> InstanceDefinition:
+        """Returns the instance information.
 
         Returns:
-            tuple(str, str): The paths to the private and public keys.
-
+            InstanceDefinition: The instance information.
         """
-        cred = VagrantCredential(self.working_dir, self.name)
-        private, public = cred.generate_key()
-        return {'private': private, 'public': public}
+        return self._instance
+
+    def get_inventory(self) -> Inventory:
+        """Returns the inventory.
+
+        Returns:
+            Inventory: The inventory.
+        """
+        return self._inventory
 
     # Internal methods
 
@@ -117,13 +107,14 @@ class VagrantProvider(Provider):
             Inventory: The ansible inventory of the instance.
         """
         inventory = {}
-        private_key = self.key_pair.get('private')
+        private_key = self.credentials.private_key
         ssh_config = self.__run_vagrant_command('ssh-config')
         patterns = {'ansible_hostname': r'HostName (.*)',
                     'ansible_user': r'User (.*)',
                     'ansible_port': r'Port (.*)'}
         # Parse the inventory.
         inventory['ansible_ssh_private_key_file'] = private_key
+        print(ssh_config)
         for key, pattern in patterns.items():
             match = re.search(pattern, ssh_config)
             if match:
@@ -144,7 +135,7 @@ class VagrantProvider(Provider):
         roles = self._get_role_specs()
         os_specs = self._get_os_specs()
         # Parse the configuration.
-        config['id'] = self.__generate_instance_id()
+        config['id'] = str(self.__generate_instance_id())
         config['box'] = os_specs[composite_name]['box']
         config['box_version'] = os_specs[composite_name]['box_version']
         for pattern, specs in roles[self.instance_params.role].items():
@@ -155,20 +146,28 @@ class VagrantProvider(Provider):
                 break
         return VagrantConfig(**config)
 
-    def __generate_instance(self) -> Instance:
+    def __parse_vagrant_status(self, message: str) -> str:
+        lines = message.split('\n')
+        for line in lines:
+            if 'Current machine states:' in line:
+                status_line = lines[lines.index(line) + 2]
+                status = status_line.split()[1]
+                return status
+
+    def __generate_instance(self) -> InstanceDefinition:
         """Generates a new instance.
 
         Returns:
-            Instance: The instance specifications.
+            InstanceDefinition: The instance specifications.
 
         """
-        instance = Instance(name=self.name,
+        instance = InstanceDefinition(name=self.instance_params.name,
                             params=self.instance_params,
-                            path=self.working_dir,
-                            provider='vagrant',
-                            credential=self.key_pair.get('private'),
+                            path=str(self.working_dir),
+                            provider=self.provider_name,
+                            credential=str(self.credentials.private_key),
                             connection_info=None,
-                            provider_config=self.config)
+                            provider_config=self._config)
         return instance
 
     def __generate_instance_id(self, prefix: str = "VAGRANT") -> str:
@@ -194,12 +193,24 @@ class VagrantProvider(Provider):
         Returns:
             str: The output of the command.
         """
-        output = subprocess.run(["vagrant", command],
-                                cwd=self.base_dir,
-                                check=True,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
-        return output.stdout.decode("utf-8")
+        try:
+            output = subprocess.run(["vagrant", command],
+                                    cwd=self.working_dir,
+                                    check=True,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+
+            if stderr := output.stderr.decode("utf-8"):
+                print(stderr)
+                print(output.stdout.decode("utf-8"))
+            # logging.warning(f"Command '{command}' completed with errors:\n{stderr}")
+
+            return output.stdout.decode("utf-8")
+
+        except subprocess.CalledProcessError as e:
+            print(e)
+            # logging.error(f"Command '{command}' failed with error {e.returncode}:\n{e.output.decode('utf-8')}")
+            return None
 
     def __render_vagrantfile(self) -> str:
         """
@@ -209,13 +220,11 @@ class VagrantProvider(Provider):
             str: The rendered Vagrantfile.
 
         """
-        public_key = self.key_pair.get('public')
-        template_path = TEMPLATES_DIR / 'vagrant'
-        template_loader = jinja2.FileSystemLoader(searchpath=template_path)
-        template_env = jinja2.Environment(loader=template_loader)
-        loaded_template = template_env.get_template(template_path)
+        public_key = self.credentials.public_key
+        environment = Environment(loader=FileSystemLoader(TEMPLATES_DIR))
+        template = environment.get_template("vagrant.j2")
 
-        return loaded_template.render(config=self.config, credential=public_key)
+        return template.render(config=self._config, credential=public_key)
 
     def __save_vagrantfile(self, vagrantfile: str) -> None:
         """
@@ -225,5 +234,7 @@ class VagrantProvider(Provider):
             vagrantfile (str): The Vagrantfile to save.
 
         """
-        with open(self.working_dir / 'Vagrantfile', 'w') as f:
+        vagrantfile_path = self.working_dir / 'Vagrantfile'
+        with open(vagrantfile_path, 'w') as f:
             f.write(vagrantfile)
+        return vagrantfile_path

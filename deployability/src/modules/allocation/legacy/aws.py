@@ -17,8 +17,8 @@ class AWSInfra():
         self.instance_dir = os.path.join(base_dir, name)
         if not os.path.exists(self.instance_dir):
             os.makedirs(self.instance_dir)
-        self.credential = AWSCredential(self.name,base_dir)
-        self.credential.create()
+        self.credentials = AWSCredentials(self.name,base_dir)
+        self.credentials.create()
         self.connection_info = dict()
         self.provider_specific = dict()
 
@@ -28,7 +28,7 @@ class AWSInfra():
         self.name = db['name']
         self.instance_params = db['instance_params']
         self.instance_dir = db['instance_dir']
-        self.credential = AWSCredential(self.name, base_dir)
+        self.credentials = AWSCredentials(self.name, base_dir)
         self.connection_info = db['connection_info']
         self.provider_specific = db['provider_specific']
 
@@ -37,7 +37,7 @@ class AWSInfra():
             'name': self.name,
             'instance_params': self.instance_params,
             'instance_dir': self.instance_dir,
-            'credential': self.credential.name,
+            'credential': self.credentials.name,
             'connection_info': self.connection_info,
             'provider_specific': self.provider_specific
         }
@@ -67,7 +67,7 @@ class AWSInfra():
         request_params = {
             'ImageId': self.provider_specific['ami'],
             'InstanceType': self.provider_specific['type'],
-            'KeyName': self.credential.name,
+            'KeyName': self.credentials.name,
             'MinCount':1,
             'MaxCount': 1,
             'TagSpecifications' : [
@@ -88,7 +88,7 @@ class AWSInfra():
         self.connection_info['hostname'] = instance.private_ip_address
         self.connection_info['user'] = self.provider_specific['user']
         self.connection_info['port'] = 22
-        self.connection_info['key'] = os.path.join(self.instance_dir, self.credential.name + '.pem')
+        self.connection_info['key'] = os.path.join(self.instance_dir, self.credentials.name + '.pem')
 
     def start(self):
         pass
@@ -100,11 +100,11 @@ class AWSInfra():
         self.ec2.describe_instances(InstanceIds=[self.provider_specific['instance_id']])
 
     def delete(self):
-        self.credential.delete()
+        self.credentials.delete()
         self.ec2.instances.filter(InstanceIds=[self.provider_specific['instance_id']]).terminate()
         shutil.rmtree(self.instance_dir)
 
-class AWSCredential():
+class AWSCredentials():
     def __init__(self, name, base_dir):
         self.name = name
         self.ec2 = boto3.resource('ec2')
