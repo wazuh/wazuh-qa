@@ -126,7 +126,7 @@ def pytest_runtest_makereport(item, call):
                 arguments[key] = str(value)
         extra.append(pytest_html.extras.json(arguments, name="Test arguments"))
 
-        if "cluster" in report.markers and "one_manager_agent_env" not in report.markers:
+        if "cluster" in report.markers:
             host_manager = getattr(item.module, "host_manager")
 
             for host in host_manager.get_inventory()['managers']['hosts']:

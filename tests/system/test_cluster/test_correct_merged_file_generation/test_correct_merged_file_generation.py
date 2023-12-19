@@ -35,7 +35,7 @@ from wazuh_testing.tools.file import replace_regex_in_file
 from system import (assign_agent_to_new_group, clean_cluster_logs, create_new_agent_group, delete_agent_group,
                     restart_cluster)
 
-pytestmark = [pytest.mark.cluster, pytest.mark.one_manager_agent_env]
+pytestmark = [pytest.mark.one_manager_agent_env]
 
 agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                '..', 'provisioning', 'one_manager_agent', 'roles', 'agent-role', 'files', 'ossec.conf')
