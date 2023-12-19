@@ -88,7 +88,9 @@ def control_service(action, daemon=None, debug_mode=False):
             for _ in range(error_109_windows_retry):
                 command = subprocess.run(["net", action, "WazuhSvc"], stderr=subprocess.PIPE)
                 result = command.returncode
-                if result != 0:
+                if result == 0:
+                    break
+                else:
                     if action == 'stop' and 'The Wazuh service is not started.' in command.stderr.decode():
                         result = 0
                         break
