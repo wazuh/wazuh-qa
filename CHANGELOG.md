@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.7.2] - TBD
 
+### Fixed
+
+- Fix the generation of syscollector events in the agent simulator class. ([#4773](https://github.com/wazuh/wazuh-qa/pull/4773)) \- (Framework)
+
 ## [4.7.1] - TBD
 
 ### Changed
