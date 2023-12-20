@@ -37,10 +37,18 @@ All notable changes to this project will be documented in this file.
 - Fix hardcoded python interpreter in qa_framework role. ([#4658](https://github.com/wazuh/wazuh-qa/pull/4658)) \- (Framework)
 - Fix duplicated jq dependency ([#4678](https://github.com/wazuh/wazuh-qa/pull/4678)) \- (Framework)
 
-## [4.7.1] - TBD
+## [4.7.2] - TBD
+
+### Fixed
+
+- Fix the generation of syscollector events in the agent simulator class. ([#4773](https://github.com/wazuh/wazuh-qa/pull/4773)) \- (Framework)
+
+## [4.7.1] - 20/12/2023
 
 ### Changed
 
+- Remove deprecated message from cluster System Tests. ([#4740](https://github.com/wazuh/wazuh-qa/pull/4740)) \- (Tests)
+- Enhance control_service error handling on windows agents. ([#4741](https://github.com/wazuh/wazuh-qa/pull/4741)) \- (Framework)
 - Add XFAIL mark to Cluster reliability logs test. ([#4706](https://github.com/wazuh/wazuh-qa/pull/4706)) \- (Tests)
 
 ## [4.7.0] - 27/11/2023

@@ -751,7 +751,7 @@ class GeneratorSyscollector:
         self.current_batch_events = -1
         self.current_batch_events_size = 0
         self.list_events = ['network', 'port', 'hotfix',
-                            'process', 'packages', 'OS', 'hardware']
+                            'process', 'program', 'OS', 'hardware']
         self.agent_name = agent_name
         self.batch_size = batch_size
         self.syscollector_tag = 'syscollector'
@@ -772,7 +772,7 @@ class GeneratorSyscollector:
             message += syscollector.SYSCOLLECTOR_PROCESS_EVENT_TEMPLATE
         elif message_type == 'port':
             message += syscollector.SYSCOLLECTOR_PORT_EVENT_TEMPLATE
-        elif message_type == 'packages':
+        elif message_type == 'program':
             message += syscollector.SYSCOLLECTOR_PACKAGES_EVENT_TEMPLATE
         elif message_type == 'OS':
             message += syscollector.SYSCOLLECTOR_OS_EVENT_TEMPLATE
