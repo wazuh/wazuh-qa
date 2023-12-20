@@ -270,6 +270,12 @@
   {% endif %}
   </vulnerability-detector>
 
+  <indexer>
+  {% if wazuh_manager_config.indexer.enabled is defined %}
+    <enabled>{{ wazuh_manager_config.indexer.enabled }}</enabled>
+  {% endif %}
+  </indexer>
+
   <!-- File integrity monitoring -->
   <syscheck>
     <disabled>{{ wazuh_manager_config.syscheck.disable }}</disabled>

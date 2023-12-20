@@ -4,6 +4,11 @@
         - enabled:
             value: 'no'
 
+    - section: indexer
+      elements:
+        - enabled:
+            value: 'no'
+
     - section: sca
       elements:
         - enabled:

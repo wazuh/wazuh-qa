@@ -13,6 +13,11 @@
         - enabled:
             value: 'no'
 
+    - section: indexer
+      elements:
+        - enabled:
+            value: 'no'
+
     - section: rootcheck
       elements:
         - disabled:
