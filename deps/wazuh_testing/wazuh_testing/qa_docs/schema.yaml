@@ -197,6 +197,7 @@ predefined_values:
     - 4.6.0
     - 4.7.0
     - 4.7.1
+    - 4.7.2
     - 4.8.0
   tags:
     - active_response
