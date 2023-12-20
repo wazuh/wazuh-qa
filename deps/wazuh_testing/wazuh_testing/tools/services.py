@@ -88,15 +88,21 @@ def control_service(action, daemon=None, debug_mode=False):
             for _ in range(error_109_windows_retry):
                 command = subprocess.run(["net", action, "WazuhSvc"], stderr=subprocess.PIPE)
                 result = command.returncode
-                if result != 0:
-                    if action == 'stop' and 'The Wazuh service is not started.' in command.stderr.decode():
+                if result == 0:
+                    break
+                else:
+                    error = command.stderr.decode()
+                    if 'The service is starting or stopping' in error:
+                        time.sleep(1)
+                        continue
+                    if action == 'stop' and 'The Wazuh service is not started.' in error:
                         result = 0
                         break
-                    if action == 'start' and 'The requested service has already been started.' \
-                       in command.stderr.decode():
+                    if action == 'start' and 'The requested service has already been started.' in error:
                         result = 0
                         break
-                    elif "System error 109 has occurred" not in command.stderr.decode():
+                    elif "System error 109 has occurred" not in error:
+                        print(f"Unexpected error when control_service failed with the following error: {error}")
                         break
     else:  # Default Unix
         if daemon is None:
