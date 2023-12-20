@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Fix one_manager_agent_env pytest marker for System Tests ([#4782](https://github.com/wazuh/wazuh-qa/pull/4782)) \- (Tests)
+- Updated Filebeat module to 0.4 ([#4775](https://github.com/wazuh/wazuh-qa/pull/4775)) \- (Framework)
 - Include ATP repository update before the installation of Ubuntu E2E agent installation ([#4761](https://github.com/wazuh/wazuh-qa/pull/4761)) \- (Framework)
 - Enhance macOS deployment ansible taks ([#4685](https://github.com/wazuh/wazuh-qa/pull/4685)) \- (Framework)
 - Updated Filebeat module to 0.3 ([#4700](https://github.com/wazuh/wazuh-qa/pull/4700)) \- (Framework)
@@ -32,6 +33,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix macOS agents provision to enable registration and connection with managers. ([#4770](https://github.com/wazuh/wazuh-qa/pull/4770/)) \- (Framework)
 - Fix hardcoded python interpreter in qa_framework role. ([#4658](https://github.com/wazuh/wazuh-qa/pull/4658)) \- (Framework)
 - Fix duplicated jq dependency ([#4678](https://github.com/wazuh/wazuh-qa/pull/4678)) \- (Framework)
 
