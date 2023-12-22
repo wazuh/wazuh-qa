@@ -35,7 +35,7 @@
         - disabled:
             value: 'yes'
 
-    - section: vulnerability-detector
+    - section: vulnerability-detection
       elements:
         - enabled:
             value: 'no'

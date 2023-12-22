@@ -258,7 +258,7 @@
   {% endif %}
   </sca>
 
-  <vulnerability-detector>
+  <vulnerability-detection>
   {% if wazuh_manager_config.vulnerability_detector.enabled is defined %}
     <enabled>{{ wazuh_manager_config.vulnerability_detector.enabled }}</enabled>
   {% endif %}
@@ -268,7 +268,7 @@
   {% if wazuh_manager_config.vulnerability_detector.feed_update_interval is defined %}
     <feed-update-interval>{{ wazuh_manager_config.vulnerability_detector.feed_update_interval }}</feed-update-interval>
   {% endif %}
-  </vulnerability-detector>
+  </vulnerability-detection>
 
   <indexer>
   {% if wazuh_manager_config.indexer.enabled is defined %}
