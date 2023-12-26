@@ -28,6 +28,24 @@
                         },
                         "required": ["this"]
                     },
+                    "cleanup": {
+                        "type": "object",
+                        "properties": {
+                            "this": {"type": "string"},
+                            "with": {
+                                "type": "object",
+                                "properties": {
+                                    "this": {"type": "string"},
+                                    "args": {
+                                        "type": "array",
+                                        "items": {"type": "string"}
+                                    },
+                                    "path": {"type": "string"}
+                                }
+                            }
+                        },
+                        "required": ["this"]
+                    },
                     "depends-on": {
                         "type": "array",
                         "items": {"type": "string"}
