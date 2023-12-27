@@ -1,6 +1,8 @@
-#!/home/fcaffieri/repos/wazuh-qa/.venv/bin/python3
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import argparse
-import logging
 from workflow_processor import WorkflowProcessor
 import sys, os
 
@@ -31,9 +33,9 @@ def main() -> None:
     validator.preprocess_data()
     validator.validateSchema()
 
-    #processor = WorkflowProcessor(args.workflow_file, args.dry_run, args.threads)
-    #processor.logger = processor.setup_logger(log_format=args.log_format, log_level=args.log_level)
-    #processor.main()
+    processor = WorkflowProcessor(args.workflow_file, args.dry_run, args.threads)
+    processor.logger = processor.setup_logger(log_format=args.log_format, log_level=args.log_level)
+    processor.main()
 
 
 if __name__ == "__main__":
