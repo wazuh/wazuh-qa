@@ -1,6 +1,8 @@
-# task.py
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 from abc import ABC, abstractmethod
-from typing import Optional
 import subprocess
 import logging
 
