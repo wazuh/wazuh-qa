@@ -8,7 +8,7 @@ import time
 import logging
 from itertools import product
 import yaml
-from task import Task, ProcessTask
+from task import Task, ProcessTask, DummyTask, DummyRandomTask
 
 
 class WorkflowProcessor:
@@ -27,6 +27,7 @@ class WorkflowProcessor:
         self.tasks = self.workflow_data.get('tasks', [])
         self.variables = self.workflow_data.get('variables', {})
         self.task_collection = self.process_workflow()
+        self.static_workflow_validation()
         self.failed_tasks = set()
         self.logger = self.setup_logger()
         self.dry_run = dry_run
@@ -72,10 +73,10 @@ class WorkflowProcessor:
         Returns:
             dict: Workflow data.
         """
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             return yaml.safe_load(file)
 
-    def replace_placeholders(self, element: Any, values: dict, parent_key: Optional[str] = None) -> Any:
+    def replace_placeholders(self, element: str, values: dict, parent_key: str = None):
         """
         Recursively replace placeholders in a dictionary or list.
 
@@ -96,7 +97,7 @@ class WorkflowProcessor:
         else:
             return element
 
-    def expand_task(self, task: dict, variables: dict) -> List[dict]:
+    def expand_task(self, task: dict, variables: dict):
         """
         Expand a task with variable values.
 
@@ -125,24 +126,51 @@ class WorkflowProcessor:
 
         return expanded_tasks
 
-    def process_workflow(self) -> List[dict]:
+    def process_workflow(self):
         """Process the workflow and return a list of tasks."""
         task_collection = []
         for task in self.tasks:
             task_collection.extend(self.expand_task(task, self.variables))
         return task_collection
 
-    def build_dependency_graph(self) -> Tuple[graphlib.TopologicalSorter, dict]:
+    def static_workflow_validation(self):
+        """Validate the workflow against static criteria."""
+        def check_duplicated_tasks(self):
+            """Validate task name duplication."""
+            task_name_counts = {task['task']: 0 for task in self.task_collection}
+            
+            for task in self.task_collection:
+                task_name_counts[task['task']] += 1
+
+            duplicates = [name for name, count in task_name_counts.items() if count > 1]
+
+            if duplicates:
+                raise ValueError(f"Duplicated task names: {', '.join(duplicates)}")
+
+        def check_not_existing_tasks(self):
+            """Validate task existance."""
+            task_names = {task['task'] for task in self.task_collection}
+            
+            for dependencies in [task.get('depends-on', []) for task in self.task_collection]:
+                non_existing_dependencies = [dependency for dependency in dependencies if dependency not in task_names]
+                if non_existing_dependencies:
+                    raise ValueError(f"Tasks do not exist: {', '.join(non_existing_dependencies)}")
+        
+        validations = [check_duplicated_tasks, check_not_existing_tasks]
+        for validation in validations:
+            validation(self)
+
+    def build_dependency_graph(self):
         """Build a dependency graph for the tasks."""
         dependency_dict = {}
-        G = graphlib.TopologicalSorter()
+        dag = graphlib.TopologicalSorter()
 
         for task in self.task_collection:
             task_name = task['task']
             dependencies = task.get('depends-on', [])
             dependency_dict[task_name] = dependencies
-            G.add(task_name, *dependencies)
-        return G, dependency_dict
+            dag.add(task_name, *dependencies)
+        return dag, dependency_dict
 
     def execute_task(self, task: dict) -> None:
         """Execute a task."""
@@ -168,19 +196,19 @@ class WorkflowProcessor:
     def create_task_object(self, task: dict) -> Task:
         """Create and return a Task object based on task type."""
         task_type = task['do']['this']
-        if task_type == 'process':
-            return ProcessTask(task['task'], task['do']['with'], self.logger)
-        elif task_type == 'custom':
-            # Create and return a CustomTask object if needed
-            pass
-        elif task_type == 'dummy':
-            # Create and return a DummyTask object if needed
-            pass
-        elif task_type == 'dummy-random':
-            # Create and return a DummyRandomTask object if needed
-            pass
-        else:
-            raise ValueError(f"Unknown task type '{task_type}'.")
+
+        task_classes = {
+            'process': ProcessTask,
+            'dummy': DummyTask,
+            'dummy-random': DummyRandomTask,
+        }
+
+        task_class = task_classes.get(task_type)
+
+        if task_class is not None:
+            return task_class(task['task'], task['do']['with'], self.logger)
+
+        raise ValueError(f"Unknown task type '{task_type}'.")
 
     def get_root_tasks(self, dependency_dict: dict) -> set:
         """Get root tasks from the dependency dictionary."""
@@ -202,7 +230,7 @@ class WorkflowProcessor:
 
     def execute_tasks_parallel(self) -> None:
         """Execute tasks in parallel."""
-        G, dependency_dict = self.build_dependency_graph()
+        dag, dependency_dict = self.build_dependency_graph()
 
         if self.dry_run:
             # Display the execution plan without executing tasks
@@ -210,22 +238,22 @@ class WorkflowProcessor:
             for root_task in root_tasks:
                 self.print_execution_plan(root_task, dependency_dict)
         else:
-            G.prepare()
+            dag.prepare()
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=self.threads) as executor:
                 futures = {}
 
                 while True:
-                    if not G.is_active() or self.failed_tasks:
+                    if not dag.is_active() or self.failed_tasks:
                         break
 
-                    for task_name in G.get_ready():
+                    for task_name in dag.get_ready():
                         dependencies = dependency_dict[task_name]
 
                         if any(dep in self.failed_tasks for dep in dependencies):
                             self.logger.info("[%s] Skipping task due to dependency failure", task_name)
                             self.failed_tasks.add(task_name)
-                            G.done(task_name)
+                            dag.done(task_name)
                             continue
 
                         dependent_futures = [futures[d] for d in dependencies if d in futures]
@@ -236,7 +264,7 @@ class WorkflowProcessor:
                         future = executor.submit(self.execute_task, task)
                         futures[task_name] = future
 
-                        G.done(task_name)
+                        dag.done(task_name)
 
     def main(self) -> None:
         """Main entry point."""
