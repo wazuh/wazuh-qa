@@ -19,7 +19,7 @@ class AWSInfra():
             os.makedirs(self.instance_dir)
         self.credentials = AWSCredentials(self.name,base_dir)
         self.credentials.create()
-        self.connection_info = dict()
+        self._connection_info = dict()
         self.provider_specific = dict()
 
     
@@ -29,7 +29,7 @@ class AWSInfra():
         self.instance_params = db['instance_params']
         self.instance_dir = db['instance_dir']
         self.credentials = AWSCredentials(self.name, base_dir)
-        self.connection_info = db['connection_info']
+        self._connection_info = db['connection_info']
         self.provider_specific = db['provider_specific']
 
     def dump(self):
@@ -38,17 +38,17 @@ class AWSInfra():
             'instance_params': self.instance_params,
             'instance_dir': self.instance_dir,
             'credential': self.credentials.name,
-            'connection_info': self.connection_info,
+            'connection_info': self._connection_info,
             'provider_specific': self.provider_specific
         }
         return { self.name: info}
 
     def ansible_inventory(self):
         connection = dict()
-        connection['ansible_host'] = self.connection_info['hostname']
-        connection['ansible_user'] = self.connection_info['user']
-        connection['ansible_port'] = self.connection_info['port']
-        connection['ansible_ssh_private_key_file'] = self.connection_info['key']
+        connection['ansible_host'] = self._connection_info['hostname']
+        connection['ansible_user'] = self._connection_info['user']
+        connection['ansible_port'] = self._connection_info['port']
+        connection['ansible_ssh_private_key_file'] = self._connection_info['key']
         return {self.instance_params['alias']: connection}
 
     def create(self):
@@ -85,10 +85,10 @@ class AWSInfra():
         instance.wait_until_running()
         instance.reload()
         self.provider_specific['instance_id'] = instance.id
-        self.connection_info['hostname'] = instance.private_ip_address
-        self.connection_info['user'] = self.provider_specific['user']
-        self.connection_info['port'] = 22
-        self.connection_info['key'] = os.path.join(self.instance_dir, self.credentials.name + '.pem')
+        self._connection_info['hostname'] = instance.private_ip_address
+        self._connection_info['user'] = self.provider_specific['user']
+        self._connection_info['port'] = 22
+        self._connection_info['key'] = os.path.join(self.instance_dir, self.credentials.name + '.pem')
 
     def start(self):
         pass

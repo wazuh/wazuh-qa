@@ -1,5 +1,5 @@
 from aws import AWSInfra
-from vagrant import VagrantInfra
+from vagrant import VagrantProvider
 import uuid
 
 
@@ -11,7 +11,7 @@ class ProviderFactory():
         if infra_config['provider'] == 'aws':
             provider = AWSInfra()
         elif infra_config['provider'] == 'vagrant':
-            provider = VagrantInfra()
+            provider = VagrantProvider()
         else:
             raise Exception('Invalid provider: {}'.format(infra_config['provider']))
         provider.init(infra_config, base_dir, uuid.uuid4().hex)
@@ -22,7 +22,7 @@ class ProviderFactory():
         if inventory_db_entry['instance_params']['provider'] == 'aws':
             provider = AWSInfra()
         elif inventory_db_entry['instance_params']['provider'] == 'vagrant':
-            provider = VagrantInfra()
+            provider = VagrantProvider()
         else:
             raise Exception('Invalid provider: {}'.format(inventory_db_entry['instance_params']))
         provider.from_db(inventory_db_entry, base_dir)

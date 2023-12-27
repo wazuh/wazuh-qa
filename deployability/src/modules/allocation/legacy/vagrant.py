@@ -7,7 +7,7 @@ import shutil
 
 
 
-class VagrantInfra():
+class VagrantProvider():
     SPECS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'specs')
     OS_SPECS_PATH = os.path.join(SPECS_DIR, 'os.yml')
     ROLE_SPECS_PATH = os.path.join(SPECS_DIR, 'roles.yml')
@@ -20,7 +20,7 @@ class VagrantInfra():
             os.makedirs(self.instance_dir)
         self.credentials = VagrantCredentialss(self.name, base_dir)
         self.credentials.create()
-        self.connection_info = dict()
+        self._connection_info = dict()
         self.provider_specific = dict()
 
     
@@ -29,7 +29,7 @@ class VagrantInfra():
         self.instance_params = db['instance_params']
         self.instance_dir = db['instance_dir']
         self.credentials = db['credential']
-        self.connection_info = db['connection_info']
+        self._connection_info = db['connection_info']
         self.provider_specific = db['provider_specific']
 
 
@@ -39,17 +39,17 @@ class VagrantInfra():
             'instance_params': self.instance_params,
             'instance_dir': self.instance_dir,
             'credential': self.credentials.name,
-            'connection_info': self.connection_info,
+            'connection_info': self._connection_info,
             'provider_specific': self.provider_specific
         }
         return { self.name: info}
 
     def ansible_inventory(self):
         connection = dict()
-        connection['ansible_host'] = self.connection_info['hostname']
-        connection['ansible_user'] = self.connection_info['user']
-        connection['ansible_port'] = self.connection_info['port']
-        connection['ansible_ssh_private_key_file'] = self.connection_info['key']
+        connection['ansible_host'] = self._connection_info['hostname']
+        connection['ansible_user'] = self._connection_info['user']
+        connection['ansible_port'] = self._connection_info['port']
+        connection['ansible_ssh_private_key_file'] = self._connection_info['key']
         if self.instance_params['role'] == 'manager':
             connection['install'] = [ {'type':'package', 'component':'wazuh-manager'}]
         elif self.instance_params['role'] == 'agent':
@@ -57,7 +57,7 @@ class VagrantInfra():
         return {self.instance_params['alias']: connection}
 
     def create(self):
-        with open(VagrantInfra.ROLE_SPECS_PATH, "r") as roles_file:
+        with open(VagrantProvider.ROLE_SPECS_PATH, "r") as roles_file:
             roles = yaml.safe_load(roles_file)
             for pattern, specs in roles[self.instance_params['role']].items():
                 if fnmatch.fnmatch(self.instance_params['composite-name'], pattern):
@@ -65,7 +65,7 @@ class VagrantInfra():
                     self.provider_specific['memory'] = specs['memory']
                     self.provider_specific['ip'] = specs['ip']
                     break
-        with open(VagrantInfra.OS_SPECS_PATH, "r") as os_file:
+        with open(VagrantProvider.OS_SPECS_PATH, "r") as os_file:
             os_specs = yaml.safe_load(os_file)
             self.provider_specific['box'] = os_specs[self.instance_params['composite-name']]['box']
             self.provider_specific['box_version'] = os_specs[self.instance_params['composite-name']]['box_version']
@@ -96,15 +96,15 @@ class VagrantInfra():
         stderr=subprocess.PIPE)
         out = subprocess.run(["vagrant", "ssh-config"], cwd=self.instance_dir, check=True, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE)
-        self.connection_info = dict()
+        self._connection_info = dict()
         for line in out.stdout.decode("utf-8").splitlines():
             if line.startswith("  HostName "):
-                self.connection_info['hostname'] = line.split()[1]
+                self._connection_info['hostname'] = line.split()[1]
             elif line.startswith("  User "):
-                self.connection_info['user'] = line.split()[1]
+                self._connection_info['user'] = line.split()[1]
             elif line.startswith("  Port "):
-                self.connection_info['port'] = line.split()[1]
-        self.connection_info['key'] = os.path.join(self.instance_dir, self.credentials.name)
+                self._connection_info['port'] = line.split()[1]
+        self._connection_info['key'] = os.path.join(self.instance_dir, self.credentials.name)
 
     def stop(self):
         subprocess.run(["vagrant", "halt"], cwd=self.instance_dir, check=True, stdout=subprocess.PIPE,

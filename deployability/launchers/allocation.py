@@ -79,30 +79,30 @@ import sys
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(project_root)
 
-from src.modules.allocation import providers, credentials
+from src.modules.allocation.providers import instances, credentials, vagrant
 
 def main():
-    creds = credentials.VagrantCredentials("/tmp/test", "test_keys")
-    test = creds.generate_key_pair()
-    print(test)
-    # creds.delete_key_pair()
+    # # Vagrant
+    creds = credentials.VagrantCredentials()
+    test = creds.generate("/tmp/tes", "test_keys", overwrite=True)
+    print(test)    
+    instance = vagrant.VagrantProvider.create_instance("/tmp", {'name': 'test', 'provider': 'vagrant',
+                                    'size': 'large',
+                                    'alias': 'str', 'composite_name': 'linux-ubuntu-22.04-amd64'}, creds)
+    print(instance.path)
+    instance.start()
+    print(instance.ssh_connection_info())
+    instance.stop()
+    print(instance.status())
+    instance.delete()
+    creds.delete()
     
-    # {'name': str,
-    # 'role': str,
-    # 'alias': str,
-    # 'composite_name': str}
+    # AWS
+    # creds = credentials.AWSCredentials("/tmp/tes", "test_keys")
+    # test_key = creds.generate()
+    # print(test_key)
+    # print(creds.key_id)
 
-    provider = providers.VagrantProvider("/tmp",  {'name': 'test',
-    'role': 'manager',
-    'alias': 'str',
-    'composite_name': 'linux-ubuntu-22.04-amd64'}, test)
-    instance = provider.create()
-    
-    print(instance)
-    provider.start()
-    # CLeanup
-    provider.delete()
-    creds.delete_key_pair()
 
 
 if __name__ == "__main__":

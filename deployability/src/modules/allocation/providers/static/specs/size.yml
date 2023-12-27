@@ -1,21 +1,21 @@
 vagrant:
-  agent:
-    linux-*:
+  medium:
+    # linux-*:
       cpu: 2
       memory: 2048
-      ip: 192.168.56.19
-  manager:
-    linux-*:
-      cpu: 2
-      memory: 2048
-      ip: 192.168.56.21
+      ip: 192.168.57.10
+  large:
+    # linux-*:
+      cpu: 4
+      memory: 4096
+      ip: 192.168.57.11
 aws:
-  agent:
+  medium:
     linux-*-amd64:
-      type: t2.nano
+      type: t2.medium
     linux-*-arm64:
       type: c7gn.medium
-  manager:
+  large:
     linux-*-amd64:
       type: c5a.xlarge
     linux-*-arm64:
