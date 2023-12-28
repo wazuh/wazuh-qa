@@ -2,9 +2,14 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import os
+import sys
 import argparse
-from workflow_processor import WorkflowProcessor
-import sys, os
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(project_root)
+from modules.workflow_engine.workflow_processor import WorkflowProcessor
+from modules.classes import SchemaValidator
+
 
 def parse_arguments() -> argparse.Namespace:
     """Parse command line arguments."""
@@ -21,14 +26,8 @@ def parse_arguments() -> argparse.Namespace:
 
 def main() -> None:
     """Main entry point."""
+
     args = parse_arguments()
-
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
-    print(project_root)
-    sys.path.append(project_root)
-
-    from src.classes import SchemaValidator
-
     validator = SchemaValidator(args.schema_file, args.workflow_file)
     validator.preprocess_data()
     validator.validateSchema()

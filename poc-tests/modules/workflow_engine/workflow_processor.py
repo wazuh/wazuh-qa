@@ -8,7 +8,7 @@ import time
 import logging
 from itertools import product
 import yaml
-from task import Task, ProcessTask, DummyTask, DummyRandomTask
+from .task import Task, ProcessTask, DummyTask, DummyRandomTask
 
 
 class WorkflowProcessor:
