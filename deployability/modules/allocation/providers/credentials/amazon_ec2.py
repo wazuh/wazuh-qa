@@ -53,10 +53,15 @@ class AWSCredentials(Credentials):
         elif private_key_path.exists():
             raise self.KeyCreationError(f"Key {name} already exists.")
         # Request the key pair from AWS.
-        if response := self._client.describe_key_pairs(KeyNames=[name]):
-            print(response)
-            response = self._client.delete_key_pair(KeyName=name)
-        (dir(self._resource))
+        # print(dir(self._resource))
+        if key:=self._resource.key_pairs.filter(KeyNames=['pepepe']):
+            if not "ec2.KeyPairInfo" in str(type(key)):
+                print("no es keypairinfo", str(type(key)))
+            # print('\nhola\n', dir(key), type(key))
+        # for key in self._resource.key_pairs.filter(KeyNames=['name']):
+        #     print(key.name)
+        for key in self._resource.key_pairs.filter(KeyNames=[name]):
+            print("\nKEY SI", key.name, type(key))
         response = self._resource.create_key_pair(KeyName=name)
         key_pair_id = response.key_pair_id
         key_material = response.key_material

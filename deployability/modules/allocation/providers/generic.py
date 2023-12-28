@@ -103,7 +103,7 @@ class Provider(ABC):
             return yaml.safe_load(f).get(cls.provider_name)
 
     @classmethod
-    def get_misc_specs(cls) -> dict:
+    def _get_misc_specs(cls) -> dict:
         """
         Gets the miscellaneous specifications for the provider.
 

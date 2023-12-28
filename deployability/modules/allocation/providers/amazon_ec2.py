@@ -1,3 +1,4 @@
+import fnmatch
 import os
 import boto3
 from pathlib import Path
@@ -8,7 +9,7 @@ from .credentials.amazon_ec2 import AWSCredentials
 
 
 class AmazonEC2Provider(Provider):
-    provider_name = 'ec2'
+    provider_name = 'aws'
     _client = boto3.resource('ec2')
 
     @staticmethod
@@ -33,15 +34,16 @@ class AmazonEC2Provider(Provider):
             credentials.generate(temp_dir, 'instance_key', True)
         elif not isinstance(credentials, AWSCredentials):
             raise Exception(f"Invalid credentials type: {type(credentials)}")
-        config = cls._parse_config(params, credentials.name)
-        _instance = cls._client.create_instance(ImageId=config['ami'],
+        config = cls._parse_config(params, credentials)
+        _instance = cls._client.create_instances(ImageId=config['ami'],
                                                 InstanceType=config['type'],
                                                 KeyName=config['key_name'],
-                                                security_groups=config['security_groups'],
+                                                SecurityGroupIds=config['security_groups'],
                                                 MinCount=1, MaxCount=1,
-                                                TagSpecifications=[{'ResourceType': 'instance',
-                                                                    'Tags': [{'Key': 'Name',
-                                                                              'Value': f"dtt1-{config['name']}"}]}])
+                                                # TagSpecifications=[{'ResourceType': 'instance',
+                                                #                     'Tags': [{'Key': 'Name',
+                                                #                               'Value': f"dtt1-{config['name']}"}]}]
+                                                )
         _instance.wait_until_running()
         instance_dir = Path(base_dir, _instance.instance_id)
         if instance_dir.exists():
@@ -54,17 +56,18 @@ class AmazonEC2Provider(Provider):
         pass
 
     @classmethod
-    def _parse_config(cls, params: InstanceParams, credentials: str) -> None:
+    def _parse_config(cls, params: InstanceParams, credentials: AWSCredentials) -> None:
         config = {}
         size_specs = cls._get_size_specs()[params.size]
         os_specs = cls._get_os_specs()[params.composite_name]
-        mics_specs = cls._get_misc_specs()[params.composite_name]
-        # TODO, esto puede venir custom
-        # config['name'] = 'params.name'
-        config['type'] = size_specs['type']
+        mics_specs = cls._get_misc_specs()
+        for spec in size_specs:
+            if fnmatch.fnmatch(params.composite_name, spec):
+                config['type'] = size_specs[spec]['type']
+                break
         config['ami'] = os_specs['ami']
-        config['region'] = os_specs['region']
+        config['zone'] = os_specs['zone']
         config['user'] = os_specs['user']
-        config['key_name'] = credentials
-        config['security_groups'] = mics_specs['security_groups']
+        config['key_name'] = credentials.name
+        config['security_groups'] = mics_specs['security-group']
         return config
