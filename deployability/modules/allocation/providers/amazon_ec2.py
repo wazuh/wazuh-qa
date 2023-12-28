@@ -1,3 +1,4 @@
+import os
 import boto3
 from pathlib import Path
 
@@ -19,14 +20,17 @@ class AmazonEC2Provider(Provider):
         return instance
 
     @classmethod
-    def create_instance(cls, base_dir: Path, params: InstanceParams, credentials: AWSCredentials) -> AmazonEC2Instance:
+    def create_instance(cls, base_dir: Path, params: InstanceParams, credentials: AWSCredentials = None) -> AmazonEC2Instance:
+        base_dir = Path(base_dir)
         if not base_dir.exists():
             base_dir.mkdir(parents=True, exist_ok=True)
         elif not base_dir.is_dir():
             raise Exception(f"Instance path {base_dir} is not a dir.")
+        temp_id = cls._generate_instance_id(cls.provider_name)
+        temp_dir = Path(base_dir, 'temp', temp_id)
         if not credentials:
             credentials = AWSCredentials()
-            credentials.generate(base_dir, 'instance_key')
+            credentials.generate(temp_dir, 'instance_key', True)
         elif not isinstance(credentials, AWSCredentials):
             raise Exception(f"Invalid credentials type: {type(credentials)}")
         config = cls._parse_config(params, credentials.name)
@@ -40,12 +44,14 @@ class AmazonEC2Provider(Provider):
                                                                               'Value': f"dtt1-{config['name']}"}]}])
         _instance.wait_until_running()
         instance_dir = Path(base_dir, _instance.instance_id)
-        if not instance_dir.exists():
-            instance_dir.mkdir(parents=True, exist_ok=True)
-        elif not instance_dir.is_dir():
+        if instance_dir.exists():
             instance_dir.unlink()
-            instance_dir.mkdir(parents=True, exist_ok=True)
-        return AmazonEC2Instance(base_dir, _instance.instance_id, credentials.key_path)
+        os.rename(temp_dir, instance_dir)
+        return AmazonEC2Instance(base_dir, _instance.instance_id, credentials)
+    
+    @classmethod
+    def destroy_instance(instance_dir, identifier):
+        pass
 
     @classmethod
     def _parse_config(cls, params: InstanceParams, credentials: str) -> None:

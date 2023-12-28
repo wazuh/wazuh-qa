@@ -24,7 +24,9 @@ class AWSCredentials(Credentials):
         """
         Initializes the AWSCredentials object.
         """
-        self._client = boto3.resource('ec2')
+        self._resource = boto3.resource('ec2')
+        self._client = boto3.client('ec2')
+        super().__init__()
 
     def generate(self, base_dir: str | Path, name: str, overwrite: bool = False) -> Path:
         """
@@ -51,10 +53,15 @@ class AWSCredentials(Credentials):
         elif private_key_path.exists():
             raise self.KeyCreationError(f"Key {name} already exists.")
         # Request the key pair from AWS.
-        response = self._client.create_key_pair(KeyName=name)
+        if response := self._client.describe_key_pairs(KeyNames=[name]):
+            print(response)
+            response = self._client.delete_key_pair(KeyName=name)
+        (dir(self._resource))
+        response = self._resource.create_key_pair(KeyName=name)
         key_pair_id = response.key_pair_id
+        key_material = response.key_material
         with open(private_key_path, 'w') as key_file:
-            key_file.write(response.key_material)
+            key_file.write(key_material)
         os.chmod(private_key_path, 0o600)
 
         self.base_dir = base_dir
@@ -103,7 +110,7 @@ class AWSCredentials(Credentials):
         """Deletes the key pair."""
         if not self.key_pair:
             return
-        self._client.KeyPair(self.name).delete()
+        self._resource.KeyPair(self.name).delete()
         Path(self.key_path).unlink()
         self.key_id = None
         self.key_path = None

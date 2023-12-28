@@ -1,9 +1,8 @@
-import fnmatch
 import shutil
 import uuid
 
-from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
+from pathlib import Path
 from pydantic import field_validator
 
 from .generic import TEMPLATES_DIR, Provider, ProviderConfig, InstanceParams
@@ -18,15 +17,15 @@ class VagrantConfig(ProviderConfig):
     ip: str
     box: str
     box_version: str
-    public_key: Path
+    public_key: str
 
     @field_validator('public_key', mode='before')
     @classmethod
-    def check_public_key_exists(cls, v: Path | str) -> Path:
+    def check_public_key_exists(cls, v: str) -> str:
         path = Path(v)
         if not path.exists() or not path.is_file():
             raise ValueError(f"Invalid public key path: {path}")
-        return path
+        return v
 
 
 class VagrantProvider(Provider):
@@ -66,7 +65,7 @@ class VagrantProvider(Provider):
 
     @classmethod
     def __create_instance(cls, base_dir: Path, params: InstanceParams, credentials: VagrantCredentials = None) -> VagrantInstance:
-        instance_id = cls.__generate_instance_id()
+        instance_id = cls._generate_instance_id(cls.provider_name)
         instance_dir = base_dir / instance_id
         # Create the instance directory if it doesn't exist.
         if not instance_dir.exists():
@@ -122,23 +121,9 @@ class VagrantProvider(Provider):
         # Parse the configuration.
         config['box'] = os_specs['box']
         config['box_version'] = os_specs['box_version']
-        config['public_key'] = credentials.key_path.with_suffix('.pub')
+        config['public_key'] = str(credentials.key_path.with_suffix('.pub'))
         config['cpu'] = size_specs['cpu']
         config['memory'] = size_specs['memory']
         config['ip'] = size_specs['ip']
 
         return VagrantConfig(**config)
-
-    @staticmethod
-    def __generate_instance_id(prefix: str = "VAGRANT") -> str:
-        """
-        Generates a random instance id with the given prefix.
-
-        Args:
-            prefix (str): The prefix for the instance id. Defaults to "VAGRANT".
-
-        Returns:
-            str: The instance id.
-
-        """
-        return f"{prefix}-{uuid.uuid4()}".upper()

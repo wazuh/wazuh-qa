@@ -56,8 +56,7 @@ class VagrantInstance(Instance):
                 ssh_config[key] = match.group(1)
             else:
                 raise ValueError(f"Couldn't find {key} in vagrant ssh-config")
-
-        ssh_config['private_key'] = self.credentials.key_path
+        ssh_config['private_key'] = str(self.credentials.key_path)
         return ConnectionInfo(**ssh_config)
 
     def __run_vagrant_command(self, command: str | list) -> str:

@@ -1,3 +1,4 @@
+import uuid
 import yaml
 
 from abc import ABC, abstractmethod
@@ -59,6 +60,25 @@ class Provider(ABC):
     def load_instance(self, instance_dir: str | Path, identifier: str, credentials: Credentials = None) -> Instance:
         """Loads an existing instance."""
         pass
+    
+    @abstractmethod
+    def destroy_instance(self, instance_dir: str | Path, identifier: str) -> None:
+        """Destroys an existing instance."""
+        pass
+
+    @staticmethod
+    def _generate_instance_id(prefix: str) -> str:
+        """
+        Generates a random instance id with the given prefix.
+
+        Args:
+            prefix (str): The prefix for the instance id.
+
+        Returns:
+            str: The instance id.
+
+        """
+        return f"{prefix}-{uuid.uuid4()}".upper()
 
     @classmethod
     def _get_os_specs(cls) -> dict:

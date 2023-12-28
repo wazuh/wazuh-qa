@@ -1,13 +1,15 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from ..credentials.generic import Credentials
+
+
 class ConnectionInfo(BaseModel):
     hostname: str
     user: str
     port: int
-    private_key: str | Path
+    private_key: str
 
 
 class Instance(ABC):
@@ -22,7 +24,6 @@ class Instance(ABC):
         self.path: Path = path
         self.identifier: str = str(identifier)
         self.credentials: Credentials = credentials
-
 
     @abstractmethod
     def start(self) -> None:

@@ -1,7 +1,6 @@
+import yaml
 
 from pathlib import Path
-from pydantic import BaseModel
-import yaml
 
 from .providers import VagrantProvider, AmazonEC2Provider, Provider
 from .providers.instances.generic import Instance
@@ -34,7 +33,7 @@ class Allocation:
         inventory = InventoryOutput(ansible_host=ssh_config.hostname,
                                     ansible_user=ssh_config.user,
                                     ansible_port=ssh_config.port,
-                                    ansible_ssh_private_key_file=ssh_config.private_key)
+                                    ansible_ssh_private_key_file=str(ssh_config.private_key))
         with open(inventory_path, 'w') as f:
             yaml.dump(inventory.model_dump(), f)
 
@@ -47,5 +46,12 @@ class Allocation:
                             key_path=str(instance.credentials.key_path))
         with open(track_path, 'w') as f:
             yaml.dump(track.model_dump(), f)
-        
+    
+    @classmethod
+    def delete(cls, track_output_path: str) -> None:
+        payload = InputPayload(**dict(payload))
+        provider: Provider = PROVIDERS[payload.provider]()
+        with open(track_output_path, 'r') as f:
+            track = TrackOutput(**yaml.safe_load(f))
+        provider.destroy_instance(track.instance_dir, track.identifier)
     # def destroy(self, )
