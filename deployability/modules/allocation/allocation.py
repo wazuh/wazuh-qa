@@ -18,6 +18,7 @@ class Allocator:
         provider: Provider = PROVIDERS[payload.provider]()
         # Perform the action.
         if payload.action == 'create':
+            print(f"Creating instance at {working_dir}")
             return cls._create(working_dir, payload, provider)
         elif payload.action == 'delete':
             return cls._delete(payload)
@@ -28,6 +29,7 @@ class Allocator:
         instance = provider.create_instance(path, instance_params)
         if instance.status() != 'running':
             instance.start()
+        print(f"Instance {instance.identifier} created.")
         cls.__generate_inventory(instance, payload.inventory_output)
         cls.__generate_track_file(instance, payload.provider, payload.track_output)
         # TODO replace with logger

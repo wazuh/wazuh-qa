@@ -1,3 +1,4 @@
+import platform
 import shutil
 import uuid
 
@@ -88,6 +89,8 @@ class VagrantProvider(Provider):
             instance_dir (Path): Path to the instance directory.
             config (VagrantConfig): Instance config to use in the vagrantfile.
         """
+        if 'win' in platform.system().lower():
+            config.public_key = config.public_key.replace('\\', '\\\\')
         content = cls.__render_vagrantfile(config)
         with open(instance_dir / 'Vagrantfile', 'w') as f:
             f.write(content)
