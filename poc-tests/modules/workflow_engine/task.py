@@ -8,6 +8,7 @@ import logging
 import random
 import time
 
+
 class Task(ABC):
     """Abstract base class for tasks."""
 
@@ -35,9 +36,17 @@ class ProcessTask(Task):
 
     def execute(self) -> None:
         """Execute the process task."""
+
+        # Function to format key:value elements
+        def format_key_value(task_arg):
+            key, value = list(task_arg.items())[0]
+            return f"--{key}={value}"
+
+        task_args = [str(task_arg) if isinstance(task_arg, str) else format_key_value(task_arg) for task_arg in self.task_parameters['args']]
+
         try:
             result = subprocess.run(
-                [self.task_parameters['path']] + self.task_parameters['args'],
+                [self.task_parameters['path']] + task_args,
                 check=True,
                 capture_output=True,
                 text=True,
