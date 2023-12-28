@@ -10,14 +10,12 @@ class AmazonEC2Provider(Provider):
     provider_name = 'ec2'
     _client = boto3.resource('ec2')
 
-    # def __init__(self,) -> None:
-
     @staticmethod
-    def load_instance(base_dir, name: str, instance_id: str) -> None:
+    def load_instance(base_dir,instance_id: str) -> None:
         if not base_dir.exists():
             raise Exception(f"Instance path {base_dir} does not exist")
 
-        instance = AmazonEC2Instance(base_dir, name, instance_id)
+        instance = AmazonEC2Instance(base_dir, instance_id)
         return instance
 
     @classmethod
@@ -28,18 +26,18 @@ class AmazonEC2Provider(Provider):
             raise Exception(f"Instance path {base_dir} is not a dir.")
         if not credentials:
             credentials = AWSCredentials()
-            credentials.generate(base_dir, params.name)
+            credentials.generate(base_dir, 'instance_key')
         elif not isinstance(credentials, AWSCredentials):
             raise Exception(f"Invalid credentials type: {type(credentials)}")
         config = cls._parse_config(params, credentials.name)
         _instance = cls._client.create_instance(ImageId=config['ami'],
-                                               InstanceType=config['type'],
-                                               KeyName=config['key_name'],
-                                               security_groups=config['security_groups'],
-                                               MinCount=1, MaxCount= 1,
-                                               TagSpecifications = [{'ResourceType': 'instance',
-                                                                     'Tags': [{'Key': 'Name',
-                                                                               'Value': f"dtt1-{config['name']}"}]}])
+                                                InstanceType=config['type'],
+                                                KeyName=config['key_name'],
+                                                security_groups=config['security_groups'],
+                                                MinCount=1, MaxCount=1,
+                                                TagSpecifications=[{'ResourceType': 'instance',
+                                                                    'Tags': [{'Key': 'Name',
+                                                                              'Value': f"dtt1-{config['name']}"}]}])
         _instance.wait_until_running()
         instance_dir = Path(base_dir, _instance.instance_id)
         if not instance_dir.exists():
@@ -47,17 +45,16 @@ class AmazonEC2Provider(Provider):
         elif not instance_dir.is_dir():
             instance_dir.unlink()
             instance_dir.mkdir(parents=True, exist_ok=True)
-        return AmazonEC2Instance(base_dir, params.name, _instance.instance_id, credentials.key_path)
-        
-        
+        return AmazonEC2Instance(base_dir, _instance.instance_id, credentials.key_path)
 
     @classmethod
     def _parse_config(cls, params: InstanceParams, credentials: str) -> None:
+        config = {}
         size_specs = cls._get_size_specs()[params.size]
         os_specs = cls._get_os_specs()[params.composite_name]
         mics_specs = cls._get_misc_specs()[params.composite_name]
-        config = {}
-        config['name'] = params.name
+        # TODO, esto puede venir custom
+        # config['name'] = 'params.name'
         config['type'] = size_specs['type']
         config['ami'] = os_specs['ami']
         config['region'] = os_specs['region']

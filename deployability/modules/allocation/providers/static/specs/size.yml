@@ -1,11 +1,9 @@
 vagrant:
   medium:
-    # linux-*:
       cpu: 2
       memory: 2048
       ip: 192.168.57.10
   large:
-    # linux-*:
       cpu: 4
       memory: 4096
       ip: 192.168.57.11

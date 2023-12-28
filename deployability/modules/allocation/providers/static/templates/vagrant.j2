@@ -2,9 +2,7 @@ Vagrant.configure("2") do |config|
     config.vm.box = "{{ config.box }}"
     config.vm.box_version = "{{ config.box_version }}"
     config.vm.network :forwarded_port, guest: 22, host: 2211, id: "ssh"
-    config.vm.define "{{ config.name }}"
     config.vm.provision "file", source: "{{ config.public_key }}", destination: ".ssh/authorized_keys"
-    config.vm.network "private_network", ip:"{{ config.ip }}"
     config.vm.provider "virtualbox" do |v|
         v.memory = {{ config.memory }}
         v.cpus = {{ config.cpu }}

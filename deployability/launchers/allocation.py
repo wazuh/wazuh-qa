@@ -1,3 +1,9 @@
+import argparse
+import os
+import sys
+from pathlib import Path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(project_root)
 # import argparse
 # import os
 # import yaml
@@ -72,37 +78,70 @@
 #             infra = provider.ProviderFactory().load_from_db(inventory_db[resource], args.working_dir)
 #             infra.status()
 
-import os
-import sys
+from modules.generic.parser import pydantic_argument_parser
+from modules.allocation.providers import instances, credentials, vagrant
+from modules.allocation import Allocation
 
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(project_root)
 
-from src.modules.allocation.providers import instances, credentials, vagrant
+print(
+    "In module products sys.path[0], __package__ ==", sys.path[0], __package__)
+
+
+# def parse_arguments():
+#     parser = argparse.ArgumentParser(
+#         description="Infrastructure providing tool")
+#     parser.add_argument("--working-dir", required=False, default=Path('/tmp/wazuh-infra'),
+#                         dest='working_dir', help='Working directory to store the infrastructure files')
+#     # subparsers = parser.add_subparsers(dest='command', required=True, help='Action to perform')
+#     # create = subparsers.add_parser('create', help='Create a new infrastructure')
+#     # create.add_argument('--input', required=True, dest='create_input', help='Input file to create')
+#     # create.add_argument('--inventory-output', required=False, dest='inventory_file', help='Output file to store the inventory')
+#     # subparsers.add_parser('delete', help='Delete an existing infrastructure')
+#     # subparsers.add_parser('status', help='Show the status of an existing infrastructure')
+#     return parser.parse_args()
+
 
 def main():
-    # # Vagrant
-    creds = credentials.VagrantCredentials()
-    test = creds.generate("/tmp/tes", "test_keys", overwrite=True)
-    print(test)    
-    instance = vagrant.VagrantProvider.create_instance("/tmp", {'name': 'test', 'provider': 'vagrant',
-                                    'size': 'large',
-                                    'alias': 'str', 'composite_name': 'linux-ubuntu-22.04-amd64'}, creds)
-    print(instance.path)
-    instance.start()
-    print(instance.ssh_connection_info())
-    instance.stop()
-    print(instance.status())
-    instance.delete()
-    creds.delete()
-    
+    # parser = pydantic_argument_parser(,InputPayload)
+    Allocation.create('/tmp/wazuh-infra', {'provider': 'vagrant',
+                                           'size': 'large',
+                                           'alias': 'str', 'composite_name': 'linux-ubuntu-22.04-amd64'})
+    # print(models.AllocationPayload.model_fields)
+    # Vagrant
+    # args = parse_arguments()
+    # creds = credentials.VagrantCredentials()
+    # creds.generate(args.working_dir, "test_keys", overwrite=True)
+    # print(creds.key_id)
+
+    # cred2 = credentials.VagrantCredentials()
+    # cred2.load(args.working_dir, "test_keys")
+    # print(cred2.key_id)
+    # # print(test)
+    # instance = vagrant.VagrantProvider.create_instance(args.working_dir, {'name': 'test', 'provider': 'vagrant',
+    #                                 'size': 'large',
+    #                                 'alias': 'str', 'composite_name': 'linux-ubuntu-22.04-amd64'})
+    # print(instance.path)
+    # print(instance.status())
+    # instance_id = instance.identifier
+
+    # instance.start()
+
+    # instance2 = vagrant.VagrantProvider.load_instance(args.working_dir, 'test', instance_id)
+    # print(instance2.path)
+    # print(instance2.status())
+    # # print(instance.ssh_connection_info())
+    # # instance.stop()
+    # # print(instance.status())
+    # instance.delete()
+    # print(instance2.status())
+    # creds.delete()
+
     # AWS
     # creds = credentials.AWSCredentials("/tmp/tes", "test_keys")
     # test_key = creds.generate()
     # print(test_key)
     # print(creds.key_id)
-
 
 
 if __name__ == "__main__":

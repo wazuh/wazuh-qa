@@ -5,27 +5,28 @@ import subprocess
 
 from pathlib import Path
 
-from .generic import ConnectionInfo, Instance, ProviderConfig
+from .generic import ConnectionInfo, Instance
+from ..credentials.amazon_ec2 import AWSCredentials
 
 
-class AmazonEC2Config(ProviderConfig):
-    id: str
-    type: str
-    ami: str
-    region: str
-    user: str
+# class AmazonEC2Config(ProviderConfig):
+#     id: str
+#     type: str
+#     ami: str
+#     zone: str
+#     user: str
 
 
 class AmazonEC2Instance(Instance):
 
-    def __init__(self, base_dir: str | Path, name: str, identifier: str, user: str, key_pair: str | Path = None) -> None:
+    def __init__(self, base_dir: str | Path, identifier: str, user: str, credentials: AWSCredentials = None) -> None:
         self._user = user
         self._client = boto3.resource('ec2')
         self._instance = self._client.Instance(identifier)
 
-        super().__init__(base_dir, name, identifier, key_pair)
-        if not self.key_pair:
-            self.key_pair = self.__get_key_pair()
+        super().__init__(base_dir, identifier, credentials)
+        if not self.credentials:
+            self.credentials = self.__get_credentials()
 
     def start(self) -> None:
         self._instance.start()
@@ -46,11 +47,10 @@ class AmazonEC2Instance(Instance):
         return ConnectionInfo(hostname=self._instance.public_dns_name,
                               user=self._user,
                               port=22,
-                              private_key=self.key_path)
+                              private_key=self.credentials.key_path)
 
-    def __get_key_pair(self):
-        key_path = Path(self.path, self._instance.key_pair).with_suffix(".pem")
-        with open(key_path, 'w') as key_file:
-            key_file.write(self._instance.key_pair.key_material)
-            os.chmod(key_path, 0o600)
-        return key_path
+    def __get_credentials(self) -> AWSCredentials:
+        key_name = self._instance.key_name
+        credentials = AWSCredentials()
+        credentials.load(self.path, key_name)
+        return credentials

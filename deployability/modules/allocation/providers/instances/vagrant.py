@@ -4,13 +4,13 @@ import subprocess
 from pathlib import Path
 
 from .generic import ConnectionInfo, Instance
-
+from ..credentials.vagrant import VagrantCredentials
 
 class VagrantInstance(Instance):
-    def __init__(self, base_dir: str | Path, name: str, identifier: str, key_pair: str | Path) -> None:
-        super().__init__(base_dir, name, identifier, key_pair)
+    def __init__(self, path: str | Path, identifier: str, credentials: VagrantCredentials) -> None:
+        super().__init__(path, identifier, credentials)
             
-        self.vagrantfile_path: Path = Path(self.path, 'Vagrantfile')
+        self.vagrantfile_path: Path = self.path / 'Vagrantfile'
 
     def start(self) -> None:
         """Starts the vagrant VM."""
@@ -24,7 +24,7 @@ class VagrantInstance(Instance):
         """Deletes the vagrant VM and cleans the environment."""
         if "not created" in self.status():
             return
-        self.__run_vagrant_command('destroy -f')
+        self.__run_vagrant_command(['destroy', '-f'])
 
     def status(self) -> str:
         """Checks the status of the vagrant VM.
@@ -57,21 +57,23 @@ class VagrantInstance(Instance):
             else:
                 raise ValueError(f"Couldn't find {key} in vagrant ssh-config")
 
-        ssh_config['private_key'] = self.key_pair
+        ssh_config['private_key'] = self.credentials.key_path
         return ConnectionInfo(**ssh_config)
 
-    def __run_vagrant_command(self, command: str) -> str:
+    def __run_vagrant_command(self, command: str | list) -> str:
         """
         Runs a Vagrant command and returns its output.
 
         Args:
-            command (str): The vagrant command to run.
+            command (str|list): The vagrant command to run.
 
         Returns:
             str: The output of the command.
         """
+        if not isinstance(command, list):
+            command = [command]
         try:
-            output = subprocess.run(["vagrant", command, self.name],
+            output = subprocess.run(["vagrant", *command],
                                     cwd=self.path,
                                     check=True,
                                     stdout=subprocess.PIPE,
@@ -94,5 +96,6 @@ class VagrantInstance(Instance):
         for line in lines:
             if 'Current machine states:' in line:
                 status_line = lines[lines.index(line) + 2]
-                status = status_line.split()[1]
+                status = ' '.join(status_line.split()[1:])
+                status = status.split('(')[0].strip()
                 return status

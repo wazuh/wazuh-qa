@@ -2,9 +2,10 @@ import yaml
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 
 from .instances.generic import ConnectionInfo, Instance
+from .credentials.generic import Credentials
 
 # Paths to the templates and specs directories.
 ROOT_DIR = Path(__file__).parent / 'static'
@@ -20,21 +21,20 @@ class ProviderConfig(BaseModel):
 
 
 class InstanceParams(BaseModel):
-    name: str
-    provider: str
-    size: str
-    alias: str
-    composite_name: str
-    custom_credentials: str | Path = None
+    provider: str = Field(..., description='Provider to use.')
+    size: str = Field(..., description='Size of the instance.')
+    composite_name: str = Field(..., description='Composite name of the instance.')
+    custom_credentials: str | None = Field(default=None, description='Path to the custom credentials file.')
 
-
-# class InstanceDefinition(BaseModel):
-#     name: str
-#     params: InstanceParams
-#     path: str
-#     provider: str
-#     credentials: Path | str
-#     provider_config: ProviderConfig
+    @field_validator('custom_credentials')
+    @classmethod
+    def check_credentials_exists(cls, v: str) -> str | None:
+        if not v:
+            return None
+        path = Path(v)
+        if not path.exists() or not path.is_file():
+            raise ValueError(f"Invalid credentials path: {path}")
+        return v
 
 
 class Provider(ABC):
@@ -51,12 +51,12 @@ class Provider(ABC):
         pass
 
     @abstractmethod
-    def create_instance(self, **kwargs) -> Instance:
+    def create_instance(self, base_dir: Path, params: InstanceParams, credentials: Credentials) -> Instance:
         """Creates a new instance."""
         pass
 
     @abstractmethod
-    def load_instance(self, **kwargs) -> Instance:
+    def load_instance(self, instance_dir: str | Path, identifier: str, credentials: Credentials = None) -> Instance:
         """Loads an existing instance."""
         pass
 
@@ -81,7 +81,7 @@ class Provider(ABC):
         """
         with open(SIZE_PATH, "r") as f:
             return yaml.safe_load(f).get(cls.provider_name)
-    
+
     @classmethod
     def get_misc_specs(cls) -> dict:
         """

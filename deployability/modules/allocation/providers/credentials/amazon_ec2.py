@@ -91,6 +91,7 @@ class AWSCredentials(Credentials):
             raise self.KeyCreationError(f"Invalid key name {name}.")
         with open(key_path, 'w') as key_file:
             key_file.write(response.key_pairs[0].key_material)
+            os.chmod(key_file, 0o600)
         # Save instance attributes.
         self.base_dir = base_dir
         self.name = name

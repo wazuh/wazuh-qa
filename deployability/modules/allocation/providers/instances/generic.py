@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from pydantic import BaseModel
 
-
+from ..credentials.generic import Credentials
 class ConnectionInfo(BaseModel):
     hostname: str
     user: str
@@ -11,18 +11,17 @@ class ConnectionInfo(BaseModel):
 
 
 class Instance(ABC):
-    def __init__(self, base_dir: Path, name: str, identifier: str, key_pair: Path = None) -> None:
+    def __init__(self, path: str | Path, identifier: str, credentials: Credentials = None) -> None:
         """Initialize Instance object."""
-        instance_path = Path(base_dir, identifier)
-        if not instance_path.exists() or not instance_path.is_dir():
-            raise ValueError(f"Invalid instance base_path or identifier: {instance_path}")
-        if key_pair and not Path(key_pair).exists():
-            raise ValueError(f"Invalid key pair path: {key_pair}")
+        path = Path(path)
+        if not path.exists() or not path.is_dir():
+            raise ValueError(f"Invalid instance base_path or identifier: {path}")
+        if credentials and not issubclass(type(credentials), Credentials):
+            raise ValueError(f"Invalid credentials.")
 
-        self.path: Path = instance_path
-        self.name: str = str(name)
+        self.path: Path = path
         self.identifier: str = str(identifier)
-        self.key_pair: Path = Path(key_pair) if key_pair else None
+        self.credentials: Credentials = credentials
 
 
     @abstractmethod
