@@ -160,7 +160,7 @@ class WorkflowProcessor:
         for validation in validations:
             validation(self)
 
-    def build_dependency_graph(self):
+    def build_dependency_graph(self, reverse=False):
         """Build a dependency graph for the tasks."""
         dependency_dict = {}
         dag = graphlib.TopologicalSorter()
@@ -168,11 +168,18 @@ class WorkflowProcessor:
         for task in self.task_collection:
             task_name = task['task']
             dependencies = task.get('depends-on', [])
+
+            if reverse:
+                for dependency in dependencies:
+                    dag.add(dependency, task_name)
+            else:
+                dag.add(task_name, *dependencies)
+
             dependency_dict[task_name] = dependencies
-            dag.add(task_name, *dependencies)
+
         return dag, dependency_dict
 
-    def execute_task(self, task: dict) -> None:
+    def execute_task(self, task: dict, action) -> None:
         """Execute a task."""
         task_name = task['task']
 
@@ -180,7 +187,7 @@ class WorkflowProcessor:
         start_time = time.time()
 
         try:
-            task_object = self.create_task_object(task)
+            task_object = self.create_task_object(task, action)
             task_object.execute()
             # Pass the tag to the tag_formatter function if it exists
             tag_info = self.logger.tag_formatter(task_name) if hasattr(self.logger, 'tag_formatter') else {}
@@ -193,9 +200,9 @@ class WorkflowProcessor:
             # Handle the exception or re-raise if necessary
             raise
 
-    def create_task_object(self, task: dict) -> Task:
+    def create_task_object(self, task: dict, action) -> Task:
         """Create and return a Task object based on task type."""
-        task_type = task['do']['this']
+        task_type = task[action]['this']
 
         task_classes = {
             'process': ProcessTask,
@@ -206,7 +213,7 @@ class WorkflowProcessor:
         task_class = task_classes.get(task_type)
 
         if task_class is not None:
-            return task_class(task['task'], task['do']['with'], self.logger)
+            return task_class(task['task'], task[action]['with'], self.logger)
 
         raise ValueError(f"Unknown task type '{task_type}'.")
 
@@ -261,10 +268,47 @@ class WorkflowProcessor:
                         concurrent.futures.wait(dependent_futures)
 
                         task = next(t for t in self.task_collection if t['task'] == task_name)
-                        future = executor.submit(self.execute_task, task)
+                        future = executor.submit(self.execute_task, task, 'do')
                         futures[task_name] = future
 
                         dag.done(task_name)
+
+            # Wait for all tasks to complete
+            concurrent.futures.wait(futures.values())
+
+            # Now execute tasks based on the reverse DAG
+            reverse_dag, reverse_dependency_dict = self.build_dependency_graph(reverse=True)
+
+            reverse_dag.prepare()
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=self.threads) as executor:
+                reverse_futures = {}
+
+                while True:
+                    if not reverse_dag.is_active() or self.failed_tasks:
+                        break
+
+                    for task_name in reverse_dag.get_ready():
+                        dependencies = reverse_dependency_dict[task_name]
+                        
+                        if any(dep in self.failed_tasks for dep in dependencies):
+                            self.logger.info("[%s] Skipping task due to dependency failure", task_name)
+                            self.failed_tasks.add(task_name)
+                            reverse_dag.done(task_name)
+                            continue
+
+                        dependent_futures = [reverse_futures[d] for d in dependencies if d in reverse_futures]
+
+                        concurrent.futures.wait(dependent_futures)
+
+                        task = next(t for t in self.task_collection if t['task'] == task_name)
+                        if 'cleanup' in task:
+                            future = executor.submit(self.execute_task, task, 'cleanup')
+                            reverse_futures[task_name] = future
+                        reverse_dag.done(task_name)
+
+            # Wait for all tasks to complete
+            concurrent.futures.wait(reverse_futures.values())
 
     def main(self) -> None:
         """Main entry point."""
