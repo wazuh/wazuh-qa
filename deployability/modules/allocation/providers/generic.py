@@ -52,7 +52,7 @@ class Provider(ABC):
         pass
 
     @abstractmethod
-    def create_instance(self, base_dir: Path, params: InstanceParams, credentials: Credentials) -> Instance:
+    def create_instance(self, base_dir: Path, params: InstanceParams, credentials: Credentials = None) -> Instance:
         """Creates a new instance."""
         pass
 

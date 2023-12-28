@@ -2,12 +2,12 @@ import yaml
 
 from pathlib import Path
 
-from .providers import VagrantProvider, AmazonEC2Provider, Provider
+from .providers import VagrantProvider, AWSProvider, Provider
 from .providers.instances.generic import Instance
 from .providers.generic import InstanceParams
 from .models import InputPayload, InventoryOutput, TrackOutput
 
-PROVIDERS = {'vagrant': VagrantProvider, 'aws': AmazonEC2Provider}
+PROVIDERS = {'vagrant': VagrantProvider, 'aws': AWSProvider}
 
 
 class Allocator:
@@ -26,6 +26,8 @@ class Allocator:
     def _create(cls, path: str, payload: InputPayload, provider: Provider):
         instance_params = InstanceParams(**dict(payload))
         instance = provider.create_instance(path, instance_params)
+        if instance.status() != 'running':
+            instance.start()
         cls.__generate_inventory(instance, payload.inventory_output)
         cls.__generate_track_file(instance, payload.provider, payload.track_output)
         # TODO replace with logger

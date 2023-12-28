@@ -8,7 +8,7 @@ from .instances.amazon_ec2 import AmazonEC2Instance
 from .credentials.amazon_ec2 import AWSCredentials
 
 
-class AmazonEC2Provider(Provider):
+class AWSProvider(Provider):
     provider_name = 'aws'
     _client = boto3.resource('ec2')
 

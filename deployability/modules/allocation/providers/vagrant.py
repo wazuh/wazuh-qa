@@ -14,7 +14,6 @@ from .instances.vagrant import VagrantInstance
 class VagrantConfig(ProviderConfig):
     cpu: int
     memory: int
-    ip: str
     box: str
     box_version: str
     public_key: str
@@ -124,6 +123,5 @@ class VagrantProvider(Provider):
         config['public_key'] = str(credentials.key_path.with_suffix('.pub'))
         config['cpu'] = size_specs['cpu']
         config['memory'] = size_specs['memory']
-        config['ip'] = size_specs['ip']
 
         return VagrantConfig(**config)

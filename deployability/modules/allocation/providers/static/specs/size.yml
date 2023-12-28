@@ -1,22 +1,27 @@
 vagrant:
+  micro:
+      cpu: 1
+      memory: 512
   small:
       cpu: 1
       memory: 1024
-      ip: 192.168.57.10
   medium:
       cpu: 2
       memory: 2048
-      ip: 192.168.57.10
   large:
       cpu: 4
       memory: 4096
-      ip: 192.168.57.11
 aws:
-  small:
+  micro:
     linux-*-amd64:
       type: t2.micro
     linux-*-arm64:
       type: c7gn.micro
+  small:
+    linux-*-amd64:
+      type: t2.small
+    linux-*-arm64:
+      type: c7gn.small
   medium:
     linux-*-amd64:
       type: t2.medium
