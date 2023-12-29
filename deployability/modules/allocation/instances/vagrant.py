@@ -7,7 +7,7 @@ from .generic import ConnectionInfo, Instance
 from modules.allocation.credentials.vagrant import VagrantCredentials
 
 class VagrantInstance(Instance):
-    def __init__(self, path: str | Path, identifier: str, credentials: VagrantCredentials) -> None:
+    def __init__(self, path: str | Path, identifier: str, credentials: VagrantCredentials = None) -> None:
         super().__init__(path, identifier, credentials)
             
         self.vagrantfile_path: Path = self.path / 'Vagrantfile'

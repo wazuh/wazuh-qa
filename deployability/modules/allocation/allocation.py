@@ -15,17 +15,17 @@ class Allocator:
     def run(cls, payload: InputPayload) -> None:
         payload = InputPayload(**dict(payload))
         working_dir = Path(payload.working_dir)
-        provider: Provider = PROVIDERS[payload.provider]()
         # Detect the action and call the appropriate method.
         if payload.action == 'create':
             print(f"Creating instance at {working_dir}")
-            return cls._create(working_dir, payload, provider)
+            return cls._create(working_dir, payload)
         elif payload.action == 'delete':
             print(f"Deleting instance from trackfile {payload.track_output}")
             return cls._delete(payload)
 
     @classmethod
-    def _create(cls, path: str, payload: InputPayload, provider: Provider):
+    def _create(cls, path: str, payload: InputPayload):
+        provider: Provider = PROVIDERS[payload.provider]()
         instance_params = InstanceParams(**dict(payload))
         instance = provider.create_instance(path, instance_params)
         print(f"Instance {instance.identifier} created.")
@@ -39,7 +39,7 @@ class Allocator:
         print(f"\nTrack file generated at {payload.track_output}")
 
     @classmethod
-    def _delete(cls, payload: InputPayload, provider: Provider) -> None:
+    def _delete(cls, payload: InputPayload) -> None:
         payload = InputPayload(**dict(payload))
         # Validate the track file.
         if not payload.track_output:
@@ -49,6 +49,7 @@ class Allocator:
         # Read the data from the track file.
         with open(payload.track_output, 'r') as f:
             track = TrackOutput(**yaml.safe_load(f))
+        provider = PROVIDERS[track.provider]()
         provider.destroy_instance(track.instance_dir, track.identifier)
 
     @staticmethod

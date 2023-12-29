@@ -61,7 +61,7 @@ class VagrantProvider(Provider):
         if not instance_dir.exists():
             raise Exception(f"Instance path {instance_dir} does not exist")
         instance = VagrantInstance(instance_dir, identifier)
-        instance.destroy()
+        instance.delete()
         shutil.rmtree(instance_dir, ignore_errors=True)
 
     @classmethod
