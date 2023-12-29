@@ -21,6 +21,7 @@ class Allocator:
             print(f"Creating instance at {working_dir}")
             return cls._create(working_dir, payload, provider)
         elif payload.action == 'delete':
+            print(f"Deleting instance from trackfile {payload.track_output}")
             return cls._delete(payload)
 
     @classmethod
@@ -28,8 +29,9 @@ class Allocator:
         instance_params = InstanceParams(**dict(payload))
         instance = provider.create_instance(path, instance_params)
         print(f"Instance {instance.identifier} created.")
-        if instance.status() != 'running':
-            instance.reload()
+        # Start the instance
+        instance.start()
+        # Generate the inventory and track files.
         cls.__generate_inventory(instance, payload.inventory_output)
         cls.__generate_track_file(instance, payload.provider, payload.track_output)
         # TODO replace with logger
@@ -39,6 +41,12 @@ class Allocator:
     @classmethod
     def _delete(cls, payload: InputPayload, provider: Provider) -> None:
         payload = InputPayload(**dict(payload))
+        # Validate the track file.
+        if not payload.track_output:
+            raise ValueError("Track file is required to delete an instance.")
+        if not Path(payload.track_output).exists():
+            raise ValueError(f"Track file {payload.track_output} does not exist.")
+        # Read the data from the track file.
         with open(payload.track_output, 'r') as f:
             track = TrackOutput(**yaml.safe_load(f))
         provider.destroy_instance(track.instance_dir, track.identifier)
