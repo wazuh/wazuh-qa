@@ -1,12 +1,9 @@
 
-
-String script_path = "scripts"
-String provision_script = "provision.py"
-String infra_script = "infra.py"
-String infra_request = "dtt1-poc-infra.yaml"
-String test_script = "test.py"
-String inventory = "inventory.yaml"
-String jenkins_reference = params.getOrDefault('JENKINS_REFERENCE', 'enhancement/4665-dtt1-poc')
+String jenkins_reference = params.getOrDefault('JENKINS_REFERENCE', 'enhancement/4751-dtt1-iteration-2-poc')
+String launcher_path = "launchers"
+String task_flow_launcher = "provision.py"
+String workflow = "modules/workflow_engine/examples/dtt1-managers.yaml"
+String schema = "modules/workflow_engine/schema.json"
 
 // Jenkinsfile
 
@@ -18,29 +15,17 @@ node {
       git branch: "${JENKINS_REFERENCE}", url: 'https://github.com/wazuh/wazuh-qa.git'
     }
 
-    stage('Launch infrastructure') {
-      print("Launch infrastructure")
-      sh "cd ${env.WORKSPACE}/poc-tests && python3 ${script_path}/infra/${infra_script} create --input ${infra_request} --inventory-output ${inventory}"
-    }
+    stage('Launch Task Flow') {
+      print("Launch Task Flow dry run")
+      sh "cd ${env.WORKSPACE}/deployability && python3 ${launcher_path}/${task_flow_launcher} ${workflow} --dry-run"
 
-    stage('Provision') {
-      print("Launch provision")
-      sh "cd ${env.WORKSPACE}/poc-tests && python3 ${script_path}/${provision_script} -i ${inventory}"
-    }
-
-    stage('Test') {
-      print("Launch tests")
-      sh "cd ${env.WORKSPACE}/poc-tests && python3 ${script_path}/${test_script} -i ${inventory} -v 4.7.0 -r 40704"
+      print("Launch Task Flow")
+      sh "cd ${env.WORKSPACE}/deployability && python3 ${launcher_path}/${task_flow_launcher} ${workflow} ${schema}"
     }
   }
   finally{
     stage('Remove venv') {
-      sh "rm -rf ${env.WORKSPACE}/poc-tests/venv"
-    }
-
-    stage('Remove infrastructure') {
-      print("Launch infrastructure")
-      sh "cd ${env.WORKSPACE}/poc-tests && python3 ${script_path}/${infra_script} delete"
+      sh "rm -rf ${env.WORKSPACE}/deployability/venv"
     }
   }
 }

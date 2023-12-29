@@ -1,0 +1,106 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+version: 0.1
+description: This workflow is used to test agents deployment por DDT1 PoC
+variables:
+  agents-os:
+    - linux-ubuntu-22.04-amd64
+    - linux-fedora-38-amd64
+  manager-os: linux-amazon-2023-amd64
+  infra-provider: vagrant
+  working-dir: /tmp/dtt1-poc
+
+tasks:
+  # Generic agent test task
+  - task: "run-agent-tests-{agent}"
+    description: "Run tests for the {agent} agent."
+    do:
+      this: process
+      with:
+        path: /bin/echo
+        args:
+          - -n
+          - "Running tests for {agent}"
+    depends-on:
+      - "provision-{agent}"
+      - "provision-manager"
+    foreach:
+      - variable: agents-os
+        as: agent
+
+  # Unique manager provision task
+  - task: "provision-manager"
+    description: "Provision the manager."
+    do:
+      this: process
+      with:
+        path: /bin/echo
+        args:
+          - -n
+          - "Running provision for manager"
+    depends-on:
+      - "allocate-manager"
+
+  # Unique manager allocate task
+  - task: "allocate-manager"
+    description: "Allocate resources for the manager."
+    do:
+      this: process
+      with:
+        path: python3 /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
+        args:
+          - action: create
+          - provider: "{infra-provider}"
+          - size: large
+          - composite-name: "{manager-os}"
+          - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+    cleanup:
+      this: process
+      with:
+        path: python3 /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
+        args:
+          - action: delete
+          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+
+  # Generic agent provision task
+  - task: "provision-{agent}"
+    description: "Provision resources for the {agent} agent."
+    do:
+      this: process
+      with:
+        path: /bin/echo
+        args:
+          - -n
+          - "Running provision for {agent}"
+    depends-on:
+      - "allocate-{agent}"
+    foreach:
+      - variable: agents-os
+        as: agent
+
+  # Generic agent allocate task
+  - task: "allocate-{agent}"
+    description: "Allocate resources for the {agent} agent."
+    do:
+      this: process
+      with:
+        path: python3 ./deployability/launchers/allocation.py
+        args:
+          - action: create
+          - provider: "{infra-provider}"
+          - size: micro
+          - composite-name: "{agent}"
+          - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
+          - track-output: "{working-dir}/agent-{agent}/track.yaml"
+    cleanup:
+      this: process
+      with:
+        path: python3 ./deployability/launchers/allocation.py
+        args:
+          - action: delete
+          - track-output: "{working-dir}/agent-{agent}/track.yaml"
+    foreach:
+      - variable: agents-os
+        as: agent

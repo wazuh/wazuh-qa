@@ -1,3 +1,0 @@
-test: !!python/object/apply:pathlib.PosixPath
-- /
-- wazuh-qa
