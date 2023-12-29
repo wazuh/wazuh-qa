@@ -5,6 +5,7 @@ __pycache__
 venv
 wazuh_testing.egg-info
 dist
+.env
 
 # Python bytecode files
 *.pyc
@@ -44,6 +45,7 @@ Temporary Items
 
 ### VisualStudioCode ###
 .vscode/*
+.vscode/
 .mypy_cache/
 .vs/*
 

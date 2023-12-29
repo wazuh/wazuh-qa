@@ -1,4 +1,0 @@
----
-linux-ubuntu-22.04-amd64:
-    box: ubuntu/jammy64
-    box_version: 20231027.0.0
