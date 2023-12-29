@@ -16,7 +16,7 @@ class Allocator:
         payload = InputPayload(**dict(payload))
         working_dir = Path(payload.working_dir)
         provider: Provider = PROVIDERS[payload.provider]()
-        # Perform the action.
+        # Detect the action and call the appropriate method.
         if payload.action == 'create':
             print(f"Creating instance at {working_dir}")
             return cls._create(working_dir, payload, provider)

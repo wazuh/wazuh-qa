@@ -5,7 +5,7 @@ import os
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(project_root)
 
-from src.modules import Ansible
+from modules.generic import Ansible
 import provision as provisioner
 
 
