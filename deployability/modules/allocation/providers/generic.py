@@ -5,8 +5,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from pydantic import BaseModel, Field, field_validator
 
-from .instances.generic import ConnectionInfo, Instance
-from .credentials.generic import Credentials
+from modules.allocation.instances.generic import ConnectionInfo, Instance
+from modules.allocation.credentials.generic import Credentials
 
 # Paths to the templates and specs directories.
 ROOT_DIR = Path(__file__).parent / 'static'

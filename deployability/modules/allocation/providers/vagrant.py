@@ -7,10 +7,10 @@ from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
 from pydantic import field_validator
 
+from modules.allocation.credentials.vagrant import VagrantCredentials
+from modules.allocation.instances.generic import ConnectionInfo
+from modules.allocation.instances.vagrant import VagrantInstance
 from .generic import TEMPLATES_DIR, Provider, ProviderConfig, InstanceParams
-from .credentials.vagrant import VagrantCredentials
-from .instances.generic import ConnectionInfo
-from .instances.vagrant import VagrantInstance
 
 
 class VagrantConfig(ProviderConfig):

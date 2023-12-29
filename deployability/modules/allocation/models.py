@@ -19,11 +19,25 @@ class TrackOutput(BaseModel):
     key_path: str
 
 
-class InputPayload(InstanceParams):
+class InputPayload(BaseModel):
+    action: Literal['create', 'delete', 'status'] = 'create'
     provider: str | None
     size: str | None
     composite_name: str | None
-    action: Literal['create', 'delete', 'status'] = 'create'
     track_output: Path | None
     inventory_output: Path | None
     working_dir: Path | None
+    custom_credentials: str | None
+
+
+class CreationPayload(InputPayload):
+    provider: str
+    size: str
+    composite_name: str
+    track_output: Path
+    inventory_output: Path
+    working_dir: Path
+
+
+class DeletionPayload(InputPayload):
+    track_output: Path

@@ -2,10 +2,10 @@ import yaml
 
 from pathlib import Path
 
-from .providers import VagrantProvider, AWSProvider, Provider
-from .providers.instances.generic import Instance
-from .providers.generic import InstanceParams
+from .instances.generic import Instance
 from .models import InputPayload, InventoryOutput, TrackOutput
+from .providers import VagrantProvider, AWSProvider, Provider
+from .providers.generic import InstanceParams
 
 PROVIDERS = {'vagrant': VagrantProvider, 'aws': AWSProvider}
 
