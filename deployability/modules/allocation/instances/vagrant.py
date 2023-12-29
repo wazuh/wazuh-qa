@@ -57,7 +57,7 @@ class VagrantInstance(Instance):
         for key, pattern in patterns.items():
             match = re.search(pattern, output)
             if match:
-                ssh_config[key] = match.group(1)
+                ssh_config[key] = str(match.group(1)).strip("\r") 
             else:
                 raise ValueError(f"Couldn't find {key} in vagrant ssh-config")
         ssh_config['private_key'] = str(self.credentials.key_path)
