@@ -4,26 +4,35 @@ All notable changes to this project will be documented in this file.
 
 ## [4.9.0] - TBD
 
-Wazuh commit: TBD \
-Release report: TBD
+### Added
+
+- Add integration tests for Update field to CPE_Helper. ([#4574](https://github.com/wazuh/wazuh-qa/pull/4574)) \- (Core)
+
+## [4.8.1] - TBD
 
 ## [4.8.0] - TBD
 
-Wazuh commit: TBD \
-Release report: TBD
-
 ### Added
 
+- Migrate Wazuh Ansibles Roles. ([#4642](https://github.com/wazuh/wazuh-qa/pull/4642)) \- (Framework)
 - Add scans environment setup documentation. ([#4444](https://github.com/wazuh/wazuh-qa/pull/4444)) \- (Tests)
 - Add system test for global group hash ([#4015](https://github.com/wazuh/wazuh-qa/pull/4015)) \- (Tests)
 - Add tests for new FIM audit buffer option. ([#4485](https://githubhttps://github.com/wazuh/wazuh-qa/pull/4497#pullrequestreview-1654748331.com/wazuh/wazuh-qa/pull/4485)) \- (Framework + tests)
 - Add tests for merged.mg file generation. ([#4129](https://github.com/wazuh/wazuh-qa/pull/4129)) \- (Tests)
 - Added tests for checking agent status upon ungraceful closure.([#4146](https://github.com/wazuh/wazuh-qa/pull/4146)) \- (Tests)
 - Agent syncronization testing after group deleting ([#4143](https://github.com/wazuh/wazuh-qa/pull/4143)) \- (Tests)
+- Add test for AWS Custom Logs. ([#4675](https://github.com/wazuh/wazuh-qa/pull/4675)) \- (Tests)
+- Add new behaviour for endpoints marked as xfail in api_endpoints_performance test ([#4657](https://github.com/wazuh/wazuh-qa/pull/4657)) \ (Tests)
 
 ### Changed
 
-- Enable Windows Vulnerability Detector E2E. ([#4251](https://github.com/wazuh/wazuh-qa/pull/4251)) (Tests)
+- Fix one_manager_agent_env pytest marker for System Tests ([#4782](https://github.com/wazuh/wazuh-qa/pull/4782)) \- (Tests)
+- Updated Filebeat module to 0.4 ([#4775](https://github.com/wazuh/wazuh-qa/pull/4775)) \- (Framework)
+- Include ATP repository update before the installation of Ubuntu E2E agent installation ([#4761](https://github.com/wazuh/wazuh-qa/pull/4761)) \- (Framework)
+- Enhance macOS deployment ansible taks ([#4685](https://github.com/wazuh/wazuh-qa/pull/4685)) \- (Framework)
+- Updated Filebeat module to 0.3 ([#4700](https://github.com/wazuh/wazuh-qa/pull/4700)) \- (Framework)
+- Change database v13 to v12. ([#4677](https://github.com/wazuh/wazuh-qa/pull/4677)) \- (Tests)
+- Enable Windows Vulnerability Detector E2E. ([#4251](https://github.com/wazuh/wazuh-qa/pull/4251)) \- (Tests)
 - Update certifi library due to a vulnerability. ([#4486](https://github.com/wazuh/wazuh-qa/pull/4486)) \- (Tests)
 - Enable Ubuntu Vulnerability Detector E2E. ([#4252](https://github.com/wazuh/wazuh-qa/pull/4252)) \- (Tests)
 - Update _wazuh_db_ schema database version ([#4353](https://github.com/wazuh/wazuh-qa/pull/4353)) \- (Tests)
@@ -33,15 +42,27 @@ Release report: TBD
 - Update the migration tool's system tests to match the new log file naming convention ([#4618](https://github.com/wazuh/wazuh-qa/pull/4618)) \- (Tests)
 - Remove deprecated group column and commands. ([#4222](https://github.com/wazuh/wazuh-qa/pull/4222)) \- (Tests)
 
-## [4.7.1] - TBD
+### Fixed
 
-Wazuh commit: TBD \
-Release report: TBD
+- Fix macOS agents provision to enable registration and connection with managers. ([#4770](https://github.com/wazuh/wazuh-qa/pull/4770/)) \- (Framework)
+- Fix hardcoded python interpreter in qa_framework role. ([#4658](https://github.com/wazuh/wazuh-qa/pull/4658)) \- (Framework)
+- Fix duplicated jq dependency ([#4678](https://github.com/wazuh/wazuh-qa/pull/4678)) \- (Framework)
 
-## [4.7.0] - TBD
+## [4.7.2] - TBD
 
-Wazuh commit: TBD \
-Release report: TBD
+### Fixed
+
+- Fix the generation of syscollector events in the agent simulator class. ([#4773](https://github.com/wazuh/wazuh-qa/pull/4773)) \- (Framework)
+
+## [4.7.1] - 20/12/2023
+
+### Changed
+
+- Remove deprecated message from cluster System Tests. ([#4740](https://github.com/wazuh/wazuh-qa/pull/4740)) \- (Tests)
+- Enhance control_service error handling on windows agents. ([#4741](https://github.com/wazuh/wazuh-qa/pull/4741)) \- (Framework)
+- Add XFAIL mark to Cluster reliability logs test. ([#4706](https://github.com/wazuh/wazuh-qa/pull/4706)) \- (Tests)
+
+## [4.7.0] - 27/11/2023
 
 ### Added
 
@@ -50,19 +71,22 @@ Release report: TBD
 
 ### Changed
 
-- Add option to run some logcollector tests isolated (without a manager) [#4226](https://github.com/wazuh/wazuh-qa/pull/4226) \- (Tests + Framework)
-- Update code analysis and dependencies known flaws. [#4083](https://github.com/wazuh/wazuh-qa/pull/4083) \- (Tests)
+- Revert a pattern log in analysisd test ([#4688](https://github.com/wazuh/wazuh-qa/pull/4688)) \- (Framework)
+- Clean environment between basic_cluster tests ([#4656](https://github.com/wazuh/wazuh-qa/pull/4656)) \- (Tests)
+- Upgrade gcc version in system tests image ([#4655](https://github.com/wazuh/wazuh-qa/pull/4655)) \- (Framework)
+- Add option to run some logcollector tests isolated (without a manager) ([#4226](https://github.com/wazuh/wazuh-qa/pull/4226)) \- (Tests + Framework)
+- Update code analysis and dependencies known flaws. ([#4083](https://github.com/wazuh/wazuh-qa/pull/4083)) \- (Tests)
 - Update _wazuh_db_ schema database version([#4405](https://github.com/wazuh/wazuh-qa/pull/4405)) \- (Tests)
 - Update framework known flaws file ([#4313](https://github.com/wazuh/wazuh-qa/pull/4313)) \- (Tests)
 
 ### Fixed
+
+- Deprecate source installation in System Tests ([#4686](https://github.com/wazuh/wazuh-qa/pull/4686)) \- (Framework)
+- Update default vacuum settings in IT ([#4671](https://github.com/wazuh/wazuh-qa/pull/4671)) \- (Tests)
 - Fix registry wildcards path ([#4400](https://github.com/wazuh/wazuh-qa/pull/4400)) \- (Tests)
 - Fix warnings in the rids tests([#4151](https://github.com/wazuh/wazuh-qa/pull/4151)) \- (Framework + Tests)
 
-## [4.6.0] - TBD
-
-Wazuh commit: TBD \
-Release report: TBD
+## [4.6.0] - 31/10/2023
 
 ### Added
 

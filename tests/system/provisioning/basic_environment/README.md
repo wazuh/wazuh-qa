@@ -77,7 +77,7 @@ The base environment defined for Docker provisioning is
 For running the docker provisioning we must execute the following command:
 
 ```shell script
-ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"wazuh_branch": "PUT YOUT wazuh/wazuh BRANCH HERE"}'
+ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"package_repository":"packages", "repository": "4.x", "package_version": "4.4.0", "package_revision": "1"}'
 ```
 
 To destroy it, the command is:
