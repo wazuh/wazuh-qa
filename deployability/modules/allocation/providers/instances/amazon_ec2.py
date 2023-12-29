@@ -32,6 +32,9 @@ class AmazonEC2Instance(Instance):
         self._instance.start()
         self._instance.wait_until_running()
 
+    def reload(self) -> None:
+        self._instance.reboot()
+
     def stop(self) -> None:
         self._instance.stop()
         self._instance.wait_until_stopped()

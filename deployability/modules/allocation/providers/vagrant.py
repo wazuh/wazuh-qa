@@ -1,5 +1,6 @@
 import platform
 import shutil
+import socket
 import uuid
 
 from jinja2 import Environment, FileSystemLoader
@@ -13,6 +14,7 @@ from .instances.vagrant import VagrantInstance
 
 
 class VagrantConfig(ProviderConfig):
+    ip: str
     cpu: int
     memory: int
     box: str
@@ -51,8 +53,7 @@ class VagrantProvider(Provider):
             credentials.generate(instance_dir, 'instance_key')
         elif not isinstance(credentials, VagrantCredentials):
             raise Exception(f"Credentials must be of type {VagrantCredentials}")
-        instance = VagrantInstance(instance_dir, identifier, credentials)
-        return instance
+        return VagrantInstance(instance_dir, identifier, credentials)
     
     @classmethod
     def destroy_instance(cls, instance_dir: str | Path, identifier: str) -> None:
@@ -121,6 +122,7 @@ class VagrantProvider(Provider):
         size_specs = cls._get_size_specs()[params.size]
         os_specs = cls._get_os_specs()[params.composite_name]
         # Parse the configuration.
+        config['ip'] = cls.__get_available_ip()
         config['box'] = os_specs['box']
         config['box_version'] = os_specs['box_version']
         config['public_key'] = str(credentials.key_path.with_suffix('.pub'))
@@ -128,3 +130,16 @@ class VagrantProvider(Provider):
         config['memory'] = size_specs['memory']
 
         return VagrantConfig(**config)
+    
+    @staticmethod
+    def __get_available_ip():
+        def check_ip(ip):
+            try:
+                socket.gethostbyaddr(ip)
+                return False
+            except socket.herror:
+                return True
+        for i in range(1, 255):
+            ip = f"192.168.57.{i}"
+            if check_ip(ip):
+                return ip

@@ -27,9 +27,9 @@ class Allocator:
     def _create(cls, path: str, payload: InputPayload, provider: Provider):
         instance_params = InstanceParams(**dict(payload))
         instance = provider.create_instance(path, instance_params)
-        if instance.status() != 'running':
-            instance.start()
         print(f"Instance {instance.identifier} created.")
+        if instance.status() != 'running':
+            instance.reload()
         cls.__generate_inventory(instance, payload.inventory_output)
         cls.__generate_track_file(instance, payload.provider, payload.track_output)
         # TODO replace with logger

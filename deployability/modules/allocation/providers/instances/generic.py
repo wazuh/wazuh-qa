@@ -10,6 +10,11 @@ class ConnectionInfo(BaseModel):
     user: str
     port: int
     private_key: str
+    
+    @field_validator('port', mode='before')
+    @classmethod
+    def sanitize_port(cls, v: str | int) -> int:
+        return int(v)
 
 
 class Instance(ABC):
@@ -27,6 +32,10 @@ class Instance(ABC):
 
     @abstractmethod
     def start(self) -> None:
+        pass
+    
+    @abstractmethod
+    def reload(self) -> None:
         pass
 
     @abstractmethod

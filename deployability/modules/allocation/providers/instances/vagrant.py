@@ -15,6 +15,10 @@ class VagrantInstance(Instance):
     def start(self) -> None:
         """Starts the vagrant VM."""
         self.__run_vagrant_command('up')
+    
+    def reload(self) -> None:
+        """Reloads the vagrant VM."""
+        self.__run_vagrant_command('reload')
 
     def stop(self) -> None:
         """Stops the vagrant VM."""
