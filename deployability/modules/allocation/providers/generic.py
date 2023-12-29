@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from pydantic import BaseModel, Field, field_validator
 
-from modules.allocation.instances.generic import ConnectionInfo, Instance
+from modules.allocation.instances.generic import Instance
 from modules.allocation.credentials.generic import Credentials
 
 # Paths to the templates and specs directories.

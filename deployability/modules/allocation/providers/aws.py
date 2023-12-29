@@ -31,7 +31,7 @@ class AWSProvider(Provider):
         temp_dir = Path(base_dir, 'temp', temp_id)
         if not credentials:
             credentials = AWSCredentials()
-            credentials.generate(temp_dir, 'instance_key', True)
+            credentials.generate(temp_dir, 'instance_key')
         elif not isinstance(credentials, AWSCredentials):
             raise Exception(f"Invalid credentials type: {type(credentials)}")
         config = cls._parse_config(params, credentials)
@@ -39,21 +39,18 @@ class AWSProvider(Provider):
                                                 InstanceType=config['type'],
                                                 KeyName=config['key_name'],
                                                 SecurityGroupIds=config['security_groups'],
-                                                MinCount=1, MaxCount=1,
-                                                # TagSpecifications=[{'ResourceType': 'instance',
-                                                #                     'Tags': [{'Key': 'Name',
-                                                #                               'Value': f"dtt1-{config['name']}"}]}]
-                                                )
+                                                MinCount=1, MaxCount=1)[0]
         _instance.wait_until_running()
         instance_dir = Path(base_dir, _instance.instance_id)
         if instance_dir.exists():
             instance_dir.unlink()
         os.rename(temp_dir, instance_dir)
-        return AmazonEC2Instance(base_dir, _instance.instance_id, credentials)
+        return AmazonEC2Instance(instance_dir, _instance.instance_id, credentials)
     
     @classmethod
-    def destroy_instance(instance_dir, identifier):
-        pass
+    def destroy_instance(instance_dir: str, identifier: str) -> None:
+        instance = AmazonEC2Instance(instance_dir, identifier)
+        instance.delete()
 
     @classmethod
     def _parse_config(cls, params: InstanceParams, credentials: AWSCredentials) -> None:

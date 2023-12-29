@@ -10,7 +10,7 @@ class ConnectionInfo(BaseModel):
     user: str
     port: int
     private_key: str
-    
+
     @field_validator('port', mode='before')
     @classmethod
     def sanitize_port(cls, v: str | int) -> int:
@@ -22,7 +22,7 @@ class Instance(ABC):
         """Initialize Instance object."""
         path = Path(path)
         if not path.exists() or not path.is_dir():
-            raise ValueError(f"Invalid instance base_path or identifier: {path}")
+            raise ValueError(f"Invalid instance path or identifier: {path}")
         if credentials and not issubclass(type(credentials), Credentials):
             raise ValueError(f"Invalid credentials.")
 
@@ -33,7 +33,7 @@ class Instance(ABC):
     @abstractmethod
     def start(self) -> None:
         pass
-    
+
     @abstractmethod
     def reload(self) -> None:
         pass

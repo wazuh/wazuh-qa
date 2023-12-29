@@ -1,7 +1,4 @@
-import os
-import re
 import boto3
-import subprocess
 
 from pathlib import Path
 
@@ -9,22 +6,13 @@ from modules.allocation.credentials.aws import AWSCredentials
 from .generic import ConnectionInfo, Instance
 
 
-# class AmazonEC2Config(ProviderConfig):
-#     id: str
-#     type: str
-#     ami: str
-#     zone: str
-#     user: str
-
-
 class AmazonEC2Instance(Instance):
 
-    def __init__(self, base_dir: str | Path, identifier: str, user: str, credentials: AWSCredentials = None) -> None:
+    def __init__(self, path: str | Path, identifier: str, user: str, credentials: AWSCredentials = None) -> None:
+        super().__init__(path, identifier, credentials)
         self._user = user
         self._client = boto3.resource('ec2')
-        self._instance = self._client.Instance(identifier)
-
-        super().__init__(base_dir, identifier, credentials)
+        self._instance = self._client.Instance(self.identifier)
         if not self.credentials:
             self.credentials = self.__get_credentials()
 

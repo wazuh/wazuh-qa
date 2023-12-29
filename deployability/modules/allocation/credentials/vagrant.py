@@ -62,8 +62,7 @@ class VagrantCredentials(Credentials):
                                 capture_output=True, text=True)
         os.chmod(private_key_path, 0o600)
         if output.returncode != 0:
-            raise self.KeyCreationError(
-                f"Error creating key pair: {output.stderr}")
+            raise self.KeyCreationError(f"Error creating key pair: {output.stderr}")
         # Save instance attributes.
         self.base_dir = base_dir
         self.name = name
