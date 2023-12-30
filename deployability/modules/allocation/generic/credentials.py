@@ -10,9 +10,8 @@ class Credentials(ABC):
     def __init__(self) -> None:
         """Initialize Credentialss"""
         self.name: str = None
-        self.base_dir: Path = None
         self.key_path: Path = None
-        self.key_id: str = None  # De aca saco el .pub en vagrant y en amazon saco el id
+        self.key_id: str = None
 
     @abstractmethod
     def generate(self, **kwargs) -> Path:

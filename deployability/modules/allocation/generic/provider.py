@@ -1,41 +1,12 @@
+import shutil
 import uuid
 import yaml
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from pydantic import BaseModel, Field, field_validator
 
-from modules.allocation.instances.generic import Instance
-from modules.allocation.credentials.generic import Credentials
-
-# Paths to the templates and specs directories.
-ROOT_DIR = Path(__file__).parent / 'static'
-TEMPLATES_DIR = ROOT_DIR / 'templates'
-SPECS_DIR = ROOT_DIR / 'specs'
-OS_PATH = SPECS_DIR / 'os.yml'
-SIZE_PATH = SPECS_DIR / 'size.yml'
-MISC_PATH = SPECS_DIR / 'misc.yml'
-
-
-class ProviderConfig(BaseModel):
-    pass
-
-
-class InstanceParams(BaseModel):
-    provider: str = Field(..., description='Provider to use.')
-    size: str = Field(..., description='Size of the instance.')
-    composite_name: str = Field(..., description='Composite name of the instance.')
-    custom_credentials: str | None = Field(default=None, description='Path to the custom credentials file.')
-
-    @field_validator('custom_credentials')
-    @classmethod
-    def check_credentials_exists(cls, v: str) -> str | None:
-        if not v:
-            return None
-        path = Path(v)
-        if not path.exists() or not path.is_file():
-            raise ValueError(f"Invalid credentials path: {path}")
-        return v
+from .instance import Instance
+from .models import CreationPayload
 
 
 class Provider(ABC):
@@ -45,24 +16,56 @@ class Provider(ABC):
         provider_name (str): The name of the provider.
 
     """
+
+    # Paths to the templates and specs directories.
+    ROOT_DIR = Path(__file__).parent.parent / 'static'
+    TEMPLATES_DIR = ROOT_DIR / 'templates'
+    SPECS_DIR = ROOT_DIR / 'specs'
+    OS_PATH = SPECS_DIR / 'os.yml'
+    SIZE_PATH = SPECS_DIR / 'size.yml'
+    MISC_PATH = SPECS_DIR / 'misc.yml'
+
     @property
     @abstractmethod
     def provider_name(self) -> str:
         """The name of the provider."""
         pass
 
+    @classmethod
+    def create_instance(cls, base_dir: str | Path, params: CreationPayload) -> Instance:
+        params = CreationPayload(**dict(params))
+        base_dir = Path(base_dir)
+        return cls._create_instance(base_dir, params)
+
+
+    @classmethod
+    def load_instance(cls, instance_dir: str | Path, instance_id: str) -> Instance:
+        instance_dir = Path(instance_dir)
+        if not instance_dir.exists():
+            raise Exception(f"Instance path {instance_dir} does not exist")
+        return cls._load_instance(instance_dir, instance_id)
+
+    @classmethod
+    def destroy_instance(cls, instance_dir: str | Path, identifier: str) -> None:
+        instance_dir = Path(instance_dir)
+        cls._destroy_instance(instance_dir, identifier)
+        shutil.rmtree(instance_dir, ignore_errors=True)
+
+    @classmethod
     @abstractmethod
-    def create_instance(self, base_dir: Path, params: InstanceParams, credentials: Credentials = None) -> Instance:
+    def _create_instance(cls, base_dir: Path, params: CreationPayload) -> Instance:
         """Creates a new instance."""
         pass
-
+    
+    @classmethod
     @abstractmethod
-    def load_instance(self, instance_dir: str | Path, identifier: str, credentials: Credentials = None) -> Instance:
+    def _load_instance(cls, instance_dir: Path, identifier: str) -> Instance:
         """Loads an existing instance."""
         pass
     
+    @classmethod
     @abstractmethod
-    def destroy_instance(self, instance_dir: str | Path, identifier: str) -> None:
+    def _destroy_instance(cls, instance_dir: Path, identifier: str) -> None:
         """Destroys an existing instance."""
         pass
 
@@ -88,7 +91,7 @@ class Provider(ABC):
         Returns:
             dict: A dict version of the os_specs yaml.
         """
-        with open(OS_PATH, "r") as f:
+        with open(cls.OS_PATH, "r") as f:
             return yaml.safe_load(f).get(cls.provider_name)
 
     @classmethod
@@ -99,7 +102,7 @@ class Provider(ABC):
         Returns:
             dict: A dict version of the size_specs yaml.
         """
-        with open(SIZE_PATH, "r") as f:
+        with open(cls.SIZE_PATH, "r") as f:
             return yaml.safe_load(f).get(cls.provider_name)
 
     @classmethod
@@ -110,5 +113,5 @@ class Provider(ABC):
         Returns:
             dict: A dict version of the misc_specs yaml.
         """
-        with open(MISC_PATH, "r") as f:
+        with open(cls.MISC_PATH, "r") as f:
             return yaml.safe_load(f).get(cls.provider_name)

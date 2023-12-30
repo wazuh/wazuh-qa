@@ -3,35 +3,69 @@ import subprocess
 
 from pathlib import Path
 
-from modules.allocation.credentials.vagrant import VagrantCredentials
-from .generic import ConnectionInfo, Instance
+from modules.allocation.generic import Instance
+from modules.allocation.generic.models import ConnectionInfo
+from .credentials import VagrantCredentials
 
 
 class VagrantInstance(Instance):
+    """
+    The VagrantInstance class represents a Vagrant virtual machine instance.
+    It inherits from the generic Instance class.
+    """
     def __init__(self, path: str | Path, identifier: str, credentials: VagrantCredentials = None) -> None:
+        """
+        Initializes a VagrantInstance.
+
+        Args:
+            path (str | Path): The path of the instance.
+            identifier (str): The identifier of the instance.
+            credentials (VagrantCredentials, optional): The credentials of the instance. Defaults to None.
+        """
         super().__init__(path, identifier, credentials)
         self.vagrantfile_path: Path = self.path / 'Vagrantfile'
 
     def start(self) -> None:
-        """Starts the vagrant VM."""
+        """
+        Starts the Vagrant virtual machine.
+
+        Returns:
+            None
+        """
         self.__run_vagrant_command('up')
 
     def reload(self) -> None:
-        """Reloads the vagrant VM."""
+        """
+        Reloads the Vagrant virtual machine.
+
+        Returns:
+            None
+        """
         self.__run_vagrant_command('reload')
 
     def stop(self) -> None:
-        """Stops the vagrant VM."""
+        """
+        Stops the Vagrant virtual machine.
+
+        Returns:
+            None
+        """
         self.__run_vagrant_command('halt')
 
     def delete(self) -> None:
-        """Deletes the vagrant VM and cleans the environment."""
+        """
+        Deletes the Vagrant virtual machine.
+
+        Returns:
+            None
+        """
         if "not created" in self.status():
             return
         self.__run_vagrant_command(['destroy', '-f'])
 
     def status(self) -> str:
-        """Checks the status of the vagrant VM.
+        """
+        Checks the status of the Vagrant virtual machine.
 
         Returns:
             str: The status of the instance.
@@ -40,10 +74,11 @@ class VagrantInstance(Instance):
         return self.__parse_vagrant_status(output)
 
     def ssh_connection_info(self) -> ConnectionInfo:
-        """Returns the ssh config of the vagrant VM.
+        """
+        Returns the SSH configuration of the Vagrant virtual machine.
 
         Returns:
-            ConnectionInfo: The VM's ssh config.
+            ConnectionInfo: The SSH configuration of the VM.
         """
         if not 'running' in self.status():
             self.start()
@@ -69,7 +104,7 @@ class VagrantInstance(Instance):
         Runs a Vagrant command and returns its output.
 
         Args:
-            command (str|list): The vagrant command to run.
+            command (str | list): The Vagrant command to run.
 
         Returns:
             str: The output of the command.
@@ -92,6 +127,15 @@ class VagrantInstance(Instance):
             return None
 
     def __parse_vagrant_status(self, message: str) -> str:
+        """
+        Parses the status of the Vagrant virtual machine.
+
+        Args:
+            message (str): The message to parse.
+
+        Returns:
+            str: The parsed status.
+        """
         lines = message.split('\n')
         for line in lines:
             if 'Current machine states:' in line:

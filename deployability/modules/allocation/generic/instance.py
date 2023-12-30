@@ -1,20 +1,9 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from pydantic import BaseModel, field_validator
 
-from modules.allocation.credentials.generic import Credentials
+from .credentials import Credentials
+from .models import ConnectionInfo
 
-
-class ConnectionInfo(BaseModel):
-    hostname: str
-    user: str
-    port: int
-    private_key: str
-
-    @field_validator('port', mode='before')
-    @classmethod
-    def sanitize_port(cls, v: str | int) -> int:
-        return int(v)
 
 
 class Instance(ABC):
@@ -22,7 +11,7 @@ class Instance(ABC):
         """Initialize Instance object."""
         path = Path(path)
         if not path.exists() or not path.is_dir():
-            raise ValueError(f"Invalid instance path or identifier: {path}")
+            raise ValueError(f"Invalid instance path: {path}")
         if credentials and not issubclass(type(credentials), Credentials):
             raise ValueError(f"Invalid credentials.")
 

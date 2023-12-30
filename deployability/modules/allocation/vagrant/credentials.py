@@ -3,7 +3,7 @@ import subprocess
 
 from pathlib import Path
 
-from .generic import Credentials
+from modules.allocation.generic import Credentials
 
 
 class VagrantCredentials(Credentials):
@@ -20,21 +20,22 @@ class VagrantCredentials(Credentials):
 
     """
 
-    def generate(self, base_dir: str | Path, name: str, overwrite: bool = False) -> Path:
+    def generate(self, base_dir: str | Path, name: str) -> Path:
         """
-        Generates a new key pair and returns it.
+        Generates a new SSH key pair and returns the path to the private key.
 
         Args:
-            overwrite (bool): Whether to overwrite the existing key pair. Defaults to False.
+            base_dir (str | Path): The directory where the key pair will be stored.
+            name (str): The filename of the key pair.
+            overwrite (bool, optional): If True, an existing key pair with the same name will be overwritten. Defaults to False.
 
         Returns:
-            Path: The paths of the key pair.
+            Path: The path to the private key of the generated key pair.
 
         Raises:
-            KeyCreationError: An error occurred while creating the key.
-
+            KeyCreationError: This exception is raised if there's an error during the key creation process.
         """
-        if self.key_path and self.key_id and not overwrite:
+        if self.key_path and self.key_id:
             return self.key_path
         base_dir = Path(base_dir)
         if not base_dir.exists():
@@ -45,7 +46,7 @@ class VagrantCredentials(Credentials):
         private_key_path = Path(base_dir / name)
         public_key_path = private_key_path.with_suffix(".pub")
         # Delete the existing key pair if it exists.
-        if private_key_path.exists() and not overwrite:
+        if private_key_path.exists():
             return self.load(base_dir, name)
         elif private_key_path.exists():
             private_key_path.unlink()
@@ -62,9 +63,9 @@ class VagrantCredentials(Credentials):
                                 capture_output=True, text=True)
         os.chmod(private_key_path, 0o600)
         if output.returncode != 0:
-            raise self.KeyCreationError(f"Error creating key pair: {output.stderr}")
+            raise self.KeyCreationError(
+                f"Error creating key pair: {output.stderr}")
         # Save instance attributes.
-        self.base_dir = base_dir
         self.name = name
         self.key_id = name
         self.key_path = private_key_path
@@ -72,11 +73,14 @@ class VagrantCredentials(Credentials):
 
     def load(self, base_dir: str | Path, name: str) -> None:
         """
-        Loads the key pair from the given path.
+        Loads an existing key pair from the specified directory.
 
         Args:
-            key_path (Path): The path to the key pair.
+            base_dir (str | Path): The directory where the key pair is stored.
+            name (str): The filename of the key pair.
 
+        Raises:
+            KeyCreationError: This exception is raised if the key pair doesn't exist or the specified directory is invalid.
         """
         base_dir = Path(base_dir)
         if not base_dir.exists() or not base_dir.is_dir():
@@ -88,13 +92,14 @@ class VagrantCredentials(Credentials):
         if not pub_key_path.exists() or not pub_key_path.is_file():
             raise self.KeyCreationError(f"Non-existen public key for {name}.")
         # Save instance attributes.
-        self.base_dir = base_dir
         self.key_path = key_path
         self.name = name
         self.key_id = name
 
     def delete(self) -> None:
-        """Deletes the key pair."""
+        """
+        Deletes the key pair from the file system.
+        """
         if not self.key_path.exists():
             return
         Path(self.key_path).unlink()
