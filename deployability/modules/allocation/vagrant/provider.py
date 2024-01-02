@@ -15,6 +15,9 @@ class VagrantProvider(Provider):
     """
     The VagrantProvider class is a provider for managing Vagrant instances.
     It inherits from the generic Provider class.
+
+    Attributes:
+        provider_name (str): Name of the provider ('vagrant').
     """
     provider_name = 'vagrant'
 
@@ -131,8 +134,8 @@ class VagrantProvider(Provider):
 
         return VagrantConfig(**config)
 
-    @staticmethod
-    def __get_available_ip():
+    @classmethod
+    def __get_available_ip(cls):
         """
         Gets an available IP address.
 
@@ -157,5 +160,5 @@ class VagrantProvider(Provider):
                 available_ip = ip
                 break
         if not available_ip:
-            raise Exception("No available IP address found.")
+            raise cls.ProvisioningError("No available IP address found.")
         return available_ip

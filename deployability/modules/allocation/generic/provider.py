@@ -27,6 +27,13 @@ class Provider(ABC):
     OS_PATH = SPECS_DIR / 'os.yml'
     SIZE_PATH = SPECS_DIR / 'size.yml'
     MISC_PATH = SPECS_DIR / 'misc.yml'
+    
+    
+    class ProvisioningError(Exception):
+        """
+        Exception raised for errors in the provisioning process.
+        """
+        pass
 
     @property
     @abstractmethod

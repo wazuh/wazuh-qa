@@ -53,6 +53,7 @@ class AWSCredentials(Credentials):
             response = self._resource.key_pairs.filter(KeyNames=[name])
             response = [key for key in response][0]
         if hasattr(response, 'key_material'):
+            private_key_path = base_dir / name
             key_material = response.key_material
             with open(private_key_path, 'w') as key_file:
                 key_file.write(key_material)

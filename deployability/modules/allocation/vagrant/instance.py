@@ -12,6 +12,11 @@ class VagrantInstance(Instance):
     """
     The VagrantInstance class represents a Vagrant virtual machine instance.
     It inherits from the generic Instance class.
+
+    Attributes:
+        path (str or Path): Directory where instance data is stored.
+        identifier (str): Identifier of the instance.
+        credentials (VagrantCredentials): Vagrant credentials object.
     """
     def __init__(self, path: str | Path, identifier: str, credentials: VagrantCredentials = None) -> None:
         """
