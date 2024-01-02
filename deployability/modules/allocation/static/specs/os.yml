@@ -12,6 +12,27 @@ vagrant:
   linux-ubuntu-22.04-amd64:
     box: generic/ubuntu2204
     box_version: 4.3.8
+  # Debian
+  linux-debian-9-amd64:
+    box: generic/debian9
+    box_version: 4.3.8
+  linux-debian-10-amd64:
+    box: generic/debian10
+    box_version: 4.3.8
+  linux-debian-11-amd64:
+    box: generic/debian11
+    box_version: 4.3.8
+  linux-debian-12-amd64:
+    box: generic/debian12
+    box_version: 4.3.8
+  # Oracle Linux
+  linux-oracle-9-amd64:
+    box: generic/oracle9
+    box_version: 4.3.8
+  # Suse Linux
+  linux-suse-15-amd64:
+    box: generic/opensuse15
+    box_version: 4.3.8
   # Centos
   linux-centos-7-amd64:
     box: generic/centos7
@@ -46,6 +67,41 @@ vagrant:
   linux-fedora-32-amd64:
     box: generic/fedora32
     box_version: 4.3.8
+  linux-fedora-37-amd64:
+    box: generic/fedora37
+    box_version: 4.3.8
+  linux-fedora-38-amd64:
+    box: generic/fedora38
+    box_version: 4.3.8
+  # # Macos
+  # macos-ventura-13.04-amd64:
+  #   box: logantbond/ventura
+  #   box_version: 1.0.4
+  # macos-sonoma-14.2-amd64:
+  #   box: barindersingh/sonoma
+  #   box_version: 1.0.6
+  # # Windows
+  # windows-desktop-10-amd64:
+  #   box: gusztavvargadr/windows-10
+  #   box_version: 2202.0.2312
+  # windows-desktop-11-amd64:
+  #   box: gusztavvargadr/windows-11
+  #   box_version: 2302.0.2312
+  # windows-server-2012-amd64:
+  #   box: jborean93/WindowsServer2012
+  #   box_version: 1.2.0
+  # windows-server-2012r2-amd64:
+  #   box: devopsgroup-io/windows_server-2012r2-standard-amd64-nocm
+  #   box_version: 1.67.0
+  # windows-server-2016-amd64:
+  #   box: mwrock/Windows2016
+  #   box_version: 0.3.0
+  # windows-server-2019-amd64:
+  #   box: gusztavvargadr/windows-server-2019-standard
+  #   box_version: 1809.0.2310
+  # windows-server-2022-amd64:
+  #   box: gusztavvargadr/windows-server-2022-standard
+  #   box_version: 2102.0.2312
 
 aws:
   linux-ubuntu-22.04-amd64:
