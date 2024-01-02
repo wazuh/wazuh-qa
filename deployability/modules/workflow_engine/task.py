@@ -45,8 +45,8 @@ class ProcessTask(Task):
         task_args = [str(task_arg) if isinstance(task_arg, str) else format_key_value(task_arg) for task_arg in self.task_parameters['args']]
 
         try:
-            self.logger.info(f"ejecutando task {self.task_parameters['path']}")
-            self.logger.info(f"con args: {task_args}")
+            self.logger.info("ejecutando task ")
+            self.logger.info(f"{[self.task_parameters['path']]+ task_args}")
             result = subprocess.run(
                 [self.task_parameters['path']] + task_args,
                 check=True,
