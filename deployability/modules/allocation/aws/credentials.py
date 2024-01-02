@@ -76,8 +76,8 @@ class AWSCredentials(Credentials):
 
         """
         # Load the key pair from AWS.
-        response = self._resource.describe_key_pairs(KeyNames=[name])
-        key_pair_id = response.key_pairs[0].key_pair_id
+        response = self._resource.key_pairs.filter(KeyNames=[name])
+        key_pair_id = [key for key in response][0].key_pair_id
         if not key_pair_id:
             raise self.KeyCreationError(f"Invalid key name {name}.")
         # Save instance attributes.
