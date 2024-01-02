@@ -14,7 +14,7 @@ class Credentials(ABC):
         key_id (str): The id of the key.
     """
 
-    class KeyCreationError(Exception):
+    class CredentialsError(Exception):
         """
         Exception raised for errors in the key creation process.
         """

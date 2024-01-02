@@ -79,6 +79,8 @@ class AWSProvider(Provider):
             identifier (str): Identifier of the instance.
         """
         instance = AWSInstance(instance_dir, identifier)
+        if instance.credentials:
+            instance.credentials.delete()
         instance.delete()
 
     @classmethod

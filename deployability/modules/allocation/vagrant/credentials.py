@@ -16,7 +16,7 @@ class VagrantCredentials(Credentials):
         public_key (Path): The key path.
 
     Raises:
-        KeyCreationError: An error occurred while creating the key.
+        CredentialsError: An error occurred while creating the key.
 
     """
 
@@ -33,7 +33,7 @@ class VagrantCredentials(Credentials):
             Path: The path to the private key of the generated key pair.
 
         Raises:
-            KeyCreationError: This exception is raised if there's an error during the key creation process.
+            CredentialsError: This exception is raised if there's an error during the key creation process.
         """
         if self.key_path and self.key_id:
             return self.key_path
@@ -41,7 +41,7 @@ class VagrantCredentials(Credentials):
         if not base_dir.exists():
             base_dir.mkdir(parents=True, exist_ok=True)
         elif Path(base_dir).is_file():
-            raise self.KeyCreationError(f"Invalid base directory: {base_dir}")
+            raise self.CredentialsError(f"Invalid base directory: {base_dir}")
 
         private_key_path = Path(base_dir / name)
         public_key_path = private_key_path.with_suffix(".pub")
@@ -63,7 +63,7 @@ class VagrantCredentials(Credentials):
                                 capture_output=True, text=True)
         os.chmod(private_key_path, 0o600)
         if output.returncode != 0:
-            raise self.KeyCreationError(
+            raise self.CredentialsError(
                 f"Error creating key pair: {output.stderr}")
         # Save instance attributes.
         self.name = name
@@ -80,17 +80,17 @@ class VagrantCredentials(Credentials):
             name (str): The filename of the key pair.
 
         Raises:
-            KeyCreationError: This exception is raised if the key pair doesn't exist or the specified directory is invalid.
+            CredentialsError: This exception is raised if the key pair doesn't exist or the specified directory is invalid.
         """
         base_dir = Path(base_dir)
         if not base_dir.exists() or not base_dir.is_dir():
-            raise self.KeyCreationError(f"Invalid path {base_dir}.")
+            raise self.CredentialsError(f"Invalid path {base_dir}.")
         key_path = Path(base_dir, name)
         pub_key_path = key_path.with_suffix(".pub")
         if not key_path.exists() or not key_path.is_file():
-            raise self.KeyCreationError(f"Invalid key name {name}.")
+            raise self.CredentialsError(f"Invalid key name {name}.")
         if not pub_key_path.exists() or not pub_key_path.is_file():
-            raise self.KeyCreationError(f"Non-existen public key for {name}.")
+            raise self.CredentialsError(f"Non-existen public key for {name}.")
         # Save instance attributes.
         self.key_path = key_path
         self.name = name
