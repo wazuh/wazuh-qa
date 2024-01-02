@@ -230,7 +230,7 @@ def create_groups_api_request(group, token):
     Returns: API call response.
     """
     headers = {'Authorization': f"Bearer {token}"}
-    json_data = {'group_name': f"{group}"}
+    json_data = {'group_id': f"{group}"}
     endpoint = '/groups'
     response = make_api_call(method='POST', endpoint=endpoint, headers=headers, request_json=json_data)
     return response

@@ -215,7 +215,7 @@ def test_max_upload_size(tags_to_apply, get_configuration, configure_api_environ
 
     # Try to create a new group.
     response = requests.post(api_details['base_url'] + '/groups', headers=api_details['auth_headers'],
-                             verify=False, json={'group_name': group_name})
+                             verify=False, json={'group_id': group_name})
     assert response.status_code == expected_status_code, f"Expected status code was {expected_status_code}, but " \
                                                          f"{response.status_code} was returned: {response.json()}"
 

@@ -143,7 +143,7 @@ def create_multigroups():
             if group != 'default':
                 # Create group.
                 response = host_manager.make_api_call(host=test_hosts[0], token=get_api_token(), method='POST',
-                                                      endpoint='/groups', request_body={'group_name': group})
+                                                      endpoint='/groups', request_body={'group_id': group})
                 assert response['status'] == 200, f"Failed to create {group} group: {response}"
 
                 # Check that the multigroup folder does not exist yet.

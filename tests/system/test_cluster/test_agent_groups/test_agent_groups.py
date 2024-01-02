@@ -39,7 +39,6 @@ time_to_sync = 21
 time_to_agent_reconnect = 180
 queries = ['sql select * from "group" where name="test_group"']
 
-
 @pytest.fixture(scope='module')
 def delete_group():
     yield
@@ -72,7 +71,7 @@ def test_agent_groups_create_remove_group(clean_environment, delete_group):
 
     # Create group from master
     response = host_manager.make_api_call(host=master_host, method='POST', token=master_token, endpoint='/groups',
-                                          request_body={'group_name': test_group})
+                                          request_body={'group_id': test_group})
 
     assert response['status'] == 200, f"API failure: {response}"
     assert response['json']['message'] == f"Group '{test_group}' created."
