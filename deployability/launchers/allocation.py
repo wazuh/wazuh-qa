@@ -5,13 +5,13 @@ import sys
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(project_root)
 
-from modules.allocation import Allocator, models
-
+from modules.allocation import Allocator
+from modules.allocation.generic.models import InputPayload
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Infrastructure providing tool")
     parser.add_argument("--provider", choices=['vagrant', 'aws', None], required=False,  default=None)
-    parser.add_argument("--size", choices=['small', 'medium', 'large', None], required=False, default=None)
+    parser.add_argument("--size", choices=['micro', 'small', 'medium', 'large', None], required=False, default=None)
     parser.add_argument("--composite-name", required=False, default=None)
     parser.add_argument("--action", choices=['create', 'delete'], required=False, default='create')
     parser.add_argument("--custom-credentials", required=False, default=None)
@@ -22,7 +22,7 @@ def parse_arguments():
 
 
 def main():
-    Allocator.run(models.InputPayload(**vars(parse_arguments())))
+    Allocator.run(InputPayload(**vars(parse_arguments())))
 
 
 if __name__ == "__main__":

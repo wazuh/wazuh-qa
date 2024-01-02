@@ -1,16 +1,16 @@
 vagrant:
   micro:
       cpu: 1
-      memory: 512
+      memory: 1024
   small:
       cpu: 1
-      memory: 1024
+      memory: 2048
   medium:
       cpu: 2
-      memory: 2048
+      memory: 4096
   large:
       cpu: 4
-      memory: 4096
+      memory: 8192
 aws:
   micro:
     linux-*-amd64:
