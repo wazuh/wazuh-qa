@@ -36,7 +36,7 @@ class TrackOutput(BaseModel):
 class InputPayload(BaseModel):
     action: Literal['create', 'delete', 'status'] = 'create'
     provider: str | None
-    size: str | None
+    size: Literal['micro', 'small', 'medium', 'large', None]
     composite_name: str | None
     track_output: Path | None
     inventory_output: Path | None
@@ -46,7 +46,7 @@ class InputPayload(BaseModel):
 
 class CreationPayload(InputPayload):
     provider: str
-    size: str
+    size: Literal['micro', 'small', 'medium', 'large']
     composite_name: str
     track_output: Path
     inventory_output: Path

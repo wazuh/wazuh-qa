@@ -48,6 +48,7 @@ class Allocator:
         print(f"Instance {instance.identifier} created.")
         # Start the instance
         instance.start()
+        print(f"Instance {instance.identifier} started.")
         # Generate the inventory and track files.
         cls.__generate_inventory(instance, payload.inventory_output)
         cls.__generate_track_file(instance, payload.provider, payload.track_output)
@@ -67,6 +68,7 @@ class Allocator:
             track = models.TrackOutput(**yaml.safe_load(f))
         provider = PROVIDERS[track.provider]()
         provider.destroy_instance(track.instance_dir, track.identifier)
+        print(f"Instance {track.identifier} deleted.")
 
     @staticmethod
     def __generate_inventory(instance: Instance, inventory_path: Path) -> None:

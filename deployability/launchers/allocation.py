@@ -11,7 +11,7 @@ from modules.allocation.generic.models import InputPayload
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Infrastructure providing tool")
     parser.add_argument("--provider", choices=['vagrant', 'aws', None], required=False,  default=None)
-    parser.add_argument("--size", choices=['small', 'medium', 'large', None], required=False, default=None)
+    parser.add_argument("--size", choices=['micro', 'small', 'medium', 'large', None], required=False, default=None)
     parser.add_argument("--composite-name", required=False, default=None)
     parser.add_argument("--action", choices=['create', 'delete'], required=False, default='create')
     parser.add_argument("--custom-credentials", required=False, default=None)
