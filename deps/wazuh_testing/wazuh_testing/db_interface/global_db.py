@@ -39,7 +39,7 @@ def create_or_update_agent(agent_id='001', name='centos8-agent', ip='127.0.0.1',
                            os_codename='centos-8', os_build='4.18.0-147.8.1.el8_1.x86_64',
                            os_platform='#1 SMP Thu Apr 9 13:49:54 UTC 2020', os_uname='x86_64', os_arch='x86_64',
                            version='Wazuh v4.3.0', config_sum='', merged_sum='', manager_host='centos-8',
-                           node_name='node01', date_add='1612942494', last_keepalive='253402300799', group='',
+                           node_name='node01', date_add='1612942494', last_keepalive='253402300799',
                            sync_status='synced', connection_status='active', disconnection_time='0'):
     """Create an agent or update its info if it already exists (checking agent_id).
 
@@ -65,18 +65,17 @@ def create_or_update_agent(agent_id='001', name='centos8-agent', ip='127.0.0.1',
         node_name (str): Name of the node.
         date_add (str): Date of the added/updated agent.
         last_keepalive (str): Last keep alive timestamp reported.
-        group (str): Group of the agent.
         sync_status (str): Status of the syncronization.
         connection_status (str): Status of the connection.
         disconnection_time (str): Last disconnection time.
     """
     query = 'global sql INSERT OR REPLACE INTO AGENT  (id, name, ip, register_ip, internal_key, os_name, os_version, ' \
             'os_major, os_minor, os_codename, os_build, os_platform, os_uname, os_arch, version, config_sum, ' \
-            'merged_sum, manager_host, node_name, date_add, last_keepalive, "group", sync_status, connection_status, ' \
+            'merged_sum, manager_host, node_name, date_add, last_keepalive, sync_status, connection_status, ' \
             f"disconnection_time) VALUES  ('{agent_id}', '{name}', '{ip}', '{register_ip}', '{internal_key}', " \
             f"'{os_name}', '{os_version}', '{os_major}', '{os_minor}', '{os_codename}', '{os_build}', " \
             f"'{os_platform}', '{os_uname}', '{os_arch}', '{version}', '{config_sum}', '{merged_sum}', " \
-            f"'{manager_host}', '{node_name}', '{date_add}', '{last_keepalive}', '{group}', '{sync_status}', " \
+            f"'{manager_host}', '{node_name}', '{date_add}', '{last_keepalive}', '{sync_status}', " \
             f"'{connection_status}', '{disconnection_time}')"
 
     query_wdb(query)

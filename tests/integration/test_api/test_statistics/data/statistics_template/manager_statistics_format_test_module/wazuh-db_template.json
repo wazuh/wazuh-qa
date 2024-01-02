@@ -308,16 +308,10 @@
                                           "get-all-agents": {
                                             "type": "integer"
                                           },
-                                          "get-groups-integrity": {
-                                            "type": "integer"
-                                          },
                                           "insert-agent": {
                                             "type": "integer"
                                           },
                                           "reset-agents-connection": {
-                                            "type": "integer"
-                                          },
-                                          "select-agent-group": {
                                             "type": "integer"
                                           },
                                           "select-agent-name": {
@@ -355,10 +349,8 @@
                                           "get-agent-info",
                                           "get-agents-by-connection-status",
                                           "get-all-agents",
-                                          "get-groups-integrity",
                                           "insert-agent",
                                           "reset-agents-connection",
-                                          "select-agent-group",
                                           "select-agent-name",
                                           "set-agent-groups",
                                           "sync-agent-groups-get",
@@ -391,9 +383,6 @@
                                           "delete-group": {
                                             "type": "integer"
                                           },
-                                          "find-group": {
-                                            "type": "integer"
-                                          },
                                           "insert-agent-group": {
                                             "type": "integer"
                                           },
@@ -403,7 +392,6 @@
                                         },
                                         "required": [
                                           "delete-group",
-                                          "find-group",
                                           "insert-agent-group",
                                           "select-groups"
                                         ]
@@ -851,16 +839,10 @@
                                           "get-all-agents": {
                                             "type": "integer"
                                           },
-                                          "get-groups-integrity": {
-                                            "type": "integer"
-                                          },
                                           "insert-agent": {
                                             "type": "integer"
                                           },
                                           "reset-agents-connection": {
-                                            "type": "integer"
-                                          },
-                                          "select-agent-group": {
                                             "type": "integer"
                                           },
                                           "select-agent-name": {
@@ -898,10 +880,8 @@
                                           "get-agent-info",
                                           "get-agents-by-connection-status",
                                           "get-all-agents",
-                                          "get-groups-integrity",
                                           "insert-agent",
                                           "reset-agents-connection",
-                                          "select-agent-group",
                                           "select-agent-name",
                                           "set-agent-groups",
                                           "sync-agent-groups-get",
@@ -934,9 +914,6 @@
                                           "delete-group": {
                                             "type": "integer"
                                           },
-                                          "find-group": {
-                                            "type": "integer"
-                                          },
                                           "insert-agent-group": {
                                             "type": "integer"
                                           },
@@ -946,7 +923,6 @@
                                         },
                                         "required": [
                                           "delete-group",
-                                          "find-group",
                                           "insert-agent-group",
                                           "select-groups"
                                         ]
