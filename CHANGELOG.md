@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.8.1] - TBD
+
 ## [4.8.0] - TBD
 
 ### Added
@@ -17,6 +19,11 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Removed configobj library from requirements.txt ([#4803](https://github.com/wazuh/wazuh-qa/pull/4803)) \- (Framework)
+- Fix one_manager_agent_env pytest marker for System Tests ([#4782](https://github.com/wazuh/wazuh-qa/pull/4782)) \- (Tests)
+- Updated Filebeat module to 0.4 ([#4775](https://github.com/wazuh/wazuh-qa/pull/4775)) \- (Framework)
+- Include ATP repository update before the installation of Ubuntu E2E agent installation ([#4761](https://github.com/wazuh/wazuh-qa/pull/4761)) \- (Framework)
+- Enhance macOS deployment ansible taks ([#4685](https://github.com/wazuh/wazuh-qa/pull/4685)) \- (Framework)
 - Updated Filebeat module to 0.3 ([#4700](https://github.com/wazuh/wazuh-qa/pull/4700)) \- (Framework)
 - Change database v13 to v12. ([#4677](https://github.com/wazuh/wazuh-qa/pull/4677)) \- (Tests)
 - Enable Windows Vulnerability Detector E2E. ([#4251](https://github.com/wazuh/wazuh-qa/pull/4251)) \- (Tests)
@@ -29,13 +36,22 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix macOS agents provision to enable registration and connection with managers. ([#4770](https://github.com/wazuh/wazuh-qa/pull/4770/)) \- (Framework)
 - Fix hardcoded python interpreter in qa_framework role. ([#4658](https://github.com/wazuh/wazuh-qa/pull/4658)) \- (Framework)
 - Fix duplicated jq dependency ([#4678](https://github.com/wazuh/wazuh-qa/pull/4678)) \- (Framework)
 
-## [4.7.1] - TBD
+## [4.7.2] - TBD
+
+### Fixed
+
+- Fix the generation of syscollector events in the agent simulator class. ([#4773](https://github.com/wazuh/wazuh-qa/pull/4773)) \- (Framework)
+
+## [4.7.1] - 20/12/2023
 
 ### Changed
 
+- Remove deprecated message from cluster System Tests. ([#4740](https://github.com/wazuh/wazuh-qa/pull/4740)) \- (Tests)
+- Enhance control_service error handling on windows agents. ([#4741](https://github.com/wazuh/wazuh-qa/pull/4741)) \- (Framework)
 - Add XFAIL mark to Cluster reliability logs test. ([#4706](https://github.com/wazuh/wazuh-qa/pull/4706)) \- (Tests)
 
 ## [4.7.0] - 27/11/2023
