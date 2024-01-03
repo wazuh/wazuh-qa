@@ -36,7 +36,7 @@ systemctl disable firewalld
 
 - Install Python3
 
-```sheel script
+```shell script
 yum install python36 python36-pip python36-devel -y
 ```
 
