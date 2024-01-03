@@ -178,3 +178,8 @@ def get_group_id(group_name, host, host_manager):
             group_id = group_data['id']
 
     return group_id
+
+
+def unassign_agent_from_group(host, id_group, agent_id, host_manager):
+    # Unassign agent from group
+    host_manager.run_command(host, f"/var/ossec/bin/agent_groups -q -r -g {id_group} -i {agent_id}")

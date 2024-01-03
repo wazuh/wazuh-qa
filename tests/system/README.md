@@ -4,7 +4,25 @@ Wazuh - System quality assurance automation templates
 
 ## Setting up a test environment
 
-To run these tests we need to use a **Linux** machine and install the following tools:
+To run these tests a **Linux** machine will be required.
+
+In the event that the tests are to be executed using AWS EC2 instances:
+
+### EC2 requirements for system testing
+
+| Environment                  | EC2                                       |
+|------------------------------|-------------------------------------------|
+|Basic_cluster                 |Ubuntu 22.04.2 LTS C5.XLarge 15GB SSD      |
+|Big_cluster_40_agents         |Ubuntu 22.04.2 LTS T3.Large 60GB SSD       |
+|Agentless_cluster             |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
+|Four_manager_disconnected_node|Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
+|One_manager_agent             |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
+|Manager_agent                 |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
+|Enrollment_cluster            |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       | 
+|Basic_environment             |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
+
+
+Now, the following tools will need to be installed:
 
 - [Docker](https://docs.docker.com/install/)
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
@@ -133,6 +151,7 @@ required an specific testing environment located in `wazuh-qa/tests/system/provi
 | test_cluster/test_agent_groups/test_assign_agent_to_a_group_by_tool       | enrollment_cluster             |
 | test_cluster/test_agent_groups/test_assign_agent_to_a_group               | enrollment_cluster             |
 | test_cluster/test_agent_groups/test_assign_groups_guess                   | enrollment_cluster             |
+| test_cluster/test_agent_groups/test_group_hash                            | enrollment_cluster             |
 | test_cluster/test_agent_groups/test_groups_sync_default                   | big_cluster_40_agents          |
 | test_cluster/test_agent_groups/test_groups_sync_time                      | big_cluster_40_agents          |
 | test_shutdown_message/test_shutdown_message                               | big_cluster_40_agents          |
@@ -212,17 +231,15 @@ in `system/provisioning/<specified_cluster_environment>` path:
 ansible-playbook -i inventory.yml playbook.yml
 ```
 
-If you want to specify a particular branch of the Wazuh repository, you will need to include:
-```shell script
-ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"wazuh_branch":"v4.3.0-rc1"}'
-```
-You can also specify a package instead using the `package_repository`, `repository`, `package_version`, `package_revision` parameters:
+You can specify a package as `package_repository`, `repository`, `package_version`, `package_revision` parameters:
 ```shell script
 ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"package_repository":"packages", "repository": "4.x", "package_version": "4.4.0", "package_revision": "1"}'
 ```
-In the **basic cluster**, you also have to specify a branch from the Wazuh QA repository.
+
+In the basic cluster, you also have to specify a branch from the Wazuh QA repository.
+
 ```shell script
-ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"wazuh_branch":"v4.3.0-rc1", "wazuh_qa_branch":"master"}'
+ansible-playbook -i inventory.yml playbook.yml --extra-vars='{"package_repository":"packages", "repository": "4.x", "package_version": "4.4.0", "package_revision": "1", "wazuh_qa_branch":"v4.3.0-rc1"}'
 ```
 
 We use [pytest](https://docs.pytest.org/en/latest/contents.html) to run our cluster system tests. Pytest will

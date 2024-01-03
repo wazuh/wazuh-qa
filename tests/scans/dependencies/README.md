@@ -1,22 +1,27 @@
 # Dependencies Scanner
 
 ## Description
-It's a tool used to scan for vulnerabilities in a requirements.txt file.\
-It can generate reports via console output or json file. Can be run with `pytest` and manage to handle remote files under github repositories. Requirements file can be specified with `repo`, `branch`, `requirements-path` parameters giving flexibility on file location.
-Output file in which the report will be generated can be specified with `report-path` parameter.
+
+The Dependencies Scanner is a tool for scanning vulnerabilities in a *requirements.txt* file from different GitHub repositories. 
+It uses `pytest` to run and can generate reports via console output or JSON files.
+
+The requirements file to scan can be specified with the `repo`, `reference`, and `requirements-path` parameters. 
+Moreover, the path of the report file generated can be chosen with the `report-path` parameter.
 
 ## How to use - Pytest
 ```
 Parameters:
     --repo: repository name. Default: 'wazuh'.
-    --branch: branch name of specified repository. Default: 'master'.
-    --commit: commit of specified repository. Default: None
+    --reference: branch name of specified repository. Default: 'master'.
     --requirements-path: requirements file path. Default: 'framework/requirements.txt'.
     --report-path: output file path. Default: 'dependencies/report_file.json'.
 ```
 ### Scanning wazuh-qa requirements file:
+
+> The script does not support pyenv version changes because it doesn't expect system variables to be modified
+
 ```
-↪ ~/git/wazuh-qa/tests/scans ⊶ feature/1612-package-vuln-scanner ⨘ python3 -m pytest -vv -x --disable-warnings dependencies/ --repo wazuh-qa --branch master --requirements-path requirements.txt
+↪ ~/git/wazuh-qa/tests/scans ⊶ feature/1612-package-vuln-scanner ⨘ python3 -m pytest -vv -x --disable-warnings dependencies/ --repo wazuh-qa --reference master --requirements-path requirements.txt
 ==================================================================================== test session starts =====================================================================================
 platform linux -- Python 3.9.5, pytest-6.2.3, py-1.10.0, pluggy-0.13.1 -- /home/kondent/pythonEnv/qa-env/bin/python3
 cachedir: .pytest_cache
@@ -75,7 +80,7 @@ FAILED dependencies/test_dependencies.py::test_python_dependencies_vuln_scan - A
 
 ### Scanning wazuh requirements file with a specific output path:
 ```
-↪ ~/git/wazuh-qa/tests/scans ⊶ feature/1612-package-vuln-scanner ⨘ python3 -m pytest -vv -x --disable-warnings dependencies/ --repo wazuh --branch master --requirements-path framework/requirements.txt --report-path ~/Desktop/report_file.json
+↪ ~/git/wazuh-qa/tests/scans ⊶ feature/1612-package-vuln-scanner ⨘ python3 -m pytest -vv -x --disable-warnings dependencies/ --repo wazuh --reference master --requirements-path framework/requirements.txt --report-path ~/Desktop/report_file.json
 ==================================================================================== test session starts =====================================================================================
 platform linux -- Python 3.9.5, pytest-6.2.3, py-1.10.0, pluggy-0.13.1 -- /home/kondent/pythonEnv/qa-env/bin/python3
 cachedir: .pytest_cache

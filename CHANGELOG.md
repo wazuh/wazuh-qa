@@ -2,53 +2,94 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.8.0] - TBD
-
-Wazuh commit: TBD \
-Release report: TBD
+## [4.9.0] - TBD
 
 ### Added
 
+- Add integration tests for Update field to CPE_Helper. ([#4574](https://github.com/wazuh/wazuh-qa/pull/4574)) \- (Core)
+
+## [4.8.1] - TBD
+
+## [4.8.0] - TBD
+
+### Added
+
+- Migrate Wazuh Ansibles Roles. ([#4642](https://github.com/wazuh/wazuh-qa/pull/4642)) \- (Framework)
+- Add scans environment setup documentation. ([#4444](https://github.com/wazuh/wazuh-qa/pull/4444)) \- (Tests)
+- Add system test for global group hash ([#4015](https://github.com/wazuh/wazuh-qa/pull/4015)) \- (Tests)
+- Add tests for new FIM audit buffer option. ([#4485](https://githubhttps://github.com/wazuh/wazuh-qa/pull/4497#pullrequestreview-1654748331.com/wazuh/wazuh-qa/pull/4485)) \- (Framework + tests)
 - Add tests for merged.mg file generation. ([#4129](https://github.com/wazuh/wazuh-qa/pull/4129)) \- (Tests)
 - Added tests for checking agent status upon ungraceful closure.([#4146](https://github.com/wazuh/wazuh-qa/pull/4146)) \- (Tests)
-- Agent syncronization testing after group deleting ([#3953](https://github.com/wazuh/wazuh-qa/pull/4143)) \- (Tests)
-
+- Agent syncronization testing after group deleting ([#4143](https://github.com/wazuh/wazuh-qa/pull/4143)) \- (Tests)
+- Add test for AWS Custom Logs. ([#4675](https://github.com/wazuh/wazuh-qa/pull/4675)) \- (Tests)
+- Add new behaviour for endpoints marked as xfail in api_endpoints_performance test ([#4657](https://github.com/wazuh/wazuh-qa/pull/4657)) \ (Tests)
 
 ### Changed
 
+- Fix one_manager_agent_env pytest marker for System Tests ([#4782](https://github.com/wazuh/wazuh-qa/pull/4782)) \- (Tests)
+- Updated Filebeat module to 0.4 ([#4775](https://github.com/wazuh/wazuh-qa/pull/4775)) \- (Framework)
+- Include ATP repository update before the installation of Ubuntu E2E agent installation ([#4761](https://github.com/wazuh/wazuh-qa/pull/4761)) \- (Framework)
+- Enhance macOS deployment ansible taks ([#4685](https://github.com/wazuh/wazuh-qa/pull/4685)) \- (Framework)
+- Updated Filebeat module to 0.3 ([#4700](https://github.com/wazuh/wazuh-qa/pull/4700)) \- (Framework)
+- Change database v13 to v12. ([#4677](https://github.com/wazuh/wazuh-qa/pull/4677)) \- (Tests)
+- Enable Windows Vulnerability Detector E2E. ([#4251](https://github.com/wazuh/wazuh-qa/pull/4251)) \- (Tests)
+- Update certifi library due to a vulnerability. ([#4486](https://github.com/wazuh/wazuh-qa/pull/4486)) \- (Tests)
 - Enable Ubuntu Vulnerability Detector E2E. ([#4252](https://github.com/wazuh/wazuh-qa/pull/4252)) \- (Tests)
 - Update _wazuh_db_ schema database version ([#4353](https://github.com/wazuh/wazuh-qa/pull/4353)) \- (Tests)
 - Update the JSON schema with the required fields for the output content of the migration tool ([#4375](https://github.com/wazuh/wazuh-qa/pull/4375)) \- (Tests)
 - Update framework known flaws file ([#4443](https://github.com/wazuh/wazuh-qa/pull/4443)) \- (Tests)
+- Align migration tool system tests to the tool's new output directory structure ([#4561](https://github.com/wazuh/wazuh-qa/pull/4561)) \- (Tests)
+- Update the migration tool's system tests to match the new log file naming convention ([#4618](https://github.com/wazuh/wazuh-qa/pull/4618)) \- (Tests)
 
-## [4.7.0] - TBD
+### Fixed
 
-Wazuh commit: TBD \
-Release report: TBD
+- Fix macOS agents provision to enable registration and connection with managers. ([#4770](https://github.com/wazuh/wazuh-qa/pull/4770/)) \- (Framework)
+- Fix hardcoded python interpreter in qa_framework role. ([#4658](https://github.com/wazuh/wazuh-qa/pull/4658)) \- (Framework)
+- Fix duplicated jq dependency ([#4678](https://github.com/wazuh/wazuh-qa/pull/4678)) \- (Framework)
 
-### Added
+## [4.7.2] - TBD
 
-- Add tests for new FIM audit buffer option. ([#4399](https://github.com/wazuh/wazuh-qa/pull/4399)) \- (Framework + tests)
-- Add callbacks and IT tests for Integratord options tag. ([#4108](https://github.com/wazuh/wazuh-qa/pull/4108)) \- (Framework + tests)
+### Fixed
+
+- Fix the generation of syscollector events in the agent simulator class. ([#4773](https://github.com/wazuh/wazuh-qa/pull/4773)) \- (Framework)
+
+## [4.7.1] - 20/12/2023
 
 ### Changed
 
-- Add option to run some logcollector tests isolated (without a manager) [#4226](https://github.com/wazuh/wazuh-qa/pull/4226) \- (Tests + Framework)
-- Update code analysis and dependencies known flaws. [#3319](https://github.com/wazuh/wazuh-qa/pull/4083) \- (Tests)
+- Remove deprecated message from cluster System Tests. ([#4740](https://github.com/wazuh/wazuh-qa/pull/4740)) \- (Tests)
+- Enhance control_service error handling on windows agents. ([#4741](https://github.com/wazuh/wazuh-qa/pull/4741)) \- (Framework)
+- Add XFAIL mark to Cluster reliability logs test. ([#4706](https://github.com/wazuh/wazuh-qa/pull/4706)) \- (Tests)
+
+## [4.7.0] - 27/11/2023
+
+### Added
+
+- Add callbacks and IT tests for Integratord options tag. ([#4166](https://github.com/wazuh/wazuh-qa/pull/4166)) \- (Framework + tests)
+- Add vulnerability Detector integration tests for Amazon Linux 2023 ([#4482](https://github.com/wazuh/wazuh-qa/pull/4482)) \- (Core)
+
+### Changed
+
+- Revert a pattern log in analysisd test ([#4688](https://github.com/wazuh/wazuh-qa/pull/4688)) \- (Framework)
+- Clean environment between basic_cluster tests ([#4656](https://github.com/wazuh/wazuh-qa/pull/4656)) \- (Tests)
+- Upgrade gcc version in system tests image ([#4655](https://github.com/wazuh/wazuh-qa/pull/4655)) \- (Framework)
+- Add option to run some logcollector tests isolated (without a manager) ([#4226](https://github.com/wazuh/wazuh-qa/pull/4226)) \- (Tests + Framework)
+- Update code analysis and dependencies known flaws. ([#4083](https://github.com/wazuh/wazuh-qa/pull/4083)) \- (Tests)
 - Update _wazuh_db_ schema database version([#4405](https://github.com/wazuh/wazuh-qa/pull/4405)) \- (Tests)
 - Update framework known flaws file ([#4313](https://github.com/wazuh/wazuh-qa/pull/4313)) \- (Tests)
 
 ### Fixed
-- Update `get_test_cases_data` function so it handles fim_mode parameter ([#4185](https://github.com/wazuh/wazuh-qa/pull/4185)) \- (Framework)
+
+- Deprecate source installation in System Tests ([#4686](https://github.com/wazuh/wazuh-qa/pull/4686)) \- (Framework)
+- Update default vacuum settings in IT ([#4671](https://github.com/wazuh/wazuh-qa/pull/4671)) \- (Tests)
+- Fix registry wildcards path ([#4400](https://github.com/wazuh/wazuh-qa/pull/4400)) \- (Tests)
 - Fix warnings in the rids tests([#4151](https://github.com/wazuh/wazuh-qa/pull/4151)) \- (Framework + Tests)
 
-## [4.6.0] - TBD
-
-Wazuh commit: TBD \
-Release report: TBD
+## [4.6.0] - 31/10/2023
 
 ### Added
 
+- Add EC2 information for system tests. ([#4536](https://github.com/wazuh/wazuh-qa/pull/4536)) \- (Documentation)
 - Add Debian Bookworm VDT IT support. ([#4463](https://github.com/wazuh/wazuh-qa/pull/4463)) \- (Tests)
 - Add new test cases for the `discard_regex` functionality of `CloudWatchLogs` and `Inspector` services. ([#4278](https://github.com/wazuh/wazuh-qa/pull/4278)) \- (Tests)
 - Add Windows location wildcards tests ([#4263](https://github.com/wazuh/wazuh-qa/pull/4263)) \- (Tests + Framework)
@@ -66,9 +107,13 @@ Release report: TBD
 - Add IT tests FIM registry monitoring using wildcards. ([#4270](https://github.com/wazuh/wazuh-qa/pull/4270)) \- (Framework + Tests)
 - Update schema database version ([#4128](https://github.com/wazuh/wazuh-qa/pull/4128)) \- (Tests)
 - Update framework known flaws files ([#4380](https://github.com/wazuh/wazuh-qa/pull/4380)) \- (Tests)
+- Add tests for Vulnerability Detector: Red Hat 9 support ([#4497](https://github.com/wazuh/wazuh-qa/pull/4497)) \- (Tests)
+- Add AlmaLinux VDT IT support ([#4376](https://github.com/wazuh/wazuh-qa/pull/4376)) \- (Tests)
+- Add new FIM test to verify checks in configuration ([#4373](https://github.com/wazuh/wazuh-qa/pull/4373)) \- (Tests)
 
 ### Changed
 
+- `Agentless_cluster` system tests timeout changed in order to reduce EC2 requirements ([#4534](https://github.com/wazuh/wazuh-qa/pull/4534)) \- (Tests)
 - Skip `test_authd_ssl_options` cases that use TLS 1.1 causing errors on several OpenSSL versions. ([#4229](https://github.com/wazuh/wazuh-qa/pull/4229)) \- (Tests)
 - Update database version ([#4467](https://github.com/wazuh/wazuh-qa/pull/4467)) \- (Tests)
 - Remove versionStartIncluding from NVD custom feed ([#4441](https://github.com/wazuh/wazuh-qa/pull/4441)) \- (Tests)
@@ -98,6 +143,10 @@ Release report: TBD
 
 ### Fixed
 
+- Fix Integration Test FIM tests skip marks changed ([#4569] (https://github.com/wazuh/wazuh-qa/pull/4569)) \- (Tests)
+- Fix invalid AR conf in integration tests ([#4521](https://github.com/wazuh/wazuh-qa/pull/4521)) \- (Tests)
+- Fix an error in AR library and test ([#4511](https://github.com/wazuh/wazuh-qa/pull/4511)) \- (Framework + Tests)
+- Fix provisioned pytest failure fixed ([#4520](https://github.com/wazuh/wazuh-qa/pull/4520)) \- (Framework)
 - Fix FIM framework to validate path in event correctly ([#4390](https://github.com/wazuh/wazuh-qa/pull/4390)) \- (Framework)
 - Fix an error related to logs format in reliability test ([#4387](https://github.com/wazuh/wazuh-qa/pull/4387)) \- (Tests)
 - Fix boto3 version requirement for legacy OS ([#4150](https://github.com/wazuh/wazuh-qa/pull/4150)) \- (Framework)
@@ -108,27 +157,40 @@ Release report: TBD
 - Fix an error in the cluster performance tests related to CSV parser ([#2999](https://github.com/wazuh/wazuh-qa/pull/2999)) \- (Framework + Tests)
 - Fix bug in the framework on migration tool ([#4027](https://github.com/wazuh/wazuh-qa/pull/4027)) \- (Framework)
 - Fix test cluster / integrity sync system test and configuration to avoid flaky behavior ([#4406](https://github.com/wazuh/wazuh-qa/pull/4406)) \- (Tests)
+- Fix misspelling regex and error in test_cluster_connection ([#4392](https://github.com/wazuh/wazuh-qa/pull/4392)) \- (Tests)
+- Fix test validate feed content - Canonical ([#4381](https://github.com/wazuh/wazuh-qa/pull/4381)) \- (Tests)
+- Fix flaky test in AR suite (excecd) ([#4360](https://github.com/wazuh/wazuh-qa/pull/4360)) \- (Tests)
+- Fix registry wildcards path ([#4357](https://github.com/wazuh/wazuh-qa/pull/4357)) \- (Tests)
 
-## [4.5.3] - TBD
+## [4.5.4] - 24/10/2023
 
-Wazuh commit: TBD \
-Release report: TBD
+Wazuh commit: https://github.com/wazuh/wazuh/commit/48870c11207b1f0ba20ae29688d75564bfc04489 \
+Release report: https://github.com/wazuh/wazuh/issues/19764
+
+## [4.5.3] - 10/10/2023
+
+Wazuh commit: https://github.com/wazuh/wazuh/commit/388ce54b704d7b6aa2dda1b30258ad1642b26a2d \
+Release report: https://github.com/wazuh/wazuh/issues/19446
 
 ### Fixed
 
 - Fix pytest test collection errors ([#3969](https://github.com/wazuh/wazuh-qa/pull/3969)) \- (Framework + Tests)
 ### Changed
 
-- Updated the cluster master logs reliability test to run with python 3.7 [#4445](https://github.com/wazuh/wazuh-qa/pull/4478) \- (Tests)
+- Update the cluster master logs reliability test to run with python 3.7 [#4445](https://github.com/wazuh/wazuh-qa/pull/4478) \- (Tests)
+- Update ITs URL for SUSE OVAL ([#4496](https://github.com/wazuh/wazuh-qa/pull/4496/))
 
 ### Fixed
 
+- Fix enrollment system tests ([#4562](https://github.com/wazuh/wazuh-qa/pull/4562/)) \- (Tests)
+- Update the request method used to call the login API endpoint. ([#4492](https://github.com/wazuh/wazuh-qa/pull/4492)) \- (Tests)
 - Enhancing the handling of authd and remoted simulators in case of restart failures ([#Wazuh-jenkins#3487](https://github.com/wazuh/wazuh-qa/pull/4205)) \- (Tests)
+- Fix py dependency version to install for Windows after the change to Python 3.11([#4523](https://github.com/wazuh/wazuh-qa/pull/4523)) \- (Framework)
 
-## [4.5.2] - TBD
+## [4.5.2] - 06-08-2023
 
-Wazuh commit: TBD \
-Release report: TBD
+Wazuh commit: https://github.com/wazuh/wazuh/commit/2efea7428ad34bce8ea0bd32d56b5faccad114a6 \
+Release report: https://github.com/wazuh/wazuh/issues/18794
 
 ### Changed
 
@@ -184,8 +246,8 @@ Release report: https://github.com/wazuh/wazuh/issues/17520
 
 ### Added
 
-- Change test_python_flaws.py to accept branch or commit in the same argument. ([#4209](https://github.com/wazuh/wazuh-qa/pull/4209)) (Tests)
-- Fix test_dependencies.py for the changes in the feature. ([#4210](https://github.com/wazuh/wazuh-qa/pull/4210)) (Tests)
+- Change test_python_flaws.py to accept branch or commit in the same argument. ([#4209](https://github.com/wazuh/wazuh-qa/pull/4209)) \- (Tests)
+- Fix test_dependencies.py for the changes in the feature. ([#4210](https://github.com/wazuh/wazuh-qa/pull/4210)) \- (Tests)
 
 ### Fixed
 
@@ -252,8 +314,6 @@ Release report: https://github.com/wazuh/wazuh/issues/15504
 - Adapt binary performance module to wazuh-cluster script renaming ([#3944](https://github.com/wazuh/wazuh-qa/pull/3944)) \- (Framework)
 - Add an option to store logs in system tests ([#2445](https://github.com/wazuh/wazuh-qa/pull/2445)) \- (Framework + Tests)
 - Add new test to check cpe_helper.json file ([#3731](https://github.com/wazuh/wazuh-qa/pull/3731))
-- Add new tests analysid handling of invalid/empty rule signature IDs ([#3649]
-(https://github.com/wazuh/wazuh-qa/pull/3649)) \- (Framework + Tests)
 - Add integration test to check statistics format ([#3813](https://github.com/wazuh/wazuh-qa/pull/3813)) \- (Framework + Tests)
 - Add new test to check vulnerable packages with triaged null([#3587](https://github.com/wazuh/wazuh-qa/pull/3587)) \- (Framework + Tests)
 - Add new tests analysid handling of invalid/empty rule signature IDs ([#3649](https://github.com/wazuh/wazuh-qa/pull/3649)) \- (Framework + Tests)

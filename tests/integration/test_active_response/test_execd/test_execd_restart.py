@@ -25,6 +25,7 @@ daemons:
 
 os_platform:
     - linux
+    - windows
 
 os_version:
     - Arch Linux
@@ -36,6 +37,9 @@ os_version:
     - Red Hat 8
     - Ubuntu Focal
     - Ubuntu Bionic
+    - Windows 10
+    - Windows Server 2019
+    - Windows Server 2016
 
 references:
     - https://documentation.wazuh.com/current/user-manual/capabilities/active-response/#active-response
@@ -57,7 +61,8 @@ from wazuh_testing.tools.remoted_sim import RemotedSimulator
 
 pytestmark = [pytest.mark.linux, pytest.mark.win32, pytest.mark.tier(level=0), pytest.mark.agent]
 
-CONF_FOLDER = '' if platform.system() == 'Windows' else 'etc'
+CURRENT_PLATFORM = platform.system()
+CONF_FOLDER = '' if CURRENT_PLATFORM == 'Windows' else 'etc'
 CLIENT_KEYS_PATH = os.path.join(WAZUH_PATH, CONF_FOLDER, 'client.keys')
 SERVER_KEY_PATH = os.path.join(WAZUH_PATH, CONF_FOLDER, 'manager.key')
 SERVER_CERT_PATH = os.path.join(WAZUH_PATH, CONF_FOLDER, 'manager.cert')
@@ -151,7 +156,7 @@ def get_configuration(request):
 
 def wait_message_line(line):
     """Callback function to wait for Active Response JSON message."""
-    if platform.system() == 'Windows' and "active-response/bin/restart-wazuh.exe: {\"version\"" in line:
+    if CURRENT_PLATFORM == 'Windows' and "active-response/bin/restart-wazuh.exe: {\"version\"" in line:
         return True
     elif "active-response/bin/restart-wazuh: {\"version\"" in line:
         return True
@@ -248,8 +253,9 @@ def test_execd_restart(set_debug_mode, get_configuration, test_version,
     # Checking AR in ossec logs
     ossec_log_monitor.start(timeout=60, callback=execd.wait_received_message_line)
 
-    # Checking AR in active-response logs
-    ar_log_monitor.start(timeout=60, callback=execd.wait_start_message_line)
+    # Checking AR in active-response logs (only in Linux systems)
+    if CURRENT_PLATFORM == 'Linux':
+        ar_log_monitor.start(timeout=60, callback=execd.wait_start_message_line)
 
     if expected['success']:
         ar_log_monitor.start(timeout=60, callback=wait_message_line)
@@ -257,6 +263,7 @@ def test_execd_restart(set_debug_mode, get_configuration, test_version,
         # Checking shutdown message in ossec logs
         ossec_log_monitor.start(timeout=60, callback=wait_shutdown_message_line)
 
-        ar_log_monitor.start(timeout=60, callback=execd.wait_ended_message_line)
+        if CURRENT_PLATFORM == 'Linux':
+            ar_log_monitor.start(timeout=60, callback=execd.wait_ended_message_line)
     else:
         ar_log_monitor.start(timeout=60, callback=wait_invalid_input_message_line)

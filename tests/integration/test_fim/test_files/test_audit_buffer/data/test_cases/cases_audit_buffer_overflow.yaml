@@ -1,8 +1,0 @@
-- name: audit_buffer_overflows
-  description: Verify if files are added over the queue's size, it overflows and files are detected in scheduled mode.
-  configuration_parameters:
-    TEST_DIRECTORIES: /
-  metadata:
-    files_to_add: 15
-    whodata_events: 10
-    fim_mode: whodata

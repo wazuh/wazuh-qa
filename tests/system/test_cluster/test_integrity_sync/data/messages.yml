@@ -2,30 +2,30 @@
 wazuh-master:
   - regex: '.*File too large to be synced: /var/ossec/etc/rules/test_file_too_big'
     path: "/var/ossec/logs/cluster.log"
-    timeout: 60
+    timeout: 120
   - regex: '.*Maximum zip size exceeded. Not all files will be compressed during this sync.*'
     path: "/var/ossec/logs/cluster.log"
-    timeout: 60
+    timeout: 120
   - regex: ".*Command received: b'cancel_task'.*"
     path: "/var/ossec/logs/cluster.log"
-    timeout: 60
+    timeout: 120
   - regex: ".*Decreasing sync size limit to .* MB.*"
     path: "/var/ossec/logs/cluster.log"
-    timeout: 60
+    timeout: 120
   - regex: ".*wazuh-worker1.*Files to create in worker: 1 \\| Files to update in worker: 0 \\| Files to delete in worker: 0.*"
     path: "/var/ossec/logs/cluster.log"
-    timeout: 100
+    timeout: 180
   - regex: ".*wazuh-worker2.*Files to create in worker: 1 \\| Files to update in worker: 0 \\| Files to delete in worker: 0.*"
     path: "/var/ossec/logs/cluster.log"
     timeout: 100
   - regex: ".*Increasing sync size limit to .* MB.*"
     path: "/var/ossec/logs/cluster.log"
-    timeout: 60
+    timeout: 120
 wazuh-worker1:
   - regex: ".*Files to create: 0 \\| Files to update: 0 \\| Files to delete: 0.*"
     path: "/var/ossec/logs/cluster.log"
-    timeout: 120
+    timeout: 180
 wazuh-worker2:
   - regex: ".*Files to create: 0 \\| Files to update: 0 \\| Files to delete: 0.*"
     path: "/var/ossec/logs/cluster.log"
-    timeout: 120
+    timeout: 180

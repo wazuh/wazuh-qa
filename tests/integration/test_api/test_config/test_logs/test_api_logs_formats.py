@@ -96,8 +96,8 @@ def send_request(remaining_attempts=3):
     # Make 3 attempts to wait for the API to start correctly
     while remaining_attempts > 0:
         try:
-            response = requests.get(login_url, headers=api.get_login_headers(api.API_USER, api.API_PASS), verify=False,
-                                    timeout=fw.T_5)
+            response = requests.post(login_url, headers=api.get_login_headers(api.API_USER, api.API_PASS), verify=False,
+                                     timeout=fw.T_5)
         except requests.exceptions.ConnectionError:
             # Capture the exception and wait
             time.sleep(fw.T_10)
