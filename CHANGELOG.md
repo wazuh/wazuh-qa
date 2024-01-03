@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.8.1] - TBD
 
+### Changed
+
+- Updated Integration Tests README ([#4742](https://github.com/wazuh/wazuh-qa/pull/4742)) \- (Framework)
+
 ## [4.8.0] - TBD
 
 ### Added
