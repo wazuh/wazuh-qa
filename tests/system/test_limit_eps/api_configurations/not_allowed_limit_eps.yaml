@@ -1,7 +1,5 @@
----
 wazuh-manager:
   upload_configuration:
     limits:
       eps:
         allow: no
-

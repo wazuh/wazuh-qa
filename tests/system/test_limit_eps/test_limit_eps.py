@@ -17,7 +17,6 @@ inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__
 host_manager = HostManager(inventory_path)
 local_path = os.path.dirname(os.path.abspath(__file__))
 
-
 api_configurations_test_path = os.path.join(local_path, 'api_configurations')
 ossec_configurations_test_path = os.path.join(local_path, 'ossec_config')
 xml_data_blocks_path = os.path.join(local_path, 'data')
@@ -80,7 +79,8 @@ def add_blocks_to_xml(original_xml_tree: ET.ElementTree, xmls_files: List[str], 
     """
     blocks_to_add = [ET.tostring(original_xml_tree.getroot(), encoding='utf-8').decode('utf-8')]
     for block_file_path in xmls_files:
-        block_string = ET.tostring(ET.parse(os.path.join(path_to_files, block_file_path)).getroot(), encoding='utf-8').decode('utf-8')
+        block_string = ET.tostring(ET.parse(os.path.join(path_to_files, block_file_path)).getroot(),
+                                   encoding='utf-8').decode('utf-8')
         blocks_to_add.append(block_string)
 
     new_xml = '\n\n'.join(blocks_to_add)
@@ -133,14 +133,19 @@ def setup_environment():
 
 @pytest.mark.parametrize('ossec_config_blocks, api_configuration_file, new_ossec_config_blocks, expected_to_update',
                          [
-                             (['block.xml'], 'not_allowed_limit_eps.yml', ['block_changed.xml'], False),
-                             (['block.xml'], 'allowed_limit_eps.yml', ['block_changed.xml'], True),
-                             (['block.xml', 'block.xml'], 'not_allowed_limit_eps.yml', ['block_changed.xml', 'block_unchanged.xml'], False),
-                             (['block.xml', 'block.xml'], 'allowed_limit_eps.yml', ['block_changed.xml', 'block_unchanged.xml'], True),
-                             (['block.xml', 'block.xml'], 'not_allowed_limit_eps.yml', ['block_unchanged.xml', 'block_changed.xml'], False),
-                             (['block.xml', 'block.xml'], 'allowed_limit_eps.yml', ['block_unchanged.xml', 'block_changed.xml'], True)
+                             (['block.xml'], 'not_allowed_limit_eps.yaml', ['block_changed.xml'], False),
+                             (['block.xml'], 'allowed_limit_eps.yaml', ['block_changed.xml'], True),
+                             (['block.xml', 'block.xml'], 'not_allowed_limit_eps.yaml', ['block_changed.xml',
+                                                                                         'block_unchanged.xml'], False),
+                             (['block.xml', 'block.xml'], 'allowed_limit_eps.yaml', ['block_changed.xml',
+                                                                                     'block_unchanged.xml'], True),
+                             (['block.xml', 'block.xml'], 'not_allowed_limit_eps.yaml', ['block_unchanged.xml',
+                                                                                         'block_changed.xml'], False),
+                             (['block.xml', 'block.xml'], 'allowed_limit_eps.yaml', ['block_unchanged.xml',
+                                                                                     'block_changed.xml'], True)
                          ])
-def test_limit_eps(setup_environment, ossec_config_blocks, api_configuration_file, new_ossec_config_blocks, expected_to_update):
+def test_limit_eps(setup_environment, ossec_config_blocks, api_configuration_file, new_ossec_config_blocks,
+                   expected_to_update):
     """
     Test the limit_eps functionality.
 
@@ -163,7 +168,8 @@ def test_limit_eps(setup_environment, ossec_config_blocks, api_configuration_fil
     original_ossec_file_tree = ET.ElementTree(ET.fromstring(original_ossec_config))
 
     # Add multiples blocks to the ossec config
-    initial_ossec_config = add_blocks_to_xml(original_ossec_file_tree, ossec_config_blocks, ossec_configurations_test_path)
+    initial_ossec_config = add_blocks_to_xml(original_ossec_file_tree, ossec_config_blocks,
+                                             ossec_configurations_test_path)
     response = update_ossec_config_with_api(host_manager, initial_ossec_config)
 
     # Assert the configuration updated as expected

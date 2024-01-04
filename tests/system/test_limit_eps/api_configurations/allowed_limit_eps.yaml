@@ -1,4 +1,3 @@
----
 wazuh-manager:
   upload_configuration:
     limits:
