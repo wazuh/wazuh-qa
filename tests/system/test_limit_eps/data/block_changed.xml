@@ -1,0 +1,10 @@
+<ossec_config>
+    <global>
+        <limits>
+            <eps>
+                <maximum>100</maximum>
+                <timeframe>10</timeframe>
+            </eps>
+        </limits>
+    </global>
+</ossec_config>
