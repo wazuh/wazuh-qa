@@ -130,6 +130,7 @@ required an specific testing environment located in `wazuh-qa/tests/system/provi
 | test_cluster/test_agent_enrollment                                        | enrollment_cluster             |
 | test_agent_auth/test_agent_auth                                           | basic_environment              |
 | test_enrollment/test_enrollment                                           | basic_environment              |
+| test_limit_eps/test_limit_eps                                             | basic_environment              |
 | test_files_cud/test_files_cud                                             | one_manager_agent              |
 | test_cluster/test_agent_info_sync                                         | basic_cluster                  |
 | test_cluster/test_agent_key_polling                                       | basic_cluster                  |
