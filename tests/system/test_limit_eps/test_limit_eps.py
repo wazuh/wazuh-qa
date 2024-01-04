@@ -86,6 +86,29 @@ def add_blocks_to_xml(original_xml_tree: ET.ElementTree, xmls_files: List[str], 
     new_xml = '\n\n'.join(blocks_to_add)
     return new_xml
 
+
+def compare_xml(first: str, second: str) -> bool:
+    """
+    Compare two XML strings for equivalence.
+
+    Parameters
+    ----------
+    first : str
+        The first XML string.
+    second : str
+        The second XML string.
+
+    Returns
+    -------
+    bool
+        True if the XML strings are equivalent, False otherwise.
+    """
+    first_formatted = ''.join([line.strip() for line in first.splitlines()])
+    second_formatted = ''.join([line.strip() for line in second.splitlines()])
+
+    return first_formatted == second_formatted
+
+
 @pytest.fixture(scope='function')
 def setup_environment():
     """
@@ -140,8 +163,8 @@ def test_limit_eps(setup_environment, ossec_config_blocks, api_configuration_fil
     original_ossec_file_tree = ET.ElementTree(ET.fromstring(original_ossec_config))
 
     # Add multiples blocks to the ossec config
-    new_ossec_config = add_blocks_to_xml(original_ossec_file_tree, ossec_config_blocks, ossec_configurations_test_path)
-    response = update_ossec_config_with_api(host_manager, new_ossec_config)
+    initial_ossec_config = add_blocks_to_xml(original_ossec_file_tree, ossec_config_blocks, ossec_configurations_test_path)
+    response = update_ossec_config_with_api(host_manager, initial_ossec_config)
 
     # Assert the configuration updated as expected
     assert response['status'] == 200 and response['json']['error'] == 0, f'Failed to update configuration: {response}'
@@ -154,8 +177,11 @@ def test_limit_eps(setup_environment, ossec_config_blocks, api_configuration_fil
     response = update_ossec_config_with_api(host_manager, new_ossec_config)
 
     assert response['status'] == 200, f'Failed to update configuration: {response}'
+    updated_ossec_config = host_manager.get_file_content('wazuh-manager', ossec_conf_path)
     # Check if there was an error updating the new configuration file
     if expected_to_update:
         assert response['json']['error'] == 0, f'Expected no error updating the configuration'
+        assert compare_xml(new_ossec_config, updated_ossec_config)
     else:
         assert response['json']['error'] == 1, f'Expected error updating the configuration'
+        assert compare_xml(initial_ossec_config, updated_ossec_config)
