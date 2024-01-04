@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Add integration tests for Update field to CPE_Helper. ([#4574](https://github.com/wazuh/wazuh-qa/pull/4574)) \- (Core)
+- Add integration test for limit_eps API Configuration ([#4813](https://github.com/wazuh/wazuh-qa/pull/4813))\- (Framework)
 
 ## [4.8.1] - TBD
 
