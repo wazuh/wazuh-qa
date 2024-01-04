@@ -39,7 +39,7 @@
   copy:
     src: ../files/ossec.conf
     dest: /var/ossec/etc/ossec.conf
-    owner: "{{agent_user}}"
+    owner: "root"
     mode: '0664'
 
 - name: enable execd debug mode
@@ -57,7 +57,7 @@
   lineinfile:
     path: /var/ossec/etc/client.keys
     line: "{{ agent_id }} {{agent_hostname}} any {{ agent_key }}"
-    owner: "{{agent_user}}"
+    owner: "root"
     mode: "0664"
     create: yes
 
