@@ -13,17 +13,19 @@ tests modify the system date and there could be some synchronization issues.
 
 This guide will cover the following platforms: [Linux](#linux), [Windows](#windows) and [MacOS](#macos).
 
-You can run these tests on a manager or an agent. In case you are using an agent, please remember to register it and use
-the correct version (Wazuh branch).
+You can run these tests on a manager or an agent. In case you are using an agent, please remember to register it and use the correct version (Wazuh branch).
 
 _We are skipping Wazuh installation steps. For further information,
-check [Wazuh documentation](https://documentation.wazuh.com/3.11/installation-guide/index.html)._
+check [Wazuh documentation](https://documentation.wazuh.com/current/installation-guide/index.html)._
 
 ### Linux
 
 _We are using **CentOS** for this example:_
 
-- Install **Wazuh**
+- Install and start **Wazuh**
+
+> [!NOTE]
+> In case you are using an agent, please remember to register to the manager
 
 - Disable firewall (only for **CentOS**)
 
@@ -32,46 +34,74 @@ systemctl stop firewalld
 systemctl disable firewalld
 ```
 
-- Install Python and its dependencies
+- Install Python3
 
 ```shell script
-# Install dependencies
-yum install make gcc policycoreutils-python automake autoconf libtool epel-release git which sudo wget -y
-
-# Install development dependencies for jq library
-yum groupinstall "Development Tools" -y
-
-# Install Python3
 yum install python36 python36-pip python36-devel -y
-
-# Install Python libraries
-pip3 install pytest freezegun jq jsonschema pyyaml==5.3 psutil distro pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
 ```
 
-- Add some internal options and restart
-
+- Avoid agent disconnections when travelling in time (only for agents)
 ```shell script
-# Enable debug 2
-echo 'syscheck.debug=2' >> $wazuh_path/etc/local_internal_options.conf
 
-# Avoid agent disconnections when travelling in time (only for agents)
 sed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g" /var/ossec/etc/ossec.conf
 
-# Disable log rotation
-echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
+```
 
-# Restart Wazuh
+- Disable log rotation
+```shell script
+echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
+```
+
+- Restart Wazuh
+```shell script
 /var/ossec/bin/wazuh-control restart
 ```
 
+- Install integration tests dependencies
+
+```shell script
+cd wazuh-qa
+python -m pip install -r requirements.txt
+```
+
+- Install wazuh-testing framework
+
+```shell script
+cd deps/wazuh_testing/
+python setup.py install
+```
+
+> [!NOTE]
+> When developing tests, utilize the following command to seamlessly update the framework with each modification.
+```shell script
+python -m pip install . -e
+```
+
+
 ### Windows
 
-- Install **Wazuh**
+- Install and start **Wazuh**
+
+> [!NOTE]
+> In case you are using an agent, please remember to register to the manager
 
 - Download and install [Python](https://www.python.org/downloads/windows/)
 
 - Download and install [chocolatey](https://chocolatey.org/docs/installation) to be able to install `jq` using the
   terminal.
+
+- Change `time-reconnect` from `C:\Program Files (x86)\ossec-agent\ossec.conf`
+```xml
+<time-reconnect>99999999999</time-reconnect>
+```
+
+- Add some internal options
+```shell script
+# Disable log rotation
+echo 'monitord.rotate_log=0' >> "C:\Program Files (x86)\ossec-agent\local_internal_options.conf"
+```
+
+- Restart **Wazuh** using the GUI
 
 - Install `jq`:
 
@@ -79,54 +109,41 @@ echo 'monitord.rotate_log=0' >> $wazuh_path/etc/local_internal_options.conf
 choco install jq
 ```
 
-- Install Python dependencies
+- Install integration tests dependencies
 
 ```shell script
-pip install pytest freezegun jsonschema pyyaml==5.4 psutil paramiko distro pywin32 pypiwin32 wmi pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
+cd wazuh-qa
+python -m pip install -r requirements.txt
 ```
 
-- Change `time-reconnect` from `C:\Program Files (x86)\ossec-agent\ossec.conf`
-
-```xml
-<time-reconnect>99999999999</time-reconnect>
-```
-
-- Add some internal options
+- Install wazuh-testing framework
 
 ```shell script
-# Enable debug 2
-echo 'syscheck.debug=2' >> "C:\Program Files (x86)\ossec-agent\local_internal_options.conf"
-
-# Disable log rotation
-echo 'monitord.rotate_log=0' >> "C:\Program Files (x86)\ossec-agent\local_internal_options.conf"
+cd deps/wazuh_testing/
+python setup.py install
 ```
 
-- Restart **Wazuh** using the GUI
+> [!NOTE]
+> When developing tests, utilize the following command to seamlessly update the framework with each modification.
+```
+python -m pip install . -e
+```
 
 ### MacOS
 
-- Install **Wazuh**
+- Install and start **Wazuh**
 
-- Install Python and its dependencies
+> [!NOTE]
+> Remember to register the agent to the manager
+
+# Install Python
 
 ```shell script
-# Install Python
 brew install python3
-
-# Install dependencies
-brew install autoconf automake libtool
-
-# Install Python libraries
-pip3 install filetype freezegun jq jsonschema lockfile numpydoc psutil pytest-html pytest-testinfra pyyaml
 ```
 
 - Add some internal options and restart
-
 ```shell script
-
-# Enable debug 2
-echo 'syscheck.debug=2' >> /Library/Ossec/etc/local_internal_options.conf
-
 # Avoid agent disconnections when travelling in time
 brew install gnu-sed
 gsed -i "s:<time-reconnect>60</time-reconnect>:<time-reconnect>99999999999</time-reconnect>:g" /Library/Ossec/etc/ossec.conf
@@ -138,9 +155,19 @@ echo 'monitord.rotate_log=0' >> /Library/Ossec/etc/local_internal_options.conf
 /Library/Ossec/bin/wazuh-control restart
 ```
 
------------
+- Install Python and its dependencies
 
-Finally, copy your `wazuh-qa` repository within your testing environment and you are set.
+```shell script
+cd wazuh-qa
+python -m pip install -r requirements.txt
+```
+
+- Install wazuh-testing framework
+
+```shell script
+cd deps/wazuh_testing/
+python setup.py install
+```
 
 ## Integration tests
 
@@ -278,13 +305,10 @@ This will be our python module with all the needed code to test everything.
 
 ### Dependencies
 
-To run them, we need to install all these Python dependencies:
-
+It is necessary to install the wazuh testing framework dependencies:
 ```shell script
-pip3 install distro freezegun jq jsonschema psutil pytest pyyaml==5.3 pandas==0.25.3 pytest-html==2.0.1 numpydoc==0.9.2
+python -m pip install -r requirements.txt
 ```
-
-_**NOTE:** `jq` library can only be installed with `pip` on **Linux**_
 
 ### Wazuh-Testing package
 
@@ -354,7 +378,6 @@ To install it:
 
 ```shell script
 cd wazuh-qa/deps/wazuh_testing
-pip3 install .
 ```
 
 _**NOTE:** It is important to reinstall this package every time we modify anything

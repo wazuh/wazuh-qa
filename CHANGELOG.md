@@ -8,7 +8,14 @@ All notable changes to this project will be documented in this file.
 
 - Add integration tests for Update field to CPE_Helper. ([#4574](https://github.com/wazuh/wazuh-qa/pull/4574)) \- (Core)
 
+## [4.8.2] - TBD
+
 ## [4.8.1] - TBD
+
+### Changed
+
+- Removed configobj library from requirements.txt ([#4803](https://github.com/wazuh/wazuh-qa/pull/4803)) \- (Framework)
+- Updated integration tests README ([#4742](https://github.com/wazuh/wazuh-qa/pull/4742)) \- (Framework)
 
 ## [4.8.0] - TBD
 
@@ -26,6 +33,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Fix body format for get_api_token ([#4797](https://github.com/wazuh/wazuh-qa/pull/4797)) \- (Framework)
 - Fix one_manager_agent_env pytest marker for System Tests ([#4782](https://github.com/wazuh/wazuh-qa/pull/4782)) \- (Tests)
 - Updated Filebeat module to 0.4 ([#4775](https://github.com/wazuh/wazuh-qa/pull/4775)) \- (Framework)
 - Include ATP repository update before the installation of Ubuntu E2E agent installation ([#4761](https://github.com/wazuh/wazuh-qa/pull/4761)) \- (Framework)
