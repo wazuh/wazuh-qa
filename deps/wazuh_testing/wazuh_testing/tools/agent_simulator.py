@@ -119,7 +119,11 @@ class Agent:
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
                  syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100,
                  fixed_message_size=None, registration_address=None, retry_enrollment=False,
-                 logcollector_msg_number=None, custom_logcollector_message=''):
+                 logcollector_msg_number=None, custom_logcollector_message='',
+                 syscollector_message_type_list=['packages'],
+                #  syscollector_message_type_list=['network', 'port', 'hotfix', 'process', 'packages', 'osinfo', 'hwinfo'],
+                 syscollector_packages_vuln_content=None,
+                 syscollector_message_old_format=False):
         self.id = id
         self.name = name
         self.key = key
@@ -133,7 +137,12 @@ class Agent:
         self.os = os
         self.fim_eps = fim_eps
         self.fim_integrity_eps = fim_integrity_eps
+
         self.syscollector_eps = syscollector_eps
+        self.syscollector_message_type_list = syscollector_message_type_list
+        self.syscollector_message_old_format = syscollector_message_old_format
+        self.syscollector_packages_vuln_content = syscollector_packages_vuln_content
+
         self.rootcheck_eps = rootcheck_eps
         self.logcollector_eps = logcollector_eps
         self.winevt_eps = winevt_eps
@@ -654,7 +663,10 @@ class Agent:
     def init_syscollector(self):
         """Initialize syscollector module."""
         if self.syscollector is None:
-            self.syscollector = GeneratorSyscollector(self.name, self.syscollector_batch_size)
+            self.syscollector = GeneratorSyscollector(self.name, self.syscollector_message_type_list,
+                                                      self.syscollector_message_old_format,
+                                                      self.syscollector_batch_size,
+                                                      self.syscollector_packages_vuln_content)
 
     def init_rootcheck(self):
         """Initialize rootcheck module."""
@@ -747,11 +759,35 @@ class GeneratorSyscollector:
         agent_name (str): Name of the agent.
         batch_size (int): Number of messages of the same type
     """
-    def __init__(self, agent_name, batch_size):
+
+    def __init__(self, agent_name, event_types_list, old_format, batch_size, syscollector_packages_vuln_content):
         self.current_batch_events = -1
         self.current_batch_events_size = 0
-        self.list_events = ['network', 'port', 'hotfix',
-                            'process', 'program', 'OS', 'hardware']
+        self.list_events = event_types_list
+        self.syscollector_event_type_mapping = {
+            'packages': 'dbsync_packages',
+            'hotfix': 'dbsync_hotfix',
+            'hwinfo': 'dbsync_hwinfo',
+            'port': 'dbsync_ports',
+            'osinfo': 'dbsync_osinfo',
+            'network': 'dbsync_network_iface',
+            'process': 'dbsync_processes'
+        }
+        self.syscollector_packages_vuln_content = syscollector_packages_vuln_content
+
+
+
+        self.default_package_data = {
+            '<package_description>': 'A low-level cryptographic library',
+            '<package_architecture>': 'x86_64',
+            '<package_format>': 'deb',
+            '<package_name>': 'nettle',
+            '<package_source>': 'vim',
+            '<package_vendor>': 'Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>',
+            '<package_version>': '2.7.1-9.el7_9'
+        }
+
+        self.old_format = old_format
         self.agent_name = agent_name
         self.batch_size = batch_size
         self.syscollector_tag = 'syscollector'
@@ -765,35 +801,66 @@ class GeneratorSyscollector:
         Returns:
             str: the generated syscollector event message.
         """
-        message = syscollector.SYSCOLLECTOR_HEADER
-        if message_type == 'network':
-            message += syscollector.SYSCOLLECTOR_NETWORK_EVENT_TEMPLATE
-        elif message_type == 'process':
-            message += syscollector.SYSCOLLECTOR_PROCESS_EVENT_TEMPLATE
-        elif message_type == 'port':
-            message += syscollector.SYSCOLLECTOR_PORT_EVENT_TEMPLATE
-        elif message_type == 'program':
-            message += syscollector.SYSCOLLECTOR_PACKAGES_EVENT_TEMPLATE
-        elif message_type == 'OS':
-            message += syscollector.SYSCOLLECTOR_OS_EVENT_TEMPLATE
-        elif message_type == 'hardware':
-            message += syscollector.SYSCOLLECTOR_HARDWARE_EVENT_TEMPLATE
-        elif message_type == 'hotfix':
-            message += syscollector.SYSCOLLECTOR_HOTFIX_EVENT_TEMPLATE
-        elif 'end' in message_type:
-            message += '}'
+        if self.old_format:
+            message = syscollector.LEGACY_SYSCOLLECTOR_HEADER
+            if message_type == 'network':
+                message += syscollector.LEGACY_SYSCOLLECTOR_NETWORK_EVENT_TEMPLATE
+            elif message_type == 'process':
+                message += syscollector.LEGACY_SYSCOLLECTOR_PROCESS_EVENT_TEMPLATE
+            elif message_type == 'port':
+                message += syscollector.LEGACY_SYSCOLLECTOR_PORT_EVENT_TEMPLATE
+            elif message_type == 'packages':
+                message += syscollector.LEGACY_SYSCOLLECTOR_PACKAGES_EVENT_TEMPLATE
+            elif message_type == 'osinfo':
+                message += syscollector.LEGACY_SYSCOLLECTOR_OS_EVENT_TEMPLATE
+            elif message_type == 'hwinfo':
+                message += syscollector.LEGACY_SYSCOLLECTOR_HARDWARE_EVENT_TEMPLATE
+            elif message_type == 'hotfix':
+                message += syscollector.LEGACY_SYSCOLLECTOR_HOTFIX_EVENT_TEMPLATE
+            elif 'end' in message_type:
+                message += '}'
+        else:
+            message = {'type': self.syscollector_event_type_mapping[message_type]}
+            operation = 'INSERTED' if (message_type == 'osinfo' or message_type == 'packages') else 'MODIFIED'
+
+            data_dict = {}
+
+            if message_type == 'network':
+                data_dict = syscollector.SYSCOLLECTOR_NETWORK_IFACE_DELTA_EVENT_TEMPLATE
+            elif message_type == 'process':
+                data_dict = syscollector.SYSCOLLECTOR_PROCESSSES_DELTA_EVENT_TEMPLATE
+            elif message_type == 'port':
+                data_dict = syscollector.SYSCOLLECTOR_PORTS_DELTA_EVENT_TEMPLATE
+            elif message_type == 'packages':
+                data_dict = syscollector.SYSCOLLECTOR_PACKAGE_DELTA_DATA_TEMPLATE
+            elif message_type == 'osinfo':
+                data_dict = syscollector.SYSCOLLECTOR_OSINFO_DELTA_EVENT_TEMPLATE
+            elif message_type == 'hwinfo':
+                data_dict = syscollector.SYSCOLLECTOR_HWINFO_DELTA_EVENT_TEMPLATE
+            elif message_type == 'hotfix':
+                data_dict = syscollector.SYSCOLLECTOR_HOTFIX_DELTA_DATA_TEMPLATE
+
+            message['data'] = data_dict
+            message['operation'] = operation
+
+            message = str(rf'{message}')
 
         today = date.today()
         timestamp = today.strftime("%Y/%m/%d %H:%M:%S")
 
-        fields_to_replace = [
+        generics_fields_to_replace = [
                         ('<agent_name>', self.agent_name), ('<random_int>', f"{self.current_id}"),
                         ('<random_string>', get_random_string(10)),
                         ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
                     ]
 
-        for variable, value in fields_to_replace:
+        for variable, value in generics_fields_to_replace:
             message = message.replace(variable, value)
+
+        if message_type == 'packages':
+            if not self.syscollector_packages_vuln_content:
+                for package_key, package_value in self.default_package_data.items():
+                    message = message.replace(package_key, package_value)
 
         self.current_id += 1
 
@@ -813,13 +880,18 @@ class GeneratorSyscollector:
             self.current_batch_events_size = self.batch_size
 
         if self.list_events[self.current_batch_events] not in ['network', 'port', 'process'] \
-                or self.current_batch_events_size > 1:
+                or self.current_batch_events_size > 1 or not self.old_format:
             event = self.list_events[self.current_batch_events]
         else:
             event = self.list_events[self.current_batch_events] + '_end'
 
         self.current_batch_events_size = self.current_batch_events_size - 1
-        return self.format_event(event)
+
+
+        event_final = self.format_event(event)
+        print(event_final)
+
+        return event_final
 
 
 class SCA:
