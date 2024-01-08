@@ -8,6 +8,7 @@ import logging
 import random
 import time
 
+logger = (lambda: logging.getLogger())()
 
 class Task(ABC):
     """Abstract base class for tasks."""
@@ -21,7 +22,7 @@ class Task(ABC):
 class ProcessTask(Task):
     """Task for executing a process."""
 
-    def __init__(self, task_name: str, task_parameters: dict, logger: logging.Logger):
+    def __init__(self, task_name: str, task_parameters: dict):
         """
         Initialize ProcessTask.
 
@@ -57,50 +58,44 @@ class ProcessTask(Task):
         # Flatten the list if there are nested lists
         task_args = [item for sublist in task_args for item in sublist] if any(isinstance(arg, list) for arg in task_args) else task_args
 
-        try:
-            self.logger.info("ejecutando task ")
-            self.logger.info(f"{[self.task_parameters['path']]+ task_args}")
-            result = subprocess.run(
-                [self.task_parameters['path']] + task_args,
-                check=True,
-                capture_output=True,
-                text=True,
-            )
+        result = subprocess.run(
+            [self.task_parameters['path']] + task_args,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
 
-            self.logger.info("Output:\n%s", result.stdout, extra={'tag': self.task_name})
-
-            if result.returncode != 0:
-                raise subprocess.CalledProcessError(returncode=result.returncode, cmd=result.args, output=result.stdout)
-
-        except Exception as e:
-            self.logger.error("Task failed with error: %s", e, extra={'tag': self.task_name})
-            # Handle the exception or re-raise if necessary
-            raise
+        if result.returncode != 0:
+            raise subprocess.CalledProcessError(returncode=result.returncode, cmd=result.args, output=result.stdout)
 
 
 class DummyTask(Task):
-    def __init__(self, task_name, task_parameters, logger: logging.Logger):
+    def __init__(self, task_name, task_parameters):
         self.task_name = task_name
         self.task_parameters = task_parameters
-        self.logger = logger
 
     def execute(self):
         message = self.task_parameters.get('message', 'No message provided')
-        self.logger.info("%s: %s", message, self.task_name, extra={'tag': self.task_name})
+        logger.info("%s: %s", message, self.task_name, extra={'tag': self.task_name})
 
 
 class DummyRandomTask(Task):
-    def __init__(self, task_name, task_parameters, logger: logging.Logger):
+    def __init__(self, task_name, task_parameters):
         self.task_name = task_name
         self.task_parameters = task_parameters
-        self.logger = logger
 
     def execute(self):
         time_interval = self.task_parameters.get('time-seconds', [1, 5])
         sleep_time = random.uniform(time_interval[0], time_interval[1])
 
         message = self.task_parameters.get('message', 'No message provided')
-        self.logger.info("%s: %s (Sleeping for %.2f seconds)", message, self.task_name, sleep_time, extra={'tag': self.task_name})
+        logger.info("%s: %s (Sleeping for %.2f seconds)", message, self.task_name, sleep_time, extra={'tag': self.task_name})
 
         time.sleep(sleep_time)
 
+
+TASKS_HANDLERS = {
+    'process': ProcessTask,
+    'dummy': DummyTask,
+    'dummy-random': DummyRandomTask,
+}

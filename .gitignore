@@ -69,3 +69,6 @@ ansible.log
 
 # Ssh keys
 key
+
+#Python
+__pycache__/

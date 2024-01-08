@@ -41,7 +41,6 @@ class SchemaValidator:
     def validateSchema(self):
         try:
             jsonschema.validate(self.yamlData, self.schemaData)
-            print("YAML is valid!")
         except jsonschema.exceptions.ValidationError as e:
             print(f"Validation error: {e}")
         except Exception as e:
