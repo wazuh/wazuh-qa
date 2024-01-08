@@ -45,24 +45,12 @@ class ProcessTask(Task):
 
         task_args = [str(task_arg) if isinstance(task_arg, str) else format_key_value(task_arg) for task_arg in self.task_parameters['args']]
 
-<<<<<<< HEAD:poc-tests/modules/workflow_engine/task.py
         result = subprocess.run(
             [self.task_parameters['path']] + task_args,
             check=True,
             capture_output=True,
             text=True,
         )
-=======
-        try:
-            self.logger.info("ejecutando task ")
-            self.logger.info(f"{[self.task_parameters['path']]+ task_args}")
-            result = subprocess.run(
-                [self.task_parameters['path']] + task_args,
-                check=True,
-                capture_output=True,
-                text=True,
-            )
->>>>>>> enhancement/4751-dtt1-iteration-2-poc:deployability/modules/workflow_engine/task.py
 
         if result.returncode != 0:
             raise subprocess.CalledProcessError(returncode=result.returncode, cmd=result.args, output=result.stdout)
