@@ -40,13 +40,26 @@ class ProcessTask(Task):
         # Function to format key:value elements
         def format_key_value(task_arg):
             key, value = list(task_arg.items())[0]
-            return f"--{key}={value}"
+            if isinstance(value, list):
+                formatted_list = f"--{key}=" + ", ".join([
+                    ", ".join([f"{sub_key}={sub_value}" for sub_key, sub_value in sub_arg.items()]) if isinstance(sub_arg, dict) else sub_arg
+                    for sub_arg in value
+                ])
+                return [formatted_list]
+            else:
+                return [f"--{key}={value}"]
 
-        task_args = [str(task_arg) if isinstance(task_arg, str) else format_key_value(task_arg) for task_arg in self.task_parameters['args']]
+        task_args = [
+            str(task_arg) if isinstance(task_arg, str) else format_key_value(task_arg)
+            for task_arg in self.task_parameters['args']
+        ]
+
+        # Flatten the list if there are nested lists
+        task_args = [item for sublist in task_args for item in sublist] if any(isinstance(arg, list) for arg in task_args) else task_args
 
         try:
-            self.logger.info(f"ejecutando task {self.task_parameters['path']}")
-            self.logger.info(f"con args: {task_args}")
+            self.logger.info("ejecutando task ")
+            self.logger.info(f"{[self.task_parameters['path']]+ task_args}")
             result = subprocess.run(
                 [self.task_parameters['path']] + task_args,
                 check=True,

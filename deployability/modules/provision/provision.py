@@ -1,107 +1,112 @@
-import jinja2
-import yaml
-import os
+# Description: Provision module for Wazuh deployability
+from modules.generic.utils import Utils
+from modules.provision.models import InputPayload
+from modules.provision.provisionModule import ProvisionModule
+from modules.provision.install import Install, InstallComponent
+from pathlib import Path
+import os, subprocess, sys
 
-class Provision:
+PATH_BASE_DIR = Path(__file__).parents[2]
 
-    # -------------------------------------
-    #   Variables
-    # -------------------------------------
+class Provision(ProvisionModule):
 
-    LIST_TASKS = ["set_repo.j2", "install.j2", "register.j2", "service.j2"]
-    LIST_AIO_TASKS = ["download.j2", "install.j2"]
-    GENERIC_TASKS = ["install.j2"]
+  def __init__(self, payload: InputPayload):
+    self.ansible_data = Utils.load_from_yaml(payload.inventory, map_keys={'ansible_host': 'ansible_host',
+                                                                          'ansible_user': 'ansible_user',
+                                                                          'ansible_port': 'ansible_port',
+                                                                          'ansible_ssh_private_key_file': 'ansible_ssh_private_key_file'})
+    self.manager_ip = Utils.load_from_yaml(payload.manager_ip, map_keys={'ansible_host': 'ansible_host'}, specific_key="ansible_host")
+    self.install_list = payload.install
+    self.summary = {}
 
-    # -------------------------------------
-    #   Constructor
-    # -------------------------------------
+  # -------------------------------------
+  #   Methods
+  # -------------------------------------
 
-    def __init__(self, ansible):
-        self.ansible = ansible
+  def run(self) -> None:
+    """
+    Run the provision.
+    """
 
-    # -------------------------------------
-    #   Setters and Getters
-    # -------------------------------------
+    #self.node_dependencies()
 
-    def set_directory(self, directory):
-      self.current_dir = directory
+    #self.install_host_dependencies()
 
-    def get_inventory(self):
-        return self.ansible.inventory
+    #--install "this=wazuh-agent with=package, this=wazuh-server with=aio version=4.7.2, this=nano"
+    print(self.install_list)
+    for item in self.install_list:
+      print(item)
+      status = self.handle_package(item)
 
-    # -------------------------------------
-    #   Methods
-    # -------------------------------------
+      self.update_status(status)
 
-    def handle_package(self, host, host_info, install_info):
-      status = {}
+    print("summary")
+    print(self.summary)
 
-      if install_info.get('install_type') is None:
-        print("Installing external package")
-        install_info['install_type'] = "external"
-        status = self.install(host, host_info, install_info, self.GENERIC_TASKS)
-      elif "package" in install_info.get('install_type') or "wazuh-agent" in install_info.get('component'):
-        print("Installing Wazuh package with package manager")
-        install_info['install_type'] = "wazuh/" + install_info.get('install_type')
-        status = self.install(host, host_info, install_info, self.LIST_TASKS)
-      elif "aio" in install_info.get('install_type'):
-        print("Installing Wazuh package with AIO")
-        install_info['install_type'] = "wazuh/" + install_info.get('install_type')
-        status = self.install(host, host_info, install_info, self.LIST_AIO_TASKS)
+  def handle_package(self, package):
+    """
+    Handle package to install.
 
-      return status
+    Args:
+        dict -> package: Data with the package to install.
+          - this: componente to install
+          - with: install type
+          - version: version to install (optional)
+    """
+    status = {}
 
-    # -------------------------------------
+    component = package.get("this")
+    install_type = package.get("with")
+    version = package.get("version")
 
-    def install(self, host, host_info, install_info, list_tasks):
-      status = {}
-      tasks = []
+    if "wazuh-agent" in component:
+      install_type = "package"
 
-      playbook_path = os.path.join(self.current_dir, "playbooks", "provision", install_info.get('install_type'))
-      template_loader = jinja2.FileSystemLoader(searchpath=playbook_path)
-      template_env = jinja2.Environment(loader=template_loader)
-      variables_values = self.set_extra_variables(host_info, install_info)
+    if not install_type:
+      install_type = "generic"
 
-      for template in list_tasks:
-        loaded_template = template_env.get_template(template)
-        rendered = yaml.safe_load(loaded_template.render(host=host_info, **variables_values))
+    info_component_install = {
+      'component': component,
+      'install_type': install_type,
+      'version': version
+    }
 
-        if not rendered:
-          continue
+    info_component_install["manager_ip"] = self.manager_ip
 
-        tasks += rendered
+    install: Install = InstallComponent(self.ansible_data, info_component_install)
+    status = install.install_component()
 
-      playbook = {
-        'hosts': host,
-        'become': True,
-        'tasks': tasks
-      }
+    return status
 
-      status = self.ansible.run_playbook(playbook)
+  @staticmethod
+  def node_dependencies():
+    """
+    Install python dependencies on Worker node.
+    """
+    venv_path = PATH_BASE_DIR / 'venv'
+    if not os.path.exists(venv_path):
+        subprocess.run(['python3', '-m', 'venv', str(venv_path)], check=True)
+    activate_script = os.path.join(venv_path, 'bin', 'activate')
+    command = f"source {activate_script}" if sys.platform != 'win32' else f"call {activate_script}"
+    subprocess.run(command, shell=True, executable="/bin/bash")
+    subprocess.run(['python3', '-m', 'pip', 'install', '--upgrade', 'pip'], check=True)
+    command = f"pip install -r {PATH_BASE_DIR}/deps/requirements.txt"
+    subprocess.run(command, shell=True, executable="/bin/bash")
 
-      return status
+  def install_host_dependencies(self):
+    """
+    Install python dependencies on host.
+    """
+    status = {}
 
-    # -------------------------------------
+    package = {
+      'this': os.path.join(str(PATH_BASE_DIR), "deps", "remote_requirements.txt"),
+      'with': "deps"
+    }
 
-    def set_extra_variables(self, host_info, install_info):
-      variables_values = {}
-      variables_values.update({"component": install_info.get('component')})
+    status = self.handle_package(package)
 
-      if "package" in install_info.get('install_type'):
-        if "wazuh-agent" in install_info.get('component') and host_info.get('manager_ip'):
-          variables_values.update({
-            "manager_ip": host_info.get('manager_ip')})
+    return status
 
-        if "wazuh-server" in install_info.get('component'):
-          pass # For future configurations
-
-      # Fix name variable with iterator
-      if "aio" in install_info.get('install_type'):
-        variables_values.update({
-          "version": install_info.get('version'),
-          "name": install_info.get('component'),
-          "component": install_info.get('component')})
-
-      return variables_values
-
-    # -------------------------------------
+  def update_status(self, status):
+    self.summary.update(status.stats)

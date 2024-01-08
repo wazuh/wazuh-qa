@@ -7,7 +7,7 @@ variables:
   agents-os:
     - linux-ubuntu-22.04-amd64
     - linux-fedora-38-amd64
-  manager-os: linux-amazon-2023-amd64
+  manager-os: linux-centos-8-amd64
   infra-provider: vagrant
   working-dir: /tmp/dtt1-poc
 
@@ -18,13 +18,11 @@ tasks:
     do:
       this: process
       with:
-        path: /bin/echo
+        path: /usr/bin/echo
         args:
-          - -n
           - "Running tests for {agent}"
     depends-on:
       - "provision-{agent}"
-      - "provision-manager"
     foreach:
       - variable: agents-os
         as: agent
@@ -35,10 +33,16 @@ tasks:
     do:
       this: process
       with:
-        path: /bin/echo
+        path: python3
         args:
-          - -n
-          - "Running provision for manager"
+          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/provision.py
+          - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - install:
+            - this: wazuh-manager
+              with: package
+            - this: wazuh-server
+              with: aio
+              version: 4.7.0
     depends-on:
       - "allocate-manager"
 
@@ -48,8 +52,9 @@ tasks:
     do:
       this: process
       with:
-        path: python3 /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
+        path: python3
         args:
+          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
           - action: create
           - provider: "{infra-provider}"
           - size: large
@@ -59,8 +64,9 @@ tasks:
     cleanup:
       this: process
       with:
-        path: python3 /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
+        path: python3
         args:
+          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
           - action: delete
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 
@@ -70,12 +76,19 @@ tasks:
     do:
       this: process
       with:
-        path: /bin/echo
+        path: python
         args:
-          - -n
-          - "Running provision for {agent}"
+          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/provision.py
+          - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
+          - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - install:
+            - this: wazuh-agent
+              with: package
+            - this: curl
+            - this: nano
     depends-on:
       - "allocate-{agent}"
+      - "provision-manager"
     foreach:
       - variable: agents-os
         as: agent
@@ -86,19 +99,21 @@ tasks:
     do:
       this: process
       with:
-        path: python3 ./deployability/launchers/allocation.py
+        path: python3
         args:
+          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
           - action: create
           - provider: "{infra-provider}"
-          - size: micro
+          - size: small
           - composite-name: "{agent}"
           - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
     cleanup:
       this: process
       with:
-        path: python3 ./deployability/launchers/allocation.py
+        path: python3
         args:
+          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
           - action: delete
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
     foreach:
