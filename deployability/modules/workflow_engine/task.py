@@ -7,6 +7,8 @@ import subprocess
 import logging
 import random
 import time
+import json
+import shlex
 
 logger = (lambda: logging.getLogger())()
 
@@ -42,21 +44,17 @@ class ProcessTask(Task):
         def format_key_value(task_arg):
             key, value = list(task_arg.items())[0]
             if isinstance(value, list):
-                formatted_list = f"--{key}=" + ", ".join([
-                    ", ".join([f"{sub_key}={sub_value}" for sub_key, sub_value in sub_arg.items()]) if isinstance(sub_arg, dict) else sub_arg
-                    for sub_arg in value
-                ])
-                return [formatted_list]
+                return f"--{key}=\"{value}\""
             else:
-                return [f"--{key}={value}"]
+                return f"--{key}={value}"
 
         task_args = [
-            str(task_arg) if isinstance(task_arg, str) else format_key_value(task_arg)
+            task_arg if isinstance(task_arg, str) else format_key_value(task_arg)
             for task_arg in self.task_parameters['args']
         ]
 
-        # Flatten the list if there are nested lists
-        task_args = [item for sublist in task_args for item in sublist] if any(isinstance(arg, list) for arg in task_args) else task_args
+        print("task_args")
+        print(task_args)
 
         result = subprocess.run(
             [self.task_parameters['path']] + task_args,
@@ -64,6 +62,8 @@ class ProcessTask(Task):
             capture_output=True,
             text=True,
         )
+
+        self.logger.info("Output:\n%s", result.stdout, extra={'tag': self.task_name})
 
         if result.returncode != 0:
             raise subprocess.CalledProcessError(returncode=result.returncode, cmd=result.args, output=result.stdout)

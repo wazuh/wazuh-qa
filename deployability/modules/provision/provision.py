@@ -30,10 +30,8 @@ class Provision(ProvisionModule):
 
     #self.node_dependencies()
 
-    #self.install_host_dependencies()
+    self.install_host_dependencies()
 
-    #--install "this=wazuh-agent with=package, this=wazuh-server with=aio version=4.7.2, this=nano"
-    print(self.install_list)
     for item in self.install_list:
       print(item)
       status = self.handle_package(item)

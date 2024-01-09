@@ -19,10 +19,11 @@ class InputPayload(BaseModel):
       Args:
           install_list: List of components to install.
       """
+
       if not install_list:
         return []
-      install = list(filter(None, install_list.split(",")))
-      return install
+
+      return install_list
 
     @model_validator(mode="before")
     def validate_inventory(cls, values):
