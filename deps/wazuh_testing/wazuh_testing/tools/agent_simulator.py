@@ -27,6 +27,7 @@ from string import ascii_letters, digits
 from struct import pack
 from sys import getsizeof
 from time import mktime, localtime, sleep, time
+import re
 
 import wazuh_testing.data.syscollector as syscollector
 import wazuh_testing.data.winevt as winevt
@@ -780,7 +781,7 @@ class GeneratorSyscollector:
         self.default_package_data = {
             '<package_description>': 'A low-level cryptographic library',
             '<package_architecture>': 'x86_64',
-            '<package_format>': 'deb',
+            '<package_format>': 'rpm',
             '<package_name>': 'nettle',
             '<package_source>': 'vim',
             '<package_vendor>': 'Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>',
@@ -820,30 +821,32 @@ class GeneratorSyscollector:
             elif 'end' in message_type:
                 message += '}'
         else:
-            message = {'type': self.syscollector_event_type_mapping[message_type]}
+            message_event_type = self.syscollector_event_type_mapping[message_type]
             operation = 'INSERTED' if (message_type == 'osinfo' or message_type == 'packages') else 'MODIFIED'
+            message_operation = operation
 
-            data_dict = {}
+            message_data = {}
 
             if message_type == 'network':
-                data_dict = syscollector.SYSCOLLECTOR_NETWORK_IFACE_DELTA_EVENT_TEMPLATE
+                message_data = syscollector.SYSCOLLECTOR_NETWORK_IFACE_DELTA_EVENT_TEMPLATE
             elif message_type == 'process':
-                data_dict = syscollector.SYSCOLLECTOR_PROCESSSES_DELTA_EVENT_TEMPLATE
+                message_data = syscollector.SYSCOLLECTOR_PROCESSSES_DELTA_EVENT_TEMPLATE
             elif message_type == 'port':
-                data_dict = syscollector.SYSCOLLECTOR_PORTS_DELTA_EVENT_TEMPLATE
+                message_data = syscollector.SYSCOLLECTOR_PORTS_DELTA_EVENT_TEMPLATE
             elif message_type == 'packages':
-                data_dict = syscollector.SYSCOLLECTOR_PACKAGE_DELTA_DATA_TEMPLATE
+                message_data = syscollector.SYSCOLLECTOR_PACKAGE_DELTA_DATA_TEMPLATE
             elif message_type == 'osinfo':
-                data_dict = syscollector.SYSCOLLECTOR_OSINFO_DELTA_EVENT_TEMPLATE
+                message_data = syscollector.SYSCOLLECTOR_OSINFO_DELTA_EVENT_TEMPLATE
             elif message_type == 'hwinfo':
-                data_dict = syscollector.SYSCOLLECTOR_HWINFO_DELTA_EVENT_TEMPLATE
+                message_data = syscollector.SYSCOLLECTOR_HWINFO_DELTA_EVENT_TEMPLATE
             elif message_type == 'hotfix':
-                data_dict = syscollector.SYSCOLLECTOR_HOTFIX_DELTA_DATA_TEMPLATE
+                message_data = syscollector.SYSCOLLECTOR_HOTFIX_DELTA_DATA_TEMPLATE
 
-            message['data'] = data_dict
-            message['operation'] = operation
-
-            message = str(rf'{message}')
+        message = '{"type": "%s", "data": %s, "operation": "%s"}' % (
+            message_event_type,
+            re.sub(r'\s', '', json.dumps(message_data)),
+            message_operation
+        )
 
         today = date.today()
         timestamp = today.strftime("%Y/%m/%d %H:%M:%S")
@@ -875,6 +878,7 @@ class GeneratorSyscollector:
          Returns:
             str: generated event with the desired format for syscollector
         """
+        print("Generating event")
         if self.current_batch_events_size == 0:
             self.current_batch_events = (self.current_batch_events + 1) % len(self.list_events)
             self.current_batch_events_size = self.batch_size
@@ -1656,11 +1660,13 @@ class InjectorThread(threading.Thread):
     def run_module(self, module):
         """Send a module message from the agent to the manager.
          Args:
-                module (str): Module name
+            module (str): Module name
         """
         module_info = self.agent.modules[module]
         eps = module_info['eps'] if 'eps' in module_info else 1
         frequency = module_info["frequency"] if 'frequency' in module_info else 1
+        print(f"Defining frequency as {frequency}")
+
 
         sleep(10)
         start_time = time()
@@ -1700,6 +1706,7 @@ class InjectorThread(threading.Thread):
         while self.stop_thread == 0:
             sent_messages = 0
             while sent_messages < batch_messages:
+                print("Send event")
                 event_msg = module_event_generator()
                 if self.agent.fixed_message_size is not None:
                     event_msg_size = getsizeof(event_msg)
@@ -1718,9 +1725,14 @@ class InjectorThread(threading.Thread):
                 self.totalMessages += 1
                 sent_messages += 1
                 if self.totalMessages % eps == 0:
+                    print("Sleeping")
+                    print(self.totalMessages)
+                    print(1.0 - ((time() - start_time) % 1.0))
                     sleep(1.0 - ((time() - start_time) % 1.0))
-
             if frequency > 1:
+                print("Sleeping freq")
+                print(frequency)
+                print(frequency - ((time() - start_time) % frequency))
                 sleep(frequency - ((time() - start_time) % frequency))
 
     def run(self):

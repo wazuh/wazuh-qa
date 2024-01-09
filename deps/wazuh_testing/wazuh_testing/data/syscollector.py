@@ -159,7 +159,7 @@ SYSCOLLECTOR_HWINFO_DELTA_EVENT_TEMPLATE = {
 
 
 SYSCOLLECTOR_NETWORK_IFACE_DELTA_EVENT_TEMPLATE = {
-        "adapter":"null",
+        "adapter": None,
         "checksum":"<random_int>",
         "item_id":"<random_int>",
         "mac":"<random_int>",
