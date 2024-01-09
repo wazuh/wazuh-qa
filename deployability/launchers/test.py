@@ -13,7 +13,7 @@ def parse_arguments():
     parser.add_argument("--inventory", required=True)
     parser.add_argument("--tests", required=True)
     parser.add_argument("--component", choices=['manager', 'agent'], required=True)
-    parser.add_argument("--manager-ip", required=False)
+    parser.add_argument("--dependency", required=False)
     parser.add_argument("--cleanup", required=False, default=True)
     parser.add_argument("--wazuh-version", required=True)
     parser.add_argument("--wazuh-revision", required=True)

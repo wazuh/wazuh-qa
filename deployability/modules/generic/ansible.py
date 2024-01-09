@@ -7,6 +7,16 @@ from pathlib import Path
 from modules.generic.utils import Utils
 
 
+from pydantic import BaseModel, IPvAnyAddress
+
+
+class AnsibleInventory(BaseModel):
+    ansible_host: str | IPvAnyAddress
+    ansible_user: str
+    ansible_port: int
+    ansible_ssh_private_key_file: str
+
+
 class Ansible:
     # def __init__(self, inventory: str | Path, path: Path = None):
     #     self._inventory = self._read_inventory(inventory)
@@ -48,11 +58,13 @@ class Ansible:
     #         raise ValueError(f'Inventory file "{inventory}" does not exist')
     #     with open(inventory, 'r') as file:
     #         return yaml.safe_load(file)
-    def __init__(self, ansible_data, path=None, inventory=None):
+    def __init__(self, ansible_data: AnsibleInventory, path: str | Path = None, inventory: str | Path = None):
         self.path = path
-        self.inventory = inventory
+        # self.inventory = inventory
         self.playbooks_path = Path(__file__).parents[2] / 'playbooks'
         self.ansible_data = ansible_data
+        self.inventory = {'all': {'hosts': {'dtt1': self.ansible_data}}}
+        print(self.ansible_data)
         self.ansible_host = self.ansible_data.get('ansible_host')
         self.ansible_port = self.ansible_data.get('ansible_port')
         self.ansible_user = self.ansible_data.get('ansible_user')
@@ -90,10 +102,8 @@ class Ansible:
             variables_rendering: Extra variables to render the playbooks.
         """
         tasks = []
-        path_to_render_playbooks = self.playbooks_path / \
-            variables_rendering['templates_path']
-        template_loader = jinja2.FileSystemLoader(
-            searchpath=path_to_render_playbooks)
+        path_to_render_playbooks = self.playbooks_path / variables_rendering['templates_path']
+        template_loader = jinja2.FileSystemLoader(searchpath=path_to_render_playbooks)
         template_env = jinja2.Environment(loader=template_loader)
 
         list_template_tasks = Utils.get_template_list(path_to_render_playbooks)
@@ -101,8 +111,7 @@ class Ansible:
         if list_template_tasks:
             for template in list_template_tasks:
                 loaded_template = template_env.get_template(template)
-                rendered = yaml.safe_load(loaded_template.render(
-                    host=self.ansible_data, **variables_rendering))
+                rendered = yaml.safe_load(loaded_template.render(host=self.ansible_data, **variables_rendering))
 
                 if not rendered:
                     continue
@@ -126,7 +135,7 @@ class Ansible:
             playbook = self.path + "/" + playbook
 
         result = ansible_runner.run(
-            # inventory=self.inventory,
+            inventory=self.inventory,
             playbook=playbook,
             verbosity=verbosity,
             extravars=extravars
