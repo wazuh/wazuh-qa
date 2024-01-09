@@ -25,14 +25,14 @@ class Tester:
 
     @classmethod
     def _run_playbooks(cls, payload: InputPayload, playbooks: list[Path], extra_vars: ExtraVars) -> None:
-        ansible = Ansible(payload.inventory, cls._playbooks_dir)
+        ansible = Ansible(payload.inventory)
         for test in payload.tests:
-            playbook = next(p for p in playbooks if test in str(p))
+            playbook = next((p for p in playbooks if test in str(p)), None)
             if not playbook:
                 raise ValueError(f'Playbook for test "{test}" not found')
             ansible.run_playbook(playbook, extra_vars.model_dump())
 
     @classmethod
     def _cleanup(cls, payload: InputPayload) -> None:
-        ansible = Ansible(payload.inventory, cls._playbooks_dir)
-        ansible.run_playbook('clear.yml')
+        ansible = Ansible(payload.inventory)
+        ansible.run_playbook(Playbook.PLAYBOOKS_PATH / 'clear.yml')

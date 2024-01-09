@@ -23,3 +23,13 @@ def parse_arguments():
 
 if __name__ == "__main__":
     Tester.run(InputPayload(**vars(parse_arguments())))
+
+
+
+# linux-ubuntu-20.04-amd64:                                   
+#   hosts:
+#     VAGRANT-F6FD6643-B41E-4112-A652-3CFF8CC26F51:
+#       ansible_host: 127.0.0.1
+#       ansible_port: 2222
+#       ansible_ssh_private_key_file: C:\tmp\wazuh-qa\VAGRANT-F6FD6643-B41E-4112-A652-3CFF8CC26F51\instance_key        
+#       ansible_user: vagrant

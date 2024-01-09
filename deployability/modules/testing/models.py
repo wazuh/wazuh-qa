@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Literal
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, field_validator, model_validator, root_validator, validator
 
 
 class InputPayload(BaseModel):
@@ -15,14 +15,20 @@ class InputPayload(BaseModel):
     wazuh_revision: str
     wazuh_branch: str | None = None
 
-    @validator('inventory', mode='before')
+    @field_validator('tests', mode='before')
+    def validate_tests(cls, value) -> list[str]:
+        """Validate tests names."""
+        if type(value) is str:
+            value = value.split(',')
+        return value
+    @field_validator('inventory', mode='before')
     def validate_inventory(cls, value) -> Path:
         """Validate inventory path."""
         if not Path(value).exists():
             raise ValueError(f'Inventory file "{value}" does not exist')
         return Path(value)
 
-    @root_validator()
+    @model_validator(mode='before')
     def validate_required_fields(cls, values) -> dict:
         """Validate required fields."""
         if values.get('component') == 'agent' and not values.get('manager_ip'):
@@ -32,8 +38,8 @@ class InputPayload(BaseModel):
 
 class ExtraVars(BaseModel):
     """Extra vars for testing module."""
-    manager_ip: str = None
+    manager_ip: str | None = None
     wazuh_version: str
     wazuh_revision: str
-    wazuh_branch: str = None
+    wazuh_branch: str | None = None
     ansible_stdout_callback: str = 'yaml'

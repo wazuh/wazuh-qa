@@ -359,7 +359,7 @@ def get_current_items(ossec_path='/var/ossec', ignore_names=[]):
 
     c_items = {}
 
-    for (dirpath, dirnames, filenames) in os.walk(ossec_path, followlinks=False):
+    for (dirpath, _, filenames) in os.walk(ossec_path, followlinks=False):
         if dirpath not in ignored_names:
             c_items[dirpath] = get_data(dirpath)
 
@@ -369,7 +369,19 @@ def get_current_items(ossec_path='/var/ossec', ignore_names=[]):
                     c_items[file_path] = get_data(file_path)
 
     return c_items
+    ignore_names = set(ignore_names)
+    c_items = {}
 
+    for dirpath, _, filenames in os.walk(ossec_path, followlinks=False):
+        if dirpath not in ignore_names:
+            c_items[dirpath] = get_data(dirpath)
+
+            for filename in (f for f in filenames if not f.endswith('.pyc')):
+                file_path = os.path.join(dirpath, filename)
+                if file_path not in ignore_names:
+                    c_items[file_path] = get_data(file_path)
+
+    return c_items  
 # ---------------------------------------------------------------------------------------------------------------
 
 
@@ -409,44 +421,34 @@ def get_current_items(ossec_path='/var/ossec', ignore_names=[]):
 """
 
 
-def get_template_items(template_path, version, target, exceptions=None):
+def get_template_items(template_path: str, version: str, target: str, exceptions: list = None) -> tuple[dict, dict]:
 
     template_static = {}
     template_dynamic = {}
 
     data = read_template_items(template_path, version, target)
 
-    if not exceptions is None:
-        for item in exceptions:
-            data.pop(item, None)
+    if exceptions:
+        [data.pop(item, None) for item in exceptions]
 
-    for item in data:
-        if "/var/ossec" not in OSSEC_PATH:
-            item = item.replace('/var/ossec', OSSEC_PATH)
-            data = {k.replace('/var/ossec', OSSEC_PATH)
-                              : v for k, v in data.items()}
+    data = {k.replace('/var/ossec', OSSEC_PATH): v for k, v in data.items()}
 
-        new_item = dict(data[item])
-        class_item = new_item['class']
-        del new_item['class']
+    for item, value in data.items():
+        # if not "/var/ossec" in OSSEC_PATH:
+        #     item = item.replace('/var/ossec', OSSEC_PATH)
+        #     data = {k.replace('/var/ossec', OSSEC_PATH)
+        #                       : v for k, v in data.items()}
+        new_item = dict(value)
+        class_item = new_item.pop('class')
 
         if class_item == 'static':
             template_static[item] = new_item
         elif class_item == 'dynamic':
-            new_paths = glob.glob(item)
-
-            # workaround: glob does not support !()
-            new_paths_manually = []
-            if "!(local)" in item:
-                item_tmp = item.replace("!(local)", "*")
-                new_paths_temp = glob.glob(item_tmp)
-                for new_path_temp in new_paths_temp:
-                    if "diff/local/" not in new_path_temp and not new_path_temp.endswith('diff/local'):
-                        new_paths_manually.append(new_path_temp)
-                new_paths = new_paths_manually
+            new_paths = glob.glob(item.replace("!(local)", "*"))
 
             for new_path in new_paths:
-                template_dynamic[new_path] = new_item
+                if "diff/local/" not in new_path and not new_path.endswith('diff/local'):
+                    template_dynamic[new_path] = new_item
 
     return template_static, template_dynamic
 
@@ -465,16 +467,19 @@ def get_template_items(template_path, version, target, exceptions=None):
 """
 
 
-def cut_items(items, ignore_keys):
+def cut_items(items: dict, ignore_keys: list) -> tuple[dict, list]:
 
-    new_items = dict(items)
-    ignored = []
+    ignore_keys = set(key.strip().lower() for key in ignore_keys)
+    ignored = [k for k in items if any(key in k.lower() for key in ignore_keys)]
+    new_items = {k: v for k, v in items.items() if k not in ignored}
 
-    for k in items:
-        for ignore_key in ignore_keys:
-            if ignore_key.strip().lower() in k or ignore_key.strip() in k:
-                ignored.append(k)
-                del new_items[k]
+    # new_items = dict(items)
+    # ignored = []
+    # for k in items:
+    #     for key in ignore_keys:
+    #         if key.strip().lower() in k.lower():
+    #             ignored.append(k)
+    #             del new_items[k]
 
     return new_items, ignored
 
@@ -523,12 +528,7 @@ if __name__ == "__main__":
             ignore_names = args.ignore.split(',')
 
         # Get data
-        if from_version:
-            static_items, dynamic_items = get_template_items(
-                template_path, version, target, exceptions_data)
-        else:
-            static_items, dynamic_items = get_template_items(
-                template_path, version, target)
+        static_items, dynamic_items = get_template_items(template_path, version, target)
         current_items = get_current_items(OSSEC_PATH, ignore_names)
 
         if args.ignore:
@@ -547,12 +547,8 @@ if __name__ == "__main__":
             current_items, ['/var/ossec/api/node_modules/'])
 
         static_names = static_items.keys()
-        static_names = static_items.keys()
-        static_names = static_items.keys()
         dynamic_names = dynamic_items.keys()
         current_names = current_items.keys()
-        if from_version:
-            current_names = set(current_names) - set(exceptions_data)
 
         # Missing files/directories
         missing_names = set(static_names) - set(current_names)

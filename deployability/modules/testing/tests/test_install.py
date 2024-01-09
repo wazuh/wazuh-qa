@@ -4,6 +4,7 @@ import pwd
 
 from .helpers import constants, utils
 
+# The test receives the environment with wazuh-agent installed and started.
 
 def test_wazuh_user():
     all_users = [x[0] for x in pwd.getpwall()]
