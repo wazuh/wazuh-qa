@@ -5,10 +5,13 @@
 import os
 import sys
 import argparse
+import logging
+import colorlog
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(project_root)
 from modules.workflow_engine.workflow_processor import WorkflowProcessor
-from modules import SchemaValidator
+from modules.generic import SchemaValidator
+
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -18,11 +21,17 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument('schema_file', type=str, default="./schema.json", help='Path to the schema definition file.')
     parser.add_argument('--threads', type=int, default=1, help='Number of threads to use for parallel execution.')
     parser.add_argument('--dry-run', action='store_true', help='Display the plan without executing tasks.')
-    parser.add_argument('--log-format', choices=['plain', 'json'], default='plain', help='Log format (plain or json).')
     parser.add_argument('--log-level', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], default='INFO',
                         help='Log level.')
     return parser.parse_args()
 
+def setup_logger(log_level: str) -> None:
+    """Setup logger."""
+    logger = logging.getLogger()
+    console_handler = colorlog.StreamHandler()
+    console_handler.setFormatter(colorlog.ColoredFormatter("%(log_color)s[%(asctime)s] [%(levelname)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+    logger.addHandler(console_handler)
+    logger.setLevel(log_level)
 
 def main() -> None:
     """Main entry point."""
@@ -31,10 +40,9 @@ def main() -> None:
     validator = SchemaValidator(args.schema_file, args.workflow_file)
     validator.preprocess_data()
     validator.validateSchema()
-
+    setup_logger(args.log_level)
     processor = WorkflowProcessor(args.workflow_file, args.dry_run, args.threads)
-    processor.logger = processor.setup_logger(log_format=args.log_format, log_level=args.log_level)
-    processor.main()
+    processor.run()
 
 
 if __name__ == "__main__":

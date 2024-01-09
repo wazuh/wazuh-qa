@@ -20,7 +20,12 @@
                                     "this": {"type": "string"},
                                     "args": {
                                         "type": "array",
-                                        "items": {"type": "string"}
+                                        "items": {
+                                            "oneOf": [
+                                                {"type": "string"},
+                                                {"type": "array"}
+                                            ]
+                                        }
                                     },
                                     "path": {"type": "string"}
                                 }
@@ -38,7 +43,12 @@
                                     "this": {"type": "string"},
                                     "args": {
                                         "type": "array",
-                                        "items": {"type": "string"}
+                                        "items": {
+                                            "oneOf": [
+                                                {"type": "string"},
+                                                {"type": "array"}
+                                            ]
+                                        }
                                     },
                                     "path": {"type": "string"}
                                 }
@@ -82,11 +92,21 @@
             "properties": {
                 "agent-os": {
                     "type": "array",
-                    "items": {"type": "string"}
+                    "items": {
+                        "oneOf": [
+                            {"type": "string"},
+                            {"type": "array"}
+                        ]
+                    }
                 },
                 "managers-os": {
                     "type": "array",
-                    "items": {"type": "string"}
+                    "items": {
+                        "oneOf": [
+                            {"type": "string"},
+                            {"type": "array"}
+                        ]
+                    }
                 }
             }
         }

@@ -35,78 +35,85 @@ variables:
 
 tasks:
   # Generic agent test task
-  - task: "run-agent-tests-{agent}"
+  - task: "test-agent-{agent}"
     description: "Run tests for the {agent} agent."
     do:
       this: process
       with:
         path: /bin/echo
         args:
+          - -n
           - "Running tests for {agent}"
     depends-on:
-      - "provision-{agent}"
-      - "provision-manager"
+      - "provision-agent-{agent}"
     foreach:
       - variable: agents-os
         as: agent
 
   # Unique manager provision task
-  - task: "provision-manager"
+  - task: "provision-manager-{manager-os}"
     description: "Provision the manager."
     do:
       this: process
       with:
         path: /bin/echo
         args:
+          - -n
           - "Running provision for manager"
     depends-on:
-      - "allocate-manager"
+      - "allocate-manager-{manager-os}"
 
   # Unique manager allocate task
-  - task: "allocate-manager"
+  - task: "allocate-manager-{manager-os}"
     description: "Allocate resources for the manager."
     do:
       this: process
       with:
         path: /bin/echo
         args:
+          - -n
           - "Running allocate for manager"
     cleanup:
       this: process
       with:
         path: /bin/echo
         args:
+          - -n
           - "Running cleanup for manager"
 
   # Generic agent provision task
-  - task: "provision-{agent}"
+  - task: "provision-agent-{agent}"
     description: "Provision resources for the {agent} agent."
     do:
       this: process
       with:
         path: /bin/echo
         args:
+          - -n
           - "Running provision for {agent}"
     depends-on:
-      - "allocate-{agent}"
+      - "allocate-agent-{agent}"
+      - "provision-manager-{manager-os}"
     foreach:
       - variable: agents-os
         as: agent
 
   # Generic agent allocate task
-  - task: "allocate-{agent}"
+  - task: "allocate-agent-{agent}"
     description: "Allocate resources for the {agent} agent."
     do:
       this: process
       with:
         path: /bin/echo
         args:
+          - -n
           - "Running allocate for {agent}"
     cleanup:
       this: process
       with:
         path: /bin/echo
         args:
+          - -n
           - "Running cleanup for allocate for {agent}"
     foreach:
       - variable: agents-os
