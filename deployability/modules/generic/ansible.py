@@ -5,7 +5,9 @@ import yaml
 from pathlib import Path
 from pydantic import BaseModel, IPvAnyAddress
 
+from jinja2 import Template
 from modules.generic.utils import Utils
+import subprocess, json
 
 
 class Inventory(BaseModel):
@@ -16,7 +18,6 @@ class Inventory(BaseModel):
 
 
 class Ansible:
-
     def __init__(self, ansible_data, path=None):
         self.path = path
         self.playbooks_path = Path(__file__).parents[2] / 'playbooks'
@@ -89,7 +90,7 @@ class Ansible:
         if self.path:
             playbook = self.path + "/" + playbook
 
-        # Set the callback to yaml to env_vars        
+        # Set the callback to yaml to env_vars
         env_vars['ANSIBLE_STDOUT_CALLBACK'] = 'community.general.yaml'
 
         result = ansible_runner.run(
