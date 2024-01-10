@@ -377,7 +377,8 @@ def main():
                             metavar='<syscollector_event_types>',
                             type=str,
                             help='''Space-separated list of event types for syscollector messages.
-                            Default is "packages".''',
+                            Default is "packages". Available types are "packages", "processes", "ports",
+                            "network", "hotfix", "hwinfo", "osinfo"''',
                             required=False,
                             default='packages',
                             dest='syscollector_event_types')
