@@ -58,14 +58,14 @@ tasks:
           - composite-name: "{manager-os}"
           - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
-    #cleanup:
-    #  this: process
-    #  with:
-    #    path: python3
-    #    args:
-    #      - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
-    #      - action: delete
-    #      - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+    cleanup:
+      this: process
+      with:
+        path: python3
+        args:
+          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
+          - action: delete
+          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 
   # Generic agent provision task
   - task: "provision-{agent}"
