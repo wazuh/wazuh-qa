@@ -1,5 +1,9 @@
 - sections:
-    - section: vulnerability-detector
+    - section: vulnerability-detection
+      elements:
+        - enabled:
+            value: 'no'
+    - section: indexer
       elements:
         - enabled:
             value: 'no'
