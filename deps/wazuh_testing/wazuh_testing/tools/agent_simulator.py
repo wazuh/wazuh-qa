@@ -19,6 +19,7 @@ import socket
 import ssl
 import threading
 import zlib
+import re
 from datetime import date
 from itertools import cycle
 from random import randint, sample, choice, getrandbits
@@ -27,7 +28,6 @@ from string import ascii_letters, digits
 from struct import pack
 from sys import getsizeof
 from time import mktime, localtime, sleep, time
-import re
 
 import wazuh_testing.data.syscollector as syscollector
 import wazuh_testing.data.winevt as winevt
