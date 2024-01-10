@@ -71,7 +71,7 @@
     agent_id: "{{ agent1_id }}"
     agent_hostname: "{{ agent1_hostname }}"
     agent_key: "{{ agent1_key }}"
-    agent_user: "{{agent_user}}"
+    agent_user: "{{agent1_user}}"
     restart_command: "{{restart_command_415}}"
   vars_files:
     - ./vars/configurations.yml
@@ -86,7 +86,7 @@
     agent_id: "{{ agent2_id }}"
     agent_hostname: "{{ agent2_hostname }}"
     agent_key: "{{ agent2_key }}"
-    agent_user: "{{agent_user}}"
+    agent_user: "{{agent1_user}}"
     restart_command: "{{restart_command_4_2}}"
   vars_files:
     - ./vars/configurations.yml
@@ -100,7 +100,7 @@
     agent_id: "{{ agent3_id }}"
     agent_hostname: "{{ agent3_hostname }}"
     agent_key: "{{ agent3_key }}"
-    agent_user: "{{agent_user}}"
+    agent_user: "{{agent3_user}}"
     restart_command: "{{restart_command_4_2}}"
   vars_files:
     - ./vars/configurations.yml
