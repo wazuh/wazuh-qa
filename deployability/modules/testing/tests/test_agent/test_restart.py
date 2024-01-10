@@ -1,11 +1,7 @@
 import pytest
 
-from .helpers import utils
-from .helpers.constants import DELETING_RESPONSES, RELEASING_RESOURCES, STARTED, WAZUH_CONTROL, WAZUH_LOG
-
-
-# Actual running service.
-service = utils.get_service()
+from ..helpers import utils
+from ..helpers.constants import DELETING_RESPONSES, RELEASING_RESOURCES, STARTED, WAZUH_CONTROL, WAZUH_LOG
 
 
 @pytest.fixture(scope='module', autouse=True)
@@ -32,7 +28,7 @@ def test_service_started():
 
 
 def test_agent_connection_status():
-    expected_status = "connected" if service == "agent" else "Active"
+    expected_status = "connected" 
 
     assert utils.check_agent_is_connected("001")
     assert utils.get_agent_connection_status("001") == expected_status

@@ -1,19 +1,24 @@
 from pathlib import Path
+from pydantic import BaseModel, field_validator, model_validator
 from typing import Literal
-from pydantic import BaseModel, field_validator, model_validator, root_validator, validator
 
 
-class InputPayload(BaseModel):
-    """Input payload for testing module."""
-
-    tests: list[str]
-    inventory: Path
+class ExtraVars(BaseModel):
+    """Extra vars for testing module."""
     component: Literal['manager', 'agent']
-    dependency: Path = None
-    cleanup: bool = True
+    dependency: str | None = None
     wazuh_version: str
     wazuh_revision: str
     wazuh_branch: str | None = None
+    working_dir: str = '/tmp/tests'
+
+
+class InputPayload(ExtraVars):
+    """Input payload for testing module."""
+    tests: list[str]
+    inventory: Path
+    dependency: Path = None
+    cleanup: bool = True
 
     @field_validator('tests', mode='before')
     def validate_tests(cls, value) -> list[str]:
@@ -35,13 +40,3 @@ class InputPayload(BaseModel):
         if values.get('component') == 'agent' and not values.get('dependency'):
             raise ValueError('dependency is required when component is agent')
         return values
-
-
-class ExtraVars(BaseModel):
-    """Extra vars for testing module."""
-    dependency: str | Path|  None = None
-    component: Literal['manager', 'agent']
-    wazuh_version: str
-    wazuh_revision: str
-    wazuh_branch: str | None = None
-    ansible_stdout_callback: str = 'yaml'

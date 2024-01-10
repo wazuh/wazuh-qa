@@ -1,4 +1,0 @@
-- name: Test {{ test_name }}
-  command: "pytest test{{ test_name }}.py  -v --tb=short --to_version={{ wazuh_version }} --target={{ component }}"
-  args:
-    chdir: "{{ tests_directory }}"

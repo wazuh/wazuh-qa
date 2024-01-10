@@ -1,7 +1,0 @@
-- hosts: all
-  become: true
-  tasks:
-    - name: Test install
-      command: "pytest test_{{ test }}.py  -v --to_version={{ wazuh_version }} --target={{ component }}"
-      args:
-        chdir: "{{ base_path }}/{{ test_directory }}"

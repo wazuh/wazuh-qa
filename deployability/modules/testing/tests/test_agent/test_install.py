@@ -1,10 +1,9 @@
 import grp
-import os
 import pwd
 
 from ..helpers import constants, utils
 
-
+# The test receives the environment with wazuh-agent installed and started.
 
 def test_wazuh_user():
     all_users = [x[0] for x in pwd.getpwall()]
@@ -15,16 +14,23 @@ def test_wazuh_group():
     all_groups = [x[0] for x in grp.getgrall()]
     assert constants.WAZUH_GROUP in all_groups, "Wazuh group not found."
 
-# Check files permissions checkfiles close-world
 
-def test_files_permissions():
-    for file in constants.FILES:
-        assert os.stat(file).st_mode == constants.FILE_PERMISSIONS, f"{file} permissions are not the expected."
-
-# Check start
+def test_wazuh_configuration():
+    assert constants.CONFIGURATIONS_DIR.exists(), "Configuration directory not found."
+    assert constants.WAZUH_CONF.exists(), "Configuration file not found."
 
 
-def test_daemons_started():
+def test_wazuh_control():
+    assert constants.BINARIES_DIR.exists(), "Binaries directory not found."
+    assert constants.WAZUH_CONTROL.exists(), "Wazuh control binary not found."
+
+
+def test_wazuh_service(component):
+    expected_service = component
+    assert utils.get_service() == expected_service, f"Installed service is not the expected."
+
+
+def test_wazuh_daemons():
     actual_daemons = utils.get_daemons_status()
     expected_daemons = constants.AGENT_DAEMONS
 

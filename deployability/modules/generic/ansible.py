@@ -10,7 +10,7 @@ from modules.generic.utils import Utils
 from pydantic import BaseModel, IPvAnyAddress
 
 
-class AnsibleInventory(BaseModel):
+class Inventory(BaseModel):
     ansible_host: str | IPvAnyAddress
     ansible_user: str
     ansible_port: int
@@ -18,80 +18,18 @@ class AnsibleInventory(BaseModel):
 
 
 class Ansible:
-    # def __init__(self, inventory: str | Path, path: Path = None):
-    #     self._inventory = self._read_inventory(inventory)
-    #     self._working_dir = Path(path) if path else None
 
-    # # Setters and Getters
-
-    # def set_inventory(self, inventory: str | Path) -> None:
-    #     self._inventory = self._read_inventory(inventory)
-
-    # def get_inventory(self) -> dict:
-    #     return self._inventory
-
-    # def set_working_dir(self, path) -> None:
-    #     self._working_dir = path
-
-    # def get_working_dir(self) -> Path:
-    #     return self._working_dir
-
-    # # Instance Methods
-
-    # # https://ansible.readthedocs.io/projects/runner/en/1.1.0/ansible_runner.html
-    # def run_playbook(self, playbook: str | Path = None, extravars: dict = None, verbosity: int = 1) -> dict:
-    #     if self._working_dir:
-    #         playbook = self._working_dir / playbook
-    #     if not Path(playbook).exists():
-    #         raise ValueError(f'Playbook "{playbook}" does not exist')
-    #     # Execute the playbook.
-    #     result = ansible_runner.run(inventory=self._inventory,
-    #                                 playbook=str(playbook),
-    #                                 verbosity=verbosity,
-    #                                 extravars=extravars)
-    #     return result
-
-    # # Internal Methods
-
-    # def _read_inventory(self, inventory: str | Path) -> dict:
-    #     if not Path(inventory).exists():
-    #         raise ValueError(f'Inventory file "{inventory}" does not exist')
-    #     with open(inventory, 'r') as file:
-    #         return yaml.safe_load(file)
-    def __init__(self, ansible_data: AnsibleInventory, path: str | Path = None, inventory: str | Path = None):
+    def __init__(self, ansible_data: Inventory, path: str | Path = None):
         self.path = path
-        # self.inventory = inventory
+
         self.playbooks_path = Path(__file__).parents[2] / 'playbooks'
-        self.ansible_data = ansible_data
-        self.inventory = {'all': {'hosts': {'dtt1': self.ansible_data}}}
-        print(self.ansible_data)
-        self.ansible_host = self.ansible_data.get('ansible_host')
-        self.ansible_port = self.ansible_data.get('ansible_port')
-        self.ansible_user = self.ansible_data.get('ansible_user')
-        self.ansible_user = self.ansible_data.get('ansible_ssh_private_key_file')
+        self.ansible_data = Inventory(**dict(ansible_data))
+        self.inventory = {'all': {'hosts': {'dtt1': dict(self.ansible_data)}}}
 
-    def set_inventory(self, inventory):
-        """
-        Set the inventory for ansible.
-
-        Args:
-            inventory: Path to the inventory file.
-        """
-        with open(inventory, 'r') as file:
-            inv = yaml.safe_load(file)
-        return inv
-
-    def get_inventory(self):
-        """
-        Get the ansible inventory.
-        """
-        return self.inventory
-
-    def get_playbooks_path(self):
-        """
-        Get the ansible playbooks_path.
-        """
-        return self.playbooks_path
+        self.ansible_host = self.ansible_data.ansible_host
+        self.ansible_port = self.ansible_data.ansible_port
+        self.ansible_user = self.ansible_data.ansible_user
+        self.ansible_user = self.ansible_data.ansible_ssh_private_key_file
 
     def render_playbooks(self, variables_rendering):
         """
@@ -122,6 +60,24 @@ class Ansible:
 
         return tasks
 
+    def render_playbook(self, playbook: Path, rendering_variables: dict = {}) -> str | None:
+        """
+        Render the playbook with Jinja.
+
+        Args:
+            ansible_data: Data with the ansible host.
+            rendering_variables: Extra variables to render the playbooks.
+        """
+        playbook = Path(playbook)
+        if not playbook.exists():
+            print(f"Error: Playbook {playbook} not found")
+            return None
+        _env = jinja2.Environment(loader=jinja2.FileSystemLoader(playbook.parent))
+        template = _env.get_template(playbook.name)
+        rendered = template.render(host=self.ansible_data, **rendering_variables)
+
+        return yaml.safe_load(rendered)
+
     def run_playbook(self, playbook=None, extravars=None, verbosity=1):
         """
         Run the playbook with ansible_runner.
@@ -138,7 +94,8 @@ class Ansible:
             inventory=self.inventory,
             playbook=playbook,
             verbosity=verbosity,
-            extravars=extravars
+            extravars=extravars,
+            envvars={'ANSIBLE_STDOUT_CALLBACK': 'community.general.yaml'},
         )
 
         return result

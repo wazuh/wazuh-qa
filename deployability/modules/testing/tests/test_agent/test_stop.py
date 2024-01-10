@@ -1,18 +1,12 @@
 import pytest
 
-from .helpers import utils
-from .helpers.constants import DELETING_RESPONSES, RELEASING_RESOURCES, WAZUH_CONTROL, WAZUH_LOG
-
-
-# Actual running service.
-service = utils.get_service()
-
+from ..helpers import utils
+from ..helpers.constants import DELETING_RESPONSES, RELEASING_RESOURCES, WAZUH_CONTROL, WAZUH_LOG
 
 @pytest.fixture(scope='module', autouse=True)
 def stop_wazuh():
-    component = 'wazuh-agent' if service == 'agent' else 'wazuh-manager'
     utils.run_command(WAZUH_CONTROL, ['stop'])
-    utils.run_command('systemctl', ['stop', component])
+    utils.run_command('systemctl', ['stop', 'wazuh-agent'])
 
 
 def test_release_resources_shutdown_log_raised():

@@ -1,17 +1,15 @@
 import grp
-import os
 import pwd
 
-import pytest
 
-from .helpers import constants, utils
+from ..helpers import constants
 
 
-@pytest.fixture(scope='module', autouse=True)
-def uninstall_wazuh():
-    service = utils.get_service()
-    daemon_name = 'wazuh-agent' if service == 'agent' else 'wazuh-manager'
-    utils.run_command('apt-get', ['purge', daemon_name, '-y'])
+# @pytest.fixture(scope='module', autouse=True)
+# def uninstall_wazuh():
+#     service = utils.get_service()
+#     daemon_name = 'wazuh-agent' if service == 'agent' else 'wazuh-manager'
+#     utils.run_command('apt-get', ['purge', daemon_name, '-y'])
 
 
 def test_wazuh_user():

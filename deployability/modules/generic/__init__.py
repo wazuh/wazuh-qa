@@ -1,3 +1,3 @@
-from .ansible import Ansible, AnsibleInventory
+from .ansible import Ansible, Inventory
 from .playbook import Playbook
 from .schemaValidator import SchemaValidator
