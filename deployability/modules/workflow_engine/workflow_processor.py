@@ -107,12 +107,12 @@ class WorkflowFile:
         def check_not_existing_tasks(self):
             """Validate task existance."""
             task_names = {task['task'] for task in self.task_collection}
-            
+
             for dependencies in [task.get('depends-on', []) for task in self.task_collection]:
                 non_existing_dependencies = [dependency for dependency in dependencies if dependency not in task_names]
                 if non_existing_dependencies:
                     raise ValueError(f"Tasks do not exist: {', '.join(non_existing_dependencies)}")
-        
+
         validations = [check_duplicated_tasks, check_not_existing_tasks]
         for validation in validations:
             validation(self)

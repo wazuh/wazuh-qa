@@ -16,10 +16,9 @@ from modules.provision import Provision, models
 
 def parse_arguments():
   parser = argparse.ArgumentParser(description="Provision infraestructure tool")
-  parser.add_argument("--inventory-agent", required=False, help="Inventory with agent host information")
-  parser.add_argument("--inventory-manager", required=False, help="Inventory with manager host information")
-  parser.add_argument('--install', type=lambda x: ast.literal_eval(x), default=[],
-                        help='List of dictionaries for installation.')
+  parser.add_argument("--inventory-agent", default=None, help="Inventory with agent host information")
+  parser.add_argument("--inventory-manager", default=None, help="Inventory with manager host information")
+  parser.add_argument('--install',  action='append', default=[], help='List of dictionaries for installation.')
   parser.add_argument("--custom-credentials", required=False, default=None)
   return parser.parse_args()
 

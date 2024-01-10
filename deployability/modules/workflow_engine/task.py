@@ -40,34 +40,30 @@ class ProcessTask(Task):
     def execute(self) -> None:
         """Execute the process task."""
 
-        # Function to format key:value elements
-        def format_key_value(task_arg):
-            key, value = list(task_arg.items())[0]
-            if isinstance(value, list):
-                return f"--{key}=\"{value}\""
-            else:
-                return f"--{key}={value}"
+        task_args = []
+        for arg in self.task_parameters['args']:
+            if isinstance(arg, str):
+                task_args.append(arg)
+            elif isinstance(arg, dict):
+                key, value = list(arg.items())[0]
+                if isinstance(value, list):
+                    task_args.extend([f"--{key}={argvalue}" for argvalue in value])
+                else:
+                    task_args.append(f"--{key}={value}")
+        print(f"task_args {task_args}")
+        result = None
+        try:
+            result = subprocess.run(
+                [self.task_parameters['path']] + task_args,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
 
-        task_args = [
-            task_arg if isinstance(task_arg, str) else format_key_value(task_arg)
-            for task_arg in self.task_parameters['args']
-        ]
-
-        print("task_args")
-        print(task_args)
-
-        result = subprocess.run(
-            [self.task_parameters['path']] + task_args,
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-
-        self.logger.info("Output:\n%s", result.stdout, extra={'tag': self.task_name})
-
-        if result.returncode != 0:
-            raise subprocess.CalledProcessError(returncode=result.returncode, cmd=result.args, output=result.stdout)
-
+            if result.returncode != 0:
+                raise subprocess.CalledProcessError(returncode=result.returncode, cmd=result.args, output=result.stdout)
+        except subprocess.CalledProcessError as e:
+            raise Exception(f"Error executing process task {e.stderr}")
 
 class DummyTask(Task):
     def __init__(self, task_name, task_parameters):

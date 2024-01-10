@@ -28,45 +28,44 @@ tasks:
         as: agent
 
   # Unique manager provision task
-  #- task: "provision-manager"
-  #  description: "Provision the manager."
-  #  do:
-  #    this: process
-  #    with:
-  #      path: python3
-  #      args:
-  #        - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/provision.py
-  #        - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-  #        - install:
-  #          - this: wazuh-manager
-  #            with: package
-  #          - this: curl
-    #depends-on:
-    #  - "allocate-manager"
+  - task: "provision-manager"
+    description: "Provision the manager."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - provision.py
+          - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - install:
+            - "component:wazuh-manager,install-type:package"
+            - "component:curl"
+    depends-on:
+      - "allocate-manager"
 
   # Unique manager allocate task
-  #- task: "allocate-manager"
-  #  description: "Allocate resources for the manager."
-  #  do:
-  #    this: process
-  #    with:
-  #      path: python3
-  #      args:
-  #        - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
-  #        - action: create
-  #        - provider: "{infra-provider}"
-  #        - size: large
-  #        - composite-name: "{manager-os}"
-  #        - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
-  #        - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
-  #  cleanup:
-  #    this: process
-  #    with:
-  #      path: python3
-  #      args:
-  #        - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
-  #        - action: delete
-  #        - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+  - task: "allocate-manager"
+    description: "Allocate resources for the manager."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
+          - action: create
+          - provider: "{infra-provider}"
+          - size: large
+          - composite-name: "{manager-os}"
+          - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+    cleanup:
+      this: process
+      with:
+        path: python3
+        args:
+          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
+          - action: delete
+          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 
   # Generic agent provision task
   - task: "provision-{agent}"
@@ -80,40 +79,39 @@ tasks:
           - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - install:
-            - this: wazuh-agent
-              with: package
-            - this: curl
-            - this: nano
-    #depends-on:
-      #- "allocate-{agent}"
-      #- "provision-manager"
+            - "component:wazuh-agent,install-type:package"
+            - "component:curl"
+            - "component:nano"
+    depends-on:
+      - "allocate-{agent}"
+      - "provision-manager"
     foreach:
       - variable: agents-os
         as: agent
 
   # Generic agent allocate task
-  #- task: "allocate-{agent}"
-  #  description: "Allocate resources for the {agent} agent."
-  #  do:
-  #    this: process
-  #    with:
-  #      path: python3
-  #      args:
-  #        - allocation.py
-  #        - action: create
-  #        - provider: "{infra-provider}"
-  #        - size: small
-  #        - composite-name: "{agent}"
-  #        - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
-  #        - track-output: "{working-dir}/agent-{agent}/track.yaml"
-  #  cleanup:
-  #    this: process
-  #    with:
-  #      path: python3
-  #      args:
-  #        - allocation.py
-  #        - action: delete
-  #        - track-output: "{working-dir}/agent-{agent}/track.yaml"
-  #  foreach:
-  #    - variable: agents-os
-  #      as: agent
+  - task: "allocate-{agent}"
+    description: "Allocate resources for the {agent} agent."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - allocation.py
+          - action: create
+          - provider: "{infra-provider}"
+          - size: small
+          - composite-name: "{agent}"
+          - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
+          - track-output: "{working-dir}/agent-{agent}/track.yaml"
+    #cleanup:
+    #  this: process
+    #  with:
+    #    path: python3
+    #    args:
+    #      - allocation.py
+    #      - action: delete
+    #      - track-output: "{working-dir}/agent-{agent}/track.yaml"
+    foreach:
+      - variable: agents-os
+        as: agent
