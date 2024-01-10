@@ -1,87 +1,122 @@
-import yaml
 import ansible_runner
-from pathlib import Path
 import jinja2
+import yaml
+
+from pathlib import Path
+from pydantic import BaseModel, IPvAnyAddress
+
 from jinja2 import Template
 from modules.generic.utils import Utils
 import subprocess, json
 
+
+class Inventory(BaseModel):
+    ansible_host: str | IPvAnyAddress
+    ansible_user: str
+    ansible_port: int
+    ansible_ssh_private_key_file: str
+
+
 class Ansible:
+    def __init__(self, ansible_data, path=None):
+        self.path = path
+        self.playbooks_path = Path(__file__).parents[2] / 'playbooks'
+        self.ansible_data = Inventory(**dict(ansible_data))
+        self.ansible_host = self.ansible_data.ansible_host
+        self.ansible_port = self.ansible_data.ansible_port
+        self.ansible_user = self.ansible_data.ansible_user
+        self.ansible_ssh_private_key_file = self.ansible_data.ansible_ssh_private_key_file
+        self.inventory = self.generate_inventory()
 
-  def __init__(self, ansible_data, path=None):
-    self.path = path
-    self.playbooks_path = Path(__file__).parents[2] / 'playbooks'
-    self.ansible_data = ansible_data
-    self.ansible_host = self.ansible_data.get('ansible_host')
-    self.ansible_port = self.ansible_data.get('ansible_port')
-    self.ansible_user = self.ansible_data.get('ansible_user')
-    self.ansible_ssh_private_key_file = self.ansible_data.get('ansible_ssh_private_key_file')
-    self.inventory = self.generate_inventory()
+    def render_playbooks(self, rendering_variables: dict) -> list:
+        """
+        Render the playbooks with Jinja.
 
-  def render_playbooks(self, variables_rendering):
-    """
-    Render the playbooks with Jinja.
+        Args:
+            ansible_data: Data with the ansible host.
+            rendering_variables: Extra variables to render the playbooks.
+        """
+        tasks = []
+        path_to_render_playbooks = self.playbooks_path / rendering_variables['templates_path']
+        template_loader = jinja2.FileSystemLoader(searchpath=path_to_render_playbooks)
+        template_env = jinja2.Environment(loader=template_loader)
 
-    Args:
-        ansible_data: Data with the ansible host.
-        variables_rendering: Extra variables to render the playbooks.
-    """
-    tasks = []
-    path_to_render_playbooks = self.playbooks_path / variables_rendering['templates_path']
-    template_loader = jinja2.FileSystemLoader(searchpath=path_to_render_playbooks)
-    template_env = jinja2.Environment(loader=template_loader)
+        list_template_tasks = Utils.get_template_list(
+            path_to_render_playbooks, rendering_variables.get('list_template_order'))
 
-    list_template_tasks = Utils.get_template_list(path_to_render_playbooks, variables_rendering.get('list_template_order'))
+        if list_template_tasks:
+            for template in list_template_tasks:
+                loaded_template = template_env.get_template(template)
+                rendered = yaml.safe_load(loaded_template.render(host=self.ansible_data, **rendering_variables))
 
-    if list_template_tasks:
-      for template in list_template_tasks:
-        loaded_template = template_env.get_template(template)
-        rendered = yaml.safe_load(loaded_template.render(host=self.ansible_data, **variables_rendering))
+                if not rendered:
+                    continue
 
-        if not rendered:
-          continue
+                tasks += rendered
+        else:
+            print("Error no templates found")
 
-        tasks += rendered
-    else:
-      print("Error no templates found")
+        return tasks
 
-    return tasks
+    def render_playbook(self, playbook: Path, rendering_variables: dict = {}) -> str | None:
+        """
+        Render one playbook with Jinja.
 
-  def run_playbook(self, playbook=None, extravars=None, verbosity=1):
-    """
-    Run the playbook with ansible_runner.
+        Args:
+            ansible_data: Data with the ansible host.
+            rendering_variables: Extra variables to render the playbooks.
+        """
+        playbook = Path(playbook)
+        if not playbook.exists():
+            print(f"Error: Playbook {playbook} not found")
+            return None
+        _env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(playbook.parent))
+        template = _env.get_template(playbook.name)
+        rendered = template.render(
+            host=self.ansible_data, **rendering_variables)
 
-    Args:
-        playbook: Playbook to run.
-        extravars: Extra variables to run the playbook.
-        verbosity: Verbosity level.
-    """
-    if self.path:
-      playbook = self.path + "/" + playbook
+        return yaml.safe_load(rendered)
 
-    result = ansible_runner.run(
-        inventory=self.inventory,
-        playbook=playbook,
-        verbosity=verbosity,
-        extravars=extravars
-    )
+    def run_playbook(self, playbook=None, extravars=None, verbosity=1, env_vars={}):
+        """
+        Run the playbook with ansible_runner.
 
-    return result
+        Args:
+            playbook: Playbook to run.
+            extravars: Extra variables to run the playbook.
+            verbosity: Verbosity level.
+        """
+        if self.path:
+            playbook = self.path + "/" + playbook
 
-  def generate_inventory(self):
-    """
-    Generate the inventory for ansible.
-    """
-    inventory_data = {
-        'all': {
-            'hosts': {
-                self.ansible_host: {
-                    'ansible_port': self.ansible_port,
-                    'ansible_user': self.ansible_user,
-                    'ansible_ssh_private_key_file': self.ansible_ssh_private_key_file
+        # Set the callback to yaml to env_vars
+        env_vars['ANSIBLE_STDOUT_CALLBACK'] = 'community.general.yaml'
+
+        result = ansible_runner.run(
+            inventory=self.inventory,
+            playbook=playbook,
+            verbosity=verbosity,
+            extravars=extravars,
+            envvars=env_vars,
+        )
+
+        return result
+
+    def generate_inventory(self) -> dict:
+        """
+        Generate the inventory for ansible.
+        """
+        inventory_data = {
+            'all': {
+                'hosts': {
+                    self.ansible_host: {
+                        'ansible_port': self.ansible_port,
+                        'ansible_user': self.ansible_user,
+                        'ansible_ssh_private_key_file': self.ansible_ssh_private_key_file
+                    }
                 }
             }
         }
-    }
 
-    return inventory_data
+        return inventory_data

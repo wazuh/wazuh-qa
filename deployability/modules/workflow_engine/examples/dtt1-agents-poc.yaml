@@ -18,11 +18,18 @@ tasks:
     do:
       this: process
       with:
-        path: /usr/bin/echo
+        path: python3
         args:
-          - "Running tests for {agent}"
+          - test.py
+          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
+          - dependency: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - tests: "install,register,stop"
+          - component: "agent"
+          - wazuh-version: "4.7.1"
+          - wazuh-revision: "40709"
     depends-on:
       - "provision-{agent}"
+      - "provision-manager"
     foreach:
       - variable: agents-os
         as: agent

@@ -1,3 +1,4 @@
+import json
 import time
 import chardet
 import subprocess
@@ -226,3 +227,8 @@ def check_agent_is_connected(agent_id: str, timeout: int = 60) -> bool:
         time.sleep(1)
 
     raise False
+
+
+def read_json_file(filepath):
+    with open(filepath) as f_json:
+        return json.load(f_json)
