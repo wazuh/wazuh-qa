@@ -903,7 +903,6 @@ class GeneratorSyscollector:
             event_template = self.get_event_template(self.list_events[self.current_batch_events])
 
         event_final = self.format_event_template(event_template, event)
-        print(event_final)
 
         self.current_id += 1
 
@@ -1677,8 +1676,6 @@ class InjectorThread(threading.Thread):
         module_info = self.agent.modules[module]
         eps = module_info['eps'] if 'eps' in module_info else 1
         frequency = module_info["frequency"] if 'frequency' in module_info else 1
-        print(f"Defining frequency as {frequency}")
-
 
         sleep(10)
         start_time = time()
@@ -1718,7 +1715,6 @@ class InjectorThread(threading.Thread):
         while self.stop_thread == 0:
             sent_messages = 0
             while sent_messages < batch_messages:
-                print("Send event")
                 event_msg = module_event_generator()
                 if self.agent.fixed_message_size is not None:
                     event_msg_size = getsizeof(event_msg)
@@ -1737,14 +1733,8 @@ class InjectorThread(threading.Thread):
                 self.totalMessages += 1
                 sent_messages += 1
                 if self.totalMessages % eps == 0:
-                    print("Sleeping")
-                    print(self.totalMessages)
-                    print(1.0 - ((time() - start_time) % 1.0))
                     sleep(1.0 - ((time() - start_time) % 1.0))
             if frequency > 1:
-                print("Sleeping freq")
-                print(frequency)
-                print(frequency - ((time() - start_time) % frequency))
                 sleep(frequency - ((time() - start_time) % frequency))
 
     def run(self):
