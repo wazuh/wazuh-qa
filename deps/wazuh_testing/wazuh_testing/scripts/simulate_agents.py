@@ -57,6 +57,9 @@ def process_script_parameters(args):
         if any(event_type not in SYSCOLLECTOR_DELTA_EVENT_TYPES for event_type in args.syscollector_event_types):
             raise ValueError(f'Invalid syscollector event type. Valid values are: {SYSCOLLECTOR_DELTA_EVENT_TYPES}')
 
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+
 
 def set_agent_modules_and_eps(agent, active_modules, modules_eps):
     """Set active modules and EPS to an agent.
@@ -340,6 +343,13 @@ def main():
     arg_parser.add_argument('-k', '--disable-keepalive', metavar='<disable_keepalive>', type=bool,
                             help='Disable keepalive module',
                             required=False, default=False, dest='disable_keepalive')
+
+    arg_parser.add_argument('--debug',
+                            help='Enable debug mode',
+                            required=False,
+                            action='store_true',
+                            default=False,
+                            dest='debug')
 
     arg_parser.add_argument('-d', '--disable-receive', metavar='<disable_receive>', type=bool,
                             help='Disable receive message module',
