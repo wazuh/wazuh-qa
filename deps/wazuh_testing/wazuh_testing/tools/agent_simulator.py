@@ -121,10 +121,9 @@ class Agent:
                  syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100,
                  fixed_message_size=None, registration_address=None, retry_enrollment=False,
                  logcollector_msg_number=None, custom_logcollector_message='',
-                 syscollector_message_type_list=['packages'],
-                #  syscollector_message_type_list=['network', 'port', 'hotfix', 'process', 'packages', 'osinfo', 'hwinfo'],
+                 syscollector_event_types=['network', 'port', 'hotfix', 'process', 'packages', 'osinfo', 'hwinfo'],
                  syscollector_packages_vuln_content=None,
-                 syscollector_message_old_format=False):
+                 syscollector_legacy_messages=False):
         self.id = id
         self.name = name
         self.key = key
@@ -140,8 +139,8 @@ class Agent:
         self.fim_integrity_eps = fim_integrity_eps
 
         self.syscollector_eps = syscollector_eps
-        self.syscollector_message_type_list = syscollector_message_type_list
-        self.syscollector_message_old_format = syscollector_message_old_format
+        self.syscollector_event_types = syscollector_event_types
+        self.syscollector_legacy_messages = syscollector_legacy_messages
         self.syscollector_packages_vuln_content = syscollector_packages_vuln_content
 
         self.rootcheck_eps = rootcheck_eps
@@ -664,8 +663,8 @@ class Agent:
     def init_syscollector(self):
         """Initialize syscollector module."""
         if self.syscollector is None:
-            self.syscollector = GeneratorSyscollector(self.name, self.syscollector_message_type_list,
-                                                      self.syscollector_message_old_format,
+            self.syscollector = GeneratorSyscollector(self.name, self.syscollector_event_types,
+                                                      self.syscollector_legacy_messages,
                                                       self.syscollector_batch_size,
                                                       self.syscollector_packages_vuln_content)
 
@@ -769,14 +768,12 @@ class GeneratorSyscollector:
             'packages': 'dbsync_packages',
             'hotfix': 'dbsync_hotfix',
             'hwinfo': 'dbsync_hwinfo',
-            'port': 'dbsync_ports',
+            'ports': 'dbsync_ports',
             'osinfo': 'dbsync_osinfo',
             'network': 'dbsync_network_iface',
             'process': 'dbsync_processes'
         }
         self.syscollector_packages_vuln_content = syscollector_packages_vuln_content
-
-
 
         self.default_package_data = {
             '<package_description>': 'A low-level cryptographic library',
@@ -795,52 +792,60 @@ class GeneratorSyscollector:
         self.syscollector_mq = 'd'
         self.current_id = 1
 
-    def format_event(self, message_type):
-        """Format syscollector message of the specified type.
+    def get_event_template_legacy(self, message_type):
+        """Get syscollector legacy message of the specified type.
+        Args:
+            message_type (str): Syscollector event type.
+        Return:
+            str: Syscollector legacy event message.
+        """
+        message = syscollector.LEGACY_SYSCOLLECTOR_HEADER
+        if message_type == 'network':
+            message += syscollector.LEGACY_SYSCOLLECTOR_NETWORK_EVENT_TEMPLATE
+        elif message_type == 'process':
+            message += syscollector.LEGACY_SYSCOLLECTOR_PROCESS_EVENT_TEMPLATE
+        elif message_type == 'ports':
+            message += syscollector.LEGACY_SYSCOLLECTOR_PORTS_EVENT_TEMPLATE
+        elif message_type == 'packages':
+            message += syscollector.LEGACY_SYSCOLLECTOR_PACKAGES_EVENT_TEMPLATE
+        elif message_type == 'osinfo':
+            message += syscollector.LEGACY_SYSCOLLECTOR_OS_EVENT_TEMPLATE
+        elif message_type == 'hwinfo':
+            message += syscollector.LEGACY_SYSCOLLECTOR_HARDWARE_EVENT_TEMPLATE
+        elif message_type == 'hotfix':
+            message += syscollector.LEGACY_SYSCOLLECTOR_HOTFIX_EVENT_TEMPLATE
+        elif 'end' in message_type:
+            message += '}'
+
+        return message
+
+    def get_event_template(self, message_type):
+        """Get syscollector message of the specified type.
         Args:
             message_type (str): Syscollector event type.
         Returns:
-            str: the generated syscollector event message.
+            str: Syscollector event message.
         """
-        if self.old_format:
-            message = syscollector.LEGACY_SYSCOLLECTOR_HEADER
-            if message_type == 'network':
-                message += syscollector.LEGACY_SYSCOLLECTOR_NETWORK_EVENT_TEMPLATE
-            elif message_type == 'process':
-                message += syscollector.LEGACY_SYSCOLLECTOR_PROCESS_EVENT_TEMPLATE
-            elif message_type == 'port':
-                message += syscollector.LEGACY_SYSCOLLECTOR_PORT_EVENT_TEMPLATE
-            elif message_type == 'packages':
-                message += syscollector.LEGACY_SYSCOLLECTOR_PACKAGES_EVENT_TEMPLATE
-            elif message_type == 'osinfo':
-                message += syscollector.LEGACY_SYSCOLLECTOR_OS_EVENT_TEMPLATE
-            elif message_type == 'hwinfo':
-                message += syscollector.LEGACY_SYSCOLLECTOR_HARDWARE_EVENT_TEMPLATE
-            elif message_type == 'hotfix':
-                message += syscollector.LEGACY_SYSCOLLECTOR_HOTFIX_EVENT_TEMPLATE
-            elif 'end' in message_type:
-                message += '}'
-        else:
-            message_event_type = self.syscollector_event_type_mapping[message_type]
-            operation = 'INSERTED' if (message_type == 'osinfo' or message_type == 'packages') else 'MODIFIED'
-            message_operation = operation
+        message_event_type = self.syscollector_event_type_mapping[message_type]
+        operation = 'INSERTED' if (message_type == 'osinfo' or message_type == 'packages') else 'MODIFIED'
+        message_operation = operation
 
-            message_data = {}
+        message_data = {}
 
-            if message_type == 'network':
-                message_data = syscollector.SYSCOLLECTOR_NETWORK_IFACE_DELTA_EVENT_TEMPLATE
-            elif message_type == 'process':
-                message_data = syscollector.SYSCOLLECTOR_PROCESSSES_DELTA_EVENT_TEMPLATE
-            elif message_type == 'port':
-                message_data = syscollector.SYSCOLLECTOR_PORTS_DELTA_EVENT_TEMPLATE
-            elif message_type == 'packages':
-                message_data = syscollector.SYSCOLLECTOR_PACKAGE_DELTA_DATA_TEMPLATE
-            elif message_type == 'osinfo':
-                message_data = syscollector.SYSCOLLECTOR_OSINFO_DELTA_EVENT_TEMPLATE
-            elif message_type == 'hwinfo':
-                message_data = syscollector.SYSCOLLECTOR_HWINFO_DELTA_EVENT_TEMPLATE
-            elif message_type == 'hotfix':
-                message_data = syscollector.SYSCOLLECTOR_HOTFIX_DELTA_DATA_TEMPLATE
+        if message_type == 'network':
+            message_data = syscollector.SYSCOLLECTOR_NETWORK_IFACE_DELTA_EVENT_TEMPLATE
+        elif message_type == 'process':
+            message_data = syscollector.SYSCOLLECTOR_PROCESSSES_DELTA_EVENT_TEMPLATE
+        elif message_type == 'ports':
+            message_data = syscollector.SYSCOLLECTOR_PORTS_DELTA_EVENT_TEMPLATE
+        elif message_type == 'packages':
+            message_data = syscollector.SYSCOLLECTOR_PACKAGE_DELTA_DATA_TEMPLATE
+        elif message_type == 'osinfo':
+            message_data = syscollector.SYSCOLLECTOR_OSINFO_DELTA_EVENT_TEMPLATE
+        elif message_type == 'hwinfo':
+            message_data = syscollector.SYSCOLLECTOR_HWINFO_DELTA_EVENT_TEMPLATE
+        elif message_type == 'hotfix':
+            message_data = syscollector.SYSCOLLECTOR_HOTFIX_DELTA_DATA_TEMPLATE
 
         message = '{"type": "%s", "data": %s, "operation": "%s"}' % (
             message_event_type,
@@ -848,8 +853,12 @@ class GeneratorSyscollector:
             message_operation
         )
 
+        return message
+
+    def format_event_template(self, template, message_type=None):
         today = date.today()
         timestamp = today.strftime("%Y/%m/%d %H:%M:%S")
+        message = template
 
         generics_fields_to_replace = [
                         ('<agent_name>', self.agent_name), ('<random_int>', f"{self.current_id}"),
@@ -865,11 +874,9 @@ class GeneratorSyscollector:
                 for package_key, package_value in self.default_package_data.items():
                     message = message.replace(package_key, package_value)
 
-        self.current_id += 1
+        final_mesage = f"{self.syscollector_mq}:{self.syscollector_tag}:{message}"
 
-        message = f"{self.syscollector_mq}:{self.syscollector_tag}:{message}"
-
-        return message
+        return final_mesage
 
     def generate_event(self):
         """Generate syscollector event.
@@ -878,7 +885,6 @@ class GeneratorSyscollector:
          Returns:
             str: generated event with the desired format for syscollector
         """
-        print("Generating event")
         if self.current_batch_events_size == 0:
             self.current_batch_events = (self.current_batch_events + 1) % len(self.list_events)
             self.current_batch_events_size = self.batch_size
@@ -891,9 +897,15 @@ class GeneratorSyscollector:
 
         self.current_batch_events_size = self.current_batch_events_size - 1
 
+        if self.old_format:
+            event_template = self.get_event_template_legacy(self.list_events[self.current_batch_events])
+        else:
+            event_template = self.get_event_template(self.list_events[self.current_batch_events])
 
-        event_final = self.format_event(event)
+        event_final = self.format_event_template(event_template, event)
         print(event_final)
+
+        self.current_id += 1
 
         return event_final
 
