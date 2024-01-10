@@ -71,7 +71,6 @@ SYSCOLLECTOR_PACKAGE_DELTA_DATA_TEMPLATE = {
         "version": "<package_version>"
 }
 
-
 SYSCOLLECTOR_HOTFIX_DELTA_DATA_TEMPLATE = {
         "checksum": "<random_string>",
         "hotfix": "<random_string>",
@@ -145,7 +144,6 @@ SYSCOLLECTOR_PORTS_DELTA_EVENT_TEMPLATE = {
         "tx_queue": "<random_int>"
 }
 
-
 SYSCOLLECTOR_HWINFO_DELTA_EVENT_TEMPLATE = {
         "scan_time": "<timestamp>",
         "board_serial": "<random_string>",
@@ -157,7 +155,6 @@ SYSCOLLECTOR_HWINFO_DELTA_EVENT_TEMPLATE = {
         "ram_total": "<random_int>",
         "ram_usage": "<random_int>"
 }
-
 
 SYSCOLLECTOR_NETWORK_IFACE_DELTA_EVENT_TEMPLATE = {
         "adapter": None,
@@ -179,7 +176,6 @@ SYSCOLLECTOR_NETWORK_IFACE_DELTA_EVENT_TEMPLATE = {
         "type": "<random_int>"
 }
 
-
 SYSCOLLECTOR_NETWORK_NETADDR_DELTA_EVENT_TEMPLATE = {
     "id": "<random_int>",
     "scan_id": "<random_int>",
@@ -190,7 +186,6 @@ SYSCOLLECTOR_NETWORK_NETADDR_DELTA_EVENT_TEMPLATE = {
     "checksum": "<random_string",
     "item_id": "<random_string>"
 }
-
 
 SYSCOLLECTOR_NETWORK_NETPRO_DELTA_EVENT_TEMPLATE = {
     "id": "<random_int>",

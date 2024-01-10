@@ -903,6 +903,7 @@ class GeneratorSyscollector:
             event_template = self.get_event_template(self.list_events[self.current_batch_events])
 
         event_final = self.format_event_template(event_template, event)
+        logging.debug(f"Syscollector Event  - {event_final}")
 
         self.current_id += 1
 
@@ -1734,6 +1735,7 @@ class InjectorThread(threading.Thread):
                 sent_messages += 1
                 if self.totalMessages % eps == 0:
                     sleep(1.0 - ((time() - start_time) % 1.0))
+
             if frequency > 1:
                 sleep(frequency - ((time() - start_time) % frequency))
 

@@ -55,7 +55,6 @@ def process_script_parameters(args):
     if args.syscollector_event_types:
         args.syscollector_event_types = args.syscollector_event_types.split(' ')
         if any(event_type not in SYSCOLLECTOR_DELTA_EVENT_TYPES for event_type in args.syscollector_event_types):
-            print(args.syscollector_event_types)
             raise ValueError(f'Invalid syscollector event type. Valid values are: {SYSCOLLECTOR_DELTA_EVENT_TYPES}')
 
 
