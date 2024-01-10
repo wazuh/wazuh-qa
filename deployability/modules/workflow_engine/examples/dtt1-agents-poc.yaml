@@ -5,8 +5,8 @@ version: 0.1
 description: This workflow is used to test agents deployment por DDT1 PoC
 variables:
   agents-os:
-    - linux-ubuntu-22.04-amd64
-    - linux-fedora-38-amd64
+    - linux-centos-8-amd64
+    #- linux-centos-7-amd64
   manager-os: linux-centos-8-amd64
   infra-provider: vagrant
   working-dir: /tmp/dtt1-poc
@@ -35,11 +35,11 @@ tasks:
       with:
         path: python3
         args:
-          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/provision.py
+          - provision.py
           - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - install:
-            - this: wazuh-manager
-              with: package
+            - "component:wazuh-manager,install-type:package"
+            - "component:curl"
     depends-on:
       - "allocate-manager"
 
@@ -73,16 +73,15 @@ tasks:
     do:
       this: process
       with:
-        path: python
+        path: python3
         args:
-          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/provision.py
+          - provision.py
           - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - install:
-            - this: wazuh-agent
-              with: package
-            - this: curl
-            - this: nano
+            - "component:wazuh-agent,install-type:package"
+            - "component:curl"
+            - "component:nano"
     depends-on:
       - "allocate-{agent}"
       - "provision-manager"
@@ -98,21 +97,21 @@ tasks:
       with:
         path: python3
         args:
-          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
+          - allocation.py
           - action: create
           - provider: "{infra-provider}"
           - size: small
           - composite-name: "{agent}"
           - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
-    cleanup:
-      this: process
-      with:
-        path: python3
-        args:
-          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
-          - action: delete
-          - track-output: "{working-dir}/agent-{agent}/track.yaml"
+    #cleanup:
+    #  this: process
+    #  with:
+    #    path: python3
+    #    args:
+    #      - allocation.py
+    #      - action: delete
+    #      - track-output: "{working-dir}/agent-{agent}/track.yaml"
     foreach:
       - variable: agents-os
         as: agent
