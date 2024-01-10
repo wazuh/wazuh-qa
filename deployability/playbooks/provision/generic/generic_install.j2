@@ -1,11 +1,12 @@
-{% if host['ansible_os_family'] == 'Debian' %}
+
 - name: Install {{ component }}
   apt:
     name: {{ component }}
     state: present
-{% elif host['ansible_os_family'] == 'RedHat' %}
+  when: ansible_os_family == "Debian"
+
 - name: Install {{ component }}
   yum:
     name: {{ component }}
     state: present
-{% endif %}
+  when: ansible_os_family == "RedHat"

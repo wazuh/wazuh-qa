@@ -8,18 +8,22 @@ class Install(ABC):
     self.install_type = component_information.get('install_type')
 
     provision_template_path = ''
+    list_template_order = ''
 
     match self.install_type:
       case "package":
         provision_template_path = 'provision/wazuh/package'
+        list_template_order = ["set_repo.j2", "install.j2", "register.j2", "service.j2"]
       case "aio":
         provision_template_path = 'provision/wazuh/aio'
+        list_template_order = ["download.j2", "install.j2", "register", "service"]
       case "deps":
         provision_template_path = 'provision/deps'
       case _ :
         provision_template_path = 'provision/generic'
 
     component_information["templates_path"] = provision_template_path
+    component_information["list_template_order"] = list_template_order
 
     self.component_information = component_information
 
@@ -63,6 +67,7 @@ class InstallComponent(Install):
     playbook = {
       'hosts': self.ansible.ansible_host,
       'become': True,
+      'gather_facts': True,
       'tasks': tasks
     }
 
@@ -78,15 +83,6 @@ class InstallComponent(Install):
         install_info: Data with the installation configuration.
     """
     variables_values = {}
-    variables_values.update({"component": self.component_information.get('component')})
 
-    if self.component_information.get('manager_ip'):
-      variables_values.update({"manager_ip": self.component_information.get('manager_ip')})
-
-    if "aio" in self.install_type:
-      variables_values.update({
-        "version": self.component_information.get('version'),
-        "name": self.component_information.get('component'),
-        "component": self.component_information.get('component')})
 
     return variables_values

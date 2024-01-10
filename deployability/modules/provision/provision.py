@@ -15,7 +15,10 @@ class Provision(ProvisionModule):
                                                                           'ansible_user': 'ansible_user',
                                                                           'ansible_port': 'ansible_port',
                                                                           'ansible_ssh_private_key_file': 'ansible_ssh_private_key_file'})
-    self.manager_ip = Utils.load_from_yaml(payload.manager_ip, map_keys={'ansible_host': 'ansible_host'}, specific_key="ansible_host")
+    if payload.manager_ip:
+      self.manager_ip = Utils.load_from_yaml(payload.manager_ip, map_keys={'ansible_host': 'ansible_host'}, specific_key="ansible_host")
+    else:
+      self.manager_ip = None
     self.install_list = payload.install
     self.summary = {}
 
@@ -33,7 +36,6 @@ class Provision(ProvisionModule):
     self.install_host_dependencies()
 
     for item in self.install_list:
-      print(item)
       status = self.handle_package(item)
 
       self.update_status(status)
@@ -53,15 +55,12 @@ class Provision(ProvisionModule):
     """
     status = {}
 
-    component = package.get("this")
-    install_type = package.get("with")
+    component = package.get("component")
+    install_type = package.get("install-type")
     version = package.get("version")
 
-    if "wazuh-agent" in component:
+    if component is not None and "wazuh-agent" in component:
       install_type = "package"
-
-    if not install_type:
-      install_type = "generic"
 
     info_component_install = {
       'component': component,
@@ -98,11 +97,12 @@ class Provision(ProvisionModule):
     status = {}
 
     package = {
-      'this': os.path.join(str(PATH_BASE_DIR), "deps", "remote_requirements.txt"),
-      'with': "deps"
+      'component': os.path.join(str(PATH_BASE_DIR), "deps", "remote_requirements.txt"),
+      'install_type': "deps"
     }
 
-    status = self.handle_package(package)
+    install: Install = InstallComponent(self.ansible_data, package)
+    status = install.install_component()
 
     return status
 

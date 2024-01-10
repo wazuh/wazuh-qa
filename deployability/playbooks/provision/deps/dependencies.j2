@@ -4,6 +4,11 @@
     state: present
     update_cache: yes
 
+- name: Upgrade pip
+  pip:
+    name: pip
+    state: latest
+
 - name: Copy requirements.txt
   copy:
     src: {{ component }}

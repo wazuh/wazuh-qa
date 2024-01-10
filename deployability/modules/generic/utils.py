@@ -4,7 +4,7 @@ import yaml
 
 class Utils:
   @staticmethod
-  def get_template_list(path) -> list[Path]:
+  def get_template_list(path, custom_order=None) -> list[Path]:
     """
     Get the list of templates in the path.
 
@@ -16,7 +16,13 @@ class Utils:
         for entry in entries:
             if entry.is_file():
                 list_tasks.append(entry.name)
-    return list_tasks
+
+    if custom_order:
+        sorted_list = sorted(list_tasks, key=lambda x: custom_order.index(x) if x in custom_order else float('inf'))
+    else:
+      sorted_list = list_tasks
+
+    return sorted_list
 
   @staticmethod
   def load_from_yaml(file_path, map_keys=None, specific_key=None):
