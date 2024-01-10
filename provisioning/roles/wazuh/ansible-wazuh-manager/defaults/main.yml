@@ -173,32 +173,11 @@ wazuh_manager_sca:
 ## Vulnerability Detector
 wazuh_manager_vulnerability_detector:
   enabled: 'no'
-  interval: '5m'
-  run_on_start: 'yes'
-  providers:
-    - enabled: 'no'
-      os:
-        - 'trusty'
-        - 'xenial'
-        - 'bionic'
-      update_interval: '1h'
-      name: '"canonical"'
-    - enabled: 'no'
-      os:
-        - 'wheezy'
-        - 'stretch'
-        - 'jessie'
-        - 'buster'
-      update_interval: '1h'
-      name: '"debian"'
-    - enabled: 'no'
-      update_from_year: '2010'
-      update_interval: '1h'
-      name: '"redhat"'
-    - enabled: 'no'
-      update_from_year: '2010'
-      update_interval: '1h'
-      name: '"nvd"'
+  index_status: 'no'
+  feed_update_interval: '60m'
+
+wazuh_manager_indexer:
+  enabled: 'no'
 
 ## Syscheck
 wazuh_manager_syscheck:
@@ -441,6 +420,7 @@ wazuh_manager_config_defaults:
   syscollector: '{{ wazuh_manager_syscollector }}'
   sca: '{{ wazuh_manager_sca }}'
   vulnerability_detector: '{{ wazuh_manager_vulnerability_detector }}'
+  indexer: '{{ wazuh_manager_indexer }}'
   log_level: '{{ wazuh_manager_log_level }}'
   email_level: '{{ wazuh_manager_email_level }}'
   localfiles: '{{ wazuh_manager_localfiles }}'
