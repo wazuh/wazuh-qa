@@ -96,14 +96,22 @@ def set_agent_modules_and_eps(agent, active_modules, modules_eps):
 
 
 def create_agent(args, custom_labels):
-    agent = ag.Agent(manager_address=args.manager_address, os=args.os,
-                     registration_address=args.manager_registration_address,
-                     version=args.version, fixed_message_size=args.fixed_message_size, labels=custom_labels,
-                     logcollector_msg_number=args.enable_logcollector_message_number,
-                     custom_logcollector_message=args.custom_logcollector_message,
-                     syscollector_frequency=args.syscollector_frequency,
-                     syscollector_event_types=args.syscollector_event_types,
-                     syscollector_legacy_messages=args.syscollector_legacy_messages)
+    agent_args = {
+        'manager_address': args.manager_address,
+        'os': args.os,
+        'registration_address': args.manager_registration_address,
+        'version': args.version,
+        'fixed_message_size': args.fixed_message_size,
+        'labels': custom_labels,
+        'logcollector_msg_number': args.enable_logcollector_message_number,
+        'custom_logcollector_message': args.custom_logcollector_message,
+        'syscollector_frequency': args.syscollector_frequency,
+        'syscollector_event_types': args.syscollector_event_types,
+        'syscollector_legacy_messages': args.syscollector_legacy_messages
+    }
+
+    agent = ag.Agent(**agent_args)
+
     return agent
 
 
