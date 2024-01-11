@@ -316,7 +316,8 @@ class HostManager:
         login_body = ''
         if auth_context is not None:
             login_endpoint = '/security/user/authenticate/run_as'
-            login_body = 'body="{}"'.format(json.dumps(auth_context).replace('"', '\\"').replace(' ', ''))
+            login_body = 'body="{}" body_format="json"'.format(
+                json.dumps(auth_context).replace('"', '\\"').replace(' ', ''))
 
         try:
             token_response = self.get_host(host).ansible('uri', f"url=https://localhost:{port}{login_endpoint} "
