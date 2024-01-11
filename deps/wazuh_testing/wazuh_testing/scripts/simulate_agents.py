@@ -2,11 +2,11 @@ import argparse
 import logging
 import os
 import wazuh_testing.tools.agent_simulator as ag
-from wazuh_testing.modules.syscollector import SYSCOLLECTOR_DELTA_EVENT_TYPES
 
-from wazuh_testing import TCP
 from multiprocessing import Process
 from time import sleep
+from wazuh_testing.modules.syscollector import SYSCOLLECTOR_DELTA_EVENT_TYPES
+from wazuh_testing import TCP
 
 
 logging.basicConfig(level=logging.INFO)
