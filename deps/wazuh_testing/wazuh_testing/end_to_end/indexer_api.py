@@ -35,6 +35,7 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
     Returns:
         str: The response text from the indexer API.
     """
+    print('Getting values from the Indexer API')
 
     url = f"https://{host_manager.get_master_ip()}:9200/{index}/_search"
     headers = {
@@ -46,19 +47,34 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
             "match_all": {}
         }
     }
+
     if greater_than_timestamp:
-        data['query'].update(
-            {
-                'range': {
-                    "@timestamp": {
-                        "gte": greater_than_timestamp
-                    }
+        query = {
+                "bool": {
+                    "must": [
+                        {"match_all": {}},
+                        {"range": {"@timestamp": {"gte": f"{greater_than_timestamp}"}}}
+                    ]
                 }
-            })
+        }
+
+        sort = [
+            {
+                "@timestamp": {
+                    "order": "desc"
+                }
+            }
+        ]
+
+        data['query'] = query
+        data['sort'] = sort
+
     param = {
         'pretty': 'true',
         'size': 10000,
     }
+
+    print(data)
 
     response = requests.get(url=url, params=param, verify=False,
                             auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']), headers=headers,

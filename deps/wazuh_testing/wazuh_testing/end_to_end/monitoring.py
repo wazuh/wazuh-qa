@@ -21,13 +21,14 @@ import re
 from time import sleep
 from typing import Dict, List
 from multiprocessing.pool import ThreadPool
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from wazuh_testing.end_to_end import logs_filepath_os
 from wazuh_testing.end_to_end.regex import get_event_regex
 from wazuh_testing.tools.system import HostManager
 
 
-def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict) -> None:
+def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict, ignore_error=False) -> Dict:
     """
     Monitor events on multiple hosts concurrently.
 
@@ -35,7 +36,8 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
         host_manager: An instance of the HostManager class containing information about hosts.
         monitoring_data: A dictionary containing monitoring data for each host.
     """
-    def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict], scan_interval: int = 5):
+    def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict], scan_interval: int = 5,
+                         ignore_error=False):
         """
         Monitor the specified elements on a host.
 
@@ -47,6 +49,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
         Raises:
             TimeoutError: If no match is found within the specified timeout.
         """
+        elements_not_found = []
 
         for element in monitoring_elements:
             regex, timeout, monitoring_file = element['regex'], element['timeout'], element['file']
@@ -63,11 +66,29 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
                 current_timeout += 5
 
             if not regex_match:
-                raise TimeoutError("No match found within the specified timeout.")
+                elements_not_found.append(element)
+                if not ignore_error:
+                    raise TimeoutError(f"Element not found: {element}")
 
-    with ThreadPool() as pool:
-        # Use the pool to map the function to the list of hosts
-        pool.starmap(monitoring_event, [(host_manager, host, data) for host, data in monitoring_data.items()])
+        host_elements_not_found = {}
+        host_elements_not_found[host] = elements_not_found
+
+        return host_elements_not_found
+
+    with ThreadPoolExecutor() as executor:
+        futures = []
+        for host, data in monitoring_data.items():
+            futures.append(executor.submit(monitoring_event, host_manager, host, data, ignore_error))
+
+        results = {}
+        for future in as_completed(futures):
+            try:
+                result = future.result()
+                results.update(result)
+            except Exception as e:
+                print(f"An error occurred: {e}")
+
+        return results
 
 
 def generate_monitoring_logs_all_agent(host_manager: HostManager, regex_list: list, timeout_list: list) -> dict:

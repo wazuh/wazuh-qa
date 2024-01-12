@@ -4,6 +4,7 @@
 
 import json
 import tempfile
+import logging
 import xml.dom.minidom as minidom
 from typing import Union
 import testinfra
@@ -14,6 +15,11 @@ from wazuh_testing.tools.configuration import set_section_wazuh_conf
 from ansible.inventory.manager import InventoryManager
 from ansible.parsing.dataloader import DataLoader
 from ansible.vars.manager import VariableManager
+
+
+logger = logging.getLogger('testinfra')
+logger.setLevel(logging.CRITICAL)
+
 
 class HostManager:
     """This class is an extensible remote host management interface. Within this we have multiple functions to modify
@@ -300,7 +306,7 @@ class HostManager:
         """Return an API token for the specified user.
 
         Args:
-            host (str): Hostname.
+            host (str): HostName in inventory.
             user (str, optional): API username. Default `wazuh`
             password (str, optional): API password. Default `wazuh`
             auth_context (dict, optional): Authorization context body. Default `None`
@@ -512,6 +518,25 @@ class HostManager:
 
         return master_ip
 
+    def get_master(self):
+        """
+        Retrieves the master node from the inventory.
+
+        Returns:
+            str: The master node, or None if not found.
+        """
+        master_node = None
+
+        for manager in self.get_group_hosts('manager'):
+            if 'type' in self.get_host_variables(manager) and \
+                         self.get_host_variables(manager)['type'] == 'master':
+                master_node = manager
+                break
+        if master_node is None:
+            raise ValueError('Master node not found in inventory')
+
+        return master_node
+
     def remove_package(self, host, package_name, system):
         """
         Removes a package from the specified host.
@@ -587,6 +612,47 @@ class HostManager:
         for group in group_list:
             for host in self.get_group_hosts(group):
                 self.handle_wazuh_services(host, operation)
+
+    def get_agents_ids(self):
+        """
+        Retrieves the ID of the agents from the API.
+
+        Args:
+            agent_name (str): The name of the agent.
+
+        Returns:
+            str: The ID of the agent.
+        """
+        token = self.get_api_token(self.get_master())
+        agents = self.make_api_call(self.get_master(), endpoint='/agents/', token=token)['json']['data']
+
+        agents_ids = []
+
+        for agent in agents['affected_items']:
+            if agent['id'] != '000':
+                agents_ids.append(agent['id'])
+
+        return agents_ids
+
+    def remove_agents(self):
+        """
+        Removes all the agents from the API.
+
+        Args:
+            host (str): The target host from which to remove the agent.
+
+        Example:
+            host_manager.remove_agent('my_host', 'my_agent_id')
+        """
+        token = self.get_api_token(self.get_master())
+        agents_ids = self.get_agents_ids()
+        result = self.make_api_call(
+            host=self.get_master(),
+            method='DELETE',
+            endpoint=f'/agents?agents_list={",".join(agents_ids)}&status=all&older_than=0s',
+            token=token,
+        )
+
 
 
 def clean_environment(host_manager, target_files):
