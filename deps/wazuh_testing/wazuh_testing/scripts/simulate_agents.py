@@ -1,14 +1,15 @@
 import argparse
 import logging
 import os
+import wazuh_testing.tools.agent_simulator as ag
+
 from multiprocessing import Process
 from time import sleep
-
-import wazuh_testing.tools.agent_simulator as ag
+from wazuh_testing.modules.syscollector import SYSCOLLECTOR_DELTA_EVENT_TYPES
 from wazuh_testing import TCP
 
-logging.basicConfig(level=logging.INFO)
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(f"P{os.getpid()}")
 
 
@@ -51,6 +52,14 @@ def process_script_parameters(args):
     if not args.version.startswith('v'):
         args.version = 'v' + args.version
 
+    if args.syscollector_event_types:
+        args.syscollector_event_types = args.syscollector_event_types.split(' ')
+        if any(event_type not in SYSCOLLECTOR_DELTA_EVENT_TYPES for event_type in args.syscollector_event_types):
+            raise ValueError(f'Invalid syscollector event type. Valid values are: {SYSCOLLECTOR_DELTA_EVENT_TYPES}')
+
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+
 
 def set_agent_modules_and_eps(agent, active_modules, modules_eps):
     """Set active modules and EPS to an agent.
@@ -86,6 +95,26 @@ def set_agent_modules_and_eps(agent, active_modules, modules_eps):
     logger.info(agent.modules)
 
 
+def create_agent(args, custom_labels):
+    agent_args = {
+        'manager_address': args.manager_address,
+        'os': args.os,
+        'registration_address': args.manager_registration_address,
+        'version': args.version,
+        'fixed_message_size': args.fixed_message_size,
+        'labels': custom_labels,
+        'logcollector_msg_number': args.enable_logcollector_message_number,
+        'custom_logcollector_message': args.custom_logcollector_message,
+        'syscollector_frequency': args.syscollector_frequency,
+        'syscollector_event_types': args.syscollector_event_types,
+        'syscollector_legacy_messages': args.syscollector_legacy_messages
+    }
+
+    agent = ag.Agent(**agent_args)
+
+    return agent
+
+
 def create_agents(args):
     """Create a list of agents according to script parameters like the mode, EPS...
     Args:
@@ -110,21 +139,14 @@ def create_agents(args):
         logger.info(f"Agents-EPS distributon = {distribution_list}")
 
         for item in distribution_list:  # item[0] = modules - item[1] = eps
-            agent = ag.Agent(manager_address=args.manager_address, os=args.os,
-                             registration_address=args.manager_registration_address,
-                             version=args.version, fixed_message_size=args.fixed_message_size, labels=custom_labels,
-                             logcollector_msg_number=args.enable_logcollector_message_number,
-                             custom_logcollector_message=args.custom_logcollector_message)
+            agent = create_agent(args, custom_labels)
             set_agent_modules_and_eps(agent, item[0].split(' ') + ['keepalive', 'receive_messages'],
                                       item[1].split(' ') + ['0', '0'])
             agents.append(agent)
     else:
         for _ in range(args.agents_number):
-            agent = ag.Agent(manager_address=args.manager_address, os=args.os,
-                             registration_address=args.manager_registration_address,
-                             version=args.version, fixed_message_size=args.fixed_message_size, labels=custom_labels,
-                             logcollector_msg_number=args.enable_logcollector_message_number,
-                             custom_logcollector_message=args.custom_logcollector_message)
+            agent = create_agent(args, custom_labels)
+
             set_agent_modules_and_eps(agent, args.modules, args.modules_eps)
             agents.append(agent)
 
@@ -330,6 +352,13 @@ def main():
                             help='Disable keepalive module',
                             required=False, default=False, dest='disable_keepalive')
 
+    arg_parser.add_argument('--debug',
+                            help='Enable debug mode',
+                            required=False,
+                            action='store_true',
+                            default=False,
+                            dest='debug')
+
     arg_parser.add_argument('-d', '--disable-receive', metavar='<disable_receive>', type=bool,
                             help='Disable receive message module',
                             required=False, default=False, dest='disable_receive')
@@ -343,6 +372,31 @@ def main():
                             metavar='<custom_logcollector_message>', type=str,
                             help='Custom logcollector message',
                             required=False, default='', dest='custom_logcollector_message')
+
+    arg_parser.add_argument('--syscollector-frequency',
+                            metavar='<syscollector_frequency>',
+                            type=int,
+                            help='Frequency of Syscollector scans. Set to 1 for constant message sending.',
+                            required=False,
+                            default=60,
+                            dest='syscollector_frequency')
+
+    arg_parser.add_argument('--syscollector-event-types',
+                            metavar='<syscollector_event_types>',
+                            type=str,
+                            help='''Space-separated list of event types for syscollector messages.
+                            Default is "packages". Available types are "packages", "processes", "ports",
+                            "network", "hotfix", "hwinfo", "osinfo"''',
+                            required=False,
+                            default='packages',
+                            dest='syscollector_event_types')
+
+    arg_parser.add_argument('--syscollector-legacy-messages',
+                            help='Enable prior 4.2 agents syscollector format. Default is False.',
+                            required=False,
+                            action='store_true',
+                            default=False,
+                            dest='syscollector_legacy_messages')
 
     args = arg_parser.parse_args()
 
