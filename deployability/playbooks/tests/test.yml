@@ -2,6 +2,6 @@
   become: true
   tasks:
     - name: Test {{ test }} for {{ component }}
-      command: "pytest test_{{component}}/test_{{ test }}.py  -vs --wazuh_version={{ wazuh_version }} --component={{ component }}"
+      command: "pytest test_{{component}}/test_{{ test }}.py  -v --wazuh_version={{ wazuh_version }} --component={{ component }}"
       args:
         chdir: "{{ working_dir }}"
