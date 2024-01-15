@@ -18,7 +18,8 @@ from distutils.version import LooseVersion
 from .utils import read_json_file
 
 OSSEC_PATH = '/var/ossec'
-CHECK_FILES_DATA_PATH = 'check_files_data.json'
+ALL_FILES_DATA = Path(__file__).parent / 'data' / 'check_files_data.json'
+FILES_TO_CHECK = Path(__file__).parent / 'data' / 'check_files_templates.json'
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -42,53 +43,55 @@ CHECK_FILES_DATA_PATH = 'check_files_data.json'
 
 
 def mode_to_str(mode: int) -> str:
-    # Define permission characters
-    permissions = ['---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx']
+    # # Define permission characters
+    # permissions = ['---', '--x', '-w-', '-wx', 'r--', 'r-x', 'rw-', 'rwx']
 
-    # Extract permission bits
-    user = permissions[(mode >> 6) & 0b111]
-    group = permissions[(mode >> 3) & 0b111]
-    others = permissions[mode & 0b111]
+    # # Extract permission bits
+    # user = permissions[(mode >> 6) & 0b111]
+    # group = permissions[(mode >> 3) & 0b111]
+    # others = permissions[mode & 0b111]
+    # # Sacar class, mode, type
+    # # Check for directory and sticky bit
+    # # file_type = 'd' if mode & stat.S_IFDIR else '-' # Esta poniendo d a archivos
+    # sticky_bit = 'T' if mode & 0o1000 and others[2] == '-' else others[2]
 
-    # Combine permission bits
-    return f'-{user}{group}{others}'
+    # # Combine permission bits
+    # return f'{user}{group}{others[:2]}{sticky_bit}'
 
 # def mode_to_str(mode):
-#     _filemode_table = (
-#         ((stat.S_IFLNK, "l"),
-#         (stat.S_IFREG, "-"),
-#         (stat.S_IFBLK, "b"),
-#         (stat.S_IFDIR, "d"),
-#         (stat.S_IFCHR, "c"),
-#         (stat.S_IFIFO, "p")),
+    _filemode_table = (((stat.S_IFLNK, "l"),
+        (stat.S_IFREG, "-"),
+        (stat.S_IFBLK, "b"),
+        (stat.S_IFDIR, "d"),
+        (stat.S_IFCHR, "c"),
+        (stat.S_IFIFO, "p")),
 
-#         ((stat.S_IRUSR, "r"),),
-#         ((stat.S_IWUSR, "w"),),
-#         ((stat.S_IXUSR | stat.S_ISUID, "s"),
-#         (stat.S_ISUID, "S"),
-#         (stat.S_IXUSR, "x")),
+        ((stat.S_IRUSR, "r"),),
+        ((stat.S_IWUSR, "w"),),
+        ((stat.S_IXUSR | stat.S_ISUID, "s"),
+        (stat.S_ISUID, "S"),
+        (stat.S_IXUSR, "x")),
 
-#         ((stat.S_IRGRP, "r"),),
-#         ((stat.S_IWGRP, "w"),),
-#         ((stat.S_IXGRP | stat.S_ISGID, "s"),
-#         (stat.S_ISGID, "S"),
-#         (stat.S_IXGRP, "x")),
+        ((stat.S_IRGRP, "r"),),
+        ((stat.S_IWGRP, "w"),),
+        ((stat.S_IXGRP | stat.S_ISGID, "s"),
+        (stat.S_ISGID, "S"),
+        (stat.S_IXGRP, "x")),
 
-#         ((stat.S_IROTH, "r"),),
-#         ((stat.S_IWOTH, "w"),),
-#         ((stat.S_IXOTH | stat.S_ISVTX, "t"),
-#         (stat.S_ISVTX, "T"),
-#         (stat.S_IXOTH, "x"))
-#     )
-#     perm = []
-#     for table in _filemode_table:
-#         for bit, char in table:
-#             if mode & bit == bit:
-#                 perm.append(char)
-#                 break
-#         else:
-#             perm.append("-")
-#     return "".join(perm)
+        ((stat.S_IROTH, "r"),),
+        ((stat.S_IWOTH, "w"),),
+        ((stat.S_IXOTH | stat.S_ISVTX, "t"),
+        (stat.S_ISVTX, "T"),
+        (stat.S_IXOTH, "x")))
+    perm = []
+    for table in _filemode_table:
+        for bit, char in table:
+            if mode & bit == bit:
+                perm.append(char)
+                break
+        else:
+            perm.append("-")
+    return "".join(perm)
 
 # ---------------------------------------------------------------------------------------------------------------
 
@@ -126,10 +129,10 @@ def get_data(path: str | Path) -> dict:
     if str(path) == f'{OSSEC_PATH}/api/configuration/auth/htpasswd':
         return {u'group': u'root',
                 u'target': u'/var/ossec/api/node_modules/htpasswd/bin/htpasswd',
+                u'mode': u'0777',
                 u'prot': u'lrwxrwxrwx',
-                u'user': u'root',
                 u'type': u'link',
-                u'mode': u'0777'}
+                u'user': u'root'}
 
     stat_info = os.stat(path)
 
@@ -142,8 +145,8 @@ def get_data(path: str | Path) -> dict:
     if len(mode) > 4:
         mode = mode[-4:]
 
-    return {'group': group, 'mode': mode, 'type': type, 'user': user, 'prot': prot}
-
+    return {'group': group, 'mode': mode, 'prot': prot, 'type': type, 'user': user}
+# {'group': 'ossec', 'mode': '0770', 'prot': 'drwxrwx---', 'type': 'directory', 'user': 'root'}
 
 # def get_data(path: str | Path):
 #     # Get stat information of the file or directory
@@ -274,33 +277,12 @@ def get_version_template_data(version: str, json_data: dict) -> list | dict:
 """
 
 
-def read_template_items(check_files_template_path, version, target):
+def read_template_items(component: str, version: str = 'last'):
+    all_files = read_json_file(ALL_FILES_DATA)['data']
+    to_check = read_json_file(FILES_TO_CHECK)[component][version]
+    items = {i['name']: i['description'] for i in all_files if i['id'] in to_check}
 
-    json_data = read_json_file(check_files_template_path)[target]
-
-    output_dict = {}
-
-    # Get list id: data[1,20,32,45,51,....]
-    list_id = get_version_template_data(version, json_data)
-
-    json_data_list = read_json_file(CHECK_FILES_DATA_PATH)['data']
-
-    # Get the information (map) from the database associated with the id
-    data_dict = {item['id']: item for item in json_data_list}
-
-    for id_item in list_id:
-        data_item = data_dict.get(id_item)
-        if data_item:
-            output_dict[data_item['name']] = data_item['description']
-            break
-
-    # for id_item in list_id:
-    #     for data_item in json_data_list:
-    #         if id_item == data_item['id']:
-    #             output_dict[data_item['name']] = data_item['description']
-    #             break
-
-    return output_dict
+    return items
 
 # ---------------------------------------------------------------------------------------------------------------
 
@@ -357,18 +339,19 @@ def read_exception_data(version: str, target: str, json_path: str | Path = 'chec
 
 def get_current_items(ossec_path='/var/ossec', ignore_names=[]):
 
-    c_items = {}
+    ignore_names = set(ignore_names)
+    current_items = {}
 
-    for (dirpath, _, filenames) in os.walk(ossec_path, followlinks=False):
-        if dirpath not in ignored_names:
-            c_items[dirpath] = get_data(dirpath)
+    for dirpath, _, filenames in os.walk(ossec_path, followlinks=False):
+        if not dirpath in ignore_names:
+            current_items[dirpath] = get_data(dirpath)
 
-            for filename in filenames:
-                file_path = "{0}/{1}".format(dirpath, filename)
-                if not file_path.endswith('.pyc') and not file_path in ignore_names:
-                    c_items[file_path] = get_data(file_path)
+            for filename in (f for f in filenames if not f.endswith('.pyc')):
+                file_path = str(Path(dirpath, filename))
+                if not file_path in ignore_names:
+                    current_items[file_path] = get_data(file_path)
 
-    return c_items
+    return current_items
     ignore_names = set(ignore_names)
     c_items = {}
 
@@ -421,23 +404,20 @@ def get_current_items(ossec_path='/var/ossec', ignore_names=[]):
 """
 
 
-def get_template_items(template_path: str, version: str, target: str, exceptions: list = None) -> tuple[dict, dict]:
+def get_template_items(component: str, exceptions: list = None, wazuh_path: str | Path = None) -> tuple[dict, dict]:
 
     template_static = {}
     template_dynamic = {}
 
-    data = read_template_items(template_path, version, target)
+    data = read_template_items(component)
 
     if exceptions:
         [data.pop(item, None) for item in exceptions]
 
-    data = {k.replace('/var/ossec', OSSEC_PATH): v for k, v in data.items()}
+    if wazuh_path:
+        data = {k.replace('/var/ossec', str(wazuh_path)): v for k, v in data.items()}
 
     for item, value in data.items():
-        # if not "/var/ossec" in OSSEC_PATH:
-        #     item = item.replace('/var/ossec', OSSEC_PATH)
-        #     data = {k.replace('/var/ossec', OSSEC_PATH)
-        #                       : v for k, v in data.items()}
         new_item = dict(value)
         class_item = new_item.pop('class')
 
@@ -445,7 +425,6 @@ def get_template_items(template_path: str, version: str, target: str, exceptions
             template_static[item] = new_item
         elif class_item == 'dynamic':
             new_paths = glob.glob(item.replace("!(local)", "*"))
-
             for new_path in new_paths:
                 if "diff/local/" not in new_path and not new_path.endswith('diff/local'):
                     template_dynamic[new_path] = new_item
@@ -467,21 +446,17 @@ def get_template_items(template_path: str, version: str, target: str, exceptions
 """
 
 
-def cut_items(items: dict, ignore_keys: list) -> tuple[dict, list]:
+def cut_items(items: dict, ignore_keys: list = []) -> tuple[dict, list]:
+    # Always ignore node_modules/
+    ignore_keys.append('/var/ossec/api/node_modules')
+    ignore_keys.append('/var/ossec/framework/python')
 
     ignore_keys = set(key.strip().lower() for key in ignore_keys)
-    ignored = [k for k in items if any(key in k.lower() for key in ignore_keys)]
-    new_items = {k: v for k, v in items.items() if k not in ignored}
+    # Get all the files that matches the ignore_keys
+    ignore_files = [k for k in items if any(i in k.lower() for i in ignore_keys)]
+    new_items = {k: v for k, v in items.items() if k not in ignore_files}
 
-    # new_items = dict(items)
-    # ignored = []
-    # for k in items:
-    #     for key in ignore_keys:
-    #         if key.strip().lower() in k.lower():
-    #             ignored.append(k)
-    #             del new_items[k]
-
-    return new_items, ignored
+    return new_items, ignore_files
 
 
 if __name__ == "__main__":
