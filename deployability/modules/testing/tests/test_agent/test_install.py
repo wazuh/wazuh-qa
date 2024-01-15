@@ -48,14 +48,7 @@ def test_files_permissions():
             different_names.append(check_extra_name)
             different_items[check_extra_name] = dynamic_items[check_extra_name]
 
-    # print("Missing files/directories:" + str(missing_names))
-    # print("Extra files/directories:" + str(extra_names))
-    for different_name in different_names:
-        print('\nDifferent file:', different_name)
-        print('Actual file:', current_items[different_name])
-        print('Expected file:', different_items[different_name])
-    # print("Different files/directories:" + str(different_items))
-
+    assert not different_names
 
 
 # The test receives the environment with wazuh-agent installed and started.

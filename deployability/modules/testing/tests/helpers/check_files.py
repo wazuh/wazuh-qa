@@ -50,17 +50,16 @@ def mode_to_str(mode: int) -> str:
     # user = permissions[(mode >> 6) & 0b111]
     # group = permissions[(mode >> 3) & 0b111]
     # others = permissions[mode & 0b111]
-
+    # # Sacar class, mode, type
     # # Check for directory and sticky bit
-    # file_type = 'd' if mode & stat.S_IFDIR == stat.S_IFDIR else '-'
+    # # file_type = 'd' if mode & stat.S_IFDIR else '-' # Esta poniendo d a archivos
     # sticky_bit = 'T' if mode & 0o1000 and others[2] == '-' else others[2]
 
     # # Combine permission bits
-    # return f'{file_type}{user}{group}{others[:2]}{sticky_bit}'
+    # return f'{user}{group}{others[:2]}{sticky_bit}'
 
 # def mode_to_str(mode):
-    _filemode_table = (
-        ((stat.S_IFLNK, "l"),
+    _filemode_table = (((stat.S_IFLNK, "l"),
         (stat.S_IFREG, "-"),
         (stat.S_IFBLK, "b"),
         (stat.S_IFDIR, "d"),
@@ -83,8 +82,7 @@ def mode_to_str(mode: int) -> str:
         ((stat.S_IWOTH, "w"),),
         ((stat.S_IXOTH | stat.S_ISVTX, "t"),
         (stat.S_ISVTX, "T"),
-        (stat.S_IXOTH, "x"))
-    )
+        (stat.S_IXOTH, "x")))
     perm = []
     for table in _filemode_table:
         for bit, char in table:
