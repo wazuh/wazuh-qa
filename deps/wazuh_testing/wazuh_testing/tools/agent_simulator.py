@@ -910,7 +910,6 @@ class GeneratorSyscollector:
             message_data = syscollector.SYSCOLLECTOR_HOTFIX_DELTA_DATA_TEMPLATE
 
         if message_type == 'packages':
-            print("PACKAGEEEEEEEEEEEES")
             package_data, operation = self.get_package_data()
             message_operation = operation
 
