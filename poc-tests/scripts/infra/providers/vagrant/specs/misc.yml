@@ -1,8 +1,0 @@
-- default:
-    key:
-      type: dynamic
-      name: ${uuid}
-    instance-name:
-      format: ${uuid}
-    tags:
-      type: qa
