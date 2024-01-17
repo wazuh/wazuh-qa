@@ -6,7 +6,7 @@ from typing import Literal
 class ExtraVars(BaseModel):
     """Extra vars for testing module."""
     component: Literal['manager', 'agent']
-    dependency: str | None = None
+    dependency_ip: str | None = None
     wazuh_version: str
     wazuh_revision: str
     wazuh_branch: str | None = None

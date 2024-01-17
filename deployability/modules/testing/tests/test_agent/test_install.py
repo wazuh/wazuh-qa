@@ -50,7 +50,6 @@ def test_files_permissions():
 
     assert not different_names
 
-
 # The test receives the environment with wazuh-agent installed and started.
 
 def test_wazuh_user():

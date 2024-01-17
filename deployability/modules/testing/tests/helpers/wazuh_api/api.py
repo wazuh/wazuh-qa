@@ -8,10 +8,10 @@ from . import endpoints
 class WazuhAPI:
 
     def __init__(self, user: str, password: str, host: str = 'localhost', port: int = 55000) -> None:
-        self.host = host
-        self.port = port
         self.user = user
         self.password = password
+        self.host = host
+        self.port = port
         # Token default values
         self.token = None
         self.token_lifetime = 900
@@ -46,15 +46,15 @@ class WazuhAPI:
         payload = {'name': name, 'ip': ip}
         return self._send_request('post', endpoint, payload=payload)
 
+    def get_agent(self, agent_id: str) -> dict:
+        endpoint = self._get_complete_url(endpoints.AGENTS)
+        params = {'agents_list': [agent_id]}
+        return self._send_request('get', endpoint, query_params=params)
+
     def get_agents(self, agents_ids: list[str],  **kwargs: dict) -> dict:
         endpoint = self._get_complete_url(endpoints.AGENTS)
         params = {**kwargs, 'agents_list': agents_ids}
         return self._send_request('get', endpoint, query_params=kwargs)
-
-    def get_agent(self, agent_id: str) -> dict:
-        endpoint = self._get_complete_url(f'{endpoints.AGENTS}')
-        params = {'agents_list': [agent_id]}
-        return self._send_request('get', endpoint, query_params=params)
 
     def delete_agent(self, agent_id: str) -> dict:
         endpoint = self._get_complete_url(endpoints.AGENTS)
