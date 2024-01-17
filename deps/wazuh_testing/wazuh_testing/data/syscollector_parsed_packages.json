@@ -2,6 +2,116 @@
     {
         "vendor": "bsdi",
         "product": "bsd_os",
-        "version": "3.1",
+        "version": "3.1"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "1.0"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "1.1"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "1.1.5.1"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "1.2"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "2.0"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "2.0.1"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "2.0.5"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "2.1.5"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "2.1.6"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "2.1.6.1"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "2.1.7"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "2.1.7.1"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "2.2"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "2.2.2"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "2.2.3"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "2.2.4"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "2.2.5"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "2.2.6"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "2.2.8"
+    },
+    {
+        "vendor": "freebsd",
+        "product": "freebsd",
+        "version": "3.0"
+    },
+    {
+        "vendor": "openbsd",
+        "product": "openbsd",
+        "version": "2.3"
+    },
+    {
+        "vendor": "openbsd",
+        "product": "openbsd",
+        "version": "2.4"
     }
 ]
