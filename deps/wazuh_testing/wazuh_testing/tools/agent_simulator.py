@@ -775,18 +775,7 @@ class GeneratorSyscollector:
         }
         self.syscollector_packages_vuln_content = syscollector_packages_vuln_content
 
-        self.packages = [
-            {
-                'installed': False,
-                'description': 'A low-level cryptographic library',
-                'architecture': 'x86_64',
-                'format': 'rpm',
-                'name': 'nettle',
-                'source': 'vim',
-                'vendor': 'Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>',
-                'version': '2.7.1-9.el7_9'
-                }
-        ]
+        self.packages = []
 
         self.old_format = old_format
         self.agent_name = agent_name
@@ -794,16 +783,23 @@ class GeneratorSyscollector:
         self.syscollector_tag = 'syscollector'
         self.syscollector_mq = 'd'
         self.current_id = 1
-        self.default_packages_vuln_content = os.path.join(_data_path, 'syscollector_parsed_packages.json')
 
+        self.default_packages_vuln_content = os.path.join(_data_path, 'syscollector_parsed_packages.json')
         self.package_index = 0
 
         if self.syscollector_packages_vuln_content:
-            self.packages = self.init_package_data(self.syscollector_packages_vuln_content)
+            self.packages = self.init_package_list(self.syscollector_packages_vuln_content)
         else:
-            self.packages = self.init_package_data(self.default_packages_vuln_content)
+            self.packages = self.init_package_list(self.default_packages_vuln_content)
 
     def parse_package_template(self, message, package_data):
+        """Parse package template with package data.
+        Args:
+            message (str): Syscollector event message.
+            package_data (dict): Package data.
+        Returns:
+            str: Parsed syscollector event message.
+        """
         template_package_fields = {
                 '<package_description>': package_data['description'],
                 '<package_architecture>': package_data['architecture'],
@@ -821,16 +817,20 @@ class GeneratorSyscollector:
         return message
 
     def get_package_data(self):
+        """Get package data.
+        Returns:
+            dict: Package data.
+            str: Operation (INSERTED or DELETED).
+        """
+
         operation = 'INSERTED' if not self.packages[self.package_index]['installed'] else 'DELETED'
-        print(f"Current package operation: {operation}")
 
         package_data = self.packages[self.package_index]
-
         self.package_index = (self.package_index + 1) % len(self.packages)
 
         return package_data, operation
 
-    def init_package_data(self, packages_file):
+    def init_package_list(self, packages_file):
         """Get package data from a json file.
         Returns:
             dict: Package data.
@@ -921,7 +921,6 @@ class GeneratorSyscollector:
 
         if message_type == 'packages':
             message = self.parse_package_template(message, package_data)
-            print(f"Current package index: {self.package_index}")
             self.packages[self.package_index]['installed'] = not self.packages[self.package_index]['installed']
 
         return message

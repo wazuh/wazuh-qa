@@ -6,11 +6,10 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("parse_packages_content.py")
 
-config = None
-
 
 def parse_packages_content(output_file, packages_file, n_packages):
     list_packages = []
+    config = None
 
     with open(packages_file) as f:
         for line in f:
@@ -55,10 +54,11 @@ def main():
     arg_parser.add_argument('-n', '--n_packages', metavar='<n_packages>', type=int, required=True,
                             help='Number of packages to parse', dest='n_packages')
 
-    arg_parser.add_argument('-d', '--debug', action='store_true', help='Enable debug mode', dest='debug')
-
     arg_parser.add_argument('-o', '--output', metavar='<output_file>', type=str, required=True,
                             help='Output file', dest='output_file')
+
+    arg_parser.add_argument('-d', '--debug', action='store_true', help='Enable debug mode', dest='debug')
+
 
     args = arg_parser.parse_args()
 
