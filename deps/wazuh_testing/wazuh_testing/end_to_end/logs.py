@@ -38,3 +38,12 @@ def truncate_remote_host_group_files(host_manager: HostManager, host_group: str,
             log_file_path = ALERTS_JSON_PATH
 
         host_manager.truncate_file(host, log_file_path)
+
+
+def get_hosts_logs(host_manager: HostManager, host_group: str = 'all') -> dict:
+    host_logs = {}
+    for host in host_manager.get_group_hosts(host_group):
+        host_os_name = host_manager.get_host_variables(host)['os_name']
+        host_logs[host] = host_manager.get_file_content(host, logs_filepath_os[host_os_name])
+
+    return host_logs

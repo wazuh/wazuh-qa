@@ -36,7 +36,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
         host_manager: An instance of the HostManager class containing information about hosts.
         monitoring_data: A dictionary containing monitoring data for each host.
     """
-    def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict], scan_interval: int = 5,
+    def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict], scan_interval: int = 20,
                          ignore_error=False):
         """
         Monitor the specified elements on a host.
@@ -50,15 +50,21 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
             TimeoutError: If no match is found within the specified timeout.
         """
         elements_not_found = []
+        elements_found = []
 
         for element in monitoring_elements:
-            regex, timeout, monitoring_file = element['regex'], element['timeout'], element['file']
+            regex, timeout, monitoring_file, n_iterations = element['regex'], element['timeout'], element['file'], \
+                                                            element['n_iterations']
             current_timeout = 0
             regex_match = None
+
             while current_timeout < timeout:
                 file_content = host_manager.get_file_content(host, monitoring_file)
-                regex_match = re.search(regex, file_content)
-                if regex_match:
+
+                match_regex = re.findall(regex, file_content)
+                if match_regex and len(list(match_regex)) >= n_iterations:
+                    elements_found = list(match_regex)
+                    regex_match = True
                     break
 
                 sleep(scan_interval)
@@ -70,10 +76,16 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
                 if not ignore_error:
                     raise TimeoutError(f"Element not found: {element}")
 
-        host_elements_not_found = {}
-        host_elements_not_found[host] = elements_not_found
+        monitoring_result = {}
 
-        return host_elements_not_found
+        if host not in monitoring_result:
+            monitoring_result[host] = {}
+
+        monitoring_result[host]['not_found'] = elements_not_found
+
+        monitoring_result[host]['found'] = elements_found
+
+        return monitoring_result
 
     with ThreadPoolExecutor() as executor:
         futures = []
@@ -91,7 +103,8 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
         return results
 
 
-def generate_monitoring_logs_all_agent(host_manager: HostManager, regex_list: list, timeout_list: list) -> dict:
+def generate_monitoring_logs(host_manager: HostManager, regex_list: list, timeout_list: list, hosts: list,
+                             n_iterations=1) -> dict:
     """
     Generate monitoring data for logs on all agent hosts.
 
@@ -104,19 +117,21 @@ def generate_monitoring_logs_all_agent(host_manager: HostManager, regex_list: li
         dict: Monitoring data for logs on all agent hosts.
     """
     monitoring_data = {}
-    for agent in host_manager.get_group_hosts('agent'):
+    for agent in hosts:
         monitoring_data[agent] = []
         for index, regex_index in enumerate(regex_list):
             os_name = host_manager.get_host_variables(agent)['os_name']
             monitoring_data[agent].append({
                 'regex': regex_index,
                 'file': logs_filepath_os[os_name],
-                'timeout': timeout_list[index]
+                'timeout': timeout_list[index],
+                'n_iterations': n_iterations
             })
     return monitoring_data
 
 
-def generate_monitoring_logs_manager(host_manager: HostManager, manager: str, regex: str, timeout: int) -> dict:
+def generate_monitoring_logs_manager(host_manager: HostManager, manager: str, regex: str, timeout: int,
+                                     n_iterations: int = 1) -> dict:
     """
     Generate monitoring data for logs on a specific manager host.
 
@@ -134,8 +149,10 @@ def generate_monitoring_logs_manager(host_manager: HostManager, manager: str, re
     monitoring_data[manager] = [{
         'regex': regex,
         'file': logs_filepath_os[os_name],
-        'timeout': timeout
+        'timeout': timeout,
+        'n_iterations': n_iterations
     }]
+
     return monitoring_data
 
 
@@ -165,6 +182,7 @@ def generate_monitoring_alerts_all_agent(host_manager: HostManager, events_metad
                 'regex': get_event_regex(event),
                 'file': '/var/ossec/logs/alerts/alerts.json',
                 'timeout': 120,
+                'n_iterations': 1
             }
             if 'parameters' in metadata_agent:
                 monitoring_element['parameters'] = metadata_agent['parameters']

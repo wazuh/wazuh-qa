@@ -22,10 +22,10 @@ from typing import Dict
 
 REGEX_PATTERNS = {
     'syscollector_scan_start': {
-        'regex': '.*INFO: Starting evaluation.'
+        'regex': r'(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}) .*? INFO: Starting evaluation'
     },
     'syscollector_scan_end': {
-        'regex': '.*INFO: Evaluation finished.'
+        'regex': r'(\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}) .*? INFO: Evaluation finished'
     },
     'syscollector_install_package_alert_yum': {
         'regex': '.*installed.*agent".*"name":"(\\S+)".*Installed: (\\S+).*?(\\S+)',

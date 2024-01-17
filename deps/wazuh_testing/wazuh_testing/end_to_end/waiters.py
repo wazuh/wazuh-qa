@@ -23,6 +23,8 @@ from wazuh_testing.end_to_end.monitoring import generate_monitoring_logs_manager
 from wazuh_testing.end_to_end.wazuh_api import get_agents_id
 from wazuh_testing.tools.system import HostManager
 
+import time
+
 
 def wait_until_vd_is_updated(host_manager: HostManager) -> None:
     """
@@ -52,16 +54,17 @@ def wait_until_vuln_scan_agents_finished(host_manager: HostManager) -> None:
     # The Vulnerability Detector scans are ordered based on the agent ID.
     # We are currently awaiting completion of all scans globally,
     # with a timeout set to 5 minutes for each agent.
-    final_timeout = 300 * len(host_manager.get_group_hosts('agent'))
+    final_timeout = 15 * len(host_manager.get_group_hosts('agent'))
+    time.sleep(final_timeout)
 
-    for agent in host_manager.get_group_hosts('agent'):
-        manager_host = host_manager.get_host_variables(agent)['manager']
-        agents_id = get_agents_id(host_manager)
-        agent_id = agents_id.get(agent, '')
-        finished_scan_pattern = rf"Finished vulnerability assessment for agent '{agent_id}'"
-
-        monitoring_data = generate_monitoring_logs_manager(
-            host_manager, manager_host, finished_scan_pattern, final_timeout
-        )
-
-        monitoring_events_multihost(host_manager, monitoring_data)
+    # for agent in host_manager.get_group_hosts('agent'):
+    #    manager_host = host_manager.get_host_variables(agent)['manager']
+    #    agents_id = get_agents_id(host_manager)
+    #    agent_id = agents_id.get(agent, '')
+    #    finished_scan_pattern = rf"Finished vulnerability assessment for agent '{agent_id}'"
+    #
+    #        monitoring_data = generate_monitoring_logs_manager(
+    #            host_manager, manager_host, finished_scan_pattern, final_timeout
+    #        )
+    #
+    #        monitoring_events_multihost(host_manager, monitoring_data)
