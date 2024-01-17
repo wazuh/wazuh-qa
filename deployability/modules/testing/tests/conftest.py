@@ -1,8 +1,6 @@
-import os
-
 import pytest
 
-from deployability.modules.testing.tests.helpers.wazuh_api.api import WazuhAPI
+from .helpers.wazuh_api.api import WazuhAPI
 
 
 def pytest_addoption(parser):
@@ -43,4 +41,5 @@ def wazuh_api_client(dependency_ip: str | None) -> WazuhAPI:
     user = 'wazuh'
     password = 'wazuh'
     host = dependency_ip if dependency_ip else 'localhost'
+    print(host)
     return WazuhAPI(user, password, host)

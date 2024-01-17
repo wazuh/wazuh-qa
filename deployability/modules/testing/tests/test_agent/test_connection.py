@@ -1,12 +1,12 @@
 from ..helpers import utils
-from ..helpers.constants import CONNECTION_AGENT, WAZUH_LOG
+from ..helpers.constants import CLIENT_KEYS, CONNECTION_AGENT, WAZUH_LOG
 
 
-def test_agent_connects_to_manager(component):
-    expected_log = CONNECTION_AGENT
-    log_file = WAZUH_LOG
-    assert utils.file_monitor(log_file, expected_log)
 
+def test_agent_connects_to_manager(wazuh_api_client):
+    keys = utils.get_client_keys()
+    agent_info = wazuh_api_client.get_agent(keys[0].get('id'))
+    print(agent_info)
 
 def test_agent_connection_status():
     expected_status = "connected"

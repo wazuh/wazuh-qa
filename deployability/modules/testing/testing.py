@@ -29,8 +29,8 @@ class Tester:
             return ExtraVars(**payload.model_dump())
 
         dep_inventory = Inventory(**Utils.load_from_yaml(payload.dependency))
-        dep_ip = dep_inventory.ansible_host
-        return ExtraVars(**payload.model_dump(exclude={'dependency'}), dependency_ip=dep_ip)
+        extra_vars = {**payload.model_dump(), 'dependency_ip': dep_inventory.ansible_host}
+        return ExtraVars(**extra_vars)
 
     @classmethod
     def _run_tests(cls, test_list: list[str], ansible: Ansible, extra_vars: ExtraVars) -> None:
