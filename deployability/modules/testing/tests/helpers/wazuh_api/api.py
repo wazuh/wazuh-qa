@@ -13,13 +13,13 @@ class WazuhAPI:
         self.password = password
         self.host = host
         self.port = port
-        # Create a requests session and disable the warnings
-        self.session = requests.Session()
-        requests.packages.urllib3.disable_warnings()
         # Token default values
         self.token = None
         self.token_lifetime = 900
         self.token_expiration = None
+        # Create a requests session and disable the warnings
+        self.session = requests.Session()
+        requests.packages.urllib3.disable_warnings()
         # Authenticate and save the token value and expiration
         self.authenticate()
 
@@ -53,21 +53,21 @@ class WazuhAPI:
     def get_agent(self, agent_id: str) -> dict:
         endpoint = self._get_complete_url(endpoints.AGENTS)
         params = {'agents_list': [agent_id]}
-        return self._send_request('get', endpoint, query_params=params)
+        response = self._send_request('get', endpoint, query_params=params)
+        return response[0] if response else {}
 
-    def get_agents(self, agents_ids: list[str],  **kwargs: dict) -> dict:
+    def get_agents(self, **kwargs: dict) -> list[dict]:
         endpoint = self._get_complete_url(endpoints.AGENTS)
-        params = {**kwargs, 'agents_list': agents_ids}
-        return self._send_request('get', endpoint, query_params=params)
+        return self._send_request('get', endpoint, query_params=kwargs)
 
     def delete_agent(self, agent_id: str) -> dict:
         endpoint = self._get_complete_url(endpoints.AGENTS)
         params = {'agents_list': [agent_id], 'status': 'all'}
         return self._send_request('delete', endpoint, query_params=params)
 
-    def delete_agents(self, agents_ids: list, **kwargs: dict) -> dict:
+    def delete_agents(self, agents_list: list, **kwargs: dict) -> dict:
         endpoint = self._get_complete_url(endpoints.AGENTS)
-        params = {**kwargs, 'agents_list': agents_ids}
+        params = {**kwargs, 'agents_list': agents_list}
         return self._send_request('delete', endpoint, query_params=params)
 
     # --- INTERNAL METHODS ---
@@ -86,7 +86,7 @@ class WazuhAPI:
         if response.status_code in responses_errors.keys():
             print(f'Failing request to: {endpoint}\nError: {response.content}')
             raise responses_errors[response.status_code]
-        return response.json()
+        return response.json().get('data', {}).get('affected_items', {})
 
     def _get_complete_url(self, endpoint) -> str:
         if endpoint.startswith('/'):
