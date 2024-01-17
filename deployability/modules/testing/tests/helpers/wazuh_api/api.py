@@ -1,12 +1,13 @@
-from datetime import datetime, timedelta
 import requests
+from datetime import datetime, timedelta
 
-from .exceptions import wazuh_api_exceptions
+from .exceptions import responses_errors
+from . import endpoints
 
 
 class WazuhAPI:
 
-    def __init__(self, user: str, password: str, host: str = 'localhost', port: int = 55000):
+    def __init__(self, user: str, password: str, host: str = 'localhost', port: int = 55000) -> None:
         self.host = host
         self.port = port
         self.user = user
@@ -18,35 +19,69 @@ class WazuhAPI:
         # Authenticate and save the token value and expiration
         self.authenticate()
 
+    # Security
+
     def authenticate(self) -> str:
-        endpoint = self._get_complete_url('security/user/authenticate')
+        endpoint = self._get_complete_url(endpoints.SECURITY_AUTHENTICATE)
         credentials = {'user': self.user, 'password': self.password}
         # _send_request is not used here because of the auth parameter.
         response = requests.post(endpoint, auth=credentials)
-        if response.status_code in wazuh_api_exceptions.keys():
-            raise wazuh_api_exceptions[response.status_code]
+        if response.status_code in responses_errors.keys():
+            print(f'Authentication error: {response.content}')
+            raise responses_errors[response.status_code]
         self.token_expiration = datetime.now() + timedelta(seconds=self.token_lifetime)
         self.token = response.json()['data']['token']
 
     def extend_token_life(self, timeout: int = 99999999) -> dict:
-        endpoint = self._get_complete_url('security/config')
-        data = {"auth_token_exp_timeout": timeout, "rbac_mode": "white"}
-        response = self._send_request('put', endpoint, data=data)
+        endpoint = self._get_complete_url(endpoints.SECURITY_CONFIG)
+        payload = {"auth_token_exp_timeout": timeout, "rbac_mode": "white"}
+        response = self._send_request('put', endpoint, payload=payload)
         self.token_lifetime = timeout
         return response
 
-    def _send_request(self, method: str, endpoint: str, data: dict = None) -> dict:
+    # Agents
+    
+    def add_agent(self, name: str, ip: str) -> dict:
+        endpoint = self._get_complete_url(endpoints.AGENTS)
+        payload = {'name': name, 'ip': ip}
+        return self._send_request('post', endpoint, payload=payload)
+
+    def get_agents(self, agents_ids: list[str],  **kwargs: dict) -> dict:
+        endpoint = self._get_complete_url(endpoints.AGENTS)
+        params = {**kwargs, 'agents_list': agents_ids}
+        return self._send_request('get', endpoint, query_params=kwargs)
+
+    def get_agent(self, agent_id: str) -> dict:
+        endpoint = self._get_complete_url(f'{endpoints.AGENTS}')
+        params = {'agents_list': [agent_id]}
+        return self._send_request('get', endpoint, query_params=params)
+
+    def delete_agent(self, agent_id: str) -> dict:
+        endpoint = self._get_complete_url(endpoints.AGENTS)
+        params = {'agents_list': [agent_id], 'status': 'all'}
+        return self._send_request('delete', endpoint, query_params=params)
+
+    def delete_agents(self, agents_ids: list, **kwargs: dict) -> dict:
+        endpoint = self._get_complete_url(endpoints.AGENTS)
+        params = {**kwargs, 'agents_list': agents_ids}
+        return self._send_request('delete', endpoint, query_params=params)
+
+    # --- INTERNAL METHODS ---
+
+    def _send_request(self, method: str, endpoint: str, payload: dict = None, query_params: dict = {}) -> dict:
         if not self.token:
             self.authenticate()
         elif self.token_expiration <= datetime.now():
             self.authenticate()
         # Set the headers and send the request
         headers = {'Authorization': f'Bearer {self.token}'}
-        response = requests.request(method, endpoint, data=data, headers=headers)
+        query_params['pretty'] = 'true'
+        response = requests.request(
+            method, endpoint, data=payload, headers=headers, params=query_params)
         # Check if the response is an error
-        if response.status_code in wazuh_api_exceptions.keys():
+        if response.status_code in responses_errors.keys():
             print(f'Failing request to: {endpoint}\nError: {response.content}')
-            raise wazuh_api_exceptions[response.status_code]
+            raise responses_errors[response.status_code]
         return response.json()
 
     def _get_complete_url(self, endpoint) -> str:

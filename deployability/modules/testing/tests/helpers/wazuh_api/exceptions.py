@@ -38,7 +38,7 @@ class GatewayTimeout(RequestException):
     """A gateway timeout error occurred."""
 
 
-wazuh_api_exceptions = {
+responses_errors = {
     400: BadRequest,
     401: Unauthorized,
     403: Forbidden,
