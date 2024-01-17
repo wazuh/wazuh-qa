@@ -1,4 +1,5 @@
 import requests
+
 from datetime import datetime, timedelta
 
 from .exceptions import responses_errors
@@ -12,6 +13,9 @@ class WazuhAPI:
         self.password = password
         self.host = host
         self.port = port
+        # Create a requests session and disable the warnings
+        self.session = requests.Session()
+        requests.packages.urllib3.disable_warnings()
         # Token default values
         self.token = None
         self.token_lifetime = 900
@@ -23,9 +27,9 @@ class WazuhAPI:
 
     def authenticate(self) -> str:
         endpoint = self._get_complete_url(endpoints.SECURITY_AUTHENTICATE)
-        credentials = {'user': self.user, 'password': self.password}
+        credentials = (self.user, self.password)
         # _send_request is not used here because of the auth parameter.
-        response = requests.post(endpoint, auth=credentials)
+        response = self.session.get(endpoint, auth=credentials, verify=False)
         if response.status_code in responses_errors.keys():
             print(f'Authentication error: {response.content}')
             raise responses_errors[response.status_code]
@@ -40,7 +44,7 @@ class WazuhAPI:
         return response
 
     # Agents
-    
+
     def add_agent(self, name: str, ip: str) -> dict:
         endpoint = self._get_complete_url(endpoints.AGENTS)
         payload = {'name': name, 'ip': ip}
@@ -54,7 +58,7 @@ class WazuhAPI:
     def get_agents(self, agents_ids: list[str],  **kwargs: dict) -> dict:
         endpoint = self._get_complete_url(endpoints.AGENTS)
         params = {**kwargs, 'agents_list': agents_ids}
-        return self._send_request('get', endpoint, query_params=kwargs)
+        return self._send_request('get', endpoint, query_params=params)
 
     def delete_agent(self, agent_id: str) -> dict:
         endpoint = self._get_complete_url(endpoints.AGENTS)
@@ -76,8 +80,8 @@ class WazuhAPI:
         # Set the headers and send the request
         headers = {'Authorization': f'Bearer {self.token}'}
         query_params['pretty'] = 'true'
-        response = requests.request(
-            method, endpoint, data=payload, headers=headers, params=query_params)
+        response = self.session.request(
+            method, endpoint, data=payload, headers=headers, params=query_params, verify=False)
         # Check if the response is an error
         if response.status_code in responses_errors.keys():
             print(f'Failing request to: {endpoint}\nError: {response.content}')

@@ -3,7 +3,7 @@ import time
 import chardet
 import subprocess
 
-from .constants import AGENTD_STATE, WAZUH_CONTROL, AGENT_CONTROL
+from .constants import AGENTD_STATE, CLIENT_KEYS, WAZUH_CONTROL, AGENT_CONTROL
 
 
 def run_command(binary: str, args: list = None) -> None:
@@ -232,3 +232,18 @@ def check_agent_is_connected(agent_id: str, timeout: int = 60) -> bool:
 def read_json_file(filepath):
     with open(filepath) as f_json:
         return json.load(f_json)
+
+def get_client_keys():
+    clients = []
+    with open(CLIENT_KEYS, 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            _id, name, address, password = line.strip().split()
+            client_info = {
+                "id": _id,
+                "name": name,
+                "address": address,
+                "password": password
+            }
+            clients.append(client_info)
+    return clients
