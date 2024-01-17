@@ -59,7 +59,7 @@ SYSCOLLECTOR_PACKAGE_DELTA_DATA_TEMPLATE = {
         "format": "<package_format>",
         "groups": "editors",
         "install_time": "<timestamp>",
-        "item_id": "<random_string>",
+        "item_id": "<package_item_id>",
         "location": " ",
         "multiarch":  "null",
         "name": "<package_name>",
