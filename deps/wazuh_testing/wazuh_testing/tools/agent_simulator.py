@@ -822,10 +822,11 @@ class GeneratorSyscollector:
             dict: Package data.
             str: Operation (INSERTED or DELETED).
         """
-
-        operation = 'INSERTED' if not self.packages[self.package_index]['installed'] else 'DELETED'
+        operation = 'DELETED' if self.packages[self.package_index]['installed'] else 'INSERTED'
 
         package_data = self.packages[self.package_index]
+
+        self.packages[self.package_index]['installed'] = not self.packages[self.package_index]['installed']
         self.package_index = (self.package_index + 1) % len(self.packages)
 
         return package_data, operation
@@ -920,7 +921,6 @@ class GeneratorSyscollector:
 
         if message_type == 'packages':
             message = self.parse_package_template(message, package_data)
-            self.packages[self.package_index]['installed'] = not self.packages[self.package_index]['installed']
 
         return message
 
