@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Agent Simulator: Syscollector message generation refactoring ([#4868](https://github.com/wazuh/wazuh-qa/pull/4868)) \- (Framework)
 - Migrate Wazuh Ansibles Roles. ([#4642](https://github.com/wazuh/wazuh-qa/pull/4642)) \- (Framework)
 - Add scans environment setup documentation. ([#4444](https://github.com/wazuh/wazuh-qa/pull/4444)) \- (Tests)
 - Add system test for global group hash ([#4015](https://github.com/wazuh/wazuh-qa/pull/4015)) \- (Tests)
