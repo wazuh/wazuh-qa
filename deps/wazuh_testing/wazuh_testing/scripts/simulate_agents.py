@@ -107,7 +107,8 @@ def create_agent(args, custom_labels):
         'custom_logcollector_message': args.custom_logcollector_message,
         'syscollector_frequency': args.syscollector_frequency,
         'syscollector_event_types': args.syscollector_event_types,
-        'syscollector_legacy_messages': args.syscollector_legacy_messages
+        'syscollector_legacy_messages': args.syscollector_legacy_messages,
+        'syscollector_packages_vuln_content': args.syscollector_packages_list_file
     }
 
     agent = ag.Agent(**agent_args)
@@ -397,6 +398,11 @@ def main():
                             action='store_true',
                             default=False,
                             dest='syscollector_legacy_messages')
+
+    arg_parser.add_argument('--syscollector-packages-list-file', metavar='<syscollector_packages_list_file>',
+                            type=str, help='''File containing a list of packages to be sent by syscollector.
+                            One package per line. Default is None.''', required=False, default=None,
+                            dest='syscollector_packages_list_file')
 
     args = arg_parser.parse_args()
 
