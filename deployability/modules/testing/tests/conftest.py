@@ -1,13 +1,13 @@
+import sys
 import pytest
 
 from .helpers.wazuh_api.api import WazuhAPI
 
 
 def pytest_addoption(parser):
-    parser.addoption('--wazuh_version', required=False, help='Wazuh version to test files.')
-    parser.addoption('--wazuh_revision', required=False, help='Wazuh revision to test.')
-    parser.addoption('--system', required=False, help='OS version where wazuh was installed.')
-    parser.addoption('--component', required=False, help='Component to be tested.')
+    parser.addoption('--wazuh_version', help='Wazuh version to test files.')
+    parser.addoption('--wazuh_revision', help='Wazuh revision to test.')
+    parser.addoption('--component', help='Component to be tested.')
     parser.addoption('--dependency_ip', required=False, help='IP of the dependency component.')
 
 
@@ -22,9 +22,8 @@ def wazuh_revision(request) -> str | None:
 
 
 @pytest.fixture(scope='session')
-def system(request) -> str | None:
-    return request.config.getoption('system')
-
+def system() -> str | None:
+    return sys.platform()
 
 @pytest.fixture(scope='session')
 def component(request) -> str | None:
