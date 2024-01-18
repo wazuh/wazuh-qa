@@ -37,7 +37,7 @@ def dependency_ip(request) -> str | None:
 
 
 @pytest.fixture(scope='module')
-def wazuh_api_client(dependency_ip: str | None) -> WazuhAPI:
+def wazuh_api(dependency_ip: str | None) -> WazuhAPI:
     user = 'wazuh'
     password = 'wazuh'
     host = dependency_ip if dependency_ip else 'localhost'
