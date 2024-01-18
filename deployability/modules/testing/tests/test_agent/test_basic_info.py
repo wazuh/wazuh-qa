@@ -13,7 +13,7 @@ def agent_uname(agent_info: dict) -> dict:
     return uname
 
 
-def test_agent_version_on_server(expected_version: str, agent_info: dict) -> None:
+def test_agent_version(expected_version: str, agent_info: dict) -> None:
     actual_version = agent_info.get('version')
     assert expected_version in actual_version, 'Unexpected agent version reported by server.'
 
