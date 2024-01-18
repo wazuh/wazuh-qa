@@ -1,4 +1,3 @@
-import sys
 import pytest
 
 from .helpers.wazuh_api.api import WazuhAPI
@@ -22,10 +21,6 @@ def wazuh_revision(request) -> str | None:
 
 
 @pytest.fixture(scope='session')
-def system() -> str | None:
-    return sys.platform()
-
-@pytest.fixture(scope='session')
 def component(request) -> str | None:
     return request.config.getoption('component')
 
@@ -40,5 +35,5 @@ def wazuh_api(dependency_ip: str | None) -> WazuhAPI:
     user = 'wazuh'
     password = 'wazuh'
     host = dependency_ip if dependency_ip else 'localhost'
-    print(host)
+
     return WazuhAPI(user, password, host)
