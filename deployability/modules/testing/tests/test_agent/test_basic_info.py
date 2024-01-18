@@ -17,8 +17,7 @@ def agent_uname(wazuh_api: WazuhAPI, agent_id: str) -> dict:
     return uname
 
 
-def test_agent_version_on_server(wazuh_api, wazuh_version, agent_id):
-    expected_version = wazuh_version
+def test_agent_version_on_server(expected_version, wazuh_api, agent_id):
     actual_version = wazuh_api.get_agent(agent_id).get('version')
     assert expected_version in actual_version, 'Unexpected agent version reported by server.'
 

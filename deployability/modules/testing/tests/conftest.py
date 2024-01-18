@@ -11,12 +11,12 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture(scope='session')
-def wazuh_version(request) -> str | None:
+def expected_version(request) -> str | None:
     return request.config.getoption('wazuh_version')
 
 
 @pytest.fixture(scope='session')
-def wazuh_revision(request) -> str | None:
+def expected_revision(request) -> str | None:
     return request.config.getoption('wazuh_revision')
 
 
