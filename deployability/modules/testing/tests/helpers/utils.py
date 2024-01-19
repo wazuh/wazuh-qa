@@ -1,8 +1,9 @@
-import json
-import socket
-import time
 import chardet
+import json
+import psutil
+import socket
 import subprocess
+import time
 
 from pathlib import Path
 
@@ -283,3 +284,16 @@ def is_port_in_use(port: int) -> bool:
     sock.close()
 
     return True if result == 0 else False
+
+
+def is_process_alive(process_name: str) -> bool:
+    """
+    Check if a process is running.
+
+    Args:
+        process_name (str): The name of the process to check.
+
+    Returns:
+        bool: True if the process is running, False otherwise.
+    """
+    return process_name in (p.name() for p in psutil.process_iter())

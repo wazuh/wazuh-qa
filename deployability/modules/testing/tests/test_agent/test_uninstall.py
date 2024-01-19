@@ -2,7 +2,7 @@ import grp
 import pwd
 
 
-from ..helpers import constants
+from ..helpers import constants, utils
 
 
 # @pytest.fixture(scope='module', autouse=True)
@@ -22,17 +22,19 @@ def test_wazuh_group():
     assert constants.WAZUH_GROUP not in all_groups, "Wazuh group found."
 
 
-def test_wazuh_configuration_dir():
-    assert not constants.CONFIGURATIONS_DIR.exists(), "Configuration directory found."
+def test_process_not_running():
+    assert not utils.is_process_alive('wazuh'), 'Wazuh process is running.'
 
 
-def test_wazuh_configuration():
-    assert not constants.WAZUH_CONF.exists(), "Configuration file found."
+def test_service_stopped():
+    assert utils.get_service_status() == "inactive", "Service is active."
 
 
-def test_wazuh_binaries_dir():
-    assert not constants.BINARIES_DIR.exists(), "Binaries directory found."
+def test_ports_not_listening():
+    assert not utils.is_port_listening(1514), 'Port 1514 is listening.'
+    assert not utils.is_port_listening(1515), 'Port 1515 is listening.'
 
 
-def test_wazuh_control():
-    assert not constants.WAZUH_CONTROL.exists(), "Wazuh control binary found."
+def test_config_is_maintained():
+    assert constants.WAZUH_CONF.exists(), "Wazuh config file not found."
+    assert constants.LOCAL_INTERNAL_OPTIONS.exists(), "Local internal options file not found."

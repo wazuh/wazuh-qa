@@ -1,7 +1,8 @@
 import pytest
 
 from ..helpers import utils
-from ..helpers.constants import DELETING_RESPONSES, RELEASING_RESOURCES, WAZUH_CONTROL, WAZUH_LOG
+from ..helpers.constants import WAZUH_CONTROL
+
 
 @pytest.fixture(scope='module', autouse=True)
 def stop_wazuh():
@@ -9,15 +10,14 @@ def stop_wazuh():
     utils.run_command('systemctl', ['stop', 'wazuh-agent'])
 
 
-def test_release_resources_shutdown_log_raised():
-    assert utils.file_monitor(
-        WAZUH_LOG, RELEASING_RESOURCES), "Release resources log not found."
+def test_process_not_running():
+    assert not utils.is_process_alive('wazuh'), 'Wazuh process is running.'
 
 
-def test_deleting_responses_shutdown_log_raised():
-    assert utils.file_monitor(
-        WAZUH_LOG, DELETING_RESPONSES), "Deleting responses log not found."
-
-
-def test_service_started():
+def test_service_stopped():
     assert utils.get_service_status() == "inactive", "Service is active."
+
+
+def test_ports_not_listening():
+    assert not utils.is_port_listening(1514), 'Port 1514 is listening.'
+    assert not utils.is_port_listening(1515), 'Port 1515 is listening.'

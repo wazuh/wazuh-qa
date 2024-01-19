@@ -7,6 +7,7 @@ WAZUH_ROOT = Path("/var", "ossec")
 CONFIGURATIONS_DIR = Path(WAZUH_ROOT, "etc")
 WAZUH_CONF = Path(CONFIGURATIONS_DIR, "ossec.conf")
 CLIENT_KEYS = Path(CONFIGURATIONS_DIR, "client.keys")
+LOCAL_INTERNAL_OPTIONS = Path(CONFIGURATIONS_DIR, "local_internal_options.conf")
 # Binaries paths
 BINARIES_DIR = Path(WAZUH_ROOT, "bin")
 WAZUH_CONTROL = Path(BINARIES_DIR, "wazuh-control")
