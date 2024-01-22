@@ -1,5 +1,8 @@
 #   - Wazuh API endpoints
 
+# -- Root --
+API_ROOT = '/'
+
 # -- Security --
 SECURITY = '/security'
 # Users
@@ -16,3 +19,9 @@ GROUPS = '/groups'
 # -- Agents --
 AGENTS = '/agents'
 AGENTS_GROUP = f'{AGENTS}/group'
+
+# -- Manager --
+MANAGER = '/manager'
+MANAGER_STATUS = f'{MANAGER}/status'
+MANAGER_INFO = f'{MANAGER}/info'
+MANAGER_CONFIGURATION = f'{MANAGER}/configuration'

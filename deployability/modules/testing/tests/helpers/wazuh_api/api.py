@@ -43,6 +43,12 @@ class WazuhAPI:
         self.token_lifetime = timeout
         return response
 
+    # API Info
+
+    def get_api_info(self) -> dict:
+        endpoint = self._get_complete_url(endpoints.API_ROOT)
+        return self._send_request('get', endpoint)
+
     # Agents
 
     def add_agent(self, name: str, ip: str) -> dict:
@@ -53,8 +59,7 @@ class WazuhAPI:
     def get_agent(self, agent_id: str) -> dict:
         endpoint = self._get_complete_url(endpoints.AGENTS)
         params = {'agents_list': [agent_id]}
-        response = self._send_request('get', endpoint, query_params=params)
-        return response[0] if response else {}
+        return self._send_request('get', endpoint, query_params=params)
 
     def get_agents(self, **kwargs: dict) -> list[dict]:
         endpoint = self._get_complete_url(endpoints.AGENTS)
@@ -69,6 +74,16 @@ class WazuhAPI:
         endpoint = self._get_complete_url(endpoints.AGENTS)
         params = {**kwargs, 'agents_list': agents_list}
         return self._send_request('delete', endpoint, query_params=params)
+
+    # Manager
+    
+    def get_manager_status(self) -> dict:
+        endpoint = self._get_complete_url(endpoints.MANAGER_STATUS)
+        return self._send_request('get', endpoint)
+    
+    def get_manager_info(self) -> dict:
+        endpoint = self._get_complete_url(endpoints.MANAGER_INFO)
+        return self._send_request('get', endpoint)
 
     # --- INTERNAL METHODS ---
 
@@ -86,9 +101,13 @@ class WazuhAPI:
         if response.status_code in responses_errors.keys():
             print(f'Failing request to: {endpoint}\nError: {response.content}')
             raise responses_errors[response.status_code]
-        return response.json().get('data', {}).get('affected_items', {})
+        # In add agent the response is different
+        data = response.json().get('data', {})
+        if items := data.get('affected_items'):
+            return items if len(items) > 1 else items[0]
+        return data
 
-    def _get_complete_url(self, endpoint) -> str:
-        if endpoint.startswith('/'):
-            endpoint = endpoint[1:]
-        return f'https://{self.host}:{self.port}/{endpoint}'
+    def _get_complete_url(self, endpoint: str = '/') -> str:
+        if not endpoint.startswith('/'):
+            endpoint = '/' + endpoint
+        return f'https://{self.host}:{self.port}{endpoint}'
