@@ -553,14 +553,21 @@ class HostManager:
         Example:
             host_manager.remove_package('my_host', 'my_package', system='ubuntu')
         """
+        logging.critical(f"Removing package {package_name} from {host}")
+        logging.critical(f"System: {system}")
+        logging.critical(f"Host variables: {self.get_host_variables(host)}")
+
         result = False
+
         os_name = self.get_host_variables(host)['os_name']
         if os_name == 'windows':
             result = self.get_host(host).ansible("win_command", f"& '{package_name}' /S", check=False)
         elif os_name == 'linux':
             os = self.get_host_variables(host)['os'].split('_')[0]
             if os == 'centos':
+                logging.critical(f"Centos!")
                 result = self.get_host(host).ansible("yum", f"name={package_name} state=absent", check=False)
+                logging.critical(f"Result: {result}")
             elif os == 'ubuntu':
                 result = self.get_host(host).ansible("apt", f"name={package_name} state=absent", check=False)
 
