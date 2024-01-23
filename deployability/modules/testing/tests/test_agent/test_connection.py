@@ -1,5 +1,4 @@
 from ..helpers import utils
-from ..helpers.wazuh_api.api import WazuhAPI
 
 
 def test_local_connection_status(agent_id: str) -> None:

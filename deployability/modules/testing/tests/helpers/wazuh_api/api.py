@@ -76,13 +76,44 @@ class WazuhAPI:
         return self._send_request('delete', endpoint, query_params=params)
 
     # Manager
-    
+
     def get_manager_status(self) -> dict:
         endpoint = self._get_complete_url(endpoints.MANAGER_STATUS)
         return self._send_request('get', endpoint)
-    
+
     def get_manager_info(self) -> dict:
         endpoint = self._get_complete_url(endpoints.MANAGER_INFO)
+        return self._send_request('get', endpoint)
+
+    def get_manager_configuration(self) -> dict:
+        endpoint = self._get_complete_url(endpoints.MANAGER_CONFIGURATION)
+        return self._send_request('get', endpoint)
+
+    # Cluster
+
+    def get_cluster_nodes(self) -> dict:
+        endpoint = self._get_complete_url(endpoints.CLUSTER_NODES)
+        return self._send_request('get', endpoint)
+
+    def get_cluster_local_node(self) -> dict:
+        endpoint = self._get_complete_url(endpoints.CLUSTER_LOCAL_NODE)
+        return self._send_request('get', endpoint)
+
+    def get_cluster_local_node_info(self) -> dict:
+        endpoint = self._get_complete_url(endpoints.CLUSTER_LOCAL_NODE_INFO)
+        return self._send_request('get', endpoint)
+
+    def get_cluster_healthcheck(self) -> dict:
+        endpoint = self._get_complete_url(endpoints.CLUSTER_HEALTHCHECK)
+        return self._send_request('get', endpoint)
+
+    def get_cluster_status(self) -> dict:
+        endpoint = self._get_complete_url(endpoints.CLUSTER_STATUS)
+        return self._send_request('get', endpoint)
+
+    def get_cluster_node_status(self, node_id: str) -> dict:
+        endpoint = self._get_complete_url(
+            endpoints.CLUSTER_NODE_STATUS.substitute(node_id=node_id))
         return self._send_request('get', endpoint)
 
     # --- INTERNAL METHODS ---
