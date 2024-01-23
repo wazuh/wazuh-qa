@@ -20,7 +20,6 @@ This program is a free software; you can redistribute it and/or modify it under 
 import re
 from time import sleep
 from typing import Dict, List
-from multiprocessing.pool import ThreadPool
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from wazuh_testing.end_to_end import logs_filepath_os
@@ -35,6 +34,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
     Args:
         host_manager: An instance of the HostManager class containing information about hosts.
         monitoring_data: A dictionary containing monitoring data for each host.
+        ignore_error: If True, ignore errors and continue monitoring.
     """
     def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict], scan_interval: int = 20,
                          ignore_error=False):
@@ -45,6 +45,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
             host_manager (HostManager): Host Manager to handle the environment
             host (str): The target host.
             monitoring_elements(List): A list of dictionaries containing regex, timeout, and file.
+            ignore_error: If True, ignore errors and continue monitoring.
 
         Raises:
             TimeoutError: If no match is found within the specified timeout.

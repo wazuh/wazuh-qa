@@ -17,6 +17,7 @@ Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
 from multiprocessing.pool import ThreadPool
+from typing import Dict
 import xml.dom.minidom
 
 from wazuh_testing.end_to_end import configuration_filepath_os
@@ -24,7 +25,7 @@ from wazuh_testing.tools.configuration import set_section_wazuh_conf
 from wazuh_testing.tools.system import HostManager
 
 
-def backup_configurations(host_manager: HostManager) -> dict:
+def backup_configurations(host_manager: HostManager) -> Dict[str, str]:
     """
     Backup configurations for all hosts in the specified host manager.
 
@@ -45,7 +46,7 @@ def backup_configurations(host_manager: HostManager) -> dict:
     return backup_configurations
 
 
-def restore_configuration(host_manager: HostManager, configuration: dict) -> None:
+def restore_configuration(host_manager: HostManager, configuration: Dict[str, str]) -> None:
     """
     Restore configurations for all hosts in the specified host manager.
 
@@ -61,7 +62,7 @@ def restore_configuration(host_manager: HostManager, configuration: dict) -> Non
         host_manager.modify_file_content(host, configuration_filepath, configuration[host])
 
 
-def configure_host(host: str, host_configuration: dict, host_manager: HostManager) -> None:
+def configure_host(host: str, host_configuration: Dict[str, Dict], host_manager: HostManager) -> None:
     """
     Configure a specific host.
 
@@ -100,7 +101,7 @@ def configure_host(host: str, host_configuration: dict, host_manager: HostManage
     host_manager.modify_file_content(str(host), config_file_path, final_configuration)
 
 
-def configure_environment(host_manager: HostManager, configurations: dict) -> None:
+def configure_environment(host_manager: HostManager, configurations: Dict[str, str]) -> None:
     """
     Configure the environment for all hosts in the specified host manager.
 
