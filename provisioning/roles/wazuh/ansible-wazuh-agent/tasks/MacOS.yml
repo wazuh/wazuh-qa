@@ -14,7 +14,7 @@
     owner: root
     group: wazuh
     mode: 0644
-  notify: macOS | Restart Wazuh Agent
+  notify: MacOS | restart wazuh-agent
   tags:
     - init
     - config
@@ -33,7 +33,7 @@
     owner: root
     group: wazuh
     mode: 0640
-  notify: macOS | Restart Wazuh Agent
+  notify: MacOS | restart wazuh-agent
   tags:
     - init
     - config
@@ -51,4 +51,3 @@
     - authd_pass | length > 0
   tags:
     - config
-
