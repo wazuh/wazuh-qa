@@ -19,7 +19,7 @@ from wazuh_testing.tools.system import HostManager
 
 
 def truncate_remote_host_group_files(host_manager: HostManager, host_group: str,
-                                     file_to_truncate: str='logs'):
+                                     file_to_truncate: str = 'logs') -> None:
     """
     Truncate log or alert files on remote hosts in a specified host group.
 
@@ -30,17 +30,26 @@ def truncate_remote_host_group_files(host_manager: HostManager, host_group: str,
       Possible values are 'logs' for log files or 'alerts' for alert files.
     """
     for host in host_manager.get_group_hosts(host_group):
-        log_file_path = None
         if file_to_truncate == 'logs':
             host_os_name = host_manager.get_host_variables(host)['os_name']
             log_file_path = logs_filepath_os[host_os_name]
         elif file_to_truncate == 'alerts':
             log_file_path = ALERTS_JSON_PATH
+        else:
+            log_file_path = file_to_truncate
 
         host_manager.truncate_file(host, log_file_path)
 
 
 def get_hosts_logs(host_manager: HostManager, host_group: str = 'all') -> dict:
+    """
+    Get the logs from the specified host group.
+
+    Parameters:
+    - host_manager (HostManager): An instance of the HostManager class for managing remote hosts.
+    - host_group (str, optional): The name of the host group where the files will be truncated.
+      Default is 'all'.
+    """
     host_logs = {}
     for host in host_manager.get_group_hosts(host_group):
         host_os_name = host_manager.get_host_variables(host)['os_name']

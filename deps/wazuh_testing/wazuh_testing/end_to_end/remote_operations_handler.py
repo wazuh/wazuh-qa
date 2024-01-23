@@ -390,7 +390,7 @@ def launch_remote_operation(host: str, operation_data: Dict[str, Dict], host_man
         raise ValueError(f"Operation {operation} not recognized")
 
 
-def launch_parallel_operations(task_list: List[Dict], host_manager: HostManager, target_to_ignore: []):
+def launch_parallel_operations(task_list: List[Dict], host_manager: HostManager, target_to_ignore: List[str] = []):
     """
     Launch parallel remote operations on multiple hosts.
 

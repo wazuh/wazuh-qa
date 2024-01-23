@@ -1,5 +1,5 @@
 """
-Wazuh Elasticsearch Indexer Module.
+Wazuh API Indexer Module.
 -----------------------------------
 
 This module provides functions to interact with the Wazuh Indexer API.
@@ -13,6 +13,7 @@ Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
 import requests
+import logging
 from typing import Dict
 
 from wazuh_testing.tools.system import HostManager
@@ -31,12 +32,12 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
         credentials (Optional): A dictionary containing the Indexer credentials. Defaults to
                                  {'user': 'admin', 'password': 'changeme'}.
         index (Optional): The Indexer index name. Defaults to 'wazuh-alerts*'.
+        greater_than_timestamp (Optional): The timestamp to filter the results. Defaults to None.
 
     Returns:
-        str: The response text from the indexer API.
+       Dict: A dictionary containing the values retrieved from the Indexer API.
     """
-    print('Getting values from the Indexer API')
-
+    logging.debug(f"Getting values from the Indexer API for index {index}.")
     url = f"https://{host_manager.get_master_ip()}:9200/{index}/_search"
     headers = {
         'Content-Type': 'application/json',
@@ -73,8 +74,6 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
         'pretty': 'true',
         'size': 10000,
     }
-
-    print(data)
 
     response = requests.get(url=url, params=param, verify=False,
                             auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']), headers=headers,

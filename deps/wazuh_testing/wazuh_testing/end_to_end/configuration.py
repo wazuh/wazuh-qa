@@ -2,12 +2,13 @@
 Configurations handler for remote hosts.
 ----------------------------------------
 
-This module provides functions for configuring and managing host
+This module provides functions for configuring and managing remote host
 configurations using the HostManager class and related tools.
 
 Functions:
     - backup_configurations: Backup configurations for all hosts in the specified host manager.
-    - restore_backup: Restore configurations for all hosts in the specified host manager.
+    - restore_configuration: Restore configurations for all hosts in the specified host manager.
+    - configure_host: Configure a specific host.
     - configure_environment: Configure the environment for all hosts in the specified host manager.
 
 
