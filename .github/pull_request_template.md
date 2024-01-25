@@ -7,7 +7,10 @@
 ## Testing performed
 
 <!-- At most there can only be this table. It must be updated if a new test has been performed. It is important to update the commit that has been tested! -->
-<!-- Optional: Add the version with the package used and loaded. -->
+<!-- Notes: 
+    - If you use a package, add the version with the package used and loaded.
+    - If you add documentation, do not add this section.
+-->
 
 |OS|Package used|
 |--|--|
