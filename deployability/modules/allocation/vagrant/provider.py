@@ -1,5 +1,5 @@
+import os
 import platform
-import socket
 
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
@@ -128,6 +128,7 @@ class VagrantProvider(Provider):
         config['ip'] = cls.__get_available_ip()
         config['box'] = os_specs['box']
         config['box_version'] = os_specs['box_version']
+        config['private_key'] = str(credentials.key_path)
         config['public_key'] = str(credentials.key_path.with_suffix('.pub'))
         config['cpu'] = size_specs['cpu']
         config['memory'] = size_specs['memory']
@@ -145,20 +146,16 @@ class VagrantProvider(Provider):
         Raises:
             Exception: If no available IP address is found.
         """
-        available_ip = None
-
         def check_ip(ip):
-            try:
-                socket.gethostbyaddr(ip)
-                return False
-            except socket.herror:
-                return True
+            response = os.system("ping -c 1 -w3 " + ip + " > /dev/null 2>&1")
+            if response != 0:
+                print(ip, 'is available')
+                return ip
 
         for i in range(1, 255):
             ip = f"192.168.57.{i}"
             if check_ip(ip):
-                available_ip = ip
-                break
-        if not available_ip:
-            raise cls.ProvisioningError("No available IP address found.")
-        return available_ip
+                return ip
+
+        # If no available IP address is found, raise an exception.
+        raise cls.ProvisioningError("No available IP address found.")
