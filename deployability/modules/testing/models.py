@@ -5,7 +5,7 @@ from typing import Literal
 class ExtraVars(BaseModel):
     """Extra vars for testing module."""
     component: Literal['manager', 'agent']
-    dependencies: list[str]
+    dependencies: list[str] | None = None
     wazuh_version: str
     wazuh_revision: str
     wazuh_branch: str | None = None
@@ -15,7 +15,7 @@ class InputPayload(ExtraVars):
     """Input payload for testing module."""
     tests: list[str]
     inventory: Path
-    dependencies: list[str]
+    dependencies: list[str] = []
     cleanup: bool = True
 
     @field_validator('tests', mode='before')
@@ -25,6 +25,7 @@ class InputPayload(ExtraVars):
             value = value.split(',')
         return value
 
+    @field_validator('inventory', mode='before')
     def validate_inventory(cls, value) -> Path:
         """Validate inventory path."""
         if not Path(value).exists():
