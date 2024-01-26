@@ -3,9 +3,6 @@ import ast
 from modules.generic import Ansible, Inventory
 from modules.generic.utils import Utils
 from .models import InputPayload, ExtraVars
-import json
-
-
 
 class Tester:
     _playbooks_dir = Path('tests')

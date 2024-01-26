@@ -1,6 +1,6 @@
 from pathlib import Path
 from pydantic import BaseModel, field_validator, model_validator
-from typing import Literal, Dict
+from typing import Literal
 
 class ExtraVars(BaseModel):
     """Extra vars for testing module."""
