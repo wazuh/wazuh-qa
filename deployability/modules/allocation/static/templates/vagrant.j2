@@ -18,12 +18,13 @@ Vagrant.configure("2") do |config|
     # Create a file to indicate that the VM has been initialized
     # This is required to correctly get the ssh-config of the VM
     # TODO: find a better solution
-    if not ::File.exists? "./init"
-      File.write("./init", "initialized")
+    init_indicator = "./init"
+    if not ::File.exists?(init_indicator)
+        File.write(init_indicator, "initialized")
     else
-      # Use the IP address of the VM to connect via SSH
-      config.ssh.host = "{{ config.ip }}"
-      config.ssh.port = 22
-      config.ssh.private_key_path = "{{ config.private_key }}"
+        # Use the IP address of the VM to connect via SSH
+        config.ssh.host = "{{ config.ip }}"
+        config.ssh.port = 22
+        config.ssh.private_key_path = "{{ config.private_key }}"
     end
 end

@@ -149,7 +149,6 @@ class VagrantProvider(Provider):
         def check_ip(ip):
             response = os.system("ping -c 1 -w3 " + ip + " > /dev/null 2>&1")
             if response != 0:
-                print(ip, 'is available')
                 return ip
 
         for i in range(1, 255):
