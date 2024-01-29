@@ -8,8 +8,8 @@
 
 <!-- At most there can only be this table. It must be updated if a new test has been performed. It is important to update the commit that has been tested! -->
 <!-- Notes: 
-    - If you use a package, add the version with the package used and loaded.
-    - If you add documentation, do not add this section.
+    - If you use a package, add its version, otherwise remove the section.
+    - If you add documentation or something that does not require running a test, remove the section.
 -->
 
 |OS|Package used|
