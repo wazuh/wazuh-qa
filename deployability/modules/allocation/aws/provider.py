@@ -20,7 +20,6 @@ class AWSProvider(Provider):
     """
 
     provider_name = 'aws'
-    _client = boto3.resource('ec2')
 
     @classmethod
     def _create_instance(cls, base_dir: Path, params: CreationPayload) -> AWSInstance:
@@ -41,11 +40,12 @@ class AWSProvider(Provider):
         credentials.generate(temp_dir, temp_id.split('-')[-1] + '_key')
         # Parse the config and create the AWS EC2 instance.
         config = cls._parse_config(params, credentials)
-        _instance = cls._client.create_instances(ImageId=config.ami,
-                                                 InstanceType=config.type,
-                                                 KeyName=config.key_name,
-                                                 SecurityGroupIds=config.security_groups,
-                                                 MinCount=1, MaxCount=1)[0]
+        client = boto3.resource('ec2')
+        _instance = client.create_instances(ImageId=config.ami,
+                                            InstanceType=config.type,
+                                            KeyName=config.key_name,
+                                            SecurityGroupIds=config.security_groups,
+                                            MinCount=1, MaxCount=1)[0]
         # Wait until the instance is running.
         _instance.wait_until_running()  
         # Rename the temp directory to its real name.
