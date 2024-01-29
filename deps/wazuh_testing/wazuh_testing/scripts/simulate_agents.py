@@ -405,6 +405,7 @@ def main():
                             dest='syscollector_packages_list_file')
 
     args = arg_parser.parse_args()
+    args = f"${args} --debug"
 
     process_script_parameters(args)
 
