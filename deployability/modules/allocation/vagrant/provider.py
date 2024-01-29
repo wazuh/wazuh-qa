@@ -38,12 +38,14 @@ class VagrantProvider(Provider):
         # Create the instance directory.
         instance_dir = base_dir / instance_id
         instance_dir.mkdir(parents=True, exist_ok=True)
-        # Generate the credentials.
         credentials = VagrantCredentials()
-        credentials.generate(instance_dir, 'instance_key')
         if not config:
+            # Generate the credentials.
+            credentials.generate(instance_dir, 'instance_key')
             # Parse the config if it is not provided.
             config = cls.__parse_config(params, credentials)
+        else:
+            credentials.load(config.public_key)
         # Create the Vagrantfile.
         cls.__create_vagrantfile(instance_dir, config)
         return VagrantInstance(instance_dir, instance_id, credentials)

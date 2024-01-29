@@ -36,12 +36,19 @@ class AWSProvider(Provider):
         """
         temp_id = cls._generate_instance_id(cls.provider_name)
         temp_dir = base_dir / temp_id
-        # Generate the credentials.
         credentials = AWSCredentials()
-        credentials.generate(temp_dir, temp_id.split('-')[-1] + '_key')
         if not config:
+            # Generate the credentials.
+            credentials.generate(temp_dir, temp_id.split('-')[-1] + '_key')
             # Parse the config if it is not provided.
             config = cls.__parse_config(params, credentials)
+        else:
+            # Load the existing credentials.
+            credentials.load(config.key_name)
+            # Create the temp directory. 
+            # TODO: Review this on the credentials refactor.
+            if not temp_dir.exists():
+                temp_dir.mkdir(parents=True, exist_ok=True)
         # Generate the instance.
         instance_id = cls.__create_ec2_instance(config)
         # Rename the temp directory to its real name.
