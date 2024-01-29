@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from .instance import Instance
-from .models import CreationPayload
+from .models import CreationPayload, ProviderConfig
 
 
 class Provider(ABC):
@@ -47,13 +47,14 @@ class Provider(ABC):
         pass
 
     @classmethod
-    def create_instance(cls, base_dir: str | Path, params: CreationPayload) -> Instance:
+    def create_instance(cls, base_dir: str | Path, params: CreationPayload, config: ProviderConfig = None) -> Instance:
         """
         Creates a new instance.
 
         Args:
             base_dir (str | Path): The base directory for the instance.
             params (CreationPayload): The parameters for creating the instance.
+            config (ProviderConfig, optional): The configuration for the instance. Defaults to None.
 
         Returns:
             Instance: The created instance.

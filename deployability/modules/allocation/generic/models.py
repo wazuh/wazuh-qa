@@ -35,13 +35,14 @@ class TrackOutput(BaseModel):
 
 class InputPayload(BaseModel):
     action: Literal['create', 'delete', 'status'] = 'create'
-    provider: str | None
-    size: Literal['micro', 'small', 'medium', 'large', None]
-    composite_name: str | None
-    track_output: Path | None
-    inventory_output: Path | None
-    working_dir: Path | None
-    custom_credentials: str | None
+    provider: str | None = None
+    size: Literal['micro', 'small', 'medium', 'large', None] = None
+    composite_name: str | None = None
+    working_dir: Path | None = Path('/tmp/wazuh-qa')
+    track_output: Path | None = working_dir / 'track.yml'
+    inventory_output: Path | None = working_dir / 'inventory.yml'
+    custom_credentials: str | None = None
+    custom_provider_config: Path | None = None
 
 
 class CreationPayload(InputPayload):
