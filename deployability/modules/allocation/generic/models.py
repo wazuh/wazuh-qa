@@ -53,15 +53,19 @@ class CreationPayload(InputPayload):
     inventory_output: Path
     working_dir: Path
     custom_credentials: str | None = None
+    custom_provider_config: Path | None = None
 
-    @field_validator('custom_credentials')
+    @field_validator('custom_provider_config')
     @classmethod
-    def check_credentials(cls, v: str) -> str | None:
+    def check_config(cls, v: Path | None) -> Path | None:
         if not v:
             return None
-        path = Path(v)
-        if not path.exists() or not path.is_file():
-            raise ValueError(f"Invalid credentials path: {path}")
+        if not v.exists():
+            raise ValueError(f"Custom provider config file does not exist: {v}")
+        elif not v.is_file():
+            raise ValueError(f"Custom provider config file is not a file: {v}")
+        elif not v.suffix in ['.yml', '.yaml']:
+            raise ValueError(f"Custom provider config file must be yaml: {v}")
         return v
 
     @field_validator('working_dir', mode='before')

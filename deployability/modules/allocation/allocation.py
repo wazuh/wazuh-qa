@@ -3,10 +3,12 @@ import yaml
 from pathlib import Path
 
 from .generic import Instance, Provider, models
-from .aws.provider import AWSProvider
-from .vagrant.provider import VagrantProvider
+from .aws.provider import AWSProvider, AWSConfig
+from .vagrant.provider import VagrantProvider, VagrantConfig
+
 
 PROVIDERS = {'vagrant': VagrantProvider, 'aws': AWSProvider}
+CONFIGS = {'vagrant': VagrantConfig, 'aws': AWSConfig}
 
 
 class Allocator:
@@ -39,12 +41,13 @@ class Allocator:
 
         Args:
             payload (CreationPayload): The payload containing the parameters
-                                              for instance creation.
+                                       for instance creation.
         """
         instance_params = models.CreationPayload(**dict(payload))
         provider: Provider = PROVIDERS[payload.provider]()
+        config = cls.___get_custom_config(payload)
         instance = provider.create_instance(
-            payload.working_dir, instance_params)
+            payload.working_dir, instance_params, config)
         print(f"Instance {instance.identifier} created.")
         # Start the instance
         instance.start()
@@ -69,6 +72,26 @@ class Allocator:
         provider = PROVIDERS[track.provider]()
         provider.destroy_instance(track.instance_dir, track.identifier)
         print(f"Instance {track.identifier} deleted.")
+
+    @staticmethod
+    def ___get_custom_config(payload: models.CreationPayload) -> models.ProviderConfig | None:
+        """
+        Gets the custom configuration from a file.
+
+        Args:
+            payload (CreationPayload): The payload containing the parameters
+                                       for instance creation.
+
+        Returns:
+            ProviderConfig: The configuration object.
+        """
+        if not payload.custom_provider_config:
+            return None
+        # Read the custom config file and validate it.
+        config_model: models.ProviderConfig = CONFIGS[payload.provider]
+        with open(payload.custom_provider_config, 'r') as f:
+            config = config_model(**yaml.safe_load(f))
+        return config
 
     @staticmethod
     def __generate_inventory(instance: Instance, inventory_path: Path) -> None:
