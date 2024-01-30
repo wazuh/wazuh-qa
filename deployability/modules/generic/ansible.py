@@ -7,6 +7,7 @@ from pydantic import BaseModel, IPvAnyAddress
 
 from jinja2 import Template
 from modules.generic.utils import Utils
+from modules.generic.logger import Logger
 import subprocess, json
 
 
@@ -27,6 +28,7 @@ class Ansible:
         self.ansible_user = self.ansible_data.ansible_user
         self.ansible_ssh_private_key_file = self.ansible_data.ansible_ssh_private_key_file
         self.inventory = self.generate_inventory()
+        self.logger = Logger(__name__).get_logger()
 
     def render_playbooks(self, rendering_variables: dict) -> list:
         """
