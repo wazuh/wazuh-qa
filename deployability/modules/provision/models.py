@@ -36,12 +36,18 @@ class InputPayload(BaseModel):
 
   @classmethod
   def validate_action(cls, values):
+    """
+    Validate action.
+    """
     if not values.get('install') and not values.get('uninstall'):
       raise ValueError('Invalid action: "install" or "uninstall" must be provided.')
     return values
 
   @classmethod
   def validate_inventory(cls, values):
+    """
+    Validate inventory recived.
+    """
     if values.get('inventory_agent') is not None and values.get('inventory_manager') is not None:
       values['manager_ip'] = Utils.load_from_yaml(values.get('inventory_manager'), map_keys={'ansible_host': 'ansible_host'}, specific_key="ansible_host")
       values['inventory'] = values.get('inventory_agent')
@@ -54,11 +60,17 @@ class InputPayload(BaseModel):
 
   @validator('install', pre=True)
   def validate_install(cls, install) -> Union[None, List[str]]:
+    """
+    Generate the component info for install.
+    """
     component_info = cls.validate_install_uninstall(install)
     return component_info
 
   @validator('uninstall', pre=True)
   def validate_uninstall(cls, uninstall) -> Union[None, List[str]]:
+    """
+    Generate the component info for uninstall.
+    """
     component_info = cls.validate_install_uninstall(uninstall)
     return component_info
 

@@ -1,6 +1,9 @@
 
 
 class ComponentType:
+    """
+    Class to define the type of component to be provisioned
+    """
     def __init__(self, component_info):
         self.component = component_info.component
         self.type = component_info.type
@@ -8,12 +11,21 @@ class ComponentType:
         self.manager_ip = component_info.manager_ip or None
 
     def get_templates_path(self, action):
+        """
+        Get the path to the templates.
+        """
         pass
 
     def get_templates_order(self, action):
+        """
+        Get the order of the templates to be executed.
+        """
         pass
 
     def generate_dict(self):
+        """
+        Generate the dictionary with the variables to be used to render the templates.
+        """
         variables = {
                     'component': self.component,
                     'version': self.version,
@@ -26,6 +38,9 @@ class ComponentType:
         return variables
 
 class Package(ComponentType):
+    """
+    Class to define the type of package to be provisioned
+    """
     TEMPLATE_BASE_PATH = 'provision/wazuh'
 
     def __init__(self, component_info, action):
@@ -40,6 +55,9 @@ class Package(ComponentType):
         return []
 
 class AIO(ComponentType):
+    """
+    Class to define the type of AIO to be provisioned
+    """
     TEMPLATE_BASE_PATH = 'provision/wazuh'
 
     def __init__(self, component_info, action):
@@ -52,6 +70,9 @@ class AIO(ComponentType):
         return ["download.j2", f"{action}.j2"]
 
 class Generic(ComponentType):
+    """
+    Class to define the type of generic component to be provisioned
+    """
     TEMPLATE_BASE_PATH = 'provision/generic'
 
     def __init__(self, component_info, action):
@@ -64,6 +85,9 @@ class Generic(ComponentType):
         return []
 
 class Dependencies(ComponentType):
+    """
+    Class to define the type of dependencies to be provisioned
+    """
     TEMPLATE_BASE_PATH = 'provision/deps'
 
     def __init__(self, component_info, action):

@@ -2,6 +2,9 @@ from modules.generic import Ansible
 from .componentType import Package, AIO, Generic, Dependencies
 
 class Action:
+    """
+    Class to define the action.
+    """
     def __init__(self, action, component_info, ansible_data):
         action_type = component_info.type
 
@@ -19,6 +22,9 @@ class Action:
         self.ansible = Ansible(ansible_data)
 
     def execute(self):
+        """
+        Execute the action.
+        """
         status = {}
 
         print(self.component.variables_dict)
@@ -37,4 +43,7 @@ class Action:
         return status
 
     def set_playbooks_variables(self, vars):
+        """
+        Method to set the playbooks extra variables.
+        """
         pass

@@ -128,7 +128,7 @@ tasks:
           - provision.py
           - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-          - install:
+          - uninstall:
             - component: wazuh-agent
               type: package
     depends-on:
