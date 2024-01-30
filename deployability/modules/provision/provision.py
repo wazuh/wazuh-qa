@@ -2,7 +2,7 @@
 from modules.generic.utils import Utils
 from modules.provision.models import InputPayload
 from modules.provision.provisionModule import ProvisionModule
-from modules.provision.install import Install, InstallComponent
+from modules.provision.actions import Action
 from pathlib import Path
 import os, subprocess, sys
 
@@ -11,15 +11,23 @@ PATH_BASE_DIR = Path(__file__).parents[2]
 class Provision(ProvisionModule):
 
   def __init__(self, payload: InputPayload):
-    self.ansible_data = Utils.load_from_yaml(payload.inventory, map_keys={'ansible_host': 'ansible_host',
-                                                                          'ansible_user': 'ansible_user',
-                                                                          'ansible_port': 'ansible_port',
-                                                                          'ansible_ssh_private_key_file': 'ansible_ssh_private_key_file'})
-    if payload.manager_ip:
-      self.manager_ip = Utils.load_from_yaml(payload.manager_ip, map_keys={'ansible_host': 'ansible_host'}, specific_key="ansible_host")
-    else:
-      self.manager_ip = None
-    self.install_list = payload.install
+    if payload.install:
+      self.component_info = payload.install
+      self.action = "install"
+    if payload.uninstall:
+      self.component_info = payload.uninstall
+      self.action = "uninstall"
+
+    self.validateManagerIp(self.component_info, payload.manager_ip)
+    self.ansible_data = Utils.load_from_yaml(
+        payload.inventory,
+        map_keys={
+            'ansible_host': 'ansible_host',
+            'ansible_user': 'ansible_user',
+            'ansible_port': 'ansible_port',
+            'ansible_ssh_private_key_file': 'ansible_ssh_private_key_file'
+        }
+    )
     self.summary = {}
 
   # -------------------------------------
@@ -33,47 +41,22 @@ class Provision(ProvisionModule):
 
     #self.node_dependencies()
 
-    self.install_host_dependencies()
+    #self.install_host_dependencies()
 
-    for item in self.install_list:
-      status = self.handle_package(item)
+    for item in self.component_info:
+      action_class = Action(self.action, item, self.ansible_data)
+      status = action_class.execute()
 
       self.update_status(status)
 
     print("summary")
     print(self.summary)
 
-  def handle_package(self, package):
-    """
-    Handle package to install.
-
-    Args:
-        dict -> package: Data with the package to install.
-          - this: componente to install
-          - with: install type
-          - version: version to install (optional)
-    """
-    status = {}
-
-    component = package.get("component")
-    install_type = package.get("install-type")
-    version = package.get("version")
-
-    if component is not None and "wazuh-agent" in component:
-      install_type = "package"
-
-    info_component_install = {
-      'component': component,
-      'install_type': install_type,
-      'version': version
-    }
-
-    info_component_install["manager_ip"] = self.manager_ip
-
-    install: Install = InstallComponent(self.ansible_data, info_component_install)
-    status = install.install_component()
-
-    return status
+  def validateManagerIp(self, components, ip):
+    if ip:
+      for component in components:
+        if component.component == 'wazuh-agent':
+            component.manager_ip = ip
 
   @staticmethod
   def node_dependencies():
@@ -98,11 +81,11 @@ class Provision(ProvisionModule):
 
     package = {
       'component': os.path.join(str(PATH_BASE_DIR), "deps", "remote_requirements.txt"),
-      'install_type': "deps"
+      'action_type': "dependencies"
     }
 
-    install: Install = InstallComponent(self.ansible_data, package)
-    status = install.install_component()
+    action_class = Action("install", package, self.ansible_data)
+    status = action_class.execute()
 
     return status
 

@@ -39,6 +39,9 @@ class SchemaValidator:
                     raise jsonschema.exceptions.ValidationError(f"Missing required properties in 'with' for task: {task}")
 
     def validateSchema(self):
+        """
+        Validate the Workflow schema
+        """
         try:
             jsonschema.validate(self.yamlData, self.schemaData)
         except jsonschema.exceptions.ValidationError as e:
