@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.9.0] - TBD
 
+### Changed
+
+- Removed conventional commits, changelog, linter and CodeQL of GitHub Action.
+
 ### Added
 
 - Add integration tests for Update field to CPE_Helper. ([#4574](https://github.com/wazuh/wazuh-qa/pull/4574)) \- (Core)
