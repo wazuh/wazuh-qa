@@ -5,16 +5,39 @@ version: 0.1
 description: This workflow is used to test agents deployment por DDT1 PoC
 variables:
   agents-os:
-    - linux-centos-8-amd64
-    #- linux-centos-7-amd64
-  manager-os: linux-centos-8-amd64
+    - linux-ubuntu-20.04-amd64
+  manager-os: linux-ubuntu-20.04-amd64
   infra-provider: vagrant
   working-dir: /tmp/dtt1-poc
 
 tasks:
   # Generic agent test task
   - task: "run-agent-tests-{agent}"
-    description: "Run tests for the {agent} agent."
+    description: "Run tests uninstall for the {agent} agent."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - test.py
+          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
+          - dependencies: 
+            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+            - agent: "{working-dir}/agent-{agent}/inventory.yaml"
+          - tests: "install,register,stop"
+          - component: "agent"
+          - wazuh-version: "4.7.1"
+          - wazuh-revision: "40709"
+    depends-on:
+      - "provision-install-{agent}"
+      - "provision-manager"
+    foreach:
+      - variable: agents-os
+        as: agent
+
+  # Generic agent test task
+  - task: "run-agent-tests-uninstall-{agent}"
+    description: "Run tests uninstall for the {agent} agent."
     do:
       this: process
       with:
@@ -23,13 +46,13 @@ tasks:
           - test.py
           - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
           - dependency: "{working-dir}/manager-{manager-os}/inventory.yaml"
-          - tests: "install,register,stop"
+          - tests: "uninstall"
           - component: "agent"
           - wazuh-version: "4.7.1"
           - wazuh-revision: "40709"
     depends-on:
-      - "provision-{agent}"
-      - "provision-manager"
+      - "run-agent-tests-{agent}"
+      - "provision-uninstall-{agent}"
     foreach:
       - variable: agents-os
         as: agent
@@ -45,8 +68,8 @@ tasks:
           - provision.py
           - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - install:
-            - "component:wazuh-manager,install-type:package"
-            - "component:curl"
+            - component: wazuh-manager
+              type: package
     depends-on:
       - "allocate-manager"
 
@@ -65,17 +88,17 @@ tasks:
           - composite-name: "{manager-os}"
           - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
-    cleanup:
-      this: process
-      with:
-        path: python3
-        args:
-          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
-          - action: delete
-          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+    #cleanup:
+    #  this: process
+    #  with:
+    #    path: python3
+    #    args:
+    #      - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
+    #      - action: delete
+    #      - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 
   # Generic agent provision task
-  - task: "provision-{agent}"
+  - task: "provision-install-{agent}"
     description: "Provision resources for the {agent} agent."
     do:
       this: process
@@ -86,12 +109,32 @@ tasks:
           - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - install:
-            - "component:wazuh-agent,install-type:package"
-            - "component:curl"
-            - "component:nano"
+            - component: wazuh-agent
+              type: package
+            - component: curl
     depends-on:
       - "allocate-{agent}"
       - "provision-manager"
+    foreach:
+      - variable: agents-os
+        as: agent
+
+  # Generic agent provision task
+  - task: "provision-uninstall-{agent}"
+    description: "Provision resources for the {agent} agent."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - provision.py
+          - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
+          - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - uninstall:
+            - component: wazuh-agent
+              type: package
+    depends-on:
+      - "provision-install-{agent}"
     foreach:
       - variable: agents-os
         as: agent
