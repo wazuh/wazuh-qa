@@ -544,7 +544,7 @@ class HostManager:
 
         return master_node
 
-    def remove_package(self, host, package_name, system):
+    def remove_package(self, host, system, package_uninstall_name=None, custom_uninstall_playbook=None):
         """
         Removes a package from the specified host.
 
@@ -560,33 +560,38 @@ class HostManager:
         Example:
             host_manager.remove_package('my_host', 'my_package', system='ubuntu')
         """
-        logging.critical(f"Removing package {package_name} from {host}")
-        logging.critical(f"System: {system}")
-        logging.critical(f"Host variables: {self.get_host_variables(host)}")
+        logging.info(f"Removing package {package_uninstall_name} from host {host}")
+        logging.info(f"System: {system}")
 
-        result = False
+        remove_operation_result = False
 
         os_name = self.get_host_variables(host)['os_name']
-        if os_name == 'windows':
-            logger.setLevel(logging.DEBUG)
-            r = self.run_playbook(host, 'remove_package_win', params={'uninstall_script_path': package_name})
-            #   result = self.get_host(host).ansible("ansible.windows.win_shell", fr'powershell -Command "& \"{package_name}\" /S /c"', check=False)
-            print(r)
-            logger.setLevel(logging.CRITICAL)
 
-        elif os_name == 'linux':
-            os = self.get_host_variables(host)['os'].split('_')[0]
-            if os == 'centos':
-                logging.critical(f"Centos!")
-                result = self.get_host(host).ansible("yum", f"name={package_name} state=absent", check=False)
-                logging.critical(f"Result: {result}")
-            elif os == 'ubuntu':
-                result = self.get_host(host).ansible("apt", f"name={package_name} state=absent", check=False)
-        elif os_name == 'macos':
-            result = self.get_host(host).ansible("command", f"brew uninstall {package_name}", check=False)
+        if custom_uninstall_playbook:
+            remove_operation_result = self.run_playbook(host, custom_uninstall_playbook)
+        elif package_uninstall_name:
+            if os_name == 'windows':
+                remove_operation_result = self.get_host(host).ansible("win_command",
+                                                                      f"{package_uninstall_name} /uninstall /quiet /S",
+                                                                      check=False)
+            elif os_name == 'linux':
+                os = self.get_host_variables(host)['os'].split('_')[0]
+                if os == 'centos':
+                    remove_operation_result = self.get_host(host).ansible("yum",
+                                                                          f"name={package_uninstall_name} state=absent",
+                                                                          check=False)
+                elif os == 'ubuntu':
+                    remove_operation_result = self.get_host(host).ansible("apt",
+                                                                          f"name={package_uninstall_name} state=absent",
+                                                                          check=False)
+            elif os_name == 'macos':
+                remove_operation_result = self.get_host(host).ansible("command",
+                                                                      f"brew uninstall {package_uninstall_name}",
+                                                                      check=False)
 
-        print(result)
-        return result
+        logging.info(f"Package removed result {remove_operation_result}")
+
+        return remove_operation_result
 
     def run_playbook(self, host, playbook_name, params=None):
         file_dir = os.path.dirname(os.path.realpath(__file__))
@@ -744,4 +749,5 @@ def clean_environment(host_manager, target_files):
         target_files (dict): a dictionary of tuples, each with the host and the path of the file to clear.
     """
     for target in target_files:
+
         host_manager.clear_file(host=target[0], file_path=target[1])
