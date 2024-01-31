@@ -1,5 +1,7 @@
 from modules.generic import Ansible
+
 from .componentType import Package, AIO, Generic, Dependencies
+from modules.provision.logger import logger
 
 class Action:
     """
@@ -27,8 +29,7 @@ class Action:
         """
         status = {}
 
-        print(self.component.variables_dict)
-
+        logger.info(f"Executing {self.component.action} for {self.component.component}")
         tasks = self.ansible.render_playbooks(self.component.variables_dict)
 
         playbook = {
