@@ -11,7 +11,7 @@ agent1_id: "001"
 agent1_hostname: "wazuh-agent1"
 agent1_key: "1111111111111111111111111111111111111111111111111111111111111111"
 agent1_package: "https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.1.5-1_amd64.deb"
-agent1_user: "ossec" #Only valid for agents verions<4.2.5
+agent1_user: "ossec" #Only valid for agents versions<4.2.5
 
 agent2_id: "002"
 agent2_hostname: "wazuh-agent2"
@@ -22,7 +22,7 @@ agent3_id: "003"
 agent3_hostname: "wazuh-agent3"
 agent3_key: "3333333333333333333333333333333333333333333333333333333333333333"
 agent3_package: "https://{{package_repository}}.wazuh.com/{{repository}}/apt/pool/main/w/wazuh-agent/wazuh-agent_{{package_version}}-{{package_revision}}_amd64.deb"
-agent3_user: "root" #Only valid for agents verions=>4.2.5
+agent3_user: "root" #Only valid for agents versions=>4.2.5
 
 docker_network: "cluster_net"
 
