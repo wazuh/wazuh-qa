@@ -10,6 +10,7 @@ class VagrantConfig(ProviderConfig):
     memory: int
     box: str
     box_version: str
+    private_key: str
     public_key: str
 
     @field_validator('public_key', mode='before')
