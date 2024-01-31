@@ -76,7 +76,8 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
     }
 
     response = requests.get(url=url, params=param, verify=False,
-                            auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']), headers=headers,
+                            auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']),
+                            headers=headers,
                             json=data)
 
     return response.json()
