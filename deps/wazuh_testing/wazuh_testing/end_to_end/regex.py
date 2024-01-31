@@ -60,8 +60,18 @@ def get_event_regex(event: Dict) -> str:
 
     Raises:
         Exception: If required parameters are missing.
-    """
 
+    Example of event:
+        {
+            'event': 'syscollector_install_package_alert_yum',
+            'parameters': {
+                'HOST_NAME': 'agent1',
+                'PACKAGE_NAME': 'openssh-server',
+                'PACKAGE_VERSION': '8.0p1-4',
+                'ARCHITECTURE': 'x86_64'
+            }
+        }
+    """
     logging.info(f"Getting regex for event {event['event']}")
 
     expected_event = REGEX_PATTERNS.get(event['event'])
