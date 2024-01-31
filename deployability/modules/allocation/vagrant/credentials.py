@@ -71,30 +71,22 @@ class VagrantCredentials(Credentials):
         self.key_path = private_key_path
         return self.key_path
 
-    def load(self, base_dir: str | Path, name: str) -> None:
+    def load(self, path: str | Path) -> None:
         """
         Loads an existing key pair from the specified directory.
 
         Args:
-            base_dir (str | Path): The directory where the key pair is stored.
-            name (str): The filename of the key pair.
+            path (str | Path): The path to the key pair.
 
         Raises:
             CredentialsError: This exception is raised if the key pair doesn't exist or the specified directory is invalid.
         """
-        base_dir = Path(base_dir)
-        if not base_dir.exists() or not base_dir.is_dir():
-            raise self.CredentialsError(f"Invalid path {base_dir}.")
-        key_path = Path(base_dir, name)
-        pub_key_path = key_path.with_suffix(".pub")
+        key_path = Path(path)
         if not key_path.exists() or not key_path.is_file():
-            raise self.CredentialsError(f"Invalid key name {name}.")
-        if not pub_key_path.exists() or not pub_key_path.is_file():
-            raise self.CredentialsError(f"Non-existen public key for {name}.")
-        # Save instance attributes.
+            raise self.CredentialsError(f"Invalid path {key_path}.")
         self.key_path = key_path
-        self.name = name
-        self.key_id = name
+        self.name = key_path.name
+        self.key_id = key_path.name
 
     def delete(self) -> None:
         """

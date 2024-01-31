@@ -20,16 +20,6 @@ class ProvisionModule(ABC):
 		pass
 
 	@abstractmethod
-	def handle_package(self, package):
-		"""
-		Handle Package.
-
-		Args:
-				package: Data with the package to install.
-		"""
-		pass
-
-	@abstractmethod
 	def update_status(self, status):
 		"""
 		Update Status.
