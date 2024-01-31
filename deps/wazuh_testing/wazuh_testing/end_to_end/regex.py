@@ -2,7 +2,8 @@
 Regex Patterns for Syscollector Events.
 ---------------------------------------
 
-This module defines regular expression patterns for various events related to Syscollector. The patterns are used to extract information from log messages.
+This module defines regular expression patterns for various events related to Syscollector.
+The patterns are used to extract information from log messages.
 
 Constants:
     REGEX_PATTERNS (dict): A dictionary mapping event names to their respective regex patterns and parameters.
@@ -15,9 +16,8 @@ Copyright (C) 2015, Wazuh Inc.
 Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
-
-
 from typing import Dict
+import logging
 
 
 REGEX_PATTERNS = {
@@ -61,6 +61,9 @@ def get_event_regex(event: Dict) -> str:
     Raises:
         Exception: If required parameters are missing.
     """
+
+    logging.info(f"Getting regex for event {event['event']}")
+
     expected_event = REGEX_PATTERNS.get(event['event'])
 
     if expected_event is None:
@@ -70,7 +73,6 @@ def get_event_regex(event: Dict) -> str:
 
     if 'parameters' in expected_event and 'parameters' not in event:
         raise Exception(f"Not provided enough data to create regex. Missing {expected_event['parameters']}")
-
     elif 'parameters' in event:
         for parameter in expected_event['parameters']:
             expected_regex = expected_regex.replace(parameter, event['parameters'].get(parameter, ''))
