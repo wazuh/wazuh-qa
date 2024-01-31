@@ -4,11 +4,13 @@
 
 import json
 import tempfile
+import os
 import logging
 import xml.dom.minidom as minidom
-from typing import Union
+from typing import Union, List
 import testinfra
 import yaml
+import ansible_runner
 
 from wazuh_testing.tools import WAZUH_CONF, WAZUH_API_CONF, API_LOG_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import set_section_wazuh_conf
@@ -484,7 +486,7 @@ class HostManager:
         result = False
         print(host)
         print(url)
-        if system =='windows':
+        if system == 'windows':
             result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
         elif system == 'ubuntu':
             result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
@@ -494,8 +496,13 @@ class HostManager:
             result = self.get_host(host).ansible("yum", f"name={url} state=present sslverify=false disable_gpg_check=True", check=False)
             if 'rc' in result and result['rc'] == 0 and result['changed']:
                 result = True
+        elif system == 'macos':
+            package_name = url.split('/')[-1]
+            result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
+            print(result)
+            cmd = f"installer -pkg {package_name} -target /"
+            result = self.get_host(host).ansible("command", cmd, check=False)
 
-        print(result)
         return result
 
     def get_master_ip(self):
@@ -561,7 +568,12 @@ class HostManager:
 
         os_name = self.get_host_variables(host)['os_name']
         if os_name == 'windows':
-            result = self.get_host(host).ansible("win_command", f"& '{package_name}' /S", check=False)
+            logger.setLevel(logging.DEBUG)
+            r = self.run_playbook(host, 'remove_package_win', params={'uninstall_script_path': package_name})
+            #   result = self.get_host(host).ansible("ansible.windows.win_shell", fr'powershell -Command "& \"{package_name}\" /S /c"', check=False)
+            print(r)
+            logger.setLevel(logging.CRITICAL)
+
         elif os_name == 'linux':
             os = self.get_host_variables(host)['os'].split('_')[0]
             if os == 'centos':
@@ -570,9 +582,50 @@ class HostManager:
                 logging.critical(f"Result: {result}")
             elif os == 'ubuntu':
                 result = self.get_host(host).ansible("apt", f"name={package_name} state=absent", check=False)
+        elif os_name == 'macos':
+            result = self.get_host(host).ansible("command", f"brew uninstall {package_name}", check=False)
 
         print(result)
         return result
+
+    def run_playbook(self, host, playbook_name, params=None):
+        file_dir = os.path.dirname(os.path.realpath(__file__))
+        print(playbook_name)
+        playbook_path = f"{file_dir}/playbooks/{playbook_name}.yaml"
+        new_playbook = None
+        new_playbook_path = None
+
+        with open(playbook_path, 'r') as playbook_file:
+            playbook = playbook_file.read()
+            new_playbook = playbook.replace('HOSTS', host)
+
+        temp_dir = tempfile.mkdtemp()
+        new_playbook_path = f"{temp_dir}/playbook.yaml"
+
+        with open(f"{temp_dir}/playbook.yaml", 'w') as playbook_file:
+            playbook_file.write(new_playbook)
+
+        r = None
+
+        logger.setLevel(logging.DEBUG)
+        try:
+            print(host)
+            r = ansible_runner.run(
+                inventory=self.inventory_path,
+                playbook=new_playbook_path,
+                host_pattern=host,
+                extravars=params,
+            )
+            print("Ansible playbook executed successfully.")
+        except Exception as e:
+            print(f"Error executing Ansible playbook: {e}")
+
+        logger.setLevel(logging.CRITICAL)
+
+        print(r)
+        return r
+
+
 
     def handle_wazuh_services(self, host, operation):
         """
@@ -660,6 +713,28 @@ class HostManager:
             token=token,
         )
 
+    def get_hosts_not_reachable(self) -> List[str]:
+        """
+        Checks that all hosts provided in the inventory are accessible.
+
+        Returns:
+            List[str]: List of hosts that are not reachable.
+        """
+        hosts_not_reachable = []
+        for host in self.get_group_hosts('all'):
+            logging.info(f"Checking host {host}...")
+            os_name = self.get_host_variables(host)['os_name']
+            if os_name == 'windows':
+                command = 'ansible.windows.win_ping'
+            else:
+                command = 'ping'
+            try:
+                self.get_host(host).ansible(command, check=False)
+            except Exception as e:
+                logging.error(f"Error connecting to host {host}: {e}")
+                hosts_not_reachable.append(host)
+
+        return hosts_not_reachable
 
 
 def clean_environment(host_manager, target_files):
