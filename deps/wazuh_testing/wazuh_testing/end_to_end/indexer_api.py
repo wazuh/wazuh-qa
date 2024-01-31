@@ -36,7 +36,8 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
     Returns:
        Dict: A dictionary containing the values retrieved from the Indexer API.
     """
-    logging.debug(f"Getting values from the Indexer API for index {index}.")
+    logging.info(f"Getting values from the Indexer API for index {index}")
+
     url = f"https://{host_manager.get_master_ip()}:9200/{index}/_search"
     headers = {
         'Content-Type': 'application/json',

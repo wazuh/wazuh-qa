@@ -43,6 +43,7 @@ def backup_configurations(host_manager: HostManager) -> Dict[str, str]:
             'agent1': ...
         }
     """
+    logging.info("Backing up configurations")
     backup_configurations = {}
     for host in host_manager.get_group_hosts('all'):
         host_os_name = host_manager.get_host_variables(host)['os_name']
@@ -50,7 +51,7 @@ def backup_configurations(host_manager: HostManager) -> Dict[str, str]:
 
         backup_configurations[host] = host_manager.get_file_content(str(host),
                                                                     configuration_filepath)
-
+    logging.info("Configurations backed up")
     return backup_configurations
 
 
@@ -68,12 +69,13 @@ def restore_configuration(host_manager: HostManager, configuration: Dict[str, Li
             'agent1': ...
         }
     """
-
+    logging.info("Restoring configurations")
     for host in host_manager.get_group_hosts('all'):
         host_os_name = host_manager.get_host_variables(host)['os_name']
         configuration_filepath = configuration_filepath_os[host_os_name]
 
         host_manager.modify_file_content(host, configuration_filepath, configuration[host])
+    logging.info("Configurations restored")
 
 
 def configure_host(host: str, host_configuration: Dict[str, Dict], host_manager: HostManager) -> None:
@@ -120,7 +122,7 @@ def configure_host(host: str, host_configuration: Dict[str, Dict], host_manager:
             ],
         }
     """
-    logging.info(f"Configuring host {host_configuration}")
+    logging.info(f"Configuring host {host}")
 
     host_os = host_manager.get_host_variables(host)['os_name']
     config_file_path = configuration_filepath_os[host_os]
@@ -149,6 +151,8 @@ def configure_host(host: str, host_configuration: Dict[str, Dict], host_manager:
     final_configuration = "\n".join(new_config_formatted_xml)
 
     host_manager.modify_file_content(str(host), config_file_path, final_configuration)
+
+    logging.info(f"Host {host} configured")
 
 
 def configure_environment(host_manager: HostManager, configurations: Dict[str, List]) -> None:
@@ -190,8 +194,11 @@ def configure_environment(host_manager: HostManager, configurations: Dict[str, L
             ],
         }
     """
+    logging.info("Configuring environment")
     configure_environment_parallel_map = [(host, configurations) for host in host_manager.get_group_hosts('all')]
 
     with ThreadPool() as pool:
         pool.starmap(configure_host,
                      [(host, config, host_manager) for host, config in configure_environment_parallel_map])
+
+    logging.info("Environment configured")
