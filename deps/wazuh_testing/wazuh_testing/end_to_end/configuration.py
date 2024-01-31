@@ -1,5 +1,5 @@
 """
-Configurations handler for remote hosts.
+Module for change configurations of remote hosts.
 ----------------------------------------
 
 This module provides functions for configuring and managing remote host
@@ -16,9 +16,11 @@ Copyright (C) 2015, Wazuh Inc.
 Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
-from multiprocessing.pool import ThreadPool
-from typing import Dict
 import xml.dom.minidom
+import logging
+
+from multiprocessing.pool import ThreadPool
+from typing import Dict, List
 
 from wazuh_testing.end_to_end import configuration_filepath_os
 from wazuh_testing.tools.configuration import set_section_wazuh_conf
@@ -34,6 +36,12 @@ def backup_configurations(host_manager: HostManager) -> Dict[str, str]:
 
     Returns:
         dict: A dictionary mapping host names to their configurations.
+
+    Example of returned dictionary:
+        {
+            'manager': '<ossec_config>...</ossec_config>',
+            'agent1': ...
+        }
     """
     backup_configurations = {}
     for host in host_manager.get_group_hosts('all'):
@@ -46,13 +54,19 @@ def backup_configurations(host_manager: HostManager) -> Dict[str, str]:
     return backup_configurations
 
 
-def restore_configuration(host_manager: HostManager, configuration: Dict[str, str]) -> None:
+def restore_configuration(host_manager: HostManager, configuration: Dict[str, List]) -> None:
     """
     Restore configurations for all hosts in the specified host manager.
 
     Args:
         host_manager: An instance of the HostManager class containing information about hosts.
         configuration: A dictionary mapping host names to their configurations.
+
+    Example of configuration dictionary:
+        {
+            'manager': '<ossec_config>...</ossec_config>',
+            'agent1': ...
+        }
     """
 
     for host in host_manager.get_group_hosts('all'):
@@ -68,9 +82,45 @@ def configure_host(host: str, host_configuration: Dict[str, Dict], host_manager:
 
     Args:
         host: The name of the host to be configured.
-        host_configuration: Role of the configured host for the host.
+        host_configuration: Role of the configured host for the host. Check below for example.
         host_manager: An instance of the HostManager class containing information about hosts.
+
+    Note: The host_configuration dictionary must contain a list of sections and elements to be configured. The sections
+    not included in the dictionary will not be modified maintaining the current configuration.
+
+
+    Example of host_configuration dictionary:
+        {
+           "manager1":[
+              {
+                 "sections":[
+                    {
+                       "section":"vulnerability-detection",
+                       "elements":[
+                          {
+                             "enabled":{
+                                "value":"yes"
+                             }
+                          },
+                          {
+                             "index-status":{
+                                "value":"yes"
+                             }
+                          },
+                          {
+                             "feed-update-interval":{
+                                "value":"2h"
+                             }
+                          }
+                       ]
+                    },
+             ],
+             "metadata":{}
+            }
+            ],
+        }
     """
+    logging.info(f"Configuring host {host_configuration}")
 
     host_os = host_manager.get_host_variables(host)['os_name']
     config_file_path = configuration_filepath_os[host_os]
@@ -101,13 +151,44 @@ def configure_host(host: str, host_configuration: Dict[str, Dict], host_manager:
     host_manager.modify_file_content(str(host), config_file_path, final_configuration)
 
 
-def configure_environment(host_manager: HostManager, configurations: Dict[str, str]) -> None:
+def configure_environment(host_manager: HostManager, configurations: Dict[str, List]) -> None:
     """
     Configure the environment for all hosts in the specified host manager.
 
     Args:
         host_manager: An instance of the HostManager class containing information about hosts.
         configurations: A dictionary mapping host roles to their configuration details.
+
+    Example of host_configurations dictionary:
+        {
+           "manager1":[
+              {
+                 "sections":[
+                    {
+                       "section":"vulnerability-detection",
+                       "elements":[
+                          {
+                             "enabled":{
+                                "value":"yes"
+                             }
+                          },
+                          {
+                             "index-status":{
+                                "value":"yes"
+                             }
+                          },
+                          {
+                             "feed-update-interval":{
+                                "value":"2h"
+                             }
+                          }
+                       ]
+                    },
+             ],
+             "metadata":{}
+            }
+            ],
+        }
     """
     configure_environment_parallel_map = [(host, configurations) for host in host_manager.get_group_hosts('all')]
 
