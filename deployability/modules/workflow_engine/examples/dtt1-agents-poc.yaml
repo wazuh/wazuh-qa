@@ -21,8 +21,10 @@ tasks:
         args:
           - test.py
           - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-          - dependency: "{working-dir}/manager-{manager-os}/inventory.yaml"
-          - tests: "install"
+          - dependencies: 
+            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+            - agent: "{working-dir}/agent-{agent}/inventory.yaml"
+          - tests: "install,register,stop"
           - component: "agent"
           - wazuh-version: "4.7.1"
           - wazuh-revision: "40709"
