@@ -17,6 +17,7 @@ This program is a free software; you can redistribute it and/or modify it under 
 
 from wazuh_testing.api import make_api_call, get_token_login_api
 
+
 # Wazuh API Methods
 def get_api_parameters(host_manager):
     """
