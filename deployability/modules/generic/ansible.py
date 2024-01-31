@@ -22,7 +22,7 @@ class Ansible:
         self.playbooks_path = Path(__file__).parents[2] / 'playbooks'
         self.ansible_data = Inventory(**dict(ansible_data))
         self.inventory = self.generate_inventory()
-        self.logger = Logger(Path(__file__).name).get_logger()
+        self.logger = Logger(Path(__file__).stem).get_logger()
 
     def render_playbooks(self, rendering_variables: dict) -> list[str]:
         """
