@@ -19,12 +19,14 @@ Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
 
-from wazuh_testing.end_to_end.monitoring import generate_monitoring_logs_manager, monitoring_events_multihost
+from wazuh_testing.end_to_end.monitoring import generate_monitoring_logs, monitoring_events_multihost
 from wazuh_testing.end_to_end.wazuh_api import get_agents_id
 from wazuh_testing.tools.system import HostManager
 
 import time
 
+
+VD_FEED_UPDATE_TIMEOUT = 300
 
 def wait_until_vd_is_updated(host_manager: HostManager) -> None:
     """
@@ -33,14 +35,11 @@ def wait_until_vd_is_updated(host_manager: HostManager) -> None:
     Args:
         host_manager (HostManager): Host manager instance to handle the environment.
     """
-    monitoring_data = {}
 
-    for manager in host_manager.get_group_hosts('manager'):
-        monitoring_data = generate_monitoring_logs_manager(
-            host_manager, manager, "INFO: Action for 'vulnerability_feed_manager' finished", 1000
-        )
+    monitoring_data = generate_monitoring_logs(host_manager, ["INFO: Action for 'vulnerability_feed_manager' finished"],
+                                               [VD_FEED_UPDATE_TIMEOUT], host_manager.get_group_hosts('manager'))
 
-        monitoring_events_multihost(host_manager, monitoring_data)
+    monitoring_events_multihost(host_manager, monitoring_data)
 
 
 def wait_until_vuln_scan_agents_finished(host_manager: HostManager) -> None:
