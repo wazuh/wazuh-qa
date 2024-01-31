@@ -22,13 +22,14 @@ class VagrantProvider(Provider):
     provider_name = 'vagrant'
 
     @classmethod
-    def _create_instance(cls, base_dir: Path, params: CreationPayload) -> VagrantInstance:
+    def _create_instance(cls, base_dir: Path, params: CreationPayload, config: VagrantConfig = None) -> VagrantInstance:
         """
         Creates a Vagrant instance.
 
         Args:
             base_dir (Path): The base directory for the instance.
             params (CreationPayload): The parameters for instance creation.
+            config (VagrantConfig, optional): The configuration for the instance. Defaults to None.
 
         Returns:
             VagrantInstance: The created Vagrant instance.
@@ -37,11 +38,15 @@ class VagrantProvider(Provider):
         # Create the instance directory.
         instance_dir = base_dir / instance_id
         instance_dir.mkdir(parents=True, exist_ok=True)
-        # Generate the credentials.
         credentials = VagrantCredentials()
-        credentials.generate(instance_dir, 'instance_key')
-        # Parse the config and create Vagrantfile.
-        config = cls.__parse_config(params, credentials)
+        if not config:
+            # Generate the credentials.
+            credentials.generate(instance_dir, 'instance_key')
+            # Parse the config if it is not provided.
+            config = cls.__parse_config(params, credentials)
+        else:
+            credentials.load(config.public_key)
+        # Create the Vagrantfile.
         cls.__create_vagrantfile(instance_dir, config)
         return VagrantInstance(instance_dir, instance_id, credentials)
 
