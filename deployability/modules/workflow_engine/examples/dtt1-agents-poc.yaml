@@ -45,7 +45,8 @@ tasks:
         args:
           - test.py
           - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-          - dependency: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - dependencies:
+            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - tests: "uninstall"
           - component: "agent"
           - wazuh-version: "4.7.1"
@@ -81,21 +82,21 @@ tasks:
       with:
         path: python3
         args:
-          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
+          - allocation.py
           - action: create
           - provider: "{infra-provider}"
           - size: large
           - composite-name: "{manager-os}"
           - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
-    #cleanup:
-    #  this: process
-    #  with:
-    #    path: python3
-    #    args:
-    #      - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
-    #      - action: delete
-    #      - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+    cleanup:
+     this: process
+     with:
+       path: python3
+       args:
+         - allocation.py
+         - action: delete
+         - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 
   # Generic agent provision task
   - task: "provision-install-{agent}"
@@ -154,14 +155,14 @@ tasks:
           - composite-name: "{agent}"
           - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
-    #cleanup:
-    #  this: process
-    #  with:
-    #    path: python3
-    #    args:
-    #      - allocation.py
-    #      - action: delete
-    #      - track-output: "{working-dir}/agent-{agent}/track.yaml"
+    cleanup:
+     this: process
+     with:
+       path: python3
+       args:
+         - allocation.py
+         - action: delete
+         - track-output: "{working-dir}/agent-{agent}/track.yaml"
     foreach:
       - variable: agents-os
         as: agent
