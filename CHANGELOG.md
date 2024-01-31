@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Add an IT to check that the agent erases its wazuh-agent.state file ([#4716](https://github.com/wazuh/wazuh-qa/pull/4716)) \- (Core)
+- Fixed agent_simulator response for active-response configuration commands. ([#4895](https://github.com/wazuh/wazuh-qa/pull/4895)) \- (Framework)
 
 ## [4.8.2] - TBD
 
@@ -73,7 +74,10 @@ All notable changes to this project will be documented in this file.
 - Update framework known flaws file ([#4443](https://github.com/wazuh/wazuh-qa/pull/4443)) \- (Tests)
 - Align migration tool system tests to the tool's new output directory structure ([#4561](https://github.com/wazuh/wazuh-qa/pull/4561)) \- (Tests)
 - Update the migration tool's system tests to match the new log file naming convention ([#4618](https://github.com/wazuh/wazuh-qa/pull/4618)) \- (Tests)
+<<<<<<< HEAD
 - Update file descriptors threshold values used in cluster performance tests ([#5073](https://github.com/wazuh/wazuh-qa/pull/5073)) \- (Tests)
+=======
+>>>>>>> 2c1dde384 (fix: deleted xfail for PUT active-response.)
 
 ### Fixed
 
