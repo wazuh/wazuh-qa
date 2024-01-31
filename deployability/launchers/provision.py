@@ -19,7 +19,7 @@ def parse_arguments():
   parser.add_argument("--inventory-agent", default=None, help="Inventory with agent host information")
   parser.add_argument("--inventory-manager", default=None, help="Inventory with manager host information")
   parser.add_argument('--install',  action='append', default=[], help='List of dictionaries for installation.')
-  parser.add_argument("--custom-credentials", required=False, default=None)
+  parser.add_argument('--uninstall',  action='append', default=[], help='List of dictionaries for uninstall.')
   return parser.parse_args()
 
 if __name__ == "__main__":
