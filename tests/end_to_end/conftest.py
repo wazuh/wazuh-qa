@@ -346,5 +346,3 @@ def pytest_addoption(parser):
         type=str,
         help='Ansible roles path.',
     )
-
-
