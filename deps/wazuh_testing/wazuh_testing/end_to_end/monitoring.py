@@ -8,7 +8,6 @@ Description:
 Functions:
     - monitoring_events_multihost: Monitor events on multiple hosts concurrently.
     - generate_monitoring_logs: Generate monitoring data for logs on all agent hosts.
-    - generate_monitoring_logs_manager: Generate monitoring data for logs on a specific manager host.
 
 
 Copyright (C) 2015, Wazuh Inc.
@@ -35,6 +34,32 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
         host_manager: An instance of the HostManager class containing information about hosts.
         monitoring_data: A dictionary containing monitoring data for each host.
         ignore_error: If True, ignore errors and continue monitoring.
+
+    Returns:
+        dict: A dictionary containing the monitoring results.
+
+    Example of monitoring_data:
+        {
+           "manager1":[
+              {
+                 "regex":"INFO: Action for 'vulnerability_feed_manager' finished",
+                 "file":"/var/ossec/logs/ossec.log",
+                 "timeout":1000,
+                 "n_iterations":1,
+                 "greater_than_timestamp":""
+              }
+           ]
+        }
+    Example of monitoring_result:
+        {
+           "manager1":{
+              "not_found":[
+              ],
+              "found":[
+                 "INFO: Action for 'vulnerability_feed_manager' finished"
+              ]
+           }
+        }
     """
     def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict], scan_interval: int = 20,
                          ignore_error: bool = False) -> Dict:
@@ -115,6 +140,8 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
 
         return monitoring_result
 
+    logging.info(f"Monitoring the following elements: {monitoring_data}")
+
     with ThreadPoolExecutor() as executor:
         futures = []
         for host, data in monitoring_data.items():
@@ -128,13 +155,15 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
             except Exception as e:
                 logging.error(f"An error occurred: {e}")
 
+        logging.info(f"Monitoring results: {results}")
+
         return results
 
 
 def generate_monitoring_logs(host_manager: HostManager, regex_list: List[str], timeout_list: List[str],
                              hosts: List[str], n_iterations=1, greater_than_timestamp: str = '') -> Dict:
     """
-    Generate monitoring data for logs on all agent hosts.
+    Generate monitoring data for logs on all provided hosts.
 
     Args:
         host_manager: An instance of the HostManager class containing information about hosts.
@@ -146,45 +175,44 @@ def generate_monitoring_logs(host_manager: HostManager, regex_list: List[str], t
 
     Returns:
         dict: Monitoring data for logs on all agent hosts.
+
+    Example of monitoring_data:
+        {
+           "agent1":[
+              {
+                 "regex":"INFO: Action for 'vulnerability_feed_manager' finished",
+                 "file":"/var/ossec/logs/ossec.log",
+                 "timeout":1000,
+                 "n_iterations":1,
+                 "greater_than_timestamp":""
+              }
+           ]
+        }
+
     """
     monitoring_data = {}
-    for agent in hosts:
-        monitoring_data[agent] = []
+    if len(regex_list) == 1:
+        logging.info("Using the same regex for all hosts")
+        regex_list = regex_list * len(hosts)
+    elif len(regex_list) != len(hosts):
+        raise ValueError("The number of regexes must be equal to the number of hosts")
+
+    if len(timeout_list) == 1:
+        logging.info("Using the same timeout for all hosts")
+        timeout_list = timeout_list * len(hosts)
+    elif len(timeout_list) != len(hosts):
+        raise ValueError("The number of timeouts must be equal to the number of hosts")
+
+    for host in hosts:
+        monitoring_data[host] = []
         for index, regex_index in enumerate(regex_list):
-            os_name = host_manager.get_host_variables(agent)['os_name']
-            monitoring_data[agent].append({
+            os_name = host_manager.get_host_variables(host)['os_name']
+            monitoring_data[host].append({
                 'regex': regex_index,
                 'file': logs_filepath_os[os_name],
                 'timeout': timeout_list[index],
                 'n_iterations': n_iterations,
                 'greater_than_timestamp': greater_than_timestamp
             })
-    return monitoring_data
-
-
-def generate_monitoring_logs_manager(host_manager: HostManager, manager: str, regex: str, timeout: int,
-                                     n_iterations: int = 1, greater_than_timestamp: str = '') -> Dict:
-    """
-    Generate monitoring data for logs on a specific manager host.
-
-    Args:
-        host_manager: An instance of the HostManager class containing information about hosts.
-        manager: The target manager host.
-        regex: The regular expression for monitoring.
-        timeout: The timeout value for monitoring.
-        greater_than_timestamp: The timestamp to filter the results. Defaults to None.
-
-    Returns:
-        dict: Monitoring data for logs on the specified manager host.
-    """
-    monitoring_data = {}
-    os_name = host_manager.get_host_variables(manager)['os_name']
-    monitoring_data[manager] = [{
-        'regex': regex,
-        'file': logs_filepath_os[os_name],
-        'timeout': timeout,
-        'n_iterations': n_iterations,
-        'greater_than_timestamp': greater_than_timestamp
-    }]
 
     return monitoring_data
