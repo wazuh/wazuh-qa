@@ -23,6 +23,7 @@ This program is a free software; you can redistribute it and/or modify it under 
 import os
 import json
 import logging
+import time
 from typing import Dict, List
 from multiprocessing.pool import ThreadPool
 from datetime import datetime
@@ -85,10 +86,20 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
 
     current_datetime = datetime.utcnow().isoformat()
     host_manager.install_package(host, package_url, system)
+    logging.critical(f"Package {package_url} installed on {host}")
+    time.sleep(200)
 
     logging.critical(f"Package installed on {host}")
+    results = {
+            'evidences': {
+                "alerts_not_found": [],
+                "states_not_found": []
+            },
+            'checks': {}
+    }
 
-    if operation_data['check']['alerts'] or operation_data['check']['state_index']:
+
+    if 'check' in operation_data and (operation_data['check']['alerts'] or operation_data['check']['state_index']):
         logging.critical(f"Waiting for syscollector scan to finish on {host}")
         TIMEOUT_SYSCOLLECTOR_SCAN = 80
         truncate_remote_host_group_files(host_manager, 'agent', 'logs')
@@ -112,24 +123,16 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
 
         logging.critical(f"Checking agent vulnerability on {host}")
 
-        results = {
-                'evidences': {
-                    "alerts_not_found": [],
-                    "states_not_found": []
-                },
-                'checks': {}
-        }
-
         if 'check' in operation_data:
             if operation_data['check']['alerts']:
                 logging.critical(f'Checking vulnerability alerts in the indexer for {host}')
-                results["alerts_not_found"] = check_vuln_alert_indexer(host_manager, host, package_data,
-                                                                       current_datetime)
+                results['evidences']["alerts_not_found"] = check_vuln_alert_indexer(host_manager, host, package_data,
+                                                                                    current_datetime)
 
             if operation_data['check']['state_index']:
                 logging.critical(f'Checking vulnerability state index for {host}')
-                results["states_not_found"] = check_vuln_state_index(host_manager, host, package_data,
-                                                                     current_datetime)
+                results['results']["states_not_found"] = check_vuln_state_index(host_manager, host, package_data,
+                                                                                current_datetime)
 
         logging.critical(f"Results: {results}")
 
@@ -137,10 +140,12 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
             results['checks']['all_successfull'] = False
         else:
             results['checks']['all_successfull'] = True
+    else:
+        results['checks']['all_successfull'] = True
 
-        return {
-                f"{host}": results
-            }
+    return {
+            f"{host}": results
+        }
 
 
 def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: HostManager):
@@ -259,7 +264,7 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
         system = host_manager.get_host_variables(host)['os'].split('_')[0]
 
     install_package_data_from = operation_data['package']['from']
-    install_package_data_to= operation_data['package']['to']
+    install_package_data_to = operation_data['package']['to']
 
     package_id_from = None
     package_id_to = None
@@ -287,6 +292,9 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
 
     current_datetime = datetime.utcnow().isoformat()
     host_manager.install_package(host, package_url_to, system)
+
+    logging.critical(f"Package {package_url_to} installed on {host}")
+    time.sleep(200)
 
     logging.critical(f"Package installed on {host}")
 
@@ -385,6 +393,7 @@ def launch_remote_operation(host: str, operation_data: Dict[str, Dict], host_man
     operation = operation_data['operation']
     if operation in globals():
         operation_result = globals()[operation](host, operation_data, host_manager)
+        logging.critical(f"Operation result: {operation_result}")
         return operation_result
     else:
         raise ValueError(f"Operation {operation} not recognized")
@@ -405,17 +414,28 @@ def launch_parallel_operations(task_list: List[Dict], host_manager: HostManager,
             results[target]['checks']['all_successfull'] = False
 
     def launch_and_store_result(args):
+        logging.info("Launching remote operation on host: {}".format(args[0]))
         host, task, manager = args
         result = launch_remote_operation(host, task, manager)
+        logging.info("FINAL Result of remote operation on host {}: {}".format(host, result))
         results.update(result)
 
     with ThreadPoolExecutor() as executor:
         # Submit tasks asynchronously
-        futures = [executor.submit(launch_and_store_result, (host, task, host_manager))
-                   for task in task_list for host in host_manager.get_group_hosts(task['target'] - target_to_ignore)]
+        futures = []
+        for task in task_list:
+            hosts_target = host_manager.get_group_hosts(task['target'])
+            if target_to_ignore:
+                hosts_target = [host for host in hosts_target if host not in target_to_ignore]
+
+            logging.info("Hosts target after removing ignored targets: {}".format(hosts_target))
+
+            for host in hosts_target:
+                futures.append(executor.submit(launch_and_store_result, (host, task, host_manager)))
 
         # Wait for all tasks to complete
         for future in futures:
             future.result()
 
+    logging.info("Results in parallel operations: {}".format(results))
     return results
