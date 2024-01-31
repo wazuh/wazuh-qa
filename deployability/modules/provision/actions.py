@@ -1,13 +1,27 @@
 from modules.generic import Ansible
 
 from .componentType import Package, AIO, Generic, Dependencies
+from modules.provision.models import ComponentInfo
 from modules.provision.logger import logger
 
 class Action:
     """
     Class to define the action.
+
+    Attributes:
+        component (Package | AIO | Generic | Dependencies): The component to execute.
+        ansible (Ansible): The Ansible instance.
     """
-    def __init__(self, action, component_info, ansible_data):
+    def __init__(self, action: str, component_info: ComponentInfo, ansible_data: dict) -> None:
+        """
+        Initialize the action.
+        
+        Args:
+            action (str): The action to execute.
+            component_info (ComponentInfo): The component information.
+            ansible_data (dict): The Ansible data.
+        """
+        component_info = ComponentInfo(**dict(component_info))
         action_type = component_info.type
 
         if action_type == "package":
@@ -23,9 +37,12 @@ class Action:
 
         self.ansible = Ansible(ansible_data)
 
-    def execute(self):
+    def execute(self) -> dict:
         """
-        Execute the action.
+        Execute the action for the component.
+
+        Returns:
+            dict: The status of the executed action.
         """
         status = {}
 
