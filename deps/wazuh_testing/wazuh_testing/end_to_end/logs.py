@@ -7,12 +7,15 @@ Description:
 
 Functions:
     - truncate_remote_host_group_files: Truncate the specified files in all the host of a group
+    - get_hosts_logs: Get the logs from the specified host group
 
 
 Copyright (C) 2015, Wazuh Inc.
 Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
+from typing import Dict
+
 from wazuh_testing import ALERTS_JSON_PATH
 from wazuh_testing.end_to_end import logs_filepath_os
 from wazuh_testing.tools.system import HostManager
@@ -41,7 +44,7 @@ def truncate_remote_host_group_files(host_manager: HostManager, host_group: str,
         host_manager.truncate_file(host, log_file_path)
 
 
-def get_hosts_logs(host_manager: HostManager, host_group: str = 'all') -> dict:
+def get_hosts_logs(host_manager: HostManager, host_group: str = 'all') -> Dict[str, str]:
     """
     Get the logs from the specified host group.
 
