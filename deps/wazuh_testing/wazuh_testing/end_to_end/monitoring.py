@@ -7,9 +7,8 @@ Description:
 
 Functions:
     - monitoring_events_multihost: Monitor events on multiple hosts concurrently.
-    - generate_monitoring_logs_all_agent: Generate monitoring data for logs on all agent hosts.
+    - generate_monitoring_logs: Generate monitoring data for logs on all agent hosts.
     - generate_monitoring_logs_manager: Generate monitoring data for logs on a specific manager host.
-    - generate_monitoring_alerts_all_agent: Generate monitoring data for alerts on all agent hosts.
 
 
 Copyright (C) 2015, Wazuh Inc.
@@ -18,16 +17,17 @@ This program is a free software; you can redistribute it and/or modify it under 
 """
 
 import re
+import logging
 from time import sleep
+from datetime import datetime
 from typing import Dict, List
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from wazuh_testing.end_to_end import logs_filepath_os
-from wazuh_testing.end_to_end.regex import get_event_regex
 from wazuh_testing.tools.system import HostManager
 
 
-def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict, ignore_error=False) -> Dict:
+def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict, ignore_error: bool = False) -> Dict:
     """
     Monitor events on multiple hosts concurrently.
 
@@ -37,7 +37,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
         ignore_error: If True, ignore errors and continue monitoring.
     """
     def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict], scan_interval: int = 20,
-                         ignore_error=False):
+                         ignore_error: bool = False) -> Dict:
         """
         Monitor the specified elements on a host.
 
@@ -50,12 +50,35 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
         Raises:
             TimeoutError: If no match is found within the specified timeout.
         """
+        def filter_events_by_timestamp(match_events: List) -> List:
+            """
+            Filter events by timestamp.
+
+            Args:
+                match_events (List): A list of events.
+
+            Returns:
+                List: A list of events that fit the timestamp.
+            """
+            match_that_fit_timestamp = []
+            for match in match_events:
+                if len(match.groups()) > 1:
+                    timestamp_str = match.groups()[0]
+                    timestamp_format = "%Y/%m/%d %H:%M:%S"
+                    timestamp_datetime = datetime.strptime(timestamp_str, timestamp_format)
+                    if timestamp_datetime >= greater_than_timestamp:
+                        match_that_fit_timestamp.append(match)
+
+            return match_that_fit_timestamp
+
         elements_not_found = []
         elements_found = []
 
         for element in monitoring_elements:
-            regex, timeout, monitoring_file, n_iterations = element['regex'], element['timeout'], element['file'], \
-                                                            element['n_iterations']
+            regex, timeout, monitoring_file, n_iterations, greater_than_timestamp = element['regex'], \
+                                                            element['timeout'], element['file'], \
+                                                            element['n_iterations'], \
+                                                            element.get('greater_than_timestamp', None)
             current_timeout = 0
             regex_match = None
 
@@ -63,8 +86,14 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
                 file_content = host_manager.get_file_content(host, monitoring_file)
 
                 match_regex = re.findall(regex, file_content)
-                if match_regex and len(list(match_regex)) >= n_iterations:
-                    elements_found = list(match_regex)
+
+                if greater_than_timestamp:
+                    match_that_fit_timestamp = filter_events_by_timestamp(match_regex)
+                else:
+                    match_that_fit_timestamp = list(match_regex)
+
+                if match_that_fit_timestamp and len(list(match_that_fit_timestamp)) >= n_iterations:
+                    elements_found = list(match_that_fit_timestamp)
                     regex_match = True
                     break
 
@@ -82,9 +111,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
         if host not in monitoring_result:
             monitoring_result[host] = {}
 
-        monitoring_result[host]['not_found'] = elements_not_found
-
-        monitoring_result[host]['found'] = elements_found
+        monitoring_result = {host: {'not_found': elements_not_found, 'found': elements_found}}
 
         return monitoring_result
 
@@ -99,13 +126,13 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
                 result = future.result()
                 results.update(result)
             except Exception as e:
-                print(f"An error occurred: {e}")
+                logging.error(f"An error occurred: {e}")
 
         return results
 
 
-def generate_monitoring_logs(host_manager: HostManager, regex_list: list, timeout_list: list, hosts: list,
-                             n_iterations=1) -> dict:
+def generate_monitoring_logs(host_manager: HostManager, regex_list: List[str], timeout_list: List[str],
+                             hosts: List[str], n_iterations=1, greater_than_timestamp: str = '') -> Dict:
     """
     Generate monitoring data for logs on all agent hosts.
 
@@ -113,6 +140,9 @@ def generate_monitoring_logs(host_manager: HostManager, regex_list: list, timeou
         host_manager: An instance of the HostManager class containing information about hosts.
         regex_list: A list of regular expressions for monitoring.
         timeout_list: A list of timeout values for monitoring.
+        hosts: A list of target hosts.
+        n_iterations: The number of iterations to find the regex. Defaults to 1.
+        greater_than_timestamp: The timestamp to filter the results. Defaults to None.
 
     Returns:
         dict: Monitoring data for logs on all agent hosts.
@@ -126,13 +156,14 @@ def generate_monitoring_logs(host_manager: HostManager, regex_list: list, timeou
                 'regex': regex_index,
                 'file': logs_filepath_os[os_name],
                 'timeout': timeout_list[index],
-                'n_iterations': n_iterations
+                'n_iterations': n_iterations,
+                'greater_than_timestamp': greater_than_timestamp
             })
     return monitoring_data
 
 
 def generate_monitoring_logs_manager(host_manager: HostManager, manager: str, regex: str, timeout: int,
-                                     n_iterations: int = 1) -> dict:
+                                     n_iterations: int = 1, greater_than_timestamp: str = '') -> Dict:
     """
     Generate monitoring data for logs on a specific manager host.
 
@@ -141,6 +172,7 @@ def generate_monitoring_logs_manager(host_manager: HostManager, manager: str, re
         manager: The target manager host.
         regex: The regular expression for monitoring.
         timeout: The timeout value for monitoring.
+        greater_than_timestamp: The timestamp to filter the results. Defaults to None.
 
     Returns:
         dict: Monitoring data for logs on the specified manager host.
@@ -151,43 +183,8 @@ def generate_monitoring_logs_manager(host_manager: HostManager, manager: str, re
         'regex': regex,
         'file': logs_filepath_os[os_name],
         'timeout': timeout,
-        'n_iterations': n_iterations
+        'n_iterations': n_iterations,
+        'greater_than_timestamp': greater_than_timestamp
     }]
-
-    return monitoring_data
-
-
-def generate_monitoring_alerts_all_agent(host_manager: HostManager, events_metadata: dict) -> dict:
-    """
-    Generate monitoring data for alerts on all agent hosts.
-
-    Args:
-        host_manager: An instance of the HostManager class containing information about hosts.
-        events_metadata: Metadata containing information about events.
-
-    Returns:
-        dict: Monitoring data for alerts on all agent hosts.
-    """
-    monitoring_data = {}
-
-    for agent in host_manager.get_group_hosts('agent'):
-        host_os_name = host_manager.get_host_variables(agent)['os'].split('_')[0]
-        metadata_agent = events_metadata[host_os_name]
-
-        if not host_manager.get_host_variables(agent)['manager'] in monitoring_data:
-            monitoring_data[host_manager.get_host_variables(agent)['manager']] = []
-
-        for event in metadata_agent[host_manager.get_host_variables(agent)['arch']]:
-            event['parameters']['HOST_NAME'] = agent
-            monitoring_element = {
-                'regex': get_event_regex(event),
-                'file': '/var/ossec/logs/alerts/alerts.json',
-                'timeout': 120,
-                'n_iterations': 1
-            }
-            if 'parameters' in metadata_agent:
-                monitoring_element['parameters'] = metadata_agent['parameters']
-
-            monitoring_data[host_manager.get_host_variables(agent)['manager']].append(monitoring_element)
 
     return monitoring_data
