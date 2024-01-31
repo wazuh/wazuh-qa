@@ -1,32 +1,33 @@
 """
-Vulnerability Data Update and Scan Monitoring Module.
+Module to handle waiters for the end-to-end tests.
 -----------------------------------------------------
 
-This module provides functions for waiting until vulnerability data is updated for all manager hosts and until vulnerability scans for all agents are finished.
+This module provides functions for waiting until vulnerability data is updated for all manager hosts and until
+vulnerability scans for all agents are finished.
 
 Functions:
     - wait_until_vd_is_updated: Wait until the vulnerability data is updated for all manager hosts.
     - wait_until_vuln_scan_agents_finished: Wait until vulnerability scans for all agents are finished.
 
-Dependencies:
-    - wazuh_testing.end_to_end.monitoring: Module containing functions for generating monitoring logs and handling events.
-    - wazuh_testing.end_to_end.wazuh_api: Module containing functions for retrieving agent IDs.
-    - wazuh_testing.tools.system: Module providing the HostManager class for handling the environment.
+Constants:
+    - VD_FEED_UPDATE_TIMEOUT: Time in seconds to wait until the vulnerability data is updated for all manager hosts.
+    - VD_INITIAL_SCAN_PER_AGENT_TIMEOUT: Time in seconds to wait until vulnerability scans for each agent is finished.
 
 
 Copyright (C) 2015, Wazuh Inc.
 Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
+import time
 
 from wazuh_testing.end_to_end.monitoring import generate_monitoring_logs, monitoring_events_multihost
 from wazuh_testing.end_to_end.wazuh_api import get_agents_id
 from wazuh_testing.tools.system import HostManager
 
-import time
-
 
 VD_FEED_UPDATE_TIMEOUT = 300
+VD_INITIAL_SCAN_PER_AGENT_TIMEOUT = 15
+
 
 def wait_until_vd_is_updated(host_manager: HostManager) -> None:
     """
@@ -38,7 +39,6 @@ def wait_until_vd_is_updated(host_manager: HostManager) -> None:
 
     monitoring_data = generate_monitoring_logs(host_manager, ["INFO: Action for 'vulnerability_feed_manager' finished"],
                                                [VD_FEED_UPDATE_TIMEOUT], host_manager.get_group_hosts('manager'))
-
     monitoring_events_multihost(host_manager, monitoring_data)
 
 
@@ -49,21 +49,5 @@ def wait_until_vuln_scan_agents_finished(host_manager: HostManager) -> None:
     Args:
         host_manager (HostManager): Host manager instance to handle the environment.
     """
-    # The order of agents may not be guaranteed.
-    # The Vulnerability Detector scans are ordered based on the agent ID.
-    # We are currently awaiting completion of all scans globally,
-    # with a timeout set to 5 minutes for each agent.
-    final_timeout = 15 * len(host_manager.get_group_hosts('agent'))
+    final_timeout = VD_INITIAL_SCAN_PER_AGENT_TIMEOUT * len(get_agents_id(host_manager))
     time.sleep(final_timeout)
-
-    # for agent in host_manager.get_group_hosts('agent'):
-    #    manager_host = host_manager.get_host_variables(agent)['manager']
-    #    agents_id = get_agents_id(host_manager)
-    #    agent_id = agents_id.get(agent, '')
-    #    finished_scan_pattern = rf"Finished vulnerability assessment for agent '{agent_id}'"
-    #
-    #        monitoring_data = generate_monitoring_logs_manager(
-    #            host_manager, manager_host, finished_scan_pattern, final_timeout
-    #        )
-    #
-    #        monitoring_events_multihost(host_manager, monitoring_data)
