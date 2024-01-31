@@ -15,39 +15,151 @@ Functions:
     - launch_remote_sequential_operation_on_agent: Launch sequential remote operations on a specific agent.
     - launch_parallel_operations: Launch parallel remote operations on multiple hosts.
 
+
 Copyright (C) 2015, Wazuh Inc.
 Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
-
-import os
-import json
 import logging
-import time
 from typing import Dict, List
-from multiprocessing.pool import ThreadPool
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 
+from wazuh_testing.modules.syscollector import TIMEOUT_SYSCOLLECTOR_SHORT_SCAN
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.end_to_end.monitoring import generate_monitoring_logs, monitoring_events_multihost
 from wazuh_testing.end_to_end.waiters import wait_until_vuln_scan_agents_finished
 from wazuh_testing.end_to_end.regex import get_event_regex
 from wazuh_testing.end_to_end.logs import truncate_remote_host_group_files
-from wazuh_testing.end_to_end.vulnerability_detector import check_vuln_alert_indexer, check_vuln_state_index
+from wazuh_testing.end_to_end.vulnerability_detector import check_vuln_alert_indexer, check_vuln_state_index, \
+        load_packages_metadata, get_vulnerabilities_alerts_indexer, get_indexer_values
 
 
-def load_packages_metadata():
-    """
-    Load packages metadata from the packages.json file.
-    """
-    packages_filepath = os.path.join(os.path.dirname(__file__),
-                                     'vulnerability_detector_packages', 'vuln_packages.json')
+def wait_syscollector_and_vuln_scan(host_manager: HostManager, host: str,  operation_data: Dict,
+                                    current_datetime: str = '') -> None:
+    logging.info(f"Waiting for syscollector scan to finish on {host}")
 
-    with open(packages_filepath, 'r') as packages_file:
-        packages_data = json.load(packages_file)
+    timeout_syscollector_scan = TIMEOUT_SYSCOLLECTOR_SHORT_SCAN if 'timeout_syscollector_scan' not in \
+        operation_data else operation_data['timeout_syscollector_scan']
 
-    return packages_data
+    # Wait until syscollector
+    monitoring_data = generate_monitoring_logs(host_manager,
+                                               [get_event_regex({'event': 'syscollector_scan_start'}),
+                                                get_event_regex({'event': 'syscollector_scan_end'})],
+                                               [timeout_syscollector_scan, timeout_syscollector_scan],
+                                               host_manager.get_group_hosts('agent'),
+                                               greater_than_timestamp=current_datetime)
+
+    monitoring_events_multihost(host_manager, monitoring_data)
+
+    logging.critical(f"Waiting for vulnerability scan to finish on {host}")
+
+    wait_until_vuln_scan_agents_finished(host_manager)
+
+    logging.critical(f"Checking agent vulnerability on {host}")
+
+
+def check_vulnerability_alerts(results: Dict, check_data: Dict, current_datetime: str, host_manager: HostManager,
+                               host: str,
+                               package_data: Dict,
+                               operation: str = 'install') -> None:
+
+    # In case of update, we need to not expect vulnerabilities from previous package and expect vulnerabilities from
+    # new package
+
+    if update:
+        package_data_from = package_data['from']
+        package_data_to = package_data['to']
+        vulnerabilities_from = package_data_from['vulnerabilities']
+        vulnerabilities_to = package_data_to['vulnerabilities']
+
+        states_vulnerabilities_expected = vulnerabilities_to
+        states_vulnerabilities_not_expected = vulnerabilities_from
+
+        # Alerts from previous package should be mitigated
+
+
+    else:
+        states_vulnerabilities_expected = package_data['vulnerabilities']
+        states_vulnerabilities_not_expected = []
+
+
+
+
+
+    # Get all the alerts generated in the timestamp
+    vulnerability_alerts = get_vulnerabilities_alerts_indexer(host_manager, host, current_datetime)
+    vulnerability_alerts_mitigated = get_vulnerabilities_alerts_indexer(host_manager, host, current_datetime, True)
+
+    vulnerability_index = get_indexer_values(host_manager, index='wazuh-vulnerability-detector',
+                                             greater_than_timestamp=current_datetime)['hits']['hits']
+
+    results['checks']['alerts_found'] = vulnerability_alerts
+    results['checks']['states_found'] = vulnerability_index
+
+    # Check unexpected alerts. For installation/removel non vulnerable package
+    if check_data['no_alerts']:
+        logging.critical(f'Checking unexpected vulnerability alerts in the indexer for {host}')
+        results['evidences']["alerts_found_unexpected"] = {
+                "mitigated": vulnerability_alerts_mitigated,
+                "vulnerabilities": vulnerability_alerts
+        }
+        if len(results['evidences']['alerts_found_unexpected'].get('mitigated', [])) > 0 or \
+                len(results['evidences']['alerts_found_unexpected'].get('vulnerabilities', [])) > 0:
+            results['checks']['all_successfull'] = False
+
+    # Check expected alerts
+    elif check_data['alerts']:
+        logging.critical(f'Checking vulnerability alerts for {host}')
+        if operation == 'update' or operation == 'remove':
+            evidence_key = "alerts_not_found_from" if operation == 'update' else "alerts_not_found"
+            package_data_to_use = package_data['from'] if operation == 'update' else package_data
+            # Check alerts from previous package are mitigated
+            results['evidences'][evidence_key] = check_vuln_alert_indexer(vulnerability_alerts_mitigated,
+                                                                          host,
+                                                                          package_data_to_use,
+                                                                          current_datetime)
+        elif operation == 'install' or operation == 'update':
+            # Check alerts from new package are found
+            evidence_key = "alerts_not_found_to" if operation == 'update' else "alerts_not_found"
+            package_data_to_use = package_data['to'] if operation == 'update' else package_data
+            results['evidences'][evidence_key] = check_vuln_alert_indexer(vulnerability_alerts,
+                                                                          host,
+                                                                          package_data_to_use,
+                                                                          current_datetime)
+
+        if len(results['evidences'].get('alerts_not_found_from', [])) > 0 or \
+                len(results['evidences'].get('alerts_not_found_to', [])) > 0 or \
+                len(results['evidences'].get('alerts_not_found', [])) > 0:
+            results['checks']['all_successfull'] = False
+
+    # Check unexpected states
+    if check_data['no_indices']:
+        logging.critical(f'Checking vulnerability state index for {host}')
+        results['evidences']["states_found_unexpected"] = vulnerability_index
+
+        if len(results['evidences']['states_found_unexpected']) > 0:
+            results['checks']['all_successfull'] = False
+
+    elif check_data['state_index']:
+        if operation == 'update' or operation == 'remove':
+            evidence_key = 'states_found_unexpected_from' if operation == 'update' else 'states_found_unexpected'
+            package_data_to_use = package_data['from'] if operation == 'update' else package_data
+            # Check states from previous package are mitigated
+            results['evidences'][evidence_key] = check_vuln_state_index(host_manager, host, package_data_to_use,
+                                                                        current_datetime)
+            if len(results['evidences'][evidence_key]) != len(package_data_to_use['vulnerabilities']):
+                results['checks']['all_successfull'] = False
+
+        elif operation == 'install' or operation == 'update':
+            # Check states from new package are found
+            evidence_key = 'states_not_found_to' if operation == 'update' else 'states_not_found'
+            package_data_to_use = package_data['to'] if operation == 'update' else package_data
+            results['evidences'][evidence_key] = check_vuln_state_index(host_manager, host, package_data_to_use,
+                                                                        current_datetime)
+
+            if len(results['evidences'][evidence_key]) != 0:
+                results['checks']['all_successfull'] = False
 
 
 def install_package(host: str, operation_data: Dict[str, Dict], host_manager: HostManager):
@@ -62,10 +174,24 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
     Raises:
         ValueError: If the specified operation is not recognized.
     """
-    logging.critical(f"Installing package on {host}")
+    results = {
+            'evidences': {
+                "alerts_not_found": [],
+                "states_not_found": [],
+                "alerts_found": [],
+                "states_found": [],
+                "alerts_found_unexpected": [],
+                "states_found_unexpected": []
+            },
+            'checks': {}
+    }
+
+    logging.info(f"Installing package on {host}")
+
     host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
     host_os_arch = host_manager.get_host_variables(host)['architecture']
     system = host_manager.get_host_variables(host)['os_name']
+
     if system == 'linux':
         system = host_manager.get_host_variables(host)['os'].split('_')[0]
 
@@ -81,67 +207,29 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
     package_data = load_packages_metadata()[package_id]
     package_url = package_data['urls'][host_os_name][host_os_arch]
 
-    logging.critical(f"Installing package on {host}")
-    logging.critical(f"Package URL: {package_url}")
+    logging.info(f"Installing package on {host}")
+    logging.info(f"Package URL: {package_url}")
 
     current_datetime = datetime.utcnow().isoformat()
+
     host_manager.install_package(host, package_url, system)
-    logging.critical(f"Package {package_url} installed on {host}")
-    time.sleep(200)
 
-    logging.critical(f"Package installed on {host}")
-    results = {
-            'evidences': {
-                "alerts_not_found": [],
-                "states_not_found": []
-            },
-            'checks': {}
-    }
+    logging.info(f"Package {package_url} installed on {host}")
 
+    logging.info(f"Package installed on {host}")
 
-    if 'check' in operation_data and (operation_data['check']['alerts'] or operation_data['check']['state_index']):
-        logging.critical(f"Waiting for syscollector scan to finish on {host}")
-        TIMEOUT_SYSCOLLECTOR_SCAN = 80
-        truncate_remote_host_group_files(host_manager, 'agent', 'logs')
+    results['checks']['all_successfull'] = True
 
-        # Wait until syscollector
-        monitoring_data = generate_monitoring_logs(host_manager,
-                                                   [get_event_regex({'event': 'syscollector_scan_start'}),
-                                                    get_event_regex({'event': 'syscollector_scan_end'})],
-                                                   [TIMEOUT_SYSCOLLECTOR_SCAN, TIMEOUT_SYSCOLLECTOR_SCAN],
-                                                   host_manager.get_group_hosts('agent'))
+    wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
+                                                      operation_data['check']['state_index'] or
+                                                      operation_data['check']['no_alerts'] or
+                                                      operation_data['check']['no_indices'])
 
-        result = monitoring_events_multihost(host_manager, monitoring_data)
+    if wait_is_required:
+        wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
 
-        logging.critical(f"Syscollector scan finished with result: {result}")
-
-        truncate_remote_host_group_files(host_manager, 'manager', 'logs')
-
-        logging.critical(f"Waiting for vulnerability scan to finish on {host}")
-
-        wait_until_vuln_scan_agents_finished(host_manager)
-
-        logging.critical(f"Checking agent vulnerability on {host}")
-
-        if 'check' in operation_data:
-            if operation_data['check']['alerts']:
-                logging.critical(f'Checking vulnerability alerts in the indexer for {host}')
-                results['evidences']["alerts_not_found"] = check_vuln_alert_indexer(host_manager, host, package_data,
-                                                                                    current_datetime)
-
-            if operation_data['check']['state_index']:
-                logging.critical(f'Checking vulnerability state index for {host}')
-                results['results']["states_not_found"] = check_vuln_state_index(host_manager, host, package_data,
-                                                                                current_datetime)
-
-        logging.critical(f"Results: {results}")
-
-        if results['alerts_not_found'] or results['states_not_found']:
-            results['checks']['all_successfull'] = False
-        else:
-            results['checks']['all_successfull'] = True
-    else:
-        results['checks']['all_successfull'] = True
+        check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
+                                   package_data, operation='install')
 
     return {
             f"{host}": results
@@ -161,6 +249,17 @@ def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
         ValueError: If the specified operation is not recognized.
     """
     logging.critical(f"Removing package on {host}")
+    results = {
+            'evidences': {
+                "alerts_not_found": [],
+                "states_not_found": [],
+                "alerts_found": [],
+                "states_found": [],
+                "alerts_found_unexpected": [],
+                "states_found_unexpected": []
+            },
+            'checks': {}
+    }
     host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
     host_os_arch = host_manager.get_host_variables(host)['architecture']
     system = host_manager.get_host_variables(host)['os_name']
@@ -178,69 +277,29 @@ def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
 
     package_data = load_packages_metadata()[package_id]
 
-    logging.critical(f"Removing package on {host}")
-    uninstall_name = package_data['uninstall_name']
-
     current_datetime = datetime.utcnow().isoformat()
-    host_manager.remove_package(host, uninstall_name, system)
 
-    if operation_data['check']['alerts'] or operation_data['check']['state_index']:
-        logging.critical(f"Waiting for syscollector scan to finish on {host}")
-        TIMEOUT_SYSCOLLECTOR_SCAN = 80
-        truncate_remote_host_group_files(host_manager, 'agent', 'logs')
+    logging.critical(f"Removing package on {host}")
+    if 'uninstall_name' in package_data:
+        uninstall_name = package_data['uninstall_name']
+        host_manager.remove_package(host, system, package_uninstall_name=uninstall_name)
+    elif 'uninstall_custom_playbook' in package_data:
+        host_manager.remove_package(host, system, custom_uninstall_playbook=package_data['uninstall_custom_playbook'])
 
-        # Wait until syscollector
-        monitoring_data = generate_monitoring_logs(host_manager,
-                                                   [get_event_regex({'event': 'syscollector_scan_start'}),
-                                                    get_event_regex({'event': 'syscollector_scan_end'})],
-                                                   [TIMEOUT_SYSCOLLECTOR_SCAN, TIMEOUT_SYSCOLLECTOR_SCAN],
-                                                   host_manager.get_group_hosts('agent'))
+    wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
+                                                      operation_data['check']['state_index'] or
+                                                      operation_data['check']['no_alerts'] or
+                                                      operation_data['check']['no_indices'])
 
-        result = monitoring_events_multihost(host_manager, monitoring_data)
+    if wait_is_required:
+        wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
 
-        logging.critical(f"Syscollector scan finished with result: {result}")
+        check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
+                                   package_data, operation='remove')
 
-        truncate_remote_host_group_files(host_manager, 'manager', 'logs')
-
-        logging.critical(f"Waiting for vulnerability scan to finish on {host}")
-
-        wait_until_vuln_scan_agents_finished(host_manager)
-
-        logging.critical(f"Checking agent vulnerability on {host}")
-
-        results = {
-                'evidences': {
-                    "alerts_not_found": [],
-                    "states_found": []
-                },
-                'checks': {}
+    return {
+            f"{host}": results
         }
-
-        logging.critical("Operation data is: {}".format(package_data))
-
-        if 'check' in operation_data:
-            if operation_data['check']['alerts'] or operation_data['check']['states']:
-                if operation_data['check']['alerts']:
-                    logging.critical(f'Checking vulnerability alerts in the indexer for {host}')
-                    results["evidences"]["alerts_not_found"] = check_vuln_alert_indexer(host_manager, host, package_data,
-                                                                                        current_datetime,
-                                                                                        vuln_mitigated=True)
-
-                if operation_data['check']['state_index']:
-                    logging.critical(f'Checking vulnerability state index for {host}')
-                    states_not_found = check_vuln_state_index(host_manager, host, package_data,
-                                                              current_datetime, return_found=True)
-
-                    results['evidences']["states_found"] = states_not_found
-
-            if results['evidences']['alerts_not_found'] or len(results['evidences']['states_found']) > 0:
-                results['checks']['all_successfull'] = False
-            else:
-                results['checks']['all_successfull'] = True
-
-        return {
-                f"{host}": results
-            }
 
 
 def update_package(host: str, operation_data: Dict[str, Dict], host_manager: HostManager):
@@ -256,6 +315,17 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
         ValueError: If the specified operation is not recognized.
     """
     logging.critical(f"Updating package on {host}")
+    results = {
+            'evidences': {
+                "alerts_not_found_from": [],
+                'alerts_found_from': [],
+                "alerts_found": [],
+                "states_found": [],
+                "alerts_found_unexpected": [],
+                "states_found_unexpected": []
+            },
+            'checks': {}
+    }
 
     host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
     host_os_arch = host_manager.get_host_variables(host)['architecture']
@@ -284,7 +354,6 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
     package_data_from = load_packages_metadata()[package_id_from]
     package_data_to = load_packages_metadata()[package_id_to]
 
-    package_url_from = package_data_from['urls'][host_os_name][host_os_arch]
     package_url_to = package_data_to['urls'][host_os_name][host_os_arch]
 
     logging.critical(f"Installing package on {host}")
@@ -294,77 +363,18 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
     host_manager.install_package(host, package_url_to, system)
 
     logging.critical(f"Package {package_url_to} installed on {host}")
-    time.sleep(200)
 
     logging.critical(f"Package installed on {host}")
 
-    if operation_data['check']['alerts'] or operation_data['check']['state_index']:
-        logging.critical(f"Waiting for syscollector scan to finish on {host}")
-        TIMEOUT_SYSCOLLECTOR_SCAN = 80
-        truncate_remote_host_group_files(host_manager, 'agent', 'logs')
+    wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
+                                                      operation_data['check']['state_index'] or
+                                                      operation_data['check']['no_alerts'] or
+                                                      operation_data['check']['no_indices'])
+    if wait_is_required:
+        wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
 
-        # Wait until syscollector
-        monitoring_data = generate_monitoring_logs(host_manager,
-                                                   [get_event_regex({'event': 'syscollector_scan_start'}),
-                                                    get_event_regex({'event': 'syscollector_scan_end'})],
-                                                   [TIMEOUT_SYSCOLLECTOR_SCAN, TIMEOUT_SYSCOLLECTOR_SCAN],
-                                                   host_manager.get_group_hosts('agent'))
-
-        result = monitoring_events_multihost(host_manager, monitoring_data)
-
-        logging.critical(f"Syscollector scan finished with result: {result}")
-
-        truncate_remote_host_group_files(host_manager, 'manager', 'logs')
-
-        logging.critical(f"Waiting for vulnerability scan to finish on {host}")
-
-        wait_until_vuln_scan_agents_finished(host_manager)
-
-        logging.critical(f"Checking agent vulnerability on {host}")
-
-        results = {
-                'evidences': {
-                    "alerts_not_found_from": [],
-                    "states_found_from": [],
-                    "alerts_not_found_to": [],
-                    "states_not_found_to": [],
-                },
-                'checks': {}
-        }
-
-        if 'check' in operation_data:
-            if operation_data['check']['alerts']:
-                logging.critical(f'Checking vulnerability alerts in the indexer for {host}. Expected CVE mitigation')
-                results["evidences"]["alerts_not_found_from"] = check_vuln_alert_indexer(host_manager, host, package_data_from,
-                                                                                    current_datetime,
-                                                                                    vuln_mitigated=True)
-
-            if operation_data['check']['state_index']:
-                logging.critical(f'Checking vulnerability state index for {host}')
-                states_not_found = check_vuln_state_index(host_manager, host, package_data_from,
-                                                          current_datetime, return_found=True)
-                results['evidences']["states_found_from"] = states_not_found
-
-                logging.critical(f'Checking vulnerability alerts in the indexer for {host}. Expected CVE vuln of new package version')
-
-            if operation_data['check']['alerts']:
-                logging.critical(f'Checking vulnerability alerts in the indexer for {host}')
-                results["alerts_not_found_to"] = check_vuln_alert_indexer(host_manager, host, package_data_to,
-                                                                       current_datetime)
-
-            if operation_data['check']['state_index']:
-                logging.critical(f'Checking vulnerability state index for {host}')
-                results["states_not_found_to"] = check_vuln_state_index(host_manager, host, package_data_to,
-                                                                     current_datetime)
-
-        logging.critical(f"Results: {results}")
-
-        if results['evidences']['alerts_not_found_from'] or len(results['evidences']['states_found_from']) > 0 or \
-                results['evidences']['alerts_not_found_to'] or results['evidences']['states_not_found_to']:
-            results['checks']['all_successfull'] = False
-        else:
-            results['checks']['all_successfull'] = True
-
+        check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
+                                   package_data_from, operation='update')
         return {
                 f"{host}": results
             }
@@ -414,10 +424,8 @@ def launch_parallel_operations(task_list: List[Dict], host_manager: HostManager,
             results[target]['checks']['all_successfull'] = False
 
     def launch_and_store_result(args):
-        logging.info("Launching remote operation on host: {}".format(args[0]))
         host, task, manager = args
         result = launch_remote_operation(host, task, manager)
-        logging.info("FINAL Result of remote operation on host {}: {}".format(host, result))
         results.update(result)
 
     with ThreadPoolExecutor() as executor:
@@ -438,4 +446,5 @@ def launch_parallel_operations(task_list: List[Dict], host_manager: HostManager,
             future.result()
 
     logging.info("Results in parallel operations: {}".format(results))
+
     return results

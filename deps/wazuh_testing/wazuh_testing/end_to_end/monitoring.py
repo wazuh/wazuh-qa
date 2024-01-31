@@ -160,7 +160,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
         return results
 
 
-def generate_monitoring_logs(host_manager: HostManager, regex_list: List[str], timeout_list: List[str],
+def generate_monitoring_logs(host_manager: HostManager, regex_list: List[str], timeout_list: List[int],
                              hosts: List[str], n_iterations=1, greater_than_timestamp: str = '') -> Dict:
     """
     Generate monitoring data for logs on all provided hosts.
