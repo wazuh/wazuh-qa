@@ -7,9 +7,8 @@ from pydantic import BaseModel, IPvAnyAddress
 
 from jinja2 import Template
 from modules.generic.utils import Utils
+from modules.provision.componentType import ComponentType
 from modules.generic.logger import Logger
-import subprocess, json
-
 
 class Inventory(BaseModel):
     ansible_host: str | IPvAnyAddress
@@ -23,14 +22,10 @@ class Ansible:
         self.path = path
         self.playbooks_path = Path(__file__).parents[2] / 'playbooks'
         self.ansible_data = Inventory(**dict(ansible_data))
-        self.ansible_host = self.ansible_data.ansible_host
-        self.ansible_port = self.ansible_data.ansible_port
-        self.ansible_user = self.ansible_data.ansible_user
-        self.ansible_ssh_private_key_file = self.ansible_data.ansible_ssh_private_key_file
         self.inventory = self.generate_inventory()
         self.logger = Logger(__name__).get_logger()
 
-    def render_playbooks(self, rendering_variables: dict) -> list:
+    def render_playbooks(self, rendering_variables) -> list:
         """
         Render the playbooks with Jinja.
 
@@ -39,16 +34,17 @@ class Ansible:
             rendering_variables: Extra variables to render the playbooks.
         """
         tasks = []
-        path_to_render_playbooks = self.playbooks_path / rendering_variables['templates_path']
+        path_to_render_playbooks = self.playbooks_path / rendering_variables.get("templates_path")
         template_loader = jinja2.FileSystemLoader(searchpath=path_to_render_playbooks)
         template_env = jinja2.Environment(loader=template_loader)
 
         list_template_tasks = Utils.get_template_list(
-            path_to_render_playbooks, rendering_variables.get('list_template_order'))
+            path_to_render_playbooks, rendering_variables.get("templates_order"))
 
         if list_template_tasks:
             for template in list_template_tasks:
                 loaded_template = template_env.get_template(template)
+
                 rendered = yaml.safe_load(loaded_template.render(host=self.ansible_data, **rendering_variables))
 
                 if not rendered:
@@ -112,10 +108,10 @@ class Ansible:
         inventory_data = {
             'all': {
                 'hosts': {
-                    self.ansible_host: {
-                        'ansible_port': self.ansible_port,
-                        'ansible_user': self.ansible_user,
-                        'ansible_ssh_private_key_file': self.ansible_ssh_private_key_file
+                    self.ansible_data.ansible_host: {
+                        'ansible_port': self.ansible_data.ansible_port,
+                        'ansible_user': self.ansible_data.ansible_user,
+                        'ansible_ssh_private_key_file': self.ansible_data.ansible_ssh_private_key_file
                     }
                 }
             }

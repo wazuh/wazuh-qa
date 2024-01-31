@@ -1,5 +1,5 @@
+import os
 import platform
-import socket
 
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
@@ -22,13 +22,14 @@ class VagrantProvider(Provider):
     provider_name = 'vagrant'
 
     @classmethod
-    def _create_instance(cls, base_dir: Path, params: CreationPayload) -> VagrantInstance:
+    def _create_instance(cls, base_dir: Path, params: CreationPayload, config: VagrantConfig = None) -> VagrantInstance:
         """
         Creates a Vagrant instance.
 
         Args:
             base_dir (Path): The base directory for the instance.
             params (CreationPayload): The parameters for instance creation.
+            config (VagrantConfig, optional): The configuration for the instance. Defaults to None.
 
         Returns:
             VagrantInstance: The created Vagrant instance.
@@ -37,11 +38,15 @@ class VagrantProvider(Provider):
         # Create the instance directory.
         instance_dir = base_dir / instance_id
         instance_dir.mkdir(parents=True, exist_ok=True)
-        # Generate the credentials.
         credentials = VagrantCredentials()
-        credentials.generate(instance_dir, 'instance_key')
-        # Parse the config and create Vagrantfile.
-        config = cls.__parse_config(params, credentials)
+        if not config:
+            # Generate the credentials.
+            credentials.generate(instance_dir, 'instance_key')
+            # Parse the config if it is not provided.
+            config = cls.__parse_config(params, credentials)
+        else:
+            credentials.load(config.public_key)
+        # Create the Vagrantfile.
         cls.__create_vagrantfile(instance_dir, config)
         return VagrantInstance(instance_dir, instance_id, credentials)
 
@@ -128,6 +133,7 @@ class VagrantProvider(Provider):
         config['ip'] = cls.__get_available_ip()
         config['box'] = os_specs['box']
         config['box_version'] = os_specs['box_version']
+        config['private_key'] = str(credentials.key_path)
         config['public_key'] = str(credentials.key_path.with_suffix('.pub'))
         config['cpu'] = size_specs['cpu']
         config['memory'] = size_specs['memory']
@@ -145,20 +151,15 @@ class VagrantProvider(Provider):
         Raises:
             Exception: If no available IP address is found.
         """
-        available_ip = None
-
         def check_ip(ip):
-            try:
-                socket.gethostbyaddr(ip)
-                return False
-            except socket.herror:
-                return True
+            response = os.system("ping -c 1 -w3 " + ip + " > /dev/null 2>&1")
+            if response != 0:
+                return ip
 
         for i in range(1, 255):
             ip = f"192.168.57.{i}"
             if check_ip(ip):
-                available_ip = ip
-                break
-        if not available_ip:
-            raise cls.ProvisioningError("No available IP address found.")
-        return available_ip
+                return ip
+
+        # If no available IP address is found, raise an exception.
+        raise cls.ProvisioningError("No available IP address found.")

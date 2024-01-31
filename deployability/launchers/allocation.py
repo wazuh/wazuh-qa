@@ -15,6 +15,7 @@ def parse_arguments():
     parser.add_argument("--composite-name", required=False, default=None)
     parser.add_argument("--action", choices=['create', 'delete'], required=False, default='create')
     parser.add_argument("--custom-credentials", required=False, default=None)
+    parser.add_argument("--custom-provider-config", required=False, default=None)
     parser.add_argument("--track-output", required=False, default='/tmp/wazuh-qa/track.yml')
     parser.add_argument("--inventory-output", required=False, default='/tmp/wazuh-qa/inventory.yml')
     parser.add_argument("--working-dir", required=False, default='/tmp/wazuh-qa')
