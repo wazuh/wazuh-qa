@@ -2,8 +2,9 @@ import yaml
 
 from pathlib import Path
 
-from .generic import Instance, Provider, models
 from .aws.provider import AWSProvider, AWSConfig
+from .generic import Instance, Provider, models
+from .generic.logger import logger
 from .vagrant.provider import VagrantProvider, VagrantConfig
 
 
@@ -26,10 +27,10 @@ class Allocator:
         payload = models.InputPayload(**dict(payload))
         # Detect the action and call the appropriate method.
         if payload.action == 'create':
-            print(f"Creating instance at {payload.working_dir}")
+            logger.info(f"Creating instance at {payload.working_dir}")
             return cls.__create(payload)
         elif payload.action == 'delete':
-            print(f"Deleting instance from trackfile {payload.track_output}")
+            logger.info(f"Deleting instance from trackfile {payload.track_output}")
             return cls.__delete(payload)
 
     # Internal methods
@@ -48,10 +49,10 @@ class Allocator:
         config = cls.___get_custom_config(payload)
         instance = provider.create_instance(
             payload.working_dir, instance_params, config)
-        print(f"Instance {instance.identifier} created.")
-        # Start the instance
+        logger.info(f"Instance {instance.identifier} created.")
+        # Start the instance    
         instance.start()
-        print(f"Instance {instance.identifier} started.")
+        logger.info(f"Instance {instance.identifier} started.")
         # Generate the inventory and track files.
         cls.__generate_inventory(instance, payload.inventory_output)
         cls.__generate_track_file(instance, payload.provider, payload.track_output)
@@ -71,7 +72,7 @@ class Allocator:
             track = models.TrackOutput(**yaml.safe_load(f))
         provider = PROVIDERS[track.provider]()
         provider.destroy_instance(track.instance_dir, track.identifier)
-        print(f"Instance {track.identifier} deleted.")
+        logger.info(f"Instance {track.identifier} deleted.")
 
     @staticmethod
     def ___get_custom_config(payload: models.CreationPayload) -> models.ProviderConfig | None:
@@ -85,11 +86,13 @@ class Allocator:
         Returns:
             ProviderConfig: The configuration object.
         """
-        if not payload.custom_provider_config:
+        config = payload.custom_provider_config
+        if not config:
             return None
         # Read the custom config file and validate it.
         config_model: models.ProviderConfig = CONFIGS[payload.provider]
-        with open(payload.custom_provider_config, 'r') as f:
+        with open(config, 'r') as f:
+            logger.info(f"Using custom provider config from {config}")
             config = config_model(**yaml.safe_load(f))
         return config
 
@@ -112,7 +115,7 @@ class Allocator:
                                            ansible_ssh_private_key_file=str(ssh_config.private_key))
         with open(inventory_path, 'w') as f:
             yaml.dump(inventory.model_dump(), f)
-        print(f"\nInventory file generated at {inventory_path}")
+        logger.info(f"Inventory file generated at {inventory_path}")
 
     @staticmethod
     def __generate_track_file(instance: Instance, provider_name: str,  track_path: Path) -> None:
@@ -133,4 +136,4 @@ class Allocator:
                                    key_path=str(instance.credentials.key_path))
         with open(track_path, 'w') as f:
             yaml.dump(track.model_dump(), f)
-        print(f"\nTrack file generated at {track_path}")
+        logger.info(f"Track file generated at {track_path}")

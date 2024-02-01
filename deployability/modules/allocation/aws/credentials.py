@@ -5,6 +5,7 @@ from botocore.exceptions import ClientError
 from pathlib import Path
 
 from modules.allocation.generic import Credentials
+from modules.allocation.generic.logger import logger
 
 
 class AWSCredentials(Credentials):
@@ -46,6 +47,7 @@ class AWSCredentials(Credentials):
 
         # Validate base directory
         if not base_dir.exists():
+            logger.debug(f"Creating base directory: {base_dir}")
             base_dir.mkdir(parents=True, exist_ok=True)
         elif base_dir.is_file():
             raise self.CredentialsError(f"Invalid base directory: {base_dir}")
@@ -57,6 +59,7 @@ class AWSCredentials(Credentials):
                 if not overwrite:
                     raise self.CredentialsError(f"Key pair {name} already exists.")
                 else:
+                    logger.warning(f"Key pair {name} already exists. Overwriting.")
                     key_pair.delete()
         except ClientError:
             pass
@@ -112,6 +115,7 @@ class AWSCredentials(Credentials):
     def delete(self) -> None:
         """Deletes the key pair."""
         if not self.name:
+            logger.warning(f"Key pair doesn't exist. Skipping deletion.")
             return
 
         try:
@@ -122,6 +126,7 @@ class AWSCredentials(Credentials):
 
         # Remove the local private key file
         if self.key_path:
+            logger.debug(f"Deleting private key: {self.key_path}")
             Path(self.key_path).unlink()
 
         # Clear instance attributes

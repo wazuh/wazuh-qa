@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .instance import Instance
 from .models import CreationPayload, ProviderConfig
+from .logger import logger
 
 
 class Provider(ABC):
@@ -76,11 +77,11 @@ class Provider(ABC):
             Instance: The loaded instance.
 
         Raises:
-            Exception: If the instance directory does not exist.
+            ValueError: If the instance directory does not exist.
         """
         instance_dir = Path(instance_dir)
         if not instance_dir.exists():
-            raise Exception(f"Instance path {instance_dir} does not exist")
+            raise ValueError(f"Instance path {instance_dir} does not exist")
         return cls._load_instance(instance_dir, instance_id)
 
     @classmethod

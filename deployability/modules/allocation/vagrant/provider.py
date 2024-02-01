@@ -6,6 +6,7 @@ from pathlib import Path
 
 from modules.allocation.generic import Provider
 from modules.allocation.generic.models import CreationPayload
+from modules.allocation.generic.logger import logger
 from .credentials import VagrantCredentials
 from .instance import VagrantInstance
 from .models import VagrantConfig
@@ -40,14 +41,17 @@ class VagrantProvider(Provider):
         instance_dir.mkdir(parents=True, exist_ok=True)
         credentials = VagrantCredentials()
         if not config:
+            logger.debug(f"No config provided. Generating")
             # Generate the credentials.
             credentials.generate(instance_dir, 'instance_key')
             # Parse the config if it is not provided.
             config = cls.__parse_config(params, credentials)
         else:
+            logger.debug(f"Using provided config")
             credentials.load(config.public_key)
         # Create the Vagrantfile.
         cls.__create_vagrantfile(instance_dir, config)
+        logger.debug(f"Vagrantfile created. Creating instance.")
         return VagrantInstance(instance_dir, instance_id, credentials)
 
     @staticmethod
@@ -64,8 +68,8 @@ class VagrantProvider(Provider):
         """
         return VagrantInstance(instance_dir, identifier)
 
-    @staticmethod
-    def _destroy_instance(instance_dir: Path, identifier: str) -> None:
+    @classmethod
+    def _destroy_instance(cls, instance_dir: Path, identifier: str) -> None:
         """
         Destroys a Vagrant instance.
 
@@ -77,6 +81,7 @@ class VagrantProvider(Provider):
             None
         """
         instance = VagrantInstance(instance_dir, identifier)
+        logger.debug(f"Destroying instance {identifier}")
         instance.delete()
 
     @classmethod
