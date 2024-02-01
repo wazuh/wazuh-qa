@@ -18,6 +18,13 @@ class SchemaValidator:
     """
 
     def __init__(self, schema: Path | str, to_validate: Path | str):
+        """
+        Initializes the SchemaValidator object.
+
+        Args:
+            schema (Path, str): The path to the schema file.
+            to_validate (Path, str): The path to the YAML file to validate.
+        """
         schema_data: str = None
         yaml_data: str = None
 
