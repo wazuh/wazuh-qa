@@ -39,7 +39,7 @@ class AWSProvider(Provider):
         temp_dir = base_dir / temp_id
         credentials = AWSCredentials()
         if not config:
-            logger.debug(f"No config provided. Generating")
+            logger.debug(f"No config provided. Generating from payload")
             # Generate the credentials.
             credentials.generate(temp_dir, temp_id.split('-')[-1] + '_key')
             # Parse the config if it is not provided.
