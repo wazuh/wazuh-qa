@@ -126,7 +126,7 @@ def check_vulnerability_alerts(results: Dict, check_data: Dict, current_datetime
             # Check states from previous package are mitigated
             results['evidences'][evidence_key] = check_vuln_state_index(host_manager, host, package_data_to_use,
                                                                         current_datetime)
-            if len(results['evidences'][evidence_key]) != len(package_data_to_use['vulnerabilities']):
+            if len(results['evidences'][evidence_key]) != len(package_data_to_use['CVE']):
                 results['checks']['all_successfull'] = False
 
         elif operation == 'install' or operation == 'update':
@@ -332,6 +332,7 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
     package_data_from = load_packages_metadata()[package_id_from]
     package_data_to = load_packages_metadata()[package_id_to]
 
+
     package_url_to = package_data_to['urls'][host_os_name][host_os_arch]
 
     logging.critical(f"Installing package on {host}")
@@ -352,7 +353,7 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
         wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
 
         check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
-                                   package_data_from, operation='update')
+                                   {'from': package_data_from, 'to': package_data_to} , operation='update')
         return {
                 f"{host}": results
             }
