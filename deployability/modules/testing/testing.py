@@ -56,7 +56,7 @@ class Tester:
             template = str(ansible.playbooks_path / cls._test_template)
             playbook = ansible.render_playbook(template, rendering_var)
             if not playbook:
-                logger.warning(f"Test {test} not found. Skipping...")
+                logger.warning(f"Test {test} not found. Skipped.")
                 continue
             ansible.run_playbook(playbook, extra_vars)
 
