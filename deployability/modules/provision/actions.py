@@ -1,6 +1,6 @@
 from modules.generic import Ansible
 
-from .componentType import Package, AIO, Generic, Dependencies
+from modules.provision.componentType import Package, AIO, Generic, Dependencies
 from modules.provision.models import ComponentInfo
 from modules.provision.logger import logger
 
@@ -12,10 +12,11 @@ class Action:
         component (Package | AIO | Generic | Dependencies): The component to execute.
         ansible (Ansible): The Ansible instance.
     """
+
     def __init__(self, action: str, component_info: ComponentInfo, ansible_data: dict) -> None:
         """
         Initialize the action.
-        
+
         Args:
             action (str): The action to execute.
             component_info (ComponentInfo): The component information.
@@ -46,7 +47,7 @@ class Action:
         """
         status = {}
 
-        logger.info(f"Executing {self.component.action} for {self.component.component}")
+        logger.info(f"Executing {self.component.type} for {self.component.component}")
         tasks = self.ansible.render_playbooks(self.component.variables_dict)
 
         playbook = {

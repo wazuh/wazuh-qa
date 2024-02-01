@@ -61,6 +61,7 @@ class Provision(ProvisionModule):
         Run the provision.
         """
         # self.node_dependencies()
+        logger.debug(f"Provisioning components: {self.component_info}. With action: {self.action}")
         self.install_host_dependencies()
 
         for item in self.component_info:
@@ -105,10 +106,8 @@ class Provision(ProvisionModule):
         """
         status = {}
 
-        package = {
-            'component': str(PATH_BASE_DIR / "deps" / "remote_requirements.txt"),
-            'action_type': "dependencies"
-        }
+        package = ComponentInfo(component=str(PATH_BASE_DIR / "deps" / "remote_requirements.txt"), 
+                                type="dependencies")
 
         logger.debug(f"Installing dependencies on guests: {package}")
         action_class = Action("install", package, self.ansible_data)
