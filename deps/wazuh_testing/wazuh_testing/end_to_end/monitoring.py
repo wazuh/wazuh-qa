@@ -86,13 +86,22 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
                 List: A list of events that fit the timestamp.
             """
             match_that_fit_timestamp = []
+            logging.critical(f"match_events: {match_events}")
             for match in match_events:
-                if len(match.groups()) > 1:
-                    timestamp_str = match.groups()[0]
-                    timestamp_format = "%Y/%m/%d %H:%M:%S"
-                    timestamp_datetime = datetime.strptime(timestamp_str, timestamp_format)
-                    if timestamp_datetime >= greater_than_timestamp:
-                        match_that_fit_timestamp.append(match)
+                if match.__class__ == tuple:
+                    timestamp_str = match[0]
+                else:
+                    timestamp_str = match
+
+                timestamp_format = "%Y/%m/%d %H:%M:%S"
+                timestamp_format_parameter = "%Y-%m-%dT%H:%M:%S.%f"
+
+                timestamp_datetime = datetime.strptime(timestamp_str, timestamp_format)
+                greater_than_timestamp_formatted = datetime.strptime(greater_than_timestamp, timestamp_format_parameter)
+
+                logging.critical(f"Comparing {timestamp_datetime} {greater_than_timestamp_formatted} ")
+                if timestamp_datetime >=  greater_than_timestamp_formatted:
+                    match_that_fit_timestamp.append(match)
 
             return match_that_fit_timestamp
 
@@ -109,9 +118,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
 
             while current_timeout < timeout:
                 file_content = host_manager.get_file_content(host, monitoring_file)
-
                 match_regex = re.findall(regex, file_content)
-
                 if greater_than_timestamp:
                     match_that_fit_timestamp = filter_events_by_timestamp(match_regex)
                 else:
@@ -180,7 +187,7 @@ def generate_monitoring_logs(host_manager: HostManager, regex_list: List[str], t
         {
            "agent1":[
               {
-                 "regex":"INFO: Action for 'vulnerability_feed_manager' finished",
+                 "regex":["INFO: Action for 'vulnerability_feed_manager' finished"],
                  "file":"/var/ossec/logs/ossec.log",
                  "timeout":1000,
                  "n_iterations":1,
@@ -191,17 +198,6 @@ def generate_monitoring_logs(host_manager: HostManager, regex_list: List[str], t
 
     """
     monitoring_data = {}
-    if len(regex_list) == 1:
-        logging.info("Using the same regex for all hosts")
-        regex_list = regex_list * len(hosts)
-    elif len(regex_list) != len(hosts):
-        raise ValueError("The number of regexes must be equal to the number of hosts")
-
-    if len(timeout_list) == 1:
-        logging.info("Using the same timeout for all hosts")
-        timeout_list = timeout_list * len(hosts)
-    elif len(timeout_list) != len(hosts):
-        raise ValueError("The number of timeouts must be equal to the number of hosts")
 
     for host in hosts:
         monitoring_data[host] = []
