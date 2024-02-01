@@ -12,6 +12,7 @@ class Utils:
 
         Args:
             path: Path to the templates.
+            custom_order: Custom order to sort the templates.
         """
         list_tasks = []
         with os.scandir(path) as entries:

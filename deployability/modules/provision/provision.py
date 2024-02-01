@@ -116,4 +116,10 @@ class Provision(ProvisionModule):
         return status
 
     def update_status(self, status):
+        """
+        Update the status of the provision.
+
+        Args:
+            status (dict): The status of the executed action.
+        """
         self.summary.update(status.stats)

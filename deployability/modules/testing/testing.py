@@ -15,6 +15,12 @@ class Tester:
 
     @classmethod
     def run(cls, payload: InputPayload) -> None:
+        """
+        Run the tests based on the payload.
+
+        Args:
+            payload (InputPayload): The payload containing the test parameters.
+        """
         payload = InputPayload(**dict(payload))
         inventory = Inventory(**Utils.load_from_yaml(payload.inventory))
         logger.info(f"Running tests for {inventory.ansible_host}")
@@ -34,6 +40,15 @@ class Tester:
 
     @classmethod
     def _get_extra_vars(cls, payload: InputPayload) -> ExtraVars:
+        """
+        Get the extra vars for the tests.
+
+        Args:
+            payload (InputPayload): The payload containing the test parameters.
+
+        Returns:
+            ExtraVars: The extra vars for the tests.
+        """
         if not payload.dependencies:
             logger.debug("No dependencies found")
             return ExtraVars(**payload.model_dump())
