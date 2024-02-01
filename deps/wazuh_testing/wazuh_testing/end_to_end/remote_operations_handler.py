@@ -47,8 +47,9 @@ def wait_syscollector_and_vuln_scan(host_manager: HostManager, host: str,  opera
                                                [get_event_regex({'event': 'syscollector_scan_start'}),
                                                 get_event_regex({'event': 'syscollector_scan_end'})],
                                                [timeout_syscollector_scan, timeout_syscollector_scan],
-                                               host_manager.get_group_hosts('agent'),
-                                               greater_than_timestamp=current_datetime)
+                                               host_manager.get_group_hosts('agent'))
+
+    truncate_remote_host_group_files(host_manager, host_manager.get_group_hosts('agent'))
 
     monitoring_events_multihost(host_manager, monitoring_data)
 
@@ -63,42 +64,19 @@ def check_vulnerability_alerts(results: Dict, check_data: Dict, current_datetime
                                host: str,
                                package_data: Dict,
                                operation: str = 'install') -> None:
-
-    # In case of update, we need to not expect vulnerabilities from previous package and expect vulnerabilities from
-    # new package
-
-    if update:
-        package_data_from = package_data['from']
-        package_data_to = package_data['to']
-        vulnerabilities_from = package_data_from['vulnerabilities']
-        vulnerabilities_to = package_data_to['vulnerabilities']
-
-        states_vulnerabilities_expected = vulnerabilities_to
-        states_vulnerabilities_not_expected = vulnerabilities_from
-
-        # Alerts from previous package should be mitigated
-
-
-    else:
-        states_vulnerabilities_expected = package_data['vulnerabilities']
-        states_vulnerabilities_not_expected = []
-
-
-
-
-
     # Get all the alerts generated in the timestamp
     vulnerability_alerts = get_vulnerabilities_alerts_indexer(host_manager, host, current_datetime)
     vulnerability_alerts_mitigated = get_vulnerabilities_alerts_indexer(host_manager, host, current_datetime, True)
 
-    vulnerability_index = get_indexer_values(host_manager, index='wazuh-vulnerability-detector',
+    vulnerability_index = get_indexer_values(host_manager, index='wazuh-states-vulnerabilities',
                                              greater_than_timestamp=current_datetime)['hits']['hits']
 
-    results['checks']['alerts_found'] = vulnerability_alerts
-    results['checks']['states_found'] = vulnerability_index
+    results['evidences']['all_alerts_found'] = vulnerability_alerts
+    results['evidences']['all_alerts_found_mitigated'] = vulnerability_alerts_mitigated
+    results['evidences']['all_states_found'] = vulnerability_index
 
     # Check unexpected alerts. For installation/removel non vulnerable package
-    if check_data['no_alerts']:
+    if 'no_alerts' in check_data and check_data['no_alerts']:
         logging.critical(f'Checking unexpected vulnerability alerts in the indexer for {host}')
         results['evidences']["alerts_found_unexpected"] = {
                 "mitigated": vulnerability_alerts_mitigated,
@@ -134,7 +112,7 @@ def check_vulnerability_alerts(results: Dict, check_data: Dict, current_datetime
             results['checks']['all_successfull'] = False
 
     # Check unexpected states
-    if check_data['no_indices']:
+    if 'no_indices' in check_data and check_data['no_indices']:
         logging.critical(f'Checking vulnerability state index for {host}')
         results['evidences']["states_found_unexpected"] = vulnerability_index
 
