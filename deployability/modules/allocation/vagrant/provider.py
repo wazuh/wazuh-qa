@@ -41,7 +41,7 @@ class VagrantProvider(Provider):
         instance_dir.mkdir(parents=True, exist_ok=True)
         credentials = VagrantCredentials()
         if not config:
-            logger.debug(f"No config provided. Generating")
+            logger.debug(f"No config provided. Generating from payload")
             # Generate the credentials.
             credentials.generate(instance_dir, 'instance_key')
             # Parse the config if it is not provided.
