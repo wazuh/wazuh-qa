@@ -32,10 +32,8 @@ class Ansible:
             rendering_variables (dict): Extra variables to render the playbooks.
         """
         tasks = []
-        path_to_render_playbooks = self.playbooks_path / \
-            rendering_variables.get("templates_path")
-        template_loader = jinja2.FileSystemLoader(
-            searchpath=path_to_render_playbooks)
+        path_to_render_playbooks = self.playbooks_path / rendering_variables.get("templates_path")
+        template_loader = jinja2.FileSystemLoader(searchpath=path_to_render_playbooks)
         template_env = jinja2.Environment(loader=template_loader)
 
         list_template_tasks = Utils.get_template_list(
@@ -45,8 +43,7 @@ class Ansible:
             for template in list_template_tasks:
                 loaded_template = template_env.get_template(template)
                 self.logger.debug(f"Rendering template {template}")
-                rendered = yaml.safe_load(loaded_template.render(
-                    host=self.ansible_data, **rendering_variables))
+                rendered = yaml.safe_load(loaded_template.render(host=self.ansible_data, **rendering_variables))
 
                 if not rendered:
                     self.logger.warn(f"Template {template} not rendered")
