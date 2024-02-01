@@ -1,7 +1,10 @@
-from pathlib import Path
 import ast
+
+from pathlib import Path
+
 from modules.generic import Ansible, Inventory
 from modules.generic.utils import Utils
+from .logger import logger
 from .models import InputPayload, ExtraVars
 
 class Tester:
@@ -14,7 +17,9 @@ class Tester:
     def run(cls, payload: InputPayload) -> None:
         payload = InputPayload(**dict(payload))
         inventory = Inventory(**Utils.load_from_yaml(payload.inventory))
+        logger.info(f"Running tests for {inventory.ansible_host}")
         extra_vars = cls._get_extra_vars(payload).model_dump()
+        logger.debug(f"Using extra vars: {extra_vars}")
         dependencies_dict = {}
         for dependency in extra_vars['dependencies']:
             dependency = ast.literal_eval(dependency)
@@ -24,14 +29,17 @@ class Tester:
         cls._setup(ansible, extra_vars['working_dir'])
         cls._run_tests(payload.tests, ansible, extra_vars)
         if payload.cleanup:
+            logger.info("Cleaning up")
             cls._cleanup(ansible, extra_vars['working_dir'])
 
     @classmethod
     def _get_extra_vars(cls, payload: InputPayload) -> ExtraVars:
         if not payload.dependencies:
+            logger.debug("No dependencies found")
             return ExtraVars(**payload.model_dump())
         
         dependencies_ip = []
+        logger.debug("Dependencies found. Parsing...")
         for dependency in range(len(payload.dependencies)):
             dicts = eval(payload.dependencies[dependency])
             for key, value in dicts.items():
@@ -48,7 +56,7 @@ class Tester:
             template = str(ansible.playbooks_path / cls._test_template)
             playbook = ansible.render_playbook(template, rendering_var)
             if not playbook:
-                print(f'ERROR: Playbook for test "{test}" not found')
+                logger.warning(f"Test {test} not found. Skipping...")
                 continue
             ansible.run_playbook(playbook, extra_vars)
 
