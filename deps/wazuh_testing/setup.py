@@ -31,6 +31,7 @@ package_data_list = [
     'data/qactl_conf_validator_schema.json',
     'data/all_disabled_ossec.conf',
     'tools/migration_tool/delta_schema.json',
+    'end_to_end/vulnerability_detector_packages/vuln_packages.json',
     'tools/migration_tool/CVE_JSON_5.0_bundled.json'
 ]
 
