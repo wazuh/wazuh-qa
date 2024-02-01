@@ -50,7 +50,7 @@ class Tester:
             ExtraVars: The extra vars for the tests.
         """
         if not payload.dependencies:
-            logger.debug("No dependencies found")
+            logger.debug("No dependencies received in payload")
             return ExtraVars(**payload.model_dump())
         
         dependencies_ip = []
