@@ -484,8 +484,6 @@ class HostManager:
             host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
         """
         result = False
-        print(host)
-        print(url)
         if system == 'windows':
             result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
         elif system == 'ubuntu':
@@ -499,7 +497,6 @@ class HostManager:
         elif system == 'macos':
             package_name = url.split('/')[-1]
             result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
-            print(result)
             cmd = f"installer -pkg {package_name} -target /"
             result = self.get_host(host).ansible("command", cmd, check=False)
 
@@ -595,7 +592,6 @@ class HostManager:
 
     def run_playbook(self, host, playbook_name, params=None):
         file_dir = os.path.dirname(os.path.realpath(__file__))
-        print(playbook_name)
         playbook_path = f"{file_dir}/playbooks/{playbook_name}.yaml"
         new_playbook = None
         new_playbook_path = None
@@ -614,7 +610,6 @@ class HostManager:
 
         logger.setLevel(logging.DEBUG)
         try:
-            print(host)
             r = ansible_runner.run(
                 inventory=self.inventory_path,
                 playbook=new_playbook_path,
@@ -627,7 +622,6 @@ class HostManager:
 
         logger.setLevel(logging.CRITICAL)
 
-        print(r)
         return r
 
 
