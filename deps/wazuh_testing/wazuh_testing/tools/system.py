@@ -41,7 +41,6 @@ class HostManager:
         except (OSError, yaml.YAMLError) as inventory_err:
             raise ValueError(f"Could not open/load Ansible inventory '{self.inventory_path}': {inventory_err}")
 
-
         data_loader = DataLoader()
         self.inventory_manager = InventoryManager(loader=data_loader, sources=inventory_path)
         self.hosts_variables = {}
@@ -50,7 +49,6 @@ class HostManager:
 
         for host in self.inventory_manager.get_hosts():
             self.hosts_variables[host] = variable_manager.get_vars(host=self.inventory_manager.get_host(str(host)))
-
 
     def get_inventory(self) -> dict:
         """Get the loaded Ansible inventory.
@@ -87,7 +85,6 @@ class HostManager:
             return [str(host) for host in self.inventory_manager.get_hosts(pattern=pattern)]
         else:
             return [str(host) for host in self.inventory_manager.get_hosts()]
-
 
     def get_host_groups(self, host):
         """Get the list of groups to which the specified host belongs.
@@ -142,7 +139,6 @@ class HostManager:
 
         return result
 
-
     def move_file(self, host: str, src_path: str, dest_path: str = '/var/ossec/etc/ossec.conf', check: bool = False):
         """Move from src_path to the desired location dest_path for the specified host.
 
@@ -155,10 +151,12 @@ class HostManager:
         result = None
 
         if self.get_host_variables(host)['os_name'] == 'windows':
-            result = self.get_host(host).ansible("ansible.windows.win_copy", f"src='{src_path}' dest='{dest_path}'", check=check)
+            result = self.get_host(host).ansible("ansible.windows.win_copy", f"src='{src_path}' dest='{dest_path}'",
+                                                 check=check)
         else:
-            result = self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=wazuh group=wazuh mode=preserve",
-                                        check=check)
+            result = self.get_host(host).ansible('copy', f'src={src_path} dest={dest_path}'
+                                                 'owner=wazuh group=wazuh mode=preserve',
+                                                 check=check)
 
         return result
 
@@ -178,7 +176,7 @@ class HostManager:
         self.get_host(host).ansible("replace", fr"path={path} regexp='{after}[\s\S]+{before}' replace='{replace}'",
                                     check=check)
 
-    def modify_file_content(self, host: str, path: str = None, content: Union[str, bytes] = ''):
+    def modify_file_content(self, host: str, path: str = '', content: Union[str, bytes] = ''):
         """Create a file with a specified content and copies it to a path.
 
         Args:
@@ -491,7 +489,8 @@ class HostManager:
             if result['changed'] and result['stderr'] == '':
                 result = True
         elif system == 'centos':
-            result = self.get_host(host).ansible("yum", f"name={url} state=present sslverify=false disable_gpg_check=True", check=False)
+            result = self.get_host(host).ansible("yum", f"name={url} state=present"
+                                                 'sslverify=false disable_gpg_check=True', check=False)
             if 'rc' in result and result['rc'] == 0 and result['changed']:
                 result = True
         elif system == 'macos':
@@ -516,7 +515,7 @@ class HostManager:
 
         for manager in self.get_group_hosts('manager'):
             if 'type' in self.get_host_variables(manager) and \
-                self.get_host_variables(manager)['type'] == 'master':
+                    self.get_host_variables(manager)['type'] == 'master':
                 master_ip = self.get_host_variables(manager)['ip']
                 break
 
@@ -624,8 +623,6 @@ class HostManager:
 
         return r
 
-
-
     def handle_wazuh_services(self, host, operation):
         """
         Handles Wazuh services on the specified host.
@@ -711,6 +708,7 @@ class HostManager:
             endpoint=f'/agents?agents_list={",".join(agents_ids)}&status=all&older_than=0s',
             token=token,
         )
+        logging.info(f"Agents removed result {result}")
 
     def get_hosts_not_reachable(self) -> List[str]:
         """
