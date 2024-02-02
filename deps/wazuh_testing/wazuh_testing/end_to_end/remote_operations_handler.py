@@ -133,7 +133,9 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
                 "alerts_found_unexpected": [],
                 "states_found_unexpected": []
             },
-            'checks': {}
+            'checks': {
+                'all_successfull': True
+            }
     }
 
     logging.info(f"Installing package on {host}")
@@ -182,7 +184,6 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
                                        package_data, operation='install')
     else:
         logging.info(f"No operation to perform on {host}")
-        results['checks']['all_successfull'] = True
 
     return {
             f"{host}": results
@@ -211,7 +212,9 @@ def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
                 "alerts_found_unexpected": [],
                 "states_found_unexpected": []
             },
-            'checks': {}
+            'checks': {
+                'all_successfull': True
+            }
     }
     host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
     host_os_arch = host_manager.get_host_variables(host)['architecture']
@@ -253,7 +256,6 @@ def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
 
     else:
         logging.info(f"No operation to perform on {host}")
-        results['checks']['all_successfull'] = True
 
     return {
             f"{host}": results
@@ -282,7 +284,10 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
                 "alerts_found_unexpected": [],
                 "states_found_unexpected": []
             },
-            'checks': {}
+            'checks': {
+                'all_successfull': True
+            }
+
     }
 
     host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
@@ -335,7 +340,6 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
                                        {'from': package_data_from, 'to': package_data_to}, operation='update')
     else:
         logging.info(f"No operation to perform on {host}")
-        results['checks']['all_successfull'] = True
 
     return {
             f"{host}": results
