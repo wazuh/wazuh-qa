@@ -1,5 +1,5 @@
 - name: Uninstall VLC
-  hosts: agent2
+  hosts: HOSTS
   become_method: runas
   tasks:
     - name: Run VLC uninstall
