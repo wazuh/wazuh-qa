@@ -37,7 +37,6 @@
     <auto_restart>{{ wazuh_auto_restart }}</auto_restart>
     <crypto_method>{{ wazuh_crypto_method }}</crypto_method>
 
-  {% if wazuh_agent_config.enrollment.enabled == 'yes' %}
     <enrollment>
       <enabled>{{ wazuh_agent_config.enrollment.enabled }}</enabled>
       {% if wazuh_agent_config.enrollment.manager_address | length > 0 %}
@@ -45,6 +44,8 @@
       {% endif %}
       {% if wazuh_agent_config.enrollment.agent_name | length > 0 %}
       <agent_name>{{ wazuh_agent_config.enrollment.agent_name }}</agent_name>
+      {% else %}
+            <agent_name>{{ inventory_hostname }}</agent_name>
       {% endif %}
       {% if wazuh_agent_config.enrollment.port is defined > 0 %}
       <port>{{ wazuh_agent_config.enrollment.port }}</port>
@@ -77,7 +78,6 @@
       <use_source_ip>{{ wazuh_agent_config.enrollment.use_source_ip }}</use_source_ip>
       {% endif %}
     </enrollment>
-  {% endif %}
 
   </client>
 

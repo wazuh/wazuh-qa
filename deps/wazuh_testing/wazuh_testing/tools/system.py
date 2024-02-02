@@ -4,14 +4,23 @@
 
 import json
 import tempfile
+import os
+import logging
 import xml.dom.minidom as minidom
-from typing import Union
-
+from typing import Union, List
 import testinfra
 import yaml
+import ansible_runner
 
 from wazuh_testing.tools import WAZUH_CONF, WAZUH_API_CONF, API_LOG_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import set_section_wazuh_conf
+from ansible.inventory.manager import InventoryManager
+from ansible.parsing.dataloader import DataLoader
+from ansible.vars.manager import VariableManager
+
+
+logger = logging.getLogger('testinfra')
+logger.setLevel(logging.CRITICAL)
 
 
 class HostManager:
@@ -32,6 +41,15 @@ class HostManager:
         except (OSError, yaml.YAMLError) as inventory_err:
             raise ValueError(f"Could not open/load Ansible inventory '{self.inventory_path}': {inventory_err}")
 
+        data_loader = DataLoader()
+        self.inventory_manager = InventoryManager(loader=data_loader, sources=inventory_path)
+        self.hosts_variables = {}
+
+        variable_manager = VariableManager(loader=data_loader, inventory=self.inventory_manager)
+
+        for host in self.inventory_manager.get_hosts():
+            self.hosts_variables[host] = variable_manager.get_vars(host=self.inventory_manager.get_host(str(host)))
+
     def get_inventory(self) -> dict:
         """Get the loaded Ansible inventory.
 
@@ -39,6 +57,67 @@ class HostManager:
             self.inventory: Ansible inventory
         """
         return self.inventory
+
+    def get_inventory_path(self) -> str:
+        """Get the path of the loaded Ansible inventory.
+
+        Returns:
+            str: Path to the Ansible inventory file.
+
+        Example:
+            inventory_path = get_inventory_path()
+        """
+        return self.inventory_path
+
+    def get_group_hosts(self, pattern='None'):
+        """Get all hosts from the inventory that belong to a specified group pattern.
+
+        Args:
+            pattern (str, optional): Group name or pattern. Defaults to 'None'.
+
+        Returns:
+            list: List of host names belonging to the specified group pattern.
+
+        Example:
+            hosts = get_group_hosts('my_group')
+        """
+        if pattern:
+            return [str(host) for host in self.inventory_manager.get_hosts(pattern=pattern)]
+        else:
+            return [str(host) for host in self.inventory_manager.get_hosts()]
+
+    def get_host_groups(self, host):
+        """Get the list of groups to which the specified host belongs.
+
+        Args:
+            host (str): Hostname.
+
+        Returns:
+            list: List of group names to which the host belongs.
+
+        Example:
+            groups = get_host_groups('my_host')
+        """
+        group_list = self.inventory_manager.get_host(host).get_groups()
+
+        return [str(group) for group in group_list]
+
+    def get_host_variables(self, host):
+        """Get the variables of the specified host.
+
+        Args:
+            host (str): Hostname.
+
+        Returns:
+            testinfra.modules.base.Ansible: Host instance from hostspec.
+
+        Example:
+            variables = get_host_variables('my_host')
+        """
+
+        inventory_manager_host = self.inventory_manager.get_host(host)
+
+        return self.hosts_variables[inventory_manager_host]
 
     def get_host(self, host: str):
         """Get the Ansible object for communicating with the specified host.
@@ -51,6 +130,15 @@ class HostManager:
         """
         return testinfra.get_host(f"ansible://{host}?ansible_inventory={self.inventory_path}")
 
+    def truncate_file(self, host: str, filepath: str):
+        ansible_command = 'file'
+        if 'os_name' in self.get_host_variables(host):
+            ansible_command = 'win_copy' if self.get_host_variables(host)['os_name'] == 'windows' else 'copy'
+
+        result = self.get_host(host).ansible(ansible_command, f"dest='{filepath}' content=''", check=False)
+
+        return result
+
     def move_file(self, host: str, src_path: str, dest_path: str = '/var/ossec/etc/ossec.conf', check: bool = False):
         """Move from src_path to the desired location dest_path for the specified host.
 
@@ -60,8 +148,17 @@ class HostManager:
         dest_path (str): Destination path
         check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be applied.
         """
-        self.get_host(host).ansible("copy", f"src={src_path} dest={dest_path} owner=wazuh group=wazuh mode=0775",
-                                    check=check)
+        result = None
+
+        if self.get_host_variables(host)['os_name'] == 'windows':
+            result = self.get_host(host).ansible("ansible.windows.win_copy", f"src='{src_path}' dest='{dest_path}'",
+                                                 check=check)
+        else:
+            result = self.get_host(host).ansible('copy', f'src={src_path} dest={dest_path}'
+                                                 'owner=wazuh group=wazuh mode=preserve',
+                                                 check=check)
+
+        return result
 
     def add_block_to_file(self, host: str, path: str, replace: str, before: str, after, check: bool = False):
         """Add text block to desired file.
@@ -79,7 +176,7 @@ class HostManager:
         self.get_host(host).ansible("replace", fr"path={path} regexp='{after}[\s\S]+{before}' replace='{replace}'",
                                     check=check)
 
-    def modify_file_content(self, host: str, path: str = None, content: Union[str, bytes] = ''):
+    def modify_file_content(self, host: str, path: str = '', content: Union[str, bytes] = ''):
         """Create a file with a specified content and copies it to a path.
 
         Args:
@@ -136,7 +233,16 @@ class HostManager:
             host (str): Hostname
             file_path (str) : Path of the file
         """
-        return self.get_host(host).file(file_path).content_string
+        ansible_method = 'command'
+        command = 'cat'
+        if 'os_name' in self.get_host_variables(host) and self.get_host_variables(host)['os_name'] == 'windows':
+            ansible_method = 'win_shell'
+            command = 'type'
+
+        result = self.get_host(host).ansible(ansible_method, f"{command} '{file_path}'", check=False)
+
+        return result['stdout']
+
 
     def apply_config(self, config_yml_path: str, dest_path: str = WAZUH_CONF, clear_files: list = None,
                      restart_services: list = None):
@@ -200,7 +306,7 @@ class HostManager:
         """Return an API token for the specified user.
 
         Args:
-            host (str): Hostname.
+            host (str): HostName in inventory.
             user (str, optional): API username. Default `wazuh`
             password (str, optional): API password. Default `wazuh`
             auth_context (dict, optional): Authorization context body. Default `None`
@@ -339,6 +445,294 @@ class HostManager:
                 replace = replace + internal_option
             self.modify_file_content(target_host, WAZUH_LOCAL_INTERNAL_OPTIONS, replace)
 
+    def download_file(self, host, url, dest_path, mode='755'):
+        """
+        Downloads a file from the specified URL to the destination path on the specified host.
+
+        Args:
+            host (str): The target host on which to download the file.
+            url (str): The URL of the file to be downloaded.
+            dest_path (str): The destination path where the file will be saved on the host.
+            mode (str, optional): The file permissions mode. Defaults to '755'.
+
+        Returns:
+            dict: Ansible result of the download operation.
+
+        Example:
+            host_manager.download_file('my_host', 'http://example.com/path/file.conf', '/etc/foo.conf', mode='0440')
+        """
+        result = self.get_host(host).ansible("get_url", f"url={url} dest={dest_path} mode={mode}", check=False)
+
+        return result
+
+    def install_package(self, host, url, system='ubuntu'):
+        """
+        Installs a package on the specified host.
+
+        Args:
+            host (str): The target host on which to install the package.
+            url (str): The URL or name of the package to be installed.
+            system (str, optional): The operating system type. Defaults to 'ubuntu'.
+                Supported values: 'windows', 'ubuntu', 'centos'.
+
+        Returns:
+            Dict: Testinfra Ansible Response of the operation
+
+        Example:
+            host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
+        """
+        result = False
+        if system == 'windows':
+            result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
+        elif system == 'ubuntu':
+            result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
+            if result['changed'] and result['stderr'] == '':
+                result = True
+        elif system == 'centos':
+            result = self.get_host(host).ansible("yum", f"name={url} state=present"
+                                                 'sslverify=false disable_gpg_check=True', check=False)
+            if 'rc' in result and result['rc'] == 0 and result['changed']:
+                result = True
+        elif system == 'macos':
+            package_name = url.split('/')[-1]
+            result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
+            cmd = f"installer -pkg {package_name} -target /"
+            result = self.get_host(host).ansible("command", cmd, check=False)
+
+        return result
+
+    def get_master_ip(self):
+        """
+        Retrieves the IP address of the master node from the inventory.
+
+        Returns:
+            str: The IP address of the master node, or None if not found.
+
+        Example:
+            master_ip = host_manager.get_master_ip()
+        """
+        master_ip = None
+
+        for manager in self.get_group_hosts('manager'):
+            if 'type' in self.get_host_variables(manager) and \
+                    self.get_host_variables(manager)['type'] == 'master':
+                master_ip = self.get_host_variables(manager)['ip']
+                break
+
+        return master_ip
+
+    def get_master(self):
+        """
+        Retrieves the master node from the inventory.
+
+        Returns:
+            str: The master node, or None if not found.
+        """
+        master_node = None
+
+        for manager in self.get_group_hosts('manager'):
+            if 'type' in self.get_host_variables(manager) and \
+                         self.get_host_variables(manager)['type'] == 'master':
+                master_node = manager
+                break
+        if master_node is None:
+            raise ValueError('Master node not found in inventory')
+
+        return master_node
+
+    def remove_package(self, host, system, package_uninstall_name=None, custom_uninstall_playbook=None):
+        """
+        Removes a package from the specified host.
+
+        Args:
+            host (str): The target host from which to remove the package.
+            package_name (str): The name of the package to be removed.
+            system (str): The operating system type.
+                Supported values: 'windows', 'ubuntu', 'centos'.
+
+        Returns:
+            Dict: Testinfra Ansible Response of the operation
+
+        Example:
+            host_manager.remove_package('my_host', 'my_package', system='ubuntu')
+        """
+        logging.info(f"Removing package {package_uninstall_name} from host {host}")
+        logging.info(f"System: {system}")
+
+        remove_operation_result = False
+
+        os_name = self.get_host_variables(host)['os_name']
+
+        if custom_uninstall_playbook:
+            remove_operation_result = self.run_playbook(host, custom_uninstall_playbook)
+        elif package_uninstall_name:
+            if os_name == 'windows':
+                remove_operation_result = self.get_host(host).ansible("win_command",
+                                                                      f"{package_uninstall_name} /uninstall /quiet /S",
+                                                                      check=False)
+            elif os_name == 'linux':
+                os = self.get_host_variables(host)['os'].split('_')[0]
+                if os == 'centos':
+                    remove_operation_result = self.get_host(host).ansible("yum",
+                                                                          f"name={package_uninstall_name} state=absent",
+                                                                          check=False)
+                elif os == 'ubuntu':
+                    remove_operation_result = self.get_host(host).ansible("apt",
+                                                                          f"name={package_uninstall_name} state=absent",
+                                                                          check=False)
+            elif os_name == 'macos':
+                remove_operation_result = self.get_host(host).ansible("command",
+                                                                      f"brew uninstall {package_uninstall_name}",
+                                                                      check=False)
+
+        logging.info(f"Package removed result {remove_operation_result}")
+
+        return remove_operation_result
+
+    def run_playbook(self, host, playbook_name, params=None):
+        file_dir = os.path.dirname(os.path.realpath(__file__))
+        playbook_path = f"{file_dir}/playbooks/{playbook_name}.yaml"
+        new_playbook = None
+        new_playbook_path = None
+
+        with open(playbook_path, 'r') as playbook_file:
+            playbook = playbook_file.read()
+            new_playbook = playbook.replace('HOSTS', host)
+
+        temp_dir = tempfile.mkdtemp()
+        new_playbook_path = f"{temp_dir}/playbook.yaml"
+
+        with open(f"{temp_dir}/playbook.yaml", 'w') as playbook_file:
+            playbook_file.write(new_playbook)
+
+        r = None
+
+        logger.setLevel(logging.DEBUG)
+        try:
+            r = ansible_runner.run(
+                inventory=self.inventory_path,
+                playbook=new_playbook_path,
+                host_pattern=host,
+                extravars=params,
+            )
+            print("Ansible playbook executed successfully.")
+        except Exception as e:
+            print(f"Error executing Ansible playbook: {e}")
+
+        logger.setLevel(logging.CRITICAL)
+
+        return r
+
+    def handle_wazuh_services(self, host, operation):
+        """
+        Handles Wazuh services on the specified host.
+
+        Args:
+            host (str): The target host on which to handle Wazuh services.
+            operation (str): The operation to perform ('start', 'stop', 'restart').
+
+        Example:
+            host_manager.handle_wazuh_services('my_host', 'restart')
+        """
+        os = self.get_host_variables(host)['os_name']
+        binary_path = None
+        result = None
+
+        if os == 'windows':
+            if operation == 'restart':
+                self.get_host(host).ansible('ansible.windows.win_shell', f'NET stop Wazuh', check=False)
+                self.get_host(host).ansible('ansible.windows.win_shell', f'NET start Wazuh', check=False)
+            else:
+                result = self.get_host(host).ansible('ansible.windows.win_shell', f'NET {operation} Wazuh', check=False)
+        else:
+            if os == 'linux':
+                result = binary_path = f"/var/ossec/bin/wazuh-control"
+            elif os == 'macos':
+                result= binary_path = f"/Library/Ossec/bin/wazuh-control"
+
+            result = self.get_host(host).ansible('shell', f"{binary_path} {operation}", check=False)
+
+        return result
+
+    def control_environment(self, operation, group_list):
+        """
+        Controls the Wazuh services on hosts in the specified groups.
+
+        Args:
+            operation (str): The operation to perform on Wazuh services ('start', 'stop', 'restart').
+            group_list (list): A list of group names whose hosts' Wazuh services should be controlled.
+
+        Example:
+            control_environment('restart', ['group1', 'group2'])
+        """
+        for group in group_list:
+            for host in self.get_group_hosts(group):
+                self.handle_wazuh_services(host, operation)
+
+    def get_agents_ids(self):
+        """
+        Retrieves the ID of the agents from the API.
+
+        Args:
+            agent_name (str): The name of the agent.
+
+        Returns:
+            str: The ID of the agent.
+        """
+        token = self.get_api_token(self.get_master())
+        agents = self.make_api_call(self.get_master(), endpoint='/agents/', token=token)['json']['data']
+
+        agents_ids = []
+
+        for agent in agents['affected_items']:
+            if agent['id'] != '000':
+                agents_ids.append(agent['id'])
+
+        return agents_ids
+
+    def remove_agents(self):
+        """
+        Removes all the agents from the API.
+
+        Args:
+            host (str): The target host from which to remove the agent.
+
+        Example:
+            host_manager.remove_agent('my_host', 'my_agent_id')
+        """
+        token = self.get_api_token(self.get_master())
+        agents_ids = self.get_agents_ids()
+        result = self.make_api_call(
+            host=self.get_master(),
+            method='DELETE',
+            endpoint=f'/agents?agents_list={",".join(agents_ids)}&status=all&older_than=0s',
+            token=token,
+        )
+        logging.info(f"Agents removed result {result}")
+
+    def get_hosts_not_reachable(self) -> List[str]:
+        """
+        Checks that all hosts provided in the inventory are accessible.
+
+        Returns:
+            List[str]: List of hosts that are not reachable.
+        """
+        hosts_not_reachable = []
+        for host in self.get_group_hosts('all'):
+            logging.info(f"Checking host {host}...")
+            os_name = self.get_host_variables(host)['os_name']
+            if os_name == 'windows':
+                command = 'ansible.windows.win_ping'
+            else:
+                command = 'ping'
+            try:
+                self.get_host(host).ansible(command, check=False)
+            except Exception as e:
+                logging.error(f"Error connecting to host {host}: {e}")
+                hosts_not_reachable.append(host)
+
+        return hosts_not_reachable
+
 
 def clean_environment(host_manager, target_files):
     """Clears a series of files on target hosts managed by a host manager
@@ -347,4 +741,5 @@ def clean_environment(host_manager, target_files):
         target_files (dict): a dictionary of tuples, each with the host and the path of the file to clear.
     """
     for target in target_files:
+
         host_manager.clear_file(host=target[0], file_path=target[1])
