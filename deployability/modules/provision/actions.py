@@ -25,12 +25,14 @@ class Action:
         """
         Execute the action.
         """
-        status = {}
+        status = {}       
 
         print(self.component.variables_dict)
 
         tasks = self.ansible.render_playbooks(self.component.variables_dict)
-
+        print("AAA")
+        print(tasks)
+        print("ZZ")
         playbook = {
             'hosts': self.ansible.ansible_data.ansible_host,
             'become': True,

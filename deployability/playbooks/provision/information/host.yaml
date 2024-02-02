@@ -1,7 +1,14 @@
-- name: Print ansible_os_family
+- name: Capture ansible_os_family
   hosts: all
-  gather_facts: true
   tasks:
-    - name: Debug ansible_os_family
+    - name: Use the setup module to gather information
+      setup:
+
+    - name: Capture ansible_os_family
+      set_fact:
+        ansible_os_family: "{{ ansible_facts['distribution_file_variety'] }}"
+        cacheable: yes
+
+    - name: Print my_variable
       debug:
         var: ansible_os_family
