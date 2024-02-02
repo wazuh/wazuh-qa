@@ -300,10 +300,10 @@ def pre_insert_packages():
     for pkg_n in range(PACKAGES_NUMBER):
         command = f"agent 000 sql INSERT OR REPLACE INTO sys_programs \
         (scan_id,scan_time,format,name,priority,section,size,vendor,install_time,version,\
-        architecture,multiarch,source,description,location,triaged,cpe,msu_name,checksum,item_id)\
+        architecture,multiarch,source,description,location,cpe,msu_name,checksum,item_id)\
         VALUES(0,'2021/04/07 22:00:00','deb','test_package_{pkg_n}','optional','utils',{random.randint(200,1000)},\
         'Wazuh wazuh@wazuh.com',NULL,'{random.randint(1,10)}.0.0','all',NULL,NULL,'Test package {pkg_n}',\
-        NULL,0,NULL,NULL,'{random.getrandbits(128)}','{random.getrandbits(128)}')"
+        NULL,NULL,NULL,'{random.getrandbits(128)}','{random.getrandbits(128)}')"
         receiver_sockets[0].send(command, size=True)
         response = receiver_sockets[0].receive(size=True).decode()
         data = response.split()
@@ -379,7 +379,7 @@ def test_wazuh_db_messages_agent(restart_wazuh, clean_registered_agents, configu
             match = True if regex_match(expected_output, response) else False
         else:
             match = validate_wazuh_db_response(expected_output, response)
-        assert match, 'Failed test case stage {}: {}. Expected: {}. Response: {}' \
+        assert match, 'Failed test case stage {}: {}. Expected: "{}". Response: "{}".' \
             .format(index + 1, stage['stage'], expected_output, response)
 
 
