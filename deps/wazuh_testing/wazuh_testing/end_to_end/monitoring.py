@@ -86,7 +86,6 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
                 List: A list of events that fit the timestamp.
             """
             match_that_fit_timestamp = []
-            logging.critical(f"match_events: {match_events}")
             for match in match_events:
                 if match.__class__ == tuple:
                     timestamp_str = match[0]
@@ -99,7 +98,6 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
                 timestamp_datetime = datetime.strptime(timestamp_str, timestamp_format)
                 greater_than_timestamp_formatted = datetime.strptime(greater_than_timestamp, timestamp_format_parameter)
 
-                logging.critical(f"Comparing {timestamp_datetime} {greater_than_timestamp_formatted} ")
                 if timestamp_datetime >=  greater_than_timestamp_formatted:
                     match_that_fit_timestamp.append(match)
 
