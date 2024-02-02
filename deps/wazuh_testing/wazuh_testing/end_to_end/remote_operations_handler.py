@@ -154,36 +154,39 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
         else:
             raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found")
 
-    package_data = load_packages_metadata()[package_id]
-    package_url = package_data['urls'][host_os_name][host_os_arch]
+        package_data = load_packages_metadata()[package_id]
+        package_url = package_data['urls'][host_os_name][host_os_arch]
 
-    logging.info(f"Installing package on {host}")
-    logging.info(f"Package URL: {package_url}")
+        logging.info(f"Installing package on {host}")
+        logging.info(f"Package URL: {package_url}")
 
-    current_datetime = datetime.utcnow().isoformat()
+        current_datetime = datetime.utcnow().isoformat()
 
-    host_manager.install_package(host, package_url, system)
+        host_manager.install_package(host, package_url, system)
 
-    logging.info(f"Package {package_url} installed on {host}")
+        logging.info(f"Package {package_url} installed on {host}")
 
-    logging.info(f"Package installed on {host}")
+        logging.info(f"Package installed on {host}")
 
-    results['checks']['all_successfull'] = True
+        results['checks']['all_successfull'] = True
 
-    wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
-                                                      operation_data['check']['state_index'] or
-                                                      operation_data['check']['no_alerts'] or
-                                                      operation_data['check']['no_indices'])
+        wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
+                                                          operation_data['check']['state_index'] or
+                                                          operation_data['check']['no_alerts'] or
+                                                          operation_data['check']['no_indices'])
 
-    if wait_is_required:
-        wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
+        if wait_is_required:
+            wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
 
-        check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
-                                   package_data, operation='install')
+            check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
+                                       package_data, operation='install')
+    else:
+        logging.info(f"No operation to perform on {host}")
+        results['checks']['all_successfull'] = True
 
     return {
             f"{host}": results
-        }
+    }
 
 
 def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: HostManager):
@@ -225,27 +228,32 @@ def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
         else:
             raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found")
 
-    package_data = load_packages_metadata()[package_id]
+        package_data = load_packages_metadata()[package_id]
 
-    current_datetime = datetime.utcnow().isoformat()
+        current_datetime = datetime.utcnow().isoformat()
 
-    logging.info(f"Removing package on {host}")
-    if 'uninstall_name' in package_data:
-        uninstall_name = package_data['uninstall_name']
-        host_manager.remove_package(host, system, package_uninstall_name=uninstall_name)
-    elif 'uninstall_custom_playbook' in package_data:
-        host_manager.remove_package(host, system, custom_uninstall_playbook=package_data['uninstall_custom_playbook'])
+        logging.info(f"Removing package on {host}")
+        if 'uninstall_name' in package_data:
+            uninstall_name = package_data['uninstall_name']
+            host_manager.remove_package(host, system, package_uninstall_name=uninstall_name)
+        elif 'uninstall_custom_playbook' in package_data:
+            host_manager.remove_package(host, system,
+                                        custom_uninstall_playbook=package_data['uninstall_custom_playbook'])
 
-    wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
-                                                      operation_data['check']['state_index'] or
-                                                      operation_data['check']['no_alerts'] or
-                                                      operation_data['check']['no_indices'])
+        wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
+                                                          operation_data['check']['state_index'] or
+                                                          operation_data['check']['no_alerts'] or
+                                                          operation_data['check']['no_indices'])
 
-    if wait_is_required:
-        wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
+        if wait_is_required:
+            wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
 
-        check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
-                                   package_data, operation='remove')
+            check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
+                                       package_data, operation='remove')
+
+    else:
+        logging.info(f"No operation to perform on {host}")
+        results['checks']['all_successfull'] = True
 
     return {
             f"{host}": results
@@ -301,34 +309,37 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
         else:
             raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found")
 
-    package_data_from = load_packages_metadata()[package_id_from]
-    package_data_to = load_packages_metadata()[package_id_to]
+        package_data_from = load_packages_metadata()[package_id_from]
+        package_data_to = load_packages_metadata()[package_id_to]
 
+        package_url_to = package_data_to['urls'][host_os_name][host_os_arch]
 
-    package_url_to = package_data_to['urls'][host_os_name][host_os_arch]
+        logging.info(f"Installing package on {host}")
+        logging.info(f"Package URL: {package_url_to}")
 
-    logging.info(f"Installing package on {host}")
-    logging.info(f"Package URL: {package_url_to}")
+        current_datetime = datetime.utcnow().isoformat()
+        host_manager.install_package(host, package_url_to, system)
 
-    current_datetime = datetime.utcnow().isoformat()
-    host_manager.install_package(host, package_url_to, system)
+        logging.info(f"Package {package_url_to} installed on {host}")
 
-    logging.info(f"Package {package_url_to} installed on {host}")
+        logging.info(f"Package installed on {host}")
 
-    logging.info(f"Package installed on {host}")
+        wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
+                                                          operation_data['check']['state_index'] or
+                                                          operation_data['check']['no_alerts'] or
+                                                          operation_data['check']['no_indices'])
+        if wait_is_required:
+            wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
 
-    wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
-                                                      operation_data['check']['state_index'] or
-                                                      operation_data['check']['no_alerts'] or
-                                                      operation_data['check']['no_indices'])
-    if wait_is_required:
-        wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
+            check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
+                                       {'from': package_data_from, 'to': package_data_to}, operation='update')
+    else:
+        logging.info(f"No operation to perform on {host}")
+        results['checks']['all_successfull'] = True
 
-        check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
-                                   {'from': package_data_from, 'to': package_data_to} , operation='update')
-        return {
-                f"{host}": results
-            }
+    return {
+            f"{host}": results
+        }
 
 
 def launch_remote_sequential_operation_on_agent(agent: str, task_list: List[Dict], host_manager: HostManager):
