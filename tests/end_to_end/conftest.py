@@ -155,7 +155,7 @@ def validate_environments(request):
     # -------------------------------------------------- End of Step 4 -------------------------------------------------
 
 
-@pytest.fixture(scope='module', autouse=False)
+@pytest.fixture(scope='module')
 def run_specific_validations(request):
     """Fixture with module scope to validate the environment of an specific tests with specific validation tasks.
 
