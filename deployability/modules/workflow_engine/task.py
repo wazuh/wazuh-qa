@@ -2,15 +2,13 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-from abc import ABC, abstractmethod
 import subprocess
-import logging
 import random
 import time
-import json
-import shlex
 
-logger = (lambda: logging.getLogger())()
+from abc import ABC, abstractmethod
+from .utils import logger
+
 
 class Task(ABC):
     """Abstract base class for tasks."""

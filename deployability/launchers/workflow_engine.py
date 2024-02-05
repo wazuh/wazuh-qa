@@ -25,14 +25,6 @@ def parse_arguments() -> argparse.Namespace:
                         help='Log level.')
     return parser.parse_args()
 
-def setup_logger(log_level: str) -> None:
-    """Setup logger."""
-    logger = logging.getLogger()
-    console_handler = colorlog.StreamHandler()
-    console_handler.setFormatter(colorlog.ColoredFormatter("%(log_color)s[%(asctime)s] [%(levelname)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
-    logger.addHandler(console_handler)
-    logger.setLevel(log_level)
-
 def main() -> None:
     """Main entry point."""
 
@@ -40,7 +32,6 @@ def main() -> None:
     validator = SchemaValidator(args.schema_file, args.workflow_file)
     validator.preprocess_data()
     validator.validateSchema()
-    setup_logger(args.log_level)
     processor = WorkflowProcessor(args.workflow_file, args.dry_run, args.threads)
     processor.run()
 

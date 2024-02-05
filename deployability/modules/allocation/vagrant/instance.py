@@ -5,6 +5,7 @@ from pathlib import Path
 
 from modules.allocation.generic import Instance
 from modules.allocation.generic.models import ConnectionInfo
+from modules.allocation.generic.utils import logger
 from .credentials import VagrantCredentials
 
 
@@ -65,6 +66,8 @@ class VagrantInstance(Instance):
             None
         """
         if "not created" in self.status():
+            logger.warning(f"Instance {self.identifier} is not created.\
+                            Skipping deletion.")
             return
         self.__run_vagrant_command(['destroy', '-f'])
 
@@ -86,6 +89,8 @@ class VagrantInstance(Instance):
             ConnectionInfo: The SSH configuration of the VM.
         """
         if not 'running' in self.status():
+            logger.debug(f"Instance {self.identifier} is not running.\
+                          Starting it.")
             self.start()
         output = self.__run_vagrant_command('ssh-config')
         patterns = {'hostname': r'HostName (.*)',
@@ -99,8 +104,10 @@ class VagrantInstance(Instance):
             if match:
                 ssh_config[key] = str(match.group(1)).strip("\r")
             else:
-                raise ValueError(f"Couldn't find {key} in vagrant ssh-config")
+                logger.error(f"Couldn't find {key} in ssh-config")
+                return None
         if self.credentials:
+            logger.debug(f"Using provided credentials")
             ssh_config['private_key'] = str(self.credentials.key_path)
         return ConnectionInfo(**ssh_config)
 
@@ -124,11 +131,11 @@ class VagrantInstance(Instance):
                                     stderr=subprocess.PIPE)
 
             if stderr := output.stderr.decode("utf-8"):
-                print(stderr)
-                print(output.stdout.decode("utf-8"))
+                logger.error(f"Command failed: {stderr}")
+                return None
             return output.stdout.decode("utf-8")
         except subprocess.CalledProcessError as e:
-            print(e)
+            logger.error(f"Command failed: {e.stderr}")
             return None
 
     def __parse_vagrant_status(self, message: str) -> str:

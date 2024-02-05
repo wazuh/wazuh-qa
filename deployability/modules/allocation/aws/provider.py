@@ -5,6 +5,7 @@ from pathlib import Path
 
 from modules.allocation.generic import Provider
 from modules.allocation.generic.models import CreationPayload
+from modules.allocation.generic.utils import logger
 from .credentials import AWSCredentials
 from .instance import AWSInstance
 from .models import AWSConfig
@@ -38,21 +39,25 @@ class AWSProvider(Provider):
         temp_dir = base_dir / temp_id
         credentials = AWSCredentials()
         if not config:
+            logger.debug(f"No config provided. Generating from payload")
             # Generate the credentials.
             credentials.generate(temp_dir, temp_id.split('-')[-1] + '_key')
             # Parse the config if it is not provided.
             config = cls.__parse_config(params, credentials)
         else:
+            logger.debug(f"Using provided config")
             # Load the existing credentials.
             credentials.load(config.key_name)
             # Create the temp directory. 
             # TODO: Review this on the credentials refactor.
             if not temp_dir.exists():
+                logger.debug(f"Creating temp directory: {temp_dir}")
                 temp_dir.mkdir(parents=True, exist_ok=True)
         # Generate the instance.
         instance_id = cls.__create_ec2_instance(config)
         # Rename the temp directory to its real name.
         instance_dir = Path(base_dir, instance_id)
+        logger.debug(f"Renaming temp {temp_dir} directory to {instance_dir}")
         os.rename(temp_dir, instance_dir)
         credentials.key_path = (instance_dir / credentials.name).with_suffix('.pem')
 
@@ -83,6 +88,7 @@ class AWSProvider(Provider):
         """
         instance = AWSInstance(instance_dir, identifier)
         if instance.credentials:
+            logger.debug(f"Deleting credentials: {instance.credentials.key_path}")
             instance.credentials.delete()
         instance.delete()
 

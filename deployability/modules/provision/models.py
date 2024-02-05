@@ -1,15 +1,16 @@
 from pathlib import Path
 from typing import List, Union
-import typing
 from pydantic import BaseModel, validator, model_validator
+
 from modules.generic.utils import Utils
-import json
+
 
 class ComponentInfo(BaseModel):
     component: str
     type: str = ""
     version: str = ""
-    manager_ip: str = None
+    manager_ip: str | None = None
+
 
 class InputPayload(BaseModel):
   inventory_agent: Path | None
@@ -17,7 +18,7 @@ class InputPayload(BaseModel):
   inventory: Path | None
   install: List[ComponentInfo] | None
   uninstall: List[ComponentInfo] | None
-  manager_ip: str | None
+  manager_ip: str | None = None
 
   @model_validator(mode="before")
   def validations(cls, values):

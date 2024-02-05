@@ -1,2 +1,2 @@
 from .ansible import Ansible, Inventory
-from .schemaValidator import SchemaValidator
+from .schema_validator import SchemaValidator
