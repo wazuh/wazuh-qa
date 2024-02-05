@@ -3,7 +3,7 @@
   command: "apt-get -y install {{ component }}"
 {% endif %}
 
-{% if ansible_os_family == 'Debian' %}
+{% if ansible_os_family == 'Redhat' %}
 - name: Install the {{ component }}
   command: "yum -y install {{ component }}"
 {% endif %}
