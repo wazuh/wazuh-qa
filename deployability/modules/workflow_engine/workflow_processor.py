@@ -11,7 +11,7 @@ import yaml
 from pathlib import Path 
 from itertools import product
 
-from modules.generic import SchemaValidator
+from .schema_validator import SchemaValidator
 from .task import *
 from .utils import logger
 
