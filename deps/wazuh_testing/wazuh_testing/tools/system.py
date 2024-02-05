@@ -607,7 +607,7 @@ class HostManager:
 
         result = None
 
-        if sys.version_info < (3, 7):
+        if sys.version_info < (3, 7) or sys.platform.startswith("win"):
             raise ValueError("Python 3.7 or higher is required to run Ansible playbooks.")
         else:
             import ansible_runner
