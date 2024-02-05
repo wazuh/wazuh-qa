@@ -627,7 +627,6 @@ class HostManager:
             with open(f"{temp_dir}/playbook.yaml", 'w') as playbook_file:
                 playbook_file.write(new_playbook)
 
-            logger.setLevel(logging.DEBUG)
             try:
                 result = ansible_runner.run(
                     inventory=self.inventory_path,
@@ -635,11 +634,9 @@ class HostManager:
                     host_pattern=host,
                     extravars=params,
                 )
-                print("Ansible playbook executed successfully.")
+                logging.info("Ansible playbook executed successfully.")
             except Exception as e:
-                print(f"Error executing Ansible playbook: {e}")
-
-            logger.setLevel(logging.CRITICAL)
+                logging.critical(f"Error executing Ansible playbook: {e}")
 
         return result
 
