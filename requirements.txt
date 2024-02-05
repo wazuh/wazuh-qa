@@ -39,7 +39,7 @@ numpydoc>=1.1.0
 ansible-runner>=2.0.1 ; platform_system == "Linux"
 docker>=5.0.0 ; platform_system == "Linux" or platform_system=='Windows'
 python-vagrant>=0.5.15 ; platform_system == "Linux" or platform_system=='Windows'
-ansible>=3.1.0 ; platform_system == "Linux"
+ansible>=3.1.0 ; platform_system == "Linux" or platform_system=='Windows'
 elasticsearch>=7.14.1 ; platform_system == "Linux" or platform_system=='Windows'
 safety==1.10.3
 bandit==1.7.0
