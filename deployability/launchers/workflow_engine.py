@@ -27,22 +27,11 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument('--schema_file', required=False, type=str, help='Path to the schema file (YAML format)')
     return parser.parse_args()
 
-
-def setup_logger(log_level: str) -> None:
-    """Setup logger."""
-    logger = logging.getLogger()
-    console_handler = colorlog.StreamHandler()
-    console_handler.setFormatter(colorlog.ColoredFormatter("%(log_color)s[%(asctime)s] [%(levelname)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
-    logger.addHandler(console_handler)
-    logger.setLevel(log_level)
-
-
 def main() -> None:
     """Main entry point."""
 
     args = parse_arguments()
-    setup_logger(args.log_level)
-    processor = WorkflowProcessor(**dict(InputPayload(**vars(parse_arguments()))))
+    processor = WorkflowProcessor(**dict(InputPayload(**vars(args))))
     processor.run()
 
 

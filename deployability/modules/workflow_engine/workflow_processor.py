@@ -2,20 +2,20 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import graphlib
 import concurrent.futures
-from pathlib import Path
-import time
+import graphlib
 import json
-import logging
-from itertools import product
+import time
 import yaml
 
-from modules.generic.schemaValidator import SchemaValidator
+from pathlib import Path 
+from itertools import product
+
+from .schema_validator import SchemaValidator
 from .task import *
+from .utils import logger
 
 
-logger = (lambda: logging.getLogger())()
 
 class WorkflowFile:
     """Class for loading and processing a workflow file."""
