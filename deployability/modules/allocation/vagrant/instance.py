@@ -5,7 +5,7 @@ from pathlib import Path
 
 from modules.allocation.generic import Instance
 from modules.allocation.generic.models import ConnectionInfo
-from modules.allocation.generic.logger import logger
+from modules.allocation.generic.utils import logger
 from .credentials import VagrantCredentials
 
 

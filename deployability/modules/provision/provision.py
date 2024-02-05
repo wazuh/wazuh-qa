@@ -6,7 +6,7 @@ from pathlib import Path
 
 from modules.generic.utils import Utils
 from modules.provision.actions import Action
-from modules.provision.logger import logger
+from modules.provision.utils import logger
 from modules.provision.models import InputPayload, ComponentInfo
 from modules.provision.provisionModule import ProvisionModule
 

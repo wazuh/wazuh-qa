@@ -4,8 +4,9 @@ from pathlib import Path
 
 from modules.generic import Ansible, Inventory
 from modules.generic.utils import Utils
-from .logger import logger
 from .models import InputPayload, ExtraVars
+from .utils import logger
+
 
 class Tester:
     _playbooks_dir = Path('tests')
@@ -66,6 +67,14 @@ class Tester:
 
     @classmethod
     def _run_tests(cls, test_list: list[str], ansible: Ansible, extra_vars: ExtraVars) -> None:
+        """
+        Execute the playbooks that runs the tests.
+
+        Args:
+            test_list (list[str]): The list of tests to run.
+            ansible (Ansible): The Ansible object to run the tests.
+            extra_vars (ExtraVars): The extra vars for the tests.
+        """
         for test in test_list:
             rendering_var = {**extra_vars, 'test': test}
             template = str(ansible.playbooks_path / cls._test_template)
@@ -77,6 +86,13 @@ class Tester:
 
     @classmethod
     def _setup(cls, ansible: Ansible, remote_working_dir: str = '/tmp') -> None:
+        """
+        Setup the environment for the tests.
+
+        Args:
+            ansible (Ansible): The Ansible object to run the setup.
+            remote_working_dir (str): The remote working directory.
+        """
         extra_vars = {'local_path': str(Path(__file__).parent / 'tests'),
                       'working_dir': remote_working_dir}
         playbook = str(ansible.playbooks_path / cls._setup_playbook)
@@ -84,6 +100,13 @@ class Tester:
 
     @classmethod
     def _cleanup(cls, ansible: Ansible, remote_working_dir: str = '/tmp') -> None:
+        """
+        Cleanup the environment after the tests.
+
+        Args:
+            ansible (Ansible): The Ansible object to run the cleanup.
+            remote_working_dir (str): The remote working directory.
+        """
         extra_vars = {'working_dir': remote_working_dir}
         playbook = str(ansible.playbooks_path / cls._cleanup_playbook)
         ansible.run_playbook(playbook, extra_vars)

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .instance import Instance
 from .models import CreationPayload, ProviderConfig
-from .logger import logger
+from .utils import logger
 
 
 class Provider(ABC):

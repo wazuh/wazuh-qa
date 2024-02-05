@@ -4,7 +4,7 @@ from pathlib import Path
 
 from .aws.provider import AWSProvider, AWSConfig
 from .generic import Instance, Provider, models
-from .generic.logger import logger
+from .generic.utils import logger
 from .vagrant.provider import VagrantProvider, VagrantConfig
 
 

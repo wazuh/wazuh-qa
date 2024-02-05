@@ -5,7 +5,7 @@ from pathlib import Path
 
 from modules.allocation.generic import Provider
 from modules.allocation.generic.models import CreationPayload
-from modules.allocation.generic.logger import logger
+from modules.allocation.generic.utils import logger
 from .credentials import AWSCredentials
 from .instance import AWSInstance
 from .models import AWSConfig

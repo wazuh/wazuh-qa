@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 
 from modules.allocation.generic import Credentials
-from modules.allocation.generic.logger import logger
+from modules.allocation.generic.utils import logger
 
 
 class VagrantCredentials(Credentials):
