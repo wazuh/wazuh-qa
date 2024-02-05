@@ -4,13 +4,13 @@
 
 import json
 import tempfile
+import sys
 import os
 import logging
 import xml.dom.minidom as minidom
 from typing import Union, List
 import testinfra
 import yaml
-import ansible_runner
 
 from wazuh_testing.tools import WAZUH_CONF, WAZUH_API_CONF, API_LOG_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 from wazuh_testing.tools.configuration import set_section_wazuh_conf
@@ -590,38 +590,55 @@ class HostManager:
         return remove_operation_result
 
     def run_playbook(self, host, playbook_name, params=None):
-        file_dir = os.path.dirname(os.path.realpath(__file__))
-        playbook_path = f"{file_dir}/playbooks/{playbook_name}.yaml"
-        new_playbook = None
-        new_playbook_path = None
+        """
+        Executes an Ansible playbook on the specified host.
 
-        with open(playbook_path, 'r') as playbook_file:
-            playbook = playbook_file.read()
-            new_playbook = playbook.replace('HOSTS', host)
+        Args:
+            host (str): The target host on which to execute the playbook.
+            playbook_name (str): The name of the playbook to be executed.
+            params (dict, optional): The parameters to be passed to the playbook. Defaults to None.
 
-        temp_dir = tempfile.mkdtemp()
-        new_playbook_path = f"{temp_dir}/playbook.yaml"
+        Returns:
+            Runner: The result of the playbook execution.
 
-        with open(f"{temp_dir}/playbook.yaml", 'w') as playbook_file:
-            playbook_file.write(new_playbook)
+        Raises:
+            ValueError: If the Python version is less than 3.7.
+        """
 
-        r = None
+        result = None
 
-        logger.setLevel(logging.DEBUG)
-        try:
-            r = ansible_runner.run(
-                inventory=self.inventory_path,
-                playbook=new_playbook_path,
-                host_pattern=host,
-                extravars=params,
-            )
-            print("Ansible playbook executed successfully.")
-        except Exception as e:
-            print(f"Error executing Ansible playbook: {e}")
+        if sys.version_info < (3, 7) or sys.platform.startswith("win"):
+            raise ValueError("Python 3.7 or higher and a Unix-like system are required to run Ansible playbooks.")
+        else:
+            import ansible_runner
 
-        logger.setLevel(logging.CRITICAL)
+            file_dir = os.path.dirname(os.path.realpath(__file__))
+            playbook_path = f"{file_dir}/playbooks/{playbook_name}.yaml"
+            new_playbook = None
+            new_playbook_path = None
 
-        return r
+            with open(playbook_path, 'r') as playbook_file:
+                playbook = playbook_file.read()
+                new_playbook = playbook.replace('HOSTS', host)
+
+            temp_dir = tempfile.mkdtemp()
+            new_playbook_path = f"{temp_dir}/playbook.yaml"
+
+            with open(f"{temp_dir}/playbook.yaml", 'w') as playbook_file:
+                playbook_file.write(new_playbook)
+
+            try:
+                result = ansible_runner.run(
+                    inventory=self.inventory_path,
+                    playbook=new_playbook_path,
+                    host_pattern=host,
+                    extravars=params,
+                )
+                logging.info("Ansible playbook executed successfully.")
+            except Exception as e:
+                logging.critical(f"Error executing Ansible playbook: {e}")
+
+        return result
 
     def handle_wazuh_services(self, host, operation):
         """
