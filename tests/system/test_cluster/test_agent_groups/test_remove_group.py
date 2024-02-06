@@ -8,7 +8,7 @@ from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups,
 from wazuh_testing import T_10
 from system.test_cluster.test_agent_groups.common import register_agent
 from wazuh_testing.tools.configuration import get_test_cases_data
-from wazuh_testing.tools.monitoring import HostMonitor
+from wazuh_testing.tools.system_monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
 pytestmark = [pytest.mark.cluster, pytest.mark.enrollment_cluster_env]
