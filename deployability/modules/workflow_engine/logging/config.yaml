@@ -22,7 +22,7 @@ handlers:
     class: logging.FileHandler
     level: DEBUG
     formatter: simple
-    filename: tmp/flowbacca/logs.log
+    filename: /tmp/flowbacca.log
 root:
   level: DEBUG
   handlers: [console, file]

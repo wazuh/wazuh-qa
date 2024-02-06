@@ -7,7 +7,7 @@ import random
 import time
 
 from abc import ABC, abstractmethod
-from .utils import logger
+from .logging.logger import logger
 
 
 class Task(ABC):
@@ -45,12 +45,10 @@ class ProcessTask(Task):
             elif isinstance(arg, dict):
                 key, value = list(arg.items())[0]
                 if isinstance(value, list):
-                    for argvalue in value:
-                        print(f"argvalue {argvalue}")
                     task_args.extend([f"--{key}={argvalue}" for argvalue in value])
                 else:
                     task_args.append(f"--{key}={value}")
-        print(f"task_args {task_args}")
+        self.logger.debug(f'Running task "{self.task_name}" with arguments: {task_args}')
         result = None
         try:
             result = subprocess.run(
@@ -59,10 +57,7 @@ class ProcessTask(Task):
                 capture_output=True,
                 text=True,
             )
-
-            logger.info(str(result.stdout))
-            logger.info("%s: %s", "Finish task: ", self.task_name, extra={'tag': self.task_name})
-
+            logger.debug(f'Finished task "{self.task_name}" execution with result:\n{str(result.stdout)}')
 
             if result.returncode != 0:
                 raise subprocess.CalledProcessError(returncode=result.returncode, cmd=result.args, output=result.stdout)
