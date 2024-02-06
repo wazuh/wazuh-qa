@@ -29,7 +29,7 @@ import time
 from wazuh_testing import T_1, T_10
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.file import read_yaml
-from wazuh_testing.tools.monitoring import HostMonitor
+from wazuh_testing.tools.system_monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.file import replace_regex_in_file
 from system import (assign_agent_to_new_group, clean_cluster_logs, create_new_agent_group, delete_agent_group,
