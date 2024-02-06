@@ -1,0 +1,118 @@
+{
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "description": {"type": "string"},
+        "version": {"type": "number"},
+        "tasks": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "task": {"type": "string"},
+                    "do": {
+                        "type": "object",
+                        "properties": {
+                            "this": {"type": "string"},
+                            "with": {
+                                "type": "object",
+                                "properties": {
+                                    "this": {"type": "string"},
+                                    "args": {
+                                        "type": "array",
+                                        "items": {
+                                            "oneOf": [
+                                                {"type": "string"},
+                                                {"type": "array"},
+                                                {"type": "object"}
+                                            ]
+                                        }
+                                    },
+                                    "path": {"type": "string"}
+                                }
+                            }
+                        },
+                        "required": ["this"]
+                    },
+                    "cleanup": {
+                        "type": "object",
+                        "properties": {
+                            "this": {"type": "string"},
+                            "with": {
+                                "type": "object",
+                                "properties": {
+                                    "this": {"type": "string"},
+                                    "args": {
+                                        "type": "array",
+                                        "items": {
+                                            "oneOf": [
+                                                {"type": "string"},
+                                                {"type": "array"}, 
+                                                {"type": "object"}
+                                            ]
+                                        }
+                                    },
+                                    "path": {"type": "string"}
+                                }
+                            }
+                        },
+                        "required": ["this"]
+                    },
+                    "depends-on": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                    },
+                    "foreach": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "variable": {"type": "string"},
+                                "as": {"type": "string"},
+                                "foreach": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "variable": {"type": "string"},
+                                            "as": {"type": "string"}
+                                        }
+                                    }
+                                }
+                            },
+                            "required": ["variable", "as"]
+                        }
+                    }
+                },
+                "required": ["task", "do"]
+
+            },
+            "minItems": 1
+        },
+        "variables": {
+            "type": "object",
+            "properties": {
+                "agent-os": {
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {"type": "string"},
+                            {"type": "array"}
+                        ]
+                    }
+                },
+                "managers-os": {
+                    "type": "array",
+                    "items": {
+                        "oneOf": [
+                            {"type": "string"},
+                            {"type": "array"}
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "required": ["tasks", "variables", "version"],
+    "additionalProperties": false
+  }
