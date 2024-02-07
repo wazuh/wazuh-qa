@@ -21,7 +21,6 @@ def _load_config() -> None:
 
 _load_config()
 
-    # self.logger = logging.getLogger(name)
 logger = logging.getLogger("workflow_engine")
 
 # def parse_multiline_log(logger, log_message):
