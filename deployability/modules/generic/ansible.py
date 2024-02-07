@@ -19,7 +19,7 @@ class Inventory(BaseModel):
 class Ansible:
     def __init__(self, ansible_data: dict | Inventory, path: str | Path = None):
         self.path = path
-        self.modules_path = Path(__file__).parents[2]
+        self.modules_path = Path(__file__).parents[1]
         self.provision_playbook_path = self.modules_path / 'provision/playbooks'
         self.testing_playbook_path = self.modules_path / 'testing/playbooks'
         self.ansible_data = Inventory(**dict(ansible_data))

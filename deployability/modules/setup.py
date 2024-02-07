@@ -23,6 +23,7 @@ def get_version():
     return version
 
 package_data_list = get_files_from_directory("workflow_engine")
+scripts_list = ['engine=workflow_engine.__main__:main']
 
 setup(
     name='workflow_engine',
@@ -35,6 +36,7 @@ setup(
     packages=['workflow_engine'],
     package_dir={'workflow_engine': 'workflow_engine'},
     package_data={'workflow_engine': package_data_list},
+    entry_points={'console_scripts': scripts_list},
     include_package_data=True,
     zip_safe=False
 )

@@ -2,6 +2,9 @@ import argparse
 import os
 import sys
 
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+sys.path.append(project_root)
+
 from modules.allocation import Allocator
 from modules.allocation.generic.models import InputPayload
 
@@ -18,8 +21,10 @@ def parse_arguments():
     parser.add_argument("--working-dir", required=False, default='/tmp/wazuh-qa')
     return parser.parse_args()
 
+
 def main():
     Allocator.run(InputPayload(**vars(parse_arguments())))
+
 
 if __name__ == "__main__":
     main()
