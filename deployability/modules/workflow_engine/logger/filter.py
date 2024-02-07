@@ -1,7 +1,6 @@
 import logging
 import threading
 
-
 class ThreadIDFilter(logging.Filter):
     """
     A filter that uppercases the name of the log record.

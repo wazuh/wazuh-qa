@@ -22,15 +22,6 @@ def get_version():
     version = data['version']
     return version
 
-scripts_list = [
-                'models=workflow_engine.models:main',
-                'schema_validator=workflow_engine.schema_validator:main',
-                'task=workflow_engine.task:main',
-                'workflow_processor=workflow_engine.workflow_processor:main',
-                'main=workflow_engine.main:main',
-                'logging=workflow_engine.logging.logger:main'
-]
-
 package_data_list = get_files_from_directory("workflow_engine")
 
 setup(
@@ -44,7 +35,6 @@ setup(
     packages=['workflow_engine'],
     package_dir={'workflow_engine': 'workflow_engine'},
     package_data={'workflow_engine': package_data_list},
-    entry_points={'console_scripts': scripts_list},
     include_package_data=True,
     zip_safe=False
 )

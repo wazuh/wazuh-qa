@@ -11,10 +11,9 @@ import yaml
 from pathlib import Path 
 from itertools import product
 
-from workflow_engine.logging.logger import logger
+from workflow_engine.logger.logger import logger
 from workflow_engine.schema_validator import SchemaValidator
 from workflow_engine.task import Task, TASKS_HANDLERS
-
 
 class WorkflowFile:
     """Class for loading and processing a workflow file."""

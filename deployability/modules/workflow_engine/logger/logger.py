@@ -5,7 +5,6 @@ import threading
 
 import yaml
 
-
 def _load_config() -> None:
     """
     Loads the logging configuration from 'config.yaml' file.
