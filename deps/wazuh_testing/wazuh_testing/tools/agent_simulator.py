@@ -19,6 +19,7 @@ import socket
 import ssl
 import threading
 import zlib
+import re
 from datetime import date
 from itertools import cycle
 from random import randint, sample, choice, getrandbits
@@ -119,7 +120,10 @@ class Agent:
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
                  syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100,
                  fixed_message_size=None, registration_address=None, retry_enrollment=False,
-                 logcollector_msg_number=None, custom_logcollector_message=''):
+                 logcollector_msg_number=None, custom_logcollector_message='',
+                 syscollector_event_types=['network', 'port', 'hotfix', 'process', 'packages', 'osinfo', 'hwinfo'],
+                 syscollector_packages_vuln_content=None,
+                 syscollector_legacy_messages=False):
         self.id = id
         self.name = name
         self.key = key
@@ -133,7 +137,12 @@ class Agent:
         self.os = os
         self.fim_eps = fim_eps
         self.fim_integrity_eps = fim_integrity_eps
+
         self.syscollector_eps = syscollector_eps
+        self.syscollector_event_types = syscollector_event_types
+        self.syscollector_legacy_messages = syscollector_legacy_messages
+        self.syscollector_packages_vuln_content = syscollector_packages_vuln_content
+
         self.rootcheck_eps = rootcheck_eps
         self.logcollector_eps = logcollector_eps
         self.winevt_eps = winevt_eps
@@ -654,7 +663,10 @@ class Agent:
     def init_syscollector(self):
         """Initialize syscollector module."""
         if self.syscollector is None:
-            self.syscollector = GeneratorSyscollector(self.name, self.syscollector_batch_size)
+            self.syscollector = GeneratorSyscollector(self.name, self.syscollector_event_types,
+                                                      self.syscollector_legacy_messages,
+                                                      self.syscollector_batch_size,
+                                                      self.syscollector_packages_vuln_content)
 
     def init_rootcheck(self):
         """Initialize rootcheck module."""
@@ -747,59 +759,188 @@ class GeneratorSyscollector:
         agent_name (str): Name of the agent.
         batch_size (int): Number of messages of the same type
     """
-    def __init__(self, agent_name, batch_size):
+
+    def __init__(self, agent_name, event_types_list, old_format, batch_size, syscollector_packages_vuln_content):
         self.current_batch_events = -1
         self.current_batch_events_size = 0
-        self.list_events = ['network', 'port', 'hotfix',
-                            'process', 'program', 'OS', 'hardware']
+        self.list_events = event_types_list
+        self.syscollector_event_type_mapping = {
+            'packages': 'dbsync_packages',
+            'hotfix': 'dbsync_hotfix',
+            'hwinfo': 'dbsync_hwinfo',
+            'ports': 'dbsync_ports',
+            'osinfo': 'dbsync_osinfo',
+            'network': 'dbsync_network_iface',
+            'process': 'dbsync_processes'
+        }
+        self.syscollector_packages_vuln_content = syscollector_packages_vuln_content
+
+        self.packages = []
+
+        self.old_format = old_format
         self.agent_name = agent_name
         self.batch_size = batch_size
         self.syscollector_tag = 'syscollector'
         self.syscollector_mq = 'd'
         self.current_id = 1
 
-    def format_event(self, message_type):
-        """Format syscollector message of the specified type.
+        self.default_packages_vuln_content = os.path.join(_data_path, 'syscollector_parsed_packages.json')
+        self.package_index = 0
+
+        if self.syscollector_packages_vuln_content:
+            self.packages = self.init_package_list(self.syscollector_packages_vuln_content)
+        else:
+            self.packages = self.init_package_list(self.default_packages_vuln_content)
+
+    def parse_package_template(self, message, package_data):
+        """Parse package template with package data.
+        Args:
+            message (str): Syscollector event message.
+            package_data (dict): Package data.
+        Returns:
+            str: Parsed syscollector event message.
+        """
+        template_package_fields = {
+                '<package_description>': package_data['description'],
+                '<package_architecture>': package_data['architecture'],
+                '<package_format>': package_data['format'],
+                '<package_name>':  package_data['product'],
+                '<package_source>': package_data['source'],
+                '<package_vendor>': package_data['vendor'],
+                '<package_version>': package_data['version'],
+                '<package_item_id>': package_data['item_id']
+        }
+
+        for package_key, package_value in template_package_fields.items():
+            message = message.replace(package_key, package_value)
+
+        return message
+
+    def get_package_data(self):
+        """Get package data.
+        Returns:
+            dict: Package data.
+            str: Operation (INSERTED or DELETED).
+        """
+        operation = 'DELETED' if self.packages[self.package_index]['installed'] else 'INSERTED'
+
+        package_data = self.packages[self.package_index]
+
+        self.packages[self.package_index]['installed'] = not self.packages[self.package_index]['installed']
+        self.package_index = (self.package_index + 1) % len(self.packages)
+
+        return package_data, operation
+
+    def init_package_list(self, packages_file):
+        """Get package data from a json file.
+        Returns:
+            dict: Package data.
+        """
+        with open(os.path.join(_data_path, packages_file), 'r') as fp:
+            package_data = json.load(fp)
+
+        for package in package_data:
+            package['installed'] = False
+            if 'description' not in package:
+                package['description'] = ''
+            if 'architecture' not in package:
+                package['architecture'] = ''
+            if 'format' not in package:
+                package['format'] = ''
+            if 'source' not in package:
+                package['source'] = ''
+            if 'item_id' not in package:
+                package['item_id'] = get_random_string(10)
+
+        return package_data
+
+    def get_event_template_legacy(self, message_type):
+        """Get syscollector legacy message of the specified type.
         Args:
             message_type (str): Syscollector event type.
-        Returns:
-            str: the generated syscollector event message.
+        Return:
+            str: Syscollector legacy event message.
         """
-        message = syscollector.SYSCOLLECTOR_HEADER
+        message = syscollector.LEGACY_SYSCOLLECTOR_HEADER
         if message_type == 'network':
-            message += syscollector.SYSCOLLECTOR_NETWORK_EVENT_TEMPLATE
+            message += syscollector.LEGACY_SYSCOLLECTOR_NETWORK_EVENT_TEMPLATE
         elif message_type == 'process':
-            message += syscollector.SYSCOLLECTOR_PROCESS_EVENT_TEMPLATE
-        elif message_type == 'port':
-            message += syscollector.SYSCOLLECTOR_PORT_EVENT_TEMPLATE
-        elif message_type == 'program':
-            message += syscollector.SYSCOLLECTOR_PACKAGES_EVENT_TEMPLATE
-        elif message_type == 'OS':
-            message += syscollector.SYSCOLLECTOR_OS_EVENT_TEMPLATE
-        elif message_type == 'hardware':
-            message += syscollector.SYSCOLLECTOR_HARDWARE_EVENT_TEMPLATE
+            message += syscollector.LEGACY_SYSCOLLECTOR_PROCESS_EVENT_TEMPLATE
+        elif message_type == 'ports':
+            message += syscollector.LEGACY_SYSCOLLECTOR_PORTS_EVENT_TEMPLATE
+        elif message_type == 'packages':
+            message += syscollector.LEGACY_SYSCOLLECTOR_PACKAGES_EVENT_TEMPLATE
+        elif message_type == 'osinfo':
+            message += syscollector.LEGACY_SYSCOLLECTOR_OS_EVENT_TEMPLATE
+        elif message_type == 'hwinfo':
+            message += syscollector.LEGACY_SYSCOLLECTOR_HARDWARE_EVENT_TEMPLATE
         elif message_type == 'hotfix':
-            message += syscollector.SYSCOLLECTOR_HOTFIX_EVENT_TEMPLATE
+            message += syscollector.LEGACY_SYSCOLLECTOR_HOTFIX_EVENT_TEMPLATE
         elif 'end' in message_type:
             message += '}'
 
+        return message
+
+    def get_event_template(self, message_type):
+        """Get syscollector message of the specified type.
+        Args:
+            message_type (str): Syscollector event type.
+        Returns:
+            str: Syscollector event message.
+        """
+        message_event_type = self.syscollector_event_type_mapping[message_type]
+        operation = 'INSERTED' if (message_type == 'osinfo' or message_type == 'packages') else 'MODIFIED'
+        message_operation = operation
+
+        message_data = {}
+        package_data = {}
+
+        if message_type == 'network':
+            message_data = syscollector.SYSCOLLECTOR_NETWORK_IFACE_DELTA_EVENT_TEMPLATE
+        elif message_type == 'process':
+            message_data = syscollector.SYSCOLLECTOR_PROCESSSES_DELTA_EVENT_TEMPLATE
+        elif message_type == 'ports':
+            message_data = syscollector.SYSCOLLECTOR_PORTS_DELTA_EVENT_TEMPLATE
+        elif message_type == 'packages':
+            message_data = syscollector.SYSCOLLECTOR_PACKAGE_DELTA_DATA_TEMPLATE
+        elif message_type == 'osinfo':
+            message_data = syscollector.SYSCOLLECTOR_OSINFO_DELTA_EVENT_TEMPLATE
+        elif message_type == 'hwinfo':
+            message_data = syscollector.SYSCOLLECTOR_HWINFO_DELTA_EVENT_TEMPLATE
+        elif message_type == 'hotfix':
+            message_data = syscollector.SYSCOLLECTOR_HOTFIX_DELTA_DATA_TEMPLATE
+
+        if message_type == 'packages':
+            package_data, message_operation = self.get_package_data()
+
+        message = '{"type": "%s", "data": %s, "operation": "%s"}' % (
+            message_event_type,
+            re.sub(r'\s', '', json.dumps(message_data)),
+            message_operation
+        )
+
+        if message_type == 'packages':
+            message = self.parse_package_template(message, package_data)
+
+        return message
+
+    def format_event_template(self, template, message_type=None):
         today = date.today()
         timestamp = today.strftime("%Y/%m/%d %H:%M:%S")
+        message = template
 
-        fields_to_replace = [
+        generics_fields_to_replace = [
                         ('<agent_name>', self.agent_name), ('<random_int>', f"{self.current_id}"),
                         ('<random_string>', get_random_string(10)),
                         ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
                     ]
 
-        for variable, value in fields_to_replace:
+        for variable, value in generics_fields_to_replace:
             message = message.replace(variable, value)
 
-        self.current_id += 1
+        final_mesage = f"{self.syscollector_mq}:{self.syscollector_tag}:{message}"
 
-        message = f"{self.syscollector_mq}:{self.syscollector_tag}:{message}"
-
-        return message
+        return final_mesage
 
     def generate_event(self):
         """Generate syscollector event.
@@ -813,13 +954,24 @@ class GeneratorSyscollector:
             self.current_batch_events_size = self.batch_size
 
         if self.list_events[self.current_batch_events] not in ['network', 'port', 'process'] \
-                or self.current_batch_events_size > 1:
+                or self.current_batch_events_size > 1 or not self.old_format:
             event = self.list_events[self.current_batch_events]
         else:
             event = self.list_events[self.current_batch_events] + '_end'
 
         self.current_batch_events_size = self.current_batch_events_size - 1
-        return self.format_event(event)
+
+        if self.old_format:
+            event_template = self.get_event_template_legacy(self.list_events[self.current_batch_events])
+        else:
+            event_template = self.get_event_template(self.list_events[self.current_batch_events])
+
+        event_final = self.format_event_template(event_template, event)
+        logging.debug(f"Syscollector Event  - {event_final}")
+
+        self.current_id += 1
+
+        return event_final
 
 
 class SCA:
@@ -1584,7 +1736,7 @@ class InjectorThread(threading.Thread):
     def run_module(self, module):
         """Send a module message from the agent to the manager.
          Args:
-                module (str): Module name
+            module (str): Module name
         """
         module_info = self.agent.modules[module]
         eps = module_info['eps'] if 'eps' in module_info else 1
