@@ -11,6 +11,22 @@ from wazuh_testing.tools.utils import retry
 
 fetched_alerts_json_path = os.path.join(gettempdir(), 'alerts.json')
 
+base_path = {
+    'linux': '/var/ossec',
+    'windows': r'C:\Program Files (x86)\ossec-agent',
+    'macos': '/Library/Ossec'
+}
+configuration_filepath_os = {
+    'linux': os.path.join(base_path['linux'], 'etc', 'ossec.conf'),
+    'windows': os.path.join(base_path['windows'], 'ossec.conf'),
+    'macos': os.path.join(base_path['macos'], 'etc', 'ossec.conf')
+}
+logs_filepath_os = {
+    'linux': os.path.join(base_path['linux'], 'logs', 'ossec.log'),
+    'windows': os.path.join(base_path['windows'], 'ossec.log'),
+    'macos': os.path.join(base_path['macos'], 'logs', 'ossec.log')
+}
+
 
 @retry(Exception, attempts=3, delay=5)
 def get_alert_indexer_api(query, credentials, ip_address, index='wazuh-alerts-4.x-*'):
