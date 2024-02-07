@@ -11,9 +11,9 @@ import yaml
 from pathlib import Path 
 from itertools import product
 
-from .logging.logger import logger
-from .schema_validator import SchemaValidator
-from .task import Task, TASKS_HANDLERS
+from workflow_engine.logging.logger import logger
+from workflow_engine.schema_validator import SchemaValidator
+from workflow_engine.task import Task, TASKS_HANDLERS
 
 
 class WorkflowFile:

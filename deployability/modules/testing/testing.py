@@ -77,7 +77,7 @@ class Tester:
         """
         for test in test_list:
             rendering_var = {**extra_vars, 'test': test}
-            template = str(ansible.playbooks_path / cls._test_template)
+            template = str(ansible.testing_playbook_path / cls._test_template)
             playbook = ansible.render_playbook(template, rendering_var)
             if not playbook:
                 logger.warning(f"Test {test} not found. Skipped.")
@@ -95,7 +95,7 @@ class Tester:
         """
         extra_vars = {'local_path': str(Path(__file__).parent / 'tests'),
                       'working_dir': remote_working_dir}
-        playbook = str(ansible.playbooks_path / cls._setup_playbook)
+        playbook = str(ansible.testing_playbook_path / cls._setup_playbook)
         ansible.run_playbook(playbook, extra_vars)
 
     @classmethod
@@ -108,5 +108,5 @@ class Tester:
             remote_working_dir (str): The remote working directory.
         """
         extra_vars = {'working_dir': remote_working_dir}
-        playbook = str(ansible.playbooks_path / cls._cleanup_playbook)
+        playbook = str(ansible.testing_playbook_path / cls._cleanup_playbook)
         ansible.run_playbook(playbook, extra_vars)

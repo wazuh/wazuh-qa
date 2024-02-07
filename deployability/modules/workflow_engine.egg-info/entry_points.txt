@@ -1,0 +1,7 @@
+[console_scripts]
+main = workflow_engine.main:main
+models = workflow_engine.models:main
+schema_validator = workflow_engine.schema_validator:main
+task = workflow_engine.task:main
+utils = workflow_engine.utils:main
+workflow_processor = workflow_engine.workflow_processor:main
