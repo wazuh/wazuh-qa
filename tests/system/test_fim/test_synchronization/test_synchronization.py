@@ -46,7 +46,7 @@ import pytest
 from time import sleep
 
 
-from wazuh_testing.tools.monitoring import HostMonitor
+from wazuh_testing.tools.system_monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager, clean_environment
 from wazuh_testing.tools import WAZUH_LOGS_PATH
 from wazuh_testing.fim import create_folder_file, query_db

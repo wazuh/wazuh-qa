@@ -7,7 +7,7 @@ import uuid
 
 import pytest
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
-from wazuh_testing.tools.monitoring import HostMonitor
+from wazuh_testing.tools.system_monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
 

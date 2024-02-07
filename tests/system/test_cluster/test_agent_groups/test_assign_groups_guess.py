@@ -50,7 +50,7 @@ from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups,
                     assign_agent_to_new_group, restart_cluster)
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.file import replace_regex_in_file
-from wazuh_testing.tools.monitoring import HostMonitor
+from wazuh_testing.tools.system_monitoring import HostMonitor
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 
 

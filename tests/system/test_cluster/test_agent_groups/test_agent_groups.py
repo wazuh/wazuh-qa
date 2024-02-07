@@ -7,7 +7,7 @@ import re
 from time import sleep
 
 import pytest
-from wazuh_testing.tools.monitoring import HostMonitor
+from wazuh_testing.tools.system_monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 from system.test_cluster.test_agent_groups.common import register_agent
 from system import AGENT_STATUS_ACTIVE, check_agent_status, restart_cluster, execute_wdb_query
