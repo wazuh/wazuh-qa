@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file.
 - Removed configobj library from requirements.txt ([#4803](https://github.com/wazuh/wazuh-qa/pull/4803)) \- (Framework)
 - Updated integration tests README ([#4742](https://github.com/wazuh/wazuh-qa/pull/4742)) \- (Framework)
 
+### Fixed
+
+- Fix manager_agent system tests environment ([#4808](https://github.com/wazuh/wazuh-qa/pull/4808)) \- (Framework)
+
 ## [4.8.0] - TBD
 
 ### Added
