@@ -5,10 +5,6 @@ import threading
 
 import yaml
 
-# The logging module will use the generic logger anyway
-# that is because the logging module is a singleton.
-# So, we can just use it this way here, and it will work.
-# formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] [%(process)d] [%(threadName)s] %(name)s: %(message)s')
 
 def _load_config() -> None:
     """
