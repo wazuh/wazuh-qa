@@ -1,8 +1,0 @@
-Metadata-Version: 2.1
-Name: workflow_engine
-Version: 1.0
-Summary: Wazuh testing utilities to help programmers automate deployment tests
-Home-page: https://github.com/wazuh
-Author: Wazuh
-Author-email: hello@wazuh.com
-License: GPLv2

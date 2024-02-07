@@ -1,1 +1,1 @@
-#from .workflow_processor import WorkflowProcessor
+from .workflow_processor import WorkflowProcessor

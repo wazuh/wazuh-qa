@@ -27,7 +27,8 @@ scripts_list = [
                 'schema_validator=workflow_engine.schema_validator:main',
                 'task=workflow_engine.task:main',
                 'workflow_processor=workflow_engine.workflow_processor:main',
-                'main=workflow_engine.main:main'
+                'main=workflow_engine.main:main',
+                'logging=workflow_engine.logging.logger:main'
 ]
 
 package_data_list = get_files_from_directory("workflow_engine")
