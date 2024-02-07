@@ -1,6 +1,0 @@
-[console_scripts]
-models = workflow.models:main
-schema_validator = workflow.schema_validator:main
-task = workflow.task:main
-utils = workflow.utils:main
-workflow_processor = workflow.workflow_processor:main
