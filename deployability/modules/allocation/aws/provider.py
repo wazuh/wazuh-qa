@@ -131,9 +131,10 @@ class AWSProvider(Provider):
         size_specs = cls._get_size_specs()[params.size]
         os_specs = cls._get_os_specs()[params.composite_name]
         mics_specs = cls._get_misc_specs()
+        arch = params.composite_name.split('-')[-1]
         # Parse the configuration.
         for spec in size_specs:
-            if fnmatch.fnmatch(params.composite_name, spec):
+            if fnmatch.fnmatch(arch, spec):
                 config['type'] = size_specs[spec]['type']
                 break
 
