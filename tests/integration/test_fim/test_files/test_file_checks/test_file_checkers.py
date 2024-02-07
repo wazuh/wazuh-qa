@@ -71,6 +71,7 @@ from wazuh_testing.tools.configuration import load_wazuh_configurations, check_a
 from wazuh_testing.tools.monitoring import FileMonitor
 from wazuh_testing.modules.fim.utils import regular_file_cud
 from wazuh_testing.tools import PREFIX
+from time import sleep
 
 # Marks
 
@@ -207,6 +208,16 @@ def test_checkers(file_path, file_attrs, tags_to_apply, triggers_modification, c
     '''
     check_apply_test(tags_to_apply, get_configuration['tags'])
 
+    def waitasecond(event):
+        sleep(1)
+
+    # In the case of CHECK_MTIME only, we need to wait one second after file creation for the timestamp to be different
+    # (otherwise FIM will not generate alert).
+    if file_attrs == {CHECK_MTIME}:
+        regular_file_cud(file_path, wazuh_log_monitor, min_timeout=global_parameters.default_timeout,
+                         validators_after_create=[waitasecond],
+                         options=file_attrs, triggers_modified_event=triggers_modification, escaped=True)
     # Test files checks.
-    regular_file_cud(file_path, wazuh_log_monitor, min_timeout=global_parameters.default_timeout,
-                     options=file_attrs, triggers_modified_event=triggers_modification, escaped=True)
+    else:
+        regular_file_cud(file_path, wazuh_log_monitor, min_timeout=global_parameters.default_timeout,
+                         options=file_attrs, triggers_modified_event=triggers_modification, escaped=True)
