@@ -24,11 +24,11 @@ aws:
       type: c7gn.small
   medium:
     linux-*-amd64:
-      type: t2.medium
+      type: t3a.medium
     linux-*-arm64:
       type: c7gn.medium
   large:
     linux-*-amd64:
-      type: c5a.xlarge
+      type: c5ad.xlarge
     linux-*-arm64:
       type: c6g.xlarge

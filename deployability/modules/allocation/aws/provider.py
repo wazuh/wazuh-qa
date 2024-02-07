@@ -48,7 +48,7 @@ class AWSProvider(Provider):
             logger.debug(f"Using provided config")
             # Load the existing credentials.
             credentials.load(config.key_name)
-            # Create the temp directory. 
+            # Create the temp directory.
             # TODO: Review this on the credentials refactor.
             if not temp_dir.exists():
                 logger.debug(f"Creating temp directory: {temp_dir}")
@@ -105,10 +105,10 @@ class AWSProvider(Provider):
         """
         client = boto3.resource('ec2')
         instance = client.create_instances(ImageId=config.ami,
-                                           InstanceType=config.type,
-                                           KeyName=config.key_name,
-                                           SecurityGroupIds=config.security_groups,
-                                           MinCount=1, MaxCount=1)[0]
+                                            InstanceType=config.type,
+                                            KeyName=config.key_name,
+                                            SecurityGroupIds=config.security_groups,
+                                            MinCount=1, MaxCount=1)[0]
         # Wait until the instance is running.
         instance.wait_until_running()
         return instance.instance_id
