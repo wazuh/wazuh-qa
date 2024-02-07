@@ -47,7 +47,7 @@ import pytest
 
 from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, restart_cluster, check_keys_file, delete_agent_group,
                     check_agent_groups_db)
-from wazuh_testing.tools.monitoring import HostMonitor
+from wazuh_testing.tools.system_monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools import WAZUH_PATH
 

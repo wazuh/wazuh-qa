@@ -7,14 +7,14 @@
 - include_tasks: "installation_from_custom_packages.yml"
   when: wazuh_custom_packages_installation_agent_enabled
 
-- name: macOS | Installing agent configuration (ossec.conf)
+- name: macOS | Set agent configuration (ossec.conf)
   template:
     src: var-ossec-etc-ossec-agent.conf.j2
     dest: "{{ macos_wazuh_dir }}/etc/ossec.conf"
     owner: root
     group: wazuh
     mode: 0644
-  notify: macOS | Restart Wazuh Agent
+  notify: MacOS | restart wazuh-agent
   tags:
     - init
     - config
@@ -26,14 +26,14 @@
   tags:
     - config
 
-- name: macOS | Installing local_internal_options.conf
+- name: macOS | Set local_internal_options.conf
   template:
     src: var-ossec-etc-local-internal-options.conf.j2
     dest: "{{ macos_wazuh_dir }}/etc/local_internal_options.conf"
     owner: root
     group: wazuh
     mode: 0640
-  notify: macOS | Restart Wazuh Agent
+  notify: MacOS | restart wazuh-agent
   tags:
     - init
     - config
