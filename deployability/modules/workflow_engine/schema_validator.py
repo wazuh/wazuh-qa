@@ -4,7 +4,7 @@ import json
 from jsonschema.exceptions import ValidationError
 from pathlib import Path
 from ruamel.yaml import YAML
-from workflow.utils import logger
+from workflow_engine.utils import logger
 
 class SchemaValidator:
     """

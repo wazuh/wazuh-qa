@@ -11,9 +11,9 @@ import yaml
 from pathlib import Path 
 from itertools import product
 
-from workflow.schema_validator import SchemaValidator
-from workflow.task import *
-from workflow.utils import logger
+from workflow_engine.schema_validator import SchemaValidator
+from workflow_engine.task import *
+from workflow_engine.utils import logger
 
 
 

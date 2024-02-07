@@ -7,7 +7,7 @@ import random
 import time
 
 from abc import ABC, abstractmethod
-from workflow.utils import logger
+from workflow_engine.utils import logger
 
 
 class Task(ABC):

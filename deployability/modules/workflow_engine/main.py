@@ -8,11 +8,11 @@ import argparse
 import logging
 import colorlog
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 sys.path.append(project_root)
 
-from workflow.workflow_processor import WorkflowProcessor
-from workflow.models import InputPayload
+from workflow_engine.workflow_processor import WorkflowProcessor
+from workflow_engine.models import InputPayload
 
 
 def parse_arguments() -> argparse.Namespace:
