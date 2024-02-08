@@ -1,14 +1,11 @@
 # Description: Provision module for Wazuh deployability
-import subprocess
-import sys
-
 from pathlib import Path
 
 from modules.generic.utils import Utils
 from modules.provision.actions import Action
 from modules.provision.utils import logger
 from modules.provision.models import InputPayload, ComponentInfo
-from modules.provision.provisionModule import ProvisionModule
+from modules.provision.provision_module import ProvisionModule
 
 
 PATH_BASE_DIR = Path(__file__).parents[2]
@@ -19,7 +16,7 @@ class Provision(ProvisionModule):
     Provision class to install and uninstall components.
 
     Attributes:
-        component_info (list[ComponentInfo]): List of components to install or uninstall.
+        components (list[ComponentInfo]): List of components to install or uninstall.
         ansible_data (dict): Ansible data to render the playbooks.
         summary (dict): Summary of the provision.
     """
@@ -31,91 +28,69 @@ class Provision(ProvisionModule):
         Args:
             payload (InputPayload): Payload with the provision information.
         """
-        if payload.install:
-            logger.debug("Installing components")
-            self.component_info = payload.install
-            self.action = "install"
-        if payload.uninstall:
-            logger.debug("Uninstalling components")
-            self.component_info = payload.uninstall
-            self.action = "uninstall"
-
-        self.validate_component_ip(self.component_info, payload.manager_ip)
-        self.ansible_data = Utils.load_from_yaml(
-            payload.inventory,
-            map_keys={
-                'ansible_host': 'ansible_host',
-                'ansible_user': 'ansible_user',
-                'ansible_port': 'ansible_port',
-                'ansible_ssh_private_key_file': 'ansible_ssh_private_key_file'
-            }
-        )
         self.summary = {}
 
-    # -------------------------------------
-    #   Methods
-    # -------------------------------------
+        self.action = 'install' if payload.install else 'uninstall'
+        self.components = self.get_components(payload)
+        self.ansible_data = self.__load_ansible_data(payload.inventory)
 
     def run(self) -> None:
         """
         Run the provision.
         """
-        # self.node_dependencies()
-        logger.debug(f"Provisioning components: {self.component_info}. With action: {self.action}")
+        logger.info(f'Initiating provisionment.')
         self.install_host_dependencies()
 
-        for item in self.component_info:
-            action_class = Action(self.action, item, self.ansible_data)
-            status = action_class.execute()
+        logger.debug(f'Running action {self.action} for components: {self.components}')
+        for component in self.components:
+            try:
+                logger.info(f'Provisioning "{component.component}"...')
+                self.__provision(component)
+                logger.info(f'Provision of "{component.component}" complete successfully.')
+            except Exception as e:
+                logger.error(f'Error while provisioning "{component.component}": {e}')
+                raise
+        logger.info('All components provisioned successfully.')
+        logger.debug(f'Provision summary: {self.summary}')
 
-            self.update_status(status)
+    def get_components(self, payload: InputPayload) -> list[ComponentInfo]:
+        """
+        Validate the component and adds its dependency IP if required.
 
-        logger.info("Provision finished")
-        logger.debug(f"Summary: {self.summary}")
+        Args:
+            payload (InputPayload): Payload with the provision information.
 
-    def validate_component_ip(self, components: list[ComponentInfo], ip: str) -> None:
-        if not ip:
-            return
+        Returns:
+            list[ComponentInfo]: List of components with the dependency IP.
+        """
+        components = payload.install or payload.uninstall
+        # Check each component and add the dependency IP if required
         for component in components:
-            if component.component == 'wazuh-agent':
-                logger.debug(f"Setting dependency IP to {ip}")
-                component.manager_ip = ip
+            if not component.component == 'wazuh-agent':
+                continue
+            elif not payload.manager_ip:
+                raise ValueError('Dependency IP is required to install Wazuh Agent.')
+            # Add the dependency IP to the component
+            logger.debug(f"Setting component dependency IP: {payload.manager_ip}")
+            component.manager_ip = payload.manager_ip
+        return components
 
-    @staticmethod
-    def node_dependencies() -> None:
+    def install_host_dependencies(self) -> dict:
         """
-        Install python dependencies on Worker node.
+        Install python dependencies on the host.
+
+        Returns:
+            dict: Status of the installation.
         """
-        venv_path = PATH_BASE_DIR / 'venv'
-        if not venv_path.exists():
-            subprocess.run(['python3', '-m', 'venv', str(venv_path)], check=True)
-
-        logger.debug(f"Activating virtualenv {venv_path}")
-        activate_script = venv_path / 'bin' / 'activate'
-        command = f"source {activate_script}" if sys.platform != 'win32' else f"call {activate_script}"
-        subprocess.run(command, shell=True, executable="/bin/bash")
-        logger.debug("Upgrading pip.")
-        subprocess.run(['python3', '-m', 'pip', 'install', '--upgrade', 'pip'], check=True)
-        logger.debug("Installing executor node dependencies.")
-        command = f"pip install -r {PATH_BASE_DIR}/deps/requirements.txt"
-        subprocess.run(command, shell=True, executable="/bin/bash")
-
-    def install_host_dependencies(self):
-        """
-        Install python dependencies on host.
-        """
-        status = {}
-
-        package = ComponentInfo(component=str(PATH_BASE_DIR / "deps" / "remote_requirements.txt"), 
-                                type="dependencies")
-
+        deps_path = PATH_BASE_DIR / "deps" / "remote_requirements.txt"
+        package = ComponentInfo(component=str(deps_path), type="dependencies")
         logger.debug(f"Installing dependencies on guests: {package}")
         action_class = Action("install", package, self.ansible_data)
         status = action_class.execute()
 
         return status
 
-    def update_status(self, status):
+    def update_status(self, status: dict) -> None:
         """
         Update the status of the provision.
 
@@ -123,3 +98,33 @@ class Provision(ProvisionModule):
             status (dict): The status of the executed action.
         """
         self.summary.update(status.stats)
+
+    def __provision(self, component: ComponentInfo) -> None:
+        """
+        Provision the components.
+
+        Args:
+            component (ComponentInfo): Component to provision.
+        """
+        action = Action(self.action, component, self.ansible_data)
+        status = action.execute()
+        self.update_status(status)
+
+    def __load_ansible_data(self, inventory: str | Path) -> dict:
+        """
+        Load the ansible data from the inventory file.
+
+        Args:
+            inventory (str | Path): Path to the inventory file.
+
+        Returns:
+            dict: Ansible data to render the playbooks.
+        """
+        try:
+            return Utils.load_from_yaml(inventory)
+        except FileNotFoundError:
+            logger.error(f'Inventory file "{inventory}" not found.')
+            raise
+        except Exception as e:
+            logger.error(f'Error loading inventory file "{inventory}": {e}')
+            raise
