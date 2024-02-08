@@ -7,9 +7,8 @@ from modules.generic.utils import Utils
 from .models import InputPayload, ExtraVars
 from .utils import logger
 
-
 class Tester:
-    _playbooks_dir = Path('playbooks')
+    _playbooks_dir = Path(__file__).parent / 'playbooks'
     _setup_playbook = _playbooks_dir / 'setup.yml'
     _cleanup_playbook = _playbooks_dir / 'cleanup.yml'
     _test_template = _playbooks_dir / 'test.yml'
