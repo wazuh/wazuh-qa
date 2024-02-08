@@ -94,7 +94,7 @@ tasks:
     #  with:
     #    path: python3
     #    args:
-    #      - wazuh-qa/deployability/launchers/allocation.py
+    #      - allocation/main.py
     #      - action: delete
     #      - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 
