@@ -5,7 +5,7 @@ from modules.generic.utils import Utils
 from modules.provision.actions import Action
 from modules.provision.utils import logger
 from modules.provision.models import InputPayload, ComponentInfo
-from modules.provision.provisionModule import ProvisionModule
+from deployability.modules.provision.provision_module import ProvisionModule
 
 
 PATH_BASE_DIR = Path(__file__).parents[2]
@@ -30,14 +30,8 @@ class Provision(ProvisionModule):
         """
         self.summary = {}
 
-        if payload.install:
-            self.components = payload.install
-            self.action = "install"
-        if payload.uninstall:
-            self.components = payload.uninstall
-            self.action = "uninstall"
-
-        self.validate_component_ip(self.components, payload.manager_ip)
+        self.action = 'install' if payload.install else 'uninstall'
+        self.components = self.get_components(payload)
         self.ansible_data = self.__load_ansible_data(payload.inventory)
 
     def run(self) -> None:
@@ -55,17 +49,31 @@ class Provision(ProvisionModule):
         logger.info('Provision complete successfully.')
         logger.debug(f'Provision summary: {self.summary}')
 
-    def validate_component_ip(self, components: list[ComponentInfo], ip: str) -> None:
-        if not ip:
-            return
+    def get_components(self, payload: InputPayload) -> list[ComponentInfo]:
+        """
+        Validate the component and adds its dependency IP if required.
+
+        Args:
+            payload (InputPayload): Payload with the provision information.
+
+        Returns:
+            list[ComponentInfo]: List of components with the dependency IP.
+        """
+        components = payload.install or payload.uninstall
+        # Check each component and add the dependency IP if required
         for component in components:
-            if component.component == 'wazuh-agent':
-                logger.debug(f"Setting component dependency IP: {ip}")
-                component.manager_ip = ip
+            if not component.name == 'wazuh-agent':
+                continue
+            elif not payload.manager_ip:
+                raise ValueError('Dependency IP is required to install Wazuh Agent.')
+            # Add the dependency IP to the component
+            logger.debug(f"Setting component dependency IP: {payload.manager_ip}")
+            component.manager_ip = payload.manager_ip
+        return components
 
     def install_host_dependencies(self) -> dict:
         """
-        Install python dependencies on host.
+        Install python dependencies on the host.
 
         Returns:
             dict: Status of the installation.
