@@ -7,8 +7,7 @@ import random
 import time
 
 from abc import ABC, abstractmethod
-from .logging.logger import logger
-
+from workflow_engine.logger.logger import logger
 
 class Task(ABC):
     """Abstract base class for tasks."""
@@ -17,8 +16,6 @@ class Task(ABC):
     def execute(self) -> None:
         """Execute the task."""
         pass
-
-
 class ProcessTask(Task):
     """Task for executing a process."""
 
@@ -73,7 +70,6 @@ class DummyTask(Task):
         message = self.task_parameters.get('message', 'No message provided')
         logger.info("%s: %s", message, self.task_name, extra={'tag': self.task_name})
 
-
 class DummyRandomTask(Task):
     def __init__(self, task_name, task_parameters):
         self.task_name = task_name
@@ -87,7 +83,6 @@ class DummyRandomTask(Task):
         logger.info("%s: %s (Sleeping for %.2f seconds)", message, self.task_name, sleep_time, extra={'tag': self.task_name})
 
         time.sleep(sleep_time)
-
 
 TASKS_HANDLERS = {
     'process': ProcessTask,

@@ -41,7 +41,7 @@ class Package(ComponentType):
     """
     Class to define the type of package to be provisioned
     """
-    TEMPLATE_BASE_PATH = 'provision/wazuh'
+    TEMPLATE_BASE_PATH = 'wazuh'
 
     def __init__(self, component_info, action):
         super().__init__(component_info)
@@ -58,7 +58,7 @@ class AIO(ComponentType):
     """
     Class to define the type of AIO to be provisioned
     """
-    TEMPLATE_BASE_PATH = 'provision/wazuh'
+    TEMPLATE_BASE_PATH = 'wazuh'
 
     def __init__(self, component_info, action):
         super().__init__(component_info)
@@ -73,7 +73,7 @@ class Generic(ComponentType):
     """
     Class to define the type of generic component to be provisioned
     """
-    TEMPLATE_BASE_PATH = 'provision/generic'
+    TEMPLATE_BASE_PATH = 'generic'
 
     def __init__(self, component_info, action):
         super().__init__(component_info)
@@ -88,7 +88,7 @@ class Dependencies(ComponentType):
     """
     Class to define the type of dependencies to be provisioned
     """
-    TEMPLATE_BASE_PATH = 'provision/deps'
+    TEMPLATE_BASE_PATH = 'deps'
 
     def __init__(self, component_info, action):
         super().__init__(component_info)
