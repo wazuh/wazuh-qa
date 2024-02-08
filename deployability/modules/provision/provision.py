@@ -38,15 +38,19 @@ class Provision(ProvisionModule):
         """
         Run the provision.
         """
-        logger.debug(f'Initiating provision "{self.action}" for {self.components}.')
+        logger.info(f'Initiating provisionment.')
         self.install_host_dependencies()
 
-        for item in self.components:
-            action = Action(self.action, item, self.ansible_data)
-            status = action.execute()
-            self.update_status(status)
-
-        logger.info('Provision complete successfully.')
+        logger.debug(f'Running action {self.action} for components: {self.components}')
+        for component in self.components:
+            try:
+                logger.info(f'Provisioning "{component.name}"...')
+                self.__provision(component)
+                logger.info(f'Provision of "{component.name}" complete successfully.')
+            except Exception as e:
+                logger.error(f'Error while provisioning "{component.name}": {e}')
+                raise
+        logger.info('All components provisioned successfully.')
         logger.debug(f'Provision summary: {self.summary}')
 
     def get_components(self, payload: InputPayload) -> list[ComponentInfo]:
@@ -65,9 +69,11 @@ class Provision(ProvisionModule):
             if not component.name == 'wazuh-agent':
                 continue
             elif not payload.manager_ip:
-                raise ValueError('Dependency IP is required to install Wazuh Agent.')
+                raise ValueError(
+                    'Dependency IP is required to install Wazuh Agent.')
             # Add the dependency IP to the component
-            logger.debug(f"Setting component dependency IP: {payload.manager_ip}")
+            logger.debug(
+                f"Setting component dependency IP: {payload.manager_ip}")
             component.manager_ip = payload.manager_ip
         return components
 
@@ -94,6 +100,17 @@ class Provision(ProvisionModule):
             status (dict): The status of the executed action.
         """
         self.summary.update(status.stats)
+
+    def __provision(self, component: ComponentInfo) -> None:
+        """
+        Provision the components.
+
+        Args:
+            component (ComponentInfo): Component to provision.
+        """
+        action = Action(self.action, component, self.ansible_data)
+        status = action.execute()
+        self.update_status(status)
 
     def __load_ansible_data(self, inventory: str | Path) -> dict:
         """

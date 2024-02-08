@@ -81,14 +81,15 @@ class InputPayload(BaseModel):
     @classmethod
     def validate_install_uninstall(cls, components) -> Union[None, List[str]]:
         component_info = []
-        if components:
+        if not components:
+            return
 
-            for item in components:
-                componentObj = ComponentInfo(**eval(item))
-                if not componentObj.type:
-                    componentObj.type = "generic"
-                if "wazuh-agent" in componentObj.component:
-                    componentObj.type = "package"
-                component_info.append(componentObj)
+        for item in components:
+            componentObj = ComponentInfo(**eval(item))
+            if not componentObj.type:
+                componentObj.type = "generic"
+            if "wazuh-agent" in componentObj.component:
+                componentObj.type = "package"
+            component_info.append(componentObj)
 
-        return component_info or None
+        return component_info
