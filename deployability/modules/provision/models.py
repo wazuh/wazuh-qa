@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import List, Union
-from pydantic import BaseModel, validator, model_validator
+from pydantic import BaseModel, field_validator, validator, model_validator
 
 from modules.generic.utils import Utils
 
@@ -18,7 +18,7 @@ class InputPayload(BaseModel):
   inventory: Path | None
   install: List[ComponentInfo] | None
   uninstall: List[ComponentInfo] | None
-  manager_ip: str | None = None
+  dependencies: list[dict] | None = None
 
   @model_validator(mode="before")
   def validations(cls, values):
@@ -31,9 +31,28 @@ class InputPayload(BaseModel):
 
     values.update(cls.validate_action(values))
 
-    values.update(cls.validate_inventory(values))
-
     return values
+  
+  @validator('install', pre=True)
+  def validate_install(cls, install) -> Union[None, List[str]]:
+    """
+    Generate the component info for install.
+    """
+    component_info = cls.validate_install_uninstall(install)
+    return component_info
+
+  @validator('dependencies', pre=True)
+  def validate_inventory(cls, v) -> list[dict]:
+    """
+    Validate inventory recived.
+    """
+    if not v:
+        return
+    if all(isinstance(item, str) for item in v):
+        return v
+
+    v = {eval(item) for item in v if isinstance(item, str)}
+    return v
 
   @classmethod
   def validate_action(cls, values):
@@ -43,29 +62,6 @@ class InputPayload(BaseModel):
     if not values.get('install') and not values.get('uninstall'):
       raise ValueError('Invalid action: "install" or "uninstall" must be provided.')
     return values
-
-  @classmethod
-  def validate_inventory(cls, values):
-    """
-    Validate inventory recived.
-    """
-    if values.get('inventory_agent') is not None and values.get('inventory_manager') is not None:
-      values['manager_ip'] = Utils.load_from_yaml(values.get('inventory_manager'), map_keys={'ansible_host': 'ansible_host'}, specific_key="ansible_host")
-      values['inventory'] = values.get('inventory_agent')
-    elif values.get('inventory_manager') is not None:
-      values['inventory'] = values.get('inventory_manager')
-      values['manager_ip'] = None
-    else:
-      raise ValueError("Inventory agent is required when inventory manager is provided")
-    return values
-
-  @validator('install', pre=True)
-  def validate_install(cls, install) -> Union[None, List[str]]:
-    """
-    Generate the component info for install.
-    """
-    component_info = cls.validate_install_uninstall(install)
-    return component_info
 
   @validator('uninstall', pre=True)
   def validate_uninstall(cls, uninstall) -> Union[None, List[str]]:
