@@ -5,7 +5,7 @@ from modules.generic.utils import Utils
 from modules.provision.actions import Action
 from modules.provision.utils import logger
 from modules.provision.models import InputPayload, ComponentInfo
-from deployability.modules.provision.provision_module import ProvisionModule
+from modules.provision.provision_module import ProvisionModule
 
 
 PATH_BASE_DIR = Path(__file__).parents[2]
