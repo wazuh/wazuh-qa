@@ -16,6 +16,8 @@ class ComponentType(ABC):
         templates_path (str): The path to the templates.
         templates_order (list[str]): The order of the templates to be executed.
     """
+    templates_order: list[str]
+    templates_path: str
 
     def __init__(self, component_info: ComponentInfo) -> None:
         """
@@ -28,22 +30,6 @@ class ComponentType(ABC):
         self.type = component_info.type
         self.version = component_info.version
         self.manager_ip = component_info.manager_ip or None
-
-    @property
-    @abstractmethod
-    def templates_path(self):
-        """
-        Get the path to the templates.
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def templates_order(self):
-        """
-        Get the order of the templates to be executed.
-        """
-        pass
 
     def get_templates_path(self, action: str):
         """

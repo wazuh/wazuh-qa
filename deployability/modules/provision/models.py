@@ -6,7 +6,7 @@ from modules.generic.utils import Utils
 
 
 class ComponentInfo(BaseModel):
-    name: str
+    component: str
     type: str = ""
     version: str = ""
     manager_ip: str | None = None

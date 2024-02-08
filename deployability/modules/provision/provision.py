@@ -44,11 +44,11 @@ class Provision(ProvisionModule):
         logger.debug(f'Running action {self.action} for components: {self.components}')
         for component in self.components:
             try:
-                logger.info(f'Provisioning "{component.name}"...')
+                logger.info(f'Provisioning "{component.component}"...')
                 self.__provision(component)
-                logger.info(f'Provision of "{component.name}" complete successfully.')
+                logger.info(f'Provision of "{component.component}" complete successfully.')
             except Exception as e:
-                logger.error(f'Error while provisioning "{component.name}": {e}')
+                logger.error(f'Error while provisioning "{component.component}": {e}')
                 raise
         logger.info('All components provisioned successfully.')
         logger.debug(f'Provision summary: {self.summary}')
@@ -66,14 +66,12 @@ class Provision(ProvisionModule):
         components = payload.install or payload.uninstall
         # Check each component and add the dependency IP if required
         for component in components:
-            if not component.name == 'wazuh-agent':
+            if not component.component == 'wazuh-agent':
                 continue
             elif not payload.manager_ip:
-                raise ValueError(
-                    'Dependency IP is required to install Wazuh Agent.')
+                raise ValueError('Dependency IP is required to install Wazuh Agent.')
             # Add the dependency IP to the component
-            logger.debug(
-                f"Setting component dependency IP: {payload.manager_ip}")
+            logger.debug(f"Setting component dependency IP: {payload.manager_ip}")
             component.manager_ip = payload.manager_ip
         return components
 
