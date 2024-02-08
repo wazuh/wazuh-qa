@@ -21,7 +21,6 @@ class Ansible:
         self.path = path
         self.modules_path = Path(__file__).parents[1]
         self.provision_playbook_path = self.modules_path / 'provision/playbooks'
-        self.testing_playbook_path = self.modules_path / 'testing/playbooks'
         self.ansible_data = Inventory(**dict(ansible_data))
         self.inventory = self.generate_inventory()
         self.logger = Logger(Path(__file__).stem).get_logger()
