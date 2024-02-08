@@ -5,7 +5,7 @@ from jsonschema.exceptions import ValidationError
 from pathlib import Path
 from ruamel.yaml import YAML
 
-from .utils import logger
+from modules.generic.logger import Logger
 
 
 class SchemaValidator:
@@ -28,7 +28,7 @@ class SchemaValidator:
         schema_data: str = None
         yaml_data: str = None
 
-        self.logger = logger
+        self.logger = Logger(Path(__file__).stem).get_logger()
         with open(schema, 'r') as schema_file:
             self.logger.debug(f"Loading schema file: {schema}")
             schema_data = json.load(schema_file)
