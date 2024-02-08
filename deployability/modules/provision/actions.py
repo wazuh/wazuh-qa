@@ -60,9 +60,3 @@ class Action:
         status = self.ansible.run_playbook(playbook)
 
         return status
-
-    def set_playbooks_variables(self, vars):
-        """
-        Method to set the playbooks extra variables.
-        """
-        pass

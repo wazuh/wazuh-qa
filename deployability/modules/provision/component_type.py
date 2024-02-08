@@ -17,7 +17,7 @@ class ComponentType(ABC):
         templates_order (list[str]): The order of the templates to be executed.
     """
 
-    def __init__(self, component_info: ComponentInfo):
+    def __init__(self, component_info: ComponentInfo) -> None:
         """
         Initialize the component type.
 
@@ -45,14 +45,14 @@ class ComponentType(ABC):
         """
         pass
 
-    def get_templates_path(self, action):
+    def get_templates_path(self, action: str):
         """
         Get the path to the templates.
         """
         pass
 
     @abstractmethod
-    def get_templates_order(self, action):
+    def get_templates_order(self, action: str) -> list:
         """
         Get the order of the templates to be executed.
         """
@@ -76,16 +76,11 @@ class ComponentType(ABC):
 
 class Package(ComponentType):
     """
-    Class to define the type of package to be provisioned
-
-    Attributes:
-        templates_path (str): The path to the templates.
-        templates_order (list[str]): The order of the templates to be executed.
-        variables_dict (dict): The dictionary with the variables to be used to render the templates.
+    Class to define the type of package to be provisioned.
     """
     __TEMPLATE_BASE_PATH = 'provision/wazuh'
 
-    def __init__(self, component_info, action):
+    def __init__(self, component_info: ComponentType, action: str) -> None:
         """
         Initialize the package component type.
 
@@ -116,13 +111,20 @@ class AIO(ComponentType):
     """
     __TEMPLATE_BASE_PATH = 'provision/wazuh'
 
-    def __init__(self, component_info, action):
+    def __init__(self, component_info: ComponentType, action: str) -> None:
+        """
+        Initialize the AIO component type.
+
+        Args:
+            component_info (ComponentInfo): The component information.
+            action (str): The action to be executed.
+        """
         super().__init__(component_info)
         self.templates_path = f'{self.__TEMPLATE_BASE_PATH}/{self.type}/{action}'
         self.templates_order = self.get_templates_order(action)
         self.variables_dict = self.generate_dict()
 
-    def get_templates_order(self, action):
+    def get_templates_order(self, action: str) -> list[str]:
         return ["download.j2", f"{action}.j2"]
 
 
@@ -132,13 +134,13 @@ class Generic(ComponentType):
     """
     __TEMPLATE_BASE_PATH = 'provision/generic'
 
-    def __init__(self, component_info, action):
+    def __init__(self, component_info: ComponentType, action: str) -> None:
         super().__init__(component_info)
         self.templates_path = f'{self.__TEMPLATE_BASE_PATH}/{action}'
         self.templates_order = self.get_templates_order(action)
         self.variables_dict = self.generate_dict()
 
-    def get_templates_order(self, action):
+    def get_templates_order(self, action: str) -> list:
         return []
 
 
@@ -148,11 +150,11 @@ class Dependencies(ComponentType):
     """
     __TEMPLATE_BASE_PATH = 'provision/deps'
 
-    def __init__(self, component_info, action):
+    def __init__(self, component_info: ComponentType, action: str) -> None:
         super().__init__(component_info)
         self.templates_path = f'{self.__TEMPLATE_BASE_PATH}'
         self.templates_order = self.get_templates_order(action)
         self.variables_dict = self.generate_dict()
 
-    def get_templates_order(self, action):
+    def get_templates_order(self, action: str) -> list:
         return []
