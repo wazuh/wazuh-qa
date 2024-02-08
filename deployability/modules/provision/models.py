@@ -9,7 +9,7 @@ class ComponentInfo(BaseModel):
     component: str
     type: str = ""
     version: str = ""
-    manager_ip: str | None = None
+    dependency: str | None = None
 
 
 class InputPayload(BaseModel):
