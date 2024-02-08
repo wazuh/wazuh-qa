@@ -6,7 +6,8 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from .instance import Instance
-from .models import CreationPayload
+from .models import CreationPayload, ProviderConfig
+from .utils import logger
 
 
 class Provider(ABC):
@@ -47,20 +48,21 @@ class Provider(ABC):
         pass
 
     @classmethod
-    def create_instance(cls, base_dir: str | Path, params: CreationPayload) -> Instance:
+    def create_instance(cls, base_dir: str | Path, params: CreationPayload, config: ProviderConfig = None) -> Instance:
         """
         Creates a new instance.
 
         Args:
             base_dir (str | Path): The base directory for the instance.
             params (CreationPayload): The parameters for creating the instance.
+            config (ProviderConfig, optional): The configuration for the instance. Defaults to None.
 
         Returns:
             Instance: The created instance.
         """
         params = CreationPayload(**dict(params))
         base_dir = Path(base_dir)
-        return cls._create_instance(base_dir, params)
+        return cls._create_instance(base_dir, params, config)
 
     @classmethod
     def load_instance(cls, instance_dir: str | Path, instance_id: str) -> Instance:
@@ -75,11 +77,11 @@ class Provider(ABC):
             Instance: The loaded instance.
 
         Raises:
-            Exception: If the instance directory does not exist.
+            ValueError: If the instance directory does not exist.
         """
         instance_dir = Path(instance_dir)
         if not instance_dir.exists():
-            raise Exception(f"Instance path {instance_dir} does not exist")
+            raise ValueError(f"Instance path {instance_dir} does not exist")
         return cls._load_instance(instance_dir, instance_id)
 
     @classmethod
@@ -97,13 +99,14 @@ class Provider(ABC):
 
     @classmethod
     @abstractmethod
-    def _create_instance(cls, base_dir: Path, params: CreationPayload) -> Instance:
+    def _create_instance(cls, base_dir: Path, params: CreationPayload, config: ProviderConfig = None) -> Instance:
         """
         Abstract method that creates a new instance.
 
         Args:
             base_dir (Path): The base directory for the instance.
             params (CreationPayload): The parameters for creating the instance.
+            config (ProviderConfig, optional): The configuration for the instance. Defaults to None.
 
         Returns:
             Instance: The created instance.

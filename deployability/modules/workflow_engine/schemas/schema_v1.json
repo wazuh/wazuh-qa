@@ -23,7 +23,8 @@
                                         "items": {
                                             "oneOf": [
                                                 {"type": "string"},
-                                                {"type": "array"}
+                                                {"type": "array"},
+                                                {"type": "object"}
                                             ]
                                         }
                                     },
@@ -46,7 +47,8 @@
                                         "items": {
                                             "oneOf": [
                                                 {"type": "string"},
-                                                {"type": "array"}
+                                                {"type": "array"}, 
+                                                {"type": "object"}
                                             ]
                                         }
                                     },

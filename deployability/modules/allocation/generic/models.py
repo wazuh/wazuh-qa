@@ -1,5 +1,5 @@
 from pathlib import Path
-from pydantic import BaseModel, IPvAnyAddress, field_validator
+from pydantic import BaseModel, IPvAnyAddress, field_validator, model_validator
 from typing_extensions import Literal
 
 
@@ -35,32 +35,49 @@ class TrackOutput(BaseModel):
 
 class InputPayload(BaseModel):
     action: Literal['create', 'delete', 'status'] = 'create'
-    provider: str | None
-    size: Literal['micro', 'small', 'medium', 'large', None]
-    composite_name: str | None
-    track_output: Path | None
-    inventory_output: Path | None
-    working_dir: Path | None
-    custom_credentials: str | None
+    provider: str | None = None
+    size: Literal['micro', 'small', 'medium', 'large', None] = None
+    composite_name: str | None = None
+    working_dir: Path | None = Path('/tmp/wazuh-qa')
+    track_output: Path | None = working_dir / 'track.yml'
+    inventory_output: Path | None = working_dir / 'inventory.yml'
+    custom_credentials: str | None = None
+    custom_provider_config: Path | None = None
 
 
 class CreationPayload(InputPayload):
     provider: str
-    size: Literal['micro', 'small', 'medium', 'large']
-    composite_name: str
+    size: Literal['micro', 'small', 'medium', 'large'] | None = None
+    composite_name: str | None = None
     track_output: Path
     inventory_output: Path
     working_dir: Path
     custom_credentials: str | None = None
+    custom_provider_config: Path | None = None
 
-    @field_validator('custom_credentials')
+    @model_validator(mode='before')
+    def validate_dependency(cls, values) -> dict:
+        """Validate required fields."""
+        required_if_not_config = ['composite_name', 'size']
+        if values.get('custom_provider_config'):
+            return values
+        for attr in required_if_not_config:
+            if not values.get(attr):
+                raise ValueError(f"{attr} is required if custom_provider_config is not provided.")
+            
+        return values
+    
+    @field_validator('custom_provider_config')
     @classmethod
-    def check_credentials(cls, v: str) -> str | None:
+    def check_config(cls, v: Path | None) -> Path | None:
         if not v:
             return None
-        path = Path(v)
-        if not path.exists() or not path.is_file():
-            raise ValueError(f"Invalid credentials path: {path}")
+        if not v.exists():
+            raise ValueError(f"Custom provider config file does not exist: {v}")
+        elif not v.is_file():
+            raise ValueError(f"Custom provider config file is not a file: {v}")
+        elif not v.suffix in ['.yml', '.yaml']:
+            raise ValueError(f"Custom provider config file must be yaml: {v}")
         return v
 
     @field_validator('working_dir', mode='before')

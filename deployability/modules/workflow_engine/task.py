@@ -2,15 +2,13 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-from abc import ABC, abstractmethod
 import subprocess
-import logging
 import random
 import time
-import json
-import shlex
 
-logger = (lambda: logging.getLogger())()
+from abc import ABC, abstractmethod
+from .utils import logger
+
 
 class Task(ABC):
     """Abstract base class for tasks."""
@@ -47,6 +45,8 @@ class ProcessTask(Task):
             elif isinstance(arg, dict):
                 key, value = list(arg.items())[0]
                 if isinstance(value, list):
+                    for argvalue in value:
+                        print(f"argvalue {argvalue}")
                     task_args.extend([f"--{key}={argvalue}" for argvalue in value])
                 else:
                     task_args.append(f"--{key}={value}")
@@ -59,6 +59,10 @@ class ProcessTask(Task):
                 capture_output=True,
                 text=True,
             )
+
+            logger.info(str(result.stdout))
+            logger.info("%s: %s", "Finish task: ", self.task_name, extra={'tag': self.task_name})
+
 
             if result.returncode != 0:
                 raise subprocess.CalledProcessError(returncode=result.returncode, cmd=result.args, output=result.stdout)
