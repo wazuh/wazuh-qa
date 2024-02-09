@@ -41,14 +41,14 @@ vagrant:
     box_version: 4.3.8
   # Centos
   linux-centos-7-amd64:
-    box: centos/7
-    box_version: 2004.01
+    box: generic/centos7
+    box_version: 4.3.8
   linux-centos-8-amd64:
-    box: centos/stream8
-    box_version: 20230710.0
+    box: generic/centos8
+    box_version: 4.3.8
   linux-centos-9-amd64:
-    box: centos/stream9
-    box_version: 20230807.1
+    box: generic/centos9s
+    box_version: 4.3.12
   # Redhat
   linux-redhat-7-amd64:
     box: generic/rhel7
@@ -58,7 +58,7 @@ vagrant:
     box_version: 3.6.8
   linux-redhat-9-amd64:
     box: generic/rhel9
-    box_version: 3.6.8
+    box_version: 4.3.12
   # Amazon
   linux-amazon-2-amd64:
     box: bento/amazonlinux-2
@@ -81,11 +81,14 @@ vagrant:
     box_version: 4.3.8
   linux-fedora-38-amd64:
     box: alvistack/fedora-38
-    box_version: 4.3.8
+    box_version: 20240206.1.1
   # Rocky Linux
+  linux-rocky-8-amd64:
+    box: generic/rocky8
+    box_version: 4.3.12
   linux-rocky-9-amd64:
-    box: rockylinux/9
-    box_version: 3.0.0
+    box: generic/rocky9
+    box_version: 4.3.12
   # # Macos
   # macos-ventura-13.04-amd64:
   #   box: logantbond/ventura
@@ -93,28 +96,28 @@ vagrant:
   # macos-sonoma-14.2-amd64:
   #   box: barindersingh/sonoma
   #   box_version: 1.0.6
-  # # Windows
-  # windows-desktop-10-amd64:
-  #   box: gusztavvargadr/windows-10
-  #   box_version: 2202.0.2312
-  # windows-desktop-11-amd64:
-  #   box: gusztavvargadr/windows-11
-  #   box_version: 2302.0.2312
-  # windows-server-2012-amd64:
-  #   box: jborean93/WindowsServer2012
-  #   box_version: 1.2.0
-  # windows-server-2012r2-amd64:
-  #   box: devopsgroup-io/windows_server-2012r2-standard-amd64-nocm
-  #   box_version: 1.67.0
-  # windows-server-2016-amd64:
-  #   box: mwrock/Windows2016
-  #   box_version: 0.3.0
-  # windows-server-2019-amd64:
-  #   box: gusztavvargadr/windows-server-2019-standard
-  #   box_version: 1809.0.2310
-  # windows-server-2022-amd64:
-  #   box: gusztavvargadr/windows-server-2022-standard
-  #   box_version: 2102.0.2312
+  # Windows
+  windows-desktop-10-amd64:
+    box: gusztavvargadr/windows-10
+    box_version: 2202.0.2312
+  windows-desktop-11-amd64:
+    box: gusztavvargadr/windows-11
+    box_version: 2302.0.2312
+  windows-server-2012-amd64:
+    box: jborean93/WindowsServer2012
+    box_version: 1.2.0
+  windows-server-2012r2-amd64:
+    box: addle/windows-server-2012-r2
+    box_version: 1.20170205.1
+  windows-server-2016-amd64:
+    box: mwrock/Windows2016
+    box_version: 0.3.0
+  windows-server-2019-amd64:
+    box: gusztavvargadr/windows-server-2019-standard
+    box_version: 1809.0.2310
+  windows-server-2022-amd64:
+    box: gusztavvargadr/windows-server-2022-standard
+    box_version: 2102.0.2312
 
 aws:
   # Ubuntu
@@ -215,7 +218,7 @@ aws:
     zone: us-east-1
     user: ec2-user
   linux-fedora-38-amd64:
-    ami: ami-081f29ca9a2a16cec
+    ami:
     zone: us-east-1
     user: ec2-user
   # Rocky Linux
