@@ -32,14 +32,6 @@ class InputPayload(BaseModel):
     values.update(cls.validate_action(values))
 
     return values
-  
-  @validator('install', pre=True)
-  def validate_install(cls, install) -> Union[None, List[str]]:
-    """
-    Generate the component info for install.
-    """
-    component_info = cls.validate_install_uninstall(install)
-    return component_info
 
   @validator('dependencies', pre=True)
   def validate_inventory(cls, v) -> list[dict]:
@@ -63,15 +55,7 @@ class InputPayload(BaseModel):
       raise ValueError('Invalid action: "install" or "uninstall" must be provided.')
     return values
 
-  @validator('uninstall', pre=True)
-  def validate_uninstall(cls, uninstall) -> Union[None, List[str]]:
-    """
-    Generate the component info for uninstall.
-    """
-    component_info = cls.validate_install_uninstall(uninstall)
-    return component_info
-
-  @classmethod
+  @validator('install','uninstall', pre=True)
   def validate_install_uninstall(cls, components) -> Union[None, List[str]]:
     component_info = []
     if components:
