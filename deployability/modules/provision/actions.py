@@ -1,6 +1,6 @@
 from modules.generic import Ansible
 
-from modules.provision.componentType import Package, AIO, Generic, Dependencies
+from modules.provision.component_type import Package, AIO, Generic, Dependencies
 from modules.provision.models import ComponentInfo
 from modules.provision.utils import logger
 
@@ -60,9 +60,3 @@ class Action:
         status = self.ansible.run_playbook(playbook)
 
         return status
-
-    def set_playbooks_variables(self, vars):
-        """
-        Method to set the playbooks extra variables.
-        """
-        pass
