@@ -35,10 +35,13 @@ vagrant:
   linux-oracle-9-amd64:
     box: generic/oracle9
     box_version: 4.3.12
-  # Suse Linux
-  linux-suse-15-amd64:
+  # openSUSE Linux
+  linux-opensuse-15-amd64:
     box: generic/opensuse15
     box_version: 4.3.8
+  linux-opensuse-tumbleweed-amd64:
+    box: opensuse/Tumbleweed.x86_64
+    box_version: 1.0.20240207
   # Centos
   linux-centos-7-amd64:
     box: generic/centos7
