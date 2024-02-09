@@ -5,20 +5,17 @@
 import os
 import sys
 import argparse
-import logging
-import colorlog
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 sys.path.append(project_root)
 
-from modules.workflow_engine.workflow_processor import WorkflowProcessor
-from modules.workflow_engine.models import InputPayload
+from workflow_engine.workflow_processor import WorkflowProcessor
+from workflow_engine.models import InputPayload
 
 
 def parse_arguments() -> argparse.Namespace:
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description='Execute tasks in a workflow.')
+    parser = argparse.ArgumentParser(description='Execute tasks in a workflow.')
     parser.add_argument('workflow_file', type=str,help='Path to the workflow file (YAML format).')
     parser.add_argument('--threads', type=int, default=1, required=False, help='Number of threads to use for parallel execution.')
     parser.add_argument('--dry-run', action='store_true', required=False, help='Display the plan without executing tasks.')

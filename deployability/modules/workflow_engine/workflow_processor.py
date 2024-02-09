@@ -11,11 +11,9 @@ import yaml
 from pathlib import Path 
 from itertools import product
 
-from .schema_validator import SchemaValidator
-from .task import *
-from .utils import logger
-
-
+from workflow_engine.logger.logger import logger
+from workflow_engine.schema_validator import SchemaValidator
+from workflow_engine.task import Task, TASKS_HANDLERS
 
 class WorkflowFile:
     """Class for loading and processing a workflow file."""
@@ -272,20 +270,21 @@ class WorkflowProcessor:
         """Execute a task."""
         task_name = task['task']
         if dag.should_be_canceled(task_name):
-            logger.warning("[%s] Skipping task due to dependency failure.", task_name)
+            logger.warning(f'Skipping task "{task_name}" due to dependency failure.')
             dag.set_status(task_name, 'canceled')
         else:
             try:
                 task_object = self.create_task_object(task, action)
 
-                logger.info("[%s] Starting task.", task_name)
+                logger.info(f'Initiating execution of task "{task_name}".')
                 start_time = time.time()
                 task_object.execute()
-                logger.info("[%s] Finished task in %.2f seconds.", task_name, time.time() - start_time)
+                finish_time = (time.time() - start_time)
+                logger.info(f'Task "{task_name}" completed succesfully in {finish_time:.2f} seconds.')
                 dag.set_status(task_name, 'successful')
             except Exception as e:
                 # Pass the tag to the tag_formatter function if it exists
-                logger.error("[%s] Task failed with error: %s.", task_name, e)
+                logger.error(f'Task "{task_name}" failed with error: {e}.')
                 dag.set_status(task_name, 'failed')
                 dag.cancel_dependant_tasks(task_name, task.get('on-error', 'abort-related-flows'))
                 # Handle the exception or re-raise if necessary
@@ -294,21 +293,22 @@ class WorkflowProcessor:
     def create_task_object(self, task: dict, action) -> Task:
         """Create and return a Task object based on task type."""
         task_type = task[action]['this']
-
         task_handler = TASKS_HANDLERS.get(task_type)
 
         if task_handler is not None:
             return task_handler(task['task'], task[action]['with'])
 
-        raise ValueError(f"Unknown task type '{task_type}'.")
+        raise ValueError(f'Unknown task type "{task_type}".')
 
     def execute_tasks_parallel(self) -> None:
         """Execute tasks in parallel."""
         if not self.dry_run:
-            logger.info("Executing tasks in parallel.")
+            logger.info('Starting workflow execution.')
             dag = DAG(self.task_collection)
             # Execute tasks based on the DAG
             with concurrent.futures.ThreadPoolExecutor(max_workers=self.threads) as executor:
+                if self.threads > 1:
+                    logger.info(f'Running tasks in parallel using {self.threads} threads.')
                 futures = {}
                 while True:
                     if not dag.is_active():
@@ -322,7 +322,7 @@ class WorkflowProcessor:
             # Now execute cleanup tasks based on the reverse DAG
             reverse_dag = DAG(self.task_collection, reverse=True)
 
-            logger.info("Executing cleanup tasks.")
+            logger.info('Executing cleanup tasks.')
             with concurrent.futures.ThreadPoolExecutor(max_workers=self.threads) as executor:
                 reverse_futures = {}
 
@@ -340,7 +340,7 @@ class WorkflowProcessor:
 
         else:
             dag = DAG(self.task_collection)
-            logger.info("Execution plan: %s", json.dumps(dag.get_execution_plan(), indent=2))
+            logger.info(f'Execution plan: {json.dumps(dag.get_execution_plan())}', indent=2)
 
     def run(self) -> None:
         """Main entry point."""
@@ -352,6 +352,6 @@ class WorkflowProcessor:
             try:
                 _ = future.result()
             except Exception as e:
-                logger.error("Error in aborted task: %s", e)
+                logger.error(f"Error in aborted task: {e}")
 
         executor.shutdown(wait=False)

@@ -7,8 +7,7 @@ import random
 import time
 
 from abc import ABC, abstractmethod
-from .utils import logger
-
+from workflow_engine.logger.logger import logger
 
 class Task(ABC):
     """Abstract base class for tasks."""
@@ -17,8 +16,6 @@ class Task(ABC):
     def execute(self) -> None:
         """Execute the task."""
         pass
-
-
 class ProcessTask(Task):
     """Task for executing a process."""
 
@@ -45,12 +42,10 @@ class ProcessTask(Task):
             elif isinstance(arg, dict):
                 key, value = list(arg.items())[0]
                 if isinstance(value, list):
-                    for argvalue in value:
-                        print(f"argvalue {argvalue}")
                     task_args.extend([f"--{key}={argvalue}" for argvalue in value])
                 else:
                     task_args.append(f"--{key}={value}")
-        print(f"task_args {task_args}")
+        self.logger.debug(f'Running task "{self.task_name}" with arguments: {task_args}')
         result = None
         try:
             result = subprocess.run(
@@ -59,10 +54,7 @@ class ProcessTask(Task):
                 capture_output=True,
                 text=True,
             )
-
-            logger.info(str(result.stdout))
-            logger.info("%s: %s", "Finish task: ", self.task_name, extra={'tag': self.task_name})
-
+            logger.debug(f'Finished task "{self.task_name}" execution with result:\n{str(result.stdout)}')
 
             if result.returncode != 0:
                 raise subprocess.CalledProcessError(returncode=result.returncode, cmd=result.args, output=result.stdout)
@@ -78,7 +70,6 @@ class DummyTask(Task):
         message = self.task_parameters.get('message', 'No message provided')
         logger.info("%s: %s", message, self.task_name, extra={'tag': self.task_name})
 
-
 class DummyRandomTask(Task):
     def __init__(self, task_name, task_parameters):
         self.task_name = task_name
@@ -92,7 +83,6 @@ class DummyRandomTask(Task):
         logger.info("%s: %s (Sleeping for %.2f seconds)", message, self.task_name, sleep_time, extra={'tag': self.task_name})
 
         time.sleep(sleep_time)
-
 
 TASKS_HANDLERS = {
     'process': ProcessTask,
