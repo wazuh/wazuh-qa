@@ -59,11 +59,11 @@ class VagrantCredentials(Credentials):
             public_key_path.unlink()
         # Generate the key pair.
         command = ["ssh-keygen",
-                   "-f", str(private_key_path),
-                   "-m", "PEM",
-                   "-t", "rsa",
-                   "-N", "",
-                   "-q"]
+                    "-f", str(private_key_path),
+                    "-m", "PEM",
+                    "-t", "rsa",
+                    "-N", "",
+                    "-q"]
         output = subprocess.run(command, check=True,
                                 capture_output=True, text=True)
         os.chmod(private_key_path, 0o600)

@@ -14,7 +14,7 @@ class Provider(ABC):
     """
     An abstract base class for providers.
 
-    This class provides an interface for creating, loading, and destroying instances. 
+    This class provides an interface for creating, loading, and destroying instances.
     It also provides methods to get OS, size, and miscellaneous specifications for the provider.
 
     Attributes:
@@ -28,8 +28,8 @@ class Provider(ABC):
     OS_PATH = SPECS_DIR / 'os.yml'
     SIZE_PATH = SPECS_DIR / 'size.yml'
     MISC_PATH = SPECS_DIR / 'misc.yml'
-    
-    
+
+
     class ProvisioningError(Exception):
         """
         Exception raised for errors in the provisioning process.

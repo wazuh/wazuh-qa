@@ -64,9 +64,8 @@ class CreationPayload(InputPayload):
         for attr in required_if_not_config:
             if not values.get(attr):
                 raise ValueError(f"{attr} is required if custom_provider_config is not provided.")
-            
         return values
-    
+
     @field_validator('custom_provider_config')
     @classmethod
     def check_config(cls, v: Path | None) -> Path | None:
