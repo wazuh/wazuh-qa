@@ -7,16 +7,14 @@ class ComponentInfo(BaseModel):
     component: str
     type: str = ""
     version: str = ""
-    dependency: str | None = None
+    dependencies: dict | None = None
 
 
 class InputPayload(BaseModel):
-    inventory_agent: Path | None
-    inventory_manager: Path | None
     inventory: Path | None
     install: List[ComponentInfo] | None
     uninstall: List[ComponentInfo] | None
-    dependencies: list[dict] | None = None
+    dependencies: dict | None = None
 
     @model_validator(mode="before")
     def validations(cls, values):
@@ -32,16 +30,21 @@ class InputPayload(BaseModel):
         return values
 
     @validator('dependencies', pre=True)
-    def validate_inventory(cls, v) -> list[dict]:
+    def validate_inventory(cls, v) -> dict | None:
         """
-        Validate inventory recived.
-        """
-        if not v:
-            return
-        if all(isinstance(item, str) for item in v):
-            return v
+        Validate inventory recived. 
+        It expects a list or dict of dictionaries with the dependencies.
 
-        v = {eval(item) for item in v if isinstance(item, str)}
+        Example: 
+            list: [{'manager': 'path/to/inventory.yaml'}, {'agent': 'path/to/inventory.yaml'}]
+            dict:  {'manager': 'path/to/inventory.yaml', 'agent': 'path/to/inventory.yaml'}
+        """
+        if v is None:
+            return
+        if isinstance(v, list):
+            return {k: v for dep in v for k, v in eval(dep).items()}
+        if isinstance(v, str):
+            return {k: v for dep in eval(v) for k, v in dep.items()}
         return v
 
     @classmethod
@@ -58,7 +61,7 @@ class InputPayload(BaseModel):
     def validate_install_uninstall(cls, components) -> Union[None, List[str]]:
         if not components:
             return
-
+# 'provision.py --inventory=/tmp/dtt1-poc/manager-linux-ubuntu-20.04-amd64/inventory.yaml --install={'component': 'wazuh-manager', 'type': 'package'}
         component_info = []
         for item in components:
             componentObj = ComponentInfo(**eval(item))

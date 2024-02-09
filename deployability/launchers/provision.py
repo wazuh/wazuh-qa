@@ -13,8 +13,8 @@ from modules.provision import Provision, models
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Provision infraestructure tool")
-    parser.add_argument("--inventory-agent", default=None, help="Inventory with agent host information")
-    parser.add_argument("--inventory-manager", default=None, help="Inventory with manager host information")
+    parser.add_argument("--inventory", default=None, help="Inventory with agent host information")
+    parser.add_argument("--dependencies",  action='append',required=False)
     parser.add_argument('--install',  action='append', default=[], help='List of dictionaries for installation.')
     parser.add_argument('--uninstall',  action='append', default=[], help='List of dictionaries for uninstall.')
     return parser.parse_args()
