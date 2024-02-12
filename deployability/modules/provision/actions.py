@@ -55,8 +55,6 @@ class Action:
             }
         }]
 
-        logger.info(f"Executing {self.component.type} for {self.component.component}")
-
         playbook = {
             'hosts': self.ansible.ansible_data.ansible_host,
             'become': True,
@@ -66,6 +64,8 @@ class Action:
         status = self.ansible.run_playbook(playbook)
 
         self.component.variables_dict['ansible_os_family'] = status.get_fact_cache(host=self.ansible.ansible_data.ansible_host)['ansible_os_family']
+
+        logger.info(f"Executing {self.component.type} for {self.component.component}")
 
         tasks = self.ansible.render_playbooks(self.component.variables_dict)
         playbook['tasks'] = tasks
