@@ -42,7 +42,9 @@ class Ansible:
         if list_template_tasks:
             for template in list_template_tasks:
                 loaded_template = template_env.get_template(template)
+
                 rendered = yaml.safe_load(loaded_template.render(host=self.ansible_data, **rendering_variables))
+
                 if not rendered:
                     continue
 
