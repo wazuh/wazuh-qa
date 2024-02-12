@@ -482,6 +482,7 @@ class HostManager:
             host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
         """
         result = False
+
         if system == 'windows':
             result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
         elif system == 'ubuntu':
@@ -489,15 +490,15 @@ class HostManager:
             if result['changed'] and result['stderr'] == '':
                 result = True
         elif system == 'centos':
-            result = self.get_host(host).ansible("yum", f"name={url} state=present"
+            result = self.get_host(host).ansible("yum", f"name={url} state=present "
                                                  'sslverify=false disable_gpg_check=True', check=False)
-            if 'rc' in result and result['rc'] == 0 and result['changed']:
-                result = True
         elif system == 'macos':
             package_name = url.split('/')[-1]
             result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
             cmd = f"installer -pkg {package_name} -target /"
             result = self.get_host(host).ansible("command", cmd, check=False)
+
+        logging.info(f"Package installed result {result}")
 
         return result
 
