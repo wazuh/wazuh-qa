@@ -47,6 +47,7 @@ class Provision(ProvisionModule):
   
 
     for item in self.component_info:
+      #print(item)
       action_class = Action(self.action, item, self.ansible_data)
       status = action_class.execute()
 

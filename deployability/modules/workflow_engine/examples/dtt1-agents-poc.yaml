@@ -73,7 +73,7 @@ tasks:
     #depends-on:
     #  - "allocate-manager"
 
-  # Unique manager allocate task
+  ## Unique manager allocate task
   #- task: "allocate-manager"
   #  description: "Allocate resources for the manager."
   #  do:
@@ -81,21 +81,21 @@ tasks:
   #    with:
   #      path: python3
   #      args:
-  #        - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
+  #        - /home/akim/Desktop/wazuh-qa/deployability/launchers/allocation.py
   #        - action: create
   #        - provider: "{infra-provider}"
   #        - size: large
   #        - composite-name: "{manager-os}"
   #        - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
   #        - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
-    #cleanup:
-    #  this: process
-    #  with:
-    #    path: python3
-    #    args:
-    #      - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
-    #      - action: delete
-    #      - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+  #  #cleanup:
+  #  #  this: process
+  #  #  with:
+  #  #    path: python3
+  #  #    args:
+  #  #      - /home/akim/Desktop/wazuh-qa/deployability/launchers/allocation.py
+  #  #      - action: delete
+  #  #      - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 
   # Generic agent provision task
   #- task: "provision-install-{agent}"
@@ -147,7 +147,7 @@ tasks:
   #    with:
   #      path: python3
   #      args:
-  #        - allocation.py
+  #        - /home/akim/Desktop/wazuh-qa/deployability/launchers/allocation.py
   #        - action: create
   #        - provider: "{infra-provider}"
   #        - size: small

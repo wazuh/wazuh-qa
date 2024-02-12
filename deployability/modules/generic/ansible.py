@@ -50,7 +50,7 @@ class Ansible:
                 tasks += rendered
         else:
             print("Error no templates found")
-
+        print(tasks)
         return tasks
 
     def render_playbook(self, playbook: Path, rendering_variables: dict = {}) -> str | None:
