@@ -1,7 +1,9 @@
 import boto3
+
 from pathlib import Path
 from modules.allocation.generic import Instance
 from modules.allocation.generic.models import ConnectionInfo
+from modules.allocation.generic.utils import logger
 from .credentials import AWSCredentials
 
 
@@ -32,6 +34,7 @@ class AWSInstance(Instance):
         self._client = boto3.resource('ec2')
         self._instance = self._client.Instance(self.identifier)
         if not self.credentials:
+            logger.debug(f"No credentials found. Loading from instance directory.")
             self.credentials = self.__get_credentials()
 
     def start(self) -> None:

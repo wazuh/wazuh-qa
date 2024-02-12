@@ -2,23 +2,42 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import graphlib
 import concurrent.futures
-import time
+import graphlib
 import json
-import logging
-from itertools import product
+import time
 import yaml
-from .task import *
 
-logger = (lambda: logging.getLogger())()
+from pathlib import Path 
+from itertools import product
+
+from .schema_validator import SchemaValidator
+from .task import *
+from .utils import logger
+
+
 
 class WorkflowFile:
     """Class for loading and processing a workflow file."""
-    def __init__(self, workflow_file_path: str):
+    schema_path = Path(__file__).parent / 'schemas' / 'schema_v1.json'
+
+    def __init__(self, workflow_file_path: Path | str, schema_path: Path | str = None) -> None:
+        self.schema_path = schema_path or self.schema_path
+        self.__validate_schema(workflow_file_path)
         self.workflow_raw_data = self.__load_workflow(workflow_file_path)
         self.task_collection = self.__process_workflow()
         self.__static_workflow_validation()
+
+    def __validate_schema(self, workflow_file: Path | str) -> None:
+        """
+        Validate the workflow file against the schema.
+
+        Args:
+            workflow_file (Path | str): Path to the workflow file.
+        """
+        validator = SchemaValidator(self.schema_path, workflow_file)
+        validator.preprocess_data()
+        validator.validateSchema()
 
     def __load_workflow(self, file_path: str) -> dict:
         """
@@ -232,16 +251,20 @@ class DAG():
 class WorkflowProcessor:
     """Class for processing a workflow."""
 
-    def __init__(self, workflow_file_path: str, dry_run: bool, threads: int):
+    def __init__(self, workflow_file: str, dry_run: bool, threads: int, log_level: str = 'INFO', schema_file: Path | str = None):
         """
         Initialize WorkflowProcessor.
 
         Args:
-            workflow_file_path (str): Path to the workflow file (YAML format).
+            workflow_file (str): Path to the workflow file (YAML format).
             dry_run (bool): Display the plan without executing tasks.
             threads (int): Number of threads to use for parallel execution.
+            log_level (str): Log level.
+            schema_file (Path | str): Path to the schema file (YAML format).
         """
-        self.task_collection = WorkflowFile(workflow_file_path).task_collection
+        logger.setLevel(log_level)
+        # Initialize the instance variables.
+        self.task_collection = WorkflowFile(workflow_file, schema_file).task_collection
         self.dry_run = dry_run
         self.threads = threads
 

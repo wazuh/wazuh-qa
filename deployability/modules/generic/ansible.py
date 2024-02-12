@@ -5,9 +5,9 @@ import yaml
 from pathlib import Path
 from pydantic import BaseModel, IPvAnyAddress
 
-from jinja2 import Template
 from modules.generic.utils import Utils
-from modules.provision.componentType import ComponentType
+from modules.generic.logger import Logger
+
 
 class Inventory(BaseModel):
     ansible_host: str | IPvAnyAddress
@@ -17,19 +17,19 @@ class Inventory(BaseModel):
 
 
 class Ansible:
-    def __init__(self, ansible_data, path=None):
+    def __init__(self, ansible_data: dict | Inventory, path: str | Path = None):
         self.path = path
         self.playbooks_path = Path(__file__).parents[2] / 'playbooks'
         self.ansible_data = Inventory(**dict(ansible_data))
         self.inventory = self.generate_inventory()
+        self.logger = Logger(Path(__file__).stem).get_logger()
 
-    def render_playbooks(self, rendering_variables) -> list:
+    def render_playbooks(self, rendering_variables: dict) -> list[str]:
         """
         Render the playbooks with Jinja.
 
         Args:
-            ansible_data: Data with the ansible host.
-            rendering_variables: Extra variables to render the playbooks.
+            rendering_variables (dict): Extra variables to render the playbooks.
         """
         tasks = []
         path_to_render_playbooks = self.playbooks_path / rendering_variables.get("templates_path")
@@ -42,53 +42,57 @@ class Ansible:
         if list_template_tasks:
             for template in list_template_tasks:
                 loaded_template = template_env.get_template(template)
-
+                self.logger.debug(f"Rendering template {template}")
                 rendered = yaml.safe_load(loaded_template.render(host=self.ansible_data, **rendering_variables))
 
                 if not rendered:
+                    self.logger.warn(f"Template {template} not rendered")
                     continue
 
                 tasks += rendered
         else:
-            print("Error no templates found")
+            self.logger.error(
+                f"No templates found in {path_to_render_playbooks}")
 
         return tasks
 
-    def render_playbook(self, playbook: Path, rendering_variables: dict = {}) -> str | None:
+    def render_playbook(self, playbook: str | Path, rendering_variables: dict = {}) -> str | None:
         """
         Render one playbook with Jinja.
 
         Args:
-            ansible_data: Data with the ansible host.
-            rendering_variables: Extra variables to render the playbooks.
+            playbook (str, Path): The playbook to render.
+            rendering_variables (dict): Extra variables to render the playbooks.
         """
         playbook = Path(playbook)
         if not playbook.exists():
-            print(f"Error: Playbook {playbook} not found")
+            self.logger.error(f"Error: Playbook {playbook} not found")
             return None
-        _env = jinja2.Environment(
-            loader=jinja2.FileSystemLoader(playbook.parent))
+        _env = jinja2.Environment(loader=jinja2.FileSystemLoader(playbook.parent))
         template = _env.get_template(playbook.name)
-        rendered = template.render(
-            host=self.ansible_data, **rendering_variables)
+        self.logger.debug(f"Rendering template {playbook}")
+        rendered = template.render(host=self.ansible_data, **rendering_variables)
 
         return yaml.safe_load(rendered)
 
-    def run_playbook(self, playbook=None, extravars=None, verbosity=1, env_vars={}):
+    def run_playbook(self, playbook: str | Path = None, extravars: dict = None, verbosity: int = 1, env_vars: dict = {}) -> ansible_runner.Runner:
         """
         Run the playbook with ansible_runner.
 
         Args:
-            playbook: Playbook to run.
-            extravars: Extra variables to run the playbook.
-            verbosity: Verbosity level.
+            playbook (str, Path): The playbook to run.
+            extravars (dict): Extra variables to pass to the playbook.
+            verbosity (int): Verbosity level for the playbook.
+            env_vars (dict): Environment variables to pass to the playbook.
         """
-        if self.path:
-            playbook = self.path + "/" + playbook
-
         # Set the callback to yaml to env_vars
         env_vars['ANSIBLE_STDOUT_CALLBACK'] = 'community.general.yaml'
 
+        if self.path and (isinstance(playbook, str) or isinstance(playbook, Path)):
+            playbook = self.path + "/" + playbook
+
+        self.logger.debug(f"Using inventory: {self.inventory}")
+        self.logger.debug(f"Running playbook: {playbook}")
         result = ansible_runner.run(
             inventory=self.inventory,
             playbook=playbook,
@@ -96,12 +100,15 @@ class Ansible:
             extravars=extravars,
             envvars=env_vars,
         )
-
+        self.logger.debug(f"Playbook {playbook} finished with status {result.stats}")
         return result
 
     def generate_inventory(self) -> dict:
         """
         Generate the inventory for ansible.
+
+        Returns:
+            dict: Inventory for ansible.        
         """
         inventory_data = {
             'all': {
