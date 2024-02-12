@@ -8,8 +8,6 @@ class Action:
     def __init__(self, action, component_info, ansible_data):
         action_type = component_info.type
 
-
-
         if action_type == "package":
             self.component = Package(component_info, action)
         elif action_type == "aio":

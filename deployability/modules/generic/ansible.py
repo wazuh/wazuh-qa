@@ -39,7 +39,6 @@ class Ansible:
         list_template_tasks = Utils.get_template_list(
             path_to_render_playbooks, rendering_variables.get("templates_order"))
 
-
         if list_template_tasks:
             for template in list_template_tasks:
                 loaded_template = template_env.get_template(template)
