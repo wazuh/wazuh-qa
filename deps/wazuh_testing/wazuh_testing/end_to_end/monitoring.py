@@ -26,7 +26,8 @@ from wazuh_testing.end_to_end import logs_filepath_os
 from wazuh_testing.tools.system import HostManager
 
 
-def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict, ignore_error: bool = False) -> Dict:
+def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict, ignore_error: bool = False,
+                                scan_interval: int = 5) -> Dict:
     """
     Monitor events on multiple hosts concurrently.
 
@@ -61,8 +62,9 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
            }
         }
     """
-    def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict], scan_interval: int = 20,
-                         ignore_error: bool = False) -> Dict:
+    def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict],
+                         ignore_error: bool = False,
+                         scan_interval: int = 5) -> Dict:
         """
         Monitor the specified elements on a host.
 
@@ -98,7 +100,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
                 timestamp_datetime = datetime.strptime(timestamp_str, timestamp_format)
                 greater_than_timestamp_formatted = datetime.strptime(greater_than_timestamp, timestamp_format_parameter)
 
-                if timestamp_datetime >=  greater_than_timestamp_formatted:
+                if timestamp_datetime >= greater_than_timestamp_formatted:
                     match_that_fit_timestamp.append(match)
 
             return match_that_fit_timestamp
@@ -112,24 +114,39 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
                                                             element['n_iterations'], \
                                                             element.get('greater_than_timestamp', None)
             current_timeout = 0
-            regex_match = None
+            regex_match = False
 
             while current_timeout < timeout:
+                logging.critical(f"Monitoring {regex} on {host} for {timeout} seconds")
+                logging.critical(f"Current timeout: {current_timeout}")
+                logging.critical(f"Timeout: {timeout}")
+
+
                 file_content = host_manager.get_file_content(host, monitoring_file)
                 match_regex = re.findall(regex, file_content)
+
+                logging.critical(f"Matched events: {match_regex}")
+
                 if greater_than_timestamp:
                     match_that_fit_timestamp = filter_events_by_timestamp(match_regex)
                 else:
                     match_that_fit_timestamp = list(match_regex)
 
+                logging.critical(f"Matched events that fit the timestamp: {match_that_fit_timestamp}")
+
                 if match_that_fit_timestamp and len(list(match_that_fit_timestamp)) >= n_iterations:
                     elements_found = list(match_that_fit_timestamp)
                     regex_match = True
+                    logging.critical(f"Element found: {element}")
                     break
+
+                logging.critical(f"Element not found: {element}")
+
+                logging.critical(f"Sleeping for {scan_interval} seconds")
 
                 sleep(scan_interval)
 
-                current_timeout += scan_interval
+                current_timeout = current_timeout + scan_interval
 
             if not regex_match:
                 elements_not_found.append(element)
