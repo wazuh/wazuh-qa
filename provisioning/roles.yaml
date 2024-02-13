@@ -75,3 +75,8 @@ filebeat:
     minimal:
       cpu: 2
       memory: 2048
+  vars:
+    mandatory:
+      version: VERSION
+      revision: REVISION
+      repository: REPOSITORY
