@@ -202,6 +202,7 @@ predefined_values:
     - 4.8.1
     - 4.8.2
     - 4.9.0
+    - 5.0.0
   tags:
     - active_response
     - agentd
