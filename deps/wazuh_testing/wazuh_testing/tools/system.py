@@ -143,20 +143,23 @@ class HostManager:
         """Move from src_path to the desired location dest_path for the specified host.
 
         Args:
-        host (str): Hostname
-        src_path (str): Source path
-        dest_path (str): Destination path
-        check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be applied.
+            host (str): Hostname
+            src_path (str): Source path
+            dest_path (str): Destination path
+            check (bool, optional): Ansible check mode("Dry Run"). Default `False`
         """
         result = None
+        host_variables = self.get_host_variables(host)
 
-        if self.get_host_variables(host)['os_name'] == 'windows':
+        if 'os_name' in host_variables and host_variables['os_name'] == 'windows':
             result = self.get_host(host).ansible("ansible.windows.win_copy", f"src='{src_path}' dest='{dest_path}'",
                                                  check=check)
         else:
-            result = self.get_host(host).ansible('copy', f'src={src_path} dest={dest_path}'
+            result = self.get_host(host).ansible('copy', f'src={src_path} dest={dest_path} '
                                                  'owner=wazuh group=wazuh mode=preserve',
                                                  check=check)
+
+        logging.info(f"File moved result {result}")
 
         return result
 
