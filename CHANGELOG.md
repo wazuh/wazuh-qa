@@ -37,6 +37,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix macOS Vulnerability Detection handler provision in E2E tests ([#4948](https://github.com/wazuh/wazuh-qa/pull/4948)) \- (Framework)
 - Migrate Vulnerability Detection timeouts variables to the waiters module ([#4949](https://github.com/wazuh/wazuh-qa/pull/4949)) \- (Framework)
 - Migrate HostMonitor to system_monitoring to avoid Windows import of ansible module ([#4917](https://github.com/wazuh/wazuh-qa/pull/4917/)) \- (Framework)
 - Fixed ansible_runner import conditional to avoid errors on Windows and python 3.6 ([#4916](https://github.com/wazuh/wazuh-qa/pull/4916)) \- (Framework)
