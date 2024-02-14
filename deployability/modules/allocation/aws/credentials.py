@@ -134,12 +134,12 @@ class AWSCredentials(Credentials):
         self.key_id = None
         self.key_path = None
 
-    def ssh_key_interpreter(self, public_key_path: str | Path) -> str:
+    def ssh_key_interpreter(self, ssh_key_path: str | Path) -> str:
         """
-        Gets the id of the SSH Key stored in AWS from the provisioned public key
+        Gets the id of the SSH Key stored in AWS from the provisioned public or private key
 
         Args:
-            public_key_path (str): The public key path.
+            public_key_path (str): The public or private key path or aws key id.
 
         Returns:
             str: The ID of the key pair.
@@ -147,6 +147,9 @@ class AWSCredentials(Credentials):
         Raises:
             CredentialsError: An error occurred during key pair loading.
         """
-        private_key_name = os.path.basename(public_key_path)
-        key_id = os.path.splitext(private_key_name)[0]
+        ssh_key_name = os.path.basename(ssh_key_path)
+        if ssh_key_name.endswith('.pub'):
+            key_id = os.path.splitext(ssh_key_name)[0]
+        else:
+            key_id = ssh_key_name
         return key_id

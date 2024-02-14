@@ -23,7 +23,7 @@ class AWSProvider(Provider):
     provider_name = 'aws'
 
     @classmethod
-    def _create_instance(cls, base_dir: Path, params: CreationPayload, config: AWSConfig = None, public_key: str = None) -> AWSInstance:
+    def _create_instance(cls, base_dir: Path, params: CreationPayload, config: AWSConfig = None, ssh_key: str = None) -> AWSInstance:
         """
         Create an AWS EC2 instance.
 
@@ -31,7 +31,7 @@ class AWSProvider(Provider):
             base_dir (Path): Base directory for storing instance data.
             params (CreationPayload): Payload containing creation parameters.
             config (AWSConfig, optional): Configuration for the instance. Defaults to None.
-            public_key (str, optional): Public key for the instance. Defaults to None.
+            ssh_key (str, optional): Public or private key for the instance. For example, we assume that if the public key is provided, the private key is located in the same directory and has the same name as the public key. Defaults to None.
 
         Returns:
             AWSInstance: Created AWSInstance object.
@@ -42,12 +42,12 @@ class AWSProvider(Provider):
         if not config:
             logger.debug(f"No config provided. Generating from payload")
             # Keys.
-            if not public_key:
+            if not ssh_key:
                 logger.debug(f"Generating new key pair")
                 credentials.generate(temp_dir, temp_id.split('-')[-1] + '_key')
             else:
-                logger.debug(f"Using provided public key")
-                key_id = credentials.ssh_key_interpreter(public_key)
+                logger.debug(f"Using provided key pair")
+                key_id = credentials.ssh_key_interpreter(ssh_key)
                 credentials.load(key_id)
             # Parse the config if it is not provided.
             config = cls.__parse_config(params, credentials)
@@ -66,10 +66,10 @@ class AWSProvider(Provider):
         instance_dir = Path(base_dir, instance_id)
         logger.debug(f"Renaming temp {temp_dir} directory to {instance_dir}")
         os.rename(temp_dir, instance_dir)
-        if not public_key:
+        if not ssh_key:
             credentials.key_path = (instance_dir / credentials.name)
         else:
-            credentials.key_path = (os.path.splitext(public_key)[0])
+            credentials.key_path = (os.path.splitext(ssh_key)[0])
 
         return AWSInstance(instance_dir, instance_id, credentials, config.user)
 
@@ -88,17 +88,21 @@ class AWSProvider(Provider):
         return AWSInstance(instance_dir, instance_id)
 
     @classmethod
-    def _destroy_instance(cls, instance_dir: str, identifier: str) -> None:
+    def _destroy_instance(cls, instance_dir: str, identifier: str, key_path: str) -> None:
         """
         Destroy an AWS EC2 instance.
 
         Args:
             instance_dir (str): Directory where instance data is stored.
             identifier (str): Identifier of the instance.
+            key_path (str): Path to the key pair.
         """
-        instance = AWSInstance(instance_dir, identifier)
-        if instance.credentials:
-            logger.debug(f"Deleting credentials: {instance.credentials.key_path}")
+        credentials = AWSCredentials()
+        key_id = os.path.basename(key_path)
+        credentials.load(key_id)
+        instance = AWSInstance(instance_dir, identifier, credentials)
+        if os.path.dirname(key_path) == str(instance_dir):
+            logger.debug(f"Deleting credentials: {instance.credentials.name}")
             instance.credentials.delete()
         instance.delete()
 
