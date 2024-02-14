@@ -34,8 +34,6 @@ def get_id_from_agent(agent, host_manager):
 def restart_cluster(hosts_list, host_manager):
     # Restart the cluster's hosts
     for host in hosts_list:
-        if "agent" in host:
-            host_manager.get_host(host).ansible('command', f'service wazuh-agent restart', check=False)
         host_manager.control_service(host=host, service='wazuh', state="restarted")
 
 
