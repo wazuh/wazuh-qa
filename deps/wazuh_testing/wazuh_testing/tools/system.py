@@ -48,7 +48,7 @@ class HostManager:
         variable_manager = VariableManager(loader=data_loader, inventory=self.inventory_manager)
 
         for host in self.inventory_manager.get_hosts():
-            self.hosts_variables[host] = variable_manager.get_vars(host=self.inventory_manager.get_host(str(host)))
+            self.hosts_variables[str(host)] = variable_manager.get_vars(host=self.inventory_manager.get_host(str(host)))
 
     def get_inventory(self) -> dict:
         """Get the loaded Ansible inventory.
@@ -114,10 +114,7 @@ class HostManager:
         Example:
             variables = get_host_variables('my_host')
         """
-
-        inventory_manager_host = self.inventory_manager.get_host(host)
-
-        return self.hosts_variables[inventory_manager_host]
+        return self.hosts_variables[host]
 
     def get_host(self, host: str):
         """Get the Ansible object for communicating with the specified host.
