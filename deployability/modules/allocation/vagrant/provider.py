@@ -23,7 +23,7 @@ class VagrantProvider(Provider):
     provider_name = 'vagrant'
 
     @classmethod
-    def _create_instance(cls, base_dir: Path, params: CreationPayload, config: VagrantConfig = None) -> VagrantInstance:
+    def _create_instance(cls, base_dir: Path, params: CreationPayload, config: VagrantConfig = None, public_key: str = None) -> VagrantInstance:
         """
         Creates a Vagrant instance.
 
@@ -31,6 +31,7 @@ class VagrantProvider(Provider):
             base_dir (Path): The base directory for the instance.
             params (CreationPayload): The parameters for instance creation.
             config (VagrantConfig, optional): The configuration for the instance. Defaults to None.
+            public_key (str, optional): Public key for the instance. Defaults to None.
 
         Returns:
             VagrantInstance: The created Vagrant instance.
@@ -42,8 +43,13 @@ class VagrantProvider(Provider):
         credentials = VagrantCredentials()
         if not config:
             logger.debug(f"No config provided. Generating from payload")
-            # Generate the credentials.
-            credentials.generate(instance_dir, 'instance_key')
+            # Keys.
+            if not public_key:
+                logger.debug(f"Generating new key pair")
+                credentials.generate(instance_dir, 'instance_key')
+            else:
+                logger.debug(f"Using provided public key")
+                credentials.load(public_key)
             # Parse the config if it is not provided.
             config = cls.__parse_config(params, credentials)
         else:

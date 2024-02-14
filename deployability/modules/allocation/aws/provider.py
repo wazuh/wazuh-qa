@@ -23,7 +23,7 @@ class AWSProvider(Provider):
     provider_name = 'aws'
 
     @classmethod
-    def _create_instance(cls, base_dir: Path, params: CreationPayload, config: AWSConfig = None) -> AWSInstance:
+    def _create_instance(cls, base_dir: Path, params: CreationPayload, config: AWSConfig = None, public_key: str = None) -> AWSInstance:
         """
         Create an AWS EC2 instance.
 
@@ -31,6 +31,7 @@ class AWSProvider(Provider):
             base_dir (Path): Base directory for storing instance data.
             params (CreationPayload): Payload containing creation parameters.
             config (AWSConfig, optional): Configuration for the instance. Defaults to None.
+            public_key (str, optional): Public key for the instance. Defaults to None.
 
         Returns:
             AWSInstance: Created AWSInstance object.
@@ -40,8 +41,14 @@ class AWSProvider(Provider):
         credentials = AWSCredentials()
         if not config:
             logger.debug(f"No config provided. Generating from payload")
-            # Generate the credentials.
-            credentials.generate(temp_dir, temp_id.split('-')[-1] + '_key')
+            # Keys.
+            if not public_key:
+                logger.debug(f"Generating new key pair")
+                credentials.generate(temp_dir, temp_id.split('-')[-1] + '_key')
+            else:
+                logger.debug(f"Using provided public key")
+                key_id = credentials.ssh_key_interpreter(public_key)
+                credentials.load(key_id)
             # Parse the config if it is not provided.
             config = cls.__parse_config(params, credentials)
         else:
@@ -50,16 +57,19 @@ class AWSProvider(Provider):
             credentials.load(config.key_name)
             # Create the temp directory.
             # TODO: Review this on the credentials refactor.
-            if not temp_dir.exists():
-                logger.debug(f"Creating temp directory: {temp_dir}")
-                temp_dir.mkdir(parents=True, exist_ok=True)
+        if not temp_dir.exists():
+            logger.debug(f"Creating temp directory: {temp_dir}")
+            temp_dir.mkdir(parents=True, exist_ok=True)
         # Generate the instance.
         instance_id = cls.__create_ec2_instance(config)
         # Rename the temp directory to its real name.
         instance_dir = Path(base_dir, instance_id)
         logger.debug(f"Renaming temp {temp_dir} directory to {instance_dir}")
         os.rename(temp_dir, instance_dir)
-        credentials.key_path = (instance_dir / credentials.name).with_suffix('.pem')
+        if not public_key:
+            credentials.key_path = (instance_dir / credentials.name)
+        else:
+            credentials.key_path = (os.path.splitext(public_key)[0])
 
         return AWSInstance(instance_dir, instance_id, credentials, config.user)
 

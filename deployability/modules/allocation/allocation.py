@@ -48,7 +48,7 @@ class Allocator:
         provider: Provider = PROVIDERS[payload.provider]()
         config = cls.___get_custom_config(payload)
         instance = provider.create_instance(
-            payload.working_dir, instance_params, config)
+            payload.working_dir, instance_params, config, payload.public_key)
         logger.info(f"Instance {instance.identifier} created.")
         # Start the instance
         instance.start()
