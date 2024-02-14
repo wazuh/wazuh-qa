@@ -21,7 +21,7 @@ tasks:
         args:
           - testing/main.py
           - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-          - dependencies: 
+          - dependencies:
             - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
             - agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - tests: "install,register,stop"
@@ -89,14 +89,14 @@ tasks:
           - composite-name: "{manager-os}"
           - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
-    #cleanup:
-    #  this: process
-    #  with:
-    #    path: python3
-    #    args:
-    #      - allocation/main.py
-    #      - action: delete
-    #      - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+    cleanup:
+      this: process
+      with:
+        path: python3
+        args:
+          - allocation/main.py
+          - action: delete
+          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 
   # Generic agent provision task
   - task: "provision-install-{agent}"
