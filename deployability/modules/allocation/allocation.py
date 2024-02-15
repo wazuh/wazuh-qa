@@ -64,7 +64,7 @@ class Allocator:
 
         Args:
             payload (DeletionPayload): The payload containing the parameters
-                                            for instance deletion.
+                                        for instance deletion.
         """
         payload = models.DeletionPayload(**dict(payload))
         # Read the data from the track file.
