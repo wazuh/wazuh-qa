@@ -2,7 +2,7 @@
 
 ### User documentation     
    
-The execution of the Provision is done through the installation of the library Worfklow library or launching the module using python command.
+The execution of the Provision is done through the installation of the library Worfklow library or launching the module using python command. The execution can be done from any operating system.
 
 Initially, Python libraries must be installed. It is recommended to use virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
 
