@@ -35,7 +35,7 @@ class WorkflowFile:
             workflow_file (Path | str): Path to the workflow file.
         """
         try:
-            logger.debug(f"Validating inptu file: {workflow_file}")
+            logger.debug(f"Validating input file: {workflow_file}")
             validator = SchemaValidator(self.schema_path, workflow_file)
             validator.preprocess_data()
             validator.validateSchema()

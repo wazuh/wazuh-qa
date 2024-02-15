@@ -50,7 +50,7 @@ class ProcessTask(Task):
                 else:
                     task_args.append(f"--{key}={value}")
             else:
-                logger.error(f'Coulg not parse arguments {arg}')
+                logger.error(f'Could not parse arguments {arg}')
 
         logger.debug(f'Running task "{self.task_name}" with arguments: {task_args}')
 
@@ -69,7 +69,7 @@ class ProcessTask(Task):
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr
             if "KeyboardInterrupt" in error_msg:
-                raise KeyboardInterrupt(f"Error executing process task with keyboard interrupt")
+                raise KeyboardInterrupt(f"Error executing process task with keyboard interrupt.")
             raise Exception(f"Error executing process task {e.stderr}")
 
 class DummyTask(Task):
