@@ -289,6 +289,9 @@ def get_file_hash(file_path):
 
 def compare_directories(old_scan, new_scan):
     changed_files = []
+    added_files = []
+    deleted_files = []
+    total_files = {}
 
     # Identify modified and added files
     for new_file, new_hash in new_scan:
@@ -297,16 +300,21 @@ def compare_directories(old_scan, new_scan):
             if os.path.relpath(old_file) == os.path.relpath(new_file):
                 file_found = True
                 if old_hash != new_hash:
-                    changed_files.append((new_file, old_hash, new_hash))
+                    changed_files.append((new_file))
 
         # If the file is not found in the initial scan, consider it added
         if not file_found:
-            changed_files.append((new_file, 'Added', new_hash))
+            added_files.append((new_file))
 
     # Identify deleted files
     for old_file, _ in old_scan:
         if os.path.relpath(old_file) not in (os.path.relpath(new_file) for new_file, _ in new_scan):
-            changed_files.append((old_file, 'Deleted', None))
+            deleted_files.append((old_file))
 
-    return changed_files
+    total_files = {'changed_files' : changed_files,
+                   'added_files': added_files,
+                   'deleted_files': deleted_files
+                   }
+
+    return total_files
 
