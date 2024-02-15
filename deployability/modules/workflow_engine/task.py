@@ -64,8 +64,8 @@ class ProcessTask(Task):
             )
             logger.debug(f'Finished task "{self.task_name}" execution with result:\n{str(result.stdout)}')
 
-            #if result.returncode != 0:
-            #    raise subprocess.CalledProcessError(returncode=result.returncode, cmd=result.args, output=result.stdout)
+            if result.returncode != 0:
+                raise subprocess.CalledProcessError(returncode=result.returncode, cmd=result.args, output=result.stdout)
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr
             if "KeyboardInterrupt" in error_msg:
