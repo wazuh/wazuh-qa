@@ -5,50 +5,50 @@ version: 0.1
 description: This workflow is used to test agents deployment por DDT1 PoC
 variables:
   agents-os:
-    - linux-centos-8-amd64
+    - linux-ubuntu-22.04-amd64
     #- linux-centos-7-amd64
-  manager-os: linux-centos-8-amd64
+  manager-os: linux-ubuntu-22.04-amd64
   infra-provider: vagrant
   working-dir: /tmp/dtt1-poc
 
 tasks:
   # Generic agent test task
-  - task: "run-agent-tests-{agent}"
-    description: "Run tests for the {agent} agent."
-    do:
-      this: process
-      with:
-        path: python3
-        args:
-          - test.py
-          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-          - dependency: "{working-dir}/manager-{manager-os}/inventory.yaml"
-          - tests: "install,register,stop"
-          - component: "agent"
-          - wazuh-version: "4.7.1"
-          - wazuh-revision: "40709"
-    depends-on:
-      - "provision-{agent}"
-      - "provision-manager"
-    foreach:
-      - variable: agents-os
-        as: agent
+  #- task: "run-agent-tests-{agent}"
+  #  description: "Run tests for the {agent} agent."
+  #  do:
+  #    this: process
+  #    with:
+  #      path: python3
+  #      args:
+  #        - /home/akim/Desktop/wazuh-qa/deployability/launchers/test.py
+  #        - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
+  #        - dependency: "{working-dir}/manager-{manager-os}/inventory.yaml"
+  #        - tests: "install"
+  #        - component: "agent"
+  #        - wazuh-version: "4.7.1"
+  #        - wazuh-revision: "40709"
+  #  depends-on:
+  #    - "provision-{agent}"
+  #    - "provision-manager"
+  #  foreach:
+  #    - variable: agents-os
+  #      as: agent
 
   # Unique manager provision task
-  - task: "provision-manager"
-    description: "Provision the manager."
-    do:
-      this: process
-      with:
-        path: python3
-        args:
-          - provision.py
-          - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-          - install:
-            - "component:wazuh-manager,install-type:package"
-            - "component:curl"
-    depends-on:
-      - "allocate-manager"
+  #- task: "provision-manager"
+  #  description: "Provision the manager."
+  #  do:
+  #    this: process
+  #    with:
+  #      path: python3
+  #      args:
+  #        - /home/akim/Desktop/wazuh-qa/deployability/launchers/provision.py
+  #        - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+  #        - install:
+  #          - "component:wazuh-manager,install-type:package"
+  #          - "component:curl"
+  #  depends-on:
+  #    - "allocate-manager"
 
   # Unique manager allocate task
   - task: "allocate-manager"
@@ -58,43 +58,43 @@ tasks:
       with:
         path: python3
         args:
-          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
+          - /home/akim/Desktop/wazuh-qa/deployability/launchers/allocation.py
           - action: create
           - provider: "{infra-provider}"
           - size: large
           - composite-name: "{manager-os}"
           - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
-    cleanup:
-      this: process
-      with:
-        path: python3
-        args:
-          - /home/fcaffieri/repos/wazuh-qa/deployability/launchers/allocation.py
-          - action: delete
-          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+    #cleanup:
+    #  this: process
+    #  with:
+    #    path: python3
+    #    args:
+    #      - /home/akim/Desktop/wazuh-qa/deployability/launchers/allocation.py
+    #      - action: delete
+    #      - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 
   # Generic agent provision task
-  - task: "provision-{agent}"
-    description: "Provision resources for the {agent} agent."
-    do:
-      this: process
-      with:
-        path: python3
-        args:
-          - provision.py
-          - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
-          - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-          - install:
-            - "component:wazuh-agent,install-type:package"
-            - "component:curl"
-            - "component:nano"
-    depends-on:
-      - "allocate-{agent}"
-      - "provision-manager"
-    foreach:
-      - variable: agents-os
-        as: agent
+  #- task: "provision-{agent}"
+  #  description: "Provision resources for the {agent} agent."
+  #  do:
+  #    this: process
+  #    with:
+  #      path: python3
+  #      args:
+  #        - /home/akim/Desktop/wazuh-qa/deployability/launchers/provision.py
+  #        - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
+  #        - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+  #        - install:
+  #          - "component:wazuh-agent,install-type:package"
+  #          - "component:curl"
+  #          - "component:nano"
+  #  depends-on:
+  #    - "allocate-{agent}"
+  #    - "provision-manager"
+  #  foreach:
+  #    - variable: agents-os
+  #      as: agent
 
   # Generic agent allocate task
   - task: "allocate-{agent}"
@@ -104,7 +104,7 @@ tasks:
       with:
         path: python3
         args:
-          - allocation.py
+          - /home/akim/Desktop/wazuh-qa/deployability/launchers/allocation.py
           - action: create
           - provider: "{infra-provider}"
           - size: small
