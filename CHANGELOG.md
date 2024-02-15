@@ -33,10 +33,10 @@ All notable changes to this project will be documented in this file.
 - Update the JSON schema with the required fields for the output content of the migration tool ([#4375](https://github.com/wazuh/wazuh-qa/pull/4375)) \- (Tests)
 - Update framework known flaws file ([#4443](https://github.com/wazuh/wazuh-qa/pull/4443)) \- (Tests)
 - Align migration tool system tests to the tool's new output directory structure ([#4561](https://github.com/wazuh/wazuh-qa/pull/4561)) \- (Tests)
-- Update pre-release and staging Filebeat module template URLs ([#4950](https://github.com/wazuh/wazuh-qa/pull/4950)) \- (Framework)
 
 ### Fixed
 
+- Fixed Filebeat provisioning role with pre-release and staging URLs ([#4950](https://github.com/wazuh/wazuh-qa/pull/4950)) \- (Framework)
 - Fixed IT control_service Windows loop ([#4765](https://github.com/wazuh/wazuh-qa/pull/4765)) \- (Framework)
 - Fix macOS agents provision to enable registration and connection with managers. ([#4770](https://github.com/wazuh/wazuh-qa/pull/4770/)) \- (Framework)
 - Fix hardcoded python interpreter in qa_framework role. ([#4658](https://github.com/wazuh/wazuh-qa/pull/4658)) \- (Framework)
