@@ -43,7 +43,7 @@ class InputPayload(BaseModel):
     inventory_output: Path | None = working_dir / 'inventory.yml'
     ssh_key: str | None = None
     custom_provider_config: Path | None = None
-
+    label: list[str] | None = None
 
 class CreationPayload(InputPayload):
     provider: str
@@ -54,6 +54,7 @@ class CreationPayload(InputPayload):
     working_dir: Path
     ssh_key: str | None = None
     custom_provider_config: Path | None = None
+    label: list[str] | None = None
 
     @model_validator(mode='before')
     def validate_dependency(cls, values) -> dict:
