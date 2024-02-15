@@ -45,7 +45,7 @@ class VagrantProvider(Provider):
             # Generate the credentials.
             credentials.generate(instance_dir, 'instance_key')
             # Parse the config if it is not provided.
-            config = cls.__parse_config(params, credentials)
+            config = cls.__parse_config(params, credentials, instance_id)
         else:
             logger.debug(f"Using provided config")
             credentials.load(config.public_key)
@@ -119,7 +119,7 @@ class VagrantProvider(Provider):
         return template.render(config=config)
 
     @classmethod
-    def __parse_config(cls, params: CreationPayload, credentials: VagrantCredentials) -> VagrantConfig:
+    def __parse_config(cls, params: CreationPayload, credentials: VagrantCredentials, instance_id: str) -> VagrantConfig:
         """
         Parses the configuration for a Vagrant instance.
 
@@ -142,6 +142,7 @@ class VagrantProvider(Provider):
         config['public_key'] = str(credentials.key_path.with_suffix('.pub'))
         config['cpu'] = size_specs['cpu']
         config['memory'] = size_specs['memory']
+        config['name'] = instance_id
 
         return VagrantConfig(**config)
 

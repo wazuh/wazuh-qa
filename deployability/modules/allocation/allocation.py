@@ -42,7 +42,7 @@ class Allocator:
 
         Args:
             payload (CreationPayload): The payload containing the parameters
-                                       for instance creation.
+                                        for instance creation.
         """
         instance_params = models.CreationPayload(**dict(payload))
         provider: Provider = PROVIDERS[payload.provider]()
@@ -50,7 +50,7 @@ class Allocator:
         instance = provider.create_instance(
             payload.working_dir, instance_params, config)
         logger.info(f"Instance {instance.identifier} created.")
-        # Start the instance    
+        # Start the instance
         instance.start()
         logger.info(f"Instance {instance.identifier} started.")
         # Generate the inventory and track files.
@@ -64,7 +64,7 @@ class Allocator:
 
         Args:
             payload (DeletionPayload): The payload containing the parameters
-                                              for instance deletion.
+                                        for instance deletion.
         """
         payload = models.DeletionPayload(**dict(payload))
         # Read the data from the track file.
@@ -81,7 +81,7 @@ class Allocator:
 
         Args:
             payload (CreationPayload): The payload containing the parameters
-                                       for instance creation.
+                                        for instance creation.
 
         Returns:
             ProviderConfig: The configuration object.
@@ -110,9 +110,9 @@ class Allocator:
             inventory_path.parent.mkdir(parents=True, exist_ok=True)
         ssh_config = instance.ssh_connection_info()
         inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
-                                           ansible_user=ssh_config.user,
-                                           ansible_port=ssh_config.port,
-                                           ansible_ssh_private_key_file=str(ssh_config.private_key))
+                                            ansible_user=ssh_config.user,
+                                            ansible_port=ssh_config.port,
+                                            ansible_ssh_private_key_file=str(ssh_config.private_key))
         with open(inventory_path, 'w') as f:
             yaml.dump(inventory.model_dump(), f)
         logger.info(f"Inventory file generated at {inventory_path}")
@@ -131,9 +131,9 @@ class Allocator:
         if not track_path.parent.exists():
             track_path.parent.mkdir(parents=True, exist_ok=True)
         track = models.TrackOutput(identifier=instance.identifier,
-                                   provider=provider_name,
-                                   instance_dir=str(instance.path),
-                                   key_path=str(instance.credentials.key_path))
+                                    provider=provider_name,
+                                    instance_dir=str(instance.path),
+                                    key_path=str(instance.credentials.key_path))
         with open(track_path, 'w') as f:
             yaml.dump(track.model_dump(), f)
         logger.info(f"Track file generated at {track_path}")

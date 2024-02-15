@@ -1,5 +1,6 @@
 import jsonschema
 import json
+import os
 
 from jsonschema.exceptions import ValidationError
 from pathlib import Path
@@ -28,9 +29,16 @@ class SchemaValidator:
         yaml_data: str = None
 
         self.logger = logger
+
+        if not os.path.exists(schema):
+            raise FileNotFoundError(f'File "{schema}" not found.')
+
         with open(schema, 'r') as schema_file:
             self.logger.debug(f"Loading schema file: {schema}")
             schema_data = json.load(schema_file)
+
+        if not os.path.exists(to_validate):
+            raise FileNotFoundError(f'File "{to_validate}" not found.')
 
         with open(to_validate, 'r') as file:
             self.logger.debug(f"Loading yaml file: {to_validate}")

@@ -5,6 +5,7 @@
 import os
 import sys
 import argparse
+import signal
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 sys.path.append(project_root)
@@ -26,11 +27,13 @@ def parse_arguments() -> argparse.Namespace:
 
 def main() -> None:
     """Main entry point."""
-
-    args = parse_arguments()
-    processor = WorkflowProcessor(**dict(InputPayload(**vars(args))))
-    processor.run()
-
+    try:
+        args = parse_arguments()
+        processor = WorkflowProcessor(**dict(InputPayload(**vars(args))))
+        signal.signal(signal.SIGINT, processor.handle_interrupt)
+        processor.run()
+    except Exception as e:
+        sys.exit(f"Error while provisioning: {e}")
 
 if __name__ == "__main__":
     main()

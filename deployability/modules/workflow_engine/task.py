@@ -16,6 +16,7 @@ class Task(ABC):
     def execute(self) -> None:
         """Execute the task."""
         pass
+
 class ProcessTask(Task):
     """Task for executing a process."""
 
@@ -36,6 +37,9 @@ class ProcessTask(Task):
         """Execute the process task."""
 
         task_args = []
+        if self.task_parameters.get('args') is None:
+            raise ValueError(f'Not argument found in {self.task_name}')
+
         for arg in self.task_parameters['args']:
             if isinstance(arg, str):
                 task_args.append(arg)
@@ -45,7 +49,11 @@ class ProcessTask(Task):
                     task_args.extend([f"--{key}={argvalue}" for argvalue in value])
                 else:
                     task_args.append(f"--{key}={value}")
-        self.logger.debug(f'Running task "{self.task_name}" with arguments: {task_args}')
+            else:
+                logger.error(f'Could not parse arguments {arg}')
+
+        logger.debug(f'Running task "{self.task_name}" with arguments: {task_args}')
+
         result = None
         try:
             result = subprocess.run(
@@ -59,6 +67,9 @@ class ProcessTask(Task):
             if result.returncode != 0:
                 raise subprocess.CalledProcessError(returncode=result.returncode, cmd=result.args, output=result.stdout)
         except subprocess.CalledProcessError as e:
+            error_msg = e.stderr
+            if "KeyboardInterrupt" in error_msg:
+                raise KeyboardInterrupt(f"Error executing process task with keyboard interrupt.")
             raise Exception(f"Error executing process task {e.stderr}")
 
 class DummyTask(Task):
