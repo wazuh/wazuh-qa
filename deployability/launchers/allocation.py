@@ -19,6 +19,9 @@ def parse_arguments():
     parser.add_argument("--track-output", required=False, default='/tmp/wazuh-qa/track.yml')
     parser.add_argument("--inventory-output", required=False, default='/tmp/wazuh-qa/inventory.yml')
     parser.add_argument("--working-dir", required=False, default='/tmp/wazuh-qa')
+    parser.add_argument("--label-issue", required=False, default=None)
+    parser.add_argument("--label-team", required=False, default=None)
+    parser.add_argument("--label-termination-date", required=False, default=None)
     return parser.parse_args()
 
 
