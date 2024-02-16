@@ -54,8 +54,6 @@ def create_registry(key, subkey, arch):
 
     if sys.platform == 'win32':
         try:
-            print("Creating registry key " + str(os.path.join(registry_class_name[key], subkey)))
-
             key = win32api.RegCreateKeyEx(key, subkey, win32con.KEY_ALL_ACCESS | arch)
 
             return key[0]  # Ignore the flag that RegCreateKeyEx returns
@@ -74,8 +72,6 @@ def delete_registry(key, subkey, arch):
         arch (int): architecture of the registry (KEY_WOW64_32KEY or KEY_WOW64_64KEY).
     """
     if sys.platform == 'win32':
-        print_arch = '[x64]' if arch == KEY_WOW64_64KEY else '[x32]'
-        print(f"Removing registry key {print_arch}{str(os.path.join(registry_class_name[key], subkey))}")
 
         try:
             key_h = win32api.RegOpenKeyEx(key, subkey, 0, win32con.KEY_ALL_ACCESS | arch)
@@ -99,7 +95,6 @@ def modify_registry_value(key_h, value_name, type, value):
     """
     if sys.platform == 'win32':
         try:
-            print(f"Modifying value '{value_name}' of type {registry_value_type[type]} and value '{value}'")
             win32api.RegSetValueEx(key_h, value_name, 0, type, value)
         except OSError as e:
             print(f"Could not modify registry value content: {e}")
@@ -108,7 +103,6 @@ def modify_registry_value(key_h, value_name, type, value):
 
 
 def generate_events(test_files, file_size, eps):
-    generated_events = 0
     n_events = int(eps/len(test_files))
     remain_events = eps % len(test_files)
     for _ in range(n_events):
@@ -117,22 +111,16 @@ def generate_events(test_files, file_size, eps):
             for n_registry in range(1, len(test_files)+1):
                 key_h = win32api.RegOpenKeyEx(registry_parser[KEY], f'{testreg}{n_registry}', 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
                 modify_registry_value(key_h, reg_value, REG_SZ, random_string)
-                generated_events += 1
         else:
             random_string = ''.join(random.choice(string.ascii_letters) for _ in range(file_size))
-            print(random_string)
             for filename in test_files:
                 with open(os.path.join(monitored_directory, filename), 'w+') as f:
                     f.write(random_string)
-                generated_events += 1
 
         random_string = ''.join(random.choice(string.ascii_letters) for _ in range(file_size))
         for filename in test_files[0:remain_events]:
             with open(os.path.join(monitored_directory, filename), 'w+') as f:
                 f.write(random_string)
-            generated_events += 1
-
-    print(f'Generated {generated_events} events')
 
 
 def main(num_files, duration, eps, file_size):
@@ -143,13 +131,9 @@ def main(num_files, duration, eps, file_size):
 
     start_time = time.time()
 
-    print(f'Start time: {start_time}')
-
     while (time.time() - start_time) < duration:
         generate_events(test_files, file_size, eps)
         time.sleep(1)
-
-    print(f'Duration: {time.time() - start_time}')
 
     if sys.platform == 'win32':
         for n_registry in range(1, num_files+1):
