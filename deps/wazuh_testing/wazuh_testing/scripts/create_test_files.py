@@ -30,7 +30,7 @@ if sys.platform == 'win32':
     KEY = "HKEY_LOCAL_MACHINE"
 
 monitored_directory = os.path.join("C:", os.sep, "stress_test") if sys.platform == 'win32' else os.path.join("/" "stress_test")
-testreg = os.path.join('SOFTWARE', 'testreg')
+testreg = os.path.join('SOFTWARE', 'testreg', 'testreg')
 
 
 def signal_handler(sig, frame):
