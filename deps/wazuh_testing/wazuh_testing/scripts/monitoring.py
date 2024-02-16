@@ -18,6 +18,7 @@ STOP_STATISTICS_MONITORING = False
 
 logger = logging.getLogger(__name__)
 
+
 def setup_logger(log_file, debug=False):
     # Create a logger
     logger = logging.getLogger(__name__)
@@ -69,7 +70,7 @@ def create_csv_header(process, directory):
                              "sent_shared", "queue_size", "queue_usage"])
         elif process == "wazuh-analysisd":
             writer.writerow(["timestamp", "name", "bytes_received", "processed_events", "processed_events_received",
-                             "decoded_agent", "syscheck", "dropped_agent", "dropped_syscheck",
+                             "decoded_agent", "Decoded Events Syscheck", "dropped_agent", "dropped_syscheck",
                              "writte_breakdown_alerts", "queue_size_alerts", "queue_usage_alerts",
                              "queue_syscheck_size", "queue_syscheck_usage"])
 
@@ -163,9 +164,10 @@ def parse_and_write_to_csv(data, process, directory):
             writer.writerow([timestamp, name, "No data"])
 
 
-def get_daemons_stats():
+def get_daemons_stats(processes_list):
     host = "localhost"
-    endpoint = "/manager/daemons/stats?daemons_list=wazuh-db,wazuh-analysisd,wazuh-remoted"
+    endpoint = f"/manager/daemons/stats?daemons_list={','.join(processes_list)}"
+
     api_details = get_api_details_dict(host=host)
     response = make_api_call(manager_address=host, endpoint=endpoint, headers=api_details['auth_headers'])
 
@@ -183,7 +185,7 @@ def collect_data(options, monitoring_evidences_directory):
 
     while not STOP_STATISTICS_MONITORING:
         try:
-            stats = get_daemons_stats()
+            stats = get_daemons_stats(options.process_list)
             with open(os.path.join(monitoring_evidences_directory, "daemons_full_stats.json"), 'a') as file:
                 json.dump(stats, file)
                 file.write("\n")
