@@ -41,31 +41,34 @@ class AWSProvider(Provider):
         temp_id = cls._generate_instance_id(cls.provider_name)
         temp_dir = base_dir / temp_id
         credentials = AWSCredentials()
-        teams = ['qa', 'core', 'framework', 'cicd', 'frontend', 'operations', 'cloud', 'threat-intel', 'marketing', 'documentation']
+        teams = ['qa', 'core', 'framework', 'devops', 'frontend', 'operations', 'cloud', 'threat-intel', 'marketing', 'documentation']
         if not config:
             logger.debug(f"No config provided. Generating from payload")
             # Labels
-            issue = None
-            label_team = None
-            termination_date = None
+            issue = params.label_issue
+            label_team = params.label_team
+            termination_date = params.label_termination_date
             date_regex = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"
-            for label in params.label:
-                url_regex = "(https:\/\/www\.|http:\/\/www\.|https:\/\/|http:\/\/)?[a-zA-Z0-9]{2,}(\.[a-zA-Z0-9]{2,})(\.[a-zA-Z0-9]{2,})?"
-                if re.match(url_regex, label):
-                    issue = label
-                for team in teams:
-                    if label == team:
-                        label_team = label
-                if re.match(date_regex, label):
-                    termination_date = label
-            if not termination_date:
+            url_regex = "(https:\/\/|http:\/\/)?[github]{2,}(\.[com]{2,})?\/wazuh\/[a-zA-Z0-9_-]+(?:-[a-zA-Z0-9_-]+)?\/issues\/[0-9]{2,}"
+            if not termination_date or not re.match(date_regex, termination_date):
                 logger.error(f"The termination_date label was not provided or is of incorrect format, example: 2024-02-25 12:00:00.")
                 sys.exit(1)
-            if not label_team:
+            if label_team:
+                not_match = 0
+                for team in teams:
+                    if label_team == team:
+                        label_team = team
+                        break
+                    else:
+                        not_match += 1
+                if not_match == len(teams):
+                    logger.error(f"The team label provided does not match any of the available teams.")
+                    sys.exit(1)
+            else:
                 logger.error(f"The team label was not provided.")
                 sys.exit(1)
-            if not issue:
-                logger.error(f"The issue label was not provided.")
+            if not issue or not re.match(url_regex, issue):
+                logger.error(f"The issue label was not provided or is of incorrect format, example: https://github.com/wazuh/<repository>/issues/<issue-number>.")
                 sys.exit(1)
             issue_name= re.search(r'github\.com\/wazuh\/([^\/]+)\/issues', issue)
             name = str(issue_name.group(1)) + "-" + str(re.search(r'(\d+)$', issue).group(1)) + "-" + str(params.composite_name.split("-")[1]) + "-" + str(params.composite_name.split("-")[2])
