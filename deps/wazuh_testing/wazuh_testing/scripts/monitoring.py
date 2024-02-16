@@ -156,13 +156,13 @@ def collect_data(options, monitoring_evidences_directory):
     global STOP_STATISTICS_MONITORING
 
     for process in options.process_list:
-        create_csv_header(process)
+        create_csv_header(process, monitoring_evidences_directory)
 
     while not STOP_STATISTICS_MONITORING:
         try:
             stats = get_daemons_stats()
             for process in options.process_list:
-                parse_and_write_to_csv(stats, process)
+                parse_and_write_to_csv(stats, process, monitoring_evidences_directory)
         except Exception as e:
             print(f"Error occurred: {str(e)}")
 
