@@ -103,24 +103,24 @@ def modify_registry_value(key_h, value_name, type, value):
 
 
 def generate_events(test_files, file_size, eps):
-    n_events = int(eps/len(test_files))
-    remain_events = eps % len(test_files)
-    for _ in range(n_events):
+    events_produced = 0
+
+    list_registry = [f'{testreg}{i}' for i in range(1, len(test_files)+1)]
+
+    while events_produced < eps:
         if sys.platform == 'win32':
             random_string = ''.join(random.choice(string.ascii_letters) for _ in range(10))
-            for n_registry in range(1, len(test_files)+1):
-                key_h = win32api.RegOpenKeyEx(registry_parser[KEY], f'{testreg}{n_registry}', 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY)
-                modify_registry_value(key_h, reg_value, REG_SZ, random_string)
+            registry_to_modify = random.choice(list_registry)
+            modify_registry_value(win32api.RegOpenKeyEx(registry_parser[KEY], registry_to_modify, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY), reg_value, REG_SZ, random_string)
         else:
             random_string = ''.join(random.choice(string.ascii_letters) for _ in range(file_size))
-            for filename in test_files:
-                with open(os.path.join(monitored_directory, filename), 'w+') as f:
-                    f.write(random_string)
+            file_to_modify = random.choice(test_files)
+            with open(os.path.join(monitored_directory, file_to_modify), 'w+') as f:
+                f.write(random_string)
+
+        events_produced += 1
 
         random_string = ''.join(random.choice(string.ascii_letters) for _ in range(file_size))
-        for filename in test_files[0:remain_events]:
-            with open(os.path.join(monitored_directory, filename), 'w+') as f:
-                f.write(random_string)
 
 
 def main(num_files, duration, eps, file_size):
