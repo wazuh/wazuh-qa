@@ -44,14 +44,12 @@ def create_csv_header(process):
 
 
 def parse_and_write_to_csv(data, process):
-    real_data = data['data']['affected_items'][0]
+    real_data = data['data']['affected_items']
     process_metrics = None
-
-    for affected_item in data['data']['affected_items']:
+    for affected_item in real_data:
         if affected_item['name'] == process:
             process_metrics = affected_item
             break
-
     if not process_metrics:
         raise Exception(f"Process {process} not found in the data")
 
@@ -59,7 +57,7 @@ def parse_and_write_to_csv(data, process):
 
     timestamp = process_metrics['timestamp']
     name = process_metrics['name']
-    metrics = real_data['metrics']
+    metrics = process_metrics['metrics']
 
     if process == "wazuh-db":
         queries_received = metrics['queries']['received']
@@ -105,18 +103,22 @@ def parse_and_write_to_csv(data, process):
         processed_events = metrics['events']['processed']
         processed_events_received = metrics['events']['received']
         decoded_agent = metrics['events']['received_breakdown']['decoded_breakdown']['agent']
-        syscheck = metrics['events']['received_breakdown']['decoded_breakdown']['syscheck']
-        dropped_agent = metrics['events']['dropped_breakdown']['agent']
-        dropped_syscheck = metrics['events']['dropped_breakdown']['syscheck']
+
+        syscheck = metrics['events']['received_breakdown']['decoded_breakdown']['modules_breakdown']['syscheck']
+
+        dropped_agent = metrics['events']['received_breakdown']['dropped_breakdown']['agent']
+        dropped_syscheck = metrics['events']['received_breakdown']['dropped_breakdown']['modules_breakdown']['syscheck']
+
+
         writte_breakdown_alerts = metrics['events']['written_breakdown']['alerts']
-        queue_size = metrics['queues']['received']['size']
-        queue_usage = metrics['queues']['received']['usage']
+        queue_size_alerts = metrics['queues']['alerts']['size']
+        queue_usage_alerts = metrics['queues']['alerts']['usage']
+
         queue_syscheck_size = metrics['queues']['syscheck']['size']
         queue_syscheck_usage = metrics['queues']['syscheck']['usage']
 
         row = [timestamp, name, bytes_received, processed_events, processed_events_received, decoded_agent, syscheck,
-               dropped_agent, dropped_syscheck, writte_breakdown_alerts, queue_size, queue_usage, queue_syscheck_size,
-               queue_syscheck_usage]
+               dropped_agent, dropped_syscheck, writte_breakdown_alerts, queue_size_alerts, queue_usage_alerts, queue_syscheck_size, queue_syscheck_usage]
 
     with open('data.csv', 'a', newline='') as file:
         writer = csv.writer(file)
