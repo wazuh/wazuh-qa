@@ -26,7 +26,7 @@ def get_script_arguments():
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-t', '--target', dest='target_list', required=True, type=str, nargs='+', action='store',
                         help='Type the statistics target to collect separated by whitespace. '
-                             'Targets: agent, logcollector, remoted, analysis-events analysisd-state.')
+                             'Targets: agent, logcollector, remoted, analysis-events and analysisd-state.')
     parser.add_argument('-s', '--sleep', dest='sleep_time', type=float, default=5, action='store',
                         help='Type the time in seconds between each entry.')
     parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False,
@@ -34,7 +34,8 @@ def get_script_arguments():
     parser.add_argument('--store', dest='store_path', action='store', default=gettempdir(),
                         help=f"Path to store the CSVs with the data. Default {gettempdir()}.")
     parser.add_argument('-a', '--use_api', dest='use_api', type=bool, action='store', default=False,
-                        help="Determine if the API should be used to collect the data. Default False.")
+                        help="Determine if the API should be used to collect the data. Default False."
+                             "For remoted set to True to get data from API. analysis_events uses API by default.")
 
     return parser.parse_args()
 
