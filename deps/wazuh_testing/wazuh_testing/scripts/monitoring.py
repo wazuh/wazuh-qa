@@ -9,25 +9,43 @@ import subprocess
 import argparse
 import threading
 
-from wazuh_testing.api import make_api_call, API_PROTOCOL, API_HOST, API_PORT, API_USER, API_PASS, API_LOGIN_ENDPOINT, get_api_details_dict
-from wazuh_testing.tools.performance.binary import Monitor
+from wazuh_testing.api import make_api_call, get_api_details_dict
 
-logger = logging.getLogger(__name__)
+
 metrics_monitoring_pid = None
 
 STOP_STATISTICS_MONITORING = False
 
-# TODO
-# - Metrics copy from wazuh-metrics. It is better to change this by launching directly the wazuh-metrics script and handle the signals
-# - Include the analysisd daemon
-# - Include parametrization to the script
-# - Testing in real environment
+logger = logging.getLogger(__name__)
+
+def setup_logger(log_file, debug=False):
+    # Create a logger
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+
+    # Create a file handler and set level to DEBUG
+    logging_files = os.path.join(os.path.dirname(log_file), "monitoring_script_logging.log")
+    file_handler = logging.FileHandler(logging_files)
+
+    if debug:
+        file_handler.setLevel(logging.DEBUG)
+    else:
+        file_handler.setLevel(logging.INFO)
+
+    # Create a formatter and set it to the handler
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(formatter)
+
+    # Add the file handler to the logger
+    logger.addHandler(file_handler)
+
+    return logger
 
 
 def signal_handler(sig, frame):
     global metrics_monitoring_pid
 
-    print("Signal received. Exiting...")
+    logger.info("Signal received. Exiting...")
 
     if metrics_monitoring_pid:
         os.kill(metrics_monitoring_pid, signal.SIGKILL)
@@ -51,11 +69,14 @@ def create_csv_header(process, directory):
                              "sent_shared", "queue_size", "queue_usage"])
         elif process == "wazuh-analysisd":
             writer.writerow(["timestamp", "name", "bytes_received", "processed_events", "processed_events_received",
-                             "decoded_agent", "syscheck", "dropped_agent", "dropped_syscheck", "writte_breakdown_alerts",
-                             "queue_size_alerts", "queue_usage_alerts", "queue_syscheck_size", "queue_syscheck_usage"])
+                             "decoded_agent", "syscheck", "dropped_agent", "dropped_syscheck",
+                             "writte_breakdown_alerts", "queue_size_alerts", "queue_usage_alerts",
+                             "queue_syscheck_size", "queue_syscheck_usage"])
 
 
 def parse_and_write_to_csv(data, process, directory):
+    logger.debug(f"Processing data for process: {process}")
+
     real_data = data['data']['affected_items']
     process_metrics = None
     for affected_item in real_data:
@@ -129,7 +150,8 @@ def parse_and_write_to_csv(data, process, directory):
         queue_syscheck_usage = metrics['queues']['syscheck']['usage']
 
         row = [timestamp, name, bytes_received, processed_events, processed_events_received, decoded_agent, syscheck,
-               dropped_agent, dropped_syscheck, writte_breakdown_alerts, queue_size_alerts, queue_usage_alerts, queue_syscheck_size, queue_syscheck_usage]
+               dropped_agent, dropped_syscheck, writte_breakdown_alerts, queue_size_alerts, queue_usage_alerts,
+               queue_syscheck_size, queue_syscheck_usage]
 
     file_path = os.path.join(directory, f'{process}_stats.csv')
 
@@ -148,9 +170,10 @@ def get_daemons_stats():
     response = make_api_call(manager_address=host, endpoint=endpoint, headers=api_details['auth_headers'])
 
     if not response:
-        raise Exception("Failed to retrieve data from API")
+        logger.error(f"Error getting daemons stats: {response}")
     else:
         return json.loads(response.content)
+
 
 def collect_data(options, monitoring_evidences_directory):
     global STOP_STATISTICS_MONITORING
@@ -164,7 +187,7 @@ def collect_data(options, monitoring_evidences_directory):
             for process in options.process_list:
                 parse_and_write_to_csv(stats, process, monitoring_evidences_directory)
         except Exception as e:
-            print(f"Error occurred: {str(e)}")
+            logger.error(f"Error collecting data: {e}")
 
         time.sleep(options.sleep_time)
 
@@ -184,12 +207,13 @@ def get_script_arguments():
     parser.add_argument('-u', '--units', dest='data_unit', default='KB', choices=['B', 'KB', 'MB'],
                         help='Type unit for the bytes-related values. Default bytes.')
     parser.add_argument('-v', '--version', dest='version', required=True, help='Version of the binaries. Default none.')
+    parser.add_argument('-d', '--debug', dest='debug', action='store_true', help='Enable debug mode.')
 
     return parser.parse_args()
 
 
-if __name__ == "__main__":
-    options = get_script_arguments()
+def main(options):
+    global STOP_STATISTICS_MONITORING
 
     monitoring_start_time = time.strftime("%Y%m%d-%H%M%S")
     wazuh_version = options.version
@@ -202,15 +226,24 @@ if __name__ == "__main__":
     if not os.path.exists(monitoring_evidences_directory):
         os.makedirs(monitoring_evidences_directory)
 
+    global logger
+    logger = setup_logger(os.path.join(monitoring_evidences_directory, "monitoring.log"), options.debug)
+
     signal.signal(signal.SIGINT, signal_handler)
 
-    metrics_monitoring_process = subprocess.Popen(f"wazuh-metrics -p {options.process_list} --store {monitoring_evidences_directory}",
+    # Start metrics monitoring
+    logger.info(f"Starting metrics monitoring for processes: {options.process_list}")
+    metrics_monitoring_process = subprocess.Popen(f"wazuh-metrics -p ' '.join({options.process_list}) "
+                                                  "--store {monitoring_evidences_directory}",
                                                   shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+    logger.info(f"Starting metrics monitoring for processes: {options.process_list}")
     metrics_monitoring_pid = metrics_monitoring_process.pid
-    statistics_monitoring_thread = threading.Thread(target=collect_data, args=(options, monitoring_evidences_directory,))
+    statistics_monitoring_thread = threading.Thread(target=collect_data,
+                                                    args=(options, monitoring_evidences_directory,))
     statistics_monitoring_thread.start()
 
+    logger.info(f"Monitoring started. Monitoring time: {options.monitoring_time} seconds. Please wait...")
     time.sleep(options.monitoring_time)
 
     # Stop statistics monitoring
@@ -218,3 +251,7 @@ if __name__ == "__main__":
 
     # Stop metrics monitoring
     os.kill(metrics_monitoring_pid, signal.SIGKILL)
+
+if __name__ == "__main__":
+    options = get_script_arguments()
+    main(options)
