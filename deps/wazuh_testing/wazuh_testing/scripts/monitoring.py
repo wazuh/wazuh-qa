@@ -240,9 +240,9 @@ def main(options):
     metrics_monitoring_process = subprocess.Popen(f"wazuh-metrics -p {' '.join(options.process_list)} "
                                                   f"--store {monitoring_evidences_directory}",
                                                   shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-    logger.info(f"Starting metrics monitoring for processes: {options.process_list}")
     metrics_monitoring_pid = metrics_monitoring_process.pid
+
+    logger.info(f"Starting statistics monitoring for processes: {options.process_list}")
     statistics_monitoring_thread = threading.Thread(target=collect_data,
                                                     args=(options, monitoring_evidences_directory,))
     statistics_monitoring_thread.start()
@@ -255,6 +255,7 @@ def main(options):
 
     # Stop metrics monitoring
     os.kill(metrics_monitoring_pid, signal.SIGKILL)
+
 
 if __name__ == "__main__":
     options = get_script_arguments()
