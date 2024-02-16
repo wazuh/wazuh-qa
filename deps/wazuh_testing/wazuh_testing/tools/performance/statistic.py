@@ -62,6 +62,9 @@ class StatisticMonitor:
         self.use_api = use_api
         self.parse_json = False
 
+        if self.use_api == True and self.target != 'analysis_events' and self.target != 'remoted':
+            self.use_api = False
+
         if self.target == 'agent':
             self.statistics_file = tls.AGENT_STATISTICS_FILE
         elif self.target == 'logcollector':
@@ -80,7 +83,7 @@ class StatisticMonitor:
             state_file = splitext(basename(self.statistics_file))[0]
             self.csv_file = join(self.dst_dir, f'{state_file}_stats.csv')
         else:
-            self.csv_file = join(self.dst_dir, f'wazuh-{self.target}_stats.csv')
+            self.csv_file = join(self.dst_dir, f'wazuh-{self.target}_api_stats.csv')
 
 
     def _parse_classic_state_file(self, data, target):
@@ -324,7 +327,7 @@ class StatisticMonitor:
 	        "Sent sca",
     	    "Sent shared",
 
-            "Metrics-Bytes received"
+            "Metrics-Bytes received",
             "Metrics-Bytes sent"]
 
         agentd_header = ["Timestamp", "Status", "Last Keepalive", "Last ACK", "Number of generated events",
