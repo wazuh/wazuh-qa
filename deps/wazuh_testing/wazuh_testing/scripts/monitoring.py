@@ -186,6 +186,7 @@ def collect_data(options, monitoring_evidences_directory):
             stats = get_daemons_stats()
             with open(os.path.join(monitoring_evidences_directory, "daemons_full_stats.json"), 'a') as file:
                 json.dump(stats, file)
+                file.write("\n")
 
             for process in options.process_list:
                 parse_and_write_to_csv(stats, process, monitoring_evidences_directory)
