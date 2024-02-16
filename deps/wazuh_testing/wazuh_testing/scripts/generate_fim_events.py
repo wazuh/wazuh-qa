@@ -140,7 +140,8 @@ def main(num_files, duration, eps, file_size):
             delete_registry(registry_parser[KEY], f'{testreg}{n_registry}', KEY_WOW64_64KEY)
     else:
         if os.path.exists(monitored_directory):
-            shutil.rmtree(monitored_directory)
+            for filename in test_files:
+                os.remove(os.path.join(monitored_directory, filename))
 
 
 if __name__ == "__main__":
