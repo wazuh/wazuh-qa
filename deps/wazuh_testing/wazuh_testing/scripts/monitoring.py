@@ -70,7 +70,7 @@ def create_csv_header(process, directory):
                              "sent_shared", "queue_size", "queue_usage"])
         elif process == "wazuh-analysisd":
             writer.writerow(["timestamp", "name", "bytes_received", "processed_events", "processed_events_received",
-                             "decoded_agent", "Decoded Events Syscheck", "dropped_agent", "dropped_syscheck",
+                             "decoded_agent", "decoded_events_syscheck", "dropped_agent", "dropped_syscheck",
                              "writte_breakdown_alerts", "queue_size_alerts", "queue_usage_alerts",
                              "queue_syscheck_size", "queue_syscheck_usage"])
 
