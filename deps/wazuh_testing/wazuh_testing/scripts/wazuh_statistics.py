@@ -52,10 +52,8 @@ def main():
     options.debug and logger.setLevel(logging.DEBUG)
     logger.info(f'Started new session: {CURRENT_SESSION}')
 
-    print("Target list: ", options.target_list)
     for target in options.target_list:
-        print("Target:", target)
-        monitor = StatisticMonitor(target=target, time_step=options.sleep_time, dst_dir=options.store_path)
+        monitor = StatisticMonitor(target=target, time_step=options.sleep_time, dst_dir=options.store_path, use_api=options.use_api)
         MONITOR_LIST.append(monitor)
         monitor.start()
 
