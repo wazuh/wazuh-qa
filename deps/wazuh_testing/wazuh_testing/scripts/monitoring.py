@@ -233,8 +233,8 @@ def main(options):
 
     # Start metrics monitoring
     logger.info(f"Starting metrics monitoring for processes: {options.process_list}")
-    metrics_monitoring_process = subprocess.Popen(f"wazuh-metrics -p ' '.join({options.process_list}) "
-                                                  "--store {monitoring_evidences_directory}",
+    metrics_monitoring_process = subprocess.Popen(f"wazuh-metrics -p {' '.join(options.process_list)}"
+                                                  f"--store {monitoring_evidences_directory}",
                                                   shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     logger.info(f"Starting metrics monitoring for processes: {options.process_list}")
