@@ -1,3 +1,6 @@
+
+
+
 # Copyright (C) 2015-2021, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
@@ -5,17 +8,23 @@
 import csv
 import json
 import logging
+import requests
+import urllib3
+import wazuh_testing.tools as tls
 from datetime import datetime
 from os.path import basename, isfile, join, splitext
 from re import sub
 from tempfile import gettempdir
 from threading import Thread, Event
-from time import sleep
+from time import sleep, time
 
-import wazuh_testing.tools as tls
+urllib3.disable_warnings()
+
+API_URL="https://localhost:55000"
+DAEMONS_ENDPOINT="/manager/daemons/stats?daemons_list=wazuh-analysisd,wazuh-remoted,wazuh-db"
+TOKEN_ENDPOINT="/security/user/authenticate"
 
 logger = logging.getLogger('wazuh-statistics-monitor')
-logger.setLevel(logging.INFO)
 
 
 class StatisticMonitor:
@@ -32,6 +41,7 @@ class StatisticMonitor:
         time_step (int): Time between intervals.
         target (str, optional): target file to monitor.
         dst_dir (str, optional): path to store the file.
+        use_api (bool, optional): Determine if the API should be used to collect the data. Default False.
 
     Attributes:
         event (thread.Event): thread Event used to control the scans.
@@ -40,44 +50,56 @@ class StatisticMonitor:
         dst_dir (str): directory to store the CSVs. Defaults to temp directory.
         csv_file (str): path to the CSV file.
         target (str): target file to monitor.
+        parse_json (bool): Determine if the file is a JSON file. Default False.
     """
 
-    def __init__(self, target='agent', time_step=5, dst_dir=gettempdir()):
+    def __init__(self, target='agent', time_step=5, dst_dir=gettempdir(), use_api=False):
         self.event = None
         self.thread = None
         self.time_step = time_step
         self.target = target
         self.dst_dir = dst_dir
+        self.use_api = use_api
         self.parse_json = False
+
+        if self.use_api == True and self.target != 'analysis_events' and self.target != 'remoted':
+            self.use_api = False
 
         if self.target == 'agent':
             self.statistics_file = tls.AGENT_STATISTICS_FILE
         elif self.target == 'logcollector':
             self.statistics_file = tls.LOGCOLLECTOR_STATISTICS_FILE
             self.parse_json = True
-        elif self.target == 'remote':
+        elif self.target == 'remoted':
             self.statistics_file = tls.REMOTE_STATISTICS_FILE
-        elif self.target == 'analysis':
+        elif self.target == 'analysis_state':
             self.statistics_file = tls.ANALYSIS_STATISTICS_FILE
+        elif self.target == 'analysis_events':
+            self.use_api = True
         else:
             raise ValueError(f'The target {self.target} is not a valid one.')
 
-        state_file = splitext(basename(self.statistics_file))[0]
-        self.csv_file = join(self.dst_dir, f'{state_file}_stats.csv')
+        if self.use_api == False:
+            state_file = splitext(basename(self.statistics_file))[0]
+            self.csv_file = join(self.dst_dir, f'{state_file}_stats.csv')
+        else:
+            self.csv_file = join(self.dst_dir, f'wazuh-{self.target}_api_stats.csv')
 
-    def _parse_classic_state_file(self, data):
+
+    def _parse_classic_state_file(self, data, target):
         """Parse the info from the .state files from Wazuh with shell compatible format.
 
         Args:
             data (dict): dictionary to store the data of the file.
+            target (string): specifies which CSV must be generated
         """
         with open(self.statistics_file) as state_file:
             for line in state_file:
                 if line.rstrip() and line.rstrip()[0] != '#':
                     key, value = line.splitlines()[0].split('=')
                     data[key] = value.split("'")[1]
+        self._write_csv(data, target, self.csv_file)
 
-        self._write_csv(data, self.csv_file)
 
     def _parse_logcollector_state_file(self, data):
         """Parse the info from the .state files from Wazuh with shell compatible format.
@@ -87,7 +109,6 @@ class StatisticMonitor:
         """
         with open(self.statistics_file) as state_file:
             state_info = json.load(state_file)
-
         for file in state_info['global']['files']:
             if isfile(file['location']):
                 csv_name = sub(r'\.', '_', basename(file['location']))
@@ -101,42 +122,448 @@ class StatisticMonitor:
                 file_data['bytes'] = file['bytes']
                 file_data['target'] = target['name']
                 file_data['target_drops'] = target['drops']
-                self._write_csv(file_data, join(self.dst_dir, f'{csv_name}.csv'))
+                self._write_csv(file_data, 'logcollector', join(self.dst_dir, f'{csv_name}.csv'))
+
 
     def _parse_state_file(self):
         """Read the data from the statistics file generated by Wazuh."""
         try:
             logging.info("Getting statistics data from {}".format(self.statistics_file))
-            data = {'Timestamp': datetime.now().strftime('%Y/%m/%d %H:%M:%S')}
+            data = {}
             if not self.parse_json:
-                self._parse_classic_state_file(data)
+                self._parse_classic_state_file(data, self.target)
             else:
                 self._parse_logcollector_state_file(data)
         except Exception as e:
             logger.error(f'Exception with {self.statistics_file} | {str(e)}')
 
-    @staticmethod
-    def _write_csv(data, csv_file):
+
+    def _parse_api_data(self):
+        """Read the data from the statistics file generated by Wazuh API."""
+
+        logging.info("Getting statistics data from API for {}".format(self.target))
+
+        response = requests.get(API_URL + TOKEN_ENDPOINT, verify=False, auth=requests.auth.HTTPBasicAuth("wazuh", "wazuh"))
+        if response.status_code != 200:
+            logging.info("Retrying get API data, status code {}".format(response.status_code))
+            return self._parse_api_data()
+
+        daemons_response = requests.get(API_URL + DAEMONS_ENDPOINT, verify=False, headers={'Authorization': 'Bearer ' + response.json()['data']['token']})
+        if daemons_response.status_code != 200:
+            logging.info("Retrying get API data, status code {}".format(response.status_code))
+            return self._parse_api_data()
+
+        data = daemons_response.json()['data']['affected_items']
+        self._write_csv(data, self.target, self.csv_file)
+
+
+    def _write_csv(self, data, target, csv_file):
         """Write the data collected from the .state into a CSV file.
 
         Args:
             data (dict): dictionary containing the info from the .state file.
+            target (string): specifies which CSV must be generated
             csv_file (string): path to the CSV file.
         """
-        header = not isfile(csv_file)
-        with open(csv_file, 'a', newline='') as f:
-            csv_writer = csv.writer(f)
-            if header:
-                csv_writer.writerow(list(data))
 
-            csv_writer.writerow(list(data.values()))
-        logger.debug(f'Added new entry in {csv_file}')
+        analysisd_events_header = [
+            "Timestamp",
+            "API Timestamp",
+            "Interval (Timestamp-Uptime)",
+            "Events processed",
+            "Events received",
+
+            "Decoded from azure",
+            "Decoded from ciscat",
+            "Decoded from command",
+            "Decoded from docker",
+            "Decoded from logcollector eventchannel",
+            "Decoded from logcollector eventlog",
+            "Decoded from logcollector macos",
+            "Decoded from logcollector others",
+            "Decoded from osquery",
+            "Decoded from rootcheck",
+            "Decoded from sca",
+            "Decoded from syscheck",
+            "Decoded from syscollector",
+            "Decoded from vulnerability",
+            "Decoded from agentd",
+            "Decoded from dbsync",
+            "Decoded from monitor",
+            "Decoded from remote",
+
+            "Dropped from azure",
+            "Dropped from ciscat",
+            "Dropped from command",
+            "Dropped from docker",
+            "Dropped from logcollector eventchannel",
+            "Dropped from logcollector eventlog",
+            "Dropped from logcollector macos",
+            "Dropped from logcollector others",
+            "Dropped from osquery",
+            "Dropped from rootcheck",
+            "Dropped from sca",
+            "Dropped from syscheck",
+            "Dropped from syscollector",
+            "Dropped from vulnerability",
+            "Dropped from agentd",
+            "Dropped from dbsync",
+            "Dropped from monitor",
+            "Dropped from remote",
+
+            "Written alerts",
+            "Written archives",
+            "Written firewall",
+            "Written fts",
+            "Written stats",
+
+            "EDPS from azure",
+            "EDPS from ciscat",
+            "EDPS from command",
+            "EDPS from docker",
+            "EDPS from logcollector eventchannel",
+            "EDPS from logcollector eventlog",
+            "EDPS from logcollector macos",
+            "EDPS from logcollector others",
+            "EDPS from osquery",
+            "EDPS from rootcheck",
+            "EDPS from sca",
+            "EDPS from syscheck",
+            "EDPS from syscollector",
+            "EDPS from vulnerability",
+            "EDPS from agentd",
+            "EDPS from dbsync",
+            "EDPS from monitor",
+            "EDPS from remote"]
+
+        analysisd_header = [
+            "Timestamp",
+            "Total Events",
+            "Syscheck Events Decoded",
+            "Syscollector Events Decoded",
+            "Rootcheck Events Decoded",
+            "SCA Events Decoded",
+            "WinEvt Events Decoded",
+            "DBSync Messages dispatched",
+            "Other Events Decoded",
+            "Events processed (Rule matching)",
+            "Events received",
+            "Events dropped",
+            "Alerts written",
+            "Firewall alerts written",
+            "FTS alerts written",
+            "Syscheck queue usage",
+            "Syscheck queue size",
+            "Syscollector queue usage",
+            "Syscollector queue size",
+            "Rootcheck queue usage",
+            "Rootcheck queue size",
+            "SCA queue usage",
+            "SCA queue size",
+            "Hostinfo queue usage",
+            "Hostinfo queue size",
+            "Winevt queue usage",
+            "Winevt queue size",
+            "DBSync queue usage",
+            "DBSync queue size",
+            "Upgrade queue usage",
+            "Upgrade queue size",
+            "Event queue usage",
+            "Event queue size",
+            "Rule matching queue usage",
+            "Rule matching queue size",
+            "Alerts log queue usage",
+            "Alerts log queue size",
+            "Firewall log queue usage",
+            "Firewall log queue size",
+            "Statistical log queue usage",
+            "Statistical log queue size",
+            "Archives log queue usage",
+            "Archives log queue size"]
+
+        logcollector_header = [
+            "Timestamp",
+            "Location",
+            "Events",
+            "Bytes",
+            "Target",
+            "Target Drops"]
+
+        remoted_header = [
+            "Timestamp",
+            "Queue size",
+            "Total Queue size",
+            "TCP sessions",
+            "Events count",
+            "Control messages",
+            "Discarded messages",
+            "Bytes received"]
+        
+        remoted_api_header = [
+            "Timestamp",
+	        "API Timestamp",
+            "Interval (Timestamp-Uptime)",
+            "Queue size",
+            "Queue usage",
+            "TCP sessions",
+            "Keys reload count",
+
+            "Control messages",
+            "Control keepalives",
+            "Control requests",
+            "Control shutdown",
+            "Control startup",
+
+            "Dequeued messages",
+            "Discarded messages",
+            "Events count",
+            "Ping messages",
+            "Unknown messages",
+
+	        "Sent ack",
+	        "Sent ar",
+	        "Sent discarded",
+	        "Sent request",
+	        "Sent sca",
+    	    "Sent shared",
+
+            "Metrics-Bytes received",
+            "Metrics-Bytes sent"]
+
+        agentd_header = ["Timestamp", "Status", "Last Keepalive", "Last ACK", "Number of generated events",
+                        "Number of messages", "Number of events buffered"]
+
+
+        if target == "analysis_state":
+            csv_header = analysisd_header
+        elif target == "analysis_events":
+            csv_header = analysisd_events_header
+        elif target == "logcollector":
+            csv_header = logcollector_header
+        elif target == "remoted":
+            csv_header = remoted_api_header if self.use_api == True  else remoted_header
+        else:
+            csv_header = agentd_header
+
+        header = not isfile(csv_file)
+        
+        with open(csv_file, 'a+') as log:
+
+            if header:
+                log.write(f'{",".join(csv_header)}\n')
+
+            timestamp = datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S')
+            
+            if self.use_api:
+
+                ## Get data from API response
+                if target == "analysis_events":
+                    data = data[0]
+                elif target == "remoted":
+                    data = data[1]
+
+                format = r"%Y-%m-%dT%H:%M:%S+%f:00"
+                datetime_timestamp = datetime.strptime(data['timestamp'], format)
+                datetime_uptime = datetime.strptime(data['uptime'], format)
+                interval =  (datetime_timestamp - datetime_uptime).total_seconds()
+
+                if target == "analysis_events":                   
+                    metrics = data['metrics']
+                    decoded = metrics['events']['received_breakdown']['decoded_breakdown']
+                    decoded_modules = decoded['modules_breakdown']
+                    dropped = metrics['events']['received_breakdown']['dropped_breakdown']
+                    dropped_modules = dropped['modules_breakdown']
+                    written = metrics['events']['written_breakdown']
+
+                    logger.info("Writing Analysisd events info to {}.".format(csv_file))
+                    log.write(("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},"+
+                        "{21},{22},{23},{24},{25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},"+
+                        "{42},{43},{44},{45},{46},{47},{48},{49},{50},{51},{52},{53},{54},{55},{56},{57},{58},{59},{60},{61},{62},"+
+                        "{63}\n").format(
+                        timestamp,                                                              # 0
+                        data['timestamp'],                                                      # 1
+                        interval,                                                               # 2
+                        metrics['events']['processed'],                                         # 3
+                        metrics['events']['received'],                                          # 4
+                        decoded_modules['azure'],                                               # 5
+                        decoded_modules['ciscat'],                                              # 6
+                        decoded_modules['command'],                                             # 7
+                        decoded_modules['docker'],                                              # 8
+                        decoded_modules['logcollector_breakdown']['eventchannel'],              # 9
+                        decoded_modules['logcollector_breakdown']['eventlog'],                  # 10
+                        decoded_modules['logcollector_breakdown']['macos'],                     # 11
+                        decoded_modules['logcollector_breakdown']['others'],                    # 12
+                        decoded_modules['osquery'],                                             # 13
+                        decoded_modules['rootcheck'],                                           # 14
+                        decoded_modules['sca'],                                                 # 15
+                        decoded_modules['syscheck'],                                            # 16
+                        decoded_modules['syscollector'],                                        # 17
+                        decoded_modules['vulnerability'],                                       # 18
+                        decoded['agent'],                                                       # 19
+                        decoded['dbsync'],                                                      # 20
+                        decoded['monitor'],                                                     # 21
+                        decoded['remote'],                                                      # 22
+
+                        dropped_modules['azure'],                                               # 23
+                        dropped_modules['ciscat'],                                              # 24
+                        dropped_modules['command'],                                             # 25
+                        dropped_modules['docker'],                                              # 26
+                        dropped_modules['logcollector_breakdown']['eventchannel'],              # 27
+                        dropped_modules['logcollector_breakdown']['eventlog'],                  # 28
+                        dropped_modules['logcollector_breakdown']['macos'],                     # 29
+                        dropped_modules['logcollector_breakdown']['others'],                    # 30
+                        dropped_modules['osquery'],                                             # 31
+                        dropped_modules['rootcheck'],                                           # 32
+                        dropped_modules['sca'],                                                 # 33
+                        dropped_modules['syscheck'],                                            # 34
+                        dropped_modules['syscollector'],                                        # 35
+                        dropped_modules['vulnerability'],                                       # 36
+                        dropped['agent'],                                                       # 37
+                        dropped['dbsync'],                                                      # 38
+                        dropped['monitor'],                                                     # 39
+                        dropped['remote'],                                                      # 40
+
+                        written['alerts'],                                                      # 41
+                        written['archives'],                                                    # 42
+                        written['firewall'],                                                    # 43
+                        written['fts'],                                                         # 44
+                        written['stats'],                                                       # 45
+
+                        decoded_modules['azure'] / interval,                                    # 46
+                        decoded_modules['ciscat'] / interval,                                   # 47
+                        decoded_modules['command'] / interval,                                  # 48
+                        decoded_modules['docker'] / interval,                                   # 49
+                        decoded_modules['logcollector_breakdown']['eventchannel'] / interval,   # 50
+                        decoded_modules['logcollector_breakdown']['eventlog'] / interval,       # 51
+                        decoded_modules['logcollector_breakdown']['macos'] / interval,          # 52
+                        decoded_modules['logcollector_breakdown']['others'] / interval,         # 53
+                        decoded_modules['osquery'] / interval,                                  # 54
+                        decoded_modules['rootcheck'] / interval,                                # 55
+                        decoded_modules['sca'] / interval,                                      # 56
+                        decoded_modules['syscheck'] / interval,                                 # 57
+                        decoded_modules['syscollector'] / interval,                             # 58
+                        decoded_modules['vulnerability'] / interval,                            # 59
+                        decoded['agent'] / interval,                                            # 60
+                        decoded['dbsync'] / interval,                                           # 61
+                        decoded['monitor'] / interval,                                          # 62
+                        decoded['remote'] / interval,                                           # 63
+                    ))
+                elif target == "remoted":
+                    metrics = data['metrics']
+                    received_messages = metrics['messages']['received_breakdown']
+                    sent_messages = metrics['messages']['sent_breakdown']
+                    logger.info("Writing remoted data from API info to {}.".format(csv_file))
+                    log.write(("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},"+
+                              "{19},{20},{21},{22},{23},{24}\n").format(
+                        timestamp,                                                       # 0
+                        data['timestamp'],                                               # 1
+                        interval,                                                        # 2
+                        metrics['queues']['received']['size'],                           # 3
+                        metrics['queues']['received']['usage'],                          # 4
+                        metrics['tcp_sessions'],                                         # 5
+                        metrics['keys_reload_count'],                                    # 6
+                        received_messages['control'],                                    # 7
+                        received_messages['control_breakdown']['keepalive'],             # 8
+                        received_messages['control_breakdown']['request'],               # 9
+                        received_messages['control_breakdown']['shutdown'],              # 10
+                        received_messages['control_breakdown']['startup'],               # 11
+                        received_messages['dequeued_after'],                             # 12
+                        received_messages['discarded'],                                  # 13
+                        received_messages['event'],                                      # 14
+                        received_messages['ping'],                                       # 15
+                        received_messages['unknown'],                                    # 16
+                        sent_messages['ack'],                                            # 17
+                        sent_messages['ar'],                                             # 18
+                        sent_messages['discarded'],                                      # 19
+                        sent_messages['request'],                                        # 20
+                        sent_messages['sca'],                                            # 21
+                        sent_messages['shared'],                                         # 22
+                        metrics['bytes']['received'],                                    # 23
+                        metrics['bytes']['sent']                                         # 24
+                    ))
+            else:
+                if target == "analysis_state":
+                    logger.info("Writing analysisd.state info to {}.".format(csv_file))
+                    log.write(("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},"+
+                        "{21},{22},{23},{24},{25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},{42}\n")
+                        .format(
+                        timestamp,                              # 0
+                        data['total_events_decoded'],           # 1
+                        data['syscheck_events_decoded'],        # 2
+                        data['syscollector_events_decoded'],    # 3
+                        data['rootcheck_events_decoded'],       # 4
+                        data['sca_events_decoded'],             # 5
+                        data['winevt_events_decoded'],          # 6
+                        data['dbsync_messages_dispatched'],     # 7
+                        data['other_events_decoded'],           # 8
+                        data['events_processed'],               # 9
+                        data['events_received'],                # 10
+                        data['events_dropped'],                 # 11
+                        data['alerts_written'],                 # 12
+                        data['firewall_written'],               # 13
+                        data['fts_written'],                    # 14
+                        data['syscheck_queue_usage'],           # 15
+                        data['syscheck_queue_size'],            # 16
+                        data['syscollector_queue_usage'],       # 17
+                        data['syscollector_queue_size'],        # 18
+                        data['rootcheck_queue_usage'],          # 19
+                        data['rootcheck_queue_size'],           # 20
+                        data['sca_queue_usage'],                # 21
+                        data['sca_queue_size'],                 # 22
+                        data['hostinfo_queue_usage'],           # 23
+                        data['hostinfo_queue_size'],            # 24
+                        data['winevt_queue_usage'],             # 25
+                        data['winevt_queue_size'],              # 26
+                        data['dbsync_queue_usage'],             # 27
+                        data['dbsync_queue_size'],              # 28
+                        data['upgrade_queue_usage'],            # 29
+                        data['upgrade_queue_size'],             # 30
+                        data['event_queue_usage'],              # 31
+                        data['event_queue_size'],               # 32
+                        data['rule_matching_queue_usage'],      # 33
+                        data['rule_matching_queue_size'],       # 34
+                        data['alerts_queue_usage'],             # 35
+                        data['alerts_queue_size'],              # 36
+                        data['firewall_queue_usage'],           # 37
+                        data['firewall_queue_size'],            # 38
+                        data['statistical_queue_usage'],        # 39
+                        data['statistical_queue_size'],         # 40
+                        data['archives_queue_usage'],           # 41
+                        data['archives_queue_size']             # 42
+                    ))
+                elif target == "logcollector":
+                    logger.info("Writing logcollector info to {}.".format(csv_file))
+                    log.write("{0},{1},{2},{3},{4},{5}\n".format(
+                        timestamp, data['location'], data['events'], data['bytes'], data['target'], data['target_drops']))
+
+                elif target == "remoted":
+                    logger.info("Writing remoted.state info to {}.".format(csv_file))
+                    log.write("{0},{1},{2},{3},{4},{5},{6},{7}\n".format(
+                        timestamp,                  # 0
+                        data['queue_size'],         # 1
+                        data['total_queue_size'],   # 2
+                        data['tcp_sessions'],       # 3
+                        data['evt_count'],          # 4
+                        data['ctrl_msg_count'],     # 5
+                        data['discarded_count'],    # 6
+                        data['recv_bytes']          # 7
+                    ))
+                elif target == "agentd_state":
+                    logger.info("Writing agentd.state info to {}.".format(csv_file))
+                    log.write("{0},{1},{2},{3},{4},{5},{6}\n".format(
+                        timestamp, data['status'], data['last_keepalive'],
+                        data['last_ack'], data['msg_count'], data['msg_sent'], data['msg_buffer']))
+
 
     def _monitor_stats(self):
         """Read the .state files and log the data into a CSV file."""
         while not self.event.is_set():
-            self._parse_state_file()
+            if self.use_api:
+                self._parse_api_data()
+            else:
+                self._parse_state_file()
             sleep(self.time_step)
+
 
     def run(self):
         """Run the event and thread monitoring functions."""
@@ -144,10 +571,15 @@ class StatisticMonitor:
         self.thread = Thread(target=self._monitor_stats)
         self.thread.start()
 
+
     def start(self):
         """Start the monitoring threads."""
         self.run()
-        logger.info(f'Started monitoring statistics from {self.statistics_file}')
+        if self.use_api:
+            logger.info(f'Started monitoring statistics from API for {self.target}')
+        else:
+            logger.info(f'Started monitoring statistics from {self.statistics_file}')
+
 
     def shutdown(self):
         """Stop all the monitoring threads."""
