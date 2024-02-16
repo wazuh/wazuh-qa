@@ -6,12 +6,16 @@ import os
 import time
 import logging
 import subprocess
+import argparse
+import threading
 
 from wazuh_testing.api import make_api_call, API_PROTOCOL, API_HOST, API_PORT, API_USER, API_PASS, API_LOGIN_ENDPOINT, get_api_details_dict
 from wazuh_testing.tools.performance.binary import Monitor
 
 logger = logging.getLogger(__name__)
 metrics_monitoring_pid = None
+
+STOP_STATISTICS_MONITORING = False
 
 # TODO
 # - Metrics copy from wazuh-metrics. It is better to change this by launching directly the wazuh-metrics script and handle the signals
@@ -31,70 +35,171 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 
-def create_csv_header():
-    with open('data.csv', 'w', newline='') as file:
+def create_csv_header(process):
+    with open(f'{process}.csv', 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(["Timestamp", "Name", "Queries Received", "Queries Global", "Time Execution", "Time Global", "Time WazuhDB"])
+        if process == "wazuh-db":
+            writer.writerow(["timestamp", "name", "queries_received", "queries_global", "queries_wazuhdb",
+                             "time_execution", "time_global", "time_wazuhdb"])
 
 
-def parse_and_convert_to_csv(data):
-    rows = []
+def parse_and_write_to_csv(data, process):
     real_data = data['data']['affected_items'][0]
+    process_metrics = None
 
-    timestamp = real_data['timestamp']
-    name = real_data['name']
+    for affected_item in data['data']['affected_items']:
+        if affected_item['name'] == process:
+            process_metrics = affected_item
+            break
+
+    if not process_metrics:
+        raise Exception(f"Process {process} not found in the data")
+
+    row = []
+
+    timestamp = process_metrics['timestamp']
+    name = process_metrics['name']
     metrics = real_data['metrics']
 
-    queries_received = metrics['queries']['received']
-    queries_global = metrics['queries']['received_breakdown']['global']
-    queries_wazuhdb = metrics['queries']['received_breakdown']['wazuhdb']
+    if process == "wazuh-db":
+        queries_received = metrics['queries']['received']
+        queries_global = metrics['queries']['received_breakdown']['global']
+        queries_wazuhdb = metrics['queries']['received_breakdown']['wazuhdb']
 
-    # Time
-    time_execution = metrics['time']['execution']
-    time_global = metrics['time']['execution_breakdown']['global']
-    time_wazuhdb = metrics['time']['execution_breakdown']['wazuhdb']
+        # Time
+        time_execution = metrics['time']['execution']
+        time_global = metrics['time']['execution_breakdown']['global']
+        time_wazuhdb = metrics['time']['execution_breakdown']['wazuhdb']
 
-    # ToDo: Include analisysd syscheck metrics
+        row = [timestamp, name, queries_received, queries_global, queries_wazuhdb, time_execution,
+               time_global, time_wazuhdb]
 
-    rows.append([timestamp, name, queries_received, queries_global, time_execution, time_global, time_wazuhdb])
+    if process == "wazuh-remoted":
+        bytes_received = metrics['bytes']['received']
+        bytes_sent = metrics['bytes']['sent']
+        keys_reload_count = metrics['keys_reload_count']
+
+        received_keepalive = metrics['messages']['received_breakdown']['control_breakdown']['keepalive']
+        received_request = metrics['messages']['received_breakdown']['control_breakdown']['request']
+        received_shutdown = metrics['messages']['received_breakdown']['control_breakdown']['shutdown']
+        received_startup = metrics['messages']['received_breakdown']['control_breakdown']['startup']
+        received_discarded = metrics['messages']['received_breakdown']['discarded']
+        received_event = metrics['messages']['received_breakdown']['event']
+
+        sent_ack = metrics['messages']['sent_breakdown']['ack']
+        sent_ar = metrics['messages']['sent_breakdown']['ar']
+        sent_discarded = metrics['messages']['sent_breakdown']['discarded']
+        sent_request = metrics['messages']['sent_breakdown']['request']
+        sent_sca = metrics['messages']['sent_breakdown']['sca']
+        sent_shared = metrics['messages']['sent_breakdown']['shared']
+
+        queue_size = metrics['queues']['received']['size']
+        queue_usage = metrics['queues']['received']['usage']
+
+        row = [timestamp, name, bytes_received, bytes_sent, keys_reload_count, received_keepalive, received_request,
+               received_shutdown, received_startup, received_discarded, received_event, sent_ack,
+               sent_ar, sent_discarded, sent_request, sent_sca, sent_shared, queue_size, queue_usage]
+
+    if process == "wazuh-analysisd":
+        bytes_received = metrics['bytes']['received']
+        processed_events = metrics['events']['processed']
+        processed_events_received = metrics['events']['received']
+        decoded_agent = metrics['events']['received_breakdown']['decoded_breakdown']['agent']
+        syscheck = metrics['events']['received_breakdown']['decoded_breakdown']['syscheck']
+        dropped_agent = metrics['events']['dropped_breakdown']['agent']
+        dropped_syscheck = metrics['events']['dropped_breakdown']['syscheck']
+        writte_breakdown_alerts = metrics['events']['written_breakdown']['alerts']
+        queue_size = metrics['queues']['received']['size']
+        queue_usage = metrics['queues']['received']['usage']
+        queue_syscheck_size = metrics['queues']['syscheck']['size']
+        queue_syscheck_usage = metrics['queues']['syscheck']['usage']
+
+        row = [timestamp, name, bytes_received, processed_events, processed_events_received, decoded_agent, syscheck,
+               dropped_agent, dropped_syscheck, writte_breakdown_alerts, queue_size, queue_usage, queue_syscheck_size,
+               queue_syscheck_usage]
 
     with open('data.csv', 'a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerows(rows)
+        if row:
+            writer.writerow(row)
+        else:
+            writer.writerow([timestamp, name, "No data"])
 
 
-def collect_data():
-    if os.path.exists('data.csv'):
-        os.remove('data.csv')
+def get_daemons_stats():
+    host = "localhost"
+    endpoint = f"/manager/daemons/stats?daemons_list=wazuh-db,wazuh-analysisd,wazuh-remoted"
+    api_details = get_api_details_dict(host=host)
+    response = make_api_call(manager_address=host, endpoint=endpoint, headers=api_details['auth_headers'])
 
-    create_csv_header()
-    while True:
+    if not response:
+        raise Exception("Failed to retrieve data from API")
+    else:
+        return json.loads(response.content)
+
+def collect_data(options, monitoring_evidences_directory):
+    global STOP_STATISTICS_MONITORING
+
+    for process in options.process_list:
+        create_csv_header(process)
+
+    while not STOP_STATISTICS_MONITORING:
         try:
-            host = "localhost"
-            # TODO Include analyzisd daemon
-            endpoint = f"/manager/daemons/stats?daemons_list=wazuh-db,wazuh-analysisd,wazuh-remoted"
-            api_details = get_api_details_dict(host=host)
-            response = make_api_call(manager_address=host, endpoint=endpoint, headers=api_details['auth_headers'])
-
-            if response.status_code == 200:
-                parse_and_convert_to_csv(json.loads(response.content))
-            else:
-                print("Failed to retrieve data from API")
-
+            stats = get_daemons_stats()
+            for process in options.process_list:
+                parse_and_write_to_csv(stats, process)
         except Exception as e:
             print(f"Error occurred: {str(e)}")
-        time.sleep(5)
+
+        time.sleep(options.sleep_time)
+
+
+def get_script_arguments():
+    parser = argparse.ArgumentParser(usage="%(prog)s [options]", description="Wazuh monitoring script",
+                                     formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('-t', '--time', dest='monitoring_time', type=float, required=True, action='store',
+                        help='Type the time in that script will be running.')
+    parser.add_argument('-o', '--output', dest='output_file', required=False, type=str, action='store',
+                        default=None, help='Type the output file name.')
+    parser.add_argument('-s', '--sleep', dest='sleep_time', type=float, default=1, action='store',
+                        help='Type the time in seconds between each entry.')
+    parser.add_argument('-p', '--processes', dest='process_list', required=False, type=str, nargs='+', action='store',
+                        default=["wazuh-db", "wazuh-remoted", "wazuh-analysisd"],
+                        help='Type the processes name to monitor separated by whitespace.')
+    parser.add_argument('-u', '--units', dest='data_unit', default='KB', choices=['B', 'KB', 'MB'],
+                        help='Type unit for the bytes-related values. Default bytes.')
+    parser.add_argument('-v', '--version', dest='version', required=True, help='Version of the binaries. Default none.')
+
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
-    ACTIVE_MONITORS = {}
+    options = get_script_arguments()
+
+    monitoring_start_time = time.strftime("%Y%m%d-%H%M%S")
+    wazuh_version = options.version
+
+    monitoring_evidences_directory = os.path.join(wazuh_version, monitoring_start_time)
+
+    if options.output_file:
+        monitoring_evidences_directory = options.output_file
+
+    if not os.path.exists(monitoring_start_time):
+        os.makedirs(monitoring_start_time)
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    process_list = ["wazuh-db"]
+    metrics_monitoring_process = subprocess.Popen(f"wazuh-metrics -p {options.process_list}",
+                                                  shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    process = subprocess.Popen('wazuh-metrics -p wazuh-analysisd,wazuh-db,wazuh-remoted',
-                               shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    metrics_monitoring_pid = process.pid
+    metrics_monitoring_pid = metrics_monitoring_process.pid
+    statistics_monitoring_thread = threading.Thread(target=collect_data, args=(options, monitoring_evidences_directory,))
+    statistics_monitoring_thread.start()
 
-    collect_data()
+    time.sleep(options.monitoring_time)
+
+    # Stop statistics monitoring
+    STOP_STATISTICS_MONITORING = True
+
+    # Stop metrics monitoring
+    os.kill(metrics_monitoring_pid, signal.SIGKILL)
