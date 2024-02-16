@@ -36,7 +36,7 @@ def signal_handler(sig, frame):
 
 
 def create_csv_header(process, directory):
-    file_path = os.path.join(directory, f'{process}.csv')
+    file_path = os.path.join(directory, f'{process}_stats.csv')
 
     with open(file_path, 'w', newline='') as file:
         writer = csv.writer(file)
@@ -131,7 +131,7 @@ def parse_and_write_to_csv(data, process, directory):
         row = [timestamp, name, bytes_received, processed_events, processed_events_received, decoded_agent, syscheck,
                dropped_agent, dropped_syscheck, writte_breakdown_alerts, queue_size_alerts, queue_usage_alerts, queue_syscheck_size, queue_syscheck_usage]
 
-    file_path = os.path.join(directory, f'{process}.csv')
+    file_path = os.path.join(directory, f'{process}_stats.csv')
 
     with open(file_path, 'a', newline='') as file:
         writer = csv.writer(file)
@@ -200,11 +200,11 @@ if __name__ == "__main__":
         monitoring_evidences_directory = options.output_file
 
     if not os.path.exists(monitoring_evidences_directory):
-        os.makedirs(monitoring_start_time)
+        os.makedirs(monitoring_evidences_directory)
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    metrics_monitoring_process = subprocess.Popen(f"wazuh-metrics -p {options.process_list}",
+    metrics_monitoring_process = subprocess.Popen(f"wazuh-metrics -p {options.process_list} --store {monitoring_evidences_directory}",
                                                   shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     metrics_monitoring_pid = metrics_monitoring_process.pid
