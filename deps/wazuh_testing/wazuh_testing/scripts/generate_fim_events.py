@@ -31,7 +31,7 @@ if sys.platform == 'win32':
     RegOpenKeyEx = win32api.RegOpenKeyEx
     KEY = "HKEY_LOCAL_MACHINE"
 
-testreg = os.path.join('SOFTWARE', 'testreg')
+testreg = os.path.join('SOFTWARE', 'testreg', 'testreg')
 reg_value = 'value_name'
 
 
