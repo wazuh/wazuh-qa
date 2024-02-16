@@ -133,13 +133,13 @@ def main(num_files, duration, eps, file_size):
         generate_events(test_files, file_size, eps)
         time.sleep(1)
 
-    if sys.platform == 'win32':
-        for n_registry in range(1, num_files+1):
-            delete_registry(registry_parser[KEY], f'{testreg}{n_registry}', KEY_WOW64_64KEY)
-    else:
-        if os.path.exists(monitored_directory):
-            for filename in test_files:
-                os.remove(os.path.join(monitored_directory, filename))
+    #if sys.platform == 'win32':
+    #    for n_registry in range(1, num_files+1):
+    #        delete_registry(registry_parser[KEY], f'{testreg}{n_registry}', KEY_WOW64_64KEY)
+    #else:
+    #    if os.path.exists(monitored_directory):
+    #        for filename in test_files:
+    #            os.remove(os.path.join(monitored_directory, filename))
 
 
 if __name__ == "__main__":
