@@ -5,11 +5,13 @@ import json
 import os
 import time
 import logging
+import subprocess
 
 from wazuh_testing.api import make_api_call, API_PROTOCOL, API_HOST, API_PORT, API_USER, API_PASS, API_LOGIN_ENDPOINT, get_api_details_dict
 from wazuh_testing.tools.performance.binary import Monitor
 
 logger = logging.getLogger(__name__)
+metrics_monitoring_pid = None
 
 # TODO
 # - Metrics copy from wazuh-metrics. It is better to change this by launching directly the wazuh-metrics script and handle the signals
@@ -18,48 +20,14 @@ logger = logging.getLogger(__name__)
 # - Testing in real environment
 
 
-def check_monitors_health():
-    """Write the collected data in a CSV file.
-
-    Args:
-        options (argparse.Options): object containing the script options.
-
-    Returns:
-        bool: True if there were any errors. False otherwise.
-    """
-    healthy = True
-    for process, monitors in ACTIVE_MONITORS.items():
-        # Check if there is any unhealthy monitor
-        if any(filter(lambda m: m.event.is_set(), monitors)):
-            logger.warning(f'Monitoring of {process} failed. Attempting to create new monitor instances')
-
-            try:
-                # Try to get new PIDs
-                process_pids = Monitor.get_process_pids(process)
-                # Shutdown all the related monitors to the failed process (necessary for multiprocessing)
-                for monitor in monitors:
-                    monitor.shutdown()
-            except ValueError:
-                healthy = False
-                logger.warning(f'Could not create new monitor instances for {process}')
-                continue
-
-            for i, pid in enumerate(process_pids):
-                # Attempt to create new monitor instances for the process
-                p_name = process if i == 0 else f'{process}_child_{i}'
-                monitor = Monitor(process_name=p_name, pid=pid)
-                monitor.start()
-
-                try:
-                    # Replace old monitors for new ones
-                    ACTIVE_MONITORS[process][i] = monitor
-                except IndexError:
-                    ACTIVE_MONITORS[process].append(monitor)
-
-    return healthy
-
 def signal_handler(sig, frame):
+    global metrics_monitoring_pid
+
     print("Signal received. Exiting...")
+
+    if metrics_monitoring_pid:
+        os.kill(metrics_monitoring_pid, signal.SIGKILL)
+
     sys.exit(0)
 
 
@@ -119,31 +87,14 @@ def collect_data():
 
 
 if __name__ == "__main__":
-
     ACTIVE_MONITORS = {}
 
     signal.signal(signal.SIGINT, signal_handler)
 
     process_list = ["wazuh-db"]
 
-    # TODO: Include options for versioning dst_dir
-    # TODO: Multithread to handle statistics and metrics
-
-    # Replacae by call wazuh-metrics directly
-    for process in process_list:
-        # Launch a monitor for every possible child process
-        for i, pid in enumerate(Monitor.get_process_pids(process)):
-            p_name = process if i == 0 else f'{process}_child_{i}'
-            monitor = Monitor(process_name=p_name, pid=pid, time_step=2,
-                              version='v4.5.5', dst_dir='./testing')
-            monitor.start()
-
-            if process not in ACTIVE_MONITORS:
-                ACTIVE_MONITORS[process] = []
-
-            ACTIVE_MONITORS[process].append(monitor)
+    process = subprocess.Popen('wazuh-metrics', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    metrics_monitoring_pid = process.pid
 
     collect_data()
-
-
 
