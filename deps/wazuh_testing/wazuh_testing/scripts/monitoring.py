@@ -199,7 +199,7 @@ if __name__ == "__main__":
     if options.output_file:
         monitoring_evidences_directory = options.output_file
 
-    if not os.path.exists(monitoring_start_time):
+    if not os.path.exists(monitoring_evidences_directory):
         os.makedirs(monitoring_start_time)
 
     signal.signal(signal.SIGINT, signal_handler)
