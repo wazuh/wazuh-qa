@@ -35,15 +35,27 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 
-def create_csv_header(process):
-    with open(f'{process}.csv', 'w', newline='') as file:
+def create_csv_header(process, directory):
+    file_path = os.path.join(directory, f'{process}.csv')
+
+    with open(file_path, 'w', newline='') as file:
         writer = csv.writer(file)
         if process == "wazuh-db":
             writer.writerow(["timestamp", "name", "queries_received", "queries_global", "queries_wazuhdb",
                              "time_execution", "time_global", "time_wazuhdb"])
+        elif process == "wazuh-remoted":
+            writer.writerow(["timestamp", "name", "bytes_received", "bytes_sent", "keys_reload_count",
+                             "received_keepalive",
+                             "received_request", "received_shutdown", "received_startup", "received_discarded",
+                             "received_event", "sent_ack", "sent_ar", "sent_discarded", "sent_request", "sent_sca",
+                             "sent_shared", "queue_size", "queue_usage"])
+        elif process == "wazuh-analysisd":
+            writer.writerow(["timestamp", "name", "bytes_received", "processed_events", "processed_events_received",
+                             "decoded_agent", "syscheck", "dropped_agent", "dropped_syscheck", "writte_breakdown_alerts",
+                             "queue_size_alerts", "queue_usage_alerts", "queue_syscheck_size", "queue_syscheck_usage"])
 
 
-def parse_and_write_to_csv(data, process):
+def parse_and_write_to_csv(data, process, directory):
     real_data = data['data']['affected_items']
     process_metrics = None
     for affected_item in real_data:
@@ -109,7 +121,6 @@ def parse_and_write_to_csv(data, process):
         dropped_agent = metrics['events']['received_breakdown']['dropped_breakdown']['agent']
         dropped_syscheck = metrics['events']['received_breakdown']['dropped_breakdown']['modules_breakdown']['syscheck']
 
-
         writte_breakdown_alerts = metrics['events']['written_breakdown']['alerts']
         queue_size_alerts = metrics['queues']['alerts']['size']
         queue_usage_alerts = metrics['queues']['alerts']['usage']
@@ -120,7 +131,9 @@ def parse_and_write_to_csv(data, process):
         row = [timestamp, name, bytes_received, processed_events, processed_events_received, decoded_agent, syscheck,
                dropped_agent, dropped_syscheck, writte_breakdown_alerts, queue_size_alerts, queue_usage_alerts, queue_syscheck_size, queue_syscheck_usage]
 
-    with open('data.csv', 'a', newline='') as file:
+    file_path = os.path.join(directory, f'{process}.csv')
+
+    with open(file_path, 'a', newline='') as file:
         writer = csv.writer(file)
         if row:
             writer.writerow(row)
@@ -130,7 +143,7 @@ def parse_and_write_to_csv(data, process):
 
 def get_daemons_stats():
     host = "localhost"
-    endpoint = f"/manager/daemons/stats?daemons_list=wazuh-db,wazuh-analysisd,wazuh-remoted"
+    endpoint = "/manager/daemons/stats?daemons_list=wazuh-db,wazuh-analysisd,wazuh-remoted"
     api_details = get_api_details_dict(host=host)
     response = make_api_call(manager_address=host, endpoint=endpoint, headers=api_details['auth_headers'])
 
