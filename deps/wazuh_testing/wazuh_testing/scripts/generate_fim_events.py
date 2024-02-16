@@ -112,6 +112,7 @@ def generate_events(test_files, file_size, eps):
             random_string = ''.join(random.choice(string.ascii_letters) for _ in range(10))
             registry_to_modify = random.choice(list_registry)
             modify_registry_value(win32api.RegOpenKeyEx(registry_parser[KEY], registry_to_modify, 0, KEY_ALL_ACCESS | KEY_WOW64_64KEY), reg_value, REG_SZ, random_string)
+            import pdb; pdb.set_trace()
         else:
             random_string = ''.join(random.choice(string.ascii_letters) for _ in range(file_size))
             file_to_modify = random.choice(test_files)
