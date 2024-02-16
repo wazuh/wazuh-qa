@@ -120,8 +120,6 @@ def generate_events(test_files, file_size, eps):
 
         events_produced += 1
 
-        random_string = ''.join(random.choice(string.ascii_letters) for _ in range(file_size))
-
 
 def main(num_files, duration, eps, file_size):
     if not os.path.exists(monitored_directory):
