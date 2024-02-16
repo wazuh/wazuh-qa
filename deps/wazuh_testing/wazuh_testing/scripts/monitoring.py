@@ -184,6 +184,9 @@ def collect_data(options, monitoring_evidences_directory):
     while not STOP_STATISTICS_MONITORING:
         try:
             stats = get_daemons_stats()
+            with open(os.path.join(monitoring_evidences_directory, "daemons_full_stats.json"), 'w+') as file:
+                json.dump(stats, file)
+
             for process in options.process_list:
                 parse_and_write_to_csv(stats, process, monitoring_evidences_directory)
         except Exception as e:
