@@ -205,7 +205,7 @@ def get_script_arguments():
                         help='Type the time in that script will be running.')
     parser.add_argument('-o', '--output', dest='output_file', required=False, type=str, action='store',
                         default=None, help='Type the output file name.')
-    parser.add_argument('-s', '--sleep', dest='sleep_time', type=float, default=1, action='store',
+    parser.add_argument('-s', '--sleep', dest='sleep_time', type=float, default=5, action='store',
                         help='Type the time in seconds between each entry.')
     parser.add_argument('-p', '--processes', dest='process_list', required=False, type=str, nargs='+', action='store',
                         default=["wazuh-db", "wazuh-remoted", "wazuh-analysisd"],
