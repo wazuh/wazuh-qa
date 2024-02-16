@@ -25,7 +25,6 @@ DAEMONS_ENDPOINT="/manager/daemons/stats?daemons_list=wazuh-analysisd,wazuh-remo
 TOKEN_ENDPOINT="/security/user/authenticate"
 
 logger = logging.getLogger('wazuh-statistics-monitor')
-logger.setLevel(logging.INFO)
 
 
 class StatisticMonitor:
