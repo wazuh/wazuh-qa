@@ -72,9 +72,9 @@ def collect_data():
         try:
             host = "localhost"
             # TODO Include analyzisd daemon
-            endpoint = f"/manager/daemons/stats?daemons_list=wazuh-db"
-            api_details = get_api_details_dict(host='localhost')
-            response = make_api_call(manager_address='localhost', endpoint=endpoint, headers=api_details['auth_headers'])
+            endpoint = f"/manager/daemons/stats?daemons_list=wazuh-db,wazuh-analysisd,wazuh-remoted"
+            api_details = get_api_details_dict(host=host)
+            response = make_api_call(manager_address=host, endpoint=endpoint, headers=api_details['auth_headers'])
 
             if response.status_code == 200:
                 parse_and_convert_to_csv(json.loads(response.content))
@@ -93,8 +93,8 @@ if __name__ == "__main__":
 
     process_list = ["wazuh-db"]
 
-    process = subprocess.Popen('wazuh-metrics', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen('wazuh-metrics -p wazuh-analysisd,wazuh-db,wazuh-remoted',
+                               shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     metrics_monitoring_pid = process.pid
 
     collect_data()
-
