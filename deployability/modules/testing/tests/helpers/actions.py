@@ -318,3 +318,111 @@ def compare_directories(old_scan, new_scan):
 
     return total_files
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def install_wazuh_agent(os_type, wazuh_version, wazuh_revision, aws_s3, repository, dependency_ip, type_os=None, architecture=None):
+    """
+    Install Wazuh agent based on the provided OS type and parameters.
+
+    Args:
+        os_type (str): The target operating system ('debian' or 'redhat').
+        wazuh_version (str): The version of Wazuh agent.
+        wazuh_revision (str): The revision of Wazuh agent.
+        aws_s3 (str): AWS S3 base URL.
+        repository (str): Wazuh repository URL.
+        dependency_ip (str): IP address of the Wazuh manager.
+        type_os (str): Type of Linux OS (rpm, deb) - applicable only for 'linux' OS type.
+        architecture: (str): Type of architecture (aarch64, amd64, intel, apple) - applicable only for 'macos' OS type.
+
+    Returns:
+        None
+    """
+    if os_type == 'redhat':
+        # Red Hat Installation
+        redhat_installation_commands(wazuh_version, wazuh_revision, aws_s3, repository)
+    elif os_type == 'debian':
+        # Debian Installation
+        debian_installation_commands(wazuh_version, wazuh_revision, aws_s3, repository)
+    else:
+        print("Unsupported operating system.")
+
+
+def redhat_installation_commands(wazuh_version, wazuh_revision, aws_s3, repository):
+    """
+    Install Wazuh agent on Red Hat.
+
+    Args:
+        wazuh_version (str): The version of Wazuh agent.
+        wazuh_revision (str): The revision of Wazuh agent.
+        aws_s3 (str): AWS S3 base URL.
+        repository (str): Wazuh repository URL.
+        dependency_ip (str): IP address of the Wazuh manager.
+
+    Returns:
+        None
+    """
+
+    subprocess.run(["rpm", "--import", f"https://{aws_s3}.wazuh.com/key/GPG-KEY-WAZUH"])
+    repo_config = f"[wazuh]\ngpgcheck=1\ngpgkey=https://{aws_s3}.wazuh.com/key/GPG-KEY-WAZUH\nenabled=1\nname=EL-$releasever - Wazuh\nbaseurl=https://{aws_s3}.wazuh.com/{repository}/yum/\nprotect=1"
+    subprocess.run(["echo", "-e", repo_config, "|", "tee", "/etc/yum.repos.d/wazuh.repo"])
+    subprocess.run(["yum", "-y", "install", "wazuh-manager"])
+
+    # Common post-installation commands
+    post_installation_commands()
+
+
+def debian_installation_commands(wazuh_version, wazuh_revision, aws_s3, repository):
+    """
+    Install Wazuh agent on Debian.
+
+    Args:
+        wazuh_version (str): The version of Wazuh agent.
+        wazuh_revision (str): The revision of Wazuh agent.
+        aws_s3 (str): AWS S3 base URL.
+        repository (str): Wazuh repository URL.
+
+    Returns:
+        None
+    """
+
+    subprocess.run(["apt-get", "install", "gnupg", "apt-transport-https"])
+    subprocess.run(["curl", "-s", f"https://{aws_s3}.wazuh.com/key/GPG-KEY-WAZUH", "|", "gpg", "--no-default-keyring", "--keyring", "gnupg-ring:/usr/share/keyrings/wazuh.gpg", "--import", "&&", "chmod", "644", "/usr/share/keyrings/wazuh.gpg"])
+    repo_config = f"deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://{aws_s3}.wazuh.com/{repository}/apt/pool/main/w/wazuh-manager/wazuh-manager_{wazuh_version}-{wazuh_revision}_amd64.deb"
+    subprocess.run(["echo", repo_config, "|", "tee", "-a", "/etc/apt/sources.list.d/wazuh.list"])
+    subprocess.run(["apt-get", "update"])
+    subprocess.run(["apt-get", "-y", "install", "wazuh-manager"])
+
+    # Common post-installation commands
+    post_installation_commands()
+
+
+def post_installation_commands():
+    """
+    Common post-installation commands for both Red Hat and Debian.
+
+    Returns:
+        None
+    """
+
+    subprocess.run(["systemctl", "daemon-reload"])
+    subprocess.run(["systemctl", "enable", "wazuh-manager"])
+    subprocess.run(["systemctl", "start", "wazuh-manager"])
+
+
+# Example usage:
+install_wazuh_agent('redhat', '4.0.0', '1', 'https://example.s3.amazonaws.com', 'https://example.repo.com', '192.168.1.1')
