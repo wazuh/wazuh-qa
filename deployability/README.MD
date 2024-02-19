@@ -32,7 +32,7 @@ git checkout {project-branch}
 3. Install requirements:
 
 ```
-pip3 install -r /deployability/deps/requirements.txt
+pip3 install -r deployability/deps/requirements.txt
 ```
 
 4. Install the Workflow engine library and its launcher:
