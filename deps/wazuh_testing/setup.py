@@ -32,6 +32,7 @@ package_data_list = [
     'data/all_disabled_ossec.conf',
     'data/syscollector_parsed_packages.json',
     'tools/migration_tool/delta_schema.json',
+    'end_to_end/vulnerability_detector_packages/vuln_packages.json',
     'tools/migration_tool/CVE_JSON_5.0_bundled.json'
 ]
 

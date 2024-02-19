@@ -34,7 +34,7 @@ import pytest
 
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOGS_PATH
 from wazuh_testing.tools.file import read_file, read_yaml, write_file
-from wazuh_testing.tools.monitoring import HostMonitor
+from wazuh_testing.tools.system_monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.utils import format_ipv6_long
 
