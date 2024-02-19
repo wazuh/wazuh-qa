@@ -1,10 +1,11 @@
 ## Provision module
 
-### User documentation     
+### User documentation
    
 The execution of the Provision is done through the installation of the library Worfklow library or launching the module using python command. The execution can be done from any operating system.
 
 Initially, Python libraries must be installed. It is recommended to use virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
+
 
 1. Activate the environment:
 
@@ -25,7 +26,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
 3. Install requirements:
 
   ```bash
-  pip3 install -r /deployability/deps/requirements.txt
+  pip3 install -r deployability/deps/requirements.txt
   ```
 
 Now, it is possible to use worklow engine library to launch provision module doing the following steps:
@@ -53,9 +54,6 @@ Now, it is possible to use worklow engine library to launch provision module doi
       variables:
         agents-os:
           - linux-ubuntu-22.04-amd64
-          - windows-11-amd64
-          - macos-ventura-13.04-amd64
-          - linux-centos-7-arm64
         manager-os: linux-ubuntu-22.04-amd64
         infra-provider: vagrant
         working-dir: /tmp/dtt1-poc
@@ -69,9 +67,9 @@ Now, it is possible to use worklow engine library to launch provision module doi
             with:
               path: python3
               args:
-                - testing/main.py
+                - modules/testing/main.py
                 - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-                - dependencies: 
+                - dependencies:
                   - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
                   - agent: "{working-dir}/agent-{agent}/inventory.yaml"
                 - tests: "install,register,stop"
@@ -93,7 +91,7 @@ Now, it is possible to use worklow engine library to launch provision module doi
             with:
               path: python3
               args:
-                - testing/main.py
+                - modules/testing/main.py
                 - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
                 - dependencies:
                   - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
@@ -108,6 +106,22 @@ Now, it is possible to use worklow engine library to launch provision module doi
             - variable: agents-os
               as: agent
       
+        # Unique manager provision task
+        - task: "provision-manager"
+          description: "Provision the manager."
+          do:
+            this: process
+            with:
+              path: python3
+              args:
+                - modules/provision/main.py
+                - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+                - install:
+                  - component: wazuh-manager
+                    type: package
+          depends-on:
+            - "allocate-manager"
+      
         # Unique manager allocate task
         - task: "allocate-manager"
           description: "Allocate resources for the manager."
@@ -116,7 +130,7 @@ Now, it is possible to use worklow engine library to launch provision module doi
             with:
               path: python3
               args:
-                - allocation/main.py
+                - modules/allocation/main.py
                 - action: create
                 - provider: "{infra-provider}"
                 - size: large
@@ -128,7 +142,7 @@ Now, it is possible to use worklow engine library to launch provision module doi
             with:
               path: python3
               args:
-                - allocation/main.py
+                - modules/allocation/main.py
                 - action: delete
                 - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
       
@@ -140,7 +154,7 @@ Now, it is possible to use worklow engine library to launch provision module doi
             with:
               path: python3
               args:
-                - provision/main.py
+                - modules/provision/main.py
                 - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
                 - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
                 - install:
@@ -162,7 +176,7 @@ Now, it is possible to use worklow engine library to launch provision module doi
             with:
               path: python3
               args:
-                - provision/main.py
+                - modules/provision/main.py
                 - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
                 - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
                 - uninstall:
@@ -182,7 +196,7 @@ Now, it is possible to use worklow engine library to launch provision module doi
             with:
               path: python3
               args:
-                - allocation/main.py
+                - modules/allocation/main.py
                 - action: create
                 - provider: "{infra-provider}"
                 - size: small
@@ -194,7 +208,7 @@ Now, it is possible to use worklow engine library to launch provision module doi
             with:
               path: python3
               args:
-                - allocation.py
+                - modules/allocation/main.py
                 - action: delete
                 - track-output: "{working-dir}/agent-{agent}/track.yaml"
           foreach:
@@ -273,7 +287,7 @@ In both cases, the following information is required:
       with:
         path: python3
         args:
-          - provision.py
+          - modules/provision/main.py
           - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - install:
             - component: wazuh-manager
