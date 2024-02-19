@@ -140,20 +140,20 @@ def parse_and_write_to_csv(data, process, directory):
         time_global = metrics['time']['execution_breakdown']['global']
         time_wazuhdb = metrics['time']['execution_breakdown']['wazuhdb']
 
-        time_db_open = metrics['time']['execution_breakdown']['agent_breakdown']['db']['open']
-        time_db_close = metrics['time']['execution_breakdown']['agent_breakdown']['db']['close']
-        time_db_commit = metrics['time']['execution_breakdown']['agent_breakdown']['db']['commit']
-        time_db_remove = metrics['time']['execution_breakdown']['agent_breakdown']['db']['remove']
-        time_db_sql = metrics['time']['execution_breakdown']['agent_breakdown']['db']['sql']
-        time_db_vacuum = metrics['time']['execution_breakdown']['agent_breakdown']['db']['vacuum']
-        time_db_get_fragmentation = metrics['time']['execution_breakdown']['agent_breakdown']['db']['get_fragmentation']
-        time_db_begin = metrics['time']['execution_breakdown']['agent_breakdown']['db']['begin']
+        time_db_open = metrics['time']['execution_breakdown']['agent_breakdown']['db']['open'] if 'open' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
+        time_db_close = metrics['time']['execution_breakdown']['agent_breakdown']['db']['close'] if 'close' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
+        time_db_commit = metrics['time']['execution_breakdown']['agent_breakdown']['db']['commit'] if 'commit' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
+        time_db_remove = metrics['time']['execution_breakdown']['agent_breakdown']['db']['remove'] if 'remove' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
+        time_db_sql = metrics['time']['execution_breakdown']['agent_breakdown']['db']['sql'] if 'sql' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
+        time_db_vacuum = metrics['time']['execution_breakdown']['agent_breakdown']['db']['vacuum'] if 'vacuum' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
+        time_db_get_fragmentation = metrics['time']['execution_breakdown']['agent_breakdown']['db']['get_fragmentation'] if 'get_fragmentation' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
+        time_db_begin = metrics['time']['execution_breakdown']['agent_breakdown']['db']['begin'] if 'begin' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
 
-        time_syscheck_fim_files = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['fim_file']
-        time_syscheck_fim_registry = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry']
-        time_syscheck_fim_registry_key = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_key']
-        time_syscheck_fim_registry_value = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_value']
-        time_syscheck_syscheck = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['syscheck']
+        time_syscheck_fim_files = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['fim_file'] if 'fim_file' in metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        time_syscheck_fim_registry = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry'] if 'fim_registry' in metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        time_syscheck_fim_registry_key = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_key'] if 'fim_registry_key' in metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        time_syscheck_fim_registry_value = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_value'] if 'fim_registry_value' in metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        time_syscheck_syscheck = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['syscheck'] if 'syscheck' in metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
 
 
 
