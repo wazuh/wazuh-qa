@@ -63,9 +63,9 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - /modules/testing/main.py
+                - modules/testing/main.py
                 - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-                - dependencies: 
+                - dependencies:
                   - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
                   - agent: "{working-dir}/agent-{agent}/inventory.yaml"
                 - tests: "install,register,stop"
@@ -87,7 +87,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - /modules/testing/main.py
+                - modules/testing/main.py
                 - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
                 - dependencies:
                   - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
@@ -102,6 +102,22 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             - variable: agents-os
               as: agent
 
+        # Unique manager provision task
+        - task: "provision-manager"
+          description: "Provision the manager."
+          do:
+            this: process
+            with:
+              path: python3
+              args:
+                - modules/provision/main.py
+                - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+                - install:
+                  - component: wazuh-manager
+                    type: package
+          depends-on:
+            - "allocate-manager"
+
         # Unique manager allocate task
         - task: "allocate-manager"
           description: "Allocate resources for the manager."
@@ -110,7 +126,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - /modules/allocation/main.py
+                - modules/allocation/main.py
                 - action: create
                 - provider: "{infra-provider}"
                 - size: large
@@ -122,7 +138,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - /modules/allocation/main.py
+                - modules/allocation/main.py
                 - action: delete
                 - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 
@@ -134,7 +150,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - /modules/provision/main.py
+                - modules/provision/main.py
                 - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
                 - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
                 - install:
@@ -156,7 +172,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - /modules/provision/main.py
+                - modules/provision/main.py
                 - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
                 - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
                 - uninstall:
@@ -176,7 +192,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - /modules/allocation/main.py
+                - modules/allocation/main.py
                 - action: create
                 - provider: "{infra-provider}"
                 - size: small
@@ -188,7 +204,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - /modules/allocation/main.py
+                - modules/allocation/main.py
                 - action: delete
                 - track-output: "{working-dir}/agent-{agent}/track.yaml"
           foreach:
