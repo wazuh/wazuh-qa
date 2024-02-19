@@ -5,7 +5,7 @@
 
 from socket import socket, AF_UNIX, SOCK_STREAM
 from struct import pack, unpack
-from sys import argv, exit, stdin, stdout
+from sys import argv, exit, stdin
 import signal
 import argparse
 import time
@@ -27,7 +27,6 @@ def db_query(agent):
 
     length = unpack("<I", sock.recv(4))[0]
     response = sock.recv(length)
-    stdout.buffer.write(response)
 
     sock.close()
 
