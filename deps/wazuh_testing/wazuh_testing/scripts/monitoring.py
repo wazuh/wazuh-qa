@@ -282,6 +282,13 @@ def main(options):
     statistics_monitoring_thread.start()
 
     logger.info(f"Monitoring started. Monitoring time: {options.monitoring_time} seconds. Please wait...")
+
+    logger.info("Starting database size monitoring")
+    database_monitoring_thread = threading.Thread(target=get_database_size,
+                                                  args=(options, monitoring_evidences_directory,))
+    database_monitoring_thread.start()
+
+    logger.info(f"Monitoring started. Monitoring time: {options.monitoring_time} seconds. Please wait...")
     time.sleep(options.monitoring_time)
 
     # Stop statistics monitoring
