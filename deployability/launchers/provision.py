@@ -14,7 +14,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Provision infraestructure tool")
     parser.add_argument("--inventory", default=None, help="Inventory with agent host information")
-    parser.add_argument("--dependencies",  action='append',required=False)
+    parser.add_argument("--dependencies",  action='append',required=False, help="List of dictionaries with the dependencies inventories.")
     parser.add_argument('--install',  action='append', default=[], help='List of dictionaries for installation.')
     parser.add_argument('--uninstall',  action='append', default=[], help='List of dictionaries for uninstall.')
     return parser.parse_args()

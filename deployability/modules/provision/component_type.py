@@ -12,7 +12,7 @@ class ComponentType(ABC):
         component (str): The component to be provisioned.
         type (str): The type of the component.
         version (str): The version of the component.
-        dependencies (str): The manager IP to be used in the provision.
+        dependencies (str): The IPs of the component dependencies. Example: Manager's IP.
         templates_path (str): The path to the templates.
         templates_order (list[str]): The order of the templates to be executed.
     """

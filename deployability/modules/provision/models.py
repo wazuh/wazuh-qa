@@ -61,7 +61,6 @@ class InputPayload(BaseModel):
     def validate_install_uninstall(cls, components) -> Union[None, List[str]]:
         if not components:
             return
-# 'provision.py --inventory=/tmp/dtt1-poc/manager-linux-ubuntu-20.04-amd64/inventory.yaml --install={'component': 'wazuh-manager', 'type': 'package'}
         component_info = []
         for item in components:
             componentObj = ComponentInfo(**eval(item))
