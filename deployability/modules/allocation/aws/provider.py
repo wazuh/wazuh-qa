@@ -1,6 +1,8 @@
 import boto3
 import fnmatch
 import os
+import re
+import sys
 from pathlib import Path
 
 from modules.allocation.generic import Provider
@@ -23,7 +25,7 @@ class AWSProvider(Provider):
     provider_name = 'aws'
 
     @classmethod
-    def _create_instance(cls, base_dir: Path, params: CreationPayload, config: AWSConfig = None) -> AWSInstance:
+    def _create_instance(cls, base_dir: Path, params: CreationPayload, config: AWSConfig = None, ssh_key: str = None) -> AWSInstance:
         """
         Create an AWS EC2 instance.
 
@@ -31,6 +33,7 @@ class AWSProvider(Provider):
             base_dir (Path): Base directory for storing instance data.
             params (CreationPayload): Payload containing creation parameters.
             config (AWSConfig, optional): Configuration for the instance. Defaults to None.
+            ssh_key (str, optional): Public or private key for the instance. For example, we assume that if the public key is provided, the private key is located in the same directory and has the same name as the public key. Defaults to None.
 
         Returns:
             AWSInstance: Created AWSInstance object.
@@ -38,28 +41,67 @@ class AWSProvider(Provider):
         temp_id = cls._generate_instance_id(cls.provider_name)
         temp_dir = base_dir / temp_id
         credentials = AWSCredentials()
+        teams = ['qa', 'core', 'framework', 'devops', 'frontend', 'operations', 'cloud', 'threat-intel', 'marketing', 'documentation']
         if not config:
             logger.debug(f"No config provided. Generating from payload")
-            # Generate the credentials.
-            credentials.generate(temp_dir, temp_id.split('-')[-1] + '_key')
+            # Labels
+            issue = params.label_issue
+            label_team = params.label_team
+            termination_date = params.label_termination_date
+            date_regex = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"
+            url_regex = "(https:\/\/|http:\/\/)?[github]{2,}(\.[com]{2,})?\/wazuh\/[a-zA-Z0-9_-]+(?:-[a-zA-Z0-9_-]+)?\/issues\/[0-9]{2,}"
+            if not termination_date or not re.match(date_regex, termination_date):
+                logger.error(f"The termination_date label was not provided or is of incorrect format, example: 2024-02-25 12:00:00.")
+                sys.exit(1)
+            if label_team:
+                not_match = 0
+                for team in teams:
+                    if label_team == team:
+                        label_team = team
+                        break
+                    else:
+                        not_match += 1
+                if not_match == len(teams):
+                    logger.error(f"The team label provided does not match any of the available teams.")
+                    sys.exit(1)
+            else:
+                logger.error(f"The team label was not provided.")
+                sys.exit(1)
+            if not issue or not re.match(url_regex, issue):
+                logger.error(f"The issue label was not provided or is of incorrect format, example: https://github.com/wazuh/<repository>/issues/<issue-number>.")
+                sys.exit(1)
+            issue_name= re.search(r'github\.com\/wazuh\/([^\/]+)\/issues', issue)
+            name = str(issue_name.group(1)) + "-" + str(re.search(r'(\d+)$', issue).group(1)) + "-" + str(params.composite_name.split("-")[1]) + "-" + str(params.composite_name.split("-")[2])
+
+            # Keys.
+            if not ssh_key:
+                logger.debug(f"Generating new key pair")
+                credentials.generate(temp_dir, str('-'.join(name.split("-")[:-2])))
+            else:
+                logger.debug(f"Using provided key pair")
+                key_id = credentials.ssh_key_interpreter(ssh_key)
+                credentials.load(key_id)
             # Parse the config if it is not provided.
-            config = cls.__parse_config(params, credentials)
+            config = cls.__parse_config(params, credentials, issue, label_team, termination_date, name)
         else:
             logger.debug(f"Using provided config")
             # Load the existing credentials.
             credentials.load(config.key_name)
             # Create the temp directory.
             # TODO: Review this on the credentials refactor.
-            if not temp_dir.exists():
-                logger.debug(f"Creating temp directory: {temp_dir}")
-                temp_dir.mkdir(parents=True, exist_ok=True)
+        if not temp_dir.exists():
+            logger.debug(f"Creating temp directory: {temp_dir}")
+            temp_dir.mkdir(parents=True, exist_ok=True)
         # Generate the instance.
         instance_id = cls.__create_ec2_instance(config)
         # Rename the temp directory to its real name.
         instance_dir = Path(base_dir, instance_id)
         logger.debug(f"Renaming temp {temp_dir} directory to {instance_dir}")
         os.rename(temp_dir, instance_dir)
-        credentials.key_path = (instance_dir / credentials.name).with_suffix('.pem')
+        if not ssh_key:
+            credentials.key_path = (instance_dir / credentials.name)
+        else:
+            credentials.key_path = (os.path.splitext(ssh_key)[0])
 
         return AWSInstance(instance_dir, instance_id, credentials, config.user)
 
@@ -78,17 +120,21 @@ class AWSProvider(Provider):
         return AWSInstance(instance_dir, instance_id)
 
     @classmethod
-    def _destroy_instance(cls, instance_dir: str, identifier: str) -> None:
+    def _destroy_instance(cls, instance_dir: str, identifier: str, key_path: str) -> None:
         """
         Destroy an AWS EC2 instance.
 
         Args:
             instance_dir (str): Directory where instance data is stored.
             identifier (str): Identifier of the instance.
+            key_path (str): Path to the key pair.
         """
-        instance = AWSInstance(instance_dir, identifier)
-        if instance.credentials:
-            logger.debug(f"Deleting credentials: {instance.credentials.key_path}")
+        credentials = AWSCredentials()
+        key_id = os.path.basename(key_path)
+        credentials.load(key_id)
+        instance = AWSInstance(instance_dir, identifier, credentials)
+        if os.path.dirname(key_path) == str(instance_dir):
+            logger.debug(f"Deleting credentials: {instance.credentials.name}")
             instance.credentials.delete()
         instance.delete()
 
@@ -108,13 +154,23 @@ class AWSProvider(Provider):
                                             InstanceType=config.type,
                                             KeyName=config.key_name,
                                             SecurityGroupIds=config.security_groups,
-                                            MinCount=1, MaxCount=1)[0]
+                                            MinCount=1, MaxCount=1,
+                                            TagSpecifications=[{
+                                                'ResourceType': 'instance',
+                                                'Tags': [
+                                                    {'Key': 'Name', 'Value': config.name},
+                                                    {'Key': 'termination_date', 'Value': config.termination_date},
+                                                    {'Key': 'issue', 'Value': config.issue},
+                                                    {'Key': 'team', 'Value': config.team}
+                                                ]
+                                            }]
+                                            )[0]
         # Wait until the instance is running.
         instance.wait_until_running()
         return instance.instance_id
 
     @classmethod
-    def __parse_config(cls, params: CreationPayload, credentials: AWSCredentials) -> AWSConfig:
+    def __parse_config(cls, params: CreationPayload, credentials: AWSCredentials, issue: str, team: str, termination_date: str, name: str) -> AWSConfig:
         """
         Parse configuration parameters for creating an AWS EC2 instance.
 
@@ -143,5 +199,9 @@ class AWSProvider(Provider):
         config['user'] = os_specs['user']
         config['key_name'] = credentials.name
         config['security_groups'] = mics_specs['security-group']
+        config['termination_date'] = termination_date
+        config['issue'] = issue
+        config['team'] = team
+        config['name'] = name
 
         return AWSConfig(**config)

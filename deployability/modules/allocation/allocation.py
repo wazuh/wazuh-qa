@@ -48,7 +48,7 @@ class Allocator:
         provider: Provider = PROVIDERS[payload.provider]()
         config = cls.___get_custom_config(payload)
         instance = provider.create_instance(
-            payload.working_dir, instance_params, config)
+            payload.working_dir, instance_params, config, payload.ssh_key)
         logger.info(f"Instance {instance.identifier} created.")
         # Start the instance
         instance.start()
@@ -71,7 +71,7 @@ class Allocator:
         with open(payload.track_output, 'r') as f:
             track = models.TrackOutput(**yaml.safe_load(f))
         provider = PROVIDERS[track.provider]()
-        provider.destroy_instance(track.instance_dir, track.identifier)
+        provider.destroy_instance(track.instance_dir, track.identifier, track.key_path)
         logger.info(f"Instance {track.identifier} deleted.")
 
     @staticmethod

@@ -9,7 +9,7 @@ class Instance(ABC):
     """
     An abstract base class for instances.
 
-    This class provides an interface for starting, reloading, stopping, deleting, and getting the status of instances. 
+    This class provides an interface for starting, reloading, stopping, deleting, and getting the status of instances.
     It also provides a method to get SSH connection information for the instance.
 
     Attributes:

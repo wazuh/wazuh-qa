@@ -41,9 +41,11 @@ class InputPayload(BaseModel):
     working_dir: Path | None = Path('/tmp/wazuh-qa')
     track_output: Path | None = working_dir / 'track.yml'
     inventory_output: Path | None = working_dir / 'inventory.yml'
-    custom_credentials: str | None = None
+    ssh_key: str | None = None
     custom_provider_config: Path | None = None
-
+    label_issue: str | None = None
+    label_team: str | None = None
+    label_termination_date: str | None = None
 
 class CreationPayload(InputPayload):
     provider: str
@@ -52,8 +54,11 @@ class CreationPayload(InputPayload):
     track_output: Path
     inventory_output: Path
     working_dir: Path
-    custom_credentials: str | None = None
+    ssh_key: str | None = None
     custom_provider_config: Path | None = None
+    label_issue: str | None = None
+    label_team: str | None = None
+    label_termination_date: str | None = None
 
     @model_validator(mode='before')
     def validate_dependency(cls, values) -> dict:
