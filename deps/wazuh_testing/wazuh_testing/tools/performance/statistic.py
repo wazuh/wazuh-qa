@@ -63,7 +63,7 @@ class StatisticMonitor:
         self.use_api = use_api
         self.parse_json = False
 
-        if self.use_api == True and self.target != 'analysis_events' and self.target != 'remoted':
+        if self.use_api == True and self.target != 'analysis_events' and self.target != 'remoted' and self.target != 'wazuhdb':
             self.use_api = False
 
         if self.target == 'agent':
@@ -75,7 +75,7 @@ class StatisticMonitor:
             self.statistics_file = tls.REMOTE_STATISTICS_FILE
         elif self.target == 'analysis_state':
             self.statistics_file = tls.ANALYSIS_STATISTICS_FILE
-        elif self.target == 'analysis_events':
+        elif self.target == 'analysis_events' or self.target == 'wazuhdb':
             self.use_api = True
         else:
             raise ValueError(f'The target {self.target} is not a valid one.')
@@ -176,6 +176,8 @@ class StatisticMonitor:
             csv_header = headers.logcollector_header
         elif target == "remoted":
             csv_header = headers.remoted_api_header if self.use_api == True  else headers.remoted_header
+        elif target == "wazuhdb":
+            csv_header = headers.wazuhdb_header
         else:
             csv_header = headers.agentd_header
 
@@ -195,6 +197,8 @@ class StatisticMonitor:
                     data = data[0]
                 elif target == "remoted":
                     data = data[1]
+                elif target == "wazuhdb":
+                    data = data[2]
 
                 format = r"%Y-%m-%dT%H:%M:%S+%f:00"
                 datetime_timestamp = datetime.strptime(data['timestamp'], format)
@@ -314,6 +318,175 @@ class StatisticMonitor:
                         sent_messages['shared'],                                         # 22
                         metrics['bytes']['received'],                                    # 23
                         metrics['bytes']['sent']                                         # 24
+                    ))
+                else:
+                    received_breakdown = data['metrics']['queries']['received_breakdown']
+                    ag_bd = received_breakdown['agent_breakdown']
+                    glob_bd = received_breakdown['global_breakdown']
+                    execution_breakdown = data['metrics']['time']['execution_breakdown']
+                    exec_ag_bd = execution_breakdown['agent_breakdown']
+                    exec_glob_bd = execution_breakdown['global_breakdown']
+                    logger.info("Writing wazuh-db data from API info to {}.".format(csv_file))
+                    log.write(("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},"+
+                              "{19},{20},{21},{22},{23},{24},{25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},"+
+                              "{36},{37},{38},{39},{40},{41},{42},{43},{44},{45},{46},{47},{48},{49},{50},{51},{52},"+
+                              "{53},{54},{55},{56},{57},{58},{59},{60},{61},{62},{63},{64},{65},{66},{67},{68},{69},"+
+                              "{70},{71},{72},{73},{74},{75},{76},{77},{78},{79},{70},{71},{72},{73},{74},{75},{76},"+
+                              "{77},{78},{79},{80},{81},{82},{83},{84},{85},{86},{87},{88},{89},{90},{91},{92},{93},"+
+                              "{94},{95},{96},{97},{98},{99},{100},{101},{102},{103},{104},{105},{106},{107},{108},"+
+                              "{109},{110},{11},{111},{112},{113},{114},{115},{116},{117},{118},{119},{120},{121},"+
+                              "{122},{123},{124},{125},{126},{127},{128},{129},{130},{131},{132},{133},{134},{135},"+
+                              "{136},{137},{138},{139},{140},{141},{142},{143},{145},{146},{147},{148}\n").format(
+                        timestamp,                                                                                  # 0
+                        data['timestamp'],                                                                          # 1
+                        interval,                                                                                   # 2
+                        data['metrics']['queries']['received'],                                                     # 3
+                        received_breakdown['agent'],                                                                # 4
+                        ag_bd['db']['begin'],                                                                       # 5
+                        ag_bd['db']['close'],                                                                       # 6
+                        ag_bd['db']['commit'],                                                                      # 7
+                        ag_bd['db']['remove'],                                                                      # 8
+                        ag_bd['db']['sql'],                                                                         # 9
+                        ag_bd['db']['vacuum'],                                                                      # 10
+                        ag_bd['db']['get_fragmentation'],                                                           # 11
+                        ag_bd['tables']['ciscat']['ciscat'],                                                        # 12
+                        ag_bd['tables']['rootcheck']['rootcheck'],                                                  # 13
+                        ag_bd['tables']['sca']['sca'],                                                              # 14
+                        ag_bd['tables']['sync']['dbsync'],                                                          # 15
+                        ag_bd['tables']['syscheck']['syscheck'],                                                    # 16
+                        ag_bd['tables']['syscheck']['fim_file'],                                                    # 17
+                        ag_bd['tables']['syscheck']['fim_registry'],                                                # 18
+                        ag_bd['tables']['syscheck']['fim_registry_key'],                                            # 19
+                        ag_bd['tables']['syscheck']['fim_registry_value'],                                          # 20              
+                        ag_bd['tables']['syscollector']['syscollector_hotfixes'],                                    # 21
+                        ag_bd['tables']['syscollector']['syscollector_hwinfo'],                                      # 22 
+                        ag_bd['tables']['syscollector']['syscollector_network_address'],                             # 23
+                        ag_bd['tables']['syscollector']['syscollector_network_iface'],                               # 24                          
+                        ag_bd['tables']['syscollector']['syscollector_network_protocol'],                            # 25
+                        ag_bd['tables']['syscollector']['syscollector_osinfo'],                                      # 26
+                        ag_bd['tables']['syscollector']['syscollector_packages'],                                    # 27
+                        ag_bd['tables']['syscollector']['syscollector_ports'],                                       # 28
+                        ag_bd['tables']['syscollector']['syscollector_processes'],                                   # 29
+                        ag_bd['tables']['vulnerability']['vuln_cves'],                                              # 30
+                        received_breakdown['global'],                                                               # 31
+                        glob_bd['db']['backup'],                                                                    # 32
+                        glob_bd['db']['sql'],                                                                       # 33       
+                        glob_bd['db']['vacuum'],                                                                    # 34
+                        glob_bd['db']['get_fragmentation'],                                                         # 35
+                        glob_bd['tables']['agent']['delete-agent'],                                                 # 36
+                        glob_bd['tables']['agent']['disconnect-agents'],                                            # 37
+                        glob_bd['tables']['agent']['find-agent'],                                                   # 38
+                        glob_bd['tables']['agent']['get-agent-info'],                                               # 39
+                        glob_bd['tables']['agent']['get-agents-by-connection-status'],                              # 40
+                        glob_bd['tables']['agent']['get-all-agents'],                                               # 41
+                        glob_bd['tables']['agent']['get-distinct-groups'],                                          # 42
+                        glob_bd['tables']['agent']['get-groups-integrity'],                                         # 43
+                        glob_bd['tables']['agent']['insert-agent'],                                                 # 44
+                        glob_bd['tables']['agent']['reset-agents-connection'],                                      # 45
+                        glob_bd['tables']['agent']['select-agent-group'],                                           # 46
+                        glob_bd['tables']['agent']['select-agent-name'],                                            # 47
+                        glob_bd['tables']['agent']['set-agent-groups'],                                             # 48
+                        glob_bd['tables']['agent']['sync-agent-groups-get'],                                        # 49
+                        glob_bd['tables']['agent']['sync-agent-info-get'],                                          # 50
+                        glob_bd['tables']['agent']['sync-agent-info-set'],                                          # 51
+                        glob_bd['tables']['agent']['update-agent-data'],                                            # 52
+                        glob_bd['tables']['agent']['update-agent-name'],                                            # 53
+                        glob_bd['tables']['agent']['update-connection-status'],                                     # 54
+                        glob_bd['tables']['agent']['update-status-code'],                                           # 55
+                        glob_bd['tables']['agent']['update-keepalive'],                                             # 56
+                        glob_bd['tables']['belongs']['get-group-agents'],                                           # 57
+                        glob_bd['tables']['belongs']['select-group-belong'],                                        # 58
+                        glob_bd['tables']['group']['delete-group'],                                                 # 59
+                        glob_bd['tables']['group']['find-group'],                                                   # 60
+                        glob_bd['tables']['group']['insert-agent-group'],                                           # 61
+                        glob_bd['tables']['group']['select-groups'],                                                # 62
+                        glob_bd['tables']['labels']['get-labels'],                                                  # 63
+                        received_breakdown['mitre'],                                                                # 64
+                        received_breakdown['task'],                                                                 # 65
+                        received_breakdown['task_breakdown']['tables']['tasks']['delete_old'],                      # 66
+                        received_breakdown['task_breakdown']['tables']['tasks']['set_timeout'],                     # 67
+                        received_breakdown['task_breakdown']['tables']['tasks']['upgrade'],                         # 68
+                        received_breakdown['task_breakdown']['tables']['tasks']['upgrade_cancel_tasks'],            # 69
+                        received_breakdown['task_breakdown']['tables']['tasks']['upgrade_custom'],                  # 70
+                        received_breakdown['task_breakdown']['tables']['tasks']['upgrade_get_status'],              # 71
+                        received_breakdown['task_breakdown']['tables']['tasks']['upgrade_result'],                  # 72
+                        received_breakdown['task_breakdown']['tables']['tasks']['upgrade_update_status'],           # 73
+                        received_breakdown['wazuhdb'],                                                              # 74
+
+                        data['metrics']['time']['execution'],                                                       # 75
+                        execution_breakdown['agent'],                                                               # 76
+                        exec_ag_bd['db']['open'],                                                                   # 77
+                        exec_ag_bd['db']['begin'],                                                                  # 78
+                        exec_ag_bd['db']['close'],                                                                  # 79
+                        exec_ag_bd['db']['commit'],                                                                 # 80
+                        exec_ag_bd['db']['remove'],                                                                 # 81
+                        exec_ag_bd['db']['sql'],                                                                    # 82
+                        exec_ag_bd['db']['vacuum'],                                                                 # 83
+                        exec_ag_bd['db']['get_fragmentation'],                                                      # 84
+                        exec_ag_bd['tables']['ciscat']['ciscat'],                                                   # 85
+                        exec_ag_bd['tables']['rootcheck']['rootcheck'],                                             # 86
+                        exec_ag_bd['tables']['sca']['sca'],                                                         # 87
+                        exec_ag_bd['tables']['sync']['dbsync'],                                                     # 88
+                        exec_ag_bd['tables']['syscheck']['syscheck'],                                               # 89
+                        exec_ag_bd['tables']['syscheck']['fim_file'],                                               # 90
+                        exec_ag_bd['tables']['syscheck']['fim_registry'],                                           # 91
+                        exec_ag_bd['tables']['syscheck']['fim_registry_key'],                                       # 92
+                        exec_ag_bd['tables']['syscheck']['fim_registry_value'],                                     # 93
+                        exec_ag_bd['tables']['syscollector']['syscollector_hotfixes'],                               # 94
+                        exec_ag_bd['tables']['syscollector']['syscollector_hwinfo'],                                 # 95
+                        exec_ag_bd['tables']['syscollector']['syscollector_network_address'],                        # 96
+                        exec_ag_bd['tables']['syscollector']['syscollector_network_iface'],                          # 97
+                        exec_ag_bd['tables']['syscollector']['syscollector_network_protocol'],                       # 98
+                        exec_ag_bd['tables']['syscollector']['syscollector_osinfo'],                                 # 99
+                        exec_ag_bd['tables']['syscollector']['syscollector_packages'],                               # 100
+                        exec_ag_bd['tables']['syscollector']['syscollector_ports'],                                  # 101
+                        exec_ag_bd['tables']['syscollector']['syscollector_processes'],                              # 102
+                        exec_ag_bd['tables']['vulnerability']['vuln_cves'],                                         # 103
+                        data['metrics']['time']['execution'],                                                          # 104
+                        exec_glob_bd['db']['open'],                                                                 # 105
+                        exec_glob_bd['db']['backup'],                                                               # 106
+                        exec_glob_bd['db']['sql'],                                                                  # 107
+                        exec_glob_bd['db']['vacuum'],                                                               # 108
+                        exec_glob_bd['db']['get_fragmentation'],                                                    # 109
+                        exec_glob_bd['tables']['agent']['delete-agent'],                                            # 110
+                        exec_glob_bd['tables']['agent']['disconnect-agents'],                                       # 111
+                        exec_glob_bd['tables']['agent']['find-agent'],                                              # 112
+                        exec_glob_bd['tables']['agent']['get-agent-info'],                                          # 113
+                        exec_glob_bd['tables']['agent']['get-agents-by-connection-status'],                         # 114
+                        exec_glob_bd['tables']['agent']['get-all-agents'],                                          # 115
+                        exec_glob_bd['tables']['agent']['get-distinct-groups'],                                     # 116
+                        exec_glob_bd['tables']['agent']['get-groups-integrity'],                                    # 117
+                        exec_glob_bd['tables']['agent']['insert-agent'],                                            # 118
+                        exec_glob_bd['tables']['agent']['reset-agents-connection'],                                 # 119
+                        exec_glob_bd['tables']['agent']['select-agent-group'],                                      # 120
+                        exec_glob_bd['tables']['agent']['select-agent-name'],                                       # 121
+                        exec_glob_bd['tables']['agent']['set-agent-groups'],                                        # 122
+                        exec_glob_bd['tables']['agent']['sync-agent-groups-get'],                                   # 123
+                        exec_glob_bd['tables']['agent']['sync-agent-info-get'],                                     # 124
+                        exec_glob_bd['tables']['agent']['sync-agent-info-set'],                                     # 125
+                        exec_glob_bd['tables']['agent']['update-agent-data'],                                       # 126
+                        exec_glob_bd['tables']['agent']['update-agent-name'],                                       # 127
+                        exec_glob_bd['tables']['agent']['update-connection-status'],                                # 128
+                        exec_glob_bd['tables']['agent']['update-status-code'],                                      # 129
+                        exec_glob_bd['tables']['agent']['update-keepalive'],
+                        exec_glob_bd['tables']['belongs']['get-group-agents'],
+                        exec_glob_bd['tables']['belongs']['select-group-belong'],
+                        exec_glob_bd['tables']['group']['delete-group'],
+                        exec_glob_bd['tables']['group']['find-group'],
+                        exec_glob_bd['tables']['group']['insert-agent-group'],
+                        exec_glob_bd['tables']['group']['select-groups'],
+                        exec_glob_bd['tables']['labels']['get-labels'],
+                        execution_breakdown['mitre'],
+                        execution_breakdown['task'],
+                        execution_breakdown['task_breakdown']['tables']['tasks']['delete_old'],
+                        execution_breakdown['task_breakdown']['tables']['tasks']['set_timeout'],
+                        execution_breakdown['task_breakdown']['tables']['tasks']['upgrade'],
+                        execution_breakdown['task_breakdown']['tables']['tasks']['upgrade_cancel_tasks'],
+                        execution_breakdown['task_breakdown']['tables']['tasks']['upgrade_custom'],
+                        execution_breakdown['task_breakdown']['tables']['tasks']['upgrade_get_status'],
+                        execution_breakdown['task_breakdown']['tables']['tasks']['upgrade_result'],
+                        execution_breakdown['task_breakdown']['tables']['tasks']['upgrade_update_status'],
+                        execution_breakdown['wazuhdb']
                     ))
             else:
                 if target == "analysis_state":
