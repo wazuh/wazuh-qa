@@ -284,7 +284,7 @@ tasks:
       with:
         path: python3
         args:
-          - testing/main.py
+          - modules/testing/main.py
           - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
           - dependencies: 
             - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
