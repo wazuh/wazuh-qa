@@ -1,5 +1,5 @@
 import csv
-import signalmonitoring.
+import signal
 import sys
 import json
 import os
