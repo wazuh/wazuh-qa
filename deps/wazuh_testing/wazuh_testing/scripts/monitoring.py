@@ -29,7 +29,7 @@ def get_database_fragmentation(options, monitoring_evidences_directory):
     # Create CSV header for framentation wazuhdb
     with open(os.path.join(monitoring_evidences_directory, "wazuhdb_fragmentation.csv"), 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(["timestamp", "last_vacuum_value_001", 'last_vacuum_value_002'])
+        writer.writerow(["timestamp", "fragmentation_001", 'fragmentation_002'])
 
     while not STOP_STATISTICS_MONITORING:
         timestamp = datetime.datetime.now()
