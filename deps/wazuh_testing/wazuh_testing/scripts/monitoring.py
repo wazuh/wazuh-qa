@@ -31,7 +31,7 @@ def get_database_fragmentation(options, monitoring_evidences_directory):
         writer = csv.writer(file)
         row = ["timestamp"]
         for agent in options.agents:
-            row += [f"fragmentation_{agent}"]
+            row.append(f"fragmentation_{agent}")
 
         writer.writerow(row)
 
