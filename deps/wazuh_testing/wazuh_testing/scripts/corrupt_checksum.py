@@ -49,8 +49,8 @@ if __name__ == "__main__":
                         help='Type the time between queries.')
     parser.add_argument('-d', '--duration', dest='duration', type=float, required=True, action='store',
                         help='Duration of script execution in seconds')
-    parser.add_argument('-a', '--agents', dest='agents', type=list, required=True, action='store',
-                        help='List of agents')
+    parser.add_argument('-a', '--agents', dest='agents', required=False, type=str, nargs='+', action='store',
+                        default=None, help='Type the agents id to monitor separated by whitespace.')
 
     args = parser.parse_args()
 
