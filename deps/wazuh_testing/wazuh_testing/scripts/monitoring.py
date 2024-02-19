@@ -44,8 +44,8 @@ def get_database_fragmentation(options, monitoring_evidences_directory):
         ok {"fragmentation":64,"free_pages_percentage":0}ok {"fragmentation":64,"free_pages_percentage":0}
         """
 
-        last_vacuum_value = pretty(agent_001_fragmentation)
-        last_vacuum_value_002 = pretty(agent_002_fragmentation)
+        last_vacuum_value = pretty(agent_001_fragmentation)['fragmentation'] 
+        last_vacuum_value_002 = pretty(agent_002_fragmentation)['fragmentation'] 
 
         file_path = os.path.join(monitoring_evidences_directory, "wazuhdb_fragmentation.csv")
 
@@ -60,7 +60,7 @@ def pretty(response):
     if response.startswith('ok '):
         try:
             data = json.loads(response[3:])
-            return json.dumps(data, indent=4)
+            return data
         except json.JSONDecodeError:
             return response[3:]
     else:
