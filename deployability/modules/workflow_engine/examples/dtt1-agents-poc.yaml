@@ -19,9 +19,9 @@ tasks:
       with:
         path: python3
         args:
-          - testing/main.py
+          - /modules/testing/main.py
           - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-          - dependencies:
+          - dependencies: 
             - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
             - agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - tests: "install,register,stop"
@@ -43,7 +43,7 @@ tasks:
       with:
         path: python3
         args:
-          - testing/main.py
+          - /modules/testing/main.py
           - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
           - dependencies:
             - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
@@ -58,22 +58,6 @@ tasks:
       - variable: agents-os
         as: agent
 
-  # Unique manager provision task
-  - task: "provision-manager"
-    description: "Provision the manager."
-    do:
-      this: process
-      with:
-        path: python3
-        args:
-          - provision/main.py
-          - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-          - install:
-            - component: wazuh-manager
-              type: package
-    depends-on:
-      - "allocate-manager"
-
   # Unique manager allocate task
   - task: "allocate-manager"
     description: "Allocate resources for the manager."
@@ -82,7 +66,7 @@ tasks:
       with:
         path: python3
         args:
-          - allocation/main.py
+          - /modules/allocation/main.py
           - action: create
           - provider: "{infra-provider}"
           - size: large
@@ -94,7 +78,7 @@ tasks:
       with:
         path: python3
         args:
-          - allocation/main.py
+          - /modules/allocation/main.py
           - action: delete
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 
@@ -106,7 +90,7 @@ tasks:
       with:
         path: python3
         args:
-          - provision/main.py
+          - /modules/provision/main.py
           - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - install:
@@ -128,7 +112,7 @@ tasks:
       with:
         path: python3
         args:
-          - provision/main.py
+          - /modules/provision/main.py
           - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - uninstall:
@@ -148,21 +132,21 @@ tasks:
       with:
         path: python3
         args:
-          - allocation/main.py
+          - /modules/allocation/main.py
           - action: create
           - provider: "{infra-provider}"
           - size: small
           - composite-name: "{agent}"
           - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
-    #cleanup:
-    #  this: process
-    #  with:
-    #    path: python3
-    #    args:
-    #      - allocation.py
-    #      - action: delete
-    #      - track-output: "{working-dir}/agent-{agent}/track.yaml"
+    cleanup:
+      this: process
+      with:
+        path: python3
+        args:
+          - /modules/allocation/main.py
+          - action: delete
+          - track-output: "{working-dir}/agent-{agent}/track.yaml"
     foreach:
       - variable: agents-os
         as: agent

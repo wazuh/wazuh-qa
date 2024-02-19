@@ -53,7 +53,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
         manager-os: linux-ubuntu-22.04-amd64
         infra-provider: vagrant
         working-dir: /tmp/dtt1-poc
-      
+
       tasks:
         # Generic agent test task
         - task: "run-agent-tests-{agent}"
@@ -63,7 +63,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - testing/main.py
+                - /modules/testing/main.py
                 - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
                 - dependencies: 
                   - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
@@ -78,7 +78,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
           foreach:
             - variable: agents-os
               as: agent
-      
+
         # Generic agent test task
         - task: "run-agent-tests-uninstall-{agent}"
           description: "Run tests uninstall for the {agent} agent."
@@ -87,7 +87,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - testing/main.py
+                - /modules/testing/main.py
                 - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
                 - dependencies:
                   - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
@@ -101,7 +101,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
           foreach:
             - variable: agents-os
               as: agent
-      
+
         # Unique manager allocate task
         - task: "allocate-manager"
           description: "Allocate resources for the manager."
@@ -110,7 +110,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - allocation/main.py
+                - /modules/allocation/main.py
                 - action: create
                 - provider: "{infra-provider}"
                 - size: large
@@ -122,10 +122,10 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - allocation/main.py
+                - /modules/allocation/main.py
                 - action: delete
                 - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
-      
+
         # Generic agent provision task
         - task: "provision-install-{agent}"
           description: "Provision resources for the {agent} agent."
@@ -134,7 +134,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - provision/main.py
+                - /modules/provision/main.py
                 - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
                 - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
                 - install:
@@ -147,7 +147,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
           foreach:
             - variable: agents-os
               as: agent
-      
+
         # Generic agent provision task
         - task: "provision-uninstall-{agent}"
           description: "Provision resources for the {agent} agent."
@@ -156,7 +156,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - provision/main.py
+                - /modules/provision/main.py
                 - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
                 - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
                 - uninstall:
@@ -167,7 +167,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
           foreach:
             - variable: agents-os
               as: agent
-      
+
         # Generic agent allocate task
         - task: "allocate-{agent}"
           description: "Allocate resources for the {agent} agent."
@@ -176,7 +176,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - allocation/main.py
+                - /modules/allocation/main.py
                 - action: create
                 - provider: "{infra-provider}"
                 - size: small
@@ -188,7 +188,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - allocation.py
+                - /modules/allocation/main.py
                 - action: delete
                 - track-output: "{working-dir}/agent-{agent}/track.yaml"
           foreach:
