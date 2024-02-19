@@ -1,5 +1,5 @@
 import csv
-import signal
+import signalmonitoring.
 import sys
 import json
 import os
@@ -42,7 +42,7 @@ def get_database_fragmentation(options, monitoring_evidences_directory):
         for agent in options.agents:
             query = f'agent {agent} get_fragmentation'
 
-            last_vacuum_value = pretty(query)['fragmentation']
+            last_vacuum_value = pretty(db_query(query))['fragmentation']
 
             row.append(last_vacuum_value)
 
