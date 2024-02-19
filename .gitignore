@@ -72,3 +72,7 @@ key
 
 #Python
 __pycache__/
+
+#Python setup
+*.egg-info/
+build/

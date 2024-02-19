@@ -1,7 +1,6 @@
-
 String jenkins_reference = params.getOrDefault('JENKINS_REFERENCE', 'enhancement/4751-dtt1-iteration-2-poc')
-String launcher_path = "launchers"
-String task_flow_launcher = "provision.py"
+String launcher_path = "modules/provision"
+String task_flow_launcher = "main.py"
 String workflow = "modules/workflow_engine/examples/dtt1-managers.yaml"
 String schema = "modules/workflow_engine/schema.json"
 
