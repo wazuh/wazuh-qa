@@ -99,15 +99,7 @@ def parse_and_write_to_csv(data, process, directory):
     name = process_metrics['name']
     metrics = process_metrics['metrics']
 
-
-
-
-
     if process == "wazuh-db":
-
-
-
-
         queries_received = metrics['queries']['received']
         queries_global = metrics['queries']['received_breakdown']['global']
         queries_wazuhdb = metrics['queries']['received_breakdown']['wazuhdb']
@@ -127,7 +119,6 @@ def parse_and_write_to_csv(data, process, directory):
         syscheck_fim_registry_key = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_key'] if 'fim_registry_key' in metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
         syscheck_fim_registry_value = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_value'] if 'fim_registry_value' in metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
         syscheck_syscheck = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['syscheck'] if 'syscheck' in metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
-
 
         # Global
         global_db_backup = metrics['queries']['received_breakdown']['global_breakdown']['db']['backup']
@@ -154,8 +145,6 @@ def parse_and_write_to_csv(data, process, directory):
         time_syscheck_fim_registry_key = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_key'] if 'fim_registry_key' in metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
         time_syscheck_fim_registry_value = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_value'] if 'fim_registry_value' in metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
         time_syscheck_syscheck = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['syscheck'] if 'syscheck' in metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
-
-
 
         row = [timestamp, name, agent_db_begin, agent_db_close, agent_db_commit, agent_remove, agent_sql, agent_vacuum,
                agent_get_fragmentation, syscheck_fim_files, syscheck_fim_registry, syscheck_fim_registry_key,
