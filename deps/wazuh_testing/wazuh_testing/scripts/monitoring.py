@@ -29,29 +29,28 @@ def get_database_fragmentation(options, monitoring_evidences_directory):
     # Create CSV header for framentation wazuhdb
     with open(os.path.join(monitoring_evidences_directory, "wazuhdb_fragmentation.csv"), 'w', newline='') as file:
         writer = csv.writer(file)
+        row = ["timestamp"]
+        for agent in options.agents:
+            row += [f"fragmentation_{agent}"]
+
         writer.writerow(["timestamp", "fragmentation_001", 'fragmentation_002'])
 
     while not STOP_STATISTICS_MONITORING:
         timestamp = datetime.datetime.now()
 
-        query1 = 'agent 001 get_fragmentation'
-        query2 = 'agent 002 get_fragmentation'
+        row = [timestamp]
+        for agent in options.agents:
+            query = f'agent {agent} get_fragmentation'
 
-        agent_001_fragmentation = db_query(query1)
-        agent_002_fragmentation = db_query(query2)
+            last_vacuum_value = pretty(query)['fragmentation']
 
-        """
-        ok {"fragmentation":64,"free_pages_percentage":0}ok {"fragmentation":64,"free_pages_percentage":0}
-        """
-
-        last_vacuum_value = pretty(agent_001_fragmentation)['fragmentation'] 
-        last_vacuum_value_002 = pretty(agent_002_fragmentation)['fragmentation'] 
+            row.append(last_vacuum_value)
 
         file_path = os.path.join(monitoring_evidences_directory, "wazuhdb_fragmentation.csv")
 
         with open(file_path, 'a', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow([timestamp, last_vacuum_value, last_vacuum_value_002])
+            writer.writerow(row)
 
         time.sleep(options.sleep_time)
 
@@ -358,6 +357,9 @@ def get_script_arguments():
                         help='Type unit for the bytes-related values. Default bytes.')
     parser.add_argument('-v', '--version', dest='version', required=True, help='Version of the binaries. Default none.')
     parser.add_argument('-d', '--debug', dest='debug', action='store_true', help='Enable debug mode.')
+
+    parser.add_argument('-a', '--agents', dest='agents', required=False, type=str, nargs='+', action='store',
+                        default=None, help='Type the agents id to monitor separated by whitespace.')
 
     return parser.parse_args()
 
