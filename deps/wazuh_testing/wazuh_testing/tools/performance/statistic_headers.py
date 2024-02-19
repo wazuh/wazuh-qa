@@ -169,10 +169,10 @@ agentd_header = ["Timestamp",
 wazuhdb_header = ["Timestamp",
                     "API Timestamp",
                     "Interval (Timestamp-Uptime)",
-	            ## QUERIES COUNTS
+	                ## QUERIES COUNTS
                     "Received queries",
                     "Agent queries",
-		    ## Agent QueriesBreakdown
+		            ## Agent QueriesBreakdown
                     "db-begin",
                     "db-close",
                     "db-commit",
@@ -180,7 +180,7 @@ wazuhdb_header = ["Timestamp",
                     "db-sql",
                     "db-vacuum",
                     "db-get_fragmentation",
-		    ## Agent Tables Breakdown
+		            ## Agent Tables Breakdown
                     "Table CisCat",
                     "Table Rootcheck",
                     "Table SCA",
@@ -195,6 +195,7 @@ wazuhdb_header = ["Timestamp",
                     "Table Syscollector network_address",
                     "Table Syscollector network_iface",
                     "Table Syscollector network_protocol",
+                    "Table Syscollector os_info",
                     "Table Syscollector packages",
                     "Table Syscollector ports",
                     "Table Syscollector processes",
@@ -239,13 +240,13 @@ wazuhdb_header = ["Timestamp",
         		    "labels-get-labels",
 
 		            "MITRE",
-                    ## Mitre breakdown
                     "Tasks",
                     ## tasks breakdown
                     "tasks-delete old task",
                     "tasks-set timeout",
                     "tasks-upgrade",
                     "tasks-upgrade cancel",
+                    "tasks-upgrade custom",
                     "tasks-upgrade get status",
                     "tasks-upgrade results",
                     "tasks-upgrade update status",
@@ -278,6 +279,7 @@ wazuhdb_header = ["Timestamp",
                     "Table Syscollector network_address",
                     "Table Syscollector network_iface",
                     "Table Syscollector network_protocol",
+                    "Table Syscollector os_info",
                     "Table Syscollector packages",
                     "Table Syscollector ports",
                     "Table Syscollector processes",
@@ -312,28 +314,24 @@ wazuhdb_header = ["Timestamp",
                     "agent-update-connection-status",
                     "agent-update-status-code",
                     "agent-update-keepalive",
-
                     "belongs-get-group-agents",
                     "belongs-select-group-belong",
-
                     "group-delete-group",
                     "group-find-group",
                     "group-insert-agent-group",
                     "group-select-groups",
-
                     "labels-get-labels",
 
                     "MITRE",
-                    ## Mitre breakdown
                     "Tasks",
                     ## tasks breakdown
                     "tasks-delete old task",
                     "tasks-set timeout",
                     "tasks-upgrade",
                     "tasks-upgrade cancel",
+                    "tasks-upgrade custom",
                     "tasks-upgrade get status",
                     "tasks-upgrade results",
                     "tasks-upgrade update status",
-
                     "Wazuhdb"
                 ]
