@@ -33,7 +33,7 @@ def get_database_fragmentation(options, monitoring_evidences_directory):
         for agent in options.agents:
             row += [f"fragmentation_{agent}"]
 
-        writer.writerow(["timestamp", "fragmentation_001", 'fragmentation_002'])
+        writer.writerow(row)
 
     while not STOP_STATISTICS_MONITORING:
         timestamp = datetime.datetime.now()
