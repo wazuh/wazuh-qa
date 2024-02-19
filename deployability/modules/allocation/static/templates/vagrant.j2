@@ -8,8 +8,9 @@ Vagrant.configure("2") do |config|
 
     # VirtualBox specific settings
     config.vm.provider "virtualbox" do |v|
-        v.memory = {{ config.memory }}
-        v.cpus = {{ config.cpu }}
+        v.memory = "{{ config.memory }}"
+        v.cpus = "{{ config.cpu }}"
+        v.name = "{{ config.name }}"
     end
 
     # Network settings

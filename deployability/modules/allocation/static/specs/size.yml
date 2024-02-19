@@ -13,22 +13,22 @@ vagrant:
       memory: 8192
 aws:
   micro:
-    linux-*-amd64:
-      type: t2.micro
-    linux-*-arm64:
-      type: c7gn.micro
+    amd64:
+      type: t3.micro
+    arm64:
+      type: a1.medium
   small:
-    linux-*-amd64:
-      type: t2.small
-    linux-*-arm64:
-      type: c7gn.small
+    amd64:
+      type: t3.small
+    arm64:
+      type: a1.large
   medium:
-    linux-*-amd64:
-      type: t2.medium
-    linux-*-arm64:
+    amd64:
+      type: t3a.medium
+    arm64:
       type: c7gn.medium
   large:
-    linux-*-amd64:
-      type: c5a.xlarge
-    linux-*-arm64:
+    amd64:
+      type: c5ad.xlarge
+    arm64:
       type: c6g.xlarge
