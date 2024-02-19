@@ -122,11 +122,11 @@ def parse_and_write_to_csv(data, process, directory):
         agent_get_fragmentation = metrics['queries']['received_breakdown']['agent_breakdown']['db']['get_fragmentation']
 
         # Tables Syscheck
-        syscheck_fim_files = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['fim_file']
-        syscheck_fim_registry = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry']
-        syscheck_fim_registry_key = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_key']
-        syscheck_fim_registry_value = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_value']
-        syscheck_syscheck = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['syscheck']
+        syscheck_fim_files = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['fim_file'] if 'fim_file' in metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        syscheck_fim_registry = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry'] if 'fim_registry' in metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        syscheck_fim_registry_key = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_key'] if 'fim_registry_key' in metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        syscheck_fim_registry_value = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_value'] if 'fim_registry_value' in metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        syscheck_syscheck = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['syscheck'] if 'syscheck' in metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
 
 
         # Global
