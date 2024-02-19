@@ -61,8 +61,14 @@ def create_csv_header(process, directory):
     with open(file_path, 'w', newline='') as file:
         writer = csv.writer(file)
         if process == "wazuh-db":
-            writer.writerow(["timestamp", "name", "queries_received", "queries_global", "queries_wazuhdb",
-                             "time_execution", "time_global", "time_wazuhdb"])
+            writer.writerow(["timestamp", "name", "DB Begin", "DB Close", "DB Commit", "DB Remove", "DB SQL", "DB Vacuum",
+                             "DB Get Fragmentation", "Tables Syscheck FIM File", "Tables Syscheck FIM Registry",
+                             "Tables Syscheck FIM Registry Key", "Tables Syscheck FIM Registry Value", "Tables Syscheck Syscheck",
+                             "Global DB Backup", "DB SQL", "DB Vacuum", "DB Get Fragmentation", "Queries Received",
+                             "Queries Global", "Queries WazuhDB", "Time Execution", "Time Global", "Time WazuhDB", "Time DB Open",
+                             "Time DB Close", "Time DB Commit", "Time DB Remove", "Time DB SQL", "Time DB Vacuum", "Time DB Get Fragmentation",
+                             "Time DB Begin", "Time Syscheck FIM File", "Time Syscheck FIM Registry", "Time Syscheck FIM Registry Key",
+                             "Time Syscheck FIM Registry Value", "Time Syscheck Syscheck"])
         elif process == "wazuh-remoted":
             writer.writerow(["timestamp", "name", "bytes_received", "bytes_sent", "keys_reload_count",
                              "received_keepalive",
@@ -102,13 +108,55 @@ def parse_and_write_to_csv(data, process, directory):
         queries_global = metrics['queries']['received_breakdown']['global']
         queries_wazuhdb = metrics['queries']['received_breakdown']['wazuhdb']
 
+        # Tables Agent
+        agent_db_begin = metrics['queries']['received_breakdown']['agent_breakdown']['db']['begin']
+        agent_db_close = metrics['queries']['received_breakdown']['agent_breakdown']['db']['close']
+        agent_db_commit = metrics['queries']['received_breakdown']['agent_breakdown']['db']['commit']
+        agent_remove = metrics['queries']['received_breakdown']['agent_breakdown']['db']['remove']
+        agent_sql = metrics['queries']['received_breakdown']['agent_breakdown']['db']['sql']
+        agent_vacuum = metrics['queries']['received_breakdown']['agent_breakdown']['db']['vacuum']
+        agent_get_fragmentation = metrics['queries']['received_breakdown']['agent_breakdown']['db']['get_fragmentation']
+
+        # Tables Syscheck
+        syscheck_fim_files = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['fim_file'] if 'fim_file' in metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        syscheck_fim_registry = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry'] if 'fim_registry' in metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        syscheck_fim_registry_key = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_key'] if 'fim_registry_key' in metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        syscheck_fim_registry_value = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_value'] if 'fim_registry_value' in metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        syscheck_syscheck = metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck']['syscheck'] if 'syscheck' in metrics['queries']['received_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+
+        # Global
+        global_db_backup = metrics['queries']['received_breakdown']['global_breakdown']['db']['backup']
+        global_db_sql = metrics['queries']['received_breakdown']['global_breakdown']['db']['sql']
+        global_db_vacuum = metrics['queries']['received_breakdown']['global_breakdown']['db']['vacuum']
+        global_db_get_fragmentation = metrics['queries']['received_breakdown']['global_breakdown']['db']['get_fragmentation']
+
         # Time
         time_execution = metrics['time']['execution']
         time_global = metrics['time']['execution_breakdown']['global']
         time_wazuhdb = metrics['time']['execution_breakdown']['wazuhdb']
 
-        row = [timestamp, name, queries_received, queries_global, queries_wazuhdb, time_execution,
-               time_global, time_wazuhdb]
+        time_db_open = metrics['time']['execution_breakdown']['agent_breakdown']['db']['open'] if 'open' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
+        time_db_close = metrics['time']['execution_breakdown']['agent_breakdown']['db']['close'] if 'close' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
+        time_db_commit = metrics['time']['execution_breakdown']['agent_breakdown']['db']['commit'] if 'commit' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
+        time_db_remove = metrics['time']['execution_breakdown']['agent_breakdown']['db']['remove'] if 'remove' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
+        time_db_sql = metrics['time']['execution_breakdown']['agent_breakdown']['db']['sql'] if 'sql' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
+        time_db_vacuum = metrics['time']['execution_breakdown']['agent_breakdown']['db']['vacuum'] if 'vacuum' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
+        time_db_get_fragmentation = metrics['time']['execution_breakdown']['agent_breakdown']['db']['get_fragmentation'] if 'get_fragmentation' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
+        time_db_begin = metrics['time']['execution_breakdown']['agent_breakdown']['db']['begin'] if 'begin' in metrics['time']['execution_breakdown']['agent_breakdown']['db'] else 0
+
+        time_syscheck_fim_files = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['fim_file'] if 'fim_file' in metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        time_syscheck_fim_registry = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry'] if 'fim_registry' in metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        time_syscheck_fim_registry_key = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_key'] if 'fim_registry_key' in metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        time_syscheck_fim_registry_value = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['fim_registry_value'] if 'fim_registry_value' in metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+        time_syscheck_syscheck = metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck']['syscheck'] if 'syscheck' in metrics['time']['execution_breakdown']['agent_breakdown']['tables']['syscheck'] else 0
+
+        row = [timestamp, name, agent_db_begin, agent_db_close, agent_db_commit, agent_remove, agent_sql, agent_vacuum,
+               agent_get_fragmentation, syscheck_fim_files, syscheck_fim_registry, syscheck_fim_registry_key,
+               syscheck_fim_registry_value, syscheck_syscheck, global_db_backup, global_db_sql, global_db_vacuum,
+               global_db_get_fragmentation, queries_received, queries_global, queries_wazuhdb, time_execution,
+               time_global, time_wazuhdb, time_db_open, time_db_close, time_db_commit, time_db_remove, time_db_sql,
+               time_db_vacuum, time_db_get_fragmentation, time_db_begin, time_syscheck_fim_files, time_syscheck_fim_registry,
+               time_syscheck_fim_registry_key, time_syscheck_fim_registry_value, time_syscheck_syscheck]
 
     if process == "wazuh-remoted":
         bytes_received = metrics['bytes']['received']
