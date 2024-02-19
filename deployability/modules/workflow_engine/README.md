@@ -24,7 +24,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
 3. Install requirements:
 
 	```bash
-	pip3 install -r /deployability/deps/requirements.txt
+	pip3 install -r deployability/deps/requirements.txt
 	```
 
 4. Install the Workflow engine library and its launcher:
