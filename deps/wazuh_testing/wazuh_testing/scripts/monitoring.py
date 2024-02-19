@@ -81,7 +81,7 @@ def db_query(query):
 
     sock.close()
 
-    return response
+    return response.decode()
 
 
 def setup_logger(log_file, debug=False):
