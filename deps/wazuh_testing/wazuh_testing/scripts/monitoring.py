@@ -29,24 +29,42 @@ def get_database_fragmentation(options, monitoring_evidences_directory):
     # Create CSV header for framentation wazuhdb
     with open(os.path.join(monitoring_evidences_directory, "wazuhdb_fragmentation.csv"), 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(["timestamp", "last_vacuum_value", "last_vacuum_time"])
+        writer.writerow(["timestamp", "fragmentation_001", 'fragmentation_002'])
 
     while not STOP_STATISTICS_MONITORING:
         timestamp = datetime.datetime.now()
 
-        query = "SELECT value FROM metadata WHERE name = 'last_vacuum_value';"
-        last_vacuum_value = db_query(query)
+        query1 = 'agent 001 get_fragmentation'
+        query2 = 'agent 002 get_fragmentation'
 
-        query = "SELECT value FROM metadata WHERE name = 'last_vacuum_time';"
-        last_vacuum_time = db_query(query)
+        agent_001_fragmentation = db_query(query1)
+        agent_002_fragmentation = db_query(query2)
+
+        """
+        ok {"fragmentation":64,"free_pages_percentage":0}ok {"fragmentation":64,"free_pages_percentage":0}
+        """
+
+        last_vacuum_value = pretty(agent_001_fragmentation)['fragmentation'] 
+        last_vacuum_value_002 = pretty(agent_002_fragmentation)['fragmentation'] 
 
         file_path = os.path.join(monitoring_evidences_directory, "wazuhdb_fragmentation.csv")
 
         with open(file_path, 'a', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow([timestamp, last_vacuum_value, last_vacuum_time])
+            writer.writerow([timestamp, last_vacuum_value, last_vacuum_value_002])
 
         time.sleep(options.sleep_time)
+
+
+def pretty(response):
+    if response.startswith('ok '):
+        try:
+            data = json.loads(response[3:])
+            return data
+        except json.JSONDecodeError:
+            return response[3:]
+    else:
+        return response
 
 
 def db_query(query):
@@ -60,9 +78,10 @@ def db_query(query):
 
     length = unpack("<I", sock.recv(4))[0]
     response = sock.recv(length)
-    stdout.buffer.write(response)
 
     sock.close()
+
+    return response.decode()
 
 
 def setup_logger(log_file, debug=False):
