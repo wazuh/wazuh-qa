@@ -8,6 +8,7 @@ import logging
 import subprocess
 import argparse
 import threading
+import datetime
 
 from wazuh_testing.api import make_api_call, get_api_details_dict
 
@@ -73,6 +74,9 @@ def create_csv_header(process, directory):
                              "decoded_agent", "decoded_events_syscheck", "dropped_agent", "dropped_syscheck",
                              "writte_breakdown_alerts", "queue_size_alerts", "queue_usage_alerts",
                              "queue_syscheck_size", "queue_syscheck_usage"])
+        elif '.db' in process:
+            writer.writerow(["timestamp", "name", "size"])
+
 
 
 def parse_and_write_to_csv(data, process, directory):
@@ -198,6 +202,34 @@ def collect_data(options, monitoring_evidences_directory):
         time.sleep(options.sleep_time)
 
 
+def get_database_size(options, monitoring_evidences_directory):
+    global STOP_STATISTICS_MONITORING
+
+    for database in os.listdir('/var/ossec/queue/db'):
+        if database.startswith("00") and database.endswith(".db"):
+            create_csv_header(database, monitoring_evidences_directory)
+
+    while not STOP_STATISTICS_MONITORING:
+        for database in os.listdir('/var/ossec/queue/db'):
+            if database.startswith("00") and database.endswith(".db"):
+                file_stats = os.stat(os.path.join('/var/ossec/queue/db', database))
+                size = file_stats.st_size  # Bytes
+                timestamp = datetime.datetime.now()
+                name = database
+                row = [timestamp, name, size]
+
+                file_path = os.path.join(monitoring_evidences_directory, f'{database}_stats.csv')
+
+                with open(file_path, 'a', newline='') as file:
+                    writer = csv.writer(file)
+                    if row:
+                        writer.writerow(row)
+                    else:
+                        writer.writerow([timestamp, name, "No data"])
+
+        time.sleep(options.sleep_time)
+
+
 def get_script_arguments():
     parser = argparse.ArgumentParser(usage="%(prog)s [options]", description="Wazuh monitoring script",
                                      formatter_class=argparse.RawTextHelpFormatter)
@@ -248,6 +280,11 @@ def main(options):
     statistics_monitoring_thread = threading.Thread(target=collect_data,
                                                     args=(options, monitoring_evidences_directory,))
     statistics_monitoring_thread.start()
+
+    logger.info("Starting database size monitoring")
+    database_monitoring_thread = threading.Thread(target=get_database_size,
+                                                  args=(options, monitoring_evidences_directory,))
+    database_monitoring_thread.start()
 
     logger.info(f"Monitoring started. Monitoring time: {options.monitoring_time} seconds. Please wait...")
     time.sleep(options.monitoring_time)
