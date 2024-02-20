@@ -1,8 +1,10 @@
 from . import utils
 import time
 import subprocess
-from pathlib import Path
-import subprocess
+import os
+import hashlib
+import platform
+
 
 def install_wazuh_agent(os_type, wazuh_version, wazuh_revision, aws_s3, repository, dependency_ip, type_os=None, architecture=None):
     """
@@ -16,7 +18,7 @@ def install_wazuh_agent(os_type, wazuh_version, wazuh_revision, aws_s3, reposito
         repository (str): Wazuh repository URL.
         dependency_ip (str): IP address of the Wazuh manager.
         type_os (str): Type of linux os (rpm, deb).
-        architecture: (str): Type of architecture (aarch64, amd64, intel, apple).
+        architecture: (str): Type of architecture (aarch64, x86_64, intel, apple).
 
     Returns:
         None
@@ -41,7 +43,7 @@ def install_linux_agent(wazuh_version, wazuh_revision, aws_s3, repository, depen
         repository (str): Wazuh repository URL.
         dependency_ip (str): IP address of the Wazuh manager.
         type_os (str): Type of linux os (rpm, deb).
-        architecture: (str): Type of architecture (aarch64, amd64, intel, apple).
+        architecture: (str): Type of architecture (aarch64, x86_64, intel, apple).
 
     Returns:
         None
@@ -51,7 +53,7 @@ def install_linux_agent(wazuh_version, wazuh_revision, aws_s3, repository, depen
     base_url = f"https://{aws_s3}/{repository}/yum/wazuh-agent-{wazuh_version}-{wazuh_revision}"
 
     # Map architectures to their corresponding suffixes
-    architecture_suffix = {'amd64': 'x86_64', 'aarch64': 'aarch64'}
+    architecture_suffix = {'x86_64': 'amd64', 'aarch64': 'aarch64'}
 
     # Construct URL, download, and install commands
     url = f"{base_url}.{architecture_suffix.get(architecture)}.rpm"
@@ -60,7 +62,7 @@ def install_linux_agent(wazuh_version, wazuh_revision, aws_s3, repository, depen
 
     # Adjust for Debian-based systems
     if type_os == 'deb':
-        architecture_suffix['amd64'] = 'amd64'
+        architecture_suffix['x86_64'] = 'amd64'
         url = f"https://{aws_s3}.wazuh.com/{repository}/apt/pool/main/w/wazuh-agent/wazuh-agent_{wazuh_version}-{wazuh_revision}_{architecture_suffix.get(architecture)}.deb"
         download_command = f'wget {url} -O wazuh-agent_{wazuh_version}-{wazuh_revision}_{architecture}.deb'
         install_command = f"sudo WAZUH_MANAGER='{dependency_ip}' dpkg -i ./wazuh-agent_{wazuh_version}-{wazuh_revision}_{architecture}.deb"
@@ -126,7 +128,7 @@ def install_macos_agent(wazuh_version, wazuh_revision, aws_s3, repository, depen
         aws_s3 (str): AWS S3 base URL.
         repository (str): Wazuh repository URL.
         dependency_ip (str): IP address of the Wazuh manager.
-        architecture: (str): Type of architecture (aarch64, amd64, intel, apple).
+        architecture: (str): Type of architecture (aarch64, x86_64, intel, apple).
 
     Returns:
         None
@@ -247,7 +249,7 @@ def uninstall_macos_agent():
 
 def checkfiles(os_type):
     if os_type == 'linux' or os_type == 'macos':
-        command = "sudo find /var/ossec -type f -o -type d  | wc -l"
+        command = "sudo find /var -type f -o -type d 2>/dev/null"
     elif os_type == 'windows':
         command = 'dir /a-d /b /s | findstr /v /c:"\\.$" /c:"\\..$"| find /c ":"'
     else:
@@ -257,172 +259,52 @@ def checkfiles(os_type):
     result = subprocess.run(command, shell=True, executable="/bin/bash", stdout=subprocess.PIPE, text=True)
     
     if result.returncode == 0:
-        return result.stdout.strip()
+        # Split the stdout into a list of paths and return
+        paths = [path.strip() for path in result.stdout.split('\n') if path.strip()]
+        return paths
     else:
         print(f"Error executing command. Return code: {result.returncode}")
         return None
+
+def get_os_type():
+    system = platform.system()
     
-import os
-import hashlib
-
-def scan_directory(directory):
-    file_list = []
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            file_path = os.path.join(root, file)
-            file_list.append((file_path, get_file_hash(file_path)))
-    return file_list
-
-def get_file_hash(file_path):
-    hasher = hashlib.md5()
-    if os.path.exists(file_path):
-        try:
-            with open(file_path, 'rb') as f:
-                while chunk := f.read(8192):
-                    hasher.update(chunk)
-        except OSError as e:
-            print(f"Failure opening the file {file_path}: {e}")
+    if system == 'Windows':
+        return 'windows'
+    elif system == 'Linux':
+        return 'linux'
+    elif system == 'Darwin':
+        return 'macos'
     else:
-        print(f"The {file_path} does not exist.")
-        return None
-    return hasher.hexdigest()
+        return 'unknown'
 
-def compare_directories(old_scan, new_scan):
-    changed_files = []
-    added_files = []
-    deleted_files = []
-    total_files = {}
+def perform_action_and_scan(callback):
+    initial_scan = checkfiles(get_os_type())
 
-    # Identify modified and added files
-    for new_file, new_hash in new_scan:
-        file_found = False
-        for old_file, old_hash in old_scan:
-            if os.path.relpath(old_file) == os.path.relpath(new_file):
-                file_found = True
-                if old_hash != new_hash:
-                    changed_files.append((new_file))
+    callback()
 
-        # If the file is not found in the initial scan, consider it added
-        if not file_found:
-            added_files.append((new_file))
+    second_scan = checkfiles(get_os_type())
 
-    # Identify deleted files
-    for old_file, _ in old_scan:
-        if os.path.relpath(old_file) not in (os.path.relpath(new_file) for new_file, _ in new_scan):
-            deleted_files.append((old_file))
+    removed = list(set(initial_scan) - set(second_scan))
+    added = list(set(second_scan) - set(initial_scan))
+    changes = {'added': added,
+               'removed': removed
+               }
 
-    total_files = {'changed_files' : changed_files,
-                   'added_files': added_files,
-                   'deleted_files': deleted_files
-                   }
+    return changes
 
-    return total_files
+def get_achitecture():
+    return platform.machine()
 
+def get_linux_distribution():
+    if get_os_type() == 'linux':
+        package_managers = {
+            '/etc/debian_version': 'deb',
+            '/etc/redhat-release': 'rpm',
+        }
 
+        for file_path, package_manager in package_managers.items():
+            if os.path.exists(file_path):
+                return package_manager
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def install_wazuh_agent(os_type, wazuh_version, wazuh_revision, aws_s3, repository, dependency_ip, type_os=None, architecture=None):
-    """
-    Install Wazuh agent based on the provided OS type and parameters.
-
-    Args:
-        os_type (str): The target operating system ('debian' or 'redhat').
-        wazuh_version (str): The version of Wazuh agent.
-        wazuh_revision (str): The revision of Wazuh agent.
-        aws_s3 (str): AWS S3 base URL.
-        repository (str): Wazuh repository URL.
-        dependency_ip (str): IP address of the Wazuh manager.
-        type_os (str): Type of Linux OS (rpm, deb) - applicable only for 'linux' OS type.
-        architecture: (str): Type of architecture (aarch64, amd64, intel, apple) - applicable only for 'macos' OS type.
-
-    Returns:
-        None
-    """
-    if os_type == 'redhat':
-        # Red Hat Installation
-        redhat_installation_commands(wazuh_version, wazuh_revision, aws_s3, repository)
-    elif os_type == 'debian':
-        # Debian Installation
-        debian_installation_commands(wazuh_version, wazuh_revision, aws_s3, repository)
-    else:
-        print("Unsupported operating system.")
-
-
-def redhat_installation_commands(wazuh_version, wazuh_revision, aws_s3, repository):
-    """
-    Install Wazuh agent on Red Hat.
-
-    Args:
-        wazuh_version (str): The version of Wazuh agent.
-        wazuh_revision (str): The revision of Wazuh agent.
-        aws_s3 (str): AWS S3 base URL.
-        repository (str): Wazuh repository URL.
-        dependency_ip (str): IP address of the Wazuh manager.
-
-    Returns:
-        None
-    """
-
-    subprocess.run(["rpm", "--import", f"https://{aws_s3}.wazuh.com/key/GPG-KEY-WAZUH"])
-    repo_config = f"[wazuh]\ngpgcheck=1\ngpgkey=https://{aws_s3}.wazuh.com/key/GPG-KEY-WAZUH\nenabled=1\nname=EL-$releasever - Wazuh\nbaseurl=https://{aws_s3}.wazuh.com/{repository}/yum/\nprotect=1"
-    subprocess.run(["echo", "-e", repo_config, "|", "tee", "/etc/yum.repos.d/wazuh.repo"])
-    subprocess.run(["yum", "-y", "install", "wazuh-manager"])
-
-    # Common post-installation commands
-    post_installation_commands()
-
-
-def debian_installation_commands(wazuh_version, wazuh_revision, aws_s3, repository):
-    """
-    Install Wazuh agent on Debian.
-
-    Args:
-        wazuh_version (str): The version of Wazuh agent.
-        wazuh_revision (str): The revision of Wazuh agent.
-        aws_s3 (str): AWS S3 base URL.
-        repository (str): Wazuh repository URL.
-
-    Returns:
-        None
-    """
-
-    subprocess.run(["apt-get", "install", "gnupg", "apt-transport-https"])
-    subprocess.run(["curl", "-s", f"https://{aws_s3}.wazuh.com/key/GPG-KEY-WAZUH", "|", "gpg", "--no-default-keyring", "--keyring", "gnupg-ring:/usr/share/keyrings/wazuh.gpg", "--import", "&&", "chmod", "644", "/usr/share/keyrings/wazuh.gpg"])
-    repo_config = f"deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://{aws_s3}.wazuh.com/{repository}/apt/pool/main/w/wazuh-manager/wazuh-manager_{wazuh_version}-{wazuh_revision}_amd64.deb"
-    subprocess.run(["echo", repo_config, "|", "tee", "-a", "/etc/apt/sources.list.d/wazuh.list"])
-    subprocess.run(["apt-get", "update"])
-    subprocess.run(["apt-get", "-y", "install", "wazuh-manager"])
-
-    # Common post-installation commands
-    post_installation_commands()
-
-
-def post_installation_commands():
-    """
-    Common post-installation commands for both Red Hat and Debian.
-
-    Returns:
-        None
-    """
-
-    subprocess.run(["systemctl", "daemon-reload"])
-    subprocess.run(["systemctl", "enable", "wazuh-manager"])
-    subprocess.run(["systemctl", "start", "wazuh-manager"])
-
-
-# Example usage:
-install_wazuh_agent('redhat', '4.0.0', '1', 'https://example.s3.amazonaws.com', 'https://example.repo.com', '192.168.1.1')
+print(get_linux_distribution())

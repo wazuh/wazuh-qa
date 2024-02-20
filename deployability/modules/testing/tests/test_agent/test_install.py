@@ -4,28 +4,20 @@ import pwd
 
 from ..helpers import actions
 from ..helpers import constants, utils
+import pytest
 
+@pytest.fixture
+def wazuh_params(request):
+    wazuh_version = request.config.getoption('--wazuh_version')
+    wazuh_revision = request.config.getoption('--wazuh_revision')
+    dependency_ip = request.config.getoption('--dependency_ip')
+    return {'wazuh_version': wazuh_version, 'wazuh_revision': wazuh_revision, 'dependency_ip': dependency_ip}
 
-def test_installation():
-    scan_directory = "/var"
-    initial_scan = actions.scan_directory(scan_directory)
-    print("Initial scan:")
-    print(initial_scan)
-    
-    actions.checkfiles('linux')
-    #actions.install_wazuh_agent('linux', '4.7.2', '1', 'packages', '4.x', '127.0.0.1', 'deb', 'amd64')
-    actions.uninstall_wazuh_agent('linux', '4.7.2', '1','deb')
-    
-    second_scan = actions.scan_directory(scan_directory)
-    print("\nPost scan:")
-    print(second_scan)
-    
-    changes = actions.compare_directories(initial_scan, second_scan)
-    print("\nDetected changes:")
-    print(changes)
+def test_installation(wazuh_params):
+    result = actions.perform_action_and_scan(lambda: actions.install_wazuh_agent(actions.get_os_type(), wazuh_params['wazuh_version'] , wazuh_params['wazuh_revision'], 'packages', '4.x', wazuh_params['dependency_ip'], actions.get_linux_distribution(), actions.get_achitecture()))
+    assert all('wazuh' in path or 'ossec' in path for path in result['added'])
+    assert not any('wazuh' in path or 'ossec' in path for path in result['removed'])
 
-    
-""" 
 def test_wazuh_user():
     all_users = [x[0] for x in pwd.getpwall()]
     assert constants.WAZUH_USER in all_users, "Wazuh user not found."
@@ -56,4 +48,3 @@ def test_wazuh_daemons():
 
     for daemon in expected_daemons:
         assert daemon in actual_daemons.keys(), f"{daemon} not found."
-"""

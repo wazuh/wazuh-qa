@@ -27,6 +27,8 @@ tasks:
   #        - component: "agent"
   #        - wazuh-version: "4.7.1"
   #        - wazuh-revision: "40709"
+  #        - install:
+  #            live: False
   #  depends-on:
   #    - "provision-{agent}"
   #    - "provision-manager"
