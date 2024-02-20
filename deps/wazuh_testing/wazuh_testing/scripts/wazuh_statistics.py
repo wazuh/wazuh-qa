@@ -26,7 +26,7 @@ def get_script_arguments():
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-t', '--target', dest='target_list', required=True, type=str, nargs='+', action='store',
                         help='Type the statistics target to collect separated by whitespace. '
-                             'Targets: agent, logcollector, remoted, analysis-events and analysisd-state.')
+                             'Targets: agent, logcollector, remoted, analysis_events and analysisd_state.')
     parser.add_argument('-s', '--sleep', dest='sleep_time', type=float, default=5, action='store',
                         help='Type the time in seconds between each entry.')
     parser.add_argument('-d', '--debug', dest='debug', action='store_true', default=False,

@@ -63,7 +63,7 @@ class StatisticMonitor:
         self.use_api = use_api
         self.parse_json = False
 
-        if self.use_api == True and self.target != 'analysis_events' and self.target != 'remoted' and self.target != 'wazuhdb':
+        if self.use_api == True and self.target != 'analysis_events' and self.target != 'remote' and self.target != 'wazuhdb':
             self.use_api = False
 
         if self.target == 'agent':
@@ -71,7 +71,7 @@ class StatisticMonitor:
         elif self.target == 'logcollector':
             self.statistics_file = tls.LOGCOLLECTOR_STATISTICS_FILE
             self.parse_json = True
-        elif self.target == 'remoted':
+        elif self.target == 'remote':
             self.statistics_file = tls.REMOTE_STATISTICS_FILE
         elif self.target == 'analysis_state':
             self.statistics_file = tls.ANALYSIS_STATISTICS_FILE
@@ -174,7 +174,7 @@ class StatisticMonitor:
             csv_header = headers.analysisd_events_header
         elif target == "logcollector":
             csv_header = headers.logcollector_header
-        elif target == "remoted":
+        elif target == "remote":
             csv_header = headers.remoted_api_header if self.use_api == True  else headers.remoted_header
         elif target == "wazuhdb":
             csv_header = headers.wazuhdb_header
@@ -195,7 +195,7 @@ class StatisticMonitor:
                 ## Get data from API response
                 if target == "analysis_events":
                     data = data[0]
-                elif target == "remoted":
+                elif target == "remote":
                     data = data[1]
                 elif target == "wazuhdb":
                     data = data[2]
@@ -286,7 +286,7 @@ class StatisticMonitor:
                         decoded['monitor'] / interval,                                          # 62
                         decoded['remote'] / interval,                                           # 63
                     ))
-                elif target == "remoted":
+                elif target == "remote":
                     metrics = data['metrics']
                     received_messages = metrics['messages']['received_breakdown']
                     sent_messages = metrics['messages']['sent_breakdown']
@@ -543,7 +543,7 @@ class StatisticMonitor:
                     log.write("{0},{1},{2},{3},{4},{5}\n".format(
                         timestamp, data['location'], data['events'], data['bytes'], data['target'], data['target_drops']))
 
-                elif target == "remoted":
+                elif target == "remote":
                     logger.info("Writing remoted.state info to {}.".format(csv_file))
                     log.write("{0},{1},{2},{3},{4},{5},{6},{7}\n".format(
                         timestamp,                  # 0
