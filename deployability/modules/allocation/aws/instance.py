@@ -19,7 +19,7 @@ class AWSInstance(Instance):
         user (str): User associated with the instance.
     """
 
-    def __init__(self, path: str | Path, identifier: str, credentials: AWSCredentials = None, user: str = None) -> None:
+    def __init__(self, path: str | Path, identifier: str, credentials: AWSCredentials = None, host_identifier: str = None, user: str = None) -> None:
         """
         Initialize an AWSInstance object.
 
@@ -33,6 +33,7 @@ class AWSInstance(Instance):
         self._user = user
         self._client = boto3.resource('ec2')
         self._instance = self._client.Instance(self.identifier)
+        self.host_identifier = host_identifier
         if not self.credentials:
             logger.debug(f"No credentials found. Loading from instance directory.")
             self.credentials = self.__get_credentials()

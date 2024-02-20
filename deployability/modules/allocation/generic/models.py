@@ -31,6 +31,7 @@ class TrackOutput(BaseModel):
     provider: str
     instance_dir: str
     key_path: str
+    host_identifier: str | None = None
 
 
 class InputPayload(BaseModel):

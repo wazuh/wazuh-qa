@@ -86,7 +86,7 @@ class Provider(ABC):
         return cls._load_instance(instance_dir, instance_id)
 
     @classmethod
-    def destroy_instance(cls, instance_dir: str | Path, identifier: str, key_path: str) -> None:
+    def destroy_instance(cls, instance_dir: str | Path, identifier: str, key_path: str, host_identifier: str = None) -> None:
         """
         Destroys an existing instance and removes its directory.
 
@@ -94,9 +94,10 @@ class Provider(ABC):
             instance_dir (str | Path): The directory of the instance.
             identifier (str): The identifier of the instance.
             key_path (str): The path to the key pair associated with the instance.
+            host_identifier (str, optional): The identifier of the host instance. Defaults to None.
         """
         instance_dir = Path(instance_dir)
-        cls._destroy_instance(instance_dir, identifier, key_path)
+        cls._destroy_instance(instance_dir, identifier, key_path, host_identifier)
         shutil.rmtree(instance_dir, ignore_errors=True)
 
     @classmethod
@@ -133,7 +134,7 @@ class Provider(ABC):
 
     @classmethod
     @abstractmethod
-    def _destroy_instance(cls, instance_dir: Path, identifier: str, key_path: str) -> None:
+    def _destroy_instance(cls, instance_dir: Path, identifier: str, key_path: str, host_identifier: str = None) -> None:
         """
         Abstract method that destroys an existing instance.
 
@@ -141,6 +142,7 @@ class Provider(ABC):
             instance_dir (Path): The directory of the instance.
             identifier (str): The identifier of the instance.
             key_path (str): The path to the key pair associated with the instance.
+            host_identifier (str, optional): The identifier of the host instance. Defaults to None.
         """
         pass
 
