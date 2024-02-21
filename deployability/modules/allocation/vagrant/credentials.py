@@ -59,11 +59,11 @@ class VagrantCredentials(Credentials):
             public_key_path.unlink()
         # Generate the key pair.
         command = ["ssh-keygen",
-                   "-f", str(private_key_path),
-                   "-m", "PEM",
-                   "-t", "rsa",
-                   "-N", "",
-                   "-q"]
+                    "-f", str(private_key_path),
+                    "-m", "PEM",
+                    "-t", "rsa",
+                    "-N", "",
+                    "-q"]
         output = subprocess.run(command, check=True,
                                 capture_output=True, text=True)
         os.chmod(private_key_path, 0o600)
@@ -86,7 +86,10 @@ class VagrantCredentials(Credentials):
         Raises:
             CredentialsError: This exception is raised if the key pair doesn't exist or the specified directory is invalid.
         """
-        key_path = Path(path)
+        if path.endswith('.pub'):
+            key_path = Path(os.path.splitext(path)[0])
+        else:
+            key_path = Path(path)
         if not key_path.exists() or not key_path.is_file():
             raise self.CredentialsError(f"Invalid key path {key_path}.")
         self.key_path = key_path
@@ -105,3 +108,20 @@ class VagrantCredentials(Credentials):
         Path(self.key_path.with_suffix(".pub")).unlink()
         self.key_id = None
         self.key_path = None
+
+    def ssh_key_interpreter(self, ssh_key_path: str | Path) -> str:
+        """
+        Gets the path of the public SSH Key from the provisioned public or private key
+
+        Args:
+            public_key_path (str): The public or private key path or aws key id.
+
+        Returns:
+            str: The path of the public key.
+
+        Raises:
+            CredentialsError: An error occurred during key pair loading.
+        """
+        if not ssh_key_path.endswith('.pub'):
+            ssh_key_path = ssh_key_path + ".pub"
+        return ssh_key_path

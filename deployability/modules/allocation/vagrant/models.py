@@ -12,6 +12,7 @@ class VagrantConfig(ProviderConfig):
     box_version: str
     private_key: str
     public_key: str
+    name: str
 
     @field_validator('public_key', mode='before')
     @classmethod

@@ -1,12 +1,13 @@
-
+{% if ansible_os_family == 'Debian' %}
 - name: Uninstall {{ component }}
   apt:
     name: {{ component }}
     state: absent
-  when: ansible_os_family == "Debian"
+{% endif %}
 
+{% if ansible_os_family == 'RedHat' %}
 - name: Uninstall {{ component }}
   yum:
     name: {{ component }}
     state: absent
-  when: ansible_os_family == "RedHat"
+{% endif %}

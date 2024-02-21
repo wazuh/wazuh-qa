@@ -4,14 +4,14 @@ vagrant:
     box: generic/ubuntu1604
     box_version: 4.3.8
   linux-ubuntu-18.04-amd64:
-    box: generic/ubuntu1804
-    box_version: 4.3.8
+    box: ubuntu/bionic64
+    box_version: 20230607.0.0
   linux-ubuntu-20.04-amd64:
-    box: generic/ubuntu2004
-    box_version: 4.3.8
+    box: ubuntu/focal64
+    box_version: 20240130.0.0
   linux-ubuntu-22.04-amd64:
-    box: generic/ubuntu2204
-    box_version: 4.3.8
+    box: ubuntu/jammy64
+    box_version: 20240131.0.0
   # Debian
   linux-debian-9-amd64:
     box: generic/debian9
@@ -20,19 +20,28 @@ vagrant:
     box: generic/debian10
     box_version: 4.3.8
   linux-debian-11-amd64:
-    box: generic/debian11
-    box_version: 4.3.8
+    box: debian/bullseye64
+    box_version: 11.20231211.1
   linux-debian-12-amd64:
-    box: generic/debian12
-    box_version: 4.3.8
+    box: debian/bookworm64
+    box_version: 12.20231211.1
   # Oracle Linux
+  linux-oracle-7-amd64:
+    box: generic/oracle7
+    box_version: 4.3.12
+  linux-oracle-8-amd64:
+    box: generic/oracle8
+    box_version: 4.3.12
   linux-oracle-9-amd64:
     box: generic/oracle9
-    box_version: 4.3.8
-  # Suse Linux
-  linux-suse-15-amd64:
+    box_version: 4.3.12
+  # openSUSE Linux
+  linux-opensuse-15-amd64:
     box: generic/opensuse15
     box_version: 4.3.8
+  linux-opensuse-tumbleweed-amd64:
+    box: opensuse/Tumbleweed.x86_64
+    box_version: 1.0.20240207
   # Centos
   linux-centos-7-amd64:
     box: generic/centos7
@@ -40,6 +49,9 @@ vagrant:
   linux-centos-8-amd64:
     box: generic/centos8
     box_version: 4.3.8
+  linux-centos-9-amd64:
+    box: generic/centos9s
+    box_version: 4.3.12
   # Redhat
   linux-redhat-7-amd64:
     box: generic/rhel7
@@ -49,7 +61,7 @@ vagrant:
     box_version: 3.6.8
   linux-redhat-9-amd64:
     box: generic/rhel9
-    box_version: 3.6.8
+    box_version: 4.3.12
   # Amazon
   linux-amazon-2-amd64:
     box: bento/amazonlinux-2
@@ -71,8 +83,15 @@ vagrant:
     box: generic/fedora37
     box_version: 4.3.8
   linux-fedora-38-amd64:
-    box: generic/fedora38
-    box_version: 4.3.8
+    box: alvistack/fedora-38
+    box_version: 20240206.1.1
+  # Rocky Linux
+  linux-rocky-8-amd64:
+    box: generic/rocky8
+    box_version: 4.3.12
+  linux-rocky-9-amd64:
+    box: generic/rocky9
+    box_version: 4.3.12
   # # Macos
   # macos-ventura-13.04-amd64:
   #   box: logantbond/ventura
@@ -80,35 +99,179 @@ vagrant:
   # macos-sonoma-14.2-amd64:
   #   box: barindersingh/sonoma
   #   box_version: 1.0.6
-  # # Windows
-  # windows-desktop-10-amd64:
-  #   box: gusztavvargadr/windows-10
-  #   box_version: 2202.0.2312
-  # windows-desktop-11-amd64:
-  #   box: gusztavvargadr/windows-11
-  #   box_version: 2302.0.2312
-  # windows-server-2012-amd64:
-  #   box: jborean93/WindowsServer2012
-  #   box_version: 1.2.0
-  # windows-server-2012r2-amd64:
-  #   box: devopsgroup-io/windows_server-2012r2-standard-amd64-nocm
-  #   box_version: 1.67.0
-  # windows-server-2016-amd64:
-  #   box: mwrock/Windows2016
-  #   box_version: 0.3.0
-  # windows-server-2019-amd64:
-  #   box: gusztavvargadr/windows-server-2019-standard
-  #   box_version: 1809.0.2310
-  # windows-server-2022-amd64:
-  #   box: gusztavvargadr/windows-server-2022-standard
-  #   box_version: 2102.0.2312
+  # Windows
+  windows-desktop-10-amd64:
+    box: gusztavvargadr/windows-10
+    box_version: 2202.0.2312
+  windows-desktop-11-amd64:
+    box: gusztavvargadr/windows-11
+    box_version: 2302.0.2312
+  windows-server-2012-amd64:
+    box: jborean93/WindowsServer2012
+    box_version: 1.2.0
+  windows-server-2012r2-amd64:
+    box: addle/windows-server-2012-r2
+    box_version: 1.20170205.1
+  windows-server-2016-amd64:
+    box: mwrock/Windows2016
+    box_version: 0.3.0
+  windows-server-2019-amd64:
+    box: gusztavvargadr/windows-server-2019-standard
+    box_version: 1809.0.2310
+  windows-server-2022-amd64:
+    box: gusztavvargadr/windows-server-2022-standard
+    box_version: 2102.0.2312
 
 aws:
+  # Ubuntu
   linux-ubuntu-22.04-amd64:
-    ami: ami-0fc5d935ebf8bc3bc
+    ami: ami-053b0d53c279acc90
     zone: us-east-1
     user: ubuntu
   linux-ubuntu-22.04-arm64:
     ami: ami-016485166ec7fa705
     zone: us-east-1
     user: ubuntu
+  linux-ubuntu-18.04-amd64:
+    ami: ami-0d23ec1228995e83b
+    zone: us-east-1
+    user: ubuntu
+  linux-ubuntu-20.04-amd64:
+    ami: ami-0261755bbcb8c4a84
+    zone: us-east-1
+    user: ubuntu
+  # Debian
+  linux-debian-10-amd64:
+    ami: ami-0aef3e5090bf17640
+    zone: us-east-1
+    user: admin
+  linux-debian-11-amd64:
+    ami: ami-0f63aa666117f7cc1
+    zone: us-east-1
+    user: admin
+  linux-debian-12-amd64:
+    ami: ami-058bd2d568351da34
+    zone: us-east-1
+    user: admin
+  # Oracle Linux
+  linux-oracle-7-amd64:
+    ami: ami-0fb08d5eb039a9ebd
+    zone: us-east-1
+    user: admin
+  linux-oracle-8-amd64:
+    ami: ami-04921b5223c6ab7f0
+    zone: us-east-1
+    user: admin
+  linux-oracle-9-amd64:
+    ami: ami-01453ca80e53609e3
+    zone: us-east-1
+    user: admin
+  # openSUSE Linux
+  linux-opensuse-15-amd64:
+    ami: ami-06b6eb8f8fb7f2916
+    zone: us-east-1
+    user: ec2-user
+  # SUSE Linux
+  linux-suse-15-amd64:
+    ami: ami-08f3662e2d5b3989a
+    zone: us-east-1
+    user: ec2-user
+  # Centos
+  linux-centos-7-amd64:
+    ami: ami-0aedf6b1cb669b4c7
+    zone: us-east-1
+    user: ec2-user
+  linux-centos-8-amd64:
+    ami: ami-0ee534f954d1b2c98
+    zone: us-east-1
+    user: ec2-user
+  linux-centos-9-amd64:
+    ami: ami-0259c451b16b72e24
+    zone: us-east-1
+    user: ec2-user
+  # Redhat
+  linux-redhat-7-amd64:
+    ami: ami-0bd83a2aad0515b35
+    zone: us-east-1
+    user: ec2-user
+  linux-redhat-7-arm64:
+    ami: ami-0e97b0e0c6dce1d4e
+    zone: us-east-1
+    user: ec2-user
+  linux-redhat-8-amd64:
+    ami: ami-054333d53aa32850c
+    zone: us-east-1
+    user: ec2-user
+  linux-redhat-9-amd64:
+    ami: ami-026ebd4cfe2c043b2
+    zone: us-east-1
+    user: ec2-user
+  # Amazon
+  linux-amazon-2-amd64:
+    ami: ami-0bb4c991fa89d4b9b
+    zone: us-east-1
+    user: ec2-user
+  linux-amazon-2023-amd64:
+    ami: ami-067d1e60475437da2
+    zone: us-east-1
+    user: ec2-user
+  # Fedora
+  linux-fedora-37-amd64:
+    ami: ami-0a3279828fb6dad65
+    zone: us-east-1
+    user: ec2-user
+  linux-fedora-38-amd64:
+    ami:
+    zone: us-east-1
+    user: ec2-user
+  # Rocky Linux
+  linux-rocky-9-amd64:
+    ami: ami-09c77dc92e45bc3ea
+    zone: us-east-1
+    user: rocky
+  # Macos
+  macos-ventura-13.04-amd64:
+    ami: ami-05f4e10ccf8272fba
+    zone: us-east-1
+    user: ec2-user
+  macos-ventura-13.04-arm64:
+    ami: ami-05acb4959a4fc514d
+    zone: us-east-1
+    user: ec2-user
+  macos-sonoma-14.2.1-amd64:
+    ami: ami-0308cf13df41f942f
+    zone: us-east-1
+    user: ec2-user
+  macos-sonoma-14.2.1-arm64:
+    ami: ami-088797a8c678dfc1a
+    zone: us-east-1
+    user: ec2-user
+  macos-monterey-12.7.2-arm64:
+    ami: ami-040d932478899fea7
+    zone: us-east-1
+    user: ec2-user
+  # Windows
+  windows-desktop-10-amd64:
+    ami: ami-004ca0c10752e17ce
+    zone: us-east-1
+    user: Administrator
+  windows-desktop-11-amd64:
+    ami: ami-09d8cef159442d5b0
+    zone: us-east-1
+    user: Administrator
+  windows-server-2012r2-amd64:
+    ami: ami-0eb3cabd65ed56ee6
+    zone: us-east-1
+    user: Administrator
+  windows-server-2016-amd64:
+    ami: ami-0f8b5c22ce0a7cf3b
+    zone: us-east-1
+    user: Administrator
+  windows-server-2019-amd64:
+    ami: ami-0ffb936e0378c083f
+    zone: us-east-1
+    user: Administrator
+  windows-server-2022-amd64:
+    ami: ami-0ad422b1ff6909089
+    zone: us-east-1
+    user: Administrator

@@ -90,7 +90,7 @@ class VagrantInstance(Instance):
         """
         if not 'running' in self.status():
             logger.debug(f"Instance {self.identifier} is not running.\
-                          Starting it.")
+                            Starting it.")
             self.start()
         output = self.__run_vagrant_command('ssh-config')
         patterns = {'hostname': r'HostName (.*)',

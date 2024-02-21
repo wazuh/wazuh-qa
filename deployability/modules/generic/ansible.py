@@ -19,7 +19,8 @@ class Inventory(BaseModel):
 class Ansible:
     def __init__(self, ansible_data: dict | Inventory, path: str | Path = None):
         self.path = path
-        self.playbooks_path = Path(__file__).parents[2] / 'playbooks'
+        self.modules_path = Path(__file__).parents[1]
+        self.provision_playbook_path = self.modules_path / 'provision/playbooks'
         self.ansible_data = Inventory(**dict(ansible_data))
         self.inventory = self.generate_inventory()
         self.logger = Logger(Path(__file__).stem).get_logger()
@@ -32,7 +33,7 @@ class Ansible:
             rendering_variables (dict): Extra variables to render the playbooks.
         """
         tasks = []
-        path_to_render_playbooks = self.playbooks_path / rendering_variables.get("templates_path")
+        path_to_render_playbooks = self.provision_playbook_path / rendering_variables.get("templates_path")
         template_loader = jinja2.FileSystemLoader(searchpath=path_to_render_playbooks)
         template_env = jinja2.Environment(loader=template_loader)
 

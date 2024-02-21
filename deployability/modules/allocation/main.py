@@ -2,7 +2,7 @@ import argparse
 import os
 import sys
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 sys.path.append(project_root)
 
 from modules.allocation import Allocator
@@ -14,11 +14,14 @@ def parse_arguments():
     parser.add_argument("--size", choices=['micro', 'small', 'medium', 'large', None], required=False, default=None)
     parser.add_argument("--composite-name", required=False, default=None)
     parser.add_argument("--action", choices=['create', 'delete'], required=False, default='create')
-    parser.add_argument("--custom-credentials", required=False, default=None)
+    parser.add_argument("--ssh-key", required=False, default=None)
     parser.add_argument("--custom-provider-config", required=False, default=None)
     parser.add_argument("--track-output", required=False, default='/tmp/wazuh-qa/track.yml')
     parser.add_argument("--inventory-output", required=False, default='/tmp/wazuh-qa/inventory.yml')
     parser.add_argument("--working-dir", required=False, default='/tmp/wazuh-qa')
+    parser.add_argument("--label-issue", required=False, default=None)
+    parser.add_argument("--label-team", required=False, default=None)
+    parser.add_argument("--label-termination-date", required=False, default=None)
     return parser.parse_args()
 
 

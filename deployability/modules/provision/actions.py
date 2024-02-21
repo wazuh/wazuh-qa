@@ -47,15 +47,28 @@ class Action:
         """
         status = {}
 
-        logger.info(f"Executing {self.component.type} for {self.component.component}")
-        tasks = self.ansible.render_playbooks(self.component.variables_dict)
+        ansible_task = [{
+            'name': 'Capture ansible_os_family',
+            'set_fact': {
+                'ansible_os_family': "{{ ansible_facts['distribution_file_variety'] }}",
+                'cacheable': 'yes'
+            }
+        }]
 
         playbook = {
             'hosts': self.ansible.ansible_data.ansible_host,
             'become': True,
             'gather_facts': True,
-            'tasks': tasks
+            'tasks': ansible_task
         }
+        status = self.ansible.run_playbook(playbook)
+
+        self.component.variables_dict['ansible_os_family'] = status.get_fact_cache(host=self.ansible.ansible_data.ansible_host)['ansible_os_family']
+
+        logger.info(f"Executing {self.component.type} for {self.component.component}")
+
+        tasks = self.ansible.render_playbooks(self.component.variables_dict)
+        playbook['tasks'] = tasks
 
         status = self.ansible.run_playbook(playbook)
 
