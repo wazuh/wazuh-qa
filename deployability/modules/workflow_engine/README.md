@@ -14,7 +14,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
 
 2. Clone the `wazuh-qa` repository:
 
-  ```bash
+	```bash
 	git clone {wazuh-qa}
 	```
 
