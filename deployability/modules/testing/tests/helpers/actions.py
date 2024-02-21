@@ -248,6 +248,12 @@ def uninstall_macos_agent():
         utils.run_command(command)
 
 def checkfiles(os_type):
+    """
+    It captures a structure of a /Var or c: directory status
+
+    Returns:
+        List: list of directories
+    """
     if os_type == 'linux' or os_type == 'macos':
         command = "sudo find /var -type f -o -type d 2>/dev/null"
     elif os_type == 'windows':
@@ -267,6 +273,12 @@ def checkfiles(os_type):
         return None
 
 def get_os_type():
+    """
+    It returns the os_type of host
+
+    Returns:
+        str: type of host (windows, linux, macos)
+    """
     system = platform.system()
     
     if system == 'Windows':
@@ -279,6 +291,15 @@ def get_os_type():
         return 'unknown'
 
 def perform_action_and_scan(callback):
+    """
+    Frame where check-file is taken before and after the callback
+
+    Args:
+        callback (callback): callback that can modify the file directory
+
+    Returns:
+        dict: added and removed files
+    """
     initial_scan = checkfiles(get_os_type())
 
     callback()
@@ -294,9 +315,21 @@ def perform_action_and_scan(callback):
     return changes
 
 def get_achitecture():
+    """
+    It returns the arch of host
+
+    Returns:
+        str: arch (aarch64, x86_64, intel, apple)
+    """
     return platform.machine()
 
 def get_linux_distribution():
+    """
+    It returns the linux distribution of host
+
+    Returns:
+        str: linux distribution (dev, rpm)
+    """
     if get_os_type() == 'linux':
         package_managers = {
             '/etc/debian_version': 'deb',
@@ -306,5 +339,3 @@ def get_linux_distribution():
         for file_path, package_manager in package_managers.items():
             if os.path.exists(file_path):
                 return package_manager
-
-print(get_linux_distribution())
