@@ -64,15 +64,11 @@ class Provision(ProvisionModule):
             list[ComponentInfo]: List of components with the dependency IP.
         """
         components = payload.install or payload.uninstall
+        dependencies = self.__get_deps_ips(payload.dependencies)
         # Check each component and add the dependency IP if required
         for component in components:
-            if not component.component == 'wazuh-agent':
-                continue
-            elif not payload.manager_ip:
-                raise ValueError('Dependency IP is required to install Wazuh Agent.')
-            # Add the dependency IP to the component
-            logger.debug(f"Setting component dependency IP: {payload.manager_ip}")
-            component.manager_ip = payload.manager_ip
+            component.dependencies = dependencies
+            self.__validate_component_deps(component)
         return components
 
     def install_host_dependencies(self) -> dict:
@@ -128,3 +124,43 @@ class Provision(ProvisionModule):
         except Exception as e:
             logger.error(f'Error loading inventory file "{inventory}": {e}')
             raise
+
+    def __get_deps_ips(self, dependencies: dict) -> dict | None:
+        """
+        Get the list of dependencies IPs from reading each dependency`s
+        inventory file and returning its ansible_host as IP.
+        
+        Args:
+            dependencies (list[dict]): List of dependencies.
+            
+        Returns:
+            dict: Dictionary with the dependencies IPs.
+        """
+        if not dependencies:
+            return
+        dependencies_ips = {}
+        for key, value in dependencies.items():
+            try:
+                inventory = Path(value)
+                if not inventory.exists():
+                    raise FileNotFoundError(f'Inventory file "{inventory}" not found.')
+                dep_ip = Utils.load_from_yaml(inventory, specific_key='ansible_host')
+                dependencies_ips[key] = dep_ip
+            except Exception as e:
+                logger.error(f'Error getting dependency IP: {e}')
+                raise
+        return dependencies_ips
+    
+    def __validate_component_deps(self, component: ComponentInfo) -> None:
+        """
+        Validate the component dependencies.
+
+        Args:
+            component (ComponentInfo): Component to validate.
+        """
+        name = component.component
+        dependencies = component.dependencies
+        # Dependencies validations.
+        if name == 'wazuh-agent' and not dependencies.get('manager'):
+            raise ValueError('Dependency IP is required to install Wazuh Agent.')
+        logger.debug(f"Setting dependencies: {dependencies} for {name} component.")

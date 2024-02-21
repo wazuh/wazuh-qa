@@ -12,7 +12,7 @@ class ComponentType(ABC):
         component (str): The component to be provisioned.
         type (str): The type of the component.
         version (str): The version of the component.
-        manager_ip (str): The manager IP to be used in the provision.
+        dependencies (str): The IPs of the component dependencies. Example: Manager's IP.
         templates_path (str): The path to the templates.
         templates_order (list[str]): The order of the templates to be executed.
     """
@@ -29,7 +29,7 @@ class ComponentType(ABC):
         self.component = component_info.component
         self.type = component_info.type
         self.version = component_info.version
-        self.manager_ip = component_info.manager_ip or None
+        self.dependencies = component_info.dependencies or None
 
     def get_templates_path(self, action: str):
         """
@@ -52,7 +52,7 @@ class ComponentType(ABC):
             'component': self.component,
             'version': self.version,
             'version': self.type,
-            'manager_ip': self.manager_ip,
+            'dependencies': self.dependencies,
             'templates_path': self.templates_path,
             'templates_order': self.templates_order or None
         }
