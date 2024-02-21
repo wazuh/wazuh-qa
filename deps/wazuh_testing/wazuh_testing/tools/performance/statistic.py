@@ -191,11 +191,11 @@ class StatisticMonitor:
             csv_file (string): path to the CSV file.
         """
         if target == "analysis":
-            csv_header = headers.analysisd_header if self.use_state_file == True else headers.analysisd_events_header
+            csv_header = headers.analysisd_header if self.use_state_file else headers.analysisd_events_header
         elif target == "logcollector":
             csv_header = headers.logcollector_header
         elif target == "remote":
-            csv_header = headers.remoted_header if self.use_state_file == True  else headers.remoted_api_header
+            csv_header = headers.remoted_header if self.use_state_file else headers.remoted_api_header
         elif target == "wazuhdb":
             csv_header = headers.wazuhdb_header
         else:
