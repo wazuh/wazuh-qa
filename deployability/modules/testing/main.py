@@ -17,6 +17,7 @@ def parse_arguments():
     parser.add_argument("--wazuh-version", required=True)
     parser.add_argument("--wazuh-revision", required=True)
     parser.add_argument("--wazuh-branch", required=False)
+    parser.add_argument('--live', required=True)
     return parser.parse_args()
 
 if __name__ == "__main__":

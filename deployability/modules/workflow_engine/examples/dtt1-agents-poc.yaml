@@ -28,6 +28,7 @@ tasks:
           - component: "agent"
           - wazuh-version: "4.7.1"
           - wazuh-revision: "40709"
+          - live: False
     depends-on:
       - "provision-install-{agent}"
       - "provision-manager"

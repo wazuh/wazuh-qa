@@ -9,7 +9,7 @@ def pytest_addoption(parser):
     parser.addoption('--system', required=False, help='OS version where wazuh was installed.')
     parser.addoption('--component', required=False, help='Component to be tested.')
     parser.addoption('--dependencies', required=False, help='Dependency to be tested.')
-
+    parser.addoption('--live', required=True)
 
 @pytest.fixture(scope='session')
 def wazuh_version(request):
@@ -29,3 +29,8 @@ def system(request):
 @pytest.fixture(scope='session')
 def component(request):
     return request.config.getoption('component')
+
+
+@pytest.fixture(scope='session')
+def live(request) -> str | None:
+    return request.config.getoption('live')
