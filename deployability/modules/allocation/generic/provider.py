@@ -7,13 +7,14 @@ from pathlib import Path
 
 from .instance import Instance
 from .models import CreationPayload, ProviderConfig
+from .utils import logger
 
 
 class Provider(ABC):
     """
     An abstract base class for providers.
 
-    This class provides an interface for creating, loading, and destroying instances. 
+    This class provides an interface for creating, loading, and destroying instances.
     It also provides methods to get OS, size, and miscellaneous specifications for the provider.
 
     Attributes:
@@ -27,8 +28,8 @@ class Provider(ABC):
     OS_PATH = SPECS_DIR / 'os.yml'
     SIZE_PATH = SPECS_DIR / 'size.yml'
     MISC_PATH = SPECS_DIR / 'misc.yml'
-    
-    
+
+
     class ProvisioningError(Exception):
         """
         Exception raised for errors in the provisioning process.
@@ -47,7 +48,7 @@ class Provider(ABC):
         pass
 
     @classmethod
-    def create_instance(cls, base_dir: str | Path, params: CreationPayload, config: ProviderConfig = None) -> Instance:
+    def create_instance(cls, base_dir: str | Path, params: CreationPayload, config: ProviderConfig = None, ssh_key: str = None) -> Instance:
         """
         Creates a new instance.
 
@@ -55,13 +56,14 @@ class Provider(ABC):
             base_dir (str | Path): The base directory for the instance.
             params (CreationPayload): The parameters for creating the instance.
             config (ProviderConfig, optional): The configuration for the instance. Defaults to None.
+            ssh_key (str, optional): Public or private key for the instance. For example, we assume that if the public key is provided, the private key is located in the same directory and has the same name as the public key. Defaults to None.
 
         Returns:
             Instance: The created instance.
         """
         params = CreationPayload(**dict(params))
         base_dir = Path(base_dir)
-        return cls._create_instance(base_dir, params, config)
+        return cls._create_instance(base_dir, params, config, ssh_key)
 
     @classmethod
     def load_instance(cls, instance_dir: str | Path, instance_id: str) -> Instance:
@@ -76,29 +78,30 @@ class Provider(ABC):
             Instance: The loaded instance.
 
         Raises:
-            Exception: If the instance directory does not exist.
+            ValueError: If the instance directory does not exist.
         """
         instance_dir = Path(instance_dir)
         if not instance_dir.exists():
-            raise Exception(f"Instance path {instance_dir} does not exist")
+            raise ValueError(f"Instance path {instance_dir} does not exist")
         return cls._load_instance(instance_dir, instance_id)
 
     @classmethod
-    def destroy_instance(cls, instance_dir: str | Path, identifier: str) -> None:
+    def destroy_instance(cls, instance_dir: str | Path, identifier: str, key_path: str) -> None:
         """
         Destroys an existing instance and removes its directory.
 
         Args:
             instance_dir (str | Path): The directory of the instance.
             identifier (str): The identifier of the instance.
+            key_path (str): The path to the key pair associated with the instance.
         """
         instance_dir = Path(instance_dir)
-        cls._destroy_instance(instance_dir, identifier)
+        cls._destroy_instance(instance_dir, identifier, key_path)
         shutil.rmtree(instance_dir, ignore_errors=True)
 
     @classmethod
     @abstractmethod
-    def _create_instance(cls, base_dir: Path, params: CreationPayload, config: ProviderConfig = None) -> Instance:
+    def _create_instance(cls, base_dir: Path, params: CreationPayload, config: ProviderConfig = None, ssh_key: str = None) -> Instance:
         """
         Abstract method that creates a new instance.
 
@@ -106,6 +109,7 @@ class Provider(ABC):
             base_dir (Path): The base directory for the instance.
             params (CreationPayload): The parameters for creating the instance.
             config (ProviderConfig, optional): The configuration for the instance. Defaults to None.
+            ssh_key (str, optional): Public or private key for the instance. Defaults to None.
 
         Returns:
             Instance: The created instance.
@@ -129,13 +133,14 @@ class Provider(ABC):
 
     @classmethod
     @abstractmethod
-    def _destroy_instance(cls, instance_dir: Path, identifier: str) -> None:
+    def _destroy_instance(cls, instance_dir: Path, identifier: str, key_path: str) -> None:
         """
         Abstract method that destroys an existing instance.
 
         Args:
             instance_dir (Path): The directory of the instance.
             identifier (str): The identifier of the instance.
+            key_path (str): The path to the key pair associated with the instance.
         """
         pass
 
