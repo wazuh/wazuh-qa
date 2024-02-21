@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.7.3] - TBD
 
+### Changed
+
+- Upgrade wazuh-db agent database version. ([#4992](https://github.com/wazuh/wazuh-qa/pull/4992)) \- (Core)
+
 ## [4.7.2] - 10/01/2024
 
 ### Fixed
