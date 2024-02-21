@@ -1,9 +1,9 @@
-from . import utils
 import time
 import subprocess
 import os
-import hashlib
 import platform
+
+from . import utils
 
 
 def install_wazuh_agent(os_type, wazuh_version, wazuh_revision, aws_s3, repository, dependency_ip, type_os=None, architecture=None):
@@ -49,39 +49,31 @@ def install_linux_agent(wazuh_version, wazuh_revision, aws_s3, repository, depen
         None
     """
 
-    # Define common parts of the URL and file names
     base_url = f"https://{aws_s3}/{repository}/yum/wazuh-agent-{wazuh_version}-{wazuh_revision}"
 
-    # Map architectures to their corresponding suffixes
     architecture_suffix = {'x86_64': 'amd64', 'aarch64': 'aarch64'}
 
-    # Construct URL, download, and install commands
     url = f"{base_url}.{architecture_suffix.get(architecture)}.rpm"
     download_command = f'wget {url} -O wazuh-agent_{wazuh_version}-{wazuh_revision}.{architecture}.rpm'
     install_command = f"sudo WAZUH_MANAGER='{dependency_ip}' rpm -ihv wazuh-agent-{wazuh_version}-{wazuh_revision}.{architecture}.rpm"
 
-    # Adjust for Debian-based systems
     if type_os == 'deb':
         architecture_suffix['x86_64'] = 'amd64'
         url = f"https://{aws_s3}.wazuh.com/{repository}/apt/pool/main/w/wazuh-agent/wazuh-agent_{wazuh_version}-{wazuh_revision}_{architecture_suffix.get(architecture)}.deb"
         download_command = f'wget {url} -O wazuh-agent_{wazuh_version}-{wazuh_revision}_{architecture}.deb'
         install_command = f"sudo WAZUH_MANAGER='{dependency_ip}' dpkg -i ./wazuh-agent_{wazuh_version}-{wazuh_revision}_{architecture}.deb"
 
-    # Download agent
     try:
         subprocess.run(download_command, shell=True, check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error al ejecutar el comando: {e}")
 
     time.sleep(2)
-    # Install agent
-    #subprocess.run("tree", shell=True, check=True)
     try:
         subprocess.run(install_command, shell=True, check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error executing the command: {e}")
 
-    # Post-installation steps for all Linux OS
     post_install_commands = [
         "sudo systemctl daemon-reload",
         "sudo systemctl enable wazuh-agent",
@@ -108,13 +100,10 @@ def install_windows_agent(wazuh_version, wazuh_revision, aws_s3, repository, dep
     Returns:
         None
     """
-    # Replace placeholders in the command with actual values
     install_command = f"Invoke-WebRequest -Uri {aws_s3}/{repository}/windows/wazuh-agent-{wazuh_version}-{wazuh_revision}.msi -OutFile $env:tmp\\wazuh-agent; msiexec.exe /i $env:tmp\\wazuh-agent /q WAZUH_MANAGER='{dependency_ip}' WAZUH_REGISTRATION_SERVER='{dependency_ip}'"
 
-    # Run installation command
     utils.run_command(install_command)
 
-    # Post-installation steps for all Windows OS
     post_install_command = "NET START WazuhSvc"
     utils.run_command(post_install_command)
 
@@ -133,16 +122,13 @@ def install_macos_agent(wazuh_version, wazuh_revision, aws_s3, repository, depen
     Returns:
         None
     """
-    # Replace placeholders in the commands with actual values
     if architecture == 'Intel':
         command = f"curl -so wazuh-agent.pkg {aws_s3}/{repository}/macos/wazuh-agent-{wazuh_version}-{wazuh_revision}.intel64.pkg && echo 'WAZUH_MANAGER='{dependency_ip}'' > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /"
     elif architecture == 'Apple':
         command = f"curl -so wazuh-agent.pkg {aws_s3}/{repository}/macos/wazuh-agent-{wazuh_version}-{wazuh_revision}.arm64.pkg && echo 'WAZUH_MANAGER='{dependency_ip}'' > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /"
 
-    # Run installation commands
     utils.run_command(command)
 
-    # Post-installation steps for all MacOS OS
     post_install_command = "sudo /Library/Ossec/bin/wazuh-control start"
     utils.run_command(post_install_command)
 
@@ -176,8 +162,6 @@ def uninstall_linux_agent(type_os):
     Returns:
         None
     """
-    # Linux uninstallation commands
-    
     if type_os == 'rpm':
         uninstall_commands = ["yum remove wazuh-agent"]
     elif type_os == 'deb':
@@ -186,21 +170,18 @@ def uninstall_linux_agent(type_os):
         "sudo apt-get remove -y --purge wazuh-agent"
         ]
 
-    # Run uninstallation commands
     for command in uninstall_commands:
         print(command)
         try:
             subprocess.run(command, shell=True, check=True)
         except subprocess.CalledProcessError as e:
             print(f"Error al ejecutar el comando: {e}")
-        
-    # Post-uninstallation steps for all Linux OS
+
     post_uninstall_commands = [
         "systemctl disable wazuh-agent",
         "systemctl daemon-reload"
     ]
 
-    # Run post-uninstallation commands
     for command in post_uninstall_commands:
         try:
             subprocess.run(command, shell=True, check=True)
@@ -218,10 +199,8 @@ def uninstall_windows_agent(wazuh_version, wazuh_revision):
     Returns:
         None
     """
-    # Replace placeholders in the command with actual values
     uninstall_command = f"msiexec.exe /x wazuh-agent-{wazuh_version}-{wazuh_revision}.msi /qn"
 
-    # Run uninstallation command
     utils.run_command(uninstall_command)
 
 def uninstall_macos_agent():
@@ -231,7 +210,7 @@ def uninstall_macos_agent():
     Returns:
         None
     """
-    # MacOS uninstallation commands
+
     uninstall_commands = [
         "/Library/Ossec/bin/wazuh-control stop",
         "/bin/rm -r /Library/Ossec",
@@ -243,7 +222,6 @@ def uninstall_macos_agent():
         "/usr/sbin/pkgutil --forget com.wazuh.pkg.wazuh-agent"
     ]
 
-    # Run uninstallation commands
     for command in uninstall_commands:
         utils.run_command(command)
 
@@ -265,7 +243,6 @@ def checkfiles(os_type):
     result = subprocess.run(command, shell=True, executable="/bin/bash", stdout=subprocess.PIPE, text=True)
     
     if result.returncode == 0:
-        # Split the stdout into a list of paths and return
         paths = [path.strip() for path in result.stdout.split('\n') if path.strip()]
         return paths
     else:

@@ -1,10 +1,10 @@
 import grp
 import pwd
-
+import pytest
 
 from ..helpers import actions
 from ..helpers import constants, utils
-import pytest
+
 
 @pytest.fixture
 def wazuh_params(request):
