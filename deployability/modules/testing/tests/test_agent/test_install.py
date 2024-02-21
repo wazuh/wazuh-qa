@@ -13,7 +13,7 @@ def wazuh_params(request):
     return {
         'wazuh_version': request.config.getoption('--wazuh_version'),
         'wazuh_revision': request.config.getoption('--wazuh_revision'),
-        'dependency_ip': request.config.getoption('--dependency_ip'),
+        'dependencies': request.config.getoption('--dependencies'),
         'live': request.config.getoption('--live'),
     }
 
@@ -28,7 +28,7 @@ def test_installation(wazuh_params):
         wazuh_params['wazuh_revision'],
         aws_s3,
         repository,
-        wazuh_params['dependency_ip'],
+        wazuh_params['dependencies'],
         hostinfo.get_linux_distribution(),
         hostinfo.get_architecture()
     )

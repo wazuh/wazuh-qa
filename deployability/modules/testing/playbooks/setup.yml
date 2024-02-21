@@ -24,7 +24,7 @@
 
         - name: Copy deps requirements
           copy:
-            src: "../../deps/remote_requirements.txt"
+            src: "../../../deps/remote_requirements.txt"
             dest: "{{ working_dir }}"
 
         - name: Install dependencies using pip3

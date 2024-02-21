@@ -1,7 +1,8 @@
-import json
-import time
 import chardet
+import json
+import psutil
 import subprocess
+import time
 
 from .constants import AGENTD_STATE, WAZUH_CONTROL, AGENT_CONTROL
 
@@ -232,3 +233,16 @@ def check_agent_is_connected(agent_id: str, timeout: int = 60) -> bool:
 def read_json_file(filepath):
     with open(filepath) as f_json:
         return json.load(f_json)
+
+
+def is_process_alive(process_name: str) -> bool:
+    """
+    Check if a process is running.
+
+    Args:
+        process_name (str): The name of the process to check.
+
+    Returns:
+        bool: True if the process is running, False otherwise.
+    """
+    return process_name in (p.name() for p in psutil.process_iter())
