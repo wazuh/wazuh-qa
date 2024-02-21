@@ -82,9 +82,10 @@ class StatisticMonitor:
             raise ValueError(f'The target {self.target} is not a valid one.')
 
         if self.use_state_file == True:
-            self.csv_file = join(self.dst_dir, f'wazuh-{self.target}d_stats.csv')
+            state_file = splitext(basename(self.statistics_file))[0]
+            self.csv_file = join(self.dst_dir, f'wazuh-{state_file}_stats.csv')
         else:
-            self.csv_file = join(self.dst_dir, f'wazuh-{self.target}d_api_stats.csv')
+            self.csv_file = join(self.dst_dir, f'wazuh-{self.target}_api_stats.csv')
 
 
     def _parse_classic_state_file(self, data, target):
