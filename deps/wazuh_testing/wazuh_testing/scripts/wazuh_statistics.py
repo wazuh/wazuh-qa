@@ -34,12 +34,13 @@ def get_script_arguments():
     parser.add_argument('--store', dest='store_path', action='store', default=gettempdir(),
                         help=f"Path to store the CSVs with the data. Default {gettempdir()}.")
     parser.add_argument('-u', '--use_state_file', action='store_true', default=False,
-                        help="Determine if the state files should be used to collect the for analysisd and remoted."
-                             "Use with remoted and analysis to get data from state files. Default False.")
+                        help="Use state files for analysis and remote operations. "
+                             "When used with 'remote' and 'analysis', data will be collected from state files; "
+                             "otherwise, the API will be used. Default False")
     parser.add_argument('-i', '--ip', dest='ip', action='store', default='localhost',
-                        help=f"IP for the API. Default localhost.")
+                        help=f"Specify the IP address for the API. Default is 'localhost'")
     parser.add_argument('-p', '--port', dest='port', action='store', default='55000',
-                        help=f"port for the API. Default localhost.")
+                        help=f"Specify the port for the API. Default is '55000'")
 
     return parser.parse_args()
 
