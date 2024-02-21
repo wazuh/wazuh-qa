@@ -8,6 +8,7 @@ def pytest_addoption(parser):
     parser.addoption('--wazuh_revision', help='Wazuh revision to test.')
     parser.addoption('--component', help='Component to be tested.')
     parser.addoption('--dependency_ip', required=False, help='IP of the dependency component.')
+    parser.addoption('--live', required=True)
 
 
 @pytest.fixture(scope='session')
@@ -28,6 +29,10 @@ def component(request) -> str | None:
 @pytest.fixture(scope='session')
 def dependency_ip(request) -> str | None:
     return request.config.getoption('dependency_ip')
+
+@pytest.fixture(scope='session')
+def live(request) -> str | None:
+    return request.config.getoption('live')
 
 
 @pytest.fixture(scope='module')

@@ -8,13 +8,30 @@ import pytest
 
 @pytest.fixture
 def wazuh_params(request):
-    wazuh_version = request.config.getoption('--wazuh_version')
-    wazuh_revision = request.config.getoption('--wazuh_revision')
-    dependency_ip = request.config.getoption('--dependency_ip')
-    return {'wazuh_version': wazuh_version, 'wazuh_revision': wazuh_revision, 'dependency_ip': dependency_ip}
+    return {
+        'wazuh_version': request.config.getoption('--wazuh_version'),
+        'wazuh_revision': request.config.getoption('--wazuh_revision'),
+        'dependency_ip': request.config.getoption('--dependency_ip'),
+        'live': request.config.getoption('--live'),
+    }
 
 def test_installation(wazuh_params):
-    result = actions.perform_action_and_scan(lambda: actions.install_wazuh_agent(actions.get_os_type(), wazuh_params['wazuh_version'] , wazuh_params['wazuh_revision'], 'packages', '4.x', wazuh_params['dependency_ip'], actions.get_linux_distribution(), actions.get_achitecture()))
+    aws_s3 = 'packages' if wazuh_params['live'] else 'packages-dev'
+    repository = wazuh_params['wazuh_version'][0] + '.x' if wazuh_params['live'] else 'pre-release'
+
+    install_args = (
+        actions.get_os_type(),
+        wazuh_params['wazuh_version'],
+        wazuh_params['wazuh_revision'],
+        aws_s3,
+        repository,
+        wazuh_params['dependency_ip'],
+        actions.get_linux_distribution(),
+        actions.get_achitecture()
+    )
+
+    result = actions.perform_action_and_scan(lambda: actions.install_wazuh_agent(*install_args))
+
     assert all('wazuh' in path or 'ossec' in path for path in result['added'])
     assert not any('wazuh' in path or 'ossec' in path for path in result['removed'])
 

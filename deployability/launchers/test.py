@@ -1,6 +1,7 @@
 import argparse
 import sys
 import os
+import json
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(project_root)
@@ -18,7 +19,7 @@ def parse_arguments():
     parser.add_argument("--wazuh-version", required=True)
     parser.add_argument("--wazuh-revision", required=True)
     parser.add_argument("--wazuh-branch", required=False)
-    parser.add_argument('--install',  action='append', default=[], help='List of dictionaries for installation.')
+    parser.add_argument('--live', required=True)
     return parser.parse_args()
 
 

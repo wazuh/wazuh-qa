@@ -2,7 +2,6 @@ from pathlib import Path
 from pydantic import BaseModel, field_validator, model_validator
 from typing import Literal
 
-
 class ExtraVars(BaseModel):
     """Extra vars for testing module."""
     component: Literal['manager', 'agent']
@@ -11,6 +10,7 @@ class ExtraVars(BaseModel):
     wazuh_revision: str
     wazuh_branch: str | None = None
     working_dir: str = '/tmp/tests'
+    live: bool = True
 
 
 class InputPayload(ExtraVars):
@@ -19,6 +19,7 @@ class InputPayload(ExtraVars):
     inventory: Path
     dependency: Path = None
     cleanup: bool = True
+    live: bool = True
 
     @field_validator('tests', mode='before')
     def validate_tests(cls, value) -> list[str]:
