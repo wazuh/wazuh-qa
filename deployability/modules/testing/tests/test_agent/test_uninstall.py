@@ -32,6 +32,7 @@ def test_uninstallation(wazuh_params):
     assert all('wazuh' in path or 'ossec' in path for path in result['removed'])
     assert not any('wazuh' in path or 'ossec' in path for path in result['added'])
 
+
 def test_wazuh_user():
     all_users = [x[0] for x in pwd.getpwall()]
     assert constants.WAZUH_USER not in all_users, "Wazuh user found."
@@ -44,6 +45,7 @@ def test_wazuh_group():
 
 def test_process_not_running():
     assert not utils.is_process_alive('wazuh'), 'Wazuh process is running.'
+
 
 def test_config_is_not_maintained():
     assert not constants.WAZUH_CONF.exists(), "Wazuh config file waz found."

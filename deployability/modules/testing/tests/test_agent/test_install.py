@@ -35,9 +35,11 @@ def test_installation(wazuh_params):
     assert all('wazuh' in path or 'ossec' in path for path in result['added'])
     assert not any('wazuh' in path or 'ossec' in path for path in result['removed'])
 
+
 def test_wazuh_user():
     all_users = [x[0] for x in pwd.getpwall()]
     assert constants.WAZUH_USER in all_users, "Wazuh user not found."
+
 
 def test_wazuh_group():
     all_groups = [x[0] for x in grp.getgrall()]
