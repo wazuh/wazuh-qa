@@ -568,9 +568,8 @@ class StatisticMonitor:
                     ))
                 elif target == "agentd_state":
                     logger.info("Writing agentd.state info to {}.".format(csv_file))
-                    log.write("{0},{1},{2},{3},{4},{5},{6}\n".format(
-                        timestamp, data['status'], data['last_keepalive'],
-                        data['last_ack'], data['msg_count']or analysisd and remoted.", data['msg_sent'], data['msg_buffer']))
+                    log.write("{0},{1},{2},{3},{4},{5},{6}\n".format(timestamp, data['status'], data['last_keepalive'],
+                        data['last_ack'], data['msg_count'], data['msg_sent'], data['msg_buffer']))
 
 
     def _monitor_stats(self):
