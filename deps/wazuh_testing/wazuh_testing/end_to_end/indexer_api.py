@@ -54,7 +54,7 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
                 "bool": {
                     "must": [
                         {"range": {"@timestamp": {"gte": f"{greater_than_timestamp}"}}},
-                        {"match": {"agent.id": f"{agent}"}}
+                        {"match": {"agent.name": f"{agent}"}}
                     ]
                 }
         }
