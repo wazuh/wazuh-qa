@@ -33,12 +33,12 @@ def get_script_arguments():
                         help='Enable debug level logging.')
     parser.add_argument('--store', dest='store_path', action='store', default=gettempdir(),
                         help=f"Path to store the CSVs with the data. Default {gettempdir()}.")
-    parser.add_argument('-a', '--use_api', dest='use_api', type=bool, action='store', default=False,
-                        help="Determine if the API should be used to collect the data. Default False."
-                             "For remoted and analysis set to True to get data from API. wazuhdb uses API by default.")
-    parser.add_argument('-i', '--ip' dest='ip', action='store', default='localhost',
+    parser.add_argument('-u', '--use_state_file', action='store_true', default=False,
+                        help="Determine if the state files should be used to collect the for analysisd and remoted."
+                             "Use with remoted and analysis to get data from state files. Default False.")
+    parser.add_argument('-i', '--ip', dest='ip', action='store', default='localhost',
                         help=f"IP for the API. Default localhost.")
-    parser.add_argument('-p', '--port' dest='port', action='store', default='55000',
+    parser.add_argument('-p', '--port', dest='port', action='store', default='55000',
                         help=f"port for the API. Default localhost.")
 
     return parser.parse_args()
@@ -59,7 +59,7 @@ def main():
 
     for target in options.target_list:
         monitor = StatisticMonitor(target=target, time_step=options.sleep_time, dst_dir=options.store_path,
-                                   use_api=options.use_api, ip=options.ip, port=options.port)
+                                   use_state_file=options.use_state_file, ip=options.ip, port=options.port)
         MONITOR_LIST.append(monitor)
         monitor.start()
 
