@@ -3,10 +3,9 @@ import pwd
 import pytest
 
 from ..helpers import constants, utils
-from ..helpers.actions import WazuhInstaller, CheckFile, HostInfo
-
-
-
+from ..helpers.installer import WazuhInstaller
+from ..helpers.checkfiles import CheckFile
+from ..helpers.hostinformation import HostInformation
 
 @pytest.fixture
 def wazuh_params(request):
@@ -21,7 +20,7 @@ def test_installation(wazuh_params):
     aws_s3 = 'packages' if wazuh_params['live'] else 'packages-dev'
     repository = wazuh_params['wazuh_version'][0] + '.x' if wazuh_params['live'] else 'pre-release'
 
-    hostinfo= HostInfo()
+    hostinfo= HostInformation()
     install_args = (
         hostinfo.get_os_type(),
         wazuh_params['wazuh_version'],

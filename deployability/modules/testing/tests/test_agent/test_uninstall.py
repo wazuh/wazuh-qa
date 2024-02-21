@@ -3,13 +3,10 @@ import pwd
 import pytest
 
 from ..helpers import constants, utils
-from ..helpers.actions import WazuhUninstaller, CheckFile, HostInfo
+from ..helpers.uninstaller import WazuhUninstaller
+from ..helpers.checkfiles import CheckFile
+from ..helpers.hostinformation import HostInformation
 
-# @pytest.fixture(scope='module', autouse=True)
-# def uninstall_wazuh():
-#     service = utils.get_service()
-#     daemon_name = 'wazuh-agent' if service == 'agent' else 'wazuh-manager'
-#     utils.run_command('apt-get', ['purge', daemon_name, '-y'])
 
 @pytest.fixture
 def wazuh_params(request):
@@ -19,7 +16,7 @@ def wazuh_params(request):
     }
 
 def test_uninstallation(wazuh_params):
-    hostinfo= HostInfo()
+    hostinfo= HostInformation()
     uninstall_args = (
         hostinfo.get_os_type(),
         wazuh_params['wazuh_version'],
