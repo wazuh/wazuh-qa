@@ -2,13 +2,13 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 version: 0.1
-description: This workflow is used to test agents deployment por DDT1 PoC
+description: This workflow is used to test agents deployment with a single manager.
 variables:
   agents-os:
     - linux-ubuntu-22.04-amd64
   manager-os: linux-ubuntu-22.04-amd64
   infra-provider: vagrant
-  working-dir: /tmp/dtt1-poc
+  working-dir: /tmp/dtt1
 
 tasks:
   # Generic agent test task
