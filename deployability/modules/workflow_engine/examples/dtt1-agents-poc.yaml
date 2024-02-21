@@ -4,6 +4,7 @@
 version: 0.1
 description: This workflow is used to test agents deployment por DDT1 PoC
 variables:
+  # ADD PYTHON VERSION
   agents-os:
     - linux-ubuntu-22.04-amd64
   manager-os: linux-ubuntu-22.04-amd64
