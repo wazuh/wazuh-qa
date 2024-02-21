@@ -30,6 +30,7 @@ def component(request) -> str | None:
 def dependency_ip(request) -> str | None:
     return request.config.getoption('dependency_ip')
 
+
 @pytest.fixture(scope='session')
 def live(request) -> str | None:
     return request.config.getoption('live')
