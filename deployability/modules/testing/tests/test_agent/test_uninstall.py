@@ -2,9 +2,8 @@ import grp
 import pwd
 import pytest
 
-from ..helpers import actions
 from ..helpers import constants, utils
-
+from ..helpers.actions import WazuhUninstaller, CheckFile, HostInfo
 
 # @pytest.fixture(scope='module', autouse=True)
 # def uninstall_wazuh():
@@ -20,14 +19,16 @@ def wazuh_params(request):
     }
 
 def test_uninstallation(wazuh_params):
+    hostinfo= HostInfo()
     uninstall_args = (
-        actions.get_os_type(),
+        hostinfo.get_os_type(),
         wazuh_params['wazuh_version'],
         wazuh_params['wazuh_revision'],
-        actions.get_linux_distribution()
+        hostinfo.get_linux_distribution()
     )
-
-    result = actions.perform_action_and_scan(lambda: actions.uninstall_wazuh_agent(*uninstall_args))
+    checkfile= CheckFile()
+    wazuh_uninstaller= WazuhUninstaller(*uninstall_args)
+    result = checkfile.perform_action_and_scan(lambda: wazuh_uninstaller.uninstall_agent())
 
     assert all('wazuh' in path or 'ossec' in path for path in result['removed'])
     assert not any('wazuh' in path or 'ossec' in path for path in result['added'])

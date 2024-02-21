@@ -2,8 +2,10 @@ import grp
 import pwd
 import pytest
 
-from ..helpers import actions
 from ..helpers import constants, utils
+from ..helpers.actions import WazuhInstaller, CheckFile, HostInfo
+
+
 
 
 @pytest.fixture
@@ -19,18 +21,20 @@ def test_installation(wazuh_params):
     aws_s3 = 'packages' if wazuh_params['live'] else 'packages-dev'
     repository = wazuh_params['wazuh_version'][0] + '.x' if wazuh_params['live'] else 'pre-release'
 
+    hostinfo= HostInfo()
     install_args = (
-        actions.get_os_type(),
+        hostinfo.get_os_type(),
         wazuh_params['wazuh_version'],
         wazuh_params['wazuh_revision'],
         aws_s3,
         repository,
         wazuh_params['dependency_ip'],
-        actions.get_linux_distribution(),
-        actions.get_achitecture()
+        hostinfo.get_linux_distribution(),
+        hostinfo.get_architecture()
     )
-
-    result = actions.perform_action_and_scan(lambda: actions.install_wazuh_agent(*install_args))
+    checkfile= CheckFile()
+    wazuh_installer= WazuhInstaller(*install_args)
+    result = checkfile.perform_action_and_scan(lambda: wazuh_installer.install_agent())
 
     assert all('wazuh' in path or 'ossec' in path for path in result['added'])
     assert not any('wazuh' in path or 'ossec' in path for path in result['removed'])

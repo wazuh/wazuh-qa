@@ -93,9 +93,9 @@ tasks:
     depends-on:
       - "allocate-{agent}"
       - "provision-manager"
-  #  foreach:
-  #    - variable: agents-os
-  #      as: agent
+    foreach:
+      - variable: agents-os
+        as: agent
 
   # Generic agent allocate task
   - task: "allocate-{agent}"
