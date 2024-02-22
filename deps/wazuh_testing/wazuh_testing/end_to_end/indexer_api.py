@@ -32,6 +32,7 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
                                  {'user': 'admin', 'password': 'changeme'}.
         index (Optional): The Indexer index name. Defaults to 'wazuh-alerts*'.
         greater_than_timestamp (Optional): The timestamp to filter the results. Defaults to None.
+        agent (Optional): The agent name to filter the results. Defaults to ''.
 
     Returns:
        Dict: A dictionary containing the values retrieved from the Indexer API.
