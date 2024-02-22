@@ -5,22 +5,27 @@
 import json
 from setuptools import setup, find_packages
 import os
+from pathlib import Path
 
 def get_files_from_directory(directory):
     paths = []
+    base_path = Path(__file__)
     for (path, directories, filenames) in os.walk(directory):
         for filename in filenames:
-            paths.append(os.path.join('..', path, filename))
+            if filename.endswith(('.yaml', '.json', '.md', '.py')):
+                paths.append(os.path.join(base_path, path, filename))
     return paths
 
 def get_version():
-    script_path = os.path.dirname(__file__)
-    rel_path = "../version.json"
-    abs_file_path = os.path.join(script_path, rel_path)
-    f = open(abs_file_path)
-    data = json.load(f)
-    version = data['version']
-    return version
+    abs_path = Path(__file__).parent.parent / "version.json"
+
+    if not os.path.exists(abs_path):
+        raise FileNotFoundError(f'File "{abs_path}" not found.')
+
+    with open(abs_path, 'r') as abs_file:
+        data = json.load(abs_file)
+        version = data['version']
+    return version or None
 
 package_data_list = get_files_from_directory("workflow_engine")
 scripts_list = ['engine=workflow_engine.__main__:main']
