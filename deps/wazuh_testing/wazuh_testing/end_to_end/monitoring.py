@@ -26,8 +26,10 @@ from wazuh_testing.end_to_end import logs_filepath_os
 from wazuh_testing.tools.system import HostManager
 
 
+DEFAULT_SCAN_INTERVAL = 5
+
 def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict, ignore_error: bool = True,
-                                scan_interval: int = 5) -> Dict:
+                                scan_interval: int = DEFAULT_SCAN_INTERVAL) -> Dict:
     """
     Monitor events on multiple hosts concurrently.
 
@@ -64,7 +66,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
     """
     def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict],
                          ignore_error: bool = True,
-                         scan_interval: int = 5) -> Dict:
+                         scan_interval: int = DEFAULT_SCAN_INTERVAL) -> Dict:
         """
         Monitor the specified elements on a host.
 
