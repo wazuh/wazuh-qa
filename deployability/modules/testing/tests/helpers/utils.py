@@ -1,10 +1,13 @@
 import chardet
 import json
 import psutil
+import socket
 import subprocess
 import time
 
-from .constants import AGENTD_STATE, WAZUH_CONTROL, AGENT_CONTROL
+from pathlib import Path
+
+from .constants import AGENTD_STATE, CLIENT_KEYS, WAZUH_CONTROL, AGENT_CONTROL
 
 
 def run_command(binary: str, args: list = None) -> None:
@@ -230,9 +233,57 @@ def check_agent_is_connected(agent_id: str, timeout: int = 60) -> bool:
     raise False
 
 
-def read_json_file(filepath):
+def read_json_file(filepath: str | Path) -> dict:
+    """
+    Read a JSON file and return a dictionary.
+
+    Args:
+        filepath (str, Path): Path to the JSON file.
+
+    Returns:
+        dict: Dictionary with the JSON file content.
+    """
     with open(filepath) as f_json:
         return json.load(f_json)
+
+
+def get_client_keys() -> list[dict]:
+    """
+    Get the client keys from the client.keys file.
+
+    Returns:
+        list: List of dictionaries with the client keys.
+    """
+    clients = []
+    with open(CLIENT_KEYS, 'r') as file:
+        lines = file.readlines()
+        for line in lines:
+            _id, name, address, password = line.strip().split()
+            client_info = {
+                "id": _id,
+                "name": name,
+                "address": address,
+                "password": password
+            }
+            clients.append(client_info)
+    return clients
+
+
+def is_port_in_use(port: int) -> bool:
+    """
+    Check if a port is in use.
+
+    Args:
+        port (int): The port to check.
+
+    Returns:
+        bool: True if the port is in use, False otherwise.
+    """
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    result = sock.connect_ex(('127.0.0.1', 80))
+    sock.close()
+
+    return True if result == 0 else False
 
 
 def is_process_alive(process_name: str) -> bool:

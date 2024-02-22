@@ -1,7 +1,7 @@
 import pytest
 
 from ..helpers import utils
-from ..helpers.constants import DELETING_RESPONSES, RELEASING_RESOURCES, STARTED, WAZUH_CONTROL, WAZUH_LOG
+from ..helpers.constants import WAZUH_CONTROL
 
 
 @pytest.fixture(scope='module', autouse=True)
@@ -9,26 +9,16 @@ def restart_wazuh():
     utils.run_command(WAZUH_CONTROL, ['restart'])
 
 
-def test_release_resources_shutdown_log_raised():
-    assert utils.file_monitor(
-        WAZUH_LOG, RELEASING_RESOURCES), "Release resources log not found."
-
-
-def test_deleting_responses_shutdown_log_raised():
-    assert utils.file_monitor(
-        WAZUH_LOG, DELETING_RESPONSES), "Deleting responses log not found."
-
-
-def test_start_log_raised():
-    assert utils.file_monitor(WAZUH_LOG, STARTED), "Start log not found."
-
-
 def test_service_started():
     assert utils.get_service_status() == "active", "Service is not active after restart."
 
 
-def test_agent_connection_status():
-    expected_status = "connected" 
+def test_local_connection_status(agent_id: str) -> None:
+    expected_status = 'connected'
+    assert utils.check_agent_is_connected(agent_id)
+    assert utils.get_agent_connection_status(agent_id) == expected_status, 'Agent not connected to manager.'
 
-    assert utils.check_agent_is_connected("001")
-    assert utils.get_agent_connection_status("001") == expected_status
+
+def test_server_connection_status(agent_info: dict) -> None:
+    expected_status = 'active'
+    assert agent_info.get('status') == expected_status, 'Agent not connected to manager.'

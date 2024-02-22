@@ -1,11 +1,33 @@
-import os
-
-from ..helpers import utils
-
-
-def test_wazuh_version(wazuh_version):
-    assert wazuh_version in utils.get_version(), "Wazuh version is not the expected."
+import platform
+import pytest
 
 
-def test_wazuh_revision(wazuh_revision):
-    assert wazuh_revision in utils.get_revision(), "Wazuh revision is not the expected."
+@pytest.fixture(scope='module')
+def agent_uname(agent_info: dict) -> dict:
+    uname_list = agent_info.get('os').get('uname').split('|')
+    uname = {'system': uname_list[0],
+             'node': uname_list[1],
+             'release': uname_list[2],
+             'version': uname_list[3],
+             'machine': uname_list[4]}
+    return uname
+
+
+def test_agent_version(expected_version: str, agent_info: dict) -> None:
+    actual_version = agent_info.get('version')
+    assert expected_version in actual_version, 'Unexpected agent version reported by server.'
+
+
+def test_agent_system(agent_uname: dict) -> None:
+    expected_system = platform.uname().system
+    assert expected_system in agent_uname.get('system'), 'Unexpected OS.'
+
+
+def test_agent_architecture(agent_uname: dict) -> None:
+    expected_machine = platform.uname().machine
+    assert expected_machine in agent_uname.get('machine'), 'Unexpected architecture.'
+
+
+def test_agent_os_version(agent_uname: dict) -> None:
+    expected_release = platform.uname().version
+    assert expected_release in agent_uname.get('version'), 'Unexpected OS version.'
