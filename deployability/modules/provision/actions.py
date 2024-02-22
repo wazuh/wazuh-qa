@@ -1,6 +1,6 @@
 from modules.generic import Ansible
 
-from modules.provision.component_type import Package, AIO, Generic, Dependencies
+from modules.provision.component_type import Package, AIO, Generic, Dependencies, Sources
 from modules.provision.models import ComponentInfo
 from modules.provision.utils import logger
 
@@ -33,6 +33,8 @@ class Action:
             self.component = Generic(component_info, action)
         elif action_type == "dependencies":
             self.component = Dependencies(component_info, action)
+        elif action_type == "sources":
+            self.component = Sources(component_info, action)
         else:
             raise ValueError(f"Unsupported action_type: {action_type}")
 

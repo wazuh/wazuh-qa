@@ -129,6 +129,20 @@ class Generic(ComponentType):
     def get_templates_order(self, action: str) -> list:
         return []
 
+class Sources(ComponentType):
+    """
+    Class to define the provision type will be from the source code.
+    """
+    __TEMPLATE_BASE_PATH = 'provision/source'
+
+    def __init__(self, component_info: ComponentType, action: str) -> None:
+        super().__init__(component_info)
+        self.templates_path = f'{self.__TEMPLATE_BASE_PATH}/{action}'
+        self.templates_order = self.get_templates_order(action)
+        self.variables_dict = self.generate_dict()
+
+    def get_templates_order(self, action: str) -> list:
+        return []
 
 class Dependencies(ComponentType):
     """
