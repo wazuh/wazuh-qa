@@ -1,6 +1,6 @@
 from modules.generic import Ansible
 
-from deployability.modules.provision.provision_type import Package, AIO, Generic, Dependencies, Sources
+from deployability.modules.provision.handler import Package, AIO, Generic, Dependencies, Sources
 from modules.provision.models import ComponentInfo
 from modules.provision.utils import logger
 

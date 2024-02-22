@@ -4,7 +4,7 @@ from modules.provision.models import ComponentInfo
 from modules.provision.utils import logger
 
 
-class ComponentHandler:
+class ProvisionHandler:
     """
     Class to define how the component provisioning should be handled.
 
