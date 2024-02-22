@@ -19,6 +19,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Fix wazuhdb API statistics parsing ([#5007](https://github.com/wazuh/wazuh-qa/pull/5007)) \- (Framework)
+- Enhance StatisticMonitor with API support ([#4970](https://github.com/wazuh/wazuh-qa/pull/4970)) \- (Framework)
 - Deactivate tests and update vulnerability-detector configuration ([#4784](https://github.com/wazuh/wazuh-qa/pull/4784)) \- (Framework + Tests)
 - Fix body format for get_api_token ([#4797](https://github.com/wazuh/wazuh-qa/pull/4797)) \- (Framework)
 - Fix one_manager_agent_env pytest marker for System Tests ([#4782](https://github.com/wazuh/wazuh-qa/pull/4782)) \- (Tests)
