@@ -332,6 +332,9 @@ The module is composed of:
 
 [Testing.drawio.zip](https://github.com/wazuh/wazuh-qa/files/14372508/Testing.drawio.zip)
 
+The testing module should receive the infrastructure generated and provisioned by the allocation and provision modules. The module has the ability to execute actions on the hosts as well as perform the necessary validation.
+
+In the case of agent tests, the provisioning of the manager must be done by the provisioner. The install test will perform both installation and validation, so it should always be placed as the first test in the test list. The same situation will occur with the uninstall test, which will go to the end of the test list because it will execute the uninstallation prior to validation.
 
 ### License
 WAZUH Copyright (C) 2015 Wazuh Inc. (License GPLv2)
