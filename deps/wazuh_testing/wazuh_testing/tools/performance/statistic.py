@@ -80,6 +80,8 @@ class StatisticMonitor:
             self.daemon = 'wazuh-analysisd'
         elif self.target == 'wazuhdb':
             self.daemon = 'wazuh-db'
+            self.use_state_file = False
+            logger.warning("Wazuhdb stat monitoring from State File is not supported. Will get data from API.")
         else:
             raise ValueError(f'The target {self.target} is not a valid one.')
 
@@ -592,9 +594,9 @@ class StatisticMonitor:
         """Start the monitoring threads."""
         self.run()
         if self.use_state_file:
-            logger.info(f'Started monitoring statistics from API for {self.target}')
-        else:
             logger.info(f'Started monitoring statistics from {self.statistics_file}')
+        else:
+            logger.info(f'Started monitoring statistics from API for {self.target}')
 
 
     def shutdown(self):
