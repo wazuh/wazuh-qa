@@ -38,12 +38,12 @@ class ProvisionHandler:
 
         # We cant uninstall from sources.
         if action == "uninstall" and method.lower() == "sources":
-            logger.debug(f"Uninstall from sources not supported. Using package.")
+            logger.warning(f"Uninstall from sources not supported. Using package.")
             method = "package"
 
         self.action = action.lower()
         self.method = method.lower()
-        self.component_info = component_info
+        self.component_info = ComponentInfo(**dict(component_info))
         self.templates_path = self._get_templates_path()
         self.templates_order = self._get_templates_order()
         self.variables_dict = self._generate_dict()
@@ -68,12 +68,19 @@ class ProvisionHandler:
         Returns:
             list[str]: List of templates to be executed.
         """
-        if self.method == 'package' and self.action == "install":
-            return ["set_repo.j2", "install.j2", "register.j2", "service.j2"]
-        elif self.method == 'aio':
-            return ["download.j2", f"{self.action}.j2"]
-
-        return []
+        match self.method:
+            case 'package' if self.action == "install":
+                return ["set_repo.j2", "install.j2", "register.j2", "service.j2"]
+            case 'aio':
+                return ["download.j2", f"{self.action}.j2"]
+            case 'sources':
+                component_file = f"{self.component_info.component}.j2"
+                if not Path(f"{self.templates_path}/{component_file}").exists():
+                    # The source installation is always component specific.
+                    raise ValueError(f"Component source file {component_file} not found.")
+                return [component_file]
+            case _:
+                return []
 
     def _generate_dict(self) -> dict:
         """
