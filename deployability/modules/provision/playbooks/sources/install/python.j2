@@ -22,7 +22,7 @@
     state: present
   {% endif %}
 
-- name: Download and extract Python {{ python_version }
+- name: Download and extract Python {{ python_version }}
   get_url:
     url: "https://www.python.org/ftp/python/{{ python_version }}/Python-{{ python_version }}.tgz"
     dest: "/tmp/Python-{{ python_version }}.tgz"
@@ -36,7 +36,7 @@
     remote_src: yes
   when: download_python.changed
 
-- name: Install Python {{ python_version }
+- name: Install Python {{ python_version }}
   shell: |
     cd /tmp/Python-{{ python_version }} && ./configure --enable-optimizations && make altinstall
   args:
