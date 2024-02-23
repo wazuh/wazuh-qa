@@ -55,9 +55,9 @@ AGENTD_CSV_HEADERS = {
 }
 
 LOGCOLLECTOR_CSV_HEADERS = {
-    'events': {'title': 'Events generated', 'columns': ['events']},
-    'bytes_sent': {'title': 'Bytes sent', 'columns': ['bytes']},
-    'drops': {'title': 'Events dropped', 'columns': ['target_drops']},
+    'events': {'title': 'Events generated', 'columns': ['Events']},
+    'bytes_sent': {'title': 'Bytes sent', 'columns': ['Bytes']},
+    'drops': {'title': 'Events dropped', 'columns': ['Target Drops']},
 }
 
 
@@ -210,7 +210,7 @@ class DataVisualizer:
                 targets = self._get_logcollector_targets()
                 colors = self._color_palette(len(targets))
                 for target, color in zip(targets, colors):
-                    self._basic_plot(ax, self.dataframe[self.dataframe.target == target][element],
+                    self._basic_plot(ax, self.dataframe[self.dataframe.Target == target][element],
                                      label=target, color=color)
                 self._save_custom_plot(ax, element, title)
 
@@ -315,4 +315,4 @@ class DataVisualizer:
 
     def _get_logcollector_targets(self):
         """Get the list of unique logcollector targets (sockets) in the dataset."""
-        return self.dataframe.target.unique()
+        return self.dataframe.Target.unique()
