@@ -1,6 +1,11 @@
 import platform
 import pytest
 
+@pytest.fixture
+def wazuh_params(request):
+    return {
+        'wazuh_version': request.config.getoption('--wazuh_version')
+    }
 
 @pytest.fixture(scope='module')
 def agent_uname(agent_info: dict) -> dict:
@@ -13,7 +18,8 @@ def agent_uname(agent_info: dict) -> dict:
     return uname
 
 
-def test_agent_version(expected_version: str, agent_info: dict) -> None:
+def test_agent_version(wazuh_params: dict, agent_info: dict) -> None:
+    expected_version = f"Wazuh v{wazuh_params['wazuh_version']}"
     actual_version = agent_info.get('version')
     assert expected_version in actual_version, 'Unexpected agent version reported by server.'
 

@@ -1,6 +1,8 @@
 import grp
 import pwd
 import pytest
+import re
+import json
 
 from ..helpers import constants, utils
 from ..helpers.installer import WazuhInstaller
@@ -8,17 +10,28 @@ from ..helpers.checkfiles import CheckFile
 from ..helpers.hostinformation import HostInformation
 
 @pytest.fixture
-def wazuh_params(request):
+def wazuh_params(request, live, one_line):
+    wazuh_version = request.config.getoption('--wazuh_version')
+    wazuh_revision = request.config.getoption('--wazuh_revision')
+    dependencies = request.config.getoption('--dependencies')
+
+    dependencies = json.loads(re.sub(r'(\d+\.\d+\.\d+\.\d+)', r'"\1"', re.sub(r'(\w+):', r'"\1":', dependencies)))
+
     return {
-        'wazuh_version': request.config.getoption('--wazuh_version'),
-        'wazuh_revision': request.config.getoption('--wazuh_revision'),
-        'dependencies': request.config.getoption('--dependencies'),
-        'live': request.config.getoption('--live'),
+        'wazuh_version': wazuh_version,
+        'wazuh_revision': wazuh_revision,
+        'dependencies': dependencies,
+        'live': live,
+        'one_line': one_line
     }
 
 def test_installation(wazuh_params):
-    aws_s3 = 'packages' if wazuh_params['live'] else 'packages-dev'
-    repository = wazuh_params['wazuh_version'][0] + '.x' if wazuh_params['live'] else 'pre-release'
+    if wazuh_params['live']:
+        aws_s3 = 'packages'
+        repository = wazuh_params['wazuh_version'][0] + '.x'
+    else:
+        aws_s3 = 'packages-dev'
+        repository = 'pre-release'
 
     hostinfo= HostInformation()
     install_args = (
@@ -27,7 +40,8 @@ def test_installation(wazuh_params):
         wazuh_params['wazuh_revision'],
         aws_s3,
         repository,
-        wazuh_params['dependencies'],
+        wazuh_params['dependencies'].get('manager'),
+        wazuh_params['one_line'],
         hostinfo.get_linux_distribution(),
         hostinfo.get_architecture()
     )

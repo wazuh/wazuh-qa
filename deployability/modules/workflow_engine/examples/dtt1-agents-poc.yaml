@@ -29,6 +29,7 @@ tasks:
           - wazuh-version: "4.7.1"
           - wazuh-revision: "40709"
           - live: False
+          - one_line : False
     depends-on:
       - "provision-install-{agent}"
       - "provision-manager"

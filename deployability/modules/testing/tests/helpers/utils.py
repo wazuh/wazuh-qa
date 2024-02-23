@@ -120,12 +120,13 @@ def get_registered_agents():
     return registered_agents
 
 
-def get_agent_connection_status(agent_id: str = None) -> str:
+def get_agent_connection_status(agent_id: str = None, timeout: int = 60) -> str:
     """
     Get the connection status of an agent.
 
     Args:
         agent_id (str, optional): The ID of the agent. Defaults to None.
+        timeout (int, optional): Timeout in seconds for waiting on pending status. Defaults to 60 seconds.
 
     Raises:
         ValueError: If the service is "server" and no agent_id is provided.
@@ -145,10 +146,22 @@ def get_agent_connection_status(agent_id: str = None) -> str:
 
         status = agent[0].get('Status')
     else:
-        agentd_output = subprocess.run(
-            ["sudo", "grep", "^status", AGENTD_STATE], stdout=subprocess.PIPE)
-        agentd_output_decoded = agentd_output.stdout.decode('utf-8')
-        status = agentd_output_decoded.split('=')[1].replace("'", "").strip()
+        start_time = time.time()
+        
+        while True:
+            agentd_output = subprocess.run(
+                ["sudo", "grep", "^status", AGENTD_STATE], stdout=subprocess.PIPE)
+
+            agentd_output_decoded = agentd_output.stdout.decode('utf-8')
+
+            status = agentd_output_decoded.split('=')[1].replace("'", "").strip()
+
+            if status != 'pending' or (time.time() - start_time) >= timeout:
+                break
+            time.sleep(5)
+
+        if status == 'pending':
+            raise TimeoutError("Timeout reached while waiting for pending status.")
 
     return status
 
