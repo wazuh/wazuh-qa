@@ -140,7 +140,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
 
                 sleep(scan_interval)
 
-                current_timeout += scan_interval
+                current_timeout = current_timeout + scan_interval
 
             if not regex_match:
                 elements_not_found.append(element)
