@@ -18,7 +18,7 @@ class Instance(ABC):
         credentials (Credentials): The credentials of the instance.
     """
 
-    def __init__(self, path: str | Path, identifier: str, credentials: Credentials = None, remote_dir: str | Path = None, ssh_port: str = None) -> None:
+    def __init__(self, path: str | Path, identifier: str, credentials: Credentials = None, host_identifier: str | Path = None, ssh_port: str = None) -> None:
         """
         Initializes an Instance object.
 
@@ -26,7 +26,7 @@ class Instance(ABC):
             path (str | Path): The path of the instance.
             identifier (str): The identifier of the instance.
             credentials (Credentials, optional): The credentials of the instance. Defaults to None.
-            remote_dir (str | Path, optional): The remote directory of the instance. Defaults to None.
+            host_identifier (str | Path, optional): The remote directory of the instance. Defaults to None.
             ssh_port (str, optional): The SSH port of the instance. Defaults to None.
 
         Raises:
@@ -42,7 +42,7 @@ class Instance(ABC):
         self.path: Path = path
         self.identifier: str = str(identifier)
         self.credentials: Credentials = credentials
-        self.remote_dir: Path = Path(remote_dir) if remote_dir else None
+        self.host_identifier: Path = Path(host_identifier) if host_identifier else None
         self.ssh_port: str = ssh_port if ssh_port else None
 
     @abstractmethod

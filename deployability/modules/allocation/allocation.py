@@ -141,7 +141,7 @@ class Allocator:
                                     provider=provider_name,
                                     instance_dir=str(instance.path),
                                     key_path=str(instance.credentials.key_path),
-                                    host_identifier=str(instance.remote_dir),
+                                    host_identifier=str(instance.host_identifier),
                                     ssh_port=ssh_config.port)
         with open(track_path, 'w') as f:
             yaml.dump(track.model_dump(), f)

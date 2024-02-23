@@ -127,7 +127,7 @@ class AWSProvider(Provider):
         return AWSInstance(instance_dir, instance_id)
 
     @classmethod
-    def _destroy_instance(cls, instance_dir: str, identifier: str, key_path: str, host_identifier: str = None) -> None:
+    def _destroy_instance(cls, instance_dir: str, identifier: str, key_path: str, host_identifier: str = None, ssh_port: str = None) -> None:
         """
         Destroy an AWS EC2 instance.
 
@@ -136,6 +136,7 @@ class AWSProvider(Provider):
             identifier (str): Identifier of the instance.
             key_path (str): Path to the key pair.
             host_identifier (str, optional): Identifier of the dedicated host. Defaults to None.
+            ssh_port (str, optional): SSH port of the instance. Defaults to None.
         """
         credentials = AWSCredentials()
         key_id = os.path.basename(key_path)
@@ -145,7 +146,7 @@ class AWSProvider(Provider):
             logger.debug(f"Deleting credentials: {instance.credentials.name}")
             instance.credentials.delete()
         instance.delete()
-        if host_identifier:
+        if host_identifier != "None" and host_identifier is not None:
             cls._release_dedicated_host(host_identifier)
 
     @staticmethod

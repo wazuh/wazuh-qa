@@ -20,9 +20,9 @@ class VagrantInstance(Instance):
         path (str or Path): Directory where instance data is stored.
         identifier (str): Identifier of the instance.
         credentials (VagrantCredentials): Vagrant credentials object.
-        remote_dir (str or Path): Remote directory of the instance.
+        host_identifier (str or Path): Remote directory of the instance.
     """
-    def __init__(self, path: str | Path, identifier: str, credentials: VagrantCredentials = None, remote_dir: str | Path = None, ssh_port: str = None) -> None:
+    def __init__(self, path: str | Path, identifier: str, credentials: VagrantCredentials = None, host_identifier: str | Path = None, ssh_port: str = None) -> None:
         """
         Initializes a VagrantInstance.
 
@@ -30,10 +30,10 @@ class VagrantInstance(Instance):
             path (str | Path): The path of the instance.
             identifier (str): The identifier of the instance.
             credentials (VagrantCredentials, optional): The credentials of the instance. Defaults to None.
-            remote_dir (str | Path, optional): The remote directory of the instance. Defaults to None.
+            host_identifier (str | Path, optional): The remote directory of the instance. Defaults to None.
             ssh_port (str, optional): The SSH port of the instance. Defaults to None.
         """
-        super().__init__(path, identifier, credentials, remote_dir, ssh_port)
+        super().__init__(path, identifier, credentials, host_identifier, ssh_port)
         self.vagrantfile_path: Path = self.path / 'Vagrantfile'
 
     def start(self) -> None:
@@ -75,9 +75,9 @@ class VagrantInstance(Instance):
                             Skipping deletion.")
             return
         self.__run_vagrant_command(['destroy', '-f'])
-        if self.remote_dir:
-            logger.debug(f"Deleting remote directory {self.remote_dir}")
-            VagrantUtils.remote_command(f"sudo rm -rf {self.remote_dir}")
+        if self.host_identifier:
+            logger.debug(f"Deleting remote directory {self.host_identifier}")
+            VagrantUtils.remote_command(f"sudo rm -rf {self.host_identifier}")
             logger.debug(f"Killing remote process on port {self.ssh_port}")
             proccess = VagrantUtils.remote_command(f"sudo lsof -Pi :{self.ssh_port} -sTCP:LISTEN -t")
             VagrantUtils.remote_command(f"sudo kill -9 {proccess}")
@@ -111,7 +111,7 @@ class VagrantInstance(Instance):
                     'private_key': r'IdentityFile (.*)'}
         # Parse the ssh-config.
         ssh_config = {}
-        if self.remote_dir:
+        if self.host_identifier:
             for key, pattern in patterns.items():
                 match = re.search(pattern, output)
                 if match and key == 'hostname':
@@ -157,8 +157,8 @@ class VagrantInstance(Instance):
         """
         if isinstance(command, str):
             command = [command]
-        if self.remote_dir:
-            cmd = f"sudo VAGRANT_CWD={self.remote_dir} /usr/local/bin/vagrant " + ' '.join(command)
+        if self.host_identifier:
+            cmd = f"sudo VAGRANT_CWD={self.host_identifier} /usr/local/bin/vagrant " + ' '.join(command)
             output = VagrantUtils.remote_command(cmd)
             return output
         else:

@@ -38,13 +38,13 @@ class VagrantUtils:
             return None
 
     @classmethod
-    def remote_copy(cls, instance_dir: Path, remote_dir: Path) -> str:
+    def remote_copy(cls, instance_dir: Path, host_identifier: Path) -> str:
         """
         Copies the instance directory to the remote host.
 
         Args:
             instance_dir (Path): The instance directory.
-            remote_dir (Path): The remote directory.
+            host_identifier (Path): The remote directory.
 
         Returns:
             str: The output of the command.
@@ -55,7 +55,7 @@ class VagrantUtils:
         ssh_user = client.get_secret_value(SecretId='devops_macstadium_m1_jenkins_user')['SecretString']
 
         try:
-            output = subprocess.Popen(f"sshpass -p {ssh_password} scp -r {instance_dir} {ssh_user}@{server_ip}:{remote_dir}",
+            output = subprocess.Popen(f"sshpass -p {ssh_password} scp -r {instance_dir} {ssh_user}@{server_ip}:{host_identifier}",
                                         shell=True,
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE)

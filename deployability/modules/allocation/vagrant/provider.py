@@ -43,9 +43,9 @@ class VagrantProvider(Provider):
         instance_dir.mkdir(parents=True, exist_ok=True)
         # Used for macOS deployments
         if params.composite_name.startswith('macos'):
-            remote_dir = "/Users/jenkins/testing/" + instance_id
+            host_identifier = "/Users/jenkins/testing/" + instance_id
             logger.debug(f"Creating instance directory on remote host")
-            cmd = f"mkdir {remote_dir}"
+            cmd = f"mkdir {host_identifier}"
             VagrantUtils.remote_command(cmd)
         credentials = VagrantCredentials()
         if not config:
@@ -68,8 +68,8 @@ class VagrantProvider(Provider):
         logger.debug(f"Vagrantfile created. Creating instance.")
         if params.composite_name.startswith('macos'):
             vagrant_file = str(instance_dir) + '/Vagrantfile'
-            VagrantUtils.remote_copy(vagrant_file, remote_dir)
-            return VagrantInstance(instance_dir, instance_id, credentials, remote_dir)
+            VagrantUtils.remote_copy(vagrant_file, host_identifier)
+            return VagrantInstance(instance_dir, instance_id, credentials, host_identifier)
         else:
             return VagrantInstance(instance_dir, instance_id, credentials)
 
@@ -88,7 +88,7 @@ class VagrantProvider(Provider):
         return VagrantInstance(instance_dir, identifier)
 
     @classmethod
-    def _destroy_instance(cls, instance_dir: Path, identifier: str, key_path: str, remote_dir:  str | Path = None, ssh_port: str =None) -> None:
+    def _destroy_instance(cls, instance_dir: Path, identifier: str, key_path: str, host_identifier:  str | Path = None, ssh_port: str =None) -> None:
         """
         Destroys a Vagrant instance.
 
@@ -96,17 +96,17 @@ class VagrantProvider(Provider):
             instance_dir (Path): The directory of the instance.
             identifier (str): The identifier of the instance.
             key_path (str): The path of the key for the instance.
-            remote_dir (str | Path, optional): The remote directory of the instance. Defaults to None.
+            host_identifier (str | Path, optional): The remote directory of the instance. Defaults to None.
             ssh_port (str, optional): The SSH port of the instance. Defaults to None.
         Returns:
             None
         """
-        if remote_dir == "None" or remote_dir is None:
+        if host_identifier == "None" or host_identifier is None:
             instance = VagrantInstance(instance_dir, identifier)
             if os.path.dirname(key_path) != str(instance_dir):
                 logger.debug(f"The key {key_path} will not be deleted. It is the user's responsibility to delete it.")
         else:
-            instance = VagrantInstance(instance_dir, identifier, None, remote_dir, ssh_port)
+            instance = VagrantInstance(instance_dir, identifier, None, host_identifier, ssh_port)
         logger.debug(f"Destroying instance {identifier}")
         instance.delete()
 
