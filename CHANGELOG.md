@@ -53,6 +53,12 @@ All notable changes to this project will be documented in this file.
 - Fix test_file_checker in check_mtime case ([#4873](https://github.com/wazuh/wazuh-qa/pull/4873)) \- (Tests)
 - Fix test cluster performance. ([#4780](https://github.com/wazuh/wazuh-qa/pull/4780)) \- (Framework)
 
+## [4.7.3] - TBD
+
+### Changed
+
+- Upgrade wazuh-db agent database version. ([#4992](https://github.com/wazuh/wazuh-qa/pull/4992)) \- (Tests)
+
 ## [4.7.2] - 10/01/2024
 
 ### Fixed
