@@ -161,7 +161,7 @@ class StatisticMonitor:
             try:
                 token_response = requests.get(API_URL + TOKEN_ENDPOINT, verify=False,
                                               auth=requests.auth.HTTPBasicAuth("wazuh", "wazuh"))
-                if token_response.status_code != 200:
+                if token_response.status_code != '200':
                     break
             except requests.exceptions.RequestException as e:
                 logging.error(f"Error getting token from API: {str(e)}")
@@ -172,7 +172,7 @@ class StatisticMonitor:
             try:
                 daemons_response = requests.get(API_URL + DAEMONS_ENDPOINT, verify=False,
                                                 headers={'Authorization': 'Bearer ' + token_response.json()['data']['token']})
-                if daemons_response.status_code != 200:
+                if daemons_response.status_code != '200':
                     break
             except requests.exceptions.RequestException as e:
                 logging.error(f"Error fetching {self.daemon} datafrom API: {str(e)}")
@@ -338,6 +338,8 @@ class StatisticMonitor:
                     execution_breakdown = data['metrics']['time']['execution_breakdown']
                     exec_ag_bd = execution_breakdown['agent_breakdown']
                     exec_glob_bd = execution_breakdown['global_breakdown']
+                    vulnerability_data = 0 if 'vulnerability' not in ag_bd['tables'] else ag_bd['tables']['vulnerability']['vuln_cves']
+                    vulnerability_time = 0 if 'vulnerability' not in exec_ag_bd['tables'] else exec_ag_bd['tables']['vulnerability']['vuln_cves']
                     logger.info("Writing wazuh-db data from API info to {}.".format(csv_file))
                     log.write(("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},"+
                               "{19},{20},{21},{22},{23},{24},{25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},"+
@@ -379,7 +381,7 @@ class StatisticMonitor:
                         ag_bd['tables']['syscollector']['syscollector_packages'],                                    # 27
                         ag_bd['tables']['syscollector']['syscollector_ports'],                                       # 28
                         ag_bd['tables']['syscollector']['syscollector_processes'],                                   # 29
-                        ag_bd['tables']['vulnerability']['vuln_cves'],                                              # 30
+                        vulnerability_data,                                                                          # 30
                         received_breakdown['global'],                                                               # 31
                         glob_bd['db']['backup'],                                                                    # 32
                         glob_bd['db']['sql'],                                                                       # 33       
@@ -453,8 +455,8 @@ class StatisticMonitor:
                         exec_ag_bd['tables']['syscollector']['syscollector_packages'],                               # 100
                         exec_ag_bd['tables']['syscollector']['syscollector_ports'],                                  # 101
                         exec_ag_bd['tables']['syscollector']['syscollector_processes'],                              # 102
-                        exec_ag_bd['tables']['vulnerability']['vuln_cves'],                                         # 103
-                        data['metrics']['time']['execution'],                                                          # 104
+                        vulnerability_time,                                                                          # 103
+                        data['metrics']['time']['execution'],                                                        # 104
                         exec_glob_bd['db']['open'],                                                                 # 105
                         exec_glob_bd['db']['backup'],                                                               # 106
                         exec_glob_bd['db']['sql'],                                                                  # 107
