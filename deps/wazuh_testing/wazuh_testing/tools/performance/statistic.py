@@ -161,7 +161,7 @@ class StatisticMonitor:
             try:
                 token_response = requests.get(API_URL + TOKEN_ENDPOINT, verify=False,
                                               auth=requests.auth.HTTPBasicAuth("wazuh", "wazuh"))
-                if token_response.status_code != '200':
+                if token_response.status_code == 200:
                     break
             except requests.exceptions.RequestException as e:
                 logging.error(f"Error getting token from API: {str(e)}")
@@ -172,7 +172,7 @@ class StatisticMonitor:
             try:
                 daemons_response = requests.get(API_URL + DAEMONS_ENDPOINT, verify=False,
                                                 headers={'Authorization': 'Bearer ' + token_response.json()['data']['token']})
-                if daemons_response.status_code != '200':
+                if daemons_response.status_code == 200:
                     break
             except requests.exceptions.RequestException as e:
                 logging.error(f"Error fetching {self.daemon} datafrom API: {str(e)}")
