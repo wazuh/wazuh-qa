@@ -27,32 +27,18 @@ def register_agent(wazuh_params):
 
     utils.run_command('systemctl', ['restart', 'wazuh-agent'])
 
-
 def test_register(wazuh_params):
     register_agent(wazuh_params)
     assert 'running' in utils.run_command('systemctl', ['status', 'wazuh-agent'])
 
-
 def test_client_keys_file():
     assert CLIENT_KEYS.exists(), 'client.keys file not found.'
-
 
 def test_client_id_local():
     agent_id = utils.get_client_keys()[0].get('id')
     assert agent_id, 'Agent key not found in client.keys.'
 
-
 def test_local_connection_status(agent_id: str) -> None:
     expected_status = 'connected'
     assert utils.check_agent_is_connected(agent_id)
     assert utils.get_agent_connection_status(agent_id) == expected_status, 'Agent not connected to manager.'
-
-
-#def test_server_connection_status(agent_info: dict) -> None:
-#    expected_status = ['active', 'pending', 'never connected']
-#    assert agent_info.get('status') == expected_status, 'Agent not connected to manager.'
-#
-#
-#def test_agent_registered(agent_info: dict):
-#    expected_status = ['active', 'pending', 'never connected']
-#    assert agent_info.get('status') in expected_status
