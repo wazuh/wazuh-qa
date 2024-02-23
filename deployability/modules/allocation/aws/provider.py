@@ -86,7 +86,6 @@ class AWSProvider(Provider):
             #Generate dedicated host for macOS instances
             if str(params.composite_name.split("-")[0]) == 'macos':
                 host_id = cls._generate_dedicated_host(config, str(params.composite_name.split("-")[3]))
-                #host_id = "h-008e0fefd5f7cc8a8"
                 config = cls.__parse_config(params, credentials, issue, label_team, termination_date, name, host_id)
         else:
             logger.debug(f"Using provided config")
@@ -138,10 +137,6 @@ class AWSProvider(Provider):
             key_path (str): Path to the key pair.
             host_identifier (str, optional): Identifier of the dedicated host. Defaults to None.
         """
-        #this if is added to test the release of dedicated hosts fuctionality
-        #if host_identifier:
-        #    cls._release_dedicated_host(host_identifier)
-        #exit(1)
         credentials = AWSCredentials()
         key_id = os.path.basename(key_path)
         credentials.load(key_id)

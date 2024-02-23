@@ -2,6 +2,7 @@ from pathlib import Path
 from pydantic import field_validator
 
 from modules.allocation.generic.models import ProviderConfig
+from .utils import VagrantUtils
 
 
 class VagrantConfig(ProviderConfig):
@@ -19,5 +20,7 @@ class VagrantConfig(ProviderConfig):
     def check_public_key(cls, v: str) -> str:
         path = Path(v)
         if not path.exists() or not path.is_file():
-            raise ValueError(f"Invalid public key path: {path}")
+            cmd = 'stat ' + str(path)
+            if not VagrantUtils.remote_command(cmd):
+                raise ValueError(f"Invalid public key path: {path}")
         return v

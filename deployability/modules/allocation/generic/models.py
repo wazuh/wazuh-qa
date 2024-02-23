@@ -7,7 +7,8 @@ class ConnectionInfo(BaseModel):
     hostname: str
     user: str
     port: int
-    private_key: str
+    private_key: str | None = None
+    password: str | None = None
 
     @field_validator('port', mode='before')
     @classmethod
@@ -24,6 +25,7 @@ class InventoryOutput(BaseModel):
     ansible_user: str
     ansible_port: int
     ansible_ssh_private_key_file: str
+    ansible_password: str | None = None
 
 
 class TrackOutput(BaseModel):
@@ -31,7 +33,8 @@ class TrackOutput(BaseModel):
     provider: str
     instance_dir: str
     key_path: str
-    host_identifier: str | None = None
+    host_identifier: str | Path = None
+    ssh_port: int | None = None
 
 
 class InputPayload(BaseModel):

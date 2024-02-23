@@ -55,7 +55,7 @@ class Allocator:
         instance = provider.create_instance(
             payload.working_dir, instance_params, config, payload.ssh_key)
         logger.info(f"Instance {instance.identifier} created.")
-        # Start the instance
+        # Start the instance.
         instance.start()
         logger.info(f"Instance {instance.identifier} started.")
         # Generate the inventory and track files.
@@ -76,7 +76,7 @@ class Allocator:
         with open(payload.track_output, 'r') as f:
             track = models.TrackOutput(**yaml.safe_load(f))
         provider = PROVIDERS[track.provider]()
-        provider.destroy_instance(track.instance_dir, track.identifier, track.key_path, track.host_identifier)
+        provider.destroy_instance(track.instance_dir, track.identifier, track.key_path, track.host_identifier, track.ssh_port)
         logger.info(f"Instance {track.identifier} deleted.")
 
     @staticmethod
@@ -117,7 +117,8 @@ class Allocator:
         inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
                                             ansible_user=ssh_config.user,
                                             ansible_port=ssh_config.port,
-                                            ansible_ssh_private_key_file=str(ssh_config.private_key))
+                                            ansible_ssh_private_key_file=str(ssh_config.private_key),
+                                            ansible_password=str(ssh_config.password))
         with open(inventory_path, 'w') as f:
             yaml.dump(inventory.model_dump(), f)
         logger.info(f"Inventory file generated at {inventory_path}")
@@ -135,13 +136,17 @@ class Allocator:
         track_path = Path(track_path)
         if not track_path.parent.exists():
             track_path.parent.mkdir(parents=True, exist_ok=True)
+        ssh_config = instance.ssh_connection_info()
         track = models.TrackOutput(identifier=instance.identifier,
                                     provider=provider_name,
                                     instance_dir=str(instance.path),
                                     key_path=str(instance.credentials.key_path),
-                                    host_identifier=instance.host_identifier)
+                                    host_identifier=str(instance.remote_dir),
+                                    ssh_port=ssh_config.port)
         with open(track_path, 'w') as f:
             yaml.dump(track.model_dump(), f)
+        if Path(str(instance.path) + "/port.txt").exists():
+            Path(str(instance.path) + "/port.txt").unlink()
         logger.info(f"Track file generated at {track_path}")
 
     @staticmethod
@@ -179,11 +184,11 @@ class Allocator:
                 for item in data_list:
                     if 'uuid' in item:
                         uuid_count += 1
-                if uuid_count == 0:
-                    logger.info(f"macStadium server has no VMs running, using Vagrant provider.")
+                if uuid_count < 2:
+                    logger.info(f"macStadium server has less than 2 VMs running, using Vagrant provider.")
                     return 'vagrant'
                 else:
-                    logger.info(f"macStadium server has 2 VMs running, using AWS provider.")
+                    logger.info(f"macStadium server has VMs running, using AWS provider.")
                     return 'aws'
         if str(composite_name.split("-")[3]) == 'amd64':
             return 'aws'

@@ -95,13 +95,13 @@ vagrant:
   # Macos
   macos-monterey-12.6-arm64:
     box: macos-12
-    box_version: 0
+    box_version: 0.0.0
   macos-ventura-13.4.1-arm64:
     box: macos-13
-    box_version: 0
+    box_version: 0.0.0
   macos-sonoma-14.0-arm64:
     box: macos-14
-    box_version: 0
+    box_version: 0.0.0
   # Windows
   windows-desktop-10-amd64:
     box: gusztavvargadr/windows-10

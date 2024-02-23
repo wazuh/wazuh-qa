@@ -10,6 +10,7 @@ from modules.allocation.generic.utils import logger
 from .credentials import VagrantCredentials
 from .instance import VagrantInstance
 from .models import VagrantConfig
+from .utils import VagrantUtils
 
 
 class VagrantProvider(Provider):
@@ -40,6 +41,12 @@ class VagrantProvider(Provider):
         # Create the instance directory.
         instance_dir = base_dir / instance_id
         instance_dir.mkdir(parents=True, exist_ok=True)
+        # Used for macOS deployments
+        if params.composite_name.startswith('macos'):
+            remote_dir = "/Users/jenkins/testing/" + instance_id
+            logger.debug(f"Creating instance directory on remote host")
+            cmd = f"mkdir {remote_dir}"
+            VagrantUtils.remote_command(cmd)
         credentials = VagrantCredentials()
         if not config:
             logger.debug(f"No config provided. Generating from payload")
@@ -59,7 +66,12 @@ class VagrantProvider(Provider):
         # Create the Vagrantfile.
         cls.__create_vagrantfile(instance_dir, config)
         logger.debug(f"Vagrantfile created. Creating instance.")
-        return VagrantInstance(instance_dir, instance_id, credentials)
+        if params.composite_name.startswith('macos'):
+            vagrant_file = str(instance_dir) + '/Vagrantfile'
+            VagrantUtils.remote_copy(vagrant_file, remote_dir)
+            return VagrantInstance(instance_dir, instance_id, credentials, remote_dir)
+        else:
+            return VagrantInstance(instance_dir, instance_id, credentials)
 
     @staticmethod
     def _load_instance(instance_dir: Path, identifier: str) -> VagrantInstance:
@@ -76,20 +88,25 @@ class VagrantProvider(Provider):
         return VagrantInstance(instance_dir, identifier)
 
     @classmethod
-    def _destroy_instance(cls, instance_dir: Path, identifier: str, key_path: str) -> None:
+    def _destroy_instance(cls, instance_dir: Path, identifier: str, key_path: str, remote_dir:  str | Path = None, ssh_port: str =None) -> None:
         """
         Destroys a Vagrant instance.
 
         Args:
             instance_dir (Path): The directory of the instance.
             identifier (str): The identifier of the instance.
-
+            key_path (str): The path of the key for the instance.
+            remote_dir (str | Path, optional): The remote directory of the instance. Defaults to None.
+            ssh_port (str, optional): The SSH port of the instance. Defaults to None.
         Returns:
             None
         """
-        instance = VagrantInstance(instance_dir, identifier)
-        if os.path.dirname(key_path) != str(instance_dir):
-            logger.debug(f"The key {key_path} will not be deleted. It is the user's responsibility to delete it.")
+        if remote_dir == "None" or remote_dir is None:
+            instance = VagrantInstance(instance_dir, identifier)
+            if os.path.dirname(key_path) != str(instance_dir):
+                logger.debug(f"The key {key_path} will not be deleted. It is the user's responsibility to delete it.")
+        else:
+            instance = VagrantInstance(instance_dir, identifier, None, remote_dir, ssh_port)
         logger.debug(f"Destroying instance {identifier}")
         instance.delete()
 
@@ -124,7 +141,10 @@ class VagrantProvider(Provider):
             str: The rendered Vagrantfile.
         """
         environment = Environment(loader=FileSystemLoader(cls.TEMPLATES_DIR))
-        template = environment.get_template("vagrant.j2")
+        if config.box.startswith('macos'):
+            template = environment.get_template("vagrant_arm.j2")
+        else:
+            template = environment.get_template("vagrant.j2")
         return template.render(config=config)
 
     @classmethod
@@ -171,7 +191,7 @@ class VagrantProvider(Provider):
             if response != 0:
                 return ip
 
-        for i in range(1, 255):
+        for i in range(2, 254):
             ip = f"192.168.57.{i}"
             if check_ip(ip):
                 return ip
