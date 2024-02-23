@@ -25,6 +25,7 @@ def run_command(binary: str, args: list = None) -> None:
         args = []
 
     output = subprocess.run([binary] + args, stdout=subprocess.PIPE)
+
     return output.stdout.decode('utf-8')
 
 
@@ -36,6 +37,7 @@ def get_service() -> str:
         str: The name of the Wazuh service.
 
     """
+
     return run_command(WAZUH_CONTROL, ["info", "-t"]).strip()
 
 
@@ -47,6 +49,7 @@ def get_version() -> str:
         str: The version of Wazuh installed.
 
     """
+
     return run_command(WAZUH_CONTROL, ["info", "-v"]).strip()
 
 
@@ -58,6 +61,7 @@ def get_revision() -> str:
         str: The version of Wazuh installed.
 
     """
+
     return run_command(WAZUH_CONTROL, ["info", "-r"]).strip()
 
 
@@ -72,6 +76,7 @@ def get_service_status() -> str:
         service_name = "wazuh-agent"
     else:
         service_name = "wazuh-manager"
+
     return run_command("systemctl", ["is-active", service_name]).strip()
 
 
@@ -142,6 +147,7 @@ def get_agent_connection_status(agent_id: str = None, timeout: int = 60) -> str:
         agent = [a for a in get_registered_agents() if a.get('ID') == agent_id]
 
         if not agent:
+
             raise ValueError("Agent not found.")
 
         status = agent[0].get('Status')
@@ -180,6 +186,7 @@ def get_file_encoding(file_path: str) -> str:
         if len(data) == 0:
             return 'utf-8'
         result = chardet.detect(data)
+
     return result['encoding']
 
 
@@ -202,6 +209,7 @@ def file_monitor(monitored_file: str, target_string: str, timeout: int = 30) -> 
     with open(monitored_file, encoding=encoding) as _file:
         for line in _file:
             if target_string in line:
+
                 return line
 
     # Start count to set the timeout.
@@ -222,6 +230,7 @@ def file_monitor(monitored_file: str, target_string: str, timeout: int = 30) -> 
             else:
                 # New line, check if the string matches.
                 if target_string in line:
+
                     return line
 
 
@@ -240,6 +249,7 @@ def check_agent_is_connected(agent_id: str, timeout: int = 60) -> bool:
     while time.time() - start_time < timeout:
         status = get_agent_connection_status(agent_id)
         if status in ["connected", "Active"]:
+
             return True
         time.sleep(1)
 
@@ -257,6 +267,7 @@ def read_json_file(filepath: str | Path) -> dict:
         dict: Dictionary with the JSON file content.
     """
     with open(filepath) as f_json:
+
         return json.load(f_json)
 
 
@@ -279,6 +290,7 @@ def get_client_keys() -> list[dict]:
                 "password": password
             }
             clients.append(client_info)
+
     return clients
 
 
@@ -309,4 +321,5 @@ def is_process_alive(process_name: str) -> bool:
     Returns:
         bool: True if the process is running, False otherwise.
     """
+
     return process_name in (p.name() for p in psutil.process_iter())

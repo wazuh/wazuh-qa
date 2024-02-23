@@ -3,6 +3,7 @@ import pytest
 from ..helpers import utils
 from ..helpers.constants import WAZUH_CONTROL
 
+
 @pytest.fixture(scope='module', autouse=True)
 def stop_wazuh():
     utils.run_command(WAZUH_CONTROL, ['stop'])

@@ -1,8 +1,10 @@
 import platform
 import pytest
 
+
 @pytest.fixture
 def wazuh_params(request):
+
     return {
         'wazuh_version': request.config.getoption('--wazuh_version')
     }
@@ -15,6 +17,7 @@ def agent_uname(agent_info: dict) -> dict:
              'release': uname_list[2],
              'version': uname_list[3],
              'machine': uname_list[4]}
+
     return uname
 
 def test_agent_version(wazuh_params: dict, agent_info: dict) -> None:

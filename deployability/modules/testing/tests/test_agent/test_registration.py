@@ -4,6 +4,7 @@ from ..helpers.constants import CLIENT_KEYS
 import re
 import json
 
+
 @pytest.fixture
 def wazuh_params(request):
     dependencies = request.config.getoption('--dependencies')

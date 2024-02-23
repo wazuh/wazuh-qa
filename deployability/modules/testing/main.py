@@ -2,10 +2,11 @@ import argparse
 import sys
 import os
 
+from modules.testing import Tester, InputPayload
+
+
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 sys.path.append(project_root)
-
-from modules.testing import Tester, InputPayload
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Wazuh testing tool")
@@ -19,6 +20,7 @@ def parse_arguments():
     parser.add_argument("--wazuh-branch", required=False)
     parser.add_argument('--live', required=True)
     parser.add_argument('--one_line', required=True)
+
     return parser.parse_args()
 
 if __name__ == "__main__":

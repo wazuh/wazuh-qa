@@ -7,6 +7,7 @@ from modules.generic.utils import Utils
 from .models import InputPayload, ExtraVars
 from .utils import logger
 
+
 class Tester:
     _playbooks_dir = Path(__file__).parent / 'playbooks'
     _setup_playbook = _playbooks_dir / 'setup.yml'
@@ -51,6 +52,7 @@ class Tester:
         """
         if not payload.dependencies:
             logger.debug("No dependencies received in payload")
+
             return ExtraVars(**payload.model_dump())
         
         dependencies_ip = []
@@ -80,7 +82,9 @@ class Tester:
             playbook = ansible.render_playbook(template, rendering_var)
             if not playbook:
                 logger.warning(f"Test {test} not found. Skipped.")
+
                 continue
+
             ansible.run_playbook(playbook, extra_vars)
 
     @classmethod

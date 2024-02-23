@@ -44,3 +44,4 @@ def test_process_not_running():
 def test_config_is_not_maintained():
     assert not constants.WAZUH_CONF.exists(), "Wazuh config file waz found."
     assert not constants.LOCAL_INTERNAL_OPTIONS.exists(), "Local internal options file was found."
+    

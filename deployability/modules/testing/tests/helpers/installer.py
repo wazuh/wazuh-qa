@@ -18,14 +18,19 @@ class WazuhInstaller:
         return'MANAGER_IP' if not self.one_line else self.dependency_ip
 
     def install_agent(self):
-        if self.os_type == 'linux':
-            self._install_linux_agent()
-        elif self.os_type == 'windows':
-            self._install_windows_agent()
-        elif self.os_type == 'macos':
-            self._install_macos_agent()
+        case_dict = {
+            'linux': self._install_linux_agent,
+            'windows': self._install_windows_agent,
+            'macos': self._install_macos_agent
+        }
+
+        installation_function = case_dict.get(self.os_type, None)
+
+        if installation_function:
+            installation_function()
         else:
             print("Unsupported operating system.")
+
 
     def _install_linux_agent(self):
         base_url = f"https://{self.aws_s3}/{self.repository}/yum/wazuh-agent-{self.wazuh_version}-{self.wazuh_revision}"

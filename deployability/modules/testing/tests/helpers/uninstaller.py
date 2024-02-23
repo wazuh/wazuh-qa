@@ -2,6 +2,7 @@
 import subprocess
 from . import utils
 
+
 class WazuhUninstaller:
     def __init__(self, os_type, wazuh_version, wazuh_revision, type_os=None):
         self.os_type = os_type

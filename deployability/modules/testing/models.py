@@ -2,6 +2,7 @@ from pathlib import Path
 from pydantic import BaseModel, field_validator, model_validator
 from typing import Literal
 
+
 class ExtraVars(BaseModel):
     """Extra vars for testing module."""
     component: Literal['manager', 'agent']
@@ -27,6 +28,7 @@ class InputPayload(ExtraVars):
         """Validate tests names."""
         if type(value) is str:
             value = value.split(',')
+
         return value
 
     @field_validator('inventory', mode='before')
@@ -34,6 +36,7 @@ class InputPayload(ExtraVars):
         """Validate inventory path."""
         if not Path(value).exists():
             raise ValueError(f'Inventory file "{value}" does not exist')
+
         return Path(value)
 
     @model_validator(mode='before')
@@ -42,5 +45,7 @@ class InputPayload(ExtraVars):
         if isinstance(values['dependencies'], str):
             values['dependencies'] = values['dependencies'].split(',')
         if values.get('component') == 'agent' and not values.get('dependencies'):
+
             raise ValueError('dependencies are required when component is agent')
+
         return values

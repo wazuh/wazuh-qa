@@ -1,6 +1,7 @@
 import platform
 import os
 
+
 class HostInformation:
     def __init__(self):
         pass
@@ -14,14 +15,13 @@ class HostInformation:
         """
         system = platform.system()
 
-        if system == 'Windows':
-            return 'windows'
-        elif system == 'Linux':
-            return 'linux'
-        elif system == 'Darwin':
-            return 'macos'
-        else:
-            return 'unknown'
+        case_dict = {
+            'Windows': 'windows',
+            'Linux': 'linux',
+            'Darwin': 'macos'
+        }
+
+        return case_dict.get(system, 'unknown')
 
     def get_architecture(self):
         """
@@ -47,4 +47,5 @@ class HostInformation:
 
             for file_path, package_manager in package_managers.items():
                 if os.path.exists(file_path):
+
                     return package_manager

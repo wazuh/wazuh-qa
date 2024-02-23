@@ -1,6 +1,7 @@
 import subprocess
 from ..helpers.hostinformation import HostInformation
 
+
 class CheckFile:
     def __init__(self):
         self.initial_scan = None
@@ -59,13 +60,17 @@ class CheckFile:
             command = 'dir /a-d /b /s | findstr /v /c:"\\.$" /c:"\\..$"| find /c ":"'
         else:
             print("Unsupported operating system.")
+
             return None
 
         result = subprocess.run(command, shell=True, executable="/bin/bash", stdout=subprocess.PIPE, text=True)
 
         if result.returncode == 0:
             paths = [path.strip() for path in result.stdout.split('\n') if path.strip()]
+
             return paths
         else:
             print(f"Error executing command. Return code: {result.returncode}")
+
             return None
+

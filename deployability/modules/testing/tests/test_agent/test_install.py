@@ -9,6 +9,7 @@ from ..helpers.installer import WazuhInstaller
 from ..helpers.checkfiles import CheckFile
 from ..helpers.hostinformation import HostInformation
 
+
 @pytest.fixture
 def wazuh_params(request, live, one_line):
     wazuh_version = request.config.getoption('--wazuh_version')
