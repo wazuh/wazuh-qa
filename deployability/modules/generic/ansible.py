@@ -31,7 +31,7 @@ class Ansible:
             rendering_variables (dict): Extra variables to render the playbooks.
         """
         tasks = []
-        path_to_render_playbooks = self.provision_playbook_path / rendering_variables.get("templates_path")
+        path_to_render_playbooks = rendering_variables.get("templates_path")
         template_loader = jinja2.FileSystemLoader(searchpath=path_to_render_playbooks)
         template_env = jinja2.Environment(loader=template_loader)
 
@@ -87,7 +87,7 @@ class Ansible:
         # Set the callback to yaml to env_vars
         env_vars['ANSIBLE_STDOUT_CALLBACK'] = 'community.general.yaml'
 
-        if self.playbooks_path and Path(playbook).exists():
+        if self.playbooks_path and (isinstance(playbook, str) or isinstance(playbook, Path)):
             playbook = Path(self.playbooks_path) / playbook
 
         self.logger.debug(f"Using inventory: {self.inventory}")

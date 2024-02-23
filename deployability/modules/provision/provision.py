@@ -38,7 +38,7 @@ class Provision:
         Run the provision.
         """
         logger.info(f'Initiating provisionment.')
-        self.install_host_dependencies()
+        # self.install_host_dependencies()
 
         logger.debug(f'Running action {self.action} for components: {self.components}')
         for component in self.components:
@@ -69,21 +69,6 @@ class Provision:
             component.dependencies = dependencies
             self.__validate_component_deps(component)
         return components
-
-    def install_host_dependencies(self) -> dict:
-        """
-        Install python dependencies on the host.
-
-        Returns:
-            dict: Status of the installation.
-        """
-        deps_path = PATH_BASE_DIR / "deps" / "remote_requirements.txt"
-        package = ComponentInfo(component=str(deps_path), type="dependencies")
-        logger.debug(f"Installing dependencies on guests: {package}")
-        action_class = Action("install", package, self.ansible_data)
-        status = action_class.execute()
-
-        return status
 
     def update_status(self, status: dict) -> None:
         """
