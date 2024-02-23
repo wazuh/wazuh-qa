@@ -26,15 +26,18 @@ from wazuh_testing.end_to_end import logs_filepath_os
 from wazuh_testing.tools.system import HostManager
 
 
-def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict, ignore_error: bool = True,
-                                scan_interval: int = 5) -> Dict:
+DEFAULT_SCAN_INTERVAL = 5
+
+
+def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict, ignore_timeout_error: bool = True,
+                                scan_interval: int = DEFAULT_SCAN_INTERVAL) -> Dict:
     """
     Monitor events on multiple hosts concurrently.
 
     Args:
         host_manager: An instance of the HostManager class containing information about hosts.
         monitoring_data: A dictionary containing monitoring data for each host.
-        ignore_error: If True, ignore errors and continue monitoring.
+        ignore_timeout_error: If True, ignore TimeoutError and return the result.
 
     Returns:
         dict: A dictionary containing the monitoring results.
@@ -63,8 +66,8 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
         }
     """
     def monitoring_event(host_manager: HostManager, host: str, monitoring_elements: List[Dict],
-                         ignore_error: bool = True,
-                         scan_interval: int = 5) -> Dict:
+                         ignore_timeout_error: bool = True,
+                         scan_interval: int = DEFAULT_SCAN_INTERVAL) -> Dict:
         """
         Monitor the specified elements on a host.
 
@@ -72,7 +75,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
             host_manager (HostManager): Host Manager to handle the environment
             host (str): The target host.
             monitoring_elements(List): A list of dictionaries containing regex, timeout, and file.
-            ignore_error: If True, ignore TimeoutError and return the result.
+            ignore_timeout_error: If True, ignore TimeoutError and return the result.
 
         Raises:
             TimeoutError: If no match is found within the specified timeout.
@@ -141,7 +144,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
 
             if not regex_match:
                 elements_not_found.append(element)
-                if not ignore_error:
+                if not ignore_timeout_error:
                     raise TimeoutError(f"Element not found: {element}")
 
         monitoring_result = {}
@@ -158,7 +161,8 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
     with ThreadPoolExecutor() as executor:
         futures = []
         for host, data in monitoring_data.items():
-            futures.append(executor.submit(monitoring_event, host_manager, host, data, ignore_error, scan_interval))
+            futures.append(executor.submit(monitoring_event, host_manager, host, data, ignore_timeout_error, 
+                                           scan_interval))
 
         results = {}
         for future in as_completed(futures):
