@@ -194,6 +194,10 @@ def test_state_delete(restart_wazuh_daemon_after_finishing):
 
     assertions:
         - Verify that the 'wazuh-agentd.state' statistics file has been deleted.
+    parameters:
+        - restart_wazuh_daemon_after_finishing:
+            type: fixture
+            brief: Restart wazuh modules after finishing the test module.
     '''
 
     # Stop service
