@@ -2,7 +2,7 @@ import subprocess
 from . import utils
 
 
-class WazuhInstaller:
+class WazuhAgentInstaller:
     def __init__(self, os_type, wazuh_version, wazuh_revision, aws_s3, repository, dependency_ip, one_line, type_os=None, architecture=None):
         self.os_type = os_type
         self.wazuh_version = wazuh_version

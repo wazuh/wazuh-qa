@@ -5,7 +5,7 @@ import re
 import json
 
 from ..helpers import constants, utils
-from ..helpers.installer import WazuhInstaller
+from ..helpers.installer import WazuhAgentInstaller
 from ..helpers.checkfiles import CheckFile
 from ..helpers.hostinformation import HostInformation
 
@@ -47,7 +47,7 @@ def test_installation(wazuh_params):
         hostinfo.get_architecture()
     )
     checkfile= CheckFile()
-    wazuh_installer= WazuhInstaller(*install_args)
+    wazuh_installer= WazuhAgentInstaller(*install_args)
     result = checkfile.perform_action_and_scan(lambda: wazuh_installer.install_agent())
 
     assert all('wazuh' in path or 'ossec' in path for path in result['added'])

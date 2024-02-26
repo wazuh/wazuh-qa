@@ -3,7 +3,7 @@ import pwd
 import pytest
 
 from ..helpers import constants, utils
-from ..helpers.uninstaller import WazuhUninstaller
+from ..helpers.uninstaller import WazuhAgentUninstaller
 from ..helpers.checkfiles import CheckFile
 from ..helpers.hostinformation import HostInformation
 
@@ -24,7 +24,7 @@ def test_uninstallation(wazuh_params):
         hostinfo.get_linux_distribution()
     )
     checkfile= CheckFile()
-    wazuh_uninstaller= WazuhUninstaller(*uninstall_args)
+    wazuh_uninstaller= WazuhAgentUninstaller(*uninstall_args)
     result = checkfile.perform_action_and_scan(lambda: wazuh_uninstaller.uninstall_agent())
 
     assert all('wazuh' in path or 'ossec' in path for path in result['removed'])
