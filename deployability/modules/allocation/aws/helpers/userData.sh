@@ -133,9 +133,9 @@ if [ ! -r "/etc/os-release" ] || [ "$DIST_NAME" = "centos" ]; then
     fi
 fi
 
-if [ "$DIST_NAME" = "amzn" ]; then
-    sed -i "s/#Port\s22/Port ${SSH_PORT}/" /etc/ssh/sshd_config
-    systemctl restart sshd.service
+if [ "$DIST_NAME" = "amzn" ] || [ "$DIST_NAME" = "sles" ]; then
+    sudo sed -i "s/#Port\s22/Port ${SSH_PORT}/" /etc/ssh/sshd_config
+    sudo systemctl restart sshd.service
 fi
 
 if [ "$DIST_NAME" = "rhel" ] || [ "$DIST_NAME" = "centos" ] || [ "$DIST_NAME" = "rocky" ] || [ "$DIST_NAME" = "fedora" ]; then
