@@ -162,6 +162,10 @@ class AWSProvider(Provider):
         """
         client = boto3.resource('ec2')
 
+        userData_file = Path(__file__).parent.parent / 'aws' / 'helpers' / 'userData.sh'
+
+        with open(userData_file, 'r') as file:
+            userData = file.read()
         params = {
             'ImageId': config.ami,
             'InstanceType': config.type,
@@ -169,6 +173,7 @@ class AWSProvider(Provider):
             'SecurityGroupIds': config.security_groups,
             'MinCount': 1,
             'MaxCount': 1,
+            'UserData': userData,
             'TagSpecifications': [{
                 'ResourceType': 'instance',
                 'Tags': [

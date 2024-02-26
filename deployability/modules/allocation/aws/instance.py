@@ -70,7 +70,7 @@ class AWSInstance(Instance):
         """
         return ConnectionInfo(hostname=self._instance.public_dns_name,
                                 user=self._user,
-                                port=22,
+                                port=2200,
                                 private_key=str(self.credentials.key_path))
 
     def __get_credentials(self) -> AWSCredentials:
