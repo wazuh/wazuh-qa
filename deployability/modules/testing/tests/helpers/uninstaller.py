@@ -1,6 +1,7 @@
 
 import subprocess
 from . import utils
+from .logger.logger import logger
 
 
 class WazuhAgentUninstaller:
@@ -18,7 +19,7 @@ class WazuhAgentUninstaller:
         elif self.os_type == 'macos':
             self._uninstall_macos_agent()
         else:
-            print("Unsupported operating system.")
+            logger.error(f"Unsupported operating system.")
 
     def _uninstall_linux_agent(self):
         if self.type_os == 'rpm':
@@ -33,7 +34,7 @@ class WazuhAgentUninstaller:
             try:
                 subprocess.run(command, shell=True, check=True)
             except subprocess.CalledProcessError as e:
-                print(f"Error al ejecutar el comando: {e}")
+                logger.error(f"Error executing the command: {e}")
 
         post_uninstall_commands = [
             "systemctl disable wazuh-agent",
@@ -44,12 +45,16 @@ class WazuhAgentUninstaller:
             try:
                 subprocess.run(command, shell=True, check=True)
             except subprocess.CalledProcessError as e:
-                print(f"Error al ejecutar el comando: {e}")
+                logger.error(f"Error executing the command: {e}")
 
     def _uninstall_windows_agent(self):
         uninstall_command = f"msiexec.exe /x wazuh-agent-{self.wazuh_version}-{self.wazuh_revision}.msi /qn"
 
-        utils.run_command(uninstall_command)
+        try:
+            utils.run_command(uninstall_command)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Error executing the uninstall command: {e}")
+
 
     def _uninstall_macos_agent():
         uninstall_commands = [
@@ -64,4 +69,7 @@ class WazuhAgentUninstaller:
         ]
 
         for command in uninstall_commands:
-            utils.run_command(command)
+            try:
+                subprocess.run(command)
+            except subprocess.CalledProcessError as e:
+                logger.error(f"Error executing the command: {e}")

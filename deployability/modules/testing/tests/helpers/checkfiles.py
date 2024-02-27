@@ -2,7 +2,7 @@ import subprocess
 from ..helpers.hostinformation import HostInformation
 
 
-class CheckFile:
+class CheckFiles:
     def __init__(self):
         self.initial_scan = None
         self.second_scan = None

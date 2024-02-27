@@ -4,7 +4,7 @@ import pytest
 
 from ..helpers import constants, utils
 from ..helpers.uninstaller import WazuhAgentUninstaller
-from ..helpers.checkfiles import CheckFile
+from ..helpers.checkfiles import CheckFiles
 from ..helpers.hostinformation import HostInformation
 
 
@@ -23,7 +23,7 @@ def test_uninstallation(wazuh_params):
         wazuh_params['wazuh_revision'],
         hostinfo.get_linux_distribution()
     )
-    checkfile= CheckFile()
+    checkfile= CheckFiles()
     wazuh_uninstaller= WazuhAgentUninstaller(*uninstall_args)
     result = checkfile.perform_action_and_scan(lambda: wazuh_uninstaller.uninstall_agent())
 

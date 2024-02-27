@@ -4,10 +4,8 @@ from pathlib import Path
 
 from modules.generic import Ansible, Inventory
 from modules.generic.utils import Utils
+from modules.testing.tests.helpers.logger.logger import logger
 from .models import InputPayload, ExtraVars
-from .utils import logger
-
-
 class Tester:
     _playbooks_dir = Path(__file__).parent / 'playbooks'
     _setup_playbook = _playbooks_dir / 'setup.yml'

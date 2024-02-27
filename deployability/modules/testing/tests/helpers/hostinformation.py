@@ -49,3 +49,4 @@ class HostInformation:
                 if os.path.exists(file_path):
 
                     return package_manager
+            raise ValueError("Unable to determine Linux distribution")

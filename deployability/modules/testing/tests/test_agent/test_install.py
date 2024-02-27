@@ -6,7 +6,7 @@ import json
 
 from ..helpers import constants, utils
 from ..helpers.installer import WazuhAgentInstaller
-from ..helpers.checkfiles import CheckFile
+from ..helpers.checkfiles import CheckFiles
 from ..helpers.hostinformation import HostInformation
 
 
@@ -46,12 +46,13 @@ def test_installation(wazuh_params):
         hostinfo.get_linux_distribution(),
         hostinfo.get_architecture()
     )
-    checkfile= CheckFile()
+    checkfile= CheckFiles()
     wazuh_installer= WazuhAgentInstaller(*install_args)
     result = checkfile.perform_action_and_scan(lambda: wazuh_installer.install_agent())
 
     assert all('wazuh' in path or 'ossec' in path for path in result['added'])
     assert not any('wazuh' in path or 'ossec' in path for path in result['removed'])
+    assert constants.WAZUH_ROOT.exists(), "Configuration file not found."
 
 def test_wazuh_user():
     all_users = [x[0] for x in pwd.getpwall()]

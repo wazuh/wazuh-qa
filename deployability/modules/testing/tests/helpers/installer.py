@@ -1,6 +1,6 @@
 import subprocess
 from . import utils
-
+from .logger.logger import logger
 
 class WazuhAgentInstaller:
     def __init__(self, os_type, wazuh_version, wazuh_revision, aws_s3, repository, dependency_ip, one_line, type_os=None, architecture=None):
@@ -29,7 +29,7 @@ class WazuhAgentInstaller:
         if installation_function:
             installation_function()
         else:
-            print("Unsupported operating system.")
+            logger.error(f"Unsupported operating system.")
 
 
     def _install_linux_agent(self):
@@ -49,13 +49,15 @@ class WazuhAgentInstaller:
 
         try:
             subprocess.run(download_command, shell=True, check=True)
+        except FileNotFoundError:
+            logger.error("URL not found.")
         except subprocess.CalledProcessError as e:
-            print(f"Error al ejecutar el comando: {e}")
+            logger.error(f"Error running 'wget' or 'install' command: {e}")
 
         try:
             subprocess.run(install_command, shell=True, check=True)
         except subprocess.CalledProcessError as e:
-            print(f"Error executing the command: {e}")
+            logger.error(f"Error executing the command: {e}")
 
         post_install_commands = [
             "sudo systemctl daemon-reload",
@@ -67,13 +69,16 @@ class WazuhAgentInstaller:
             try:
                 subprocess.run(command, shell=True, check=True)
             except subprocess.CalledProcessError as e:
-                print(f"Error executing the command: {e}")
+                logger.error(f"Error executing the command: {e}")
 
     def _install_windows_agent(self):
         install_command = f"Invoke-WebRequest -Uri {self.aws_s3}/{self.repository}/windows/wazuh-agent-{self.wazuh_version}-{self.wazuh_revision}.msi -OutFile $env:tmp\\wazuh-agent; msiexec.exe /i $env:tmp\\wazuh-agent /q WAZUH_MANAGER='{self._connection_dependency_ip()}' WAZUH_AGENT_NAME='agent-{self.os_type}-{self.dependency_ip}' WAZUH_REGISTRATION_SERVER='{self._connection_dependency_ip()}'"
 
-        utils.run_command(install_command)
-
+        try:
+            utils.run_command(install_command)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Error executing the command: {e}")
+        
         post_install_command = "NET START WazuhSvc"
         utils.run_command(post_install_command)
 
@@ -83,7 +88,15 @@ class WazuhAgentInstaller:
         elif self.architecture == 'Apple':
             command = f"curl -so wazuh-agent.pkg {self.aws_s3}/{self.repository}/macos/wazuh-agent-{self.wazuh_version}-{self.wazuh_revision}.arm64.pkg && echo 'WAZUH_MANAGER='{self._connection_dependency_ip()}' && WAZUH_AGENT_NAME='agent-{self.os_type}-{self.dependency_ip}' > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /"
 
-        utils.run_command(command)
+        try:
+            utils.run_command(command)
+        except FileNotFoundError:
+            logger.error("URL not found.")
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Error running 'wget' or 'install' command: {e}")
 
         post_install_command = "sudo /Library/Ossec/bin/wazuh-control start"
-        utils.run_command(post_install_command)
+        try:
+            utils.run_command(post_install_command)
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Error executing the command: {e}")
