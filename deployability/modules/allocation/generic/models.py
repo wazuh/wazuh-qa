@@ -24,8 +24,10 @@ class InventoryOutput(BaseModel):
     ansible_host: str | IPvAnyAddress
     ansible_user: str
     ansible_port: int
-    ansible_ssh_private_key_file: str
+    ansible_ssh_private_key_file: str | None = None
     ansible_password: str | None = None
+    ansible_connection: Literal['ssh', 'winrm'] | None = None
+    ansible_winrm_server_cert_validation: Literal['ignore'] | None = None
 
 
 class TrackOutput(BaseModel):

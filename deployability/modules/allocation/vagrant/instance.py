@@ -22,18 +22,19 @@ class VagrantInstance(Instance):
         credentials (VagrantCredentials): Vagrant credentials object.
         host_identifier (str or Path): Remote directory of the instance.
     """
-    def __init__(self, path: str | Path, identifier: str, credentials: VagrantCredentials = None, host_identifier: str | Path = None, ssh_port: str = None) -> None:
+    def __init__(self, path: str | Path, identifier: str, platform: str, credentials: VagrantCredentials = None, host_identifier: str | Path = None, ssh_port: str = None) -> None:
         """
         Initializes a VagrantInstance.
 
         Args:
             path (str | Path): The path of the instance.
             identifier (str): The identifier of the instance.
+            platform (str): The platform of the instance.
             credentials (VagrantCredentials, optional): The credentials of the instance. Defaults to None.
             host_identifier (str | Path, optional): The remote directory of the instance. Defaults to None.
             ssh_port (str, optional): The SSH port of the instance. Defaults to None.
         """
-        super().__init__(path, identifier, credentials, host_identifier, ssh_port)
+        super().__init__(path, identifier, platform, credentials, host_identifier, ssh_port)
         self.vagrantfile_path: Path = self.path / 'Vagrantfile'
 
     def start(self) -> None:
@@ -141,7 +142,6 @@ class VagrantInstance(Instance):
                     logger.error(f"Couldn't find {key} in ssh-config")
                     return None
             if self.credentials:
-                logger.debug(f"Using provided credentials")
                 ssh_config['private_key'] = str(self.credentials.key_path)
         return ConnectionInfo(**ssh_config)
 

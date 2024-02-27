@@ -114,13 +114,29 @@ class Allocator:
         if not inventory_path.parent.exists():
             inventory_path.parent.mkdir(parents=True, exist_ok=True)
         ssh_config = instance.ssh_connection_info()
-        inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
-                                            ansible_user=ssh_config.user,
-                                            ansible_port=ssh_config.port,
-                                            ansible_ssh_private_key_file=str(ssh_config.private_key),
-                                            ansible_password=str(ssh_config.password))
+        if instance.platform == 'windows':
+            inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
+                                                ansible_user=ssh_config.user,
+                                                ansible_port=ssh_config.port,
+                                                ansible_password=ssh_config.password,
+                                                ansible_connection='winrm',
+                                                ansible_winrm_server_cert_validation='ignore')
+        elif not ssh_config.private_key:
+            inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
+                                                ansible_user=ssh_config.user,
+                                                ansible_port=ssh_config.port,
+                                                ansible_connection='ssh',
+                                                ansible_password=ssh_config.password)
+            logger.info(f"SSH connection string: ssh {ssh_config.user}@{ssh_config.hostname} -p {ssh_config.port}")
+        else:
+            inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
+                                                ansible_user=ssh_config.user,
+                                                ansible_port=ssh_config.port,
+                                                ansible_connection='ssh',
+                                                ansible_ssh_private_key_file=str(ssh_config.private_key))
+            logger.info(f"SSH connection string: ssh {ssh_config.user}@{ssh_config.hostname} -p {ssh_config.port} -i {ssh_config.private_key}")
         with open(inventory_path, 'w') as f:
-            yaml.dump(inventory.model_dump(), f)
+            yaml.dump(inventory.model_dump(exclude_none=True), f)
         logger.info(f"Inventory file generated at {inventory_path}")
 
     @staticmethod

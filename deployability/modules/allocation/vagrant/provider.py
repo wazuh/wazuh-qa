@@ -41,8 +41,9 @@ class VagrantProvider(Provider):
         # Create the instance directory.
         instance_dir = base_dir / instance_id
         instance_dir.mkdir(parents=True, exist_ok=True)
+        platform = str(params.composite_name.split("-")[0])
         # Used for macOS deployments
-        if params.composite_name.startswith('macos'):
+        if platform == 'macos':
             host_identifier = "/Users/jenkins/testing/" + instance_id
             logger.debug(f"Creating instance directory on remote host")
             cmd = f"mkdir {host_identifier}"
@@ -69,9 +70,9 @@ class VagrantProvider(Provider):
         if params.composite_name.startswith('macos'):
             vagrant_file = str(instance_dir) + '/Vagrantfile'
             VagrantUtils.remote_copy(vagrant_file, host_identifier)
-            return VagrantInstance(instance_dir, instance_id, credentials, host_identifier)
+            return VagrantInstance(instance_dir, instance_id, platform, credentials, host_identifier)
         else:
-            return VagrantInstance(instance_dir, instance_id, credentials)
+            return VagrantInstance(instance_dir, instance_id, platform, credentials)
 
     @staticmethod
     def _load_instance(instance_dir: Path, identifier: str) -> VagrantInstance:
@@ -102,11 +103,11 @@ class VagrantProvider(Provider):
             None
         """
         if host_identifier == "None" or host_identifier is None:
-            instance = VagrantInstance(instance_dir, identifier)
+            instance = VagrantInstance(instance_dir, identifier, platform)
             if os.path.dirname(key_path) != str(instance_dir):
                 logger.debug(f"The key {key_path} will not be deleted. It is the user's responsibility to delete it.")
         else:
-            instance = VagrantInstance(instance_dir, identifier, None, host_identifier, ssh_port)
+            instance = VagrantInstance(instance_dir, identifier, platform, None, host_identifier, ssh_port)
         logger.debug(f"Destroying instance {identifier}")
         instance.delete()
 

@@ -19,17 +19,18 @@ class AWSInstance(Instance):
         user (str): User associated with the instance.
     """
 
-    def __init__(self, path: str | Path, identifier: str, credentials: AWSCredentials = None, host_identifier: str = None, user: str = None) -> None:
+    def __init__(self, path: str | Path, identifier: str, platform: str, credentials: AWSCredentials = None, host_identifier: str = None, user: str = None) -> None:
         """
         Initialize an AWSInstance object.
 
         Args:
             path (str or Path): Directory where instance data is stored.
             identifier (str): Identifier of the instance.
+            platform (str): The platform of the instance.
             credentials (AWSCredentials): AWS credentials object.
             user (str): User associated with the instance.
         """
-        super().__init__(path, identifier, credentials)
+        super().__init__(path, identifier, platform, credentials)
         self._user = user
         self._client = boto3.resource('ec2')
         self._instance = self._client.Instance(self.identifier)
@@ -37,6 +38,7 @@ class AWSInstance(Instance):
         if not self.credentials:
             logger.debug(f"No credentials found. Loading from instance directory.")
             self.credentials = self.__get_credentials()
+        self.platform = platform
 
     def start(self) -> None:
         """Start the AWS EC2 instance."""
@@ -68,10 +70,16 @@ class AWSInstance(Instance):
         Returns:
             ConnectionInfo: SSH connection information.
         """
-        return ConnectionInfo(hostname=self._instance.public_dns_name,
+        if self.platform == 'windows':
+            return ConnectionInfo(hostname=self._instance.public_dns_name,
                                 user=self._user,
-                                port=22,
-                                private_key=str(self.credentials.key_path))
+                                port=3389,
+                                password='-J3nk1ns-')
+        else:
+            return ConnectionInfo(hostname=self._instance.public_dns_name,
+                                    user=self._user,
+                                    port=22,
+                                    private_key=str(self.credentials.key_path))
 
     def __get_credentials(self) -> AWSCredentials:
         """

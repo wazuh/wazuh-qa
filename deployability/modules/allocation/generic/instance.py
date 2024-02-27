@@ -18,13 +18,14 @@ class Instance(ABC):
         credentials (Credentials): The credentials of the instance.
     """
 
-    def __init__(self, path: str | Path, identifier: str, credentials: Credentials = None, host_identifier: str | Path = None, ssh_port: str = None) -> None:
+    def __init__(self, path: str | Path, identifier: str, platform: str, credentials: Credentials = None, host_identifier: str | Path = None, ssh_port: str = None) -> None:
         """
         Initializes an Instance object.
 
         Args:
             path (str | Path): The path of the instance.
             identifier (str): The identifier of the instance.
+            platform (str): The platform of the instance.
             credentials (Credentials, optional): The credentials of the instance. Defaults to None.
             host_identifier (str | Path, optional): The remote directory of the instance. Defaults to None.
             ssh_port (str, optional): The SSH port of the instance. Defaults to None.
@@ -36,14 +37,16 @@ class Instance(ABC):
         path = Path(path)
         if not path.exists() or not path.is_dir():
             raise ValueError(f"Invalid instance path: {path}")
-        if credentials and not issubclass(type(credentials), Credentials):
-            raise ValueError(f"Invalid credentials.")
+        if credentials != "None" and credentials is not None:
+            if credentials and not issubclass(type(credentials), Credentials):
+                raise ValueError(f"Invalid credentials.")
 
         self.path: Path = path
         self.identifier: str = str(identifier)
         self.credentials: Credentials = credentials
         self.host_identifier: Path = Path(host_identifier) if host_identifier else None
         self.ssh_port: str = ssh_port if ssh_port else None
+        self.platform: str = platform
 
     @abstractmethod
     def start(self) -> None:

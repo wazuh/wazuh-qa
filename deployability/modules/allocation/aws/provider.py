@@ -42,6 +42,7 @@ class AWSProvider(Provider):
         temp_dir = base_dir / temp_id
         credentials = AWSCredentials()
         teams = ['qa', 'core', 'framework', 'devops', 'frontend', 'operations', 'cloud', 'threat-intel', 'marketing', 'documentation']
+        platform = str(params.composite_name.split("-")[0])
         if not config:
             logger.debug(f"No config provided. Generating from payload")
             # Labels
@@ -108,9 +109,9 @@ class AWSProvider(Provider):
             credentials.key_path = (os.path.splitext(ssh_key)[0])
 
         if config.host_id:
-            return AWSInstance(instance_dir, instance_id, credentials, host_id, config.user)
+            return AWSInstance(instance_dir, instance_id, platform, credentials, host_id, config.user)
         else:
-            return AWSInstance(instance_dir, instance_id, credentials, None, config.user)
+            return AWSInstance(instance_dir, instance_id, platform, credentials, None, config.user)
 
     @staticmethod
     def _load_instance(instance_dir: Path, instance_id: str) -> AWSInstance:
