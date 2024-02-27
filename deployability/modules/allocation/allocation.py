@@ -121,7 +121,6 @@ class Allocator:
                                             ansible_password=str(ssh_config.password))
         with open(inventory_path, 'w') as f:
             yaml.dump(inventory.model_dump(), f)
-        logger.info(f"SSH connection string: ssh {ssh_config.user}@{ssh_config.hostname} -p {ssh_config.port} -i {ssh_config.private_key}")
         logger.info(f"Inventory file generated at {inventory_path}")
 
     @staticmethod
