@@ -22,30 +22,32 @@
     state: present
   {% endif %}
 
-- name: Download and extract Python {{ python_version }}
+- name: Download and extract Python {{ version }}
   get_url:
-    url: "https://www.python.org/ftp/python/{{ python_version }}/Python-{{ python_version }}.tgz"
-    dest: "/tmp/Python-{{ python_version }}.tgz"
+    url: "https://www.python.org/ftp/python/{{ version }}/Python-{{ version }}.tgz"
+    dest: "/tmp/Python-{{ version }}.tgz"
     mode: 0755
   register: download_python
 
-- name: Extract Python {{ python_version }}
+- name: Extract Python {{ version }}
   unarchive:
-    src: "/tmp/Python-{{ python_version }}.tgz"
+    src: "/tmp/Python-{{ version }}.tgz"
     dest: "/tmp"
     remote_src: yes
   when: download_python.changed
 
-- name: Install Python {{ python_version }}
+- name: Install Python {{ version }}
   shell: |
-    cd /tmp/Python-{{ python_version }} && ./configure --enable-optimizations && make altinstall
+    cd /tmp/Python-{{ version }}
+    ./configure --enable-optimizations
+    make altinstall
   args:
-    chdir: "/tmp/Python-{{ python_version }}"
+    chdir: "/tmp/Python-{{ version }}"
   when: download_python.changed
   register: install_python
 
-- name: Set default python to {{ python_version }}
+- name: Set default python to {{ version }}
   shell: |
-    update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python{{ python_version }} 1
-    update-alternatives --install /usr/bin/pip3 pip3 /usr/local/bin/pip{{ python_version }} 1
+    update-alternatives --install /usr/local/bin/python3 python3 /usr/bin/python{{ version }} 1
+    update-alternatives --install /usr/local/bin/pip3 pip3 /usr/bin/pip{{ version }} 1
   when: install_python.changed

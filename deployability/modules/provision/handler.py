@@ -18,7 +18,7 @@ class ProvisionHandler:
     """
     _base_templates_path = Path(__file__).parent / 'playbooks'
     _actions = ['install', 'uninstall']
-    _methods = ['package', 'aio', 'dependencies', 'sources']
+    _methods = ['package', 'aio', 'dependencies', 'source']
 
     def __init__(self, component_info: ComponentInfo, action: str, method: str) -> None:
         """
@@ -36,9 +36,9 @@ class ProvisionHandler:
         if not "wazuh" in component_info.component and method.lower() == 'aio':
             raise ValueError(f"AIO actions is only supported for Wazuh components.")
 
-        # We cant uninstall from sources.
-        if action == "uninstall" and method.lower() == "sources":
-            logger.warning(f"Uninstall from sources not supported. Using package.")
+        # We cant uninstall from source.
+        if action == "uninstall" and method.lower() == "source":
+            logger.warning(f"Uninstall from source not supported. Using package.")
             method = "package"
 
         self.action = action.lower()
@@ -73,7 +73,7 @@ class ProvisionHandler:
                 return ["set_repo.j2", "install.j2", "register.j2", "service.j2"]
             case 'aio':
                 return ["download.j2", f"{self.action}.j2"]
-            case 'sources':
+            case 'source':
                 component_file = f"{self.component_info.component}.j2"
                 if not Path(f"{self.templates_path}/{component_file}").exists():
                     # The source installation is always component specific.
