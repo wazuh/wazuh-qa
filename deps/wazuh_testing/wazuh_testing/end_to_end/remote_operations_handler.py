@@ -42,9 +42,7 @@ def check_vulnerability_alerts(results: Dict, check_data: Dict, current_datetime
     vulnerability_alerts_mitigated = {}
     vulnerability_index = {}
 
-
     for agent in host_manager.get_group_hosts('agent'):
-
         agent_all_alerts = parse_vulnerability_detector_alerts(get_indexer_values(host_manager,
                                               greater_than_timestamp=current_datetime,
                                               agent=agent)['hits']['hits'])
