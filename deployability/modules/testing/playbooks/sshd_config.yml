@@ -1,0 +1,66 @@
+- name: Replace values in config.yml
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Check if firewalld is installed
+      stat:
+        path: /usr/lib/systemd/system/firewalld.service
+      register: firewalld_installed
+
+    - debug:
+        var: firewalld_installed
+
+    - name: Stop firewalld
+      systemd:
+        name: firewalld
+        state: stopped
+      become: yes
+      when: firewalld_installed.stat.exists
+
+    - name: Disable firewalld at boot
+      systemd:
+        name: firewalld
+        enabled: no
+      become: yes
+      when: firewalld_installed.stat.exists
+
+
+    - name: Comprobar si es necesario realizar cambios
+      command: cat /etc/ssh/sshd_config
+      register: sshd_config_content
+
+    - name: Comentar las líneas en /etc/ssh/sshd_config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PasswordAuthentication'
+        line: '#PasswordAuthentication no'
+      when: "'PasswordAuthentication no' in sshd_config_content.stdout"
+
+    - name: Comentar PermitRootLogin no
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin no'
+        line: '#PermitRootLogin no'
+      when: "'PermitRootLogin no' in sshd_config_content.stdout"
+
+    - name: Comentar PermitRootLogin prohibit-password
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^PermitRootLogin prohibit-password'
+        line: '#PermitRootLogin prohibit-password'
+      when: "'PermitRootLogin prohibit-password' in sshd_config_content.stdout"
+
+    - name: Agregar nuevas líneas al final del archivo
+      blockinfile:
+        path: /etc/ssh/sshd_config
+        marker: ""
+        block: |
+          PasswordAuthentication yes
+          PermitRootLogin yes
+      when: "'PasswordAuthentication no' in sshd_config_content.stdout or 'PermitRootLogin no' in sshd_config_content.stdout or 'PermitRootLogin prohibit-password' in sshd_config_content.stdout"
+
+    - name: Reiniciar el servicio SSH
+      systemd:
+        name: sshd
+        state: restarted

@@ -11,7 +11,7 @@ class Tester:
     _playbooks_dir = Path(__file__).parent / 'playbooks'
     _setup_playbook = _playbooks_dir / 'setup.yml'
     _cleanup_playbook = _playbooks_dir / 'cleanup.yml'
-    _test_template = _playbooks_dir / 'test.yml'
+    _test_template = _playbooks_dir / 'install_wazuh_manager.yml'
 
     @classmethod
     def run(cls, payload: InputPayload) -> None:
