@@ -45,6 +45,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix Initial scans tests([5032](https://github.com/wazuh/wazuh-qa/pull/5032)) \- (Framework + Tests)
+- Handle VDT data missing in wazuhdb API ([5014](https://github.com/wazuh/wazuh-qa/pull/5014)) \- (Framework + Tests)
 - Fixed x-axis labels in data-visualizer script ([#4987 ](https://github.com/wazuh/wazuh-qa/pull/4987)) \- (Framework) 
 - Fix monitoring module for e2e tests ([#4959](https://github.com/wazuh/wazuh-qa/pull/4959)) \- (Framework) 
 - Fix get_host_variables for system tests ([#4958](https://github.com/wazuh/wazuh-qa/pull/4958)) \- (Framework)  
