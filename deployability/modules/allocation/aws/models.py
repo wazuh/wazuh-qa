@@ -13,3 +13,4 @@ class AWSConfig(ProviderConfig):
     team: str
     name: str
     host_id: str | None = None
+    platform: str

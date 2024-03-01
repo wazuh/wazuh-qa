@@ -75,17 +75,20 @@ class AWSProvider(Provider):
             name = str(issue_name.group(1)) + "-" + str(re.search(r'(\d+)$', issue).group(1)) + "-" + str(params.composite_name.split("-")[1]) + "-" + str(params.composite_name.split("-")[2])
 
             # Keys.
-            if not ssh_key:
-                logger.debug(f"Generating new key pair")
-                credentials.generate(temp_dir, str('-'.join(name.split("-")[:-2])))
+            if platform == "windows":
+                credentials.create_password()
             else:
-                logger.debug(f"Using provided key pair")
-                key_id = credentials.ssh_key_interpreter(ssh_key)
-                credentials.load(key_id)
+                if not ssh_key:
+                    logger.debug(f"Generating new key pair")
+                    credentials.generate(temp_dir, str('-'.join(name.split("-")[:-2])))
+                else:
+                    logger.debug(f"Using provided key pair")
+                    key_id = credentials.ssh_key_interpreter(ssh_key)
+                    credentials.load(key_id)
             # Parse the config if it is not provided.
             config = cls.__parse_config(params, credentials, issue, label_team, termination_date, name)
             #Generate dedicated host for macOS instances
-            if str(params.composite_name.split("-")[0]) == 'macos':
+            if platform == 'macos':
                 host_id = cls._generate_dedicated_host(config, str(params.composite_name.split("-")[3]))
                 config = cls.__parse_config(params, credentials, issue, label_team, termination_date, name, host_id)
         else:
@@ -163,13 +166,23 @@ class AWSProvider(Provider):
         """
         client = boto3.resource('ec2')
 
+        userData_file = Path(__file__).parent.parent / 'aws' / 'helpers' / 'userData.sh'
+        windosUserData_file = Path(__file__).parent.parent / 'aws' / 'helpers' / 'windowsUserData.ps1'
+
+        if config.platform == 'windows':
+            with open(windosUserData_file, 'r') as file:
+                userData = file.read()
+                userData = userData.replace('ChangeMe', config.key_name)
+        else:
+            with open(userData_file, 'r') as file:
+                userData = file.read()
         params = {
             'ImageId': config.ami,
             'InstanceType': config.type,
-            'KeyName': config.key_name,
             'SecurityGroupIds': config.security_groups,
             'MinCount': 1,
             'MaxCount': 1,
+            'UserData': userData,
             'TagSpecifications': [{
                 'ResourceType': 'instance',
                 'Tags': [
@@ -180,6 +193,9 @@ class AWSProvider(Provider):
                 ]
             }]
         }
+        if config.platform != 'windows':
+            params['KeyName'] = config.key_name
+
 
         if config.host_id:
             params['Placement'] = {'AvailabilityZone': config.zone, 'HostId': config.host_id}
@@ -213,6 +229,7 @@ class AWSProvider(Provider):
         os_specs = cls._get_os_specs()[params.composite_name]
         mics_specs = cls._get_misc_specs()
         arch = params.composite_name.split('-')[-1]
+        platform = str(params.composite_name.split("-")[0])
 
         # Parse the configuration.
         if str(params.composite_name.split("-")[0]) == 'macos':
@@ -238,6 +255,7 @@ class AWSProvider(Provider):
         config['name'] = name
         if host_id:
             config['host_id'] = host_id
+        config['platform'] = platform
 
         return AWSConfig(**config)
 

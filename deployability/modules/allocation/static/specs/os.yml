@@ -160,15 +160,15 @@ aws:
   linux-oracle-7-amd64:
     ami: ami-0fb08d5eb039a9ebd
     zone: us-east-1
-    user: admin
+    user: ec2-user
   linux-oracle-8-amd64:
     ami: ami-04921b5223c6ab7f0
     zone: us-east-1
-    user: admin
+    user: ec2-user
   linux-oracle-9-amd64:
     ami: ami-01453ca80e53609e3
     zone: us-east-1
-    user: admin
+    user: ec2-user
   # openSUSE Linux
   linux-opensuse-15-amd64:
     ami: ami-06b6eb8f8fb7f2916
@@ -183,11 +183,11 @@ aws:
   linux-centos-7-amd64:
     ami: ami-0aedf6b1cb669b4c7
     zone: us-east-1
-    user: ec2-user
+    user: centos
   linux-centos-8-amd64:
     ami: ami-0ee534f954d1b2c98
     zone: us-east-1
-    user: ec2-user
+    user: centos
   linux-centos-9-amd64:
     ami: ami-0259c451b16b72e24
     zone: us-east-1
@@ -218,15 +218,15 @@ aws:
     ami: ami-067d1e60475437da2
     zone: us-east-1
     user: ec2-user
-  # Fedora
-  linux-fedora-37-amd64:
-    ami: ami-0a3279828fb6dad65
-    zone: us-east-1
-    user: ec2-user
-  linux-fedora-38-amd64:
-    ami:
-    zone: us-east-1
-    user: ec2-user
+  # Fedora AMIs does not have official support on AWS TODO create a new AMI
+  #linux-fedora-37-amd64:
+  #  ami: ami-0a3279828fb6dad65
+  #  zone: us-east-1
+  #  user: ec2-user
+  #linux-fedora-38-amd64:
+  #  ami:
+  #  zone: us-east-1
+  #  user: ec2-user
   # Rocky Linux
   linux-rocky-9-amd64:
     ami: ami-09c77dc92e45bc3ea
@@ -259,26 +259,26 @@ aws:
     user: ec2-user
   # Windows
   windows-desktop-10-amd64:
-    ami: ami-004ca0c10752e17ce
+    ami: ami-0a747df120215911a
     zone: us-east-1
-    user: Jenkins
-  windows-desktop-11-amd64:
+    user: Administrator
+  windows-desktop-11-amd64: # update with the correct AMI for userData
     ami: ami-09d8cef159442d5b0
     zone: us-east-1
     user: Jenkins
   windows-server-2012r2-amd64:
-    ami: ami-0eb3cabd65ed56ee6
+    ami: ami-09a3ef2bc0c6a252f
     zone: us-east-1
-    user: Jenkins
+    user: Administrator
   windows-server-2016-amd64:
-    ami: ami-0f8b5c22ce0a7cf3b
+    ami: ami-04d7825822fe66af3
     zone: us-east-1
-    user: Jenkins
+    user: Administrator
   windows-server-2019-amd64:
-    ami: ami-0ffb936e0378c083f
+    ami: ami-06cc514f1012a7431
     zone: us-east-1
-    user: Jenkins
+    user: Administrator
   windows-server-2022-amd64:
-    ami: ami-0ad422b1ff6909089
+    ami: ami-0f9c44e98edf38a2b
     zone: us-east-1
-    user: Jenkins
+    user: Administrator

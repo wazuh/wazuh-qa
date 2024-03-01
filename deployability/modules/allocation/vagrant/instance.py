@@ -76,7 +76,7 @@ class VagrantInstance(Instance):
                             Skipping deletion.")
             return
         self.__run_vagrant_command(['destroy', '-f'])
-        if self.host_identifier:
+        if self.platform == 'macos':
             logger.debug(f"Deleting remote directory {self.host_identifier}")
             VagrantUtils.remote_command(f"sudo rm -rf {self.host_identifier}")
             logger.debug(f"Killing remote process on port {self.ssh_port}")
@@ -112,7 +112,7 @@ class VagrantInstance(Instance):
                     'private_key': r'IdentityFile (.*)'}
         # Parse the ssh-config.
         ssh_config = {}
-        if self.host_identifier:
+        if self.platform == 'macos':
             for key, pattern in patterns.items():
                 match = re.search(pattern, output)
                 if match and key == 'hostname':
@@ -131,6 +131,15 @@ class VagrantInstance(Instance):
                     port = f.read()
             ssh_config['port'] = port
             ssh_config['hostname'] = server_ip
+            ssh_config['user'] = 'vagrant'
+            ssh_config['password'] = 'vagrant'
+        elif self.platform == 'windows':
+            for key, pattern in patterns.items():
+                match = re.search(pattern, output)
+                if match and key == 'hostname':
+                    ip = match.group(1).strip()
+            ssh_config['hostname'] = ip
+            ssh_config['port'] = 3389
             ssh_config['user'] = 'vagrant'
             ssh_config['password'] = 'vagrant'
         else:

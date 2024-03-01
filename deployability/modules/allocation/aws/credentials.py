@@ -1,5 +1,7 @@
 import os
 import boto3
+import random
+import string
 
 from botocore.exceptions import ClientError
 from pathlib import Path
@@ -153,3 +155,32 @@ class AWSCredentials(Credentials):
         else:
             key_id = ssh_key_name
         return key_id
+
+    def create_password(self) -> str:
+        """
+        Creates a password for the instance.
+
+        Returns:
+            str: The password for the instance.
+        """
+        # Define character sets
+        uppercase_letters = string.ascii_uppercase
+        lowercase_letters = string.ascii_lowercase
+        numbers = string.digits
+
+        # Combine all character sets
+        all_characters = uppercase_letters + lowercase_letters + numbers
+
+        # Ensure each set contributes at least one character
+        password = [random.choice(uppercase_letters),
+                    random.choice(lowercase_letters),
+                    random.choice(numbers)]
+
+        # Fill up the rest of the password length
+        password.extend(random.choice(all_characters) for _ in range(12 - 4))
+
+        # Shuffle the password to ensure randomness
+        random.shuffle(password)
+
+        # Convert list to string
+        self.name = ''.join(password)
