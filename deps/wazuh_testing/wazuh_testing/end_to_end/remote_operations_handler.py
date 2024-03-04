@@ -28,7 +28,8 @@ from concurrent.futures import ThreadPoolExecutor
 from wazuh_testing.end_to_end.waiters import wait_syscollector_and_vuln_scan
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.end_to_end.vulnerability_detector import check_vuln_alert_indexer, check_vuln_state_index, \
-        load_packages_metadata, get_vulnerabilities_alerts_indexer, get_indexer_values
+        load_packages_metadata, parse_vulnerability_detector_alerts
+from wazuh_testing.end_to_end.indexer_api import get_indexer_values
 
 
 def check_vulnerability_alerts(results: Dict, check_data: Dict, current_datetime: str, host_manager: HostManager,
@@ -37,11 +38,23 @@ def check_vulnerability_alerts(results: Dict, check_data: Dict, current_datetime
                                operation: str = 'install') -> None:
 
     # Get all the alerts generated in the timestamp
-    vulnerability_alerts = get_vulnerabilities_alerts_indexer(host_manager, current_datetime)
-    vulnerability_alerts_mitigated = get_vulnerabilities_alerts_indexer(host_manager, current_datetime, True)
+    vulnerability_alerts = {}
+    vulnerability_alerts_mitigated = {}
+    vulnerability_index = {}
 
-    vulnerability_index = get_indexer_values(host_manager, index='wazuh-states-vulnerabilities',
-                                             greater_than_timestamp=current_datetime)['hits']['hits']
+    for agent in host_manager.get_group_hosts('agent'):
+        agent_all_alerts = parse_vulnerability_detector_alerts(get_indexer_values(host_manager,
+                                              greater_than_timestamp=current_datetime,
+                                              agent=agent)['hits']['hits'])
+
+        agent_all_vulnerabilities = get_indexer_values(host_manager, greater_than_timestamp=current_datetime,
+                                                       agent=agent,
+                                                       index='wazuh-states-vulnerabilities')['hits']['hits']
+
+        vulnerability_alerts[agent] = agent_all_alerts['affected']
+        vulnerability_alerts_mitigated[agent] = agent_all_alerts['mitigated']
+
+        vulnerability_index[agent] = agent_all_vulnerabilities
 
     results['evidences']['all_alerts_found'] = vulnerability_alerts
     results['evidences']['all_alerts_found_mitigated'] = vulnerability_alerts_mitigated

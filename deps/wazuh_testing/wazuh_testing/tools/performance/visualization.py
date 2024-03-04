@@ -6,6 +6,7 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from matplotlib.ticker import LinearLocator
 
 BINARY_NON_PRINTABLE_HEADERS = ['PID', 'Daemon', 'Version']
 
@@ -122,9 +123,9 @@ class DataVisualizer:
             ax (axes.SubplotBase): subplot base where the data will be printed.
         """
         if self.x_ticks_granularity == 'seconds':
-            ax.xaxis.set_major_locator(mdates.SecondLocator(interval=self.x_ticks_interval))
+            ax.xaxis.set_major_locator(LinearLocator(30))
         elif self.x_ticks_granularity == 'minutes':
-            ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=self.x_ticks_interval))
+            ax.xaxis.set_major_locator(LinearLocator(30))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
 
     @staticmethod
