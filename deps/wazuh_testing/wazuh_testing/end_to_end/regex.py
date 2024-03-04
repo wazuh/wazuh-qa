@@ -44,6 +44,12 @@ REGEX_PATTERNS = {
         'regex': '.*HOST_NAME.*package":.*name":"PACKAGE_NAME".*version":"PACKAGE_VERSION".*"'
         'architecture":"ARCHITECTURE.*"cve":"CVE"',
         'parameters': ['HOST_NAME', 'CVE', 'PACKAGE_NAME', 'PACKAGE_VERSION', 'ARCHITECTURE']
+    },
+    'vuln_affected': {
+        'regex':  'CVE.*? affects.*"?'
+    },
+    'vuln_mitigated': {
+        'regex': "The .* that affected .* was solved due to a package removal"
     }
 }
 
