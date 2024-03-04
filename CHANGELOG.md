@@ -31,11 +31,11 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Reduced test_shutdown_message runtime ([#4986](https://github.com/wazuh/wazuh-qa/pull/4986)) \- (Tests) 
-- Change e2e vd configuration keystore ([#4952](https://github.com/wazuh/wazuh-qa/pull/4952)) \- (Framework)  
-- Updating tests after removing references to the legacy vulnerability detector module ([#4872](https://github.com/wazuh/wazuh-qa/pull/4872)) \- (Tests)  
-- Fix test cluster performance ([#4780](https://github.com/wazuh/wazuh-qa/pull/4780)) \- (Tests) 
-- Fixed IT control_service Windows loop ([#4765](https://github.com/wazuh/wazuh-qa/pull/4765)) \- (Framework) 
+- Reduced test_shutdown_message runtime ([#4986](https://github.com/wazuh/wazuh-qa/pull/4986)) \- (Tests)
+- Change e2e vd configuration keystore ([#4952](https://github.com/wazuh/wazuh-qa/pull/4952)) \- (Framework)
+- Updating tests after removing references to the legacy vulnerability detector module ([#4872](https://github.com/wazuh/wazuh-qa/pull/4872)) \- (Tests)
+- Fix test cluster performance ([#4780](https://github.com/wazuh/wazuh-qa/pull/4780)) \- (Tests)
+- Fixed IT control_service Windows loop ([#4765](https://github.com/wazuh/wazuh-qa/pull/4765)) \- (Framework)
 - Fix wazuhdb API statistics parsing ([#5007](https://github.com/wazuh/wazuh-qa/pull/5007)) \- (Framework)
 - Enhance StatisticMonitor with API support ([#4970](https://github.com/wazuh/wazuh-qa/pull/4970)) \- (Framework)
 - Deactivate tests and update vulnerability-detector configuration ([#4784](https://github.com/wazuh/wazuh-qa/pull/4784)) \- (Framework + Tests)
@@ -58,11 +58,11 @@ All notable changes to this project will be documented in this file.
 
 - Fix initial scans tests ([5032](https://github.com/wazuh/wazuh-qa/pull/5032)) \- (Framework + Tests)
 - Handle VDT data missing in wazuh-db API ([5014](https://github.com/wazuh/wazuh-qa/pull/5014)) \- (Framework + Tests)
-- Fixed x-axis labels in data-visualizer script ([#4987 ](https://github.com/wazuh/wazuh-qa/pull/4987)) \- (Framework) 
-- Fix monitoring module for e2e tests ([#4959](https://github.com/wazuh/wazuh-qa/pull/4959)) \- (Framework) 
-- Fix get_host_variables for system tests ([#4958](https://github.com/wazuh/wazuh-qa/pull/4958)) \- (Framework)  
-- Fix install package HostManager method ([#4954](https://github.com/wazuh/wazuh-qa/pull/4954)) \- (Framework) 
-- Fix Modify file method in system module ([#4953](https://github.com/wazuh/wazuh-qa/pull/4953)) \- (Framework) 
+- Fixed x-axis labels in data-visualizer script ([#4987 ](https://github.com/wazuh/wazuh-qa/pull/4987)) \- (Framework)
+- Fix monitoring module for e2e tests ([#4959](https://github.com/wazuh/wazuh-qa/pull/4959)) \- (Framework)
+- Fix get_host_variables for system tests ([#4958](https://github.com/wazuh/wazuh-qa/pull/4958)) \- (Framework)
+- Fix install package HostManager method ([#4954](https://github.com/wazuh/wazuh-qa/pull/4954)) \- (Framework)
+- Fix Modify file method in system module ([#4953](https://github.com/wazuh/wazuh-qa/pull/4953)) \- (Framework)
 - Fix timeout and performance issues in E2E Vulnerability Detector tests ([#5003](https://github.com/wazuh/wazuh-qa/pull/5003)) \- (Framework)
 - Fix E2E Vulnerability Detection monitoring function ([#4959](https://github.com/wazuh/wazuh-qa/pull/4959)) \- (Framework)
 - Fixed Filebeat provisioning role with pre-release and staging URLs ([#4950](https://github.com/wazuh/wazuh-qa/pull/4950)) \- (Framework)
@@ -77,7 +77,7 @@ All notable changes to this project will be documented in this file.
 - Fix test_file_checker in check_mtime case ([#4873](https://github.com/wazuh/wazuh-qa/pull/4873)) \- (Tests)
 - Fix test cluster performance. ([#4780](https://github.com/wazuh/wazuh-qa/pull/4780)) \- (Framework)
 
-## [4.7.3] - TBD
+## [4.7.3] - 04/03/2024
 
 ### Changed
 
