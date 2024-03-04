@@ -29,7 +29,10 @@ from wazuh_testing.end_to_end.regex import get_event_regex
 from wazuh_testing.end_to_end.logs import truncate_remote_host_group_files
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.modules.syscollector import TIMEOUT_SYSCOLLECTOR_SHORT_SCAN
-from wazuh_testing.modules.vulnerability_detector import VD_FEED_UPDATE_TIMEOUT, VD_INITIAL_SCAN_PER_AGENT_TIMEOUT
+
+
+VD_FEED_UPDATE_TIMEOUT = 300
+VD_INITIAL_SCAN_PER_AGENT_TIMEOUT = 15
 
 
 def wait_until_vd_is_updated(host_manager: HostManager) -> None:

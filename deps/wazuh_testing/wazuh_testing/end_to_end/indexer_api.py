@@ -22,7 +22,7 @@ STATE_INDEX_NAME = 'wazuh-vulnerabilities-states'
 
 
 def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'},
-                       index: str = 'wazuh-alerts*', greater_than_timestamp=None) -> Dict:
+                       index: str = 'wazuh-alerts*', greater_than_timestamp=None, agent: str = '') -> Dict:
     """
     Get values from the Wazuh Indexer API.
 
@@ -32,6 +32,7 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
                                  {'user': 'admin', 'password': 'changeme'}.
         index (Optional): The Indexer index name. Defaults to 'wazuh-alerts*'.
         greater_than_timestamp (Optional): The timestamp to filter the results. Defaults to None.
+        agent (Optional): The agent name to filter the results. Defaults to ''.
 
     Returns:
        Dict: A dictionary containing the values retrieved from the Indexer API.
@@ -49,26 +50,37 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
         }
     }
 
-    if greater_than_timestamp:
+    if greater_than_timestamp and agent:
         query = {
                 "bool": {
                     "must": [
-                        {"match_all": {}},
+                        {"range": {"@timestamp": {"gte": f"{greater_than_timestamp}"}}},
+                        {"match": {"agent.name": f"{agent}"}}
+                    ]
+                }
+        }
+
+        data['query'] = query
+    elif greater_than_timestamp:
+        query = {
+                "bool": {
+                    "must": [
                         {"range": {"@timestamp": {"gte": f"{greater_than_timestamp}"}}}
                     ]
                 }
         }
 
-        sort = [
-            {
-                "@timestamp": {
-                    "order": "desc"
+        data['query'] = query
+    elif agent:
+        query = {
+                "bool": {
+                    "must": [
+                        {"match": {"agent.name": f"{agent}"}}
+                    ]
                 }
-            }
-        ]
+        }
 
         data['query'] = query
-        data['sort'] = sort
 
     param = {
         'pretty': 'true',

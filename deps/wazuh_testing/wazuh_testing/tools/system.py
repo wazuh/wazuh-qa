@@ -48,7 +48,7 @@ class HostManager:
         variable_manager = VariableManager(loader=data_loader, inventory=self.inventory_manager)
 
         for host in self.inventory_manager.get_hosts():
-            self.hosts_variables[host] = variable_manager.get_vars(host=self.inventory_manager.get_host(str(host)))
+            self.hosts_variables[str(host)] = variable_manager.get_vars(host=self.inventory_manager.get_host(str(host)))
 
     def get_inventory(self) -> dict:
         """Get the loaded Ansible inventory.
@@ -114,10 +114,7 @@ class HostManager:
         Example:
             variables = get_host_variables('my_host')
         """
-
-        inventory_manager_host = self.inventory_manager.get_host(host)
-
-        return self.hosts_variables[inventory_manager_host]
+        return self.hosts_variables[host]
 
     def get_host(self, host: str):
         """Get the Ansible object for communicating with the specified host.
@@ -143,20 +140,23 @@ class HostManager:
         """Move from src_path to the desired location dest_path for the specified host.
 
         Args:
-        host (str): Hostname
-        src_path (str): Source path
-        dest_path (str): Destination path
-        check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be applied.
+            host (str): Hostname
+            src_path (str): Source path
+            dest_path (str): Destination path
+            check (bool, optional): Ansible check mode("Dry Run"). Default `False`
         """
         result = None
+        host_variables = self.get_host_variables(host)
 
-        if self.get_host_variables(host)['os_name'] == 'windows':
+        if 'os_name' in host_variables and host_variables['os_name'] == 'windows':
             result = self.get_host(host).ansible("ansible.windows.win_copy", f"src='{src_path}' dest='{dest_path}'",
                                                  check=check)
         else:
-            result = self.get_host(host).ansible('copy', f'src={src_path} dest={dest_path}'
+            result = self.get_host(host).ansible('copy', f'src={src_path} dest={dest_path} '
                                                  'owner=wazuh group=wazuh mode=preserve',
                                                  check=check)
+
+        logging.info(f"File moved result {result}")
 
         return result
 
@@ -482,6 +482,7 @@ class HostManager:
             host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
         """
         result = False
+
         if system == 'windows':
             result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
         elif system == 'ubuntu':
@@ -489,15 +490,15 @@ class HostManager:
             if result['changed'] and result['stderr'] == '':
                 result = True
         elif system == 'centos':
-            result = self.get_host(host).ansible("yum", f"name={url} state=present"
+            result = self.get_host(host).ansible("yum", f"name={url} state=present "
                                                  'sslverify=false disable_gpg_check=True', check=False)
-            if 'rc' in result and result['rc'] == 0 and result['changed']:
-                result = True
         elif system == 'macos':
             package_name = url.split('/')[-1]
             result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
             cmd = f"installer -pkg {package_name} -target /"
             result = self.get_host(host).ansible("command", cmd, check=False)
+
+        logging.info(f"Package installed result {result}")
 
         return result
 
