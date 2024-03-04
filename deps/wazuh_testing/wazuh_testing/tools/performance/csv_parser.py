@@ -241,8 +241,8 @@ class ClusterCSVResourcesParser(ClusterCSVParser):
 
     def __init__(self, artifacts_path, columns=None):
         self.columns = ['USS(KB)', 'CPU(%)', 'FD'] if columns is None else columns
-        super().__init__(artifacts_path, files_to_load=['wazuh-clusterd', 'integrity_sync', 'wazuh-clusterd_child_1',
-                                                        'wazuh-clusterd_child_2'])
+        super().__init__(artifacts_path, files_to_load=['wazuh_clusterd', 'integrity_sync', 'wazuh_clusterd_child_1',
+                                                        'wazuh_clusterd_child_2'])
 
     def _calculate_stats(self, df):
         """Calculate mean and regression coefficient of each column in self.columns from a dataframe.

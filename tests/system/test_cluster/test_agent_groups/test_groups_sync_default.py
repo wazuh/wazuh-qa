@@ -67,8 +67,8 @@ sync_delay = 40
 
 
 # Tests
-@pytest.mark.parametrize("agent_host", test_infra_managers[0:2])
-def test_agent_groups_sync_default(agent_host, clean_environment):
+@pytest.mark.parametrize("target_host", test_infra_managers[0:2])
+def test_agent_groups_sync_default(target_host, clean_environment):
     '''
     description: Check that after a long time when the manager has been unable to synchronize de databases, because
     new agents are being continually added, database synchronization is forced and the expected information is in
@@ -77,7 +77,7 @@ def test_agent_groups_sync_default(agent_host, clean_environment):
     in all the cluster nodes.
     wazuh_min_version: 4.4.0
     parameters:
-        - agent_host:
+        - target_host:
             type: List
             brief: Name of the host where the agent will register in each case.
         - clean_enviroment:
@@ -93,7 +93,7 @@ def test_agent_groups_sync_default(agent_host, clean_environment):
     # Register agents in manager
     agent_data = []
     for index, agent in enumerate(test_infra_agents):
-        data = register_agent(agent, agent_host, host_manager)
+        data = register_agent(agent, target_host, host_manager)
         agent_data.append(data)
 
     # get the time before all the process is started

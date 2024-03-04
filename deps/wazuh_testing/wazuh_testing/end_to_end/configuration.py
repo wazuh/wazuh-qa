@@ -202,3 +202,22 @@ def configure_environment(host_manager: HostManager, configurations: Dict[str, L
                      [(host, config, host_manager) for host, config in configure_environment_parallel_map])
 
     logging.info("Environment configured")
+
+
+def save_indexer_credentials_into_keystore(host_manager):
+    """
+    Save indexer credentials into the keystore.
+
+    Args:
+        host_manager: An instance of the HostManager class containing information about hosts.
+    """
+    keystore_path = '/var/ossec/bin/wazuh-keystore'
+
+    indexer_server = host_manager.get_group_hosts('indexer')[0]
+    indexer_server_variables = host_manager.get_host_variables(indexer_server)
+    indexer_user = indexer_server_variables['indexer_user']
+    indexer_password = indexer_server_variables['indexer_password']
+
+    for manager in host_manager.get_group_hosts('manager'):
+        host_manager.run_command(manager, f"{keystore_path} -f indexer -k username -v {indexer_user}")
+        host_manager.run_command(manager, f"{keystore_path} -f indexer -k password -v {indexer_password}")
