@@ -35,9 +35,6 @@ All notable changes to this project will be documented in this file.
 - Reduced test_shutdown_message runtime ([#4986](https://github.com/wazuh/wazuh-qa/pull/4986)) \- (Tests)
 - Change e2e vd configuration keystore ([#4952](https://github.com/wazuh/wazuh-qa/pull/4952)) \- (Framework)
 - Updating tests after removing references to the legacy vulnerability detector module ([#4872](https://github.com/wazuh/wazuh-qa/pull/4872)) \- (Tests)
-- Fix test cluster performance ([#4780](https://github.com/wazuh/wazuh-qa/pull/4780)) \- (Tests)
-- Fixed IT control_service Windows loop ([#4765](https://github.com/wazuh/wazuh-qa/pull/4765)) \- (Framework)
-
 - Fix wazuhdb API statistics parsing ([#5007](https://github.com/wazuh/wazuh-qa/pull/5007)) \- (Framework)
 - Enhance StatisticMonitor with API support ([#4970](https://github.com/wazuh/wazuh-qa/pull/4970)) \- (Framework)
 - Deactivate tests and update vulnerability-detector configuration ([#4784](https://github.com/wazuh/wazuh-qa/pull/4784)) \- (Framework + Tests)
