@@ -107,10 +107,7 @@ class AWSProvider(Provider):
         else:
             credentials.key_path = (os.path.splitext(ssh_key)[0])
 
-        if config.host_id:
-            return AWSInstance(instance_dir, instance_id, credentials, host_id, config.user)
-        else:
-            return AWSInstance(instance_dir, instance_id, credentials, None, config.user)
+        return AWSInstance(instance_dir, instance_id, credentials, host_id, config.user)
 
     @staticmethod
     def _load_instance(instance_dir: Path, instance_id: str) -> AWSInstance:
