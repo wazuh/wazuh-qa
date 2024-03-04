@@ -43,7 +43,7 @@ class Instance(ABC):
         self.identifier: str = str(identifier)
         self.credentials: Credentials = credentials
         self.host_identifier: Path = Path(host_identifier) if host_identifier else None
-        self.ssh_port: str = ssh_port if ssh_port else None
+        self.ssh_port: str = ssh_port or None
 
     @abstractmethod
     def start(self) -> None:
