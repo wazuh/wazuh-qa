@@ -63,7 +63,6 @@ All notable changes to this project will be documented in this file.
 - Fix install package HostManager method ([#4954](https://github.com/wazuh/wazuh-qa/pull/4954)) \- (Framework)
 - Fix Modify file method in system module ([#4953](https://github.com/wazuh/wazuh-qa/pull/4953)) \- (Framework)
 - Fix timeout and performance issues in E2E Vulnerability Detector tests ([#5003](https://github.com/wazuh/wazuh-qa/pull/5003)) \- (Framework)
-- Fix E2E Vulnerability Detection monitoring function ([#4959](https://github.com/wazuh/wazuh-qa/pull/4959)) \- (Framework)
 - Fixed Filebeat provisioning role with pre-release and staging URLs ([#4950](https://github.com/wazuh/wazuh-qa/pull/4950)) \- (Framework)
 - Fix macOS Vulnerability Detection handler provision in E2E tests ([#4948](https://github.com/wazuh/wazuh-qa/pull/4948)) \- (Framework)
 - Migrate Vulnerability Detection timeouts variables to the waiters module ([#4949](https://github.com/wazuh/wazuh-qa/pull/4949)) \- (Framework)
