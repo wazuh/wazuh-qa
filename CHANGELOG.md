@@ -4,17 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [4.9.0] - TBD
 
-### Changed
-
-- Removed conventional commits, changelog, linter and CodeQL of GitHub Action.
-
 ### Added
 
+- Add Workflow module to Wazuh-qa repository ([#4990](https://github.com/wazuh/wazuh-qa/pull/4990)) \- (Tests)
 - Add integration tests for Update field to CPE_Helper. ([#4574](https://github.com/wazuh/wazuh-qa/pull/4574)) \- (Core)
 
 ### Changed
 
 - Enhance the PR template. ([#4881](https://github.com/wazuh/wazuh-qa/pull/4881)) \- (Framework)
+
+### Fixed
+
+- Add an IT to check that the agent erases its wazuh-agent.state file ([#4716](https://github.com/wazuh/wazuh-qa/pull/4716)) \- (Core)
 
 ## [4.8.2] - TBD
 
