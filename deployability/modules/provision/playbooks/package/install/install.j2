@@ -1,13 +1,9 @@
 {% if ansible_os_family == 'Debian' %}
 - name: Install {{ component }}
-  apt:
-    name: {{ component }}
-    state: present
+  shell: apt-get install -y {{ component }}
 {% endif %}
 
-{% if ansible_os_family == 'RedHat' %}
+{% if ansible_os_family in ['RedHat', 'OracleLinux'] %}
 - name: Install {{ component }}
-  yum:
-    name: {{ component }}
-    state: present
+  shell: yum install -y {{ component }}
 {% endif %}
