@@ -61,10 +61,11 @@ class Action:
                 'cacheable': 'yes'
             }
         }]
-
+        logger.debug(f"Get OS family for {self.ansible.ansible_data.ansible_host}.")
         playbook = self._get_playbook(ansible_task)
         status = self.ansible.run_playbook(playbook)
         fact_cache = status.get_fact_cache(host=self.ansible.ansible_data.ansible_host)
+        logger.debug(f"OS family: {fact_cache.get('ansible_os_family')}.")
         return fact_cache.get('ansible_os_family') or None
 
     def _get_playbook(self, tasks: list[dict]) -> dict:
