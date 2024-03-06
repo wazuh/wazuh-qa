@@ -1,33 +1,32 @@
 import grp
 import pwd
 import pytest
+import json
+import re
 
-from ..helpers import constants, utils
-from ..helpers.uninstaller import WazuhManagerUninstaller
-from ..helpers.checkfiles import CheckFile
-from ..helpers.hostinformation import HostInformation
+from ..helpers.manager import WazuhManager
+from ..helpers.generic import HostConfiguration, HostInformation
+wazuh_manager = WazuhManager()
+host_configuration = HostConfiguration()
 
-
-@pytest.fixture
+@pytest.fixture(scope='function')
 def wazuh_params(request):
+    wazuh_version = request.config.getoption('--wazuh_version')
+    wazuh_revision = request.config.getoption('--wazuh_revision')
+    dependencies = request.config.getoption('--dependencies')
+    inventory = request.config.getoption('--inventory')
+
     return {
-        'wazuh_version': request.config.getoption('--wazuh_version'),
-        'live': request.config.getoption('--live')
+        'wazuh_version': wazuh_version,
+        'wazuh_revision': wazuh_revision,
+        'dependencies': dependencies,
+        'inventory': inventory
     }
 
-def test_uninstallation(wazuh_params):
-    aws_s3 = 'packages' if wazuh_params['live'] else 'packages-dev'
+def test_uninstall(wazuh_params):
 
-    hostinfo= HostInformation()
-    uninstall_args = (
-        hostinfo.get_linux_distribution(),
-        'all',
-        wazuh_params['wazuh_version'][0:3],
-        aws_s3
-    )
-    checkfile= CheckFile()
-    wazuh_uninstaller= WazuhManagerUninstaller(*uninstall_args)
-    result = checkfile.perform_action_and_scan(lambda: wazuh_uninstaller.uninstall_central_components())
-    print(result)
-    assert all('wazuh' in path or 'ossec' in path for path in result['removed'])
-    assert not any('wazuh' in path or 'ossec' in path for path in result['added'])
+    wazuh_manager.uninstall_manager(wazuh_params['dependencies']['manager'])
+
+    #checkfiles + validaciones de existencia de carepeta
+
+

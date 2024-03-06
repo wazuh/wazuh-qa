@@ -1,14 +1,50 @@
 import grp
 import pwd
 import pytest
+import json
+import re
 
 from ..helpers.manager import WazuhManager
+from ..helpers.generic import HostConfiguration, HostInformation
 wazuh_manager = WazuhManager()
+host_configuration = HostConfiguration()
 
-def test_installation():
-    assert "hola" == "hola"
-    #inv = ["/tmp/dtt1-poc/manager-linux-ubuntu-18.04-amd64/inventory.yaml", "/tmp/dtt1-poc/manager-linux-redhat-7-amd64/inventory.yaml"]
-    #wazuh_manager.install_manager(inv[0])
+
+def wazuh_params(request):
+    wazuh_version = request.config.getoption('--wazuh_version')
+    wazuh_revision = request.config.getoption('--wazuh_revision')
+    dependencies = request.config.getoption('--dependencies')
+    inventory = request.config.getoption('--inventory')
+
+    return {
+        'wazuh_version': wazuh_version,
+        'wazuh_revision': wazuh_revision,
+        'dependencies': dependencies,
+        'inventory': inventory
+
+    }
+
+def test_installation(wazuh_params):
+    
+    managers = [wazuh_params['inventory'], wazuh_params['dependencies']['manager']]
+    indexers = [wazuh_params['inventory']]
+
+    host_configuration.sshd_config(wazuh_params['inventory'])
+    host_configuration.sshd_config(wazuh_params['dependencies']['manager'])
+
+    host_configuration.disable_firewall(wazuh_params['inventory'])
+    host_configuration.disable_firewall(wazuh_params['dependencies']['manager'])
+
+    host_configuration.certs_create(wazuh_params['inventory'], wazuh_params['inventory'], indexers, managers)
+
+    host_configuration.scp_to(wazuh_params['inventory'], wazuh_params['dependencies']['manager'])
+
+    #checkfile
+    wazuh_manager.install_managers(managers)
+    #checkfile
+    assert 'active ' in wazuh_manager.get_manager_status(wazuh_params['inventory'])
+    assert 'active ' in wazuh_manager.get_manager_status(wazuh_params['dependencies']['manager'])
+    #validacion checkfile
 
 def test_wazuh_user():
     pass

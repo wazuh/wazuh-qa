@@ -163,7 +163,7 @@ class HostConfiguration:
         Executor.execute_commands(from_inventory_path, commands)
 
 
-class HostConfiguration:
+class HostMonitor:
     def __init__(self):
         pass
 
