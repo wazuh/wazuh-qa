@@ -482,9 +482,13 @@ class HostManager:
             host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
         """
         result = False
+        extension = '.msi'
 
         if system == 'windows':
-            result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
+            if url.lower().endswith(extension):
+                result = self.get_host(host).ansible("win_package", f"path={url} arguments=/passive", check=False)
+            else:
+                result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
         elif system == 'ubuntu':
             result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
             if result['changed'] and result['stderr'] == '':
