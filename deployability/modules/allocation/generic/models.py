@@ -35,8 +35,11 @@ class TrackOutput(BaseModel):
     provider: str
     instance_dir: str
     key_path: str
-    host_identifier: str | Path = None
+    host_identifier: str = None
+    host_instance_dir: str | Path = None
     ssh_port: int | None = None
+    platform: str
+    arch: str
 
 
 class InputPayload(BaseModel):
@@ -52,6 +55,7 @@ class InputPayload(BaseModel):
     label_issue: str | None = None
     label_team: str | None = None
     label_termination_date: str | None = None
+    instance_name: str | None = None
 
 class CreationPayload(InputPayload):
     provider: str
@@ -65,6 +69,7 @@ class CreationPayload(InputPayload):
     label_issue: str | None = None
     label_team: str | None = None
     label_termination_date: str | None = None
+    instance_name: str | None = None
 
     @model_validator(mode='before')
     def validate_dependency(cls, values) -> dict:

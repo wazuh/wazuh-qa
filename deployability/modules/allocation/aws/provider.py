@@ -43,12 +43,14 @@ class AWSProvider(Provider):
         credentials = AWSCredentials()
         teams = ['qa', 'core', 'framework', 'devops', 'frontend', 'operations', 'cloud', 'threat-intel', 'marketing', 'documentation']
         platform = str(params.composite_name.split("-")[0])
+        arch = str(params.composite_name.split("-")[3])
         if not config:
             logger.debug(f"No config provided. Generating from payload")
             # Labels
             issue = params.label_issue
             label_team = params.label_team
             termination_date = params.label_termination_date
+            host_identifier = None
             date_regex = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"
             url_regex = "(https:\/\/|http:\/\/)?[github]{2,}(\.[com]{2,})?\/wazuh\/[a-zA-Z0-9_-]+(?:-[a-zA-Z0-9_-]+)?\/issues\/[0-9]{2,}"
             if not termination_date or not re.match(date_regex, termination_date):
@@ -71,8 +73,12 @@ class AWSProvider(Provider):
             if not issue or not re.match(url_regex, issue):
                 logger.error(f"The issue label was not provided or is of incorrect format, example: https://github.com/wazuh/<repository>/issues/<issue-number>.")
                 sys.exit(1)
-            issue_name= re.search(r'github\.com\/wazuh\/([^\/]+)\/issues', issue)
-            name = str(issue_name.group(1)) + "-" + str(re.search(r'(\d+)$', issue).group(1)) + "-" + str(params.composite_name.split("-")[1]) + "-" + str(params.composite_name.split("-")[2])
+            if params.instance_name:
+                name = params.instance_name
+            else:
+                issue_name= re.search(r'github\.com\/wazuh\/([^\/]+)\/issues', issue)
+                repository = cls.generate_repository_name(str(issue_name.group(1)))
+                name = repository + "-" + str(re.search(r'(\d+)$', issue).group(1)) + "-" + str(params.composite_name.split("-")[1]) + "-" + str(params.composite_name.split("-")[2])
 
             # Keys.
             if platform == "windows":
@@ -89,8 +95,9 @@ class AWSProvider(Provider):
             config = cls.__parse_config(params, credentials, issue, label_team, termination_date, name)
             #Generate dedicated host for macOS instances
             if platform == 'macos':
-                host_id = cls._generate_dedicated_host(config, str(params.composite_name.split("-")[3]))
-                config = cls.__parse_config(params, credentials, issue, label_team, termination_date, name, host_id)
+                #host_identifier = cls._generate_dedicated_host(config, str(params.composite_name.split("-")[3]))
+                host_identifier = "h-063f33be1f52efbe9"
+                config = cls.__parse_config(params, credentials, issue, label_team, termination_date, name, host_identifier)
         else:
             logger.debug(f"Using provided config")
             # Load the existing credentials.
@@ -111,10 +118,7 @@ class AWSProvider(Provider):
         else:
             credentials.key_path = (os.path.splitext(ssh_key)[0])
 
-        if config.host_id:
-            return AWSInstance(instance_dir, instance_id, platform, credentials, host_id, config.user)
-        else:
-            return AWSInstance(instance_dir, instance_id, platform, credentials, None, config.user)
+        return AWSInstance(instance_dir, instance_id, platform, credentials, host_identifier, None, None, arch, None, config.user)
 
     @staticmethod
     def _load_instance(instance_dir: Path, instance_id: str) -> AWSInstance:
@@ -131,7 +135,7 @@ class AWSProvider(Provider):
         return AWSInstance(instance_dir, instance_id)
 
     @classmethod
-    def _destroy_instance(cls, instance_dir: str, identifier: str, key_path: str, host_identifier: str = None, ssh_port: str = None) -> None:
+    def _destroy_instance(cls, instance_dir: str, identifier: str, key_path: str, platform: str, host_identifier: str = None, host_instance_dir: str | Path = None, ssh_port: str = None, arch: str = None) -> None:
         """
         Destroy an AWS EC2 instance.
 
@@ -139,13 +143,16 @@ class AWSProvider(Provider):
             instance_dir (str): Directory where instance data is stored.
             identifier (str): Identifier of the instance.
             key_path (str): Path to the key pair.
+            platform (str): Platform of the instance.
             host_identifier (str, optional): Identifier of the dedicated host. Defaults to None.
+            host_instance_dir (str | Path, optional): Directory of the host instance. Defaults to None.
             ssh_port (str, optional): SSH port of the instance. Defaults to None.
+            arch (str, optional): Architecture of the instance. Defaults to None.
         """
         credentials = AWSCredentials()
         key_id = os.path.basename(key_path)
         credentials.load(key_id)
-        instance = AWSInstance(instance_dir, identifier, credentials, host_identifier)
+        instance = AWSInstance(instance_dir, identifier, platform, credentials, host_identifier)
         if os.path.dirname(key_path) == str(instance_dir):
             logger.debug(f"Deleting credentials: {instance.credentials.name}")
             instance.credentials.delete()
@@ -197,8 +204,8 @@ class AWSProvider(Provider):
             params['KeyName'] = config.key_name
 
 
-        if config.host_id:
-            params['Placement'] = {'AvailabilityZone': config.zone, 'HostId': config.host_id}
+        if config.host_identifier:
+            params['Placement'] = {'AvailabilityZone': config.zone, 'HostId': config.host_identifier}
 
         instance = client.create_instances(**params)[0]
         # Wait until the instance is running.
@@ -206,7 +213,7 @@ class AWSProvider(Provider):
         return instance.instance_id
 
     @classmethod
-    def __parse_config(cls, params: CreationPayload, credentials: AWSCredentials, issue: str, team: str, termination_date: str, name: str, host_id: str = None) -> AWSConfig:
+    def __parse_config(cls, params: CreationPayload, credentials: AWSCredentials, issue: str, team: str, termination_date: str, name: str, host_identifier: str = None) -> AWSConfig:
         """
         Parse configuration parameters for creating an AWS EC2 instance.
 
@@ -217,7 +224,7 @@ class AWSProvider(Provider):
             team (str): Team label.
             termination_date (str): Termination date label.
             name (str): Name of the instance.
-            host_id (str): Identifier of the dedicated host.
+            host_identifier (str): Identifier of the dedicated host.
 
         Returns:
             AWSConfig: Parsed AWSConfig object.
@@ -232,7 +239,7 @@ class AWSProvider(Provider):
         platform = str(params.composite_name.split("-")[0])
 
         # Parse the configuration.
-        if str(params.composite_name.split("-")[0]) == 'macos':
+        if platform == 'macos':
             os_specs['zone'] = os_specs['zone'] + 'c'
             if arch == 'arm64':
                 config['type'] = 'mac2.metal'
@@ -253,8 +260,8 @@ class AWSProvider(Provider):
         config['issue'] = issue
         config['team'] = team
         config['name'] = name
-        if host_id:
-            config['host_id'] = host_id
+        if host_identifier:
+            config['host_identifier'] = host_identifier
         config['platform'] = platform
 
         return AWSConfig(**config)
@@ -290,22 +297,41 @@ class AWSProvider(Provider):
         return host['HostIds'][0]
 
     @staticmethod
-    def _release_dedicated_host(host_id: str) -> str:
+    def _release_dedicated_host(host_identifier: str) -> str:
         """
         Release a dedicated host.
 
         Args:
-            host_id (str): Identifier of the dedicated host.
+            host_identifier (str): Identifier of the dedicated host.
 
         Returns:
             str: Identifier of the released dedicated host.
         """
         client = boto3.client('ec2')
-        logger.info(f"Releasing dedicated host: {host_id}")
-        host = client.release_hosts(HostIds=[host_id])
+        logger.info(f"Releasing dedicated host: {host_identifier}")
+        host = client.release_hosts(HostIds=[host_identifier])
         if host['Unsuccessful']:
             unsuccessful_messages = [item['Error']['Message'] for item in host['Unsuccessful']]
             for message in unsuccessful_messages:
                 logger.info(f"{message}")
         else:
-            logger.info(f"Dedicated host released: {host_id}")
+            logger.info(f"Dedicated host released: {host_identifier}")
+
+    @staticmethod
+    def generate_repository_name(repository: str) -> str:
+        """
+        Generate a repository name for the instance.
+
+        Args:
+            repository (str): Repository name.
+
+        Returns:
+            str: Repository name for the instance.
+        """
+        matches = re.findall(r'(\w+)', repository)
+        if len(matches) == 3:
+            return ''.join([c[0] for c in matches])
+        elif len(matches) == 2:
+            return matches[1]
+        else:
+            return repository

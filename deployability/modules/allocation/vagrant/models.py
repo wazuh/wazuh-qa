@@ -14,6 +14,9 @@ class VagrantConfig(ProviderConfig):
     private_key: str
     public_key: str
     name: str
+    port: int = None
+    platform: str
+    arch: str
 
     @field_validator('public_key', mode='before')
     @classmethod
