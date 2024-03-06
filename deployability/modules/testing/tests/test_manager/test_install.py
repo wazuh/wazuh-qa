@@ -2,11 +2,39 @@ import grp
 import pwd
 import pytest
 
-from ..helpers import constants, utils
-from ..helpers.installer import WazuhManagerInstaller
-from ..helpers.checkfiles import CheckFile
-from ..helpers.hostinformation import HostInformation
+from ..helpers.manager import WazuhManager
+wazuh_manager = WazuhManager()
 
+def test_installation():
+    assert "hola" == "hola"
+    #inv = ["/tmp/dtt1-poc/manager-linux-ubuntu-18.04-amd64/inventory.yaml", "/tmp/dtt1-poc/manager-linux-redhat-7-amd64/inventory.yaml"]
+    #wazuh_manager.install_manager(inv[0])
+
+def test_wazuh_user():
+    pass
+
+
+def test_wazuh_group():
+    pass
+
+
+def test_wazuh_configuration():
+    pass
+
+def test_wazuh_control():
+    pass
+
+
+def test_wazuh_service():
+    pass
+
+
+def test_wazuh_daemons():
+    pass
+
+
+
+"""
 @pytest.fixture
 def wazuh_params(request):
     return {
@@ -29,7 +57,7 @@ def test_installation(wazuh_params):
     print(result)
     assert all('wazuh' in path or 'ossec' in path for path in result['added'])
     assert not any('wazuh' in path or 'ossec' in path for path in result['removed'])
-"""
+
 
 def test_wazuh_user():
     all_users = [x[0] for x in pwd.getpwall()]

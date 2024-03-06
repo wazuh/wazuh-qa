@@ -166,46 +166,7 @@ def get_file_encoding(file_path: str) -> str:
     return result['encoding']
 
 
-def file_monitor(monitored_file: str, target_string: str, timeout: int = 30) -> None:
-    """
-    Monitor a file for a specific string.
 
-    Args:
-        monitored_file (str): The file to monitor.
-        target_string (str): The string to look for in the file.
-        timeout (int, optional): The time to wait for the string to appear in the file. Defaults to 30.
-
-    Returns:
-        None: Returns None if the string is not found within the timeout.
-        str: Returns the line containing the target string if found within the timeout.
-    """
-    encoding = get_file_encoding(monitored_file)
-
-    # Check in the current file content for the string.
-    with open(monitored_file, encoding=encoding) as _file:
-        for line in _file:
-            if target_string in line:
-                return line
-
-    # Start count to set the timeout.
-    start_time = time.time()
-
-    # Start the file monitoring for future lines.
-    with open(monitored_file, encoding=encoding) as _file:
-        # Go to the end of the file.
-        _file.seek(0, 2)
-        while time.time() - start_time < timeout:
-            current_position = _file.tell()
-            line = _file.readline()
-
-            if not line:
-                # No new line, wait for nex try.
-                _file.seek(current_position)
-                time.sleep(0.1)
-            else:
-                # New line, check if the string matches.
-                if target_string in line:
-                    return line
 
 
 def check_agent_is_connected(agent_id: str, timeout: int = 60) -> bool:

@@ -11,8 +11,6 @@ class ExtraVars(BaseModel):
     wazuh_revision: str
     wazuh_branch: str | None = None
     working_dir: str = '/tmp/tests'
-    live: bool = True
-    one_line: bool = False
 
 class InputPayload(ExtraVars):
     """Input payload for testing module."""
@@ -20,9 +18,6 @@ class InputPayload(ExtraVars):
     inventory: Path
     dependencies: list[str] = []
     cleanup: bool = True
-    live: bool = True
-    one_line: bool = False
-
     @field_validator('tests', mode='before')
     def validate_tests(cls, value) -> list[str]:
         """Validate tests names."""
