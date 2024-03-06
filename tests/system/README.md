@@ -18,7 +18,7 @@ In the event that the tests are to be executed using AWS EC2 instances:
 |Four_manager_disconnected_node|Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
 |One_manager_agent             |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
 |Manager_agent                 |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
-|Enrollment_cluster            |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       | 
+|Enrollment_cluster            |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
 |Basic_environment             |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
 
 
@@ -255,6 +255,18 @@ To run any test, we just need to call `pytest` from `python3` using the followin
 
 ```shell script
 python3 -m pytest [options] [file_or_dir] [file_or_dir] [...]
+```
+
+If we want to launch all the tests in the same environment, without having to launch several executions depending on the directory, we can launch it with the `-m` option:
+
+```shell script
+python3 -m pytest -m [environment]_env [file_or_dir] [file_or_dir] [...]
+```
+
+For example, for the `basic_cluster` environment tests:
+
+```shell script
+python3 -m pytest tests/system -m basic_cluster_env
 ```
 
 **Options:**
