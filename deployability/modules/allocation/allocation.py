@@ -1,9 +1,6 @@
-import yaml, json
-import subprocess
-import boto3
+import yaml
 
 from pathlib import Path
-from telnetlib import Telnet
 
 from .aws.provider import AWSProvider, AWSConfig
 from .generic import Instance, Provider, models
@@ -48,8 +45,6 @@ class Allocator:
                                         for instance creation.
         """
         instance_params = models.CreationPayload(**dict(payload))
-        if payload.composite_name.startswith('macos'):
-            payload.provider = cls.__macos_provider(payload.composite_name)
         provider: Provider = PROVIDERS[payload.provider]()
         config = cls.___get_custom_config(payload)
         instance = provider.create_instance(
@@ -76,7 +71,7 @@ class Allocator:
         with open(payload.track_output, 'r') as f:
             track = models.TrackOutput(**yaml.safe_load(f))
         provider = PROVIDERS[track.provider]()
-        provider.destroy_instance(track.instance_dir, track.identifier, track.key_path, track.host_identifier, track.ssh_port)
+        provider.destroy_instance(track.instance_dir, track.identifier, track.key_path, track.platform, track.host_identifier, track.host_instance_dir, track.ssh_port, track.arch)
         logger.info(f"Instance {track.identifier} deleted.")
 
     @staticmethod
@@ -142,53 +137,12 @@ class Allocator:
                                     instance_dir=str(instance.path),
                                     key_path=str(instance.credentials.key_path),
                                     host_identifier=str(instance.host_identifier),
-                                    ssh_port=ssh_config.port)
+                                    host_instance_dir=str(instance.host_instance_dir),
+                                    ssh_port=ssh_config.port,
+                                    platform=instance.platform,
+                                    arch=instance.arch)
         with open(track_path, 'w') as f:
             yaml.dump(track.model_dump(), f)
         if Path(str(instance.path) + "/port.txt").exists():
             Path(str(instance.path) + "/port.txt").unlink()
         logger.info(f"Track file generated at {track_path}")
-
-    @staticmethod
-    def __macos_provider(composite_name: str) -> str:
-        """
-        Returns the provider name for macOS instances.
-
-        Args:
-            composite_name (str): The name of the composite.
-
-        Returns:
-            str: The provider name.
-        """
-        if str(composite_name.split("-")[3]) == 'arm64':
-            client = boto3.client('secretsmanager')
-            server_ip = client.get_secret_value(SecretId='devops_macstadium_m1_jenkins_ip')['SecretString']
-            server_port = 22
-            timeout = 5
-
-            conn_ok = False
-            try:
-                tn = Telnet(server_ip, server_port, timeout)
-                conn_ok = True
-                tn.close()
-            except Exception as e:
-                logger.info('Could not connect to macOS macStadium server: ' + str(e) + '. Using AWS provider.')
-
-            if conn_ok:
-                ssh_password = client.get_secret_value(SecretId='devops_macstadium_m1_jenkins_password')['SecretString']
-                ssh_user = client.get_secret_value(SecretId='devops_macstadium_m1_jenkins_user')['SecretString']
-                cmd = "sudo /usr/local/bin/prlctl list -j"
-                prlctl_output = subprocess.Popen(f"sshpass -p {ssh_password} ssh {ssh_user}@{server_ip} {cmd}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
-                data_list = json.loads(prlctl_output)
-                uuid_count = 0
-                for item in data_list:
-                    if 'uuid' in item:
-                        uuid_count += 1
-                if uuid_count < 2:
-                    logger.info(f"macStadium server has less than 2 VMs running, using Vagrant provider.")
-                    return 'vagrant'
-                else:
-                    logger.info(f"macStadium server has VMs running, using AWS provider.")
-                    return 'aws'
-        if str(composite_name.split("-")[3]) == 'amd64':
-            return 'aws'

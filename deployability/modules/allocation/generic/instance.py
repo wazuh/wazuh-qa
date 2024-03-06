@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
+from .utils import logger
 
 from .credentials import Credentials
 from .models import ConnectionInfo
@@ -18,16 +19,21 @@ class Instance(ABC):
         credentials (Credentials): The credentials of the instance.
     """
 
-    def __init__(self, path: str | Path, identifier: str, credentials: Credentials = None, host_identifier: str | Path = None, ssh_port: str = None) -> None:
+    def __init__(self, path: str | Path, identifier: str, platform: str, credentials: Credentials = None, host_identifier: str = None, host_instance_dir: str | Path = None, macos_host_parameters: dict = None, arch: str = None, ssh_port: str = None, user: str = None) -> None:
         """
         Initializes an Instance object.
 
         Args:
             path (str | Path): The path of the instance.
             identifier (str): The identifier of the instance.
-            credentials (Credentials, optional): The credentials of the instance. Defaults to None.
-            host_identifier (str | Path, optional): The remote directory of the instance. Defaults to None.
+            platform (str): The platform of the instance.
+            credentials (VagrantCredentials, optional): The credentials of the instance. Defaults to None.
+            host_identifier (str, optional): The host for the instance. Defaults to None.
+            host_instance_dir (str | Path, optional): The remote directory of the instance. Defaults to None.
+            macos_host_parameters (dict, optional): The parameters of the remote host. Defaults to None.
+            arch (str, optional): The architecture of the instance. Defaults to None.
             ssh_port (str, optional): The SSH port of the instance. Defaults to None.
+            user (str): User associated with the instance.
 
         Raises:
             ValueError: If the path does not exist or is not a directory.
@@ -35,15 +41,22 @@ class Instance(ABC):
         """
         path = Path(path)
         if not path.exists() or not path.is_dir():
-            raise ValueError(f"Invalid instance path: {path}")
+            logger.error(f"Invalid instance path: {path}")
+            exit(1)
         if credentials and not issubclass(type(credentials), Credentials):
-            raise ValueError(f"Invalid credentials.")
+            logger.error(f"Invalid credentials: {credentials}")
+            exit(1)
 
         self.path: Path = path
         self.identifier: str = str(identifier)
         self.credentials: Credentials = credentials
-        self.host_identifier: Path = Path(host_identifier) if host_identifier else None
-        self.ssh_port: str = ssh_port or None
+        self.host_identifier: str = host_identifier
+        self.host_instance_dir: Path = host_instance_dir
+        self.ssh_port: str = ssh_port
+        self.macos_host_parameters: dict = macos_host_parameters
+        self.platform: str = platform
+        self.arch: str = arch
+        self.user: str = user
 
     @abstractmethod
     def start(self) -> None:

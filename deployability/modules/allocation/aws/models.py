@@ -12,4 +12,5 @@ class AWSConfig(ProviderConfig):
     issue: str
     team: str
     name: str
-    host_id: str | None = None
+    host_identifier: str | None = None
+    platform: str

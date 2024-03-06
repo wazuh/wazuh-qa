@@ -86,7 +86,7 @@ class Provider(ABC):
         return cls._load_instance(instance_dir, instance_id)
 
     @classmethod
-    def destroy_instance(cls, instance_dir: str | Path, identifier: str, key_path: str, host_identifier: str = None, ssh_port: str = None) -> None:
+    def destroy_instance(cls, instance_dir: str | Path, identifier: str, key_path: str, platform: str, host_identifier: str = None, host_instance_dir: str | Path = None, ssh_port: str = None, arch: str = None) -> None:
         """
         Destroys an existing instance and removes its directory.
 
@@ -94,11 +94,14 @@ class Provider(ABC):
             instance_dir (str | Path): The directory of the instance.
             identifier (str): The identifier of the instance.
             key_path (str): The path to the key pair associated with the instance.
+            platform (str): The platform of the instance.
             host_identifier (str, optional): The identifier of the host instance. Defaults to None.
+            host_instance_dir (str | Path, optional): The directory of the host instance. Defaults to None.
             ssh_port (str, optional): The SSH port of the instance. Defaults to None.
+            arch (str, optional): The architecture of the instance. Defaults to None.
         """
         instance_dir = Path(instance_dir)
-        cls._destroy_instance(instance_dir, identifier, key_path, host_identifier, ssh_port)
+        cls._destroy_instance(instance_dir, identifier, key_path, platform, host_identifier, host_instance_dir, ssh_port, arch)
         shutil.rmtree(instance_dir, ignore_errors=True)
 
     @classmethod
