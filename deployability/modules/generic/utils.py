@@ -29,14 +29,25 @@ class Utils:
         return sorted_list
 
     @staticmethod
-    def load_from_yaml(file_path, map_keys=None, specific_key=None):
+    def load_from_yaml(file_path: str | Path, map_keys: dict = None, specific_key: dict = None) -> dict:
         """
         Load data from a yaml file.
 
         Args:
             file_path: Path to the yaml file.
             map_keys: Map of keys to change.
+            specific_key: Specific key to return.
+
+        Returns:
+            dict: Data from the yaml file.
+
+        Raises:
+            FileNotFoundError: If the file is not found.
         """
+        file_path = Path(file_path)
+        if not file_path.exists():
+            raise FileNotFoundError(f'File "{file_path}" not found.')
+
         data = yaml.safe_load(open(file_path))
 
         if map_keys:

@@ -7,15 +7,14 @@ import graphlib
 import json
 import time
 import yaml
+import os
 
-from pathlib import Path 
+from pathlib import Path
 from itertools import product
 
-from .schema_validator import SchemaValidator
-from .task import *
-from .utils import logger
-
-
+from workflow_engine.logger.logger import logger
+from workflow_engine.schema_validator import SchemaValidator
+from workflow_engine.task import Task, TASKS_HANDLERS
 
 class WorkflowFile:
     """Class for loading and processing a workflow file."""
@@ -35,9 +34,14 @@ class WorkflowFile:
         Args:
             workflow_file (Path | str): Path to the workflow file.
         """
-        validator = SchemaValidator(self.schema_path, workflow_file)
-        validator.preprocess_data()
-        validator.validateSchema()
+        try:
+            logger.debug(f"Validating input file: {workflow_file}")
+            validator = SchemaValidator(self.schema_path, workflow_file)
+            validator.preprocess_data()
+            validator.validateSchema()
+        except Exception as e:
+            logger.error("Error while validating schema [%s] with error: %s", self.schema_path, e)
+            raise
 
     def __load_workflow(self, file_path: str) -> dict:
         """
@@ -49,15 +53,25 @@ class WorkflowFile:
         Returns:
             dict: Workflow data.
         """
+
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f'File "{file_path}" not found.')
+
+        logger.debug(f"Loading workflow file: {file_path}")
+
         with open(file_path, 'r', encoding='utf-8') as file:
             return yaml.safe_load(file)
 
     def __process_workflow(self):
         """Process the workflow and return a list of tasks."""
+        logger.debug("Process workflow.")
         task_collection = []
         variables = self.workflow_raw_data.get('variables', {})
         for task in self.workflow_raw_data.get('tasks', []):
             task_collection.extend(self.__expand_task(task, variables))
+
+        if not task_collection:
+            raise ValueError("No tasks found in the workflow.")
         return task_collection
 
     def __replace_placeholders(self, element: str, values: dict, parent_key: str = None):
@@ -283,13 +297,17 @@ class WorkflowProcessor:
                 task_object.execute()
                 logger.info("[%s] Finished task in %.2f seconds.", task_name, time.time() - start_time)
                 dag.set_status(task_name, 'successful')
-            except Exception as e:
-                # Pass the tag to the tag_formatter function if it exists
+            except KeyboardInterrupt as e:
                 logger.error("[%s] Task failed with error: %s.", task_name, e)
                 dag.set_status(task_name, 'failed')
                 dag.cancel_dependant_tasks(task_name, task.get('on-error', 'abort-related-flows'))
-                # Handle the exception or re-raise if necessary
+                raise KeyboardInterrupt
+            except Exception as e:
+                logger.error("[%s] Task failed with error: %s.", task_name, e)
+                dag.set_status(task_name, 'failed')
+                dag.cancel_dependant_tasks(task_name, task.get('on-error', 'abort-related-flows'))
                 raise
+
 
     def create_task_object(self, task: dict, action) -> Task:
         """Create and return a Task object based on task type."""
@@ -302,56 +320,65 @@ class WorkflowProcessor:
 
         raise ValueError(f"Unknown task type '{task_type}'.")
 
-    def execute_tasks_parallel(self) -> None:
+    def execute_tasks_parallel(self, dag: DAG, reverse: bool = False) -> None:
         """Execute tasks in parallel."""
-        if not self.dry_run:
-            logger.info("Executing tasks in parallel.")
-            dag = DAG(self.task_collection)
-            # Execute tasks based on the DAG
+        logger.info("Executing tasks in parallel.")
+        try:
             with concurrent.futures.ThreadPoolExecutor(max_workers=self.threads) as executor:
-                futures = {}
-                while True:
-                    if not dag.is_active():
-                        break
-                    for task_name in dag.get_available_tasks():
-                        task = next(t for t in self.task_collection if t['task'] == task_name)
-                        future = executor.submit(self.execute_task, dag, task, 'do')
-                        futures[task_name] = future
+                futures = self.generate_futures(dag, executor, reverse)
                 concurrent.futures.wait(futures.values())
+        except KeyboardInterrupt:
+            logger.error("User interrupt detected. Aborting execution...")
+            self.execute_tasks_parallel(dag, reverse=True)
 
-            # Now execute cleanup tasks based on the reverse DAG
-            reverse_dag = DAG(self.task_collection, reverse=True)
+    def generate_futures(self, dag, executor, reverse: bool = False):
+        futures = {}
 
-            logger.info("Executing cleanup tasks.")
-            with concurrent.futures.ThreadPoolExecutor(max_workers=self.threads) as executor:
-                reverse_futures = {}
+        while True:
+            if not dag.is_active():
+                break
 
-                while True:
-                    if not reverse_dag.is_active():
-                        break
-                    for task_name in reverse_dag.get_available_tasks():
-                        task = next(t for t in self.task_collection if t['task'] == task_name)
-                        if 'cleanup' in task:
-                            future = executor.submit(self.execute_task, reverse_dag, task, 'cleanup')
-                            reverse_futures[task_name] = future
-                        else:
-                            reverse_dag.set_status(task_name, 'successful')
-                concurrent.futures.wait(reverse_futures.values())
+            for task_name in list(dag.get_available_tasks()):
+                task = next(t for t in self.task_collection if t['task'] == task_name)
+                action = 'cleanup' if reverse and 'cleanup' in task else 'do'
+                if reverse and 'cleanup' not in task:
+                    dag.set_status(task_name, 'successful')
+                else:
+                    future = executor.submit(self.execute_task, dag, task, action)
+                    futures[task_name] = future
 
-        else:
-            dag = DAG(self.task_collection)
-            logger.info("Execution plan: %s", json.dumps(dag.get_execution_plan(), indent=2))
+        return futures
+
 
     def run(self) -> None:
         """Main entry point."""
-        self.execute_tasks_parallel()
+        try:
+            if not self.dry_run:
+                logger.info("Executing DAG tasks.")
+                dag = DAG(self.task_collection)
+                self.execute_tasks_parallel(dag)
 
-    def abort_execution(self, executor: concurrent.futures.ThreadPoolExecutor, futures: dict) -> None:
+                logger.info("Executing Reverse DAG tasks.")
+                reversed_dag = DAG(self.task_collection, reverse=True)
+                self.execute_tasks_parallel(reversed_dag, reverse=True)
+            else:
+                dag = DAG(self.task_collection)
+                logger.info("Execution plan: %s", json.dumps(dag.get_execution_plan(), indent=2))
+
+        except Exception as e:
+            logger.error("Error in Workflow: %s", e)
+
+
+    def handle_interrupt(self, signum, frame):
+        logger.error("User interrupt detected. End process...")
+        raise KeyboardInterrupt("User interrupt detected. End process...")
+
+    def abort_execution(self, futures) -> None:
         """Abort the execution of tasks."""
-        for future in concurrent.futures.as_completed(futures.values()):
-            try:
-                _ = future.result()
-            except Exception as e:
-                logger.error("Error in aborted task: %s", e)
-
-        executor.shutdown(wait=False)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=self.threads) as executor:
+            for future in concurrent.futures.as_completed(futures.values()):
+                try:
+                    _ = future.result()
+                except Exception as e:
+                    logger.error("Error in aborted task: %s", e)
+            executor.shutdown(wait=False, cancel_futures=True)

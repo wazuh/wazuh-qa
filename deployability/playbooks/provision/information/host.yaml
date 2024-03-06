@@ -1,7 +1,0 @@
-- name: Print ansible_os_family
-  hosts: all
-  gather_facts: true
-  tasks:
-    - name: Debug ansible_os_family
-      debug:
-        var: ansible_os_family

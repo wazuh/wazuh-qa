@@ -2,7 +2,7 @@ import argparse
 import os
 import sys
 
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 sys.path.append(project_root)
 
 from modules.allocation import Allocator
@@ -22,6 +22,7 @@ def parse_arguments():
     parser.add_argument("--label-issue", required=False, default=None)
     parser.add_argument("--label-team", required=False, default=None)
     parser.add_argument("--label-termination-date", required=False, default=None)
+    parser.add_argument("--instance-name", required=False, default=None)
     return parser.parse_args()
 
 

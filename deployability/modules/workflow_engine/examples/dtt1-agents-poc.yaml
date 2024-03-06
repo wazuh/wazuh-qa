@@ -5,8 +5,8 @@ version: 0.1
 description: This workflow is used to test agents deployment por DDT1 PoC
 variables:
   agents-os:
-    - linux-ubuntu-20.04-amd64
-  manager-os: linux-ubuntu-20.04-amd64
+    - linux-ubuntu-22.04-amd64
+  manager-os: linux-ubuntu-22.04-amd64
   infra-provider: vagrant
   working-dir: /tmp/dtt1-poc
 
@@ -19,9 +19,9 @@ tasks:
       with:
         path: python3
         args:
-          - test.py
+          - modules/testing/main.py
           - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-          - dependencies: 
+          - dependencies:
             - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
             - agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - tests: "install,register,stop"
@@ -43,7 +43,7 @@ tasks:
       with:
         path: python3
         args:
-          - test.py
+          - modules/testing/main.py
           - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
           - dependencies:
             - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
@@ -66,8 +66,8 @@ tasks:
       with:
         path: python3
         args:
-          - provision.py
-          - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - modules/provision/main.py
+          - inventory: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - install:
             - component: wazuh-manager
               type: package
@@ -82,7 +82,7 @@ tasks:
       with:
         path: python3
         args:
-          - allocation.py
+          - modules/allocation/main.py
           - action: create
           - provider: "{infra-provider}"
           - size: large
@@ -90,13 +90,13 @@ tasks:
           - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
     cleanup:
-     this: process
-     with:
-       path: python3
-       args:
-         - allocation.py
-         - action: delete
-         - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: delete
+          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 
   # Generic agent provision task
   - task: "provision-install-{agent}"
@@ -106,9 +106,11 @@ tasks:
       with:
         path: python3
         args:
-          - provision.py
-          - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
-          - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - modules/provision/main.py
+          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
+          - dependencies:
+            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+            - agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - install:
             - component: wazuh-agent
               type: package
@@ -128,9 +130,11 @@ tasks:
       with:
         path: python3
         args:
-          - provision.py
-          - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
-          - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - modules/provision/main.py
+          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
+          - dependencies:
+            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+            - agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - uninstall:
             - component: wazuh-agent
               type: package
@@ -148,7 +152,7 @@ tasks:
       with:
         path: python3
         args:
-          - allocation.py
+          - modules/allocation/main.py
           - action: create
           - provider: "{infra-provider}"
           - size: small
@@ -156,13 +160,13 @@ tasks:
           - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
     cleanup:
-     this: process
-     with:
-       path: python3
-       args:
-         - allocation.py
-         - action: delete
-         - track-output: "{working-dir}/agent-{agent}/track.yaml"
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: delete
+          - track-output: "{working-dir}/agent-{agent}/track.yaml"
     foreach:
       - variable: agents-os
         as: agent

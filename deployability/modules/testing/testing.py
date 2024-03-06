@@ -7,9 +7,8 @@ from modules.generic.utils import Utils
 from .models import InputPayload, ExtraVars
 from .utils import logger
 
-
 class Tester:
-    _playbooks_dir = Path('tests')
+    _playbooks_dir = Path(__file__).parent / 'playbooks'
     _setup_playbook = _playbooks_dir / 'setup.yml'
     _cleanup_playbook = _playbooks_dir / 'cleanup.yml'
     _test_template = _playbooks_dir / 'test.yml'
@@ -77,7 +76,7 @@ class Tester:
         """
         for test in test_list:
             rendering_var = {**extra_vars, 'test': test}
-            template = str(ansible.playbooks_path / cls._test_template)
+            template = str(cls._test_template)
             playbook = ansible.render_playbook(template, rendering_var)
             if not playbook:
                 logger.warning(f"Test {test} not found. Skipped.")
@@ -95,7 +94,7 @@ class Tester:
         """
         extra_vars = {'local_path': str(Path(__file__).parent / 'tests'),
                       'working_dir': remote_working_dir}
-        playbook = str(ansible.playbooks_path / cls._setup_playbook)
+        playbook = str(cls._setup_playbook)
         ansible.run_playbook(playbook, extra_vars)
 
     @classmethod
@@ -108,5 +107,5 @@ class Tester:
             remote_working_dir (str): The remote working directory.
         """
         extra_vars = {'working_dir': remote_working_dir}
-        playbook = str(ansible.playbooks_path / cls._cleanup_playbook)
+        playbook = str(cls._cleanup_playbook)
         ansible.run_playbook(playbook, extra_vars)
