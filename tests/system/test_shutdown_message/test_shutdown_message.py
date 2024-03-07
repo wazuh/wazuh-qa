@@ -26,7 +26,7 @@ import pytest
 import re
 import time
 import threading
-from wazuh_testing import T_1, T_5
+from wazuh_testing import T_1
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
 from system import restart_cluster
@@ -41,12 +41,14 @@ agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'
 testinfra_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
 workers = ['wazuh-worker1', 'wazuh-worker2']
 agents = []
+
+TIMEOUT_AGENT = 8
+
 number_agents = 40
 for number_agent in range(number_agents):
     agents.append(f'wazuh-agent{number_agent+1}')
 
 pytestmark = [pytest.mark.cluster, pytest.mark.big_cluster_40_agents_env]
-
 
 @pytest.fixture()
 def restart_all_agents():
@@ -89,7 +91,7 @@ def test_shut_down_message_gracefully_stopped_agent(restart_all_agents, stop_gra
         expected_output:
             - Gracefully closed, it is expected to find agents 'Disconected' in agent-manager
     '''
-    time.sleep(T_5)
+    time.sleep(TIMEOUT_AGENT)
 
     matches = re.findall(r"Disconnected", host_manager.run_command(testinfra_hosts[0],
                                                                    f'{WAZUH_PATH}/bin/agent_control -l'))
