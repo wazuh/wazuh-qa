@@ -8,26 +8,27 @@ class WazuhAgent:
     def install_agent(self, inventory_path):
         hostinformation = HostInformation()
         os_type = hostinformation.get_os_type(inventory_path)
+        commands = []
         if 'linux' in os_type:
             distribution = hostinformation.get_linux_distribution(inventory_path)
             architecture = hostinformation.get_architecture(inventory_path)
 
-            if 'rpm' in distribution and 'x86_64' in architecture:
-                commands = [
+            if distribution == 'rpm' or distribution == 'opensuse-leap' or distribution == 'amzn' and 'x86_64' in architecture:
+                commands.extend([
                     "curl -o wazuh-agent-4.7.0-1.x86_64.rpm https://packages.wazuh.com/4.x/yum/wazuh-agent-4.7.0-1.x86_64.rpm && sudo WAZUH_MANAGER='192.168.57.2' WAZUH_AGENT_NAME='agente' rpm -ihv wazuh-agent-4.7.0-1.x86_64.rpm"
-                ]
-            elif 'rpm' in distribution and 'aarch64' in architecture:
-                commands = [
+                ])
+            elif distribution == 'rpm' or distribution == 'opensuse-leap' or distribution == 'amzn' and 'aarch64' in architecture:
+                commands.extend([
                     "curl -o wazuh-agent-4.7.0-1.aarch64.rpm https://packages.wazuh.com/4.x/yum/wazuh-agent-4.7.0-1.aarch64.rpm && sudo WAZUH_MANAGER='192.168.57.2' WAZUH_AGENT_NAME='agente' rpm -ihv wazuh-agent-4.7.0-1.aarch64.rpm"
-                ]
-            elif 'deb' in distribution and 'x86_64' in architecture:
-                commands = [
+                ])
+            elif distribution == 'deb' and 'x86_64' in architecture:
+                commands.extend([
                     "wget https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.7.0-1_amd64.deb && sudo WAZUH_MANAGER='192.168.57.2' WAZUH_AGENT_NAME='agente' dpkg -i ./wazuh-agent_4.7.0-1_amd64.deb"
-                ]
-            elif 'deb' in distribution and 'aarch64' in architecture:
-                commands = [
+                ])
+            elif distribution == 'deb' and 'aarch64' in architecture:
+                commands.extend([
                     "wget https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.7.0-1_arm64.deb && sudo WAZUH_MANAGER='192.168.57.2' WAZUH_AGENT_NAME='agente' dpkg -i ./wazuh-agent_4.7.0-1_arm64.deb"
-                ]
+                ])
             system_commands = [
                     "systemctl daemon-reload",
                     "systemctl enable wazuh-agent",
@@ -35,28 +36,28 @@ class WazuhAgent:
                     "systemctl status wazuh-agent"
             ]
 
-            commands.append(system_commands)
+            commands.extend(system_commands)
         elif 'windows' in os_type :
-            commands = [
+            commands.extend([
                 "Invoke-WebRequest -Uri https://packages.wazuh.com/4.x/windows/wazuh-agent-4.7.0-1.msi -OutFile ${env.tmp}\wazuh-agent; msiexec.exe /i ${env.tmp}\wazuh-agent /q WAZUH_MANAGER='192.168.57.2' WAZUH_AGENT_NAME='agente' WAZUH_REGISTRATION_SERVER='192.168.57.2'",
                 "NET START WazuhSvc",
                 "NET STATUS WazuhSvc"
-                ]
+                ])
         elif 'macos' in os_type:
             if 'intel' in architecture:
-                commands = [
+                commands.extend([
                     'curl -so wazuh-agent.pkg https://packages.wazuh.com/4.x/macos/wazuh-agent-4.7.0-1.intel64.pkg && echo "WAZUH_MANAGER=\'192.168.57.2\' && WAZUH_AGENT_NAME=\'agente\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
-                ]
+                ])
             elif 'apple' in architecture:
-                commands = [
+                commands.extend([
                     'curl -so wazuh-agent.pkg https://packages.wazuh.com/4.x/macos/wazuh-agent-4.7.0-1.arm64.pkg && echo "WAZUH_MANAGER=\'192.168.57.2\' && WAZUH_AGENT_NAME=\'agente\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
-                ]
+                ])
             system_commands = [
                     '/Library/Ossec/bin/wazuh-control start',
                     '/Library/Ossec/bin/wazuh-control status'
             ]
 
-            commands.append(system_commands)
+            commands.extend(system_commands)
         Executor.execute_commands(inventory_path, commands)
 
 
@@ -68,32 +69,32 @@ class WazuhAgent:
     def uninstall_agent(self, inventory_path):
         hostinformation = HostInformation()
         os_type = hostinformation.get_os_type(inventory_path)
-
+        commands = []
         if 'linux' in os_type:
             distribution = hostinformation.get_linux_distribution(inventory_path)
-            if 'rpm' in distribution:
-                commands = [
+            if distribution == 'rpm' or distribution == 'opensuse-leap' or distribution == 'amzn':
+                commands.extend([
                     "yum remove wazuh-agent -y",
                     "rm -rf /var/ossec/"
-                ]
+                ])
 
-            elif 'deb' in distribution:
-                commands = [
+            elif distribution == 'deb':
+                commands.extend([
                     "apt-get remove --purge wazuh-agent -y"
 
-                ]
+                ])
             system_commands = [
                     "systemctl disable wazuh-agent",
                     "systemctl daemon-reload"
             ]
 
-            commands.append(system_commands)
+            commands.extend(system_commands)
         elif 'windows' in os_type:
-            commands = [
+            commands.extend([
                 "msiexec.exe /x wazuh-agent-4.7.3-1.msi /qn"
-            ]
+            ])
         elif 'macos' in os_type:
-            commands = [
+            commands.extend([
                 "/Library/Ossec/bin/wazuh-control stop",
                 "/bin/rm -r /Library/Ossec",
                 "/bin/launchctl unload /Library/LaunchDaemons/com.wazuh.agent.plist",
@@ -102,7 +103,7 @@ class WazuhAgent:
                 "/usr/bin/dscl . -delete '/Users/wazuh'",
                 "/usr/bin/dscl . -delete '/Groups/wazuh'",
                 "/usr/sbin/pkgutil --forget com.wazuh.pkg.wazuh-agent"
-            ]
+            ])
         Executor.execute_commands(inventory_path, commands)
 
 

@@ -1,4 +1,4 @@
-from generic import HostInformation
+from generic import HostInformation, HostConfiguration
 from executor import Executor
 
 
@@ -9,21 +9,22 @@ class WazuhManager:
     def install_manager(self, inventory_path):
         hostinformation = HostInformation()
         distribution = hostinformation.get_linux_distribution(inventory_path)
-
-        if distribution == 'rpm':
-            commands = [
+        commands = []
+        print(distribution)
+        if distribution == 'rpm' or distribution == 'opensuse-leap' or distribution == 'amzn':
+            commands.extend([
                 "rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH",
                 "echo -e '[wazuh]\ngpgcheck=1\ngpgkey=https://packages.wazuh.com/key/GPG-KEY-WAZUH\nenabled=1\nname=EL-$releasever - Wazuh\nbaseurl=https://packages.wazuh.com/4.x/yum/\nprotect=1' | sudo tee /etc/yum.repos.d/wazuh.repo",
                 "yum -y install wazuh-manager"
-            ]
+            ])
         elif distribution == 'deb':
-            commands = [
+            commands.extend([
                 "apt-get install gnupg apt-transport-https",
                 "curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | sudo gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && sudo chmod 644 /usr/share/keyrings/wazuh.gpg",
                 'echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main" | sudo tee -a /etc/apt/sources.list.d/wazuh.list',
                 "apt-get update",
                 "apt-get -y install wazuh-manager"
-            ]
+            ])
         system_commands = [
                 "systemctl daemon-reload",
                 "systemctl enable wazuh-manager",
@@ -31,7 +32,7 @@ class WazuhManager:
                 "systemctl status wazuh-manager"
         ]
 
-        commands.append(system_commands)
+        commands.extend(system_commands)
         Executor.execute_commands(inventory_path, commands)
 
     def install_managers(self, inventories_paths=[]):
@@ -41,23 +42,25 @@ class WazuhManager:
     def uninstall_manager(self, inventory_path):
         hostinformation = HostInformation()
         distribution = hostinformation.get_linux_distribution(inventory_path)
+        commands = []
 
-        if 'rpm' in distribution:
-            commands = [
+        if distribution == 'rpm' or distribution == 'opensuse-leap' or distribution == 'amzn':
+            commands.extend([
                 "yum remove wazuh-manager -y",
                 "rm -rf /var/ossec/"
-            ]
+            ])
 
-        elif 'deb' in distribution:
-            commands = [
+        elif distribution == 'deb':
+            commands.extend([
                 "apt-get remove --purge wazuh-manager -y"
-            ]
+            ])
+
         system_commands = [
                 "systemctl disable wazuh-manager",
                 "systemctl daemon-reload"
         ]
 
-        commands.append(system_commands)
+        commands.extend(system_commands)
         Executor.execute_commands(inventory_path, commands)
 
 
@@ -211,70 +214,32 @@ class WazuhManager:
 
 
 
-
-
-
-
-"""
-    get_var_files=[
-        "sudo find /var -type f -o -type d 2>/dev/null"
-    ]
-
-
-    initial_scan = None
-    second_scan = None
-
-
-#    for inven in inventories_paths:
-#        for i in get_var_files:
-#            result = Executor.execute_command(inven, i)
-#            print(f"Command: {i}\nResult: {result}\n")
-#            initial_scan = result
-#            ruta_archivo = '/tmp/dtt1-poc/initial_scan.txt'
-#            with open(ruta_archivo, 'w') as archivo:
-#                archivo.write(initial_scan)
+#from agent import WazuhAgent
+#from generic import CheckFiles
+#checkfiles = CheckFiles()
+#
+##inventories_paths = ["/tmp/dtt1-poc/manager-linux-ubuntu-18.04-amd64/inventory.yaml", "/tmp/dtt1-poc/manager-linux-redhat-7-amd64/inventory.yaml"]
+##inventories_paths = ["/tmp/dtt1-poc/manager-linux-redhat-7-amd64/inventory.yaml"]
+##inventories_paths = ["/tmp/dtt1-poc/manager-linux-ubuntu-18.04-amd64/inventory.yaml", "/tmp/dtt1-poc/manager-linux-redhat-7-amd64/inventory.yaml"]
+##inventories_paths = ["/tmp/dtt1-poc/manager-linux-debian-12-amd64/inventory.yaml", "/tmp/dtt1-poc/manager-linux-oracle-9-amd64/inventory.yaml"]
+#inventories_paths = ["/tmp/dtt1-poc/manager-linux-ubuntu-16.04-amd64/inventory.yaml", "/tmp/dtt1-poc/manager-linux-centos-7-amd64/inventory.yaml"]
+#
+#maquina = 1
 #
 #
+#def install_manager_callback():
+#    WazuhManager().install_manager(inventories_paths[maquina])
 #
-#    for inven in inventories_paths:
-#        for i in install_manager_deb:
-#            result = Executor.execute_command(inven, i)
-#            print(f"Command: {i}\nResult: {result}\n")
+#def uninstall_manager_callback():
+#    WazuhManager().uninstall_manager(inventories_paths[maquina])
 #
-#    for inven in inventories_paths:
-#        for i in get_var_files:
-#            result = Executor.execute_command(inven, i)
-#            print(f"Command: {i}\nResult: {result}\n")
-#            second_scan = result
-#            ruta_archivo = '/tmp/dtt1-poc/second_scan.txt'
-#            with open(ruta_archivo, 'w') as archivo:
-#                archivo.write(second_scan)
+#def install_agent_callback():
+#    WazuhAgent().install_agent(inventories_paths[maquina])
 #
-#    if initial_scan is None or second_scan is None:
-#        print("Error: Scans not performed.")
-#        
-#    set1 = set(initial_scan.strip().splitlines())
-#    set2 = set(second_scan.strip().splitlines())
+#def uninstall_agent_callback():
+#    WazuhAgent().uninstall_agent(inventories_paths[maquina])
 #
-#    added_lines = set2 - set1
-#    removed_lines = set1 - set2
+#result = checkfiles.perform_action_and_scan(inventories_paths[maquina], install_manager_callback)
 #
-#    changes = {
-#            'added': added_lines,
-#            'removed': removed_lines
-#            }
-#    #print(added_lines)
-#    #print(removed_lines)
-#    ruta_archivo = '/tmp/dtt1-poc/comparison.txt'
-#    with open(ruta_archivo, 'w') as archivo:
-#        archivo.write(str(changes))
+##result = checkfiles.perform_action_and_scan(inventories_paths[maquina], uninstall_manager_callback)
 #
-#    for inven in inventories_paths:
-#        for i in uninstall_manager_deb:
-#            result = Executor.execute_command(inven, i)
-
-
-    #inventories_paths = ["/tmp/dtt1-poc/manager-linux-ubuntu-18.04-amd64/inventory.yaml", "/tmp/dtt1-poc/manager-linux-redhat-7-amd64/inventory.yaml"]
-    inventories_paths = ["/tmp/dtt1-poc/manager-linux-redhat-7-amd64/inventory.yaml"]
-    inventories_paths = ["/tmp/dtt1-poc/manager-linux-ubuntu-18.04-amd64/inventory.yaml"]
-"""

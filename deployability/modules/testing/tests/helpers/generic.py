@@ -2,6 +2,7 @@ from executor import Executor
 import yaml
 import chardet
 import time
+import re
 class HostInformation:
     def __init__(self):
         pass
@@ -53,12 +54,14 @@ class HostInformation:
         It returns the linux distribution of host
 
         Returns:
-            str: linux distribution (deb, rpm)
+            str: linux distribution (deb, rpm, opensuse-leap, amzn)
         """
         if 'linux' in self.get_os_type(inventory_path):
             package_managers = {
                 '/etc/debian_version': 'deb',
                 '/etc/redhat-release': 'rpm',
+                '/etc/os-release': 'opensuse-leap',
+                '/etc/system-release': 'amzn'
             }
             for file_path, package_manager in package_managers.items():
                 if self.file_exists(inventory_path, file_path):
@@ -226,8 +229,113 @@ class HostMonitor:
                     if target_string in line:
                         return line
 
+
+class CheckFiles:
+    def __init__(self):
+        self.initial_scan = None
+        self.second_scan = None
+
+    def perform_action_and_scan(self, inventory_path, callback):
+        """
+        Frame where check-file is taken before and after the callback
+        Args:
+            inventory_path (str): Inventory path
+            callback (callback): callback that can modify the file directory
+        Returns:
+            dict: added and removed files
+        """
+        host_info = HostInformation()
+        os_type = host_info.get_os_type(inventory_path)
+        
+        self.initial_scan = self._checkfiles(inventory_path, os_type)
+
+        callback()
+
+        self.second_scan = self._checkfiles(inventory_path, os_type)
+
+        if self.initial_scan is None or self.second_scan is None:
+            print("Error: Scans not performed.")
+        set1 = set(self.initial_scan.strip().splitlines())
+        set2 = set(self.second_scan.strip().splitlines())
+
+        added_lines = list(set2 - set1)
+        removed_lines = list(set1 - set2)
+
+        changes = {
+            'added': added_lines,
+            'removed': removed_lines
+        }
+        print(len(changes['added']))
+        print(len(changes['removed']))
+        return changes
+
+    def _checkfiles(self,inventory_path, os_type):
+        """
+        It captures a structure of a /Var or c: directory status
+        Returns:
+            List: list of directories
+        """
+        if 'linux' in os_type or 'macos' in os_type:
+            
+            os_name = re.search(r'/manager-linux-([^-]+)-', inventory_path).group(1)
+            print(os_name)
+            command = "sudo find /var -type f -o -type d 2>/dev/null"
+
+            centos = ['yum', 'rpm']
+            redhat = ['yum', 'rpm']
+            amazonlinux = ['yum']
+            ubuntu = ['ubuntu', 'lxcfs', 'dpkg']
+            debian = ['dpkg', 'lists']
+            oracle = ['dnf', 'selinux']
+            fedora = ['dnf', 'selinux', 'rpm']
+            rocky_linux = ['dnf', 'selinux']
+
+            if os_name == 'ubuntu':
+                for i in ubuntu:
+                    command += f" | grep -v {i}"
+            elif os_name == 'centos':
+                for i in centos:
+                    command += f" | grep -v {i}"
+            elif os_name == 'redhat':
+                for i in redhat:
+                    command += f" | grep -v {i}"
+            elif os_name == 'amazonlinux':
+                for i in amazonlinux:
+                    command += f" | grep -v {i}"
+            elif os_name == 'debian':
+                for i in debian:
+                    command += f" | grep -v {i}"
+            elif os_name == 'oracle':
+                for i in oracle:
+                    command += f" | grep -v {i}"
+            elif os_name == 'fedora':
+                for i in fedora:
+                    command += f" | grep -v {i}"
+            elif os_name == 'rocky_linux':
+                for i in rocky_linux:
+                    command += f" | grep -v {i}"
+            else:
+                print(f"Os name '{os_name}' not recognized.")
+
+            print(command)
+
+        elif 'windows' in os_type:
+            command = 'dir /a-d /b /s | findstr /v /c:"\\.$" /c:"\\..$"| find /c ":"'
+        else:
+            print("Unsupported operating system.")
+
+            return None
+
+        return Executor.execute_command(inventory_path, command)
+
+
+
+
+
 #-----------------------------
 #inv = ["/tmp/dtt1-poc/manager-linux-ubuntu-18.04-amd64/inventory.yaml", "/tmp/dtt1-poc/manager-linux-redhat-7-amd64/inventory.yaml"]
 #
 #hostconfig_= HostConfiguration()
 #hostconfig_.sshd_config(inv[0])
+
+#CheckFiles()._checkfiles(inv[0],'linux')
