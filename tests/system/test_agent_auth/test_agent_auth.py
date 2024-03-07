@@ -114,7 +114,7 @@ def configure_network(test_case):
             host_manager.run_command('wazuh-agent1', 'ip route add 172.24.27.0/24 via 0.0.0.0 dev eth0')
         elif 'ipv4' in configuration['agent_network']:
             host_manager.run_command('wazuh-agent1', f"ip addr add {network['agent_network'][1]} dev eth0")
-            host_manager.run_command('wazuh-agent1', f"ip addr add {network['manager_network'][2]} dev eth0")
+            host_manager.run_command('wazuh-agent1', f"ip addr add {network['agent_network'][2]} dev eth0")
 
 
 @pytest.fixture(scope='function')
