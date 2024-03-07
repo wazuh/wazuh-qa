@@ -51,8 +51,8 @@ class CreationPayload(InputPayload):
     provider: str
     size: Literal['micro', 'small', 'medium', 'large'] | None = None
     composite_name: str | None = None
-    track_output: Path
-    inventory_output: Path
+    track_output: Path | None = None
+    inventory_output: Path | None = None
     working_dir: Path
     ssh_key: str | None = None
     custom_provider_config: Path | None = None

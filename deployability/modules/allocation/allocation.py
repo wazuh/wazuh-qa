@@ -105,7 +105,10 @@ class Allocator:
             instance (Instance): The instance for which the inventory file is generated.
             inventory_path (Path): The path where the inventory file will be generated.
         """
-        inventory_path = Path(inventory_path)
+        if inventory_path is None:
+            inventory_path = Path(instance.path, 'inventory.yml')
+        else:
+            inventory_path = Path(inventory_path, 'inventory.yml')
         if not inventory_path.parent.exists():
             inventory_path.parent.mkdir(parents=True, exist_ok=True)
         ssh_config = instance.ssh_connection_info()
@@ -127,7 +130,10 @@ class Allocator:
             provider_name (str): The name of the provider.
             track_path (Path): The path where the track file will be generated.
         """
-        track_path = Path(track_path)
+        if track_path is None:
+            track_path = Path(instance.path, 'track.yml')
+        else:
+            track_path = Path(track_path, 'track.yml')
         if not track_path.parent.exists():
             track_path.parent.mkdir(parents=True, exist_ok=True)
         track = models.TrackOutput(identifier=instance.identifier,
