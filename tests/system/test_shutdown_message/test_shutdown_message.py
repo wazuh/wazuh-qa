@@ -25,6 +25,7 @@ import os
 import pytest
 import re
 import time
+import threading
 from wazuh_testing import T_1, T_5
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
@@ -53,13 +54,20 @@ def restart_all_agents():
     time.sleep(T_1)
 
     yield
+
     restart_cluster(testinfra_hosts + agents, host_manager, parallel=True)
 
 
 @pytest.fixture()
 def stop_gracefully_all_agents():
+    threads = []
     for agent in agents:
-        host_manager.run_command(agent, f'{WAZUH_PATH}/bin/wazuh-control stop')
+        thread = threading.Thread(target=host_manager.run_command, args=(agent, f'{WAZUH_PATH}/bin/wazuh-control stop',))
+        thread.start()
+        threads.append(thread)
+
+    for thread in threads:
+        thread.join()
 
 
 def test_shut_down_message_gracefully_stopped_agent(restart_all_agents, stop_gracefully_all_agents):
