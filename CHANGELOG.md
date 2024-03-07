@@ -45,6 +45,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix agent groups tests for enrollment_cluster environment ([#5086](https://github.com/wazuh/wazuh-qa/pull/5086)) \- (Framework + Tests)
 - Fix initial scans tests ([5032](https://github.com/wazuh/wazuh-qa/pull/5032)) \- (Framework + Tests)
 - Handle VDT data missing in wazuh-db API ([5014](https://github.com/wazuh/wazuh-qa/pull/5014)) \- (Framework + Tests)
 - Fixed x-axis labels in data-visualizer script ([#4987 ](https://github.com/wazuh/wazuh-qa/pull/4987)) \- (Framework)
