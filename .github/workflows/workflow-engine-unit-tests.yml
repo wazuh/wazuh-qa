@@ -1,0 +1,35 @@
+name: Workflow Engine unit tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/workflow-engine-unit-tests.yml'
+      - 'depoyability/modules/workflow_engine/**'
+
+jobs:
+  build: 
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10']
+    env:
+      PYTHONPATH: /home/runner/work/wazuh-qa/wazuh-qa/deployability/modules
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: 'deployability/modules/workflow_engine/requirements-dev.txt'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip wheel
+          pip install -r deployability/modules/workflow_engine/requirements-dev.txt --no-build-isolation
+
+      - name: Run workflow_engine tests
+        run: python -m pytest deployability/modules/workflow_engine
