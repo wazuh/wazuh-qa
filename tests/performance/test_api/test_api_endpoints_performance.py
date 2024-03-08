@@ -13,9 +13,6 @@ case_ids = [f"{case['method']}_{case['endpoint']}" for case in test_data['test_c
 api_details = dict()
 
 xfailed_items = {
-    '/active-response': {'message': 'Agent simulator not handling active-response messages: '
-                                    'https://github.com/wazuh/wazuh-qa/issues/1266',
-                         'method': 'put'},
     '/agents/group': {'message': 'Investigate performance issues with PUT /agents/group API endpoint: '
                                  'https://github.com/wazuh/wazuh/issues/13872',
                       'method': 'put'}

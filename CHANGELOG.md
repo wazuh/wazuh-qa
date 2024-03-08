@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 ## [4.8.2] - TBD
+### Fixed
+
+- Fixed agent_simulator response for active-response configuration commands. ([#4895](https://github.com/wazuh/wazuh-qa/pull/4895)) \- (Framework)
+
 
 ## [4.8.1] - TBD
 
