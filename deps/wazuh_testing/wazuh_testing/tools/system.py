@@ -439,7 +439,7 @@ class HostManager:
             internal_options_data = []
             backup_local_internal_options = self.get_file_content(target_host, WAZUH_LOCAL_INTERNAL_OPTIONS)
             for internal_options in local_internal_options[target_host]:
-                internal_options_data.append(f"{internal_options['name']}={internal_options['value']}\n")
+                internal_options_data.append(f"\n{internal_options['name']}={internal_options['value']}\n")
             replace = backup_local_internal_options
             for internal_option in internal_options_data:
                 replace = replace + internal_option
