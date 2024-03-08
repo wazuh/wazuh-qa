@@ -92,28 +92,44 @@ else:
 
 
 def get_version():
+    """Get Wazuh version
 
-    if platform.system() in ['Windows', 'win32']:
-        with open(os.path.join(WAZUH_PATH, 'VERSION'), 'r') as f:
-            version = f.read()
-            return version[:version.rfind('\n')]
+    Returns:
+        str: Wazuh version. If it is not possible to get it, it returns 'N/A'
+    """
+    try:
+        if platform.system() in ['Windows', 'win32']:
+            with open(os.path.join(WAZUH_PATH, 'VERSION'), 'r') as f:
+                version = f.read()
+                return version[:version.rfind('\n')]
 
-    else:  # Linux, sunos5, darwin, aix...
-        return subprocess.check_output([
-          f"{WAZUH_PATH}/bin/wazuh-control", "info", "-v"
-        ], stderr=subprocess.PIPE).decode('utf-8').rstrip()
+        else:  # Linux, sunos5, darwin, aix...
+            return subprocess.check_output([f"{WAZUH_PATH}/bin/wazuh-control", "info", "-v"],
+                                           stderr=subprocess.PIPE).decode('utf-8').rstrip()
+    except Exception:
+        return 'N/A'
 
 
 def get_service():
-    if platform.system() in ['Windows', 'win32']:
-        return 'wazuh-agent'
+    """Get Wazuh installed component
 
-    else:  # Linux, sunos5, darwin, aix...
-        service = subprocess.check_output([
-          f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"
-        ], stderr=subprocess.PIPE).decode('utf-8').strip()
+    Returns:
+        str: Wazuh installed component, wazuh-manager or wazuh-agent. If it is not possible to get it, it returns 'N/A'
+    """
+    try:
+        if platform.system() in ['Windows', 'win32']:
+            if os.path.exists(WAZUH_PATH):
+                service = 'wazuh-agent'
+            else:
+                service = 'N/A'
+        else:  # Linux, sunos5, darwin, aix...
+            output = subprocess.check_output([f"{WAZUH_PATH}/bin/wazuh-control", "info", "-t"],
+                                             stderr=subprocess.PIPE).decode('utf-8').strip()
+            service = 'wazuh-manager' if output == 'server' else 'wazuh-agent'
+    except Exception:
+        service = 'N/A'
 
-    return 'wazuh-manager' if service == 'server' else 'wazuh-agent'
+    return service
 
 
 _data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'data')

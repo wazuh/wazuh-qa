@@ -1,7 +1,7 @@
 - name: cannot_read_alerts_file_inode_changed
   description: The alerts.json file inode has changed and it cannot read alerts from it until it reloads.
   configuration_parameters:
-    WEBHOOK_URL: Insert using --slack-webhook-url parameter
+    WEBHOOK_URL: WEBHOOK_URL
   metadata:
     alert_sample: '{"timestamp":"2022-05-11T12:29:19.905+0000","rule":{"level":10,"description":
                    "sshd: brute force trying to get access to the system. Non existent user.","id":"5712",

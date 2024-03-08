@@ -143,6 +143,7 @@ def get_version():
     f = open('../../version.json')
     data = json.load(f)
     version = data['version']
+
     return version
 
 

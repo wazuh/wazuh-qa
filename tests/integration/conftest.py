@@ -63,36 +63,38 @@ def get_report_files():
 def pytest_collection_modifyitems(session, config, items):
     selected_tests = []
     deselected_tests = []
+    # Ignore platform deselection if avoid-platform-based-deselection is used
+    if not global_parameters.avoid_platform_based_deselection:
+        for item in items:
+            supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
+            plat = sys.platform
 
-    for item in items:
-        supported_platforms = PLATFORMS.intersection(mark.name for mark in item.iter_markers())
-        plat = sys.platform
-
-        selected = True
-        if supported_platforms and plat not in supported_platforms:
-            selected = False
-
-        host_type = 'agent' if 'agent' in get_service() else 'server'
-        supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
-        if supported_types and host_type not in supported_types:
-            selected = False
-        # Consider only first mark
-        levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
-        if levels and len(levels) > 0:
-            tiers = item.config.getoption("--tier")
-            if tiers is not None and levels[0] not in tiers:
+            selected = True
+            if supported_platforms and plat not in supported_platforms:
                 selected = False
-            elif item.config.getoption("--tier-minimum") > levels[0]:
-                selected = False
-            elif item.config.getoption("--tier-maximum") < levels[0]:
-                selected = False
-        if selected:
-            selected_tests.append(item)
-        else:
-            deselected_tests.append(item)
 
-    config.hook.pytest_deselected(items=deselected_tests)
-    items[:] = selected_tests
+            host_type = 'agent' if 'agent' in get_service() else 'server'
+
+            supported_types = HOST_TYPES.intersection(mark.name for mark in item.iter_markers())
+            if supported_types and host_type not in supported_types:
+                selected = False
+            # Consider only first mark
+            levels = [mark.kwargs['level'] for mark in item.iter_markers(name="tier")]
+            if levels and len(levels) > 0:
+                tiers = item.config.getoption("--tier")
+                if tiers is not None and levels[0] not in tiers:
+                    selected = False
+                elif item.config.getoption("--tier-minimum") > levels[0]:
+                    selected = False
+                elif item.config.getoption("--tier-maximum") < levels[0]:
+                    selected = False
+            if selected:
+                selected_tests.append(item)
+            else:
+                deselected_tests.append(item)
+
+        config.hook.pytest_deselected(items=deselected_tests)
+        items[:] = selected_tests
 
 
 @pytest.fixture(scope='module')
@@ -259,6 +261,7 @@ def pytest_addoption(parser):
     parser.addoption(
         "--fim-database-memory",
         action="store_true",
+        default=False,
         help="run tests activating database memory in the syscheck configuration"
     )
     parser.addoption(
@@ -366,6 +369,13 @@ def pytest_addoption(parser):
         help="pass web hook url required for shuffle integratord tests."
     )
 
+    parser.addoption(
+        "--avoid-platform-based-deselection",
+        action="store_true",
+        default=False,
+        help="Avoid tests deselection based on current environment"
+    )
+
 
 def pytest_configure(config):
     # Register an additional marker
@@ -444,6 +454,9 @@ def pytest_configure(config):
     global_parameters.wpk_package_path = config.getoption("--wpk_package_path")
     if global_parameters.wpk_package_path:
         global_parameters.wpk_package_path = global_parameters.wpk_package_path
+
+    # Set collect test mode
+    global_parameters.avoid_platform_based_deselection = config.getoption("--avoid-platform-based-deselection")
 
 
 def pytest_html_results_table_header(cells):

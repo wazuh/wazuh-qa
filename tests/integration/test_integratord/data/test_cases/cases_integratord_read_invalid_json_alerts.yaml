@@ -1,7 +1,7 @@
 - name: read_invalid_json_alert
   description: Read a invalid alert from alerts.json - removed rule key name - Integration fails
   configuration_parameters:
-    WEBHOOK_URL: Insert using --slack-webhook-url parameter
+    WEBHOOK_URL: WEBHOOK_URL
   metadata:
     alert_sample: '{"timestamp":"2022-05-11T12:29:19.905+0000",:{"level":10,"description":
                    "sshd: brute force trying to get access to the system. Non existent user.","id":"5712",
@@ -25,7 +25,7 @@
 - name: read_overlong_json_alert
   description: Read a an alert that is over 64kb alert from alerts.json - Integration fails
   configuration_parameters:
-    WEBHOOK_URL: Insert using --slack-webhook-url parameter
+    WEBHOOK_URL: WEBHOOK_URL
   metadata:
     alert_sample: '{"timestamp":"2022-05-11T12:29:19.905+0000","rule":{"level":10,"description":
                    "sshd: brute force trying to get access to the system. Non existent user.","id":"5712",

@@ -225,6 +225,9 @@ Release report: https://github.com/wazuh/wazuh/issues/19764
 Wazuh commit: https://github.com/wazuh/wazuh/commit/388ce54b704d7b6aa2dda1b30258ad1642b26a2d \
 Release report: https://github.com/wazuh/wazuh/issues/19446
 
+### Fixed
+
+- Fix pytest test collection errors ([#3969](https://github.com/wazuh/wazuh-qa/pull/3969)) \- (Framework + Tests)
 ### Changed
 
 - Update the cluster master logs reliability test to run with python 3.7 [#4445](https://github.com/wazuh/wazuh-qa/pull/4478) \- (Tests)
@@ -279,6 +282,10 @@ Release report: https://github.com/wazuh/wazuh/issues/18235
 - Delete `update_from_year` from system and E2E tests configuration ([#4372](https://github.com/wazuh/wazuh-qa/pull/4372)) \- (Tests)
 - Upgrade PyYAML to 6.0.1. ([#4326](https://github.com/wazuh/wazuh-qa/pull/4326)) \- (Framework)
 - Change Vulnerability Detector ITs to support the development of the NVD 2.0 refactor. ([#4327](https://github.com/wazuh/wazuh-qa/pull/4327)) \- (Tests)
+
+### Fixed
+
+- Fix pytest test collection errors ([#3969](https://github.com/wazuh/wazuh-qa/pull/3972)) \- (Framework + Tests)
 
 ## [4.4.5] - 10-07-2023
 

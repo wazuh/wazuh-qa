@@ -67,7 +67,7 @@ pytestmark = [pytest.mark.linux, pytest.mark.tier(level=0), pytest.mark.server]
 UPGRADE_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'upgrade')
 TASK_SOCKET = os.path.join(WAZUH_PATH, 'queue', 'tasks', 'task')
 SERVER_ADDRESS = 'localhost'
-WPK_REPOSITORY_4x = global_parameters.wpk_package_path[0]
+WPK_REPOSITORY_4x = global_parameters.wpk_package_path[0] if global_parameters.wpk_package_path else 'v4.4.0'
 CRYPTO = "aes"
 CHUNK_SIZE = 16384
 TASK_TIMEOUT = '15m'
@@ -422,10 +422,9 @@ def test_wpk_manager_task_states(get_configuration, configure_environment,
 
             # Chech that result of first attempt is Success
             assert new_expected_response[agents_id.index(agent_id)] == \
-                   response['data'][0]['message'], \
-                f'New upgrade response did not match expected! ' \
-                f'Expected {new_expected_response} obtained ' \
-                f'{response["data"][0]["message"]}'
+                   response['data'][0]['message'], f'New upgrade response did not match expected! ' \
+                                                   f'Expected {new_expected_response} obtained ' \
+                                                   f'{response["data"][0]["message"]}'
 
         for injector in injectors:
             injector.stop_receive()

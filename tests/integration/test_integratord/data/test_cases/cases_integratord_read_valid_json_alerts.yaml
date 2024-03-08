@@ -1,7 +1,7 @@
 - name: read_valid_json_alert
   description: Read a valid alert from alerts.json
   configuration_parameters:
-    WEBHOOK_URL: Insert using --slack-webhook-url parameter
+    WEBHOOK_URL: WEBHOOK_URL
   metadata:
     alert_sample: '{"timestamp":"2022-05-11T12:29:19.905+0000","rule":{"level":10,"description":
                    "sshd: brute force trying to get access to the system. Non existent user.","id":"5712",

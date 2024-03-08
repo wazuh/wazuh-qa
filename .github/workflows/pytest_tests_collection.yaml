@@ -1,0 +1,48 @@
+name: Tests collection
+
+on:
+  pull_request:
+    types:
+      - opened
+      - ready_for_review
+      - synchronize
+
+jobs:
+  test-collection:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install the QA framework
+        run: python3 setup.py install
+        working-directory: deps/wazuh_testing
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v35.9.2
+
+      - name: Get tests modules changed
+        id: set-changed-modules
+        run: |
+          files_changed="${{ steps.changed-files.outputs.all_changed_files }}"
+          DIRECTORIES=$(echo $files_changed | tr ' ' '\n' |  grep ^tests | grep -v pytest.ini | cut -d/ -f2 | \
+          uniq | tr -d ' ')
+          DIRECTORIES=$(echo $DIRECTORIES | tr ' ' ',')
+          echo "matrix=$DIRECTORIES" >> $GITHUB_OUTPUT
+
+      - name: Collect tests
+        run: |
+          DIRECTORIES=$(echo ${{ steps.set-changed-modules.outputs.matrix }} | tr ',' ' ')
+          for directory in $DIRECTORIES; do
+          pytest --collect-only tests/${directory}
+          done
