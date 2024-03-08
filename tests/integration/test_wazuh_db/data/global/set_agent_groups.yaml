@@ -5,17 +5,17 @@
             [\"TestGroup1\"]}]}"
     output: ok
     agent_id: 1
-    expected_group: TestGroup1
+    expected_group:
+      - TestGroup1
     expected_group_sync_status: syncreq
 
-- name: Group Append Empty groups - Agent has no groups - Warning - No groups added
+- name: Group Append Empty groups - Agent has no groups
   test_case:
     input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":002,\"groups\":\
             []}]}"
     output: ok
     agent_id: 2
-    expected_group: None
-    expected_warning: ".*WARNING: The groups were empty right after the set for agent '002'"
+    expected_group: []
     expected_group_sync_status: syncreq
 
 - name: Group Append Empty groups - Agent has default group - No groups affected
@@ -26,7 +26,8 @@
             []}]}"
     output: ok
     agent_id: 3
-    expected_group: default
+    expected_group:
+      - default
     expected_group_sync_status: syncreq
 
 - name: Group Append Add same group twice - Has only one group
@@ -38,7 +39,8 @@
             [\"TestGroup1\"]}]}"
     output: ok
     agent_id: 4
-    expected_group: TestGroup1
+    expected_group:
+      - TestGroup1
     expected_group_sync_status: syncreq
 
 - name: Group Append group - Agent has one group - Agent has two groups
@@ -50,7 +52,9 @@
             [\"TestGroup2\"]}]}"
     output: ok
     agent_id: 5
-    expected_group: TestGroup1,TestGroup2
+    expected_group:
+      - TestGroup1
+      - TestGroup2
     expected_group_sync_status: syncreq
 
 - name: Group Empty-Only - Agent Has no groups. One Group is Added
@@ -60,7 +64,8 @@
             \"groups\":[\"TestGroup1\"]}]}"
     output: ok
     agent_id: 6
-    expected_group: TestGroup1
+    expected_group:
+      - TestGroup1
     expected_group_sync_status: syncreq
 
 - name: Group Empty-Only - Agent Has one group. No new groups added
@@ -72,7 +77,8 @@
             \"groups\":[\"TestGroup2\"]}]}"
     output: ok
     agent_id: 7
-    expected_group: TestGroup1
+    expected_group:
+      - TestGroup1
     expected_group_sync_status: syncreq
 
 - name: Group Override - Agent Has one group.  New group replaces old group
@@ -84,10 +90,11 @@
             \"groups\":[\"TestGroup2\"]}]}"
     output: ok
     agent_id: 8
-    expected_group: TestGroup2
+    expected_group:
+      - TestGroup2
     expected_group_sync_status: syncreq
 
-- name: Group Override - Agent has one group - Pass no new group.  Warning - groups deleted
+- name: Group Override - Agent has one group - Pass no new group - Groups deleted
   test_case:
     pre_required_group: TestGroup1
     pre_input: "global set-agent-groups {\"mode\":\"override\",\"sync_status\":\"syncreq\",\"data\":[{\"id\":009,\
@@ -96,8 +103,7 @@
             \"groups\":[]}]}"
     output: ok
     agent_id: 9
-    expected_group: None
-    expected_warning: ".*WARNING: The groups were empty right after the set for agent '009'"
+    expected_group: []
     expected_group_sync_status: syncreq
 
 - name: Group Remove - Agent has one Group - Remove the group.  Agent has default assigned
@@ -109,7 +115,8 @@
             [\"TestGroup1\"]}]}"
     output: ok
     agent_id: 10
-    expected_group: default
+    expected_group:
+      - default
     expected_group_sync_status: syncreq
 
 - name: Group Remove - Agent has TestGroup1 and TestGroup2 - Remove Tesgroup1.  Agent has TestGroup2 assigned
@@ -121,7 +128,8 @@
             [\"TestGroup1\"]}]}"
     output: ok
     agent_id: 11
-    expected_group: TestGroup2
+    expected_group:
+      - TestGroup2
     expected_group_sync_status: syncreq
 
 - name: Group Remove - Agent has no groups - Try remove a group.  Agent has default assigned
@@ -131,7 +139,8 @@
             [\"TestGroup1\"]}]}"
     output: ok
     agent_id: 12
-    expected_group: default
+    expected_group:
+      - default
     expected_group_sync_status: syncreq
 
 - name: Invalid Mode - use an Invalid mode - no groups added
@@ -161,27 +170,28 @@
             [\"TestGroup1\"]}]}"
     output: ok
     agent_id: 15
-    expected_group: TestGroup1
+    expected_group:
+      - TestGroup1
     expected_group_sync_status: synced
 
-- name: Wrong sync_status - Assign a group using and invalid Sync_Status - agent has no group
+- name: Wrong sync_status - Assign a group using and invalid Sync_Status (rollback)
   test_case:
     pre_required_group: TestGroup1
     input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"wrong_status\",\"data\":[{\"id\":016,\
             \"groups\":[\"TestGroup1\"]}]}"
     output: err An error occurred during the set of the groups
     agent_id: 16
-    expected_group: None
+    expected_group: []
     expected_group_sync_status: synced
 
-- name: No sync_status - Assign a group using and empty Sync_Status field - agent has no group assigned
+- name: No sync_status - Assign a group using and empty Sync_Status field (rollback)
   test_case:
     pre_required_group: TestGroup1
     input: "global set-agent-groups {\"mode\":\"append\",\"sync_status\":\"\",\"data\":[{\"id\":017,\"groups\":\
             [\"TestGroup1\"]}]}"
     output: err An error occurred during the set of the groups
     agent_id: 17
-    expected_group: None
+    expected_group: []
     expected_group_sync_status: synced
 
 - name: Missing Fields - Assign a group using without data field - agent has no group assigned
@@ -225,7 +235,8 @@
     input: "global set-agent-groups {\"mode\":\"append\",\"data\":[{\"id\":022,\"groups\":[\"TestGroup1\"]}]}"
     output: ok
     agent_id: 22
-    expected_group: TestGroup1
+    expected_group:
+      - TestGroup1
     expected_group_sync_status: synced
 
 - name: Valid group name format - Assign a group with a '.' character
@@ -235,7 +246,8 @@
             [\"Test.Group1\"]}]}"
     output: ok
     agent_id: 23
-    expected_group: "Test.Group1"
+    expected_group:
+      - Test.Group1
     expected_group_sync_status: syncreq
 
 - name: Valid group name format - Assign a group with a '-' character
@@ -245,7 +257,8 @@
             [\"Test-Group1\"]}]}"
     output: ok
     agent_id: 24
-    expected_group: "Test-Group1"
+    expected_group:
+      - Test-Group1
     expected_group_sync_status: syncreq
 
 - name: Valid group name format - Assign a group with a '_' character
@@ -255,7 +268,8 @@
             [\"Test_Group1\"]}]}"
     output: ok
     agent_id: 25
-    expected_group: "Test_Group1"
+    expected_group:
+      - Test_Group1
     expected_group_sync_status: syncreq
 
 - name: Valid group name format - Assign a group with a long name
@@ -269,9 +283,10 @@
             ebf1Ot8C0gBmVYZbjBDwUrHBHNpDL7tnScnISannzT8J\"]}]}"
     output: ok
     agent_id: 26
-    expected_group: "19im4QM7Vn8vr4kE4YeZJ92AMvZS8bkKGrinEPSfAjNnhDgZ2a741ajntTWCaB6oJpOORSP46wLs2g14TqfbAJDmsbOxJG3xMc\
-                     YwFj5hcwpABb75W0CE6EQv9cTDm0SBqZAC6PIJltof7brN0bIodOPSrIL7XyDXnquqSuIaeuqY1uwcvBTlrlvRqFuH2wfIpkxE\
-                     wgxlj2LcLOzE4nrebf1Ot8C0gBmVYZbjBDwUrHBHNpDL7tnScnISannzT8J"
+    expected_group:
+      - "19im4QM7Vn8vr4kE4YeZJ92AMvZS8bkKGrinEPSfAjNnhDgZ2a741ajntTWCaB6oJpOORSP46wLs2g14TqfbAJDmsbOxJG3xMc\
+         YwFj5hcwpABb75W0CE6EQv9cTDm0SBqZAC6PIJltof7brN0bIodOPSrIL7XyDXnquqSuIaeuqY1uwcvBTlrlvRqFuH2wfIpkxE\
+         wgxlj2LcLOzE4nrebf1Ot8C0gBmVYZbjBDwUrHBHNpDL7tnScnISannzT8J"
     expected_group_sync_status: syncreq
 
 - name: Wrong group name format - Assign a group with an invalid group name (has invalid ',' character) - Warning
