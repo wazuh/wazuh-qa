@@ -1,9 +1,23 @@
-{% if ansible_os_family == 'Debian' %}
+{% if ansible_os_family in ['Debian'] %}
+- name: Update apt cache
+  shell: apt-get update
+
 - name: Install {{ component }}
-  shell: apt-get install -y {{ component }}
+  shell: 
+    apt-get install -y {{ component }}
 {% endif %}
 
-{% if ansible_os_family in ['RedHat', 'OracleLinux'] %}
+{% if ansible_os_family in ['RedHat', 'OracleLinux', 'Amazon'] %}
+- name: Update yum cache
+  shell: yum makecache
+
 - name: Install {{ component }}
   shell: yum install -y {{ component }}
+{% endif %}
+
+{% if ansible_os_family in ['SUSE'] %}
+- name: Update zypper cache
+  command: "zypper -n ref"
+- name: Install the {{ component }}
+  command: "zypper -n install {{ component }}"
 {% endif %}
