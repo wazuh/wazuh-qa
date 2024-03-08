@@ -151,7 +151,7 @@ def test_synchronization(folder_path, case, host):
             sleep(5)
             result = execute_wdb_query(query, 'wazuh-manager', host_manager)
 
-            assert result != '[]'
+            assert result == '[]'
 
     finally:
         host_manager.run_command('wazuh-agent1', f'rm -rf {folder_path}')
