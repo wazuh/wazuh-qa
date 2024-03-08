@@ -2,7 +2,7 @@ import boto3
 
 from pathlib import Path
 from modules.allocation.generic import Instance
-from modules.allocation.generic.models import ConnectionInfo
+from modules.allocation.generic.models import ConnectionInfo, InstancePayload
 from modules.allocation.generic.utils import logger
 from .credentials import AWSCredentials
 
@@ -19,35 +19,27 @@ class AWSInstance(Instance):
         user (str): User associated with the instance.
     """
 
-    def __init__(self, path: str | Path, identifier: str, platform: str, credentials: AWSCredentials = None, host_identifier: str = None, host_instance_dir: str | Path = None, macos_host_parameters: dict = None, arch: str = None, ssh_port: str = None, user: str = None) -> None:
+    def __init__(self, instance_parameters: InstancePayload, credentials: AWSCredentials = None) -> None:
         """
         Initialize an AWSInstance object.
 
         Args:
-            path (str or Path): Directory where instance data is stored.
-            identifier (str): Identifier of the instance.
-            platform (str): The platform of the instance.
+            instance_parameters (InstancePayload): The parameters of the instance.
             credentials (AWSCredentials): AWS credentials object.
-            host_identifier (str, optional): The host for the instance. Defaults to None.
-            host_instance_dir (str | Path, optional): The remote directory of the instance. Defaults to None.
-            macos_host_parameters (dict, optional): Parameters of the remote host. Defaults to None.
-            arch (str, optional): The architecture of the instance. Defaults to None.
-            ssh_port (str, optional): The SSH port of the instance. Defaults to None.
-            user (str): User associated with the instance.
         """
-        super().__init__(path, identifier, platform, credentials)
+        super().__init__(instance_parameters, credentials)
         self._client = boto3.resource('ec2')
-        self._instance = self._client.Instance(self.identifier)
-        self.platform = platform
+        self._instance = self._client.Instance(instance_parameters.identifier)
+        self.platform = instance_parameters.platform
         if not self.credentials:
             logger.debug(f"No credentials found. Loading from instance directory.")
             self.credentials = self.__get_credentials()
-        self.host_identifier = host_identifier
-        self.host_instance_dir = host_instance_dir
-        self.macos_host_parameters = macos_host_parameters
-        self.arch = arch
-        self.ssh_port = ssh_port
-        self._user = user
+        self.host_identifier = instance_parameters.host_identifier
+        self.host_instance_dir = instance_parameters.host_instance_dir
+        self.macos_host_parameters = instance_parameters.macos_host_parameters
+        self.arch = instance_parameters.arch
+        self.ssh_port = instance_parameters.ssh_port
+        self._user = instance_parameters.user
 
     def start(self) -> None:
         """Start the AWS EC2 instance."""

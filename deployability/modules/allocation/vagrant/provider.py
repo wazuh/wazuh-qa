@@ -8,7 +8,7 @@ from pathlib import Path
 from telnetlib import Telnet
 
 from modules.allocation.generic import Provider
-from modules.allocation.generic.models import CreationPayload
+from modules.allocation.generic.models import CreationPayload, DeletionPayload, InstancePayload
 from modules.allocation.generic.utils import logger
 from .credentials import VagrantCredentials
 from .instance import VagrantInstance
@@ -82,7 +82,16 @@ class VagrantProvider(Provider):
         if platform == 'macos':
             vagrant_file = str(instance_dir) + '/Vagrantfile'
             VagrantUtils.remote_copy(vagrant_file, host_instance_dir, macos_host_parameters)
-        return VagrantInstance(instance_dir, instance_id, platform, credentials, host_identifier, host_instance_dir, macos_host_parameters, arch, ssh_port=None)
+
+        instance_params = {}
+        instance_params['path'] = instance_dir
+        instance_params['identifier'] = instance_id
+        instance_params['platform'] = platform
+        instance_params['host_identifier'] = host_identifier
+        instance_params['host_instance_dir'] = host_instance_dir
+        instance_params['macos_host_parameters'] = macos_host_parameters
+        instance_params['arch'] = arch
+        return VagrantInstance(InstancePayload(**instance_params), credentials)
 
     @staticmethod
     def _load_instance(instance_dir: Path, identifier: str) -> VagrantInstance:
@@ -96,33 +105,40 @@ class VagrantProvider(Provider):
         Returns:
             VagrantInstance: The loaded Vagrant instance.
         """
-        return VagrantInstance(instance_dir, identifier)
+        instance_params = InstancePayload(**dict(instance_dir, identifier))
+        return VagrantInstance(instance_params)
 
     @classmethod
-    def _destroy_instance(cls, instance_dir: Path, identifier: str, key_path: str, platform: str, host_identifier: str = None, host_instance_dir: str | Path = None, ssh_port: str = None, arch: str = None) -> None:
+    def _destroy_instance(cls, destroy_parameters: DeletionPayload) -> None:
         """
         Destroys a Vagrant instance.
 
         Args:
-            instance_dir (Path): The directory of the instance.
-            identifier (str): The identifier of the instance.
-            key_path (str): The path of the key for the instance.
-            platform (str): The platform of the instance.
-            host_identifier (str, optional): The host for the instance. Defaults to None.
-            host_instance_dir (str | Path, optional): The remote directory of the instance. Defaults to None.
-            ssh_port (str, optional): The SSH port of the instance. Defaults to None.
-            arch (str): The architecture of the instance.
+            destroy_parameters (DeletionPayload): The parameters for instance deletion.
         Returns:
             None
         """
-        if host_identifier == "None" or host_identifier is None:
-            instance = VagrantInstance(instance_dir, identifier, platform)
-            if os.path.dirname(key_path) != str(instance_dir):
-                logger.debug(f"The key {key_path} will not be deleted. It is the user's responsibility to delete it.")
+        if destroy_parameters.host_identifier == "None" or destroy_parameters.host_identifier is None:
+            instance_params = {}
+            instance_params['path'] = destroy_parameters.instance_dir
+            instance_params['identifier'] = destroy_parameters.identifier
+            instance_params['platform'] = destroy_parameters.platform
+            instance = VagrantInstance(InstancePayload(**instance_params))
+            if os.path.dirname(destroy_parameters.key_path) != str(destroy_parameters.instance_dir):
+                logger.debug(f"The key {destroy_parameters.key_path} will not be deleted. It is the user's responsibility to delete it.")
         else:
-            macos_host_parameters = cls.__macos_host(str(arch), 'delete')
-            instance = VagrantInstance(instance_dir, identifier, platform, None, host_identifier, host_instance_dir, macos_host_parameters, arch, ssh_port)
-        logger.debug(f"Destroying instance {identifier}")
+            macos_host_parameters = cls.__macos_host(str(destroy_parameters.arch), 'delete')
+            instance_params = {}
+            instance_params['path'] = destroy_parameters.instance_dir
+            instance_params['identifier'] = destroy_parameters.identifier
+            instance_params['platform'] = destroy_parameters.platform
+            instance_params['host_identifier'] = destroy_parameters.host_identifier
+            instance_params['host_instance_dir'] = destroy_parameters.host_instance_dir
+            instance_params['macos_host_parameters'] = macos_host_parameters
+            instance_params['arch'] = destroy_parameters.arch
+            instance_params['ssh_port'] = destroy_parameters.ssh_port
+            instance = VagrantInstance(InstancePayload(**instance_params))
+        logger.debug(f"Destroying instance {destroy_parameters.identifier}")
         instance.delete()
 
     @classmethod

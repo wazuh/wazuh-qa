@@ -66,12 +66,21 @@ class Allocator:
             payload (DeletionPayload): The payload containing the parameters
                                         for instance deletion.
         """
-        payload = models.DeletionPayload(**dict(payload))
+        payload = models.TrackPayload(**dict(payload))
         # Read the data from the track file.
         with open(payload.track_output, 'r') as f:
             track = models.TrackOutput(**yaml.safe_load(f))
         provider = PROVIDERS[track.provider]()
-        provider.destroy_instance(track.instance_dir, track.identifier, track.key_path, track.platform, track.host_identifier, track.host_instance_dir, track.ssh_port, track.arch)
+        deletion_payload = {}
+        deletion_payload['instance_dir'] = track.instance_dir
+        deletion_payload['identifier'] = track.identifier
+        deletion_payload['key_path'] = track.key_path
+        deletion_payload['platform'] = track.platform
+        deletion_payload['host_identifier'] = track.host_identifier
+        deletion_payload['host_instance_dir'] = track.host_instance_dir
+        deletion_payload['ssh_port'] = str(track.ssh_port)
+        deletion_payload['arch'] = track.arch
+        provider.destroy_instance(models.DeletionPayload(**deletion_payload))
         logger.info(f"Instance {track.identifier} deleted.")
 
     @staticmethod

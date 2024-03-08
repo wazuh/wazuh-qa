@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from modules.allocation.generic import Provider
-from modules.allocation.generic.models import CreationPayload
+from modules.allocation.generic.models import CreationPayload, DeletionPayload, InstancePayload
 from modules.allocation.generic.utils import logger
 from .credentials import AWSCredentials
 from .instance import AWSInstance
@@ -92,7 +92,8 @@ class AWSProvider(Provider):
             config = cls.__parse_config(params, credentials, issue, label_team, termination_date, name)
             #Generate dedicated host for macOS instances
             if platform == 'macos':
-                host_identifier = cls._generate_dedicated_host(config, str(params.composite_name.split("-")[3]))
+                #host_identifier = cls._generate_dedicated_host(config, str(params.composite_name.split("-")[3]))
+                host_identifier = "h-063f33be1f52efbe9"
                 config = cls.__parse_config(params, credentials, issue, label_team, termination_date, name, host_identifier)
         else:
             logger.debug(f"Using provided config")
@@ -114,7 +115,14 @@ class AWSProvider(Provider):
         else:
             credentials.key_path = (os.path.splitext(ssh_key)[0])
 
-        return AWSInstance(instance_dir, instance_id, platform, credentials, host_identifier, None, None, arch, None, config.user)
+        instance_params = {}
+        instance_params['path'] = instance_dir
+        instance_params['identifier'] = instance_id
+        instance_params['platform'] = platform
+        instance_params['host_identifier'] = host_identifier
+        instance_params['arch'] = arch
+        instance_params['user'] = config.user
+        return AWSInstance(InstancePayload(**instance_params), credentials)
 
     @staticmethod
     def _load_instance(instance_dir: Path, instance_id: str) -> AWSInstance:
@@ -128,33 +136,35 @@ class AWSProvider(Provider):
         Returns:
             AWSInstance: Loaded AWSInstance object.
         """
-        return AWSInstance(instance_dir, instance_id)
+        instance_params = {}
+        instance_params['path'] = instance_dir
+        instance_params['identifier'] = instance_id
+        return AWSInstance(InstancePayload(**instance_params))
 
     @classmethod
-    def _destroy_instance(cls, instance_dir: str, identifier: str, key_path: str, platform: str, host_identifier: str = None, host_instance_dir: str | Path = None, ssh_port: str = None, arch: str = None) -> None:
+    def _destroy_instance(cls, destroy_parameters: DeletionPayload) -> None:
         """
         Destroy an AWS EC2 instance.
 
         Args:
-            instance_dir (str): Directory where instance data is stored.
-            identifier (str): Identifier of the instance.
-            key_path (str): Path to the key pair.
-            platform (str): Platform of the instance.
-            host_identifier (str, optional): Identifier of the dedicated host. Defaults to None.
-            host_instance_dir (str | Path, optional): Directory of the host instance. Defaults to None.
-            ssh_port (str, optional): SSH port of the instance. Defaults to None.
-            arch (str, optional): Architecture of the instance. Defaults to None.
+            destroy_parameters (DeletionPayload): The parameters for destroying the instance.
         """
         credentials = AWSCredentials()
-        key_id = os.path.basename(key_path)
+        key_id = os.path.basename(destroy_parameters.key_path)
         credentials.load(key_id)
-        instance = AWSInstance(instance_dir, identifier, platform, credentials, host_identifier)
-        if os.path.dirname(key_path) == str(instance_dir):
+        instance_params = {}
+        instance_params['path'] = destroy_parameters.instance_dir
+        instance_params['identifier'] = destroy_parameters.identifier
+        instance_params['platform'] = destroy_parameters.platform
+        instance_params['host_identifier'] = destroy_parameters.host_identifier
+
+        instance = AWSInstance(InstancePayload(**instance_params), credentials)
+        if os.path.dirname(destroy_parameters.key_path) == str(destroy_parameters.instance_dir):
             logger.debug(f"Deleting credentials: {instance.credentials.name}")
             instance.credentials.delete()
         instance.delete()
-        if host_identifier != "None" and host_identifier is not None:
-            cls._release_dedicated_host(host_identifier)
+        if destroy_parameters.host_identifier != "None" and destroy_parameters.host_identifier is not None:
+            cls._release_dedicated_host(destroy_parameters.host_identifier)
 
     @staticmethod
     def __create_ec2_instance(config: AWSConfig) -> str:

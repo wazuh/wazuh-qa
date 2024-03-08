@@ -1,11 +1,10 @@
 import re
 import subprocess
-import boto3
 
 from pathlib import Path
 
 from modules.allocation.generic import Instance
-from modules.allocation.generic.models import ConnectionInfo
+from modules.allocation.generic.models import ConnectionInfo, InstancePayload
 from modules.allocation.generic.utils import logger
 from .credentials import VagrantCredentials
 from .utils import VagrantUtils
@@ -25,23 +24,25 @@ class VagrantInstance(Instance):
         ssh_port (str): SSH port of the instance.
         macos_host_parameters (dict): Parameters of the remote host.
     """
-    def __init__(self, path: str | Path, identifier: str, platform: str, credentials: VagrantCredentials = None, host_identifier: str = None, host_instance_dir: str | Path = None, macos_host_parameters: dict = None, arch: str = None, ssh_port: str = None, user: str = None) -> None:
+    def __init__(self, instance_parameters: InstancePayload, credentials: VagrantCredentials = None) -> None:
         """
         Initializes a VagrantInstance.
 
         Args:
-            path (str | Path): The path of the instance.
-            identifier (str): The identifier of the instance.
-            platform (str): The platform of the instance.
+            instance_parameters (InstancePayload): The parameters of the instance.
             credentials (VagrantCredentials, optional): The credentials of the instance. Defaults to None.
-            host_identifier (str, optional): The host for the instance. Defaults to None.
-            host_instance_dir (str | Path, optional): The remote directory of the instance. Defaults to None.
-            macos_host_parameters (dict, optional): The parameters of the remote host. Defaults to None.
-            arch (str, optional): The architecture of the instance. Defaults to None.
-            ssh_port (str, optional): The SSH port of the instance. Defaults to None.
-            user (str): User associated with the instance.
         """
-        super().__init__(path, identifier, platform, credentials, host_identifier, host_instance_dir, macos_host_parameters, arch, ssh_port, user)
+        super().__init__(instance_parameters, credentials)
+        self.path: Path = Path(instance_parameters.path)
+        self.identifier: str = instance_parameters.identifier
+        self.credentials: VagrantCredentials = credentials
+        self.host_identifier: str = instance_parameters.host_identifier
+        self.host_instance_dir: str | Path = instance_parameters.host_instance_dir
+        self.ssh_port: str = instance_parameters.ssh_port
+        self.macos_host_parameters: dict = instance_parameters.macos_host_parameters
+        self.arch: str = instance_parameters.arch
+        self.platform: str = instance_parameters.platform
+        self.user: str = instance_parameters.user
         self.vagrantfile_path: Path = self.path / 'Vagrantfile'
 
     def start(self) -> None:

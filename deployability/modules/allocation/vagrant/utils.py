@@ -1,5 +1,4 @@
 import subprocess
-import boto3
 from pathlib import Path
 from modules.allocation.generic.utils import logger
 

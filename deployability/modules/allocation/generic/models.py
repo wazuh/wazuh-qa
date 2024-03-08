@@ -1,6 +1,7 @@
 from pathlib import Path
 from pydantic import BaseModel, IPvAnyAddress, field_validator, model_validator
 from typing_extensions import Literal
+from .credentials import Credentials
 
 
 class ConnectionInfo(BaseModel):
@@ -104,5 +105,26 @@ class CreationPayload(InputPayload):
         return path
 
 
-class DeletionPayload(InputPayload):
+class TrackPayload(BaseModel):
     track_output: Path
+
+class DeletionPayload(BaseModel):
+    instance_dir: Path
+    identifier: str
+    key_path: Path
+    platform: str
+    host_identifier: str | None = None
+    host_instance_dir: Path | None = None
+    ssh_port: str | None = None
+    arch: str
+
+class InstancePayload(BaseModel):
+    path: str | Path
+    identifier: str
+    platform: str
+    host_identifier: str  | None = None
+    host_instance_dir: str | Path | None = None
+    macos_host_parameters: dict | None = None
+    arch: str | None = None
+    ssh_port: str | None = None
+    user: str | None = None
