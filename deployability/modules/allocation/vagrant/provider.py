@@ -145,8 +145,8 @@ class VagrantProvider(Provider):
         os_specs = cls._get_os_specs()[params.composite_name]
         # Parse the configuration.
         config['ip'] = cls.__get_available_ip()
-        config['box'] = os_specs['box']
-        config['box_version'] = os_specs['box_version']
+        config['box'] = str(os_specs['box'])
+        config['box_version'] = str(os_specs['box_version'])
         config['private_key'] = str(credentials.key_path)
         config['public_key'] = str(credentials.key_path.with_suffix('.pub'))
         config['cpu'] = size_specs['cpu']

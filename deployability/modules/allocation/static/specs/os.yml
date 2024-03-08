@@ -44,8 +44,8 @@ vagrant:
     box_version: 1.0.20240207
   # Centos
   linux-centos-7-amd64:
-    box: generic/centos7
-    box_version: 4.3.8
+    box: centos/7
+    box_version: 2004.01
   linux-centos-8-amd64:
     box: generic/centos8
     box_version: 4.3.8
