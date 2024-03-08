@@ -1,3 +1,15 @@
+- name: Install the required packages
+  {% if ansible_os_family in ['Debian'] %}
+  shell: | 
+    sudo apt-get update
+    sudo apt-get -y install curl
+  {% endif %}
+  {% if ansible_os_family in ['RedHat', 'OracleLinux', 'Amazon'] %} 
+  shell: "yum -y install curl"
+  {% endif %}
+  {% if ansible_os_family in ['SUSE'] %}
+  shell: "zypper -n install curl"
+  {% endif %}
 
 - name: Download the Wazuh installation assistant
-  shell: "curl -sO https://packages.wazuh.com/{{ version }}/wazuh-install.sh"
+  shell: "curl -sO https://packages.wazuh.com/4.7/wazuh-install.sh"

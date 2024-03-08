@@ -41,6 +41,7 @@ class Action:
         logger.debug(f"Render playbook with vars: {self.handler.variables_dict}.")
         tasks = self.ansible.render_playbooks(self.handler.variables_dict)
         # Get and execute the playbook.
+        logger.debug(f"Tasks to execute: {tasks}.")
         playbook = self._get_playbook(tasks)
         logger.info(f"Execute {self.handler.action} for {self.handler.component_info.component}.")
         status = self.ansible.run_playbook(playbook)

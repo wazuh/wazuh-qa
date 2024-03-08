@@ -1,6 +1,9 @@
-{% if ansible_os_family == 'Debian' %}
+{% if ansible_os_family in ['Debian'] %}
+- name: Update packages cache
+  command: apt-get update -y
+
 - name: Install packages
-  command: apt-get -y install gnupg apt-transport-https
+  command: apt-get -y install curl gnupg apt-transport-https
 
 - name: Install GPG key
   shell: "curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && chmod 644 /usr/share/keyrings/wazuh.gpg"
@@ -12,10 +15,21 @@
   command: "apt-get update"
 {% endif %}
 
-{% if ansible_os_family == 'RedHat' %}
+{% if ansible_os_family in ['RedHat', 'OracleLinux', 'Amazon'] %}
+- name: Update packages cache
+  command: yum makecache
+
 - name: Import the GPG key
   command: "rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH"
 
 - name: Add Wazuh repository
   shell: "echo -e '[wazuh]\ngpgcheck=1\ngpgkey=https://packages.wazuh.com/key/GPG-KEY-WAZUH\nenabled=1\nname=EL-$releasever - Wazuh\nbaseurl=https://packages.wazuh.com/4.x/yum/\nprotect=1' | tee /etc/yum.repos.d/wazuh.repo"
+{% endif %}
+
+{% if ansible_os_family in ['SUSE']%}
+- name: Import the GPG key
+  command: "rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH"
+- name: Add Wazuh repository
+  shell: "echo -e '[wazuh]\ngpgcheck=1\ngpgkey=https://packages.wazuh.com/key/GPG-KEY-WAZUH\nenabled=1\nname=EL-$releasever - Wazuh\nbaseurl=https://packages.wazuh.com/4.x/yum/\nprotect=1' | tee /etc/zypp/repos.d/wazuh.repo"
+
 {% endif %}

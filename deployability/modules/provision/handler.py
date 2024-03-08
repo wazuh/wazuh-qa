@@ -18,7 +18,7 @@ class ProvisionHandler:
     """
     _base_templates_path = Path(__file__).parent / 'playbooks'
     _actions = ['install', 'uninstall']
-    _methods = ['package', 'aio', 'dependencies', 'source']
+    _methods = ['package', 'aio', 'source']
 
     def __init__(self, component_info: ComponentInfo, action: str, method: str) -> None:
         """
@@ -74,6 +74,7 @@ class ProvisionHandler:
             case 'aio':
                 return ["download.j2", f"{self.action}.j2"]
             case 'source':
+                # This will be kept as it could be used in the wazuh installation from sources.
                 component_file = f"{self.component_info.component}.j2"
                 if not Path(f"{self.templates_path}/{component_file}").exists():
                     # The source installation is always component specific.
