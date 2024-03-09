@@ -7,10 +7,17 @@
     apt-get install -y {{ component }}
 {% endif %}
 
-{% if ansible_os_family in ['RedHat', 'OracleLinux', 'Amazon'] %}
-- name: Update yum cache
-  shell: yum makecache
+{% if ansible_os_family in ['RedHat'] %}
+- name: Install EPEL repository
+  shell: |
+    yum update -y
+    yum install -y epel-release
+{% endif %}
 
+{% if ansible_os_family in ['RedHat', 'OracleLinux', 'Amazon'] %}
+
+- name: Update yum cache
+  shell: yum update
 - name: Install {{ component }}
   shell: yum install -y {{ component }}
 {% endif %}
