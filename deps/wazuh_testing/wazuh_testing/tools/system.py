@@ -21,7 +21,7 @@ from threading import Thread
 
 
 logger = logging.getLogger('testinfra')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.CRITICAL)
 
 
 class HostManager:

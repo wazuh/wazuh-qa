@@ -221,3 +221,21 @@ def save_indexer_credentials_into_keystore(host_manager):
     for manager in host_manager.get_group_hosts('manager'):
         host_manager.run_command(manager, f"{keystore_path} -f indexer -k username -v {indexer_user}")
         host_manager.run_command(manager, f"{keystore_path} -f indexer -k password -v {indexer_password}")
+
+
+def change_agent_manager_ip(host_manager: HostManager, agent: str, new_manager_ip: str) -> None:
+    """Change the manager IP of an agent.
+
+    Args:
+        host_manager: An instance of the HostManager class containing information about hosts.
+        agent: The name of the agent to be configured.
+        new_manager_ip: The new manager IP for the agent.
+    """
+
+    server_block = {'server': {'elements': [{'address': {'value': new_manager_ip}}]}}
+    configuration = {'sections': [{'section': 'client', 'elements': [server_block]}]}
+
+    new_configuration = {f"{agent}": [configuration]}
+
+    configure_host(agent, new_configuration, host_manager)
+
