@@ -17,10 +17,11 @@ from wazuh_testing.tools.configuration import set_section_wazuh_conf
 from ansible.inventory.manager import InventoryManager
 from ansible.parsing.dataloader import DataLoader
 from ansible.vars.manager import VariableManager
+from threading import Thread
 
 
 logger = logging.getLogger('testinfra')
-logger.setLevel(logging.CRITICAL)
+logger.setLevel(logging.DEBUG)
 
 
 class HostManager:
@@ -672,7 +673,7 @@ class HostManager:
 
         return result
 
-    def control_environment(self, operation, group_list):
+    def control_environment(self, operation, group_list, parallel=False):
         """
         Controls the Wazuh services on hosts in the specified groups.
 
@@ -683,9 +684,20 @@ class HostManager:
         Example:
             control_environment('restart', ['group1', 'group2'])
         """
-        for group in group_list:
-            for host in self.get_group_hosts(group):
-                self.handle_wazuh_services(host, operation)
+        if parallel:
+            threads = []
+            for group in group_list:
+                for host in self.get_group_hosts(group):
+                    thread = Thread(target=self.handle_wazuh_services, args=(host, operation))
+                    threads.append(thread)
+                    thread.start()
+
+            for thread in threads:
+                thread.join()
+        else:
+            for group in group_list:
+                for host in self.get_group_hosts(group):
+                    self.handle_wazuh_services(host, operation)
 
     def get_agents_ids(self):
         """
