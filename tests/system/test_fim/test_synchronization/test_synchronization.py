@@ -41,8 +41,8 @@ tags:
 """
 
 import os
-import json
 import pytest
+import re
 from time import sleep
 
 
@@ -134,7 +134,9 @@ def test_synchronization(folder_path, case, host):
     else:
         host_manager.run_command('wazuh-agent1', f'rm -rf {folder_path}')
         folder_path = f"'/{folder_path}/{folder_path}.txt'"
-        query = "001 select * from fim_entry where full_path='\"{}\"'".format(folder_path)
+        query = " select * from fim_entry where full_path='\"{}\"'".format(folder_path)
+        agent_info = host_manager.run_command(host, '/var/ossec/bin/manage_agents -l')
+        agent_id = re.search(r'ID: (\d+)', agent_info).group(1)
 
     # Start host
     host_manager.run_command(host, '/var/ossec/bin/wazuh-control start')
@@ -149,7 +151,7 @@ def test_synchronization(folder_path, case, host):
         if (case == 'delete'):
             # Execute query to DB
             sleep(5)
-            result = execute_wdb_query(query, 'wazuh-manager', host_manager)
+            result = execute_wdb_query(f"{agent_id} {query}", 'wazuh-manager', host_manager)
 
             assert result == '[]'
 
