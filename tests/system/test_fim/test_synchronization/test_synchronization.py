@@ -46,7 +46,7 @@ import re
 from time import sleep
 
 
-from system import execute_wdb_query
+from system import execute_wdb_query, get_agent_id
 from wazuh_testing.tools.system_monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager, clean_environment
 from wazuh_testing.tools import WAZUH_LOGS_PATH
@@ -135,8 +135,7 @@ def test_synchronization(folder_path, case, host):
         host_manager.run_command('wazuh-agent1', f'rm -rf {folder_path}')
         folder_path = f"'/{folder_path}/{folder_path}.txt'"
         query = " select * from fim_entry where full_path='\"{}\"'".format(folder_path)
-        agent_info = host_manager.run_command(host, '/var/ossec/bin/manage_agents -l')
-        agent_id = re.search(r'ID: (\d+)', agent_info).group(1)
+        agent_id = get_agent_id(host_manager, 'wazuh-manager')
 
     # Start host
     host_manager.run_command(host, '/var/ossec/bin/wazuh-control start')
