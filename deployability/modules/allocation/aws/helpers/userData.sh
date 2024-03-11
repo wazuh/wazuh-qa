@@ -148,7 +148,7 @@ if [ "$DIST_NAME" = "rhel" ] || [ "$DIST_NAME" = "centos" ] || [ "$DIST_NAME" = 
     sudo semanage port -a -t ssh_port_t -p tcp ${SSH_PORT}
     sudo systemctl restart sshd.service
     if sudo firewall-cmd --state 2>/dev/null | grep -q -w "running"; then
-        sudo firewall-cmd --permanent --zone=public --add-port=2200/tcp
+        sudo firewall-cmd --permanent --zone=public --add-port=${SSH_PORT}/tcp
         sudo firewall-cmd --reload
     fi
 fi
