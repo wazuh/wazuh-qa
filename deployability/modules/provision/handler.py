@@ -18,7 +18,7 @@ class ProvisionHandler:
     """
     _base_templates_path = Path(__file__).parent / 'playbooks'
     _actions = ['install', 'uninstall']
-    _methods = ['package', 'aio', 'source']
+    _methods = ['package', 'assistant', 'source']
 
     def __init__(self, component_info: ComponentInfo, action: str, method: str) -> None:
         """
@@ -34,7 +34,7 @@ class ProvisionHandler:
         if not method in self._methods:
             raise ValueError(f"Unsupported method: {method}")
         if not "wazuh" in component_info.component and method.lower() == 'aio':
-            raise ValueError(f"AIO actions is only supported for Wazuh components.")
+            raise ValueError(f"Assistant actions is only supported for Wazuh components.")
 
         # We cant uninstall from source.
         if action == "uninstall" and method.lower() == "source":
@@ -56,7 +56,7 @@ class ProvisionHandler:
             str: The path to the templates.
         """
         # If the component is wazuh, we need to change the templates path.
-        if "wazuh" in self.component_info.component:
+        if "wazuh" in self.component_info.component or self.method == "assistant":
             self._base_templates_path = f'{self._base_templates_path}/wazuh'
 
         return f"{self._base_templates_path}/{self.method}/{self.action}"

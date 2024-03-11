@@ -12,51 +12,51 @@ variables:
 
 tasks:
   # Generic agent test task
-  - task: "run-agent-tests-{agent}"
-    description: "Run tests uninstall for the {agent} agent."
-    do:
-      this: process
-      with:
-        path: python3
-        args:
-          - modules/testing/main.py
-          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-          - dependencies:
-            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-            - agent: "{working-dir}/agent-{agent}/inventory.yaml"
-          - tests: "install,register,stop"
-          - component: "agent"
-          - wazuh-version: "4.7.1"
-          - wazuh-revision: "40709"
-    depends-on:
-      - "provision-install-{agent}"
-      - "provision-manager"
-    foreach:
-      - variable: agents-os
-        as: agent
+  # - task: "run-agent-tests-{agent}"
+  #   description: "Run tests uninstall for the {agent} agent."
+  #   do:
+  #     this: process
+  #     with:
+  #       path: python3
+  #       args:
+  #         - modules/testing/main.py
+  #         - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
+  #         - dependencies:
+  #           - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+  #           - agent: "{working-dir}/agent-{agent}/inventory.yaml"
+  #         - tests: "install,register,stop"
+  #         - component: "agent"
+  #         - wazuh-version: "4.7.1"
+  #         - wazuh-revision: "40709"
+  #   depends-on:
+  #     - "provision-install-{agent}"
+  #     - "provision-manager"
+  #   foreach:
+  #     - variable: agents-os
+  #       as: agent
 
   # Generic agent test task
-  - task: "run-agent-tests-uninstall-{agent}"
-    description: "Run tests uninstall for the {agent} agent."
-    do:
-      this: process
-      with:
-        path: python3
-        args:
-          - modules/testing/main.py
-          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-          - dependencies:
-            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-          - tests: "uninstall"
-          - component: "agent"
-          - wazuh-version: "4.7.1"
-          - wazuh-revision: "40709"
-    depends-on:
-      - "run-agent-tests-{agent}"
-      - "provision-uninstall-{agent}"
-    foreach:
-      - variable: agents-os
-        as: agent
+  # - task: "run-agent-tests-uninstall-{agent}"
+  #   description: "Run tests uninstall for the {agent} agent."
+  #   do:
+  #     this: process
+  #     with:
+  #       path: python3
+  #       args:
+  #         - modules/testing/main.py
+  #         - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
+  #         - dependencies:
+  #           - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+  #         - tests: "uninstall"
+  #         - component: "agent"
+  #         - wazuh-version: "4.7.1"
+  #         - wazuh-revision: "40709"
+  #   depends-on:
+  #     - "run-agent-tests-{agent}"
+  #     - "provision-uninstall-{agent}"
+  #   foreach:
+  #     - variable: agents-os
+  #       as: agent
 
   # Unique manager provision task
   - task: "provision-manager"
@@ -69,8 +69,8 @@ tasks:
           - modules/provision/main.py
           - inventory: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - install:
-            - component: wazuh-manager
-              type: package
+            - component: aio
+              type: assistant
     depends-on:
       - "allocate-manager"
 
