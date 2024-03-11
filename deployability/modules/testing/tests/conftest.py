@@ -9,6 +9,7 @@ def pytest_addoption(parser):
     parser.addoption('--system', required=False, help='OS version where wazuh was installed.')
     parser.addoption('--component', required=False, help='Component to be tested.')
     parser.addoption('--dependencies', required=False, help='Dependency to be tested.')
+    parser.addoption('--inventory', required=False, help='Dependency to be tested.')
 
 
 @pytest.fixture(scope='session')

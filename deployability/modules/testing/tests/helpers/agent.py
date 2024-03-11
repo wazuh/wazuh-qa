@@ -1,5 +1,7 @@
-from executor import Executor
-from generic import HostInformation
+from .executor import Executor
+from .generic import HostInformation
+
+executor = Executor()
 
 class WazuhAgent:
     def __init__(self):
@@ -58,7 +60,7 @@ class WazuhAgent:
             ]
 
             commands.extend(system_commands)
-        Executor.execute_commands(inventory_path, commands)
+        executor.execute_commands(inventory_path, commands)
 
 
     def install_agents(self, inventories_paths=[]):
@@ -104,7 +106,7 @@ class WazuhAgent:
                 "/usr/bin/dscl . -delete '/Groups/wazuh'",
                 "/usr/sbin/pkgutil --forget com.wazuh.pkg.wazuh-agent"
             ])
-        Executor.execute_commands(inventory_path, commands)
+        executor.execute_commands(inventory_path, commands)
 
 
     def uninstall_agents(self, inventories_paths=[]):
@@ -122,7 +124,7 @@ class WazuhAgent:
         Returns:
             str: status
         """
-        return Executor.execute_command(inventory_path, 'systemctl status wazuh-agent')
+        return executor.execute_command(inventory_path, 'systemctl status wazuh-agent')
 
 
     def agent_stop(self, inventory_path):
@@ -132,7 +134,7 @@ class WazuhAgent:
         Args:
             inventory_path: host's inventory path
         """
-        Executor.execute_command(inventory_path, 'systemctl stop wazuh-agent')
+        executor.execute_command(inventory_path, 'systemctl stop wazuh-agent')
 
 
     def agent_start(self, inventory_path):
@@ -142,7 +144,7 @@ class WazuhAgent:
         Args:
             inventory_path: host's inventory path
         """
-        Executor.execute_command(inventory_path, 'systemctl start wazuh-agent')
+        executor.execute_command(inventory_path, 'systemctl start wazuh-agent')
 
 
     def agent_restart(self, inventory_path):
@@ -152,7 +154,7 @@ class WazuhAgent:
         Args:
             inventory_path: host's inventory path
         """
-        Executor.execute_command(inventory_path, 'systemctl restart wazuh-agent')
+        executor.execute_command(inventory_path, 'systemctl restart wazuh-agent')
 
 
     def get_agent_version(self, inventory_path):
@@ -165,7 +167,7 @@ class WazuhAgent:
         Returns:
             str: version
         """
-        return Executor.execute_command(inventory_path, '/var/ossec/bin/wazuh-control info -v')
+        return executor.execute_command(inventory_path, '/var/ossec/bin/wazuh-control info -v')
 
 
     def get_agent_revision(self, inventory_path):
@@ -178,7 +180,7 @@ class WazuhAgent:
         Returns:
             str: revision number
         """
-        return Executor.execute_command(inventory_path, '/var/ossec/bin/wazuh-control info -r')
+        return executor.execute_command(inventory_path, '/var/ossec/bin/wazuh-control info -r')
 
 
     def hasAgentClientKeys(self, inventory_path):
@@ -191,7 +193,7 @@ class WazuhAgent:
         Returns:
             bool: True/False
         """
-        return 'true' in Executor.execute_command(inventory_path, '[ -f /var/ossec/etc/client.keys ] && echo true || echo false')
+        return 'true' in executor.execute_command(inventory_path, '[ -f /var/ossec/etc/client.keys ] && echo true || echo false')
 
 
     def isAgentActive(self, inventory_path):
@@ -204,7 +206,7 @@ class WazuhAgent:
         Returns:
             bool: True/False
         """
-        return Executor.execute_command(inventory_path, 'systemctl is-active wazuh-agent') == 'active'
+        return executor.execute_command(inventory_path, 'systemctl is-active wazuh-agent') == 'active'
 
 
 #---------------------------------------------------

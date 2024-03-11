@@ -1,8 +1,11 @@
-from executor import Executor
 import yaml
 import chardet
 import time
 import re
+
+from .executor import Executor
+executor = Executor
+
 class HostInformation:
     def __init__(self):
         pass
@@ -14,7 +17,7 @@ class HostInformation:
         Returns:
             str: type of host (windows, linux, macos)
         """
-        return 'true' in Executor.execute_command(inventory_path, f'test -d {dir_path} && echo "true" || echo "false"')
+        return 'true' in executor.execute_command(inventory_path, f'test -d {dir_path} && echo "true" || echo "false"')
 
 
     def file_exists(self, inventory_path, file_path):
@@ -24,7 +27,7 @@ class HostInformation:
         Returns:
             str: type of host (windows, linux, macos)
         """
-        return 'true' in Executor.execute_command(inventory_path, f'test -f {file_path} && echo "true" || echo "false"')
+        return 'true' in executor.execute_command(inventory_path, f'test -f {file_path} && echo "true" || echo "false"')
 
 
     def get_os_type(self, inventory_path):
@@ -34,7 +37,7 @@ class HostInformation:
         Returns:
             str: type of host (windows, linux, macos)
         """
-        system = Executor.execute_command(inventory_path, 'uname')
+        system = executor.execute_command(inventory_path, 'uname')
         return system.lower()
 
 
@@ -46,7 +49,7 @@ class HostInformation:
         Returns:
             str: arch (aarch64, x86_64, intel, apple)
         """
-        return Executor.execute_command(inventory_path, 'uname -m')
+        return executor.execute_command(inventory_path, 'uname -m')
 
 
     def get_linux_distribution(self, inventory_path):
@@ -54,36 +57,48 @@ class HostInformation:
         It returns the linux distribution of host
 
         Returns:
-            str: linux distribution (deb, rpm, opensuse-leap, amzn)
+            str: linux distribution (deb, rpm, opensuse-leap, amazon)
         """
-        if 'linux' in self.get_os_type(inventory_path):
-            package_managers = {
-                '/etc/debian_version': 'deb',
-                '/etc/redhat-release': 'rpm',
-                '/etc/os-release': 'opensuse-leap',
-                '/etc/system-release': 'amzn'
-            }
-            for file_path, package_manager in package_managers.items():
-                if self.file_exists(inventory_path, file_path):
-                    return package_manager
+        os_name = re.search(r'/manager-linux-([^-]+)-', inventory_path).group(1)
 
+        if os_name == 'ubuntu' or os_name == 'debian':
+            linux_distribution = 'deb'
+        else:
+            linux_distribution = 'rpm'
+
+        return linux_distribution
+
+
+    def get_os_name_from_inventory(self, inventory_path):
+        """
+        It returns the linux os_name host inventory
+
+        Returns:
+            str: linux distribution (deb, rpm, opensuse-leap, amazon)
+        """
+        os_name = re.search(r'/manager-linux-([^-]+)-', inventory_path).group(1)
+
+        return os_name
 
 class HostConfiguration:
     def __init__(self):
-        pass
+        self.host_information = HostInformation()
 
-
+    def caca(self, inventory_path):
+        os_name = self.host_information.get_os_name_from_inventory(inventory_path)
+        return os_name
     def sshd_config(self, inventory_path):
         commands = ["sudo sed -i '/^PasswordAuthentication/s/^/#/' /etc/ssh/sshd_config", "sudo sed -i '/^PermitRootLogin no/s/^/#/' /etc/ssh/sshd_config", 'echo -e "PasswordAuthentication yes\nPermitRootLogin yes" | sudo tee -a /etc/ssh/sshd_config', 'sudo systemctl restart sshd', 'cat /etc/ssh/sshd_config']
-        Executor.execute_commands(inventory_path, commands)
+        executor.execute_commands(inventory_path, commands)
 
 
     def disable_firewall(self, inventory_path):
         commands = ["sudo systemctl stop firewalld", "sudo systemctl disable firewalld"]
-        Executor.execute_commands(inventory_path, commands)
+        executor.execute_commands(inventory_path, commands)
 
 
-    def certs_create(self, master_path, dashboard_path, indexer_paths=[], worker_paths=[] ):
+    def certs_create(self, wazuh_version, master_path, dashboard_path, indexer_paths=[], worker_paths=[] ):
+        wazuh_version = '.'.join(wazuh_version.split('.')[:2])
         with open(master_path, 'r') as yaml_file:
             inventory_data = yaml.safe_load(yaml_file)
         master = inventory_data.get('ansible_host')
@@ -105,14 +120,26 @@ class HostConfiguration:
             workers.append(inventory_data.get('ansible_host'))
 
         ##Basic commands to setup the config file, add the ip for the master & dashboard
-        commands = [
-            'curl -sO https://packages.wazuh.com/4.7/wazuh-certs-tool.sh',
-            'curl -sO https://packages.wazuh.com/4.7/config.yml',
-            "sed -i '/^\s*#/d' /home/vagrant/config.yml",
-            """sed -i '/ip: "<wazuh-manager-ip>"/a\      node_type: master' /home/vagrant/config.yml""",
-            f"sed -i '0,/<wazuh-manager-ip>/s//{master}/' /home/vagrant/config.yml",
-            f"sed -i '0,/<dashboard-node-ip>/s//{dashboard}/' /home/vagrant/config.yml"
-        ]
+        os_name = self.host_information.get_os_name_from_inventory(master_path)
+        print(os_name)
+        if os_name == 'debian':
+            commands = [
+                f'wget https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh',
+                f'wget https://packages.wazuh.com/{wazuh_version}/config.yml',
+                "sed -i '/^\s*#/d' /home/vagrant/config.yml",
+                """sed -i '/ip: "<wazuh-manager-ip>"/a\      node_type: master' /home/vagrant/config.yml""",
+                f"sed -i '0,/<wazuh-manager-ip>/s//{master}/' /home/vagrant/config.yml",
+                f"sed -i '0,/<dashboard-node-ip>/s//{dashboard}/' /home/vagrant/config.yml"
+            ]
+        else:
+            commands = [
+                f'curl -sO https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh',
+                f'curl -sO https://packages.wazuh.com/{wazuh_version}/config.yml',
+                "sed -i '/^\s*#/d' /home/vagrant/config.yml",
+                """sed -i '/ip: "<wazuh-manager-ip>"/a\      node_type: master' /home/vagrant/config.yml""",
+                f"sed -i '0,/<wazuh-manager-ip>/s//{master}/' /home/vagrant/config.yml",
+                f"sed -i '0,/<dashboard-node-ip>/s//{dashboard}/' /home/vagrant/config.yml"
+            ]
 
         # Adding workers
         for index, element in reversed(list(enumerate(workers))):
@@ -133,37 +160,52 @@ class HostConfiguration:
 
         ## Adding workers and indexer Ips
         certs_creation = [
-            'bash ./wazuh-certs-tool.sh -A',
-            'tar -cvf ./wazuh-certificates.tar -C ./wazuh-certificates/ .',
-            'rm -rf ./wazuh-certificates'
+            'bash wazuh-install.sh --generate-config-files --ignore-check'
         ]
         commands.extend(certs_creation)
         for i in commands:
             print(i)
-        Executor.execute_commands(master_path, commands)
+        executor.execute_commands(master_path, commands)
 
 
     def scp_to(self, from_inventory_path, to_inventory_path):
-        hostinformation = HostInformation()
-        distribution = hostinformation.get_linux_distribution(from_inventory_path)
 
+        os_name = self.host_information.get_os_name_from_inventory(from_inventory_path)
+
+        print(os_name)
+        if os_name == 'ubuntu' or os_name == 'debian':
+            distribution = 'deb'
+        elif os_name == 'amazon':
+            distribution = 'amazon'
+        else:
+            distribution = 'rpm'
+        print(distribution)
+        print("------------------")
         with open(to_inventory_path, 'r') as yaml_file:
             inventory_data = yaml.safe_load(yaml_file)
 
         host = inventory_data.get('ansible_host')
     
-        if 'deb' in distribution:
+        if distribution == 'deb':
             commands = [
                 "apt install sshpass",
-                f"sshpass -p vagrant scp -o StrictHostKeyChecking=no /home/vagrant/wazuh-certificates.tar vagrant@{host}:/home/vagrant"
+                f"sshpass -p vagrant scp -o StrictHostKeyChecking=no /home/vagrant/wazuh-install-files.tar vagrant@{host}:/home/vagrant"
             ]
-        elif 'rpm' in distribution:
+        elif distribution == 'rpm':
             commands = [
                 "yum install -y sshpass",
-                f"sshpass -p vagrant scp -o StrictHostKeyChecking=no /home/vagrant/wazuh-certificates.tar vagrant@{host}:/home/vagrant"
+                f"sshpass -p vagrant scp -o StrictHostKeyChecking=no /home/vagrant/wazuh-install-files.tar vagrant@{host}:/home/vagrant"
             ]
-
-        Executor.execute_commands(from_inventory_path, commands)
+        elif distribution == 'amazon':
+            commands = [
+                "amazon-linux-extras install epel -y",
+                "yum-config-manager --enable epel",
+                "yum install -y sshpass",
+                f"sshpass -p vagrant scp -o StrictHostKeyChecking=no /home/vagrant/wazuh-install-files.tar vagrant@{host}:/home/vagrant"
+            ]
+        print(commands)
+        eje = executor.execute_commands(from_inventory_path, commands)
+        print(eje)
 
 
 class HostMonitor:
@@ -232,8 +274,9 @@ class HostMonitor:
 
 class CheckFiles:
     def __init__(self):
-        self.initial_scan = None
-        self.second_scan = None
+        self.initial_scan = []
+        self.second_scan = []
+        self.host_information = HostInformation()
 
     def perform_action_and_scan(self, inventory_path, callback):
         """
@@ -265,27 +308,30 @@ class CheckFiles:
             'added': added_lines,
             'removed': removed_lines
         }
-        print(len(changes['added']))
-        print(len(changes['removed']))
+        
+        result_file_path = '/home/akim/Desktop/resultado_install.txt'
+        with open(result_file_path, 'w') as result_file:
+            result_file.write(str(changes))
+        
         return changes
 
-    def _checkfiles(self,inventory_path, os_type):
+    def _checkfiles(self, inventory_path, os_type):
         """
         It captures a structure of a /Var or c: directory status
         Returns:
             List: list of directories
         """
         if 'linux' in os_type or 'macos' in os_type:
-            
-            os_name = re.search(r'/manager-linux-([^-]+)-', inventory_path).group(1)
+
+            os_name = self.host_information.get_os_name_from_inventory(inventory_path)
             print(os_name)
-            command = "sudo find /var -type f -o -type d 2>/dev/null"
+            command = "sudo find /var -type f -o -type d 2>/dev/null | grep -v cache "
 
             centos = ['yum', 'rpm']
             redhat = ['yum', 'rpm']
-            amazonlinux = ['yum']
-            ubuntu = ['ubuntu', 'lxcfs', 'dpkg']
-            debian = ['dpkg', 'lists']
+            amazon = ['yum']
+            ubuntu = ['ubuntu', 'lxcfs', 'dpkg', 'PackageKit']
+            debian = ['dpkg', 'lists', 'PackageKit', 'polkit-1', 'ucf', 'unattended', '.db', '.log']
             oracle = ['dnf', 'selinux']
             fedora = ['dnf', 'selinux', 'rpm']
             rocky_linux = ['dnf', 'selinux']
@@ -299,8 +345,8 @@ class CheckFiles:
             elif os_name == 'redhat':
                 for i in redhat:
                     command += f" | grep -v {i}"
-            elif os_name == 'amazonlinux':
-                for i in amazonlinux:
+            elif os_name == 'amazon':
+                for i in amazon:
                     command += f" | grep -v {i}"
             elif os_name == 'debian':
                 for i in debian:
@@ -326,16 +372,4 @@ class CheckFiles:
 
             return None
 
-        return Executor.execute_command(inventory_path, command)
-
-
-
-
-
-#-----------------------------
-#inv = ["/tmp/dtt1-poc/manager-linux-ubuntu-18.04-amd64/inventory.yaml", "/tmp/dtt1-poc/manager-linux-redhat-7-amd64/inventory.yaml"]
-#
-#hostconfig_= HostConfiguration()
-#hostconfig_.sshd_config(inv[0])
-
-#CheckFiles()._checkfiles(inv[0],'linux')
+        return executor.execute_command(inventory_path, command)

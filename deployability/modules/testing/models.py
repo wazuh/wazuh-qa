@@ -18,6 +18,8 @@ class InputPayload(ExtraVars):
     inventory: Path
     dependencies: list[str] = []
     cleanup: bool = True
+
+
     @field_validator('tests', mode='before')
     def validate_tests(cls, value) -> list[str]:
         """Validate tests names."""
@@ -31,7 +33,6 @@ class InputPayload(ExtraVars):
         """Validate inventory path."""
         if not Path(value).exists():
             raise ValueError(f'Inventory file "{value}" does not exist')
-
         return Path(value)
 
     @model_validator(mode='before')

@@ -22,11 +22,14 @@ class Tester:
             payload (InputPayload): The payload containing the test parameters.
         """
         payload = InputPayload(**dict(payload))
-        inventory = Inventory(**Utils.load_from_yaml(payload.inventory))
+        inventory_path = payload.inventory
+        inventory = Inventory(**Utils.load_from_yaml((payload.inventory)))
         logger.info(f"Running tests for {inventory.ansible_host}")
         extra_vars = cls._get_extra_vars(payload).model_dump()
+        extra_vars['inventory'] = str(inventory_path)
         logger.debug(f"Using extra vars: {extra_vars}")
         dependencies_dict = {}
+
         for dependency in extra_vars['dependencies']:
             dependency = ast.literal_eval(dependency)
             dependencies_dict.update(dependency)
@@ -53,16 +56,17 @@ class Tester:
             logger.debug("No dependencies received in payload")
             return ExtraVars(**payload.model_dump())
         
-        dependencies_ip = []
+        dependencies_paths = []
         logger.debug("Dependencies found. Parsing...")
         for dependency in range(len(payload.dependencies)):
             dicts = eval(payload.dependencies[dependency])
             for key, value in dicts.items():
-                dep_inventory = Inventory(**Utils.load_from_yaml(value))
-                dicts[key] = dep_inventory.ansible_host         
-                dependencies_ip.append(str(dicts))
+                #dep_inventory = Inventory(**Utils.load_from_yaml(value))
+                #dicts[key] = dep_inventory.ansible_host
+                dicts[key] = value           
+                dependencies_paths.append(str(dicts))
 
-        return ExtraVars(**payload.model_dump(exclude={'dependencies'}), dependencies=dependencies_ip)
+        return ExtraVars(**payload.model_dump(exclude={'dependencies'}), dependencies=dependencies_paths)
 
     @classmethod
     def _run_tests(cls, test_list: list[str], ansible: Ansible, extra_vars: ExtraVars) -> None:
