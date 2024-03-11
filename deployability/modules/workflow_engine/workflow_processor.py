@@ -6,6 +6,7 @@ import concurrent.futures
 import graphlib
 import json
 import time
+import uuid
 import yaml
 import os
 
@@ -26,6 +27,8 @@ class WorkflowFile:
         self.workflow_raw_data = self.__load_workflow(workflow_file_path)
         self.task_collection = self.__process_workflow()
         self.__static_workflow_validation()
+        # Set the internal attr execution ID.
+        self.__execution_id = self.__get_execution_id()
 
     def __validate_schema(self, workflow_file: Path | str) -> None:
         """
@@ -67,6 +70,7 @@ class WorkflowFile:
         logger.debug("Process workflow.")
         task_collection = []
         variables = self.workflow_raw_data.get('variables', {})
+        variables['execution_id'] = self.__execution_id
         for task in self.workflow_raw_data.get('tasks', []):
             task_collection.extend(self.__expand_task(task, variables))
 
@@ -149,6 +153,10 @@ class WorkflowFile:
         validations = [check_duplicated_tasks, check_not_existing_tasks]
         for validation in validations:
             validation(self)
+    
+    def __get_execution_id(self):
+        """Retrieves a UUID as the execution ID."""
+        return str(uuid.uuid4())
 
 
 class DAG():
