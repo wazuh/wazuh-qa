@@ -346,3 +346,15 @@ def pytest_addoption(parser):
         type=str,
         help='Ansible roles path.',
     )
+    parser.addoption(
+        '--enable-modulesd-debug',
+        action='store_true',
+        default=False,
+        help='Enable modulesd debug mode. Default: False',
+    )
+    parser.addoption(
+        '--gather-evidences-when-passed',
+        action='store_true',
+        default=False,
+        help='Enable gather evidences when passed. Default: False',
+    )
