@@ -440,7 +440,7 @@ class HostManager:
             internal_options_data = []
             backup_local_internal_options = self.get_file_content(target_host, WAZUH_LOCAL_INTERNAL_OPTIONS)
             for internal_options in local_internal_options[target_host]:
-                internal_options_data.append(f"{internal_options['name']}={internal_options['value']}\n")
+                internal_options_data.append(f"\n{internal_options['name']}={internal_options['value']}\n")
             replace = backup_local_internal_options
             for internal_option in internal_options_data:
                 replace = replace + internal_option
@@ -483,9 +483,13 @@ class HostManager:
             host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
         """
         result = False
+        extension = '.msi'
 
         if system == 'windows':
-            result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
+            if url.lower().endswith(extension):
+                result = self.get_host(host).ansible("win_package", f"path={url} arguments=/passive", check=False)
+            else:
+                result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
         elif system == 'ubuntu':
             result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
             if result['changed'] and result['stderr'] == '':

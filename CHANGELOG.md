@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Add documentation about markers for system tests ([#5080](https://github.com/wazuh/wazuh-qa/pull/5080)) \- (Documentation)
 - Add AWS Custom Buckets Integration tests ([#4675](https://github.com/wazuh/wazuh-qa/pull/4675)) \- (Framework + Tests)
 - Add Vulnerability Detector end to end tests ([#4878](https://github.com/wazuh/wazuh-qa/pull/4878)) \- (Framework + Tests)
 - Agent Simulator: Syscollector message generation refactoring ([#4868](https://github.com/wazuh/wazuh-qa/pull/4868)) \- (Framework)
@@ -20,6 +21,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Update Packages in TestScanSyscollectorCases ([#4997](https://github.com/wazuh/wazuh-qa/pull/4997)) \- (Framework + Tests)
 - Reduced test_shutdown_message runtime ([#4986](https://github.com/wazuh/wazuh-qa/pull/4986)) \- (Tests)
 - Change e2e vd configuration keystore ([#4952](https://github.com/wazuh/wazuh-qa/pull/4952)) \- (Framework)
 - Updating tests after removing references to the legacy vulnerability detector module ([#4872](https://github.com/wazuh/wazuh-qa/pull/4872)) \- (Tests)
@@ -42,9 +44,11 @@ All notable changes to this project will be documented in this file.
 - Update the JSON schema with the required fields for the output content of the migration tool ([#4375](https://github.com/wazuh/wazuh-qa/pull/4375)) \- (Tests)
 - Update framework known flaws file ([#4443](https://github.com/wazuh/wazuh-qa/pull/4443)) \- (Tests)
 - Align migration tool system tests to the tool's new output directory structure ([#4561](https://github.com/wazuh/wazuh-qa/pull/4561)) \- (Tests)
+- Update file descriptors threshold values used in cluster performance tests ([#5073](https://github.com/wazuh/wazuh-qa/pull/5073)) \- (Tests)
 
 ### Fixed
 
+- Fix agent groups tests for enrollment_cluster environment ([#5086](https://github.com/wazuh/wazuh-qa/pull/5086)) \- (Framework + Tests)
 - Fix initial scans tests ([5032](https://github.com/wazuh/wazuh-qa/pull/5032)) \- (Framework + Tests)
 - Handle VDT data missing in wazuh-db API ([5014](https://github.com/wazuh/wazuh-qa/pull/5014)) \- (Framework + Tests)
 - Fixed x-axis labels in data-visualizer script ([#4987 ](https://github.com/wazuh/wazuh-qa/pull/4987)) \- (Framework)
@@ -65,6 +69,7 @@ All notable changes to this project will be documented in this file.
 - Fix duplicated jq dependency ([#4678](https://github.com/wazuh/wazuh-qa/pull/4678)) \- (Framework)
 - Fix test_file_checker in check_mtime case ([#4873](https://github.com/wazuh/wazuh-qa/pull/4873)) \- (Tests)
 - Fix test cluster performance. ([#4780](https://github.com/wazuh/wazuh-qa/pull/4780)) \- (Framework)
+- Fixed the graphic generation for the logcollectord statistics files. ([#5021](https://github.com/wazuh/wazuh-qa/pull/5021)) \- (Framework)
 
 ## [4.7.3] - 04/03/2024
 
