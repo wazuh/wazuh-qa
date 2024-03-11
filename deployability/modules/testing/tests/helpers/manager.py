@@ -11,7 +11,6 @@ class WazuhManager:
     def install_manager(self, inventory_path, node_name, wazuh_version):
         wazuh_version = '.'.join(wazuh_version.split('.')[:2])
         os_name = self.host_information.get_os_name_from_inventory(inventory_path)
-        print(os_name)
         if os_name == 'debian':
             commands = [
                     f"wget https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh",
@@ -25,9 +24,11 @@ class WazuhManager:
 
         executor.execute_commands(inventory_path, commands)
 
-    def install_managers(self, inventories_paths=[]):
+    def install_managers(self, inventories_paths=[], node_names=[], wazuh_versions=[]):
         for inventory in inventories_paths:
-            self.install_manager(inventory)
+            for node_name in node_names:
+                for wazuh_version in wazuh_versions:
+                    self.install_manager(inventory, node_name, wazuh_version)
 
     def uninstall_manager(self, inventory_path):
         distribution = self.host_information.get_linux_distribution(inventory_path)
@@ -50,13 +51,13 @@ class WazuhManager:
         ]
 
         commands.extend(system_commands)
+
         executor.execute_commands(inventory_path, commands)
 
 
     def uninstall_managers(self, inventories_paths=[]):
         for inventory in inventories_paths:
             self.uninstall_manager(inventory)
-        
 
 
     def get_manager_status(self, inventory_path):
@@ -69,6 +70,7 @@ class WazuhManager:
         Returns:
             str: Manager status
         """
+
         return executor.execute_command(inventory_path, 'systemctl status wazuh-manager')
 
 
@@ -80,6 +82,7 @@ class WazuhManager:
             inventory_path: host's inventory path
 
         """
+
         executor.execute_command(inventory_path, 'systemctl stop wazuh-manager')
 
 
@@ -91,6 +94,7 @@ class WazuhManager:
             inventory_path: host's inventory path
 
         """
+
         executor.execute_command(inventory_path, 'systemctl restart wazuh-manager')
 
 
@@ -102,6 +106,7 @@ class WazuhManager:
             inventory_path: host's inventory path
 
         """
+
         executor.execute_command(inventory_path, 'systemctl start wazuh-manager')
 
 
@@ -115,6 +120,7 @@ class WazuhManager:
         Returns:
             str: Manager version
         """
+
         return executor.execute_command(inventory_path, '/var/ossec/bin/wazuh-control info -v')
 
 
@@ -128,6 +134,7 @@ class WazuhManager:
         Returns:
             str: Manager revision number
         """
+
         return executor.execute_command(inventory_path, '/var/ossec/bin/wazuh-control info -r')
 
 
@@ -141,6 +148,7 @@ class WazuhManager:
         Returns:
             str: Cluster status
         """
+
         return executor.execute_command(inventory_path, '/var/ossec/bin/cluster_control -l')
 
 
@@ -154,6 +162,7 @@ class WazuhManager:
         Returns:
             str: Agents status
         """
+
         return executor.execute_command(inventory_path, '/var/ossec/bin/agent_control -l')
 
 
@@ -167,6 +176,7 @@ class WazuhManager:
         Returns:
             bool: True/False
         """
+
         return 'true' in executor.execute_command(inventory_path, '[ -f /var/ossec/etc/client.keys ] && echo true || echo false')
 
 
@@ -191,4 +201,5 @@ class WazuhManager:
             f"sed -i 's/<disabled>yes<\/disabled>/<disabled>{disabled}<\/disabled>/' /var/ossec/etc/ossec.conf",
             "systemctl restart wazuh-manager"
         ]
+
         executor.execute_commands(inventory_path, commands)

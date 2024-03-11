@@ -84,9 +84,7 @@ class HostConfiguration:
     def __init__(self):
         self.host_information = HostInformation()
 
-    def caca(self, inventory_path):
-        os_name = self.host_information.get_os_name_from_inventory(inventory_path)
-        return os_name
+
     def sshd_config(self, inventory_path):
         commands = ["sudo sed -i '/^PasswordAuthentication/s/^/#/' /etc/ssh/sshd_config", "sudo sed -i '/^PermitRootLogin no/s/^/#/' /etc/ssh/sshd_config", 'echo -e "PasswordAuthentication yes\nPermitRootLogin yes" | sudo tee -a /etc/ssh/sshd_config', 'sudo systemctl restart sshd', 'cat /etc/ssh/sshd_config']
         executor.execute_commands(inventory_path, commands)
@@ -162,9 +160,9 @@ class HostConfiguration:
         certs_creation = [
             'bash wazuh-install.sh --generate-config-files --ignore-check'
         ]
+
         commands.extend(certs_creation)
-        for i in commands:
-            print(i)
+
         executor.execute_commands(master_path, commands)
 
 
@@ -172,40 +170,30 @@ class HostConfiguration:
 
         os_name = self.host_information.get_os_name_from_inventory(from_inventory_path)
 
-        print(os_name)
-        if os_name == 'ubuntu' or os_name == 'debian':
-            distribution = 'deb'
-        elif os_name == 'amazon':
-            distribution = 'amazon'
-        else:
-            distribution = 'rpm'
-        print(distribution)
-        print("------------------")
         with open(to_inventory_path, 'r') as yaml_file:
             inventory_data = yaml.safe_load(yaml_file)
 
         host = inventory_data.get('ansible_host')
-    
-        if distribution == 'deb':
+
+        if os_name == 'ubuntu' or os_name == 'debian':
             commands = [
                 "apt install sshpass",
                 f"sshpass -p vagrant scp -o StrictHostKeyChecking=no /home/vagrant/wazuh-install-files.tar vagrant@{host}:/home/vagrant"
             ]
-        elif distribution == 'rpm':
-            commands = [
-                "yum install -y sshpass",
-                f"sshpass -p vagrant scp -o StrictHostKeyChecking=no /home/vagrant/wazuh-install-files.tar vagrant@{host}:/home/vagrant"
-            ]
-        elif distribution == 'amazon':
+        elif os_name == 'amazon':
             commands = [
                 "amazon-linux-extras install epel -y",
                 "yum-config-manager --enable epel",
                 "yum install -y sshpass",
                 f"sshpass -p vagrant scp -o StrictHostKeyChecking=no /home/vagrant/wazuh-install-files.tar vagrant@{host}:/home/vagrant"
             ]
-        print(commands)
-        eje = executor.execute_commands(from_inventory_path, commands)
-        print(eje)
+        else:
+            commands = [
+                "yum install -y sshpass",
+                f"sshpass -p vagrant scp -o StrictHostKeyChecking=no /home/vagrant/wazuh-install-files.tar vagrant@{host}:/home/vagrant"
+            ]
+
+        executor.execute_commands(from_inventory_path, commands)
 
 
 class HostMonitor:
@@ -308,11 +296,7 @@ class CheckFiles:
             'added': added_lines,
             'removed': removed_lines
         }
-        
-        result_file_path = '/home/akim/Desktop/resultado_install.txt'
-        with open(result_file_path, 'w') as result_file:
-            result_file.write(str(changes))
-        
+
         return changes
 
     def _checkfiles(self, inventory_path, os_type):
@@ -324,46 +308,26 @@ class CheckFiles:
         if 'linux' in os_type or 'macos' in os_type:
 
             os_name = self.host_information.get_os_name_from_inventory(inventory_path)
-            print(os_name)
             command = "sudo find /var -type f -o -type d 2>/dev/null | grep -v cache "
 
-            centos = ['yum', 'rpm']
-            redhat = ['yum', 'rpm']
-            amazon = ['yum']
-            ubuntu = ['ubuntu', 'lxcfs', 'dpkg', 'PackageKit']
-            debian = ['dpkg', 'lists', 'PackageKit', 'polkit-1', 'ucf', 'unattended', '.db', '.log']
-            oracle = ['dnf', 'selinux']
-            fedora = ['dnf', 'selinux', 'rpm']
-            rocky_linux = ['dnf', 'selinux']
+            os_commands = {
+                'ubuntu': ['ubuntu', 'lxcfs', 'dpkg', 'PackageKit'],
+                'centos': ['yum', 'rpm'],
+                'redhat': ['yum', 'rpm'],
+                'amazon': ['yum'],
+                'debian': ['dpkg', 'lists', 'PackageKit', 'polkit-1', 'ucf', 'unattended', '.db', '.log'],
+                'oracle': ['dnf', 'selinux'],
+                'fedora': ['dnf', 'selinux', 'rpm'],
+                'rocky_linux': ['dnf', 'selinux'],
+            }
 
-            if os_name == 'ubuntu':
-                for i in ubuntu:
-                    command += f" | grep -v {i}"
-            elif os_name == 'centos':
-                for i in centos:
-                    command += f" | grep -v {i}"
-            elif os_name == 'redhat':
-                for i in redhat:
-                    command += f" | grep -v {i}"
-            elif os_name == 'amazon':
-                for i in amazon:
-                    command += f" | grep -v {i}"
-            elif os_name == 'debian':
-                for i in debian:
-                    command += f" | grep -v {i}"
-            elif os_name == 'oracle':
-                for i in oracle:
-                    command += f" | grep -v {i}"
-            elif os_name == 'fedora':
-                for i in fedora:
-                    command += f" | grep -v {i}"
-            elif os_name == 'rocky_linux':
-                for i in rocky_linux:
+            os_command = os_commands.get(os_name)
+
+            if os_command is not None:
+                for i in os_command:
                     command += f" | grep -v {i}"
             else:
                 print(f"Os name '{os_name}' not recognized.")
-
-            print(command)
 
         elif 'windows' in os_type:
             command = 'dir /a-d /b /s | findstr /v /c:"\\.$" /c:"\\..$"| find /c ":"'

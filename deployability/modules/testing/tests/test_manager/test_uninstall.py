@@ -29,7 +29,7 @@ def wazuh_params(request):
 
 @pytest.fixture(autouse=True)
 def setup_test_environment(wazuh_params):
-    wazuh_params['workers'] = [wazuh_params['dependencies']['manager']]
+    wazuh_params['workers'] = [wazuh_params['dependencies']['wazuh-2']]
     wazuh_params['master'] = wazuh_params['inventory']
     wazuh_params['indexers'] = [wazuh_params['inventory']]
     wazuh_params['dashboard'] = wazuh_params['inventory']
@@ -40,12 +40,6 @@ def test_uninstall(wazuh_params):
         wazuh_manager.uninstall_manager(wazuh_params['workers'][0])
 
     result = checkfiles.perform_action_and_scan(wazuh_params['workers'][0], lambda: uninstall_manager_callback(wazuh_params))
-
-    #------------------------------------------------
-    print("added: " + str(len(result['added'])))
-
-    print("removed: " + str(len(result['removed'])))
-    #------------------------------------------------
 
     assert all('wazuh' in path or 'ossec' in path or 'filebeat' in path for path in result['removed'])
     assert not any('wazuh' in path or 'ossec' in path or 'filebeat' in path for path in result['added'])

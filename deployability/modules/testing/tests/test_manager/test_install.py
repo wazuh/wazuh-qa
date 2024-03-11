@@ -25,12 +25,13 @@ def wazuh_params(request):
 
 @pytest.fixture(autouse=True)
 def setup_test_environment(wazuh_params):
-    wazuh_params['workers'] = [wazuh_params['dependencies']['manager']]
+    wazuh_params['workers'] = [wazuh_params['dependencies']['wazuh-2']]
     wazuh_params['master'] = wazuh_params['inventory']
     wazuh_params['indexers'] = [wazuh_params['inventory']]
     wazuh_params['dashboard'] = wazuh_params['inventory']
 
 def test_installation(wazuh_params):
+
     # sshd configuration for scp
     host_configuration.sshd_config(wazuh_params['master'])
     host_configuration.sshd_config(wazuh_params['workers'][0])

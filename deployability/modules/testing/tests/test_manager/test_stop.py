@@ -19,16 +19,14 @@ def wazuh_params(request):
         'wazuh_revision': wazuh_revision,
         'dependencies': json.loads(dependencies.replace("{", "{\"").replace(":", "\":\"").replace(",", "\",\"").replace("}", "\"}").replace(' ', '')),
         'inventory': inventory
-
     }
 
     yield params
-
     wazuh_manager.manager_restart(params['workers'][0])
 
 @pytest.fixture(autouse=True)
 def setup_test_environment(wazuh_params):
-    wazuh_params['workers'] = [wazuh_params['dependencies']['manager']]
+    wazuh_params['workers'] = [wazuh_params['dependencies']['wazuh-2']]
     wazuh_params['master'] = wazuh_params['inventory']
     wazuh_params['indexers'] = [wazuh_params['inventory']]
     wazuh_params['dashboard'] = wazuh_params['inventory']
