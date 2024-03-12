@@ -6,6 +6,7 @@ from modules.generic import Ansible, Inventory
 from modules.generic.utils import Utils
 from .models import InputPayload, ExtraVars
 from .utils import logger
+import os
 
 class Tester:
     _playbooks_dir = Path(__file__).parent / 'playbooks'
@@ -22,18 +23,22 @@ class Tester:
             payload (InputPayload): The payload containing the test parameters.
         """
         payload = InputPayload(**dict(payload))
+
         inventory_path = payload.inventory
         inventory = Inventory(**Utils.load_from_yaml((payload.inventory)))
         logger.info(f"Running tests for {inventory.ansible_host}")
         extra_vars = cls._get_extra_vars(payload).model_dump()
         extra_vars['inventory'] = str(inventory_path)
         logger.debug(f"Using extra vars: {extra_vars}")
+        print(extra_vars['dependencies'])
         dependencies_dict = {}
 
         for dependency in extra_vars['dependencies']:
             dependency = ast.literal_eval(dependency)
             dependencies_dict.update(dependency)
         extra_vars['dependencies'] = dependencies_dict
+        extra_vars['local_host_path'] = str(Path(__file__).parent.parent.parent)
+        extra_vars['current_user'] = os.getlogin()
         ansible = Ansible(ansible_data=inventory.model_dump())
         cls._setup(ansible, extra_vars['working_dir'])
         cls._run_tests(payload.tests, ansible, extra_vars)

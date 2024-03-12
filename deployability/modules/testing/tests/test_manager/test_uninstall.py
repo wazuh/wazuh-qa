@@ -23,9 +23,8 @@ def wazuh_params(request):
 
     }
 
-    yield params
+    return params
 
-    wazuh_manager.uninstall_manager(params['master'])
 
 @pytest.fixture(autouse=True)
 def setup_test_environment(wazuh_params):
@@ -36,10 +35,22 @@ def setup_test_environment(wazuh_params):
 
 
 def test_uninstall(wazuh_params):
-    def uninstall_manager_callback(wazuh_params):
-        wazuh_manager.uninstall_manager(wazuh_params['workers'][0])
+    managers = {
+        'wazuh-1': wazuh_params['master'],
+        'wazuh-2': wazuh_params['workers'][0]
+    }
+    def uninstall_manager_callback(manager_params):
+        wazuh_manager.uninstall_manager(manager_params)
 
-    result = checkfiles.perform_action_and_scan(wazuh_params['workers'][0], lambda: uninstall_manager_callback(wazuh_params))
+    def perform_action_and_scan_for_manager(manager_params):
+        result = checkfiles.perform_action_and_scan(manager_params, lambda: uninstall_manager_callback(manager_params))
 
-    assert all('wazuh' in path or 'ossec' in path or 'filebeat' in path for path in result['removed'])
-    assert not any('wazuh' in path or 'ossec' in path or 'filebeat' in path for path in result['added'])
+        categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
+        actions = ['added', 'modified', 'removed']
+
+        for category in categories:
+            for action in actions:
+                assert result[category][action] == []
+
+    for manager_name, manager_params in managers.items():
+        perform_action_and_scan_for_manager(manager_params)

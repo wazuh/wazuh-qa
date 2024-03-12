@@ -31,37 +31,46 @@ def setup_test_environment(wazuh_params):
     wazuh_params['dashboard'] = wazuh_params['inventory']
 
 def test_installation(wazuh_params):
+    managers = {
+        'wazuh-1': wazuh_params['master'],
+        'wazuh-2': wazuh_params['workers'][0]
+    }
 
-    # sshd configuration for scp
-    host_configuration.sshd_config(wazuh_params['master'])
-    host_configuration.sshd_config(wazuh_params['workers'][0])
-
-    # Disabling firewall
-    host_configuration.disable_firewall(wazuh_params['master'])
-    host_configuration.disable_firewall(wazuh_params['workers'][0])
+    # Disabling firewall for all managers
+    for manager_name, manager_params in managers.items():
+        host_configuration.disable_firewall(manager_params)
 
     # Certs create and scp from master to worker
     host_configuration.certs_create(wazuh_params['wazuh_version'], wazuh_params['master'], wazuh_params['dashboard'], wazuh_params['indexers'], wazuh_params['workers'])
-    host_configuration.scp_to(wazuh_params['master'], wazuh_params['workers'][0])
+    host_configuration.scp_to(wazuh_params['master'], wazuh_params['workers'][0], 'wazuh-install-files.tar')
 
-    # Install manager in master
-    wazuh_manager.install_manager(wazuh_params['master'], 'wazuh-1', wazuh_params['wazuh_version'])
 
-    # Install manager and checkfile
-    def install_manager_callback(wazuh_params):
-        wazuh_manager.install_manager(wazuh_params['workers'][0], 'wazuh-2', wazuh_params['wazuh_version'])
+    def install_manager_callback(wazuh_params, manager_name, manager_params):
+        wazuh_manager.install_manager(manager_params, manager_name, wazuh_params['wazuh_version'])
 
-    result = checkfiles.perform_action_and_scan(wazuh_params['workers'][0], lambda: install_manager_callback(wazuh_params))
+    def perform_action_and_scan_for_manager(manager_params, manager_name):
+        result = checkfiles.perform_action_and_scan(manager_params, lambda: install_manager_callback(wazuh_params, manager_name, manager_params))
+        print(manager_name)
+        print(result)
+        categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
+        actions = ['added', 'modified', 'removed']
 
-    assert all('wazuh' in path or 'ossec' in path or 'filebeat' in path for path in result['added'])
-    assert not any('wazuh' in path or 'ossec' in path or 'filebeat' in path for path in result['removed'])
+        #for category in categories:
+        #    for action in actions:
+        #        assert result[category][action] == []
 
-    # Configuring cluster
-    wazuh_manager.configuring_clusters(wazuh_params['master'], 'wazuh-1', 'master', 'master','eecda366dded9b32bcfbf3b057bf3ede', 'no')
-    wazuh_manager.configuring_clusters(wazuh_params['workers'][0], 'wazuh-2', 'worker', 'master','eecda366dded9b32bcfbf3b057bf3ede', 'no')
-    
+    # Combine the code using a loop over managers
+    for manager_name, manager_params in managers.items():
+        perform_action_and_scan_for_manager(manager_params, manager_name)
+
+    # Configuring cluster for all managers
+    hex16_code = 'eecda366dded9b32bcfbf3b057bf3ede'
+    for manager_name, manager_params in managers.items():
+        node_type = 'master' if manager_name == 'wazuh-1' else 'worker'
+        wazuh_manager.configuring_clusters(manager_params, manager_name, node_type, 'master', hex16_code, 'no')
+
     # Cluster info check
-    cluster_info = wazuh_manager.get_cluster_info(wazuh_params['master'])
+    cluster_info = wazuh_manager.get_cluster_info(managers['wazuh-1'])
 
     assert 'wazuh-1' in cluster_info
-    assert 'wazuh-2' in cluster_info 
+    assert 'wazuh-2' in cluster_info

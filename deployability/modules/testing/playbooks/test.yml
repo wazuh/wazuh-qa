@@ -1,11 +1,9 @@
 - hosts: localhost
   become: true
-  become_user: akim
+  become_user: "{{ current_user }}"
   tasks:
-    #- name: Update known_hosts
-    #  command: "ssh-keygen -f /home/akim/.ssh/known_hosts -R {{ host_ip }}"
 
     - name: Test {{ test }} for {{ component }}
       command: "python3 -m pytest modules/testing/tests/test_{{component}}/test_{{ test }}.py  -v --wazuh_version={{ wazuh_version }} --component={{ component }} --dependencies='{{ dependencies }}' --inventory='{{ inventory }}' -s"
       args:
-        chdir: "/home/akim/Desktop/wazuh-qa/deployability"
+        chdir: "{{ local_host_path }}"

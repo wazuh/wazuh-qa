@@ -8,7 +8,7 @@ class WazuhManager:
     def __init__(self):
         self.host_information = HostInformation()
 
-    def install_manager(self, inventory_path, node_name, wazuh_version):
+    def install_manager(self, inventory_path, node_name, wazuh_version) -> None:
         wazuh_version = '.'.join(wazuh_version.split('.')[:2])
         os_name = self.host_information.get_os_name_from_inventory(inventory_path)
         if os_name == 'debian':
@@ -24,13 +24,13 @@ class WazuhManager:
 
         executor.execute_commands(inventory_path, commands)
 
-    def install_managers(self, inventories_paths=[], node_names=[], wazuh_versions=[]):
+    def install_managers(self, inventories_paths=[], node_names=[], wazuh_versions=[]) -> None:
         for inventory in inventories_paths:
             for node_name in node_names:
                 for wazuh_version in wazuh_versions:
                     self.install_manager(inventory, node_name, wazuh_version)
 
-    def uninstall_manager(self, inventory_path):
+    def uninstall_manager(self, inventory_path) -> None:
         distribution = self.host_information.get_linux_distribution(inventory_path)
         commands = []
 
@@ -55,12 +55,12 @@ class WazuhManager:
         executor.execute_commands(inventory_path, commands)
 
 
-    def uninstall_managers(self, inventories_paths=[]):
+    def uninstall_managers(self, inventories_paths=[]) -> None:
         for inventory in inventories_paths:
             self.uninstall_manager(inventory)
 
 
-    def get_manager_status(self, inventory_path):
+    def get_manager_status(self, inventory_path) -> str:
         """
         Stops the manager
 
@@ -74,7 +74,7 @@ class WazuhManager:
         return executor.execute_command(inventory_path, 'systemctl status wazuh-manager')
 
 
-    def manager_stop(self, inventory_path):
+    def manager_stop(self, inventory_path) -> None:
         """
         Stops the manager
 
@@ -86,7 +86,7 @@ class WazuhManager:
         executor.execute_command(inventory_path, 'systemctl stop wazuh-manager')
 
 
-    def manager_restart(self, inventory_path):
+    def manager_restart(self, inventory_path) -> None:
         """
         Restarts the manager
 
@@ -98,7 +98,7 @@ class WazuhManager:
         executor.execute_command(inventory_path, 'systemctl restart wazuh-manager')
 
 
-    def manager_start(self, inventory_path):
+    def manager_start(self, inventory_path) -> None:
         """
         Starts the manager
 
@@ -110,7 +110,7 @@ class WazuhManager:
         executor.execute_command(inventory_path, 'systemctl start wazuh-manager')
 
 
-    def get_manager_version(self, inventory_path):
+    def get_manager_version(self, inventory_path) -> None:
         """
         It returns the Manager versiom
 
@@ -124,7 +124,7 @@ class WazuhManager:
         return executor.execute_command(inventory_path, '/var/ossec/bin/wazuh-control info -v')
 
 
-    def get_manager_revision(self, inventory_path):
+    def get_manager_revision(self, inventory_path) -> None:
         """
         It returns the Manager revision number
 
@@ -138,7 +138,7 @@ class WazuhManager:
         return executor.execute_command(inventory_path, '/var/ossec/bin/wazuh-control info -r')
 
 
-    def get_cluster_info(self, inventory_path):
+    def get_cluster_info(self, inventory_path) -> None:
         """
         It returns the cluster information
 
@@ -152,7 +152,7 @@ class WazuhManager:
         return executor.execute_command(inventory_path, '/var/ossec/bin/cluster_control -l')
 
 
-    def get_agent_control_info(self, inventory_path):
+    def get_agent_control_info(self, inventory_path) -> None:
         """
         It returns the Agent information from the manager
 
@@ -166,7 +166,7 @@ class WazuhManager:
         return executor.execute_command(inventory_path, '/var/ossec/bin/agent_control -l')
 
 
-    def hasManagerClientKeys(self, inventory_path):
+    def hasManagerClientKeys(self, inventory_path) -> bool:
         """
         It returns the True of False depending if in the Manager Client.keys exists
 
@@ -180,7 +180,7 @@ class WazuhManager:
         return 'true' in executor.execute_command(inventory_path, '[ -f /var/ossec/etc/client.keys ] && echo true || echo false')
 
 
-    def configuring_clusters(self, inventory_path, node_name, node_type, node_to_connect, key, disabled):
+    def configuring_clusters(self, inventory_path, node_name, node_type, node_to_connect, key, disabled) -> None:
         """
         It configures the cluster in ossec.conf
 
