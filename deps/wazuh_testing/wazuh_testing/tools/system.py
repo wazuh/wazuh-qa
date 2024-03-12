@@ -586,9 +586,10 @@ class HostManager:
                                                                           f"name={package_uninstall_name} state=absent",
                                                                           check=False)
             elif os_name == 'macos':
-                remove_operation_result = self.get_host(host).ansible("command",
-                                                                      f"brew uninstall {package_uninstall_name}",
-                                                                      check=False)
+                cmd = f"npm uninstall {package_uninstall_name}"
+                remove_operation_result = self.get_host(host).ansible("shell", cmd, check=False)
+                if not remove_operation_result.get('failed'):
+                    remove_operation_result = True
 
         logging.info(f"Package removed result {remove_operation_result}")
 
