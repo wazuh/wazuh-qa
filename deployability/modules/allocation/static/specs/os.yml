@@ -207,7 +207,7 @@ aws:
   linux-centos-7-amd64:
     ami: ami-0aedf6b1cb669b4c7
     zone: us-east-1
-    user: ec2-user
+    user: centos
   linux-centos-8-amd64:
     ami: ami-0ee534f954d1b2c98
     zone: us-east-1

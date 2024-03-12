@@ -31,7 +31,7 @@ class Instance(ABC):
             ValueError: If the path does not exist or is not a directory.
             ValueError: If the credentials are not a subclass of Credentials.
         """
-        path = Path(instance_parameters.path)
+        path = Path(instance_parameters.instance_dir)
         if not path.exists() or not path.is_dir():
             logger.error(f"Invalid instance path: {path}")
             exit(1)

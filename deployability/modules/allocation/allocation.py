@@ -58,12 +58,12 @@ class Allocator:
         cls.__generate_track_file(instance, payload.provider, payload.track_output)
 
     @classmethod
-    def __delete(cls, payload: models.DeletionPayload) -> None:
+    def __delete(cls, payload: models.InstancePayload) -> None:
         """
         Deletes an instance based on the data from the track file.
 
         Args:
-            payload (DeletionPayload): The payload containing the parameters
+            payload (InstancePayload): The payload containing the parameters
                                         for instance deletion.
         """
         payload = models.TrackPayload(**dict(payload))
@@ -71,16 +71,7 @@ class Allocator:
         with open(payload.track_output, 'r') as f:
             track = models.TrackOutput(**yaml.safe_load(f))
         provider = PROVIDERS[track.provider]()
-        deletion_payload = {}
-        deletion_payload['instance_dir'] = track.instance_dir
-        deletion_payload['identifier'] = track.identifier
-        deletion_payload['key_path'] = track.key_path
-        deletion_payload['platform'] = track.platform
-        deletion_payload['host_identifier'] = track.host_identifier
-        deletion_payload['host_instance_dir'] = track.host_instance_dir
-        deletion_payload['ssh_port'] = str(track.ssh_port)
-        deletion_payload['arch'] = track.arch
-        provider.destroy_instance(models.DeletionPayload(**deletion_payload))
+        provider.destroy_instance(models.InstancePayload(**dict(track)))
         logger.info(f"Instance {track.identifier} deleted.")
 
     @staticmethod

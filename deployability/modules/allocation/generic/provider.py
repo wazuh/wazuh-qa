@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from .instance import Instance
-from .models import CreationPayload, ProviderConfig, DeletionPayload
+from .models import CreationPayload, ProviderConfig, InstancePayload
 from .utils import logger
 
 
@@ -86,12 +86,12 @@ class Provider(ABC):
         return cls._load_instance(instance_dir, instance_id)
 
     @classmethod
-    def destroy_instance(cls, destroy_parameters: DeletionPayload) -> None:
+    def destroy_instance(cls, destroy_parameters: InstancePayload) -> None:
         """
         Destroys an existing instance and removes its directory.
 
         Args:
-            destroy_parameters (DeletionPayload): The parameters for destroying the instance.
+            destroy_parameters (InstancePayload): The parameters for destroying the instance.
         """
         destroy_parameters.instance_dir = Path(destroy_parameters.instance_dir)
         cls._destroy_instance(destroy_parameters)
@@ -131,12 +131,12 @@ class Provider(ABC):
 
     @classmethod
     @abstractmethod
-    def _destroy_instance(cls, destroy_parameters: DeletionPayload) -> None:
+    def _destroy_instance(cls, destroy_parameters: InstancePayload) -> None:
         """
         Abstract method that destroys an existing instance.
 
         Args:
-            destroy_parameters (DeletionPayload): The parameters for destroying the instance.
+            destroy_parameters (InstancePayload): The parameters for destroying the instance.
         """
         pass
 

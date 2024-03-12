@@ -68,7 +68,6 @@ class CreationPayload(InputPayload):
     label_issue: str | None = None
     label_team: str | None = None
     label_termination_date: str | None = None
-    instance_name: str | None = None
 
     @model_validator(mode='before')
     def validate_dependency(cls, values) -> dict:
@@ -108,23 +107,21 @@ class CreationPayload(InputPayload):
 class TrackPayload(BaseModel):
     track_output: Path
 
-class DeletionPayload(BaseModel):
-    instance_dir: Path
-    identifier: str
-    key_path: Path
-    platform: str
-    host_identifier: str | None = None
-    host_instance_dir: Path | None = None
-    ssh_port: str | None = None
-    arch: str
-
 class InstancePayload(BaseModel):
-    path: str | Path
     identifier: str
-    platform: str
+    instance_dir: str | Path
+    key_path: Path | None = None
     host_identifier: str  | None = None
     host_instance_dir: str | Path | None = None
     macos_host_parameters: dict | None = None
-    arch: str | None = None
     ssh_port: str | None = None
+    platform: str
+    arch: str | None = None
     user: str | None = None
+
+    @field_validator('ssh_port', mode='before')
+    def validate_port(cls, value) -> str | None:
+        if not value:
+            return
+
+        return str(value)

@@ -8,7 +8,7 @@ from pathlib import Path
 from telnetlib import Telnet
 
 from modules.allocation.generic import Provider
-from modules.allocation.generic.models import CreationPayload, DeletionPayload, InstancePayload
+from modules.allocation.generic.models import CreationPayload, InstancePayload, InstancePayload
 from modules.allocation.generic.utils import logger
 from .credentials import VagrantCredentials
 from .instance import VagrantInstance
@@ -84,7 +84,7 @@ class VagrantProvider(Provider):
             VagrantUtils.remote_copy(vagrant_file, host_instance_dir, macos_host_parameters)
 
         instance_params = {}
-        instance_params['path'] = instance_dir
+        instance_params['instance_dir'] = instance_dir
         instance_params['identifier'] = instance_id
         instance_params['platform'] = platform
         instance_params['host_identifier'] = host_identifier
@@ -109,18 +109,18 @@ class VagrantProvider(Provider):
         return VagrantInstance(instance_params)
 
     @classmethod
-    def _destroy_instance(cls, destroy_parameters: DeletionPayload) -> None:
+    def _destroy_instance(cls, destroy_parameters: InstancePayload) -> None:
         """
         Destroys a Vagrant instance.
 
         Args:
-            destroy_parameters (DeletionPayload): The parameters for instance deletion.
+            destroy_parameters (InstancePayload): The parameters for instance deletion.
         Returns:
             None
         """
         if destroy_parameters.host_identifier == "None" or destroy_parameters.host_identifier is None:
             instance_params = {}
-            instance_params['path'] = destroy_parameters.instance_dir
+            instance_params['instance_dir'] = destroy_parameters.instance_dir
             instance_params['identifier'] = destroy_parameters.identifier
             instance_params['platform'] = destroy_parameters.platform
             instance = VagrantInstance(InstancePayload(**instance_params))
@@ -129,7 +129,7 @@ class VagrantProvider(Provider):
         else:
             macos_host_parameters = cls.__macos_host(str(destroy_parameters.arch), 'delete')
             instance_params = {}
-            instance_params['path'] = destroy_parameters.instance_dir
+            instance_params['instance_dir'] = destroy_parameters.instance_dir
             instance_params['identifier'] = destroy_parameters.identifier
             instance_params['platform'] = destroy_parameters.platform
             instance_params['host_identifier'] = destroy_parameters.host_identifier

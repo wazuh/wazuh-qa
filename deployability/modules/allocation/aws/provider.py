@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 from modules.allocation.generic import Provider
-from modules.allocation.generic.models import CreationPayload, DeletionPayload, InstancePayload
+from modules.allocation.generic.models import CreationPayload, InstancePayload, InstancePayload
 from modules.allocation.generic.utils import logger
 from .credentials import AWSCredentials
 from .instance import AWSInstance
@@ -116,7 +116,7 @@ class AWSProvider(Provider):
             credentials.key_path = (os.path.splitext(ssh_key)[0])
 
         instance_params = {}
-        instance_params['path'] = instance_dir
+        instance_params['instance_dir'] = instance_dir
         instance_params['identifier'] = instance_id
         instance_params['platform'] = platform
         instance_params['host_identifier'] = host_identifier
@@ -137,23 +137,23 @@ class AWSProvider(Provider):
             AWSInstance: Loaded AWSInstance object.
         """
         instance_params = {}
-        instance_params['path'] = instance_dir
+        instance_params['instance_dir'] = instance_dir
         instance_params['identifier'] = instance_id
         return AWSInstance(InstancePayload(**instance_params))
 
     @classmethod
-    def _destroy_instance(cls, destroy_parameters: DeletionPayload) -> None:
+    def _destroy_instance(cls, destroy_parameters: InstancePayload) -> None:
         """
         Destroy an AWS EC2 instance.
 
         Args:
-            destroy_parameters (DeletionPayload): The parameters for destroying the instance.
+            destroy_parameters (InstancePayload): The parameters for destroying the instance.
         """
         credentials = AWSCredentials()
         key_id = os.path.basename(destroy_parameters.key_path)
         credentials.load(key_id)
         instance_params = {}
-        instance_params['path'] = destroy_parameters.instance_dir
+        instance_params['instance_dir'] = destroy_parameters.instance_dir
         instance_params['identifier'] = destroy_parameters.identifier
         instance_params['platform'] = destroy_parameters.platform
         instance_params['host_identifier'] = destroy_parameters.host_identifier

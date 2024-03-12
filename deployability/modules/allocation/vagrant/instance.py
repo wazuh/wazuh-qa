@@ -33,17 +33,14 @@ class VagrantInstance(Instance):
             credentials (VagrantCredentials, optional): The credentials of the instance. Defaults to None.
         """
         super().__init__(instance_parameters, credentials)
-        self.path: Path = Path(instance_parameters.path)
+        self.path: Path = Path(instance_parameters.instance_dir)
         self.identifier: str = instance_parameters.identifier
         self.credentials: VagrantCredentials = credentials
         self.host_identifier: str = instance_parameters.host_identifier
         self.host_instance_dir: str | Path = instance_parameters.host_instance_dir
         self.ssh_port: str = instance_parameters.ssh_port
         self.macos_host_parameters: dict = instance_parameters.macos_host_parameters
-        self.arch: str = instance_parameters.arch
         self.platform: str = instance_parameters.platform
-        self.user: str = instance_parameters.user
-        self.vagrantfile_path: Path = self.path / 'Vagrantfile'
 
     def start(self) -> None:
         """
