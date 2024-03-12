@@ -243,7 +243,6 @@ class HostManager:
 
         return result['stdout']
 
-
     def apply_config(self, config_yml_path: str, dest_path: str = WAZUH_CONF, clear_files: list = None,
                      restart_services: list = None):
         """Apply the configuration described in the config_yml_path to the environment.
@@ -671,7 +670,7 @@ class HostManager:
             if os == 'linux':
                 result = binary_path = f"/var/ossec/bin/wazuh-control"
             elif os == 'macos':
-                result= binary_path = f"/Library/Ossec/bin/wazuh-control"
+                result = binary_path = f"/Library/Ossec/bin/wazuh-control"
 
             result = self.get_host(host).ansible('shell', f"{binary_path} {operation}", check=False)
 
