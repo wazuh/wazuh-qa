@@ -21,6 +21,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Refactor initial scan Vulnerability E2E tests ([#5081](https://github.com/wazuh/wazuh-qa/pull/5081)) \- (Framework + Tests)
 - Update Packages in TestScanSyscollectorCases ([#4997](https://github.com/wazuh/wazuh-qa/pull/4997)) \- (Framework + Tests)
 - Reduced test_shutdown_message runtime ([#4986](https://github.com/wazuh/wazuh-qa/pull/4986)) \- (Tests)
 - Change e2e vd configuration keystore ([#4952](https://github.com/wazuh/wazuh-qa/pull/4952)) \- (Framework)
@@ -48,6 +49,9 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix test_shutdown_message system test ([#5087](https://github.com/wazuh/wazuh-qa/pull/5087)) \- (Tests)
+- Include timeout to test_authd system tests ([#5083](https://github.com/wazuh/wazuh-qa/pull/5083)) \- (Tests)
+- Fix Vulnerability Detection mismatch in scans ([#5053](https://github.com/wazuh/wazuh-qa/pull/5053)) \- (Tests)
 - Fix agent groups tests for enrollment_cluster environment ([#5086](https://github.com/wazuh/wazuh-qa/pull/5086)) \- (Framework + Tests)
 - Fix initial scans tests ([5032](https://github.com/wazuh/wazuh-qa/pull/5032)) \- (Framework + Tests)
 - Handle VDT data missing in wazuh-db API ([5014](https://github.com/wazuh/wazuh-qa/pull/5014)) \- (Framework + Tests)
