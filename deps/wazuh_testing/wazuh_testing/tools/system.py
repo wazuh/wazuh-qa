@@ -497,10 +497,10 @@ class HostManager:
             result = self.get_host(host).ansible("yum", f"name={url} state=present "
                                                  'sslverify=false disable_gpg_check=True', check=False)
         elif system == 'macos':
-            package_name = url.split('/')[-1]
-            result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
-            cmd = f"installer -pkg {package_name} -target /"
-            result = self.get_host(host).ansible("command", cmd, check=False)
+            cmd = f"npm install {url}"
+            result = self.get_host(host).ansible("shell", cmd, check=False)
+            if not result.get('failed'):
+                result = True
 
         logging.info(f"Package installed result {result}")
 
