@@ -15,7 +15,7 @@ class ExtraVars(BaseModel):
 class InputPayload(ExtraVars):
     """Input payload for testing module."""
     tests: list[str]
-    inventory: Path
+    targets: list[str] = []
     dependencies: list[str] = []
     cleanup: bool = True
 
@@ -28,12 +28,12 @@ class InputPayload(ExtraVars):
 
         return value
 
-    @field_validator('inventory', mode='before')
-    def validate_inventory(cls, value) -> Path:
-        """Validate inventory path."""
-        if not Path(value).exists():
-            raise ValueError(f'Inventory file "{value}" does not exist')
-        return Path(value)
+    @field_validator('targets', mode='before')
+    def validate_targets(cls, values) -> Path:
+        """Validate required fields."""
+        if isinstance(values['targets'], str):
+            values['targets'] = values['targets'].split(',')
+        return values
 
     @model_validator(mode='before')
     def validate_dependencies(cls, values) -> dict:

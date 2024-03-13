@@ -7,55 +7,56 @@ from pathlib import Path
 import os
 
 from .executor import Executor
-executor = Executor
 
 class HostInformation:
-    def __init__(self):
-        pass
-    
-    def dir_exists(self, inventory_path, dir_path) -> str:
+
+    @staticmethod
+    def dir_exists(inventory_path, dir_path) -> str:
         """
         It returns the True of False depending if the directory exists
 
         Returns:
             str: type of host (windows, linux, macos)
         """
-        return 'true' in executor.execute_command(inventory_path, f'test -d {dir_path} && echo "true" || echo "false"')
+        return 'true' in Executor.execute_command(inventory_path, f'test -d {dir_path} && echo "true" || echo "false"')
 
 
-    def file_exists(self, inventory_path, file_path) -> bool:
+    @staticmethod
+    def file_exists(inventory_path, file_path) -> bool:
         """
         It returns the True of False depending if the file exists
 
         Returns:
             bool: True or False
         """
-        return 'true' in executor.execute_command(inventory_path, f'test -f {file_path} && echo "true" || echo "false"')
+        return 'true' in Executor.execute_command(inventory_path, f'test -f {file_path} && echo "true" || echo "false"')
 
 
-    def get_os_type(self, inventory_path) -> str:
+    @staticmethod
+    def get_os_type(inventory_path) -> str:
         """
         It returns the os_type of host
 
         Returns:
             str: type of host (windows, linux, macos)
         """
-        system = executor.execute_command(inventory_path, 'uname')
+        system = Executor.execute_command(inventory_path, 'uname')
         return system.lower()
 
 
-    def get_architecture(self, inventory_path) -> str:
+    @staticmethod
+    def get_architecture(inventory_path) -> str:
         """
         It returns the arch of host
-
 
         Returns:
             str: arch (aarch64, x86_64, intel, apple)
         """
-        return executor.execute_command(inventory_path, 'uname -m')
+        return Executor.execute_command(inventory_path, 'uname -m')
 
 
-    def get_linux_distribution(self, inventory_path) -> str:
+    @staticmethod
+    def get_linux_distribution(inventory_path) -> str:
         """
         It returns the linux distribution of host
 
@@ -72,7 +73,8 @@ class HostInformation:
         return linux_distribution
 
 
-    def get_os_name_from_inventory(self, inventory_path) -> str:
+    @staticmethod
+    def get_os_name_from_inventory(inventory_path) -> str:
         """
         It returns the linux os_name host inventory
 
@@ -83,22 +85,23 @@ class HostInformation:
 
         return os_name
 
+
 class HostConfiguration:
-    def __init__(self):
-        self.host_information = HostInformation()
 
-
-    def sshd_config(self, inventory_path) -> None:
+    @staticmethod
+    def sshd_config(inventory_path) -> None:
         commands = ["sudo sed -i '/^PasswordAuthentication/s/^/#/' /etc/ssh/sshd_config", "sudo sed -i '/^PermitRootLogin no/s/^/#/' /etc/ssh/sshd_config", 'echo -e "PasswordAuthentication yes\nPermitRootLogin yes" | sudo tee -a /etc/ssh/sshd_config', 'sudo systemctl restart sshd', 'cat /etc/ssh/sshd_config']
-        executor.execute_commands(inventory_path, commands)
+        Executor.execute_commands(inventory_path, commands)
 
 
-    def disable_firewall(self, inventory_path) -> None:
+    @staticmethod
+    def disable_firewall(inventory_path) -> None:
         commands = ["sudo systemctl stop firewalld", "sudo systemctl disable firewalld"]
-        executor.execute_commands(inventory_path, commands)
+        Executor.execute_commands(inventory_path, commands)
 
 
-    def certs_create(self, wazuh_version, master_path, dashboard_path, indexer_paths=[], worker_paths=[]) -> None:
+    @staticmethod
+    def certs_create(wazuh_version, master_path, dashboard_path, indexer_paths=[], worker_paths=[]) -> None:
         wazuh_version = '.'.join(wazuh_version.split('.')[:2])
         with open(master_path, 'r') as yaml_file:
             inventory_data = yaml.safe_load(yaml_file)
@@ -121,7 +124,7 @@ class HostConfiguration:
             workers.append(inventory_data.get('ansible_host'))
 
         ##Basic commands to setup the config file, add the ip for the master & dashboard
-        os_name = self.host_information.get_os_name_from_inventory(master_path)
+        os_name = HostInformation.get_os_name_from_inventory(master_path)
         if os_name == 'debian':
             commands = [
                 f'wget https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh',
@@ -165,10 +168,11 @@ class HostConfiguration:
 
         commands.extend(certs_creation)
 
-        executor.execute_commands(master_path, commands)
+        Executor.execute_commands(master_path, commands)
 
 
-    def scp_to(self, from_inventory_path, to_inventory_path, file_name) -> None:
+    @staticmethod
+    def scp_to(from_inventory_path, to_inventory_path, file_name) -> None:
 
         with open(from_inventory_path, 'r') as yaml_file:
             from_inventory_data = yaml.safe_load(yaml_file)
@@ -186,7 +190,7 @@ class HostConfiguration:
 
         # Allowing handling permissions
         if file_name == 'wazuh-install-files.tar':
-            executor.execute_command(from_inventory_path, f'chmod +rw {file_name}')
+            Executor.execute_command(from_inventory_path, f'chmod +rw {file_name}')
 
         # SCP
         subprocess.run(f'scp -i {from_key} -o StrictHostKeyChecking=no {from_user}@{from_host}:/home/vagrant/{file_name} {Path(__file__).parent}'  , shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -194,8 +198,8 @@ class HostConfiguration:
 
         # Restoring permissions
         if file_name == 'wazuh-install-files.tar':
-            executor.execute_command(from_inventory_path, f'chmod 600 {file_name}')
-            executor.execute_command(to_inventory_path, f'chmod 600 {file_name}')
+            Executor.execute_command(from_inventory_path, f'chmod 600 {file_name}')
+            Executor.execute_command(to_inventory_path, f'chmod 600 {file_name}')
 
         # Deleting file from localhost
         file_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), file_name)
@@ -208,11 +212,9 @@ class HostConfiguration:
 
 
 class HostMonitor:
-    def __init__(self):
-        pass
 
-
-    def get_file_encoding(self, file_path: str) -> str:
+    @staticmethod
+    def get_file_encoding(file_path: str) -> str:
         """Detect and return the file encoding.
 
         Args:
@@ -229,7 +231,8 @@ class HostMonitor:
         return result['encoding']
 
 
-    def file_monitor(self, monitored_file: str, target_string: str, timeout: int = 30) -> None:
+    @staticmethod
+    def file_monitor(monitored_file: str, target_string: str, timeout: int = 30) -> None:
         """
         Monitor a file for a specific string.
 
@@ -242,7 +245,7 @@ class HostMonitor:
             None: Returns None if the string is not found within the timeout.
             str: Returns the line containing the target string if found within the timeout.
         """
-        encoding = self.get_file_encoding(monitored_file)
+        encoding = HostMonitor.get_file_encoding(monitored_file)
 
         # Check in the current file content for the string.
         with open(monitored_file, encoding=encoding) as _file:
@@ -272,23 +275,19 @@ class HostMonitor:
 
 
 class CheckFiles:
-    def __init__(self):
-        self.initial_scan = []
-        self.second_scan = []
-        self.host_information = HostInformation()
 
-    def _checkfiles(self, inventory_path, os_type, directory, hash_algorithm='sha256') -> dict:
+    @staticmethod
+    def _checkfiles(inventory_path, os_type, directory, hash_algorithm='sha256') -> dict:
         """
         It captures a structure of a directory
         Returns:
             Dict: dict of directories:hash
         """
-
         if 'linux' in os_type or 'macos' in os_type:
 
             command = f'sudo find {directory} -type f -exec sha256sum {{}} +'
 
-            result = executor.execute_command(inventory_path, command)
+            result = Executor.execute_command(inventory_path, command)
 
         elif 'windows' in os_type:
             command = 'dir /a-d /b /s | findstr /v /c:"\\.$" /c:"\\..$"| find /c ":"'
@@ -302,28 +301,32 @@ class CheckFiles:
 
         return snapshot
 
-    def _perform_scan(self, inventory_path, os_type, directories):
-        return {directory: self._checkfiles(inventory_path, os_type, directory) for directory in directories}
 
-    def _calculate_changes(self, initial_scan, second_scan):
+    @staticmethod
+    def _perform_scan(inventory_path, os_type, directories):
+        return {directory: CheckFiles._checkfiles(inventory_path, os_type, directory) for directory in directories}
+
+
+    @staticmethod
+    def _calculate_changes(initial_scan, second_scan):
         added_files = list(set(second_scan) - set(initial_scan))
         removed_files = list(set(initial_scan) - set(second_scan))
         modified_files = [path for path in set(initial_scan) & set(second_scan) if initial_scan[path] != second_scan[path]]
         return {'added': added_files, 'removed': removed_files, 'modified': modified_files}
 
-    def perform_action_and_scan(self, inventory_path, callback) -> dict:
-        host_info = HostInformation()
-        os_type = host_info.get_os_type(inventory_path)
+
+    @staticmethod
+    def perform_action_and_scan(inventory_path, callback) -> dict:
+        os_type = HostInformation.get_os_type(inventory_path)
 
         directories = ['/boot', '/usr/bin', '/root', '/usr/sbin']
 
-        initial_scans = self._perform_scan(inventory_path, os_type, directories)
+        initial_scans = CheckFiles._perform_scan(inventory_path, os_type, directories)
 
         callback()
 
-        second_scans = self._perform_scan(inventory_path, os_type, directories)
+        second_scans = CheckFiles._perform_scan(inventory_path, os_type, directories)
 
-        changes = {directory: self._calculate_changes(initial_scans[directory], second_scans[directory]) for directory in directories}
+        changes = {directory: CheckFiles._calculate_changes(initial_scans[directory], second_scans[directory]) for directory in directories}
 
         return changes
-

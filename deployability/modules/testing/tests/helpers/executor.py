@@ -3,10 +3,9 @@ import subprocess
 
 
 class Executor:
-    def __init__(self):
-        pass
 
-    def execute_command(inventory_path, command):
+    @staticmethod
+    def execute_command(inventory_path, command) -> str:
 
         with open(inventory_path, 'r') as yaml_file:
             inventory_data = yaml.safe_load(yaml_file)
@@ -30,7 +29,8 @@ class Executor:
 
         return result.stdout
 
-    def execute_commands(inventory_path, commands=[]):
+    @staticmethod
+    def execute_commands(inventory_path, commands=[]) -> dict:
 
         with open(inventory_path, 'r') as yaml_file:
             inventory_data = yaml.safe_load(yaml_file)
@@ -53,6 +53,5 @@ class Executor:
             ]
 
             results[command] = subprocess.run(ssh_command, stdout=subprocess.PIPE, text=True).stdout
-            print(results[command])
 
         return results

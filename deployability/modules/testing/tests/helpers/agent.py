@@ -1,19 +1,17 @@
 from .executor import Executor
 from .generic import HostInformation
-
-executor = Executor()
+from .constants import WAZUH_CONTROL, CLUSTER_CONTROL, AGENT_CONTROL, CLIENT_KEYS, WAZUH_CONF, WAZUH_ROOT
 
 class WazuhAgent:
-    def __init__(self):
-        pass
 
-    def install_agent(self, inventory_path):
-        hostinformation = HostInformation()
-        os_type = hostinformation.get_os_type(inventory_path)
+    @staticmethod
+    def install_agent(inventory_path) -> None:
+
+        os_type = HostInformation.get_os_type(inventory_path)
         commands = []
         if 'linux' in os_type:
-            distribution = hostinformation.get_linux_distribution(inventory_path)
-            architecture = hostinformation.get_architecture(inventory_path)
+            distribution = HostInformation.get_linux_distribution(inventory_path)
+            architecture = HostInformation.get_architecture(inventory_path)
 
             if distribution == 'rpm' or distribution == 'opensuse-leap' or distribution == 'amzn' and 'x86_64' in architecture:
                 commands.extend([
@@ -60,24 +58,25 @@ class WazuhAgent:
             ]
 
             commands.extend(system_commands)
-        executor.execute_commands(inventory_path, commands)
+        Executor.execute_commands(inventory_path, commands)
 
 
-    def install_agents(self, inventories_paths=[]):
+    @staticmethod
+    def install_agents(inventories_paths=[]) -> None:
         for inventory_path in inventories_paths:
-            self.install_agent(inventory_path)
+            WazuhAgent.install_agent(inventory_path)
 
 
-    def uninstall_agent(self, inventory_path):
-        hostinformation = HostInformation()
-        os_type = hostinformation.get_os_type(inventory_path)
+    @staticmethod
+    def uninstall_agent(inventory_path) -> None:
+        os_type = HostInformation.get_os_type(inventory_path)
         commands = []
         if 'linux' in os_type:
-            distribution = hostinformation.get_linux_distribution(inventory_path)
+            distribution = HostInformation.get_linux_distribution(inventory_path)
             if distribution == 'rpm' or distribution == 'opensuse-leap' or distribution == 'amzn':
                 commands.extend([
                     "yum remove wazuh-agent -y",
-                    "rm -rf /var/ossec/"
+                    f"rm -rf {WAZUH_ROOT}"
                 ])
 
             elif distribution == 'deb':
@@ -106,15 +105,17 @@ class WazuhAgent:
                 "/usr/bin/dscl . -delete '/Groups/wazuh'",
                 "/usr/sbin/pkgutil --forget com.wazuh.pkg.wazuh-agent"
             ])
-        executor.execute_commands(inventory_path, commands)
+        Executor.execute_commands(inventory_path, commands)
 
 
-    def uninstall_agents(self, inventories_paths=[]):
+    @staticmethod
+    def uninstall_agents( inventories_paths=[]) -> None:
         for inventory_path in inventories_paths:
-            self.uninstall_agent(inventory_path)
+            WazuhAgent.uninstall_agent(inventory_path)
 
 
-    def get_agent_status(self, inventory_path):
+    @staticmethod
+    def get_agent_status(inventory_path) -> str:
         """
         Returns the Agent's status
 
@@ -124,40 +125,44 @@ class WazuhAgent:
         Returns:
             str: status
         """
-        return executor.execute_command(inventory_path, 'systemctl status wazuh-agent')
+        return Executor.execute_command(inventory_path, 'systemctl status wazuh-agent')
 
 
-    def agent_stop(self, inventory_path):
+    @staticmethod
+    def agent_stop(inventory_path) -> None:
         """
         Stops the agent
 
         Args:
             inventory_path: host's inventory path
         """
-        executor.execute_command(inventory_path, 'systemctl stop wazuh-agent')
+        Executor.execute_command(inventory_path, 'systemctl stop wazuh-agent')
 
 
-    def agent_start(self, inventory_path):
+    @staticmethod
+    def agent_start(inventory_path) -> None:
         """
         Starts the agent
 
         Args:
             inventory_path: host's inventory path
         """
-        executor.execute_command(inventory_path, 'systemctl start wazuh-agent')
+        Executor.execute_command(inventory_path, 'systemctl start wazuh-agent')
 
 
-    def agent_restart(self, inventory_path):
+    @staticmethod
+    def agent_restart(inventory_path) -> None:
         """
         Restarts the agent
 
         Args:
             inventory_path: host's inventory path
         """
-        executor.execute_command(inventory_path, 'systemctl restart wazuh-agent')
+        Executor.execute_command(inventory_path, 'systemctl restart wazuh-agent')
 
 
-    def get_agent_version(self, inventory_path):
+    @staticmethod
+    def get_agent_version(inventory_path) -> str:
         """
         It returns the Agent version
 
@@ -167,10 +172,11 @@ class WazuhAgent:
         Returns:
             str: version
         """
-        return executor.execute_command(inventory_path, '/var/ossec/bin/wazuh-control info -v')
+        return Executor.execute_command(inventory_path, f'{WAZUH_CONTROL} info -v')
 
 
-    def get_agent_revision(self, inventory_path):
+    @staticmethod
+    def get_agent_revision(inventory_path) -> str:
         """
         It returns the Agent revision number
 
@@ -180,10 +186,11 @@ class WazuhAgent:
         Returns:
             str: revision number
         """
-        return executor.execute_command(inventory_path, '/var/ossec/bin/wazuh-control info -r')
+        return Executor.execute_command(inventory_path, f'{WAZUH_CONTROL} info -r')
 
 
-    def hasAgentClientKeys(self, inventory_path):
+    @staticmethod
+    def hasAgentClientKeys(inventory_path) -> bool:
         """
         It returns the True of False depending if in the Agent Client.keys exists
 
@@ -193,10 +200,11 @@ class WazuhAgent:
         Returns:
             bool: True/False
         """
-        return 'true' in executor.execute_command(inventory_path, '[ -f /var/ossec/etc/client.keys ] && echo true || echo false')
+        return 'true' in Executor.execute_command(inventory_path, f'[ -f {CLIENT_KEYS} ] && echo true || echo false')
 
 
-    def isAgentActive(self, inventory_path):
+    @staticmethod
+    def isAgentActive(inventory_path) -> bool:
         """
         It returns the True of False depending if the Agent is Active
 
@@ -206,13 +214,4 @@ class WazuhAgent:
         Returns:
             bool: True/False
         """
-        return executor.execute_command(inventory_path, 'systemctl is-active wazuh-agent') == 'active'
-
-
-#---------------------------------------------------
-
-
-#inv = ["/tmp/dtt1-poc/manager-linux-ubuntu-18.04-amd64/inventory.yaml", "/tmp/dtt1-poc/manager-linux-redhat-7-amd64/inventory.yaml"]
-#print(WazuhAgent().uninstall_agent(inv[0]))
-
-
+        return Executor.execute_command(inventory_path, 'systemctl is-active wazuh-agent') == 'active'

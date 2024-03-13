@@ -1,16 +1,13 @@
 from .generic import HostInformation, HostConfiguration
 from .executor import Executor
-import re
-
-executor = Executor
+from .constants import WAZUH_CONTROL, CLUSTER_CONTROL, AGENT_CONTROL, CLIENT_KEYS, WAZUH_CONF
 
 class WazuhManager:
-    def __init__(self):
-        self.host_information = HostInformation()
 
-    def install_manager(self, inventory_path, node_name, wazuh_version) -> None:
+    @staticmethod
+    def install_manager(inventory_path, node_name, wazuh_version) -> None:
         wazuh_version = '.'.join(wazuh_version.split('.')[:2])
-        os_name = self.host_information.get_os_name_from_inventory(inventory_path)
+        os_name = HostInformation.get_os_name_from_inventory(inventory_path)
         if os_name == 'debian':
             commands = [
                     f"wget https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh",
@@ -22,16 +19,20 @@ class WazuhManager:
                     f"bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
             ] 
 
-        executor.execute_commands(inventory_path, commands)
+        Executor.execute_commands(inventory_path, commands)
 
-    def install_managers(self, inventories_paths=[], node_names=[], wazuh_versions=[]) -> None:
+
+    @staticmethod
+    def install_managers(inventories_paths=[], node_names=[], wazuh_versions=[]) -> None:
         for inventory in inventories_paths:
             for node_name in node_names:
                 for wazuh_version in wazuh_versions:
-                    self.install_manager(inventory, node_name, wazuh_version)
+                    WazuhManager.install_manager(inventory, node_name, wazuh_version)
 
-    def uninstall_manager(self, inventory_path) -> None:
-        distribution = self.host_information.get_linux_distribution(inventory_path)
+
+    @staticmethod
+    def uninstall_manager(inventory_path) -> None:
+        distribution = HostInformation.get_linux_distribution(inventory_path)
         commands = []
 
         if distribution == 'rpm':
@@ -52,15 +53,17 @@ class WazuhManager:
 
         commands.extend(system_commands)
 
-        executor.execute_commands(inventory_path, commands)
+        Executor.execute_commands(inventory_path, commands)
 
 
-    def uninstall_managers(self, inventories_paths=[]) -> None:
+    @staticmethod
+    def uninstall_managers(inventories_paths=[]) -> None:
         for inventory in inventories_paths:
-            self.uninstall_manager(inventory)
+            WazuhManager.uninstall_manager(inventory)
 
 
-    def get_manager_status(self, inventory_path) -> str:
+    @staticmethod
+    def get_manager_status(inventory_path) -> str:
         """
         Stops the manager
 
@@ -71,10 +74,11 @@ class WazuhManager:
             str: Manager status
         """
 
-        return executor.execute_command(inventory_path, 'systemctl status wazuh-manager')
+        return Executor.execute_command(inventory_path, 'systemctl status wazuh-manager')
 
 
-    def manager_stop(self, inventory_path) -> None:
+    @staticmethod
+    def manager_stop(inventory_path) -> None:
         """
         Stops the manager
 
@@ -83,10 +87,11 @@ class WazuhManager:
 
         """
 
-        executor.execute_command(inventory_path, 'systemctl stop wazuh-manager')
+        Executor.execute_command(inventory_path, 'systemctl stop wazuh-manager')
 
 
-    def manager_restart(self, inventory_path) -> None:
+    @staticmethod
+    def manager_restart(inventory_path) -> None:
         """
         Restarts the manager
 
@@ -95,10 +100,11 @@ class WazuhManager:
 
         """
 
-        executor.execute_command(inventory_path, 'systemctl restart wazuh-manager')
+        Executor.execute_command(inventory_path, 'systemctl restart wazuh-manager')
 
 
-    def manager_start(self, inventory_path) -> None:
+    @staticmethod
+    def manager_start(inventory_path) -> None:
         """
         Starts the manager
 
@@ -107,10 +113,11 @@ class WazuhManager:
 
         """
 
-        executor.execute_command(inventory_path, 'systemctl start wazuh-manager')
+        Executor.execute_command(inventory_path, 'systemctl start wazuh-manager')
 
 
-    def get_manager_version(self, inventory_path) -> None:
+    @staticmethod
+    def get_manager_version(inventory_path) -> None:
         """
         It returns the Manager versiom
 
@@ -121,10 +128,11 @@ class WazuhManager:
             str: Manager version
         """
 
-        return executor.execute_command(inventory_path, '/var/ossec/bin/wazuh-control info -v')
+        return Executor.execute_command(inventory_path, f'{WAZUH_CONTROL} info -v')
 
 
-    def get_manager_revision(self, inventory_path) -> None:
+    @staticmethod
+    def get_manager_revision(inventory_path) -> None:
         """
         It returns the Manager revision number
 
@@ -135,10 +143,11 @@ class WazuhManager:
             str: Manager revision number
         """
 
-        return executor.execute_command(inventory_path, '/var/ossec/bin/wazuh-control info -r')
+        return Executor.execute_command(inventory_path, f'{WAZUH_CONTROL} info -r')
 
 
-    def get_cluster_info(self, inventory_path) -> None:
+    @staticmethod
+    def get_cluster_info(inventory_path) -> None:
         """
         It returns the cluster information
 
@@ -149,10 +158,11 @@ class WazuhManager:
             str: Cluster status
         """
 
-        return executor.execute_command(inventory_path, '/var/ossec/bin/cluster_control -l')
+        return Executor.execute_command(inventory_path, f'{CLUSTER_CONTROL} -l')
 
 
-    def get_agent_control_info(self, inventory_path) -> None:
+    @staticmethod
+    def get_agent_control_info(inventory_path) -> None:
         """
         It returns the Agent information from the manager
 
@@ -163,10 +173,11 @@ class WazuhManager:
             str: Agents status
         """
 
-        return executor.execute_command(inventory_path, '/var/ossec/bin/agent_control -l')
+        return Executor.execute_command(inventory_path, f'{AGENT_CONTROL} -l')
 
 
-    def hasManagerClientKeys(self, inventory_path) -> bool:
+    @staticmethod
+    def hasManagerClientKeys(inventory_path) -> bool:
         """
         It returns the True of False depending if in the Manager Client.keys exists
 
@@ -177,10 +188,11 @@ class WazuhManager:
             bool: True/False
         """
 
-        return 'true' in executor.execute_command(inventory_path, '[ -f /var/ossec/etc/client.keys ] && echo true || echo false')
+        return 'true' in Executor.execute_command(inventory_path, f'[ -f {CLIENT_KEYS} ] && echo true || echo false')
 
 
-    def configuring_clusters(self, inventory_path, node_name, node_type, node_to_connect, key, disabled) -> None:
+    @staticmethod
+    def configuring_clusters(inventory_path, node_name, node_type, node_to_connect, key, disabled) -> None:
         """
         It configures the cluster in ossec.conf
 
@@ -194,12 +206,12 @@ class WazuhManager:
 
         """
         commands = [
-            f"sed -i 's/<node_name>node01<\/node_name>/<node_name>{node_name}<\/node_name>/' /var/ossec/etc/ossec.conf",
-            f"sed -i 's/<node_type>master<\/node_type>/<node_type>{node_type}<\/node_type>/'  /var/ossec/etc/ossec.conf",
-            f"sed -i 's/<key><\/key>/<key>{key}<\/key>/' /var/ossec/etc/ossec.conf",
-            f"sed -i 's/<node>NODE_IP<\/node>/<node>{node_to_connect}<\/node>/' /var/ossec/etc/ossec.conf",
-            f"sed -i 's/<disabled>yes<\/disabled>/<disabled>{disabled}<\/disabled>/' /var/ossec/etc/ossec.conf",
+            f"sed -i 's/<node_name>node01<\/node_name>/<node_name>{node_name}<\/node_name>/' {WAZUH_CONF}",
+            f"sed -i 's/<node_type>master<\/node_type>/<node_type>{node_type}<\/node_type>/'  {WAZUH_CONF}",
+            f"sed -i 's/<key><\/key>/<key>{key}<\/key>/' {WAZUH_CONF}",
+            f"sed -i 's/<node>NODE_IP<\/node>/<node>{node_to_connect}<\/node>/' {WAZUH_CONF}",
+            f"sed -i 's/<disabled>yes<\/disabled>/<disabled>{disabled}<\/disabled>/' {WAZUH_CONF}",
             "systemctl restart wazuh-manager"
         ]
 
-        executor.execute_commands(inventory_path, commands)
+        Executor.execute_commands(inventory_path, commands)

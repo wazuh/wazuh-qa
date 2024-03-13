@@ -1,41 +1,19 @@
 import pytest
-import json
-
 
 from ..helpers.manager import WazuhManager
-from ..helpers.generic import HostConfiguration, CheckFiles, HostInformation
-
-wazuh_manager = WazuhManager()
-host_configuration = HostConfiguration()
-checkfiles = CheckFiles()
-host_information = HostInformation()
-
-@pytest.fixture
-def wazuh_params(request):
-    wazuh_version = request.config.getoption('--wazuh_version')
-    wazuh_revision = request.config.getoption('--wazuh_revision')
-    dependencies = request.config.getoption('--dependencies')
-    inventory = request.config.getoption('--inventory')
-
-    params = {
-        'wazuh_version': wazuh_version,
-        'wazuh_revision': wazuh_revision,
-        'dependencies': json.loads(dependencies.replace("{", "{\"").replace(":", "\":\"").replace(",", "\",\"").replace("}", "\"}").replace(' ', '')),
-        'inventory': inventory
-    }
-
-    return params
+from ..helpers.generic import CheckFiles, HostInformation
+from ..helpers.constants import WAZUH_ROOT
 
 def uninstall_manager_callback(manager_params):
-    wazuh_manager.uninstall_manager(manager_params)
+    WazuhManager.uninstall_manager(manager_params)
 
 def perform_action_and_scan_for_manager(manager_params):
-    result = checkfiles.perform_action_and_scan(manager_params, lambda: uninstall_manager_callback(manager_params))
+    result = CheckFiles.perform_action_and_scan(manager_params, lambda: uninstall_manager_callback(manager_params))
     categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
     actions = ['added', 'modified', 'removed']
 
     # Selecting filter
-    os_name = host_information.get_os_name_from_inventory(manager_params)
+    os_name = HostInformation.get_os_name_from_inventory(manager_params)
     if 'debian' in os_name:
         filter_data= {'/boot': {'added': [], 'removed': [], 'modified': ['grubenv']}, '/usr/bin': {'added': ['unattended-upgrade', 'gapplication', 'add-apt-repository', 'gpg-wks-server', 'pkexec', 'gpgsplit', 'watchgnupg', 'pinentry-curses', 'gpg-zip', 'gsettings', 'gpg-agent', 'gresource', 'gdbus', 'gpg-connect-agent', 'gpgconf', 'gpgparsemail', 'lspgpot', 'pkaction', 'pkttyagent', 'pkmon', 'dirmngr', 'kbxutil', 'migrate-pubring-from-classic-gpg', 'gpgcompose', 'pkcheck', 'gpgsm', 'gio', 'pkcon', 'gpgtar', 'dirmngr-client', 'gpg', 'filebeat', 'gawk', 'curl', 'update-mime-database', 'dh_installxmlcatalogs', 'appstreamcli','lspgpot'], 'removed': [], 'modified': []}, '/root': {'added': ['trustdb.gpg'], 'removed': [], 'modified': []}, '/usr/sbin': {'added': ['update-catalog', 'applygnupgdefaults', 'addgnupghome', 'install-sgmlcatalog', 'update-xmlcatalog'], 'removed': [], 'modified': []}}
     else:
@@ -53,19 +31,44 @@ def perform_action_and_scan_for_manager(manager_params):
         for action in actions:
             assert result[category][action] == []
 
-@pytest.fixture(autouse=True)
-def setup_test_environment(wazuh_params):
-    wazuh_params['workers'] = [wazuh_params['dependencies']['wazuh-2']]
-    wazuh_params['master'] = wazuh_params['inventory']
-    wazuh_params['indexers'] = [wazuh_params['inventory']]
-    wazuh_params['dashboard'] = wazuh_params['inventory']
+@pytest.fixture
+def wazuh_params(request):
+    wazuh_version = request.config.getoption('--wazuh_version')
+    wazuh_revision = request.config.getoption('--wazuh_revision')
+    dependencies = request.config.getoption('--dependencies')
+    targets = request.config.getoption('--targets')
 
-
-def test_uninstall(wazuh_params):
-    managers = {
-        'wazuh-1': wazuh_params['master'],
-        'wazuh-2': wazuh_params['workers'][0]
+    return {
+        'wazuh_version': wazuh_version,
+        'wazuh_revision': wazuh_revision,
+        'dependencies': dependencies,
+        'targets': targets
     }
 
-    for manager_name, manager_params in managers.items():
+@pytest.fixture(autouse=True)
+def setup_test_environment(wazuh_params):
+    targets = wazuh_params['targets']
+    # Clean the string and split it into key-value pairs
+    targets = targets.replace(' ', '')
+    targets = targets.replace('  ', '')
+    pairs = [pair.strip() for pair in targets.strip('{}').split(',')]
+    targets_dict = dict(pair.split(':') for pair in pairs)
+
+    wazuh_params['master'] = targets_dict.get('wazuh-1')
+    wazuh_params['workers'] = [value for key, value in targets_dict.items() if key.startswith('wazuh-') and key != 'wazuh-1']
+    wazuh_params['indexers'] = [value for key, value in targets_dict.items() if key.startswith('node-')]
+    wazuh_params['dashboard'] = targets_dict.get('dashboard', wazuh_params['master'])
+
+    # If there are no indexers, we choose wazuh-1 by default
+    if not wazuh_params['indexers']:
+        wazuh_params['indexers'].append(wazuh_params['master'])
+
+    wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
+
+def test_uninstall(wazuh_params):
+    for manager_name, manager_params in wazuh_params['managers'].items():
         perform_action_and_scan_for_manager(manager_params)
+
+def test_manager_uninstalled_directory(wazuh_params):
+    for manager in wazuh_params['managers'].values():
+        assert not HostInformation.dir_exists(manager, WAZUH_ROOT)

@@ -11,6 +11,7 @@ CLIENT_KEYS = Path(CONFIGURATIONS_DIR, "client.keys")
 BINARIES_DIR = Path(WAZUH_ROOT, "bin")
 WAZUH_CONTROL = Path(BINARIES_DIR, "wazuh-control")
 AGENT_CONTROL = Path(BINARIES_DIR, "agent_control")
+CLUSTER_CONTROL = Path(BINARIES_DIR, "cluster_control")
 # Logs paths
 LOGS_DIR = Path(WAZUH_ROOT, "logs")
 WAZUH_LOG = Path(LOGS_DIR, "ossec.log")

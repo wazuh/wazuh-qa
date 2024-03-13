@@ -9,7 +9,7 @@ def pytest_addoption(parser):
     parser.addoption('--system', required=False, help='OS version where wazuh was installed.')
     parser.addoption('--component', required=False, help='Component to be tested.')
     parser.addoption('--dependencies', required=False, help='Dependency to be tested.')
-    parser.addoption('--inventory', required=False, help='Dependency to be tested.')
+    parser.addoption('--targets', required=False, help='Targets to be tested.')
 
 
 @pytest.fixture(scope='session')
@@ -40,3 +40,8 @@ def component(request):
 def dependencies(request) -> dict | None:
 
     return request.config.getoption('dependencies')
+
+@pytest.fixture(scope='session')
+def targets(request) -> dict | None:
+
+    return request.config.getoption('targets')
