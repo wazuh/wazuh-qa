@@ -24,11 +24,13 @@ tasks:
           - modules/testing/main.py
           - targets:
             - wazuh-1: "{working-dir}/manager-linux-ubuntu-22.04-amd64/inventory.yaml"
-            - wazuh-2: "{working-dir}/manager-linux-centos-7-amd64-amd64/inventory.yaml"
-          - tests: "install"
+            - wazuh-2: "{working-dir}/manager-linux-centos-7-amd64/inventory.yaml"
+          - dependencies:
+            - wazuh-1: "{working-dir}/manager-linux-ubuntu-22.04-amd64/inventory.yaml"
+          - tests: "install,stop,restart,uninstall"
           - component: "manager"
-          - wazuh-version: "4.7.1"
-          - wazuh-revision: "40709"
+          - wazuh-version: "4.7.3"
+          - wazuh-revision: "1"
 
 
 

@@ -85,6 +85,15 @@ class HostInformation:
 
         return os_name
 
+    @staticmethod
+    def get_current_dir(inventory_path) -> str:
+        """
+        It returns the current directory
+
+        Returns:
+            str: current directory
+        """
+        return Executor.execute_command(inventory_path, 'pwd')
 
 class HostConfiguration:
 
@@ -102,6 +111,8 @@ class HostConfiguration:
 
     @staticmethod
     def certs_create(wazuh_version, master_path, dashboard_path, indexer_paths=[], worker_paths=[]) -> None:
+        current_directory = HostInformation.get_current_dir(master_path).replace("\n","")
+
         wazuh_version = '.'.join(wazuh_version.split('.')[:2])
         with open(master_path, 'r') as yaml_file:
             inventory_data = yaml.safe_load(yaml_file)
@@ -129,37 +140,37 @@ class HostConfiguration:
             commands = [
                 f'wget https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh',
                 f'wget https://packages.wazuh.com/{wazuh_version}/config.yml',
-                "sed -i '/^\s*#/d' /home/vagrant/config.yml",
-                """sed -i '/ip: "<wazuh-manager-ip>"/a\      node_type: master' /home/vagrant/config.yml""",
-                f"sed -i '0,/<wazuh-manager-ip>/s//{master}/' /home/vagrant/config.yml",
-                f"sed -i '0,/<dashboard-node-ip>/s//{dashboard}/' /home/vagrant/config.yml"
+                f"sed -i '/^\s*#/d' {current_directory}/config.yml",
+                f"""sed -i '/ip: "<wazuh-manager-ip>"/a\      node_type: master' {current_directory}/config.yml""",
+                f"sed -i '0,/<wazuh-manager-ip>/s//{master}/' {current_directory}/config.yml",
+                f"sed -i '0,/<dashboard-node-ip>/s//{dashboard}/' {current_directory}/config.yml"
             ]
         else:
             commands = [
                 f'curl -sO https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh',
                 f'curl -sO https://packages.wazuh.com/{wazuh_version}/config.yml',
-                "sed -i '/^\s*#/d' /home/vagrant/config.yml",
-                """sed -i '/ip: "<wazuh-manager-ip>"/a\      node_type: master' /home/vagrant/config.yml""",
-                f"sed -i '0,/<wazuh-manager-ip>/s//{master}/' /home/vagrant/config.yml",
-                f"sed -i '0,/<dashboard-node-ip>/s//{dashboard}/' /home/vagrant/config.yml"
+                f"sed -i '/^\s*#/d' {current_directory}/config.yml",
+                f"""sed -i '/ip: "<wazuh-manager-ip>"/a\      node_type: master' {current_directory}/config.yml""",
+                f"sed -i '0,/<wazuh-manager-ip>/s//{master}/' {current_directory}/config.yml",
+                f"sed -i '0,/<dashboard-node-ip>/s//{dashboard}/' {current_directory}/config.yml"
             ]
 
         # Adding workers
         for index, element in reversed(list(enumerate(workers))):
-            commands.append(f'sed -i \'/node_type: master/a\\    - name: wazuh-{index+2}\\n      ip: "<wazuh-manager-ip>"\\n      node_type: worker\' /home/vagrant/config.yml')
+            commands.append(f'sed -i \'/node_type: master/a\\    - name: wazuh-{index+2}\\n      ip: "<wazuh-manager-ip>"\\n      node_type: worker\' {current_directory}/config.yml')
 
         # Add as much indexers as indexer_paths were presented
         for index, element in enumerate(indexers, start=1):
-            commands.append(f'sed -i \'/ip: "<indexer-node-ip>"/a\\    - name: node-{index+1}\\n      ip: "<indexer-node-ip>"\' /home/vagrant/config.yml')
-            commands.append(f"""sed -i '0,/<indexer-node-ip>/s//{element}/' /home/vagrant/config.yml""")
+            commands.append(f'sed -i \'/ip: "<indexer-node-ip>"/a\\    - name: node-{index+1}\\n      ip: "<indexer-node-ip>"\' {current_directory}/config.yml')
+            commands.append(f"""sed -i '0,/<indexer-node-ip>/s//{element}/' {current_directory}/config.yml""")
 
         # Remove the last indexer due to previous existance of index-1 in the config
         for index, element in enumerate(indexers):
             if index == len(indexers) - 1:
-                commands.append(f'''sed -i '/- name: node-{index+2}/,/^ *ip: "<indexer-node-ip>"/d' /home/vagrant/config.yml''')
+                commands.append(f'''sed -i '/- name: node-{index+2}/,/^ *ip: "<indexer-node-ip>"/d' {current_directory}/config.yml''')
 
         for index, element in enumerate(workers):
-                commands.append(f"""sed -i '0,/<wazuh-manager-ip>/s//{element}/' /home/vagrant/config.yml""")
+                commands.append(f"""sed -i '0,/<wazuh-manager-ip>/s//{element}/' {current_directory}/config.yml""")
 
         ## Adding workers and indexer Ips
         certs_creation = [
@@ -167,13 +178,13 @@ class HostConfiguration:
         ]
 
         commands.extend(certs_creation)
-
         Executor.execute_commands(master_path, commands)
 
 
     @staticmethod
     def scp_to(from_inventory_path, to_inventory_path, file_name) -> None:
-
+        current_from_directory = HostInformation.get_current_dir(from_inventory_path).replace("\n","")
+        current_to_directory = HostInformation.get_current_dir(to_inventory_path).replace("\n","")
         with open(from_inventory_path, 'r') as yaml_file:
             from_inventory_data = yaml.safe_load(yaml_file)
 
@@ -193,8 +204,8 @@ class HostConfiguration:
             Executor.execute_command(from_inventory_path, f'chmod +rw {file_name}')
 
         # SCP
-        subprocess.run(f'scp -i {from_key} -o StrictHostKeyChecking=no {from_user}@{from_host}:/home/vagrant/{file_name} {Path(__file__).parent}'  , shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        subprocess.run(f'scp -i {to_key} -o StrictHostKeyChecking=no {Path(__file__).parent}/{file_name} {to_user}@{to_host}:/home/vagrant', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        subprocess.run(f'scp -i {from_key} -o StrictHostKeyChecking=no {from_user}@{from_host}:{current_from_directory}/{file_name} {Path(__file__).parent}'  , shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        subprocess.run(f'scp -i {to_key} -o StrictHostKeyChecking=no {Path(__file__).parent}/{file_name} {to_user}@{to_host}:{current_to_directory}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         # Restoring permissions
         if file_name == 'wazuh-install-files.tar':

@@ -6,7 +6,7 @@ from typing import Literal
 class ExtraVars(BaseModel):
     """Extra vars for testing module."""
     component: Literal['manager', 'agent']
-    dependencies: list[str] | None = None
+    dependencies: str | None = None
     wazuh_version: str
     wazuh_revision: str
     wazuh_branch: str | None = None
@@ -15,8 +15,8 @@ class ExtraVars(BaseModel):
 class InputPayload(ExtraVars):
     """Input payload for testing module."""
     tests: list[str]
-    targets: list[str] = []
-    dependencies: list[str] = []
+    targets: str
+    dependencies: str
     cleanup: bool = True
 
 
@@ -29,19 +29,11 @@ class InputPayload(ExtraVars):
         return value
 
     @field_validator('targets', mode='before')
-    def validate_targets(cls, values) -> Path:
+    def validate_targets(cls, values) -> str:
         """Validate required fields."""
-        if isinstance(values['targets'], str):
-            values['targets'] = values['targets'].split(',')
         return values
 
     @model_validator(mode='before')
-    def validate_dependencies(cls, values) -> dict:
+    def validate_dependencies(cls, values) -> str:
         """Validate required fields."""
-        if isinstance(values['dependencies'], str):
-            values['dependencies'] = values['dependencies'].split(',')
-        if values.get('component') == 'agent' and not values.get('dependencies'):
-
-            raise ValueError('dependencies are required when component is agent')
-
         return values

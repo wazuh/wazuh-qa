@@ -1,6 +1,6 @@
 from .generic import HostInformation, HostConfiguration
 from .executor import Executor
-from .constants import WAZUH_CONTROL, CLUSTER_CONTROL, AGENT_CONTROL, CLIENT_KEYS, WAZUH_CONF
+from .constants import WAZUH_CONTROL, CLUSTER_CONTROL, AGENT_CONTROL, CLIENT_KEYS, WAZUH_CONF, WAZUH_ROOT
 
 class WazuhManager:
 
@@ -38,7 +38,7 @@ class WazuhManager:
         if distribution == 'rpm':
             commands.extend([
                 "yum remove wazuh-manager -y",
-                "rm -rf /var/ossec/"
+                f"rm -rf {WAZUH_ROOT}"
             ])
 
         elif distribution == 'deb':
