@@ -1,7 +1,7 @@
 import pytest
 
 from ..helpers.manager import WazuhManager
-from ..helpers.generic import HostConfiguration, CheckFiles, HostInformation
+from ..helpers.generic import HostConfiguration, CheckFiles, HostInformation, GeneralComponentActions
 from ..helpers.constants import WAZUH_ROOT
 
 
@@ -98,12 +98,12 @@ def test_installation(wazuh_params):
 
 def test_manager_status(wazuh_params):
     for manager in wazuh_params['managers'].values():
-        manager_status = WazuhManager.get_manager_status(manager)
+        manager_status = GeneralComponentActions.get_component_status(manager, 'wazuh-manager')
         assert 'active' in manager_status
 
 def test_manager_version(wazuh_params):
     for manager in wazuh_params['managers'].values():
-        manager_status = WazuhManager.get_manager_version(manager)
+        manager_status = GeneralComponentActions.get_component_version(manager)
         assert wazuh_params['wazuh_version'] in manager_status
 
 def test_manager_installed_directory(wazuh_params):

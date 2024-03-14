@@ -63,90 +63,6 @@ class WazuhManager:
 
 
     @staticmethod
-    def get_manager_status(inventory_path) -> str:
-        """
-        Stops the manager
-
-        Args:
-            inventory_path: host's inventory path
-
-        Returns:
-            str: Manager status
-        """
-
-        return Executor.execute_command(inventory_path, 'systemctl status wazuh-manager')
-
-
-    @staticmethod
-    def manager_stop(inventory_path) -> None:
-        """
-        Stops the manager
-
-        Args:
-            inventory_path: host's inventory path
-
-        """
-
-        Executor.execute_command(inventory_path, 'systemctl stop wazuh-manager')
-
-
-    @staticmethod
-    def manager_restart(inventory_path) -> None:
-        """
-        Restarts the manager
-
-        Args:
-            inventory_path: host's inventory path
-
-        """
-
-        Executor.execute_command(inventory_path, 'systemctl restart wazuh-manager')
-
-
-    @staticmethod
-    def manager_start(inventory_path) -> None:
-        """
-        Starts the manager
-
-        Args:
-            inventory_path: host's inventory path
-
-        """
-
-        Executor.execute_command(inventory_path, 'systemctl start wazuh-manager')
-
-
-    @staticmethod
-    def get_manager_version(inventory_path) -> None:
-        """
-        It returns the Manager versiom
-
-        Args:
-            inventory_path: host's inventory path
-
-        Returns:
-            str: Manager version
-        """
-
-        return Executor.execute_command(inventory_path, f'{WAZUH_CONTROL} info -v')
-
-
-    @staticmethod
-    def get_manager_revision(inventory_path) -> None:
-        """
-        It returns the Manager revision number
-
-        Args:
-            inventory_path: host's inventory path
-
-        Returns:
-            str: Manager revision number
-        """
-
-        return Executor.execute_command(inventory_path, f'{WAZUH_CONTROL} info -r')
-
-
-    @staticmethod
     def get_cluster_info(inventory_path) -> None:
         """
         It returns the cluster information
@@ -174,21 +90,6 @@ class WazuhManager:
         """
 
         return Executor.execute_command(inventory_path, f'{AGENT_CONTROL} -l')
-
-
-    @staticmethod
-    def hasManagerClientKeys(inventory_path) -> bool:
-        """
-        It returns the True of False depending if in the Manager Client.keys exists
-
-        Args:
-            inventory_path: host's inventory path
-
-        Returns:
-            bool: True/False
-        """
-
-        return 'true' in Executor.execute_command(inventory_path, f'[ -f {CLIENT_KEYS} ] && echo true || echo false')
 
 
     @staticmethod

@@ -2,7 +2,7 @@ import json
 import pytest
 
 from ..helpers.manager import WazuhManager
-from ..helpers.generic import HostConfiguration
+from ..helpers.generic import HostConfiguration, GeneralComponentActions
 
 
 @pytest.fixture
@@ -43,12 +43,12 @@ def setup_test_environment(wazuh_params):
 
 def test_restart(wazuh_params):
     for worker in wazuh_params['workers']:
-        WazuhManager.manager_restart(worker)
+        GeneralComponentActions.component_restart(worker, 'wazuh-manager')
 
-    assert 'active ' in WazuhManager.get_manager_status(wazuh_params['master'])
+    assert 'active ' in GeneralComponentActions.get_component_status(wazuh_params['master'], 'wazuh-manager')
 
     for workers in wazuh_params['workers']:
-        assert 'active ' in WazuhManager.get_manager_status(workers)
+        assert 'active ' in GeneralComponentActions.get_component_status(workers, 'wazuh-manager')
 
 
 

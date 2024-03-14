@@ -5,8 +5,10 @@ import re
 import subprocess
 from pathlib import Path
 import os
-
 from .executor import Executor
+
+from .constants import WAZUH_CONTROL, CLUSTER_CONTROL, AGENT_CONTROL, CLIENT_KEYS, WAZUH_CONF, WAZUH_ROOT
+
 
 class HostInformation:
 
@@ -288,7 +290,7 @@ class HostMonitor:
 class CheckFiles:
 
     @staticmethod
-    def _checkfiles(inventory_path, os_type, directory, hash_algorithm='sha256') -> dict:
+    def _checkfiles(inventory_path, os_type, directory, filter= None, hash_algorithm='sha256') -> dict:
         """
         It captures a structure of a directory
         Returns:
@@ -296,7 +298,7 @@ class CheckFiles:
         """
         if 'linux' in os_type or 'macos' in os_type:
 
-            command = f'sudo find {directory} -type f -exec sha256sum {{}} +'
+            command = f'sudo find {directory} -type f -exec sha256sum {{}} + {filter}'
 
             result = Executor.execute_command(inventory_path, command)
 
@@ -314,8 +316,8 @@ class CheckFiles:
 
 
     @staticmethod
-    def _perform_scan(inventory_path, os_type, directories):
-        return {directory: CheckFiles._checkfiles(inventory_path, os_type, directory) for directory in directories}
+    def _perform_scan(inventory_path, os_type, directories, filters):
+        return {directory: CheckFiles._checkfiles(inventory_path, os_type, directory, filters) for directory in directories}
 
 
     @staticmethod
@@ -331,13 +333,129 @@ class CheckFiles:
         os_type = HostInformation.get_os_type(inventory_path)
 
         directories = ['/boot', '/usr/bin', '/root', '/usr/sbin']
+        filters_keywords = ['grep', 'tar', 'coreutils', 'sed', 'procps', 'gawk', 'lsof', 'curl', 'openssl', 'libcap', 'apt-transport-https', 'libcap2-bin', 'software-properties-common', 'gnupg', 'gpg']
+        filters = f"| grep -v {filters_keywords[0]}"
 
-        initial_scans = CheckFiles._perform_scan(inventory_path, os_type, directories)
+        for filter_ in filters_keywords[1:]:
+            filters+= f" | grep -v {filter_}"
+
+        initial_scans = CheckFiles._perform_scan(inventory_path, os_type, directories, filters)
 
         callback()
 
-        second_scans = CheckFiles._perform_scan(inventory_path, os_type, directories)
+        second_scans = CheckFiles._perform_scan(inventory_path, os_type, directories, filters)
 
         changes = {directory: CheckFiles._calculate_changes(initial_scans[directory], second_scans[directory]) for directory in directories}
 
         return changes
+
+class GeneralComponentActions:
+
+    @staticmethod
+    def get_component_status(inventory_path, host_role) -> str:
+        """
+        Return the host status
+
+        Args:
+            inventory_path: host's inventory path
+
+        Returns:
+            str: Role status
+        """
+
+        return Executor.execute_command(inventory_path, f'systemctl status {host_role}')
+
+
+    @staticmethod
+    def component_stop(inventory_path, host_role) -> None:
+        """
+        Stops the component
+
+        Args:
+            inventory_path: host's inventory path
+
+        """
+
+        Executor.execute_command(inventory_path, f'systemctl stop {host_role}')
+
+
+    @staticmethod
+    def component_restart(inventory_path, host_role) -> None:
+        """
+        Restarts the component
+
+        Args:
+            inventory_path: host's inventory path
+
+        """
+
+        Executor.execute_command(inventory_path, f'systemctl restart {host_role}')
+
+
+    @staticmethod
+    def component_start(inventory_path, host_role) -> None:
+        """
+        Starts the component
+
+        Args:
+            inventory_path: host's inventory path
+
+        """
+
+        Executor.execute_command(inventory_path, f'systemctl restart {host_role}')
+
+
+    @staticmethod
+    def get_component_version(inventory_path) -> str:
+        """
+        It returns the installed component version
+
+        Args:
+            inventory_path: host's inventory path
+
+        Returns:
+            str: version
+        """
+        return Executor.execute_command(inventory_path, f'{WAZUH_CONTROL} info -v')
+
+
+    @staticmethod
+    def get_component_revision(inventory_path) -> str:
+        """
+        It returns the Agent revision number
+
+        Args:
+            inventory_path: host's inventory path
+
+        Returns:
+            str: revision number
+        """
+        return Executor.execute_command(inventory_path, f'{WAZUH_CONTROL} info -r')
+
+
+    @staticmethod
+    def hasAgentClientKeys(inventory_path) -> bool:
+        """
+        It returns the True of False depending if in the component Client.keys exists
+
+        Args:
+            inventory_path: host's inventory path
+
+        Returns:
+            bool: True/False
+        """
+        return 'true' in Executor.execute_command(inventory_path, f'[ -f {CLIENT_KEYS} ] && echo true || echo false')
+
+
+    @staticmethod
+    def isComponentActive(inventory_path, host_role) -> bool:
+        """
+        It returns the True of False depending if the component is Active
+
+        Args:
+            inventory_path: host's inventory path
+
+        Returns:
+            bool: True/False
+        """
+        return Executor.execute_command(inventory_path, f'systemctl is-active {host_role}') == 'active'

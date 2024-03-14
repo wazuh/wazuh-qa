@@ -26,8 +26,7 @@ class Tester:
 
         extra_vars = cls._get_extra_vars(payload).model_dump()
         targets_paths = payload.targets
-        
-        
+
         json_targets_paths = eval(targets_paths)
 
         payload.targets = json_targets_paths

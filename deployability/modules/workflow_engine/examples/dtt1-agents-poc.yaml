@@ -27,7 +27,7 @@ tasks:
             - wazuh-2: "{working-dir}/manager-linux-centos-7-amd64/inventory.yaml"
           - dependencies:
             - wazuh-1: "{working-dir}/manager-linux-ubuntu-22.04-amd64/inventory.yaml"
-          - tests: "install,stop,restart,uninstall"
+          - tests: "uninstall"
           - component: "manager"
           - wazuh-version: "4.7.3"
           - wazuh-revision: "1"

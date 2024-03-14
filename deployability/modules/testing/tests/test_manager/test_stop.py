@@ -3,6 +3,7 @@ import json
 
 
 from ..helpers.manager import WazuhManager
+from ..helpers.generic import GeneralComponentActions
 
 
 @pytest.fixture
@@ -19,8 +20,9 @@ def wazuh_params(request):
         'targets': targets
     }
     yield params
-    for workers in params['workers']:
-        WazuhManager.manager_restart(workers)
+    for worker in params['workers']:
+        GeneralComponentActions.component_restart(worker, 'wazuh-manager')
+
 
 @pytest.fixture(autouse=True)
 def setup_test_environment(wazuh_params):
@@ -45,10 +47,8 @@ def setup_test_environment(wazuh_params):
 def test_stop(wazuh_params):
 
     for workers in wazuh_params['workers']:
-        WazuhManager.manager_stop(workers)
+        GeneralComponentActions.component_stop(workers, 'wazuh-manager')
 
-    assert 'active ' in WazuhManager.get_manager_status(wazuh_params['master'])
+    assert 'active ' in GeneralComponentActions.get_component_status(wazuh_params['master'], 'wazuh-manager')
     for workers in wazuh_params['workers']:
-        assert 'inactive ' in WazuhManager.get_manager_status(workers)
-
-
+        assert 'inactive ' in GeneralComponentActions.get_component_status(workers, 'wazuh-manager')
