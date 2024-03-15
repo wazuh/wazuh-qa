@@ -24,55 +24,47 @@ class Tester:
         """
         payload = InputPayload(**dict(payload))
         extra_vars = cls._get_extra_vars(payload).model_dump()
-        targets_paths = payload.targets # lista con 2 items
+        targets_paths = payload.targets
         for target_path in targets_paths:
             path = ', '.join(list(eval(target_path).values()))
             target = Inventory(**Utils.load_from_yaml((path)))
             logger.info(f"Running tests for {target.ansible_host}")  
-
-        print(targets_paths)
-        
-        for i in targets_paths:
-            assert isinstance(eval(i), dict)
-
-        resultado = {}
+        targets = {}
         for item in targets_paths:
-            diccionario = eval(item)
-            resultado.update(diccionario)
-
-        # Convertir el resultado a string JSON
-        resultado_json = json.dumps(resultado)
-        print(type(resultado_json))
-
-        """
-        for target_path in json_targets_paths.values():
-            target = Inventory(**Utils.load_from_yaml((target_path)))
-                 
-
-
+            dictionary = eval(item)
+            targets.update(dictionary)
+        target_string = json.dumps(targets)
+        extra_vars['targets'] = target_string.replace('"',"")
         dependencies_paths = payload.dependencies
-        json_dependencies_paths = eval(dependencies_paths)
-        for dependency_path in json_dependencies_paths.values():
-            dependency = Inventory(**Utils.load_from_yaml((dependency_path)))
-            logger.info(f"Dependencies: {dependency.ansible_host}")            
-        extra_vars['dependencies'] = dependencies_paths.replace('"',"")
-
+        for dependency_path in dependencies_paths:
+            path = ', '.join(list(eval(dependency_path).values()))
+            dependency = Inventory(**Utils.load_from_yaml((path)))
+            logger.info(f"Dependencies {dependency.ansible_host}")  
+        dependencies = {}
+        for item in targets_paths:
+            dictionary = eval(item)
+            dependencies.update(dictionary)
+        target_string = json.dumps(dependencies)
+        extra_vars['dependencies'] = target_string.replace('"',"")
         extra_vars['local_host_path'] = str(Path(__file__).parent.parent.parent)
         extra_vars['current_user'] = os.getlogin()
         logger.debug(f"Using extra vars: {extra_vars}")
-
-        for target in payload.targets.values():
-            target_inventory = Inventory(**Utils.load_from_yaml(target))
+        for target in targets_paths:
+            target_value = eval(target).values()
+            target_inventory = Inventory(**Utils.load_from_yaml(str(list(target_value)[0])))
             ansible = Ansible(ansible_data=target_inventory.model_dump())
             cls._setup(ansible, extra_vars['working_dir'])
 
+        target_inventory = Inventory(**Utils.load_from_yaml(str(list(eval(targets_paths[0]).values())[0])))
+        ansible = Ansible(ansible_data=target_inventory.model_dump())
         cls._run_tests(payload.tests, ansible, extra_vars)
 
-        for target in payload.targets.values():
-            target_inventory = Inventory(**Utils.load_from_yaml(target))
+        for target in targets_paths:
+            target_value = eval(target).values()
+            target_inventory = Inventory(**Utils.load_from_yaml(str(list(target_value)[0])))
             if payload.cleanup:
                 logger.info("Cleaning up")
-                cls._cleanup(ansible, extra_vars['working_dir']) """
+                cls._cleanup(ansible, extra_vars['working_dir'])
 
 
     @classmethod
@@ -86,19 +78,6 @@ class Tester:
         Returns:
             ExtraVars: The extra vars for the tests.
         """
-        #if not payload.dependencies:
-        #    logger.debug("No dependencies received in payload")
-        #    return ExtraVars(**payload.model_dump())
-        #
-        #dependencies_paths = []
-        #logger.debug("Dependencies found. Parsing...")
-        #for dependency in range(len(payload.dependencies)):
-        #    dicts = eval(payload.dependencies[dependency])
-        #    for key, value in dicts.items():
-        #        #dep_inventory = Inventory(**Utils.load_from_yaml(value))
-        #        #dicts[key] = dep_inventory.ansible_host
-        #        dicts[key] = value           
-        #        dependencies_paths.append(str(dicts))
 
         return ExtraVars(**payload.model_dump())
 

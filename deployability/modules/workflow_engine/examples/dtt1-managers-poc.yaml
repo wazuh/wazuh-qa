@@ -1,29 +1,34 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 version: 0.1
 description: This workflow is used to test agents deployment por DDT1 PoC
 variables:
   #agents-os:
   #  - linux-ubuntu-22.04-amd64
   manager-os: 
-    - linux-ubuntu-20.04-amd64
-    - linux-ubuntu-18.04-amd64
+    - linux-ubuntu-22.04-amd64
+    - linux-redhat-8-amd64
   infra-provider: vagrant
   working-dir: /tmp/dtt1-poc
+
 tasks:
-  # Unique manager allocate task
-  - task: "allocate-manager-{manager}"
-    description: "Allocate resources for the manager."
+  # Generic agent test task
+  - task: "run-agent-tests"
+    description: "Run tests install for the manager."
     do:
       this: process
       with:
         path: python3
         args:
-          - modules/allocation/main.py
-          - action: create
-          - provider: "{infra-provider}"
-          - size: large
-          - composite-name: "{manager}"
-          - inventory-output: "{working-dir}/manager-{manager}/inventory.yaml"
-          - track-output: "{working-dir}/manager-{manager}/track.yaml"
-    foreach:
-      - variable: manager-os
-        as: manager
+          - modules/testing/main.py
+          - targets:
+            - wazuh-1: "{working-dir}/manager-linux-ubuntu-22.04-amd64/inventory.yaml"
+            - wazuh-2: "{working-dir}/manager-linux-redhat-8-amd64/inventory.yaml"
+          - tests: "install"
+          - component: "manager"
+          - wazuh-version: "4.7.1"
+          - wazuh-revision: "40709"
+
+
+

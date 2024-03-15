@@ -28,7 +28,6 @@ class Executor:
             "sudo", 
             command
         ]
-        print(command)
         result = subprocess.run(ssh_command, stdout=subprocess.PIPE, text=True)
 
         return result.stdout
@@ -75,12 +74,12 @@ class WazuhAPI:
 
         user = 'wazuh'
         
-        #----Patch issue https://github.com/wazuh/wazuh-packages/issues/2883
+        #----Patch issue https://github.com/wazuh/wazuh-packages/issues/2883-------------
         file_path = Executor.execute_command(self.inventory_path, 'pwd').replace("\n","") + '/wazuh-install-files/wazuh-passwords.txt '
         if not 'true' in Executor.execute_command(self.inventory_path, f'test -f {file_path} && echo "true" || echo "false"'):
             Executor.execute_command(self.inventory_path, 'tar -xvf wazuh-install-files.tar')
         password = Executor.execute_command(self.inventory_path, "grep api_password wazuh-install-files/wazuh-passwords.txt | head -n 1 | awk '{print $NF}'").replace("'","").replace("\n","")
-        #---------------------------------------------------------------------
+        #--------------------------------------------------------------------------------
         
         login_endpoint = 'security/user/authenticate'
         host = inventory_data.get('ansible_host')

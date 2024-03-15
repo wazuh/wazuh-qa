@@ -119,4 +119,3 @@ def test_manager_revision(wazuh_params):
 def test_manager_installed_directory(wazuh_params):
     for manager in wazuh_params['managers'].values():
         assert HostInformation.dir_exists(manager, WAZUH_ROOT)
-

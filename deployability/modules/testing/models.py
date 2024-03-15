@@ -15,7 +15,7 @@ class InputPayload(ExtraVars):
     """Input payload for testing module."""
     tests: list[str]
     targets: list[str]
-    dependencies: str
+    dependencies: list[str]
     cleanup: bool = True
 
 
@@ -34,7 +34,7 @@ class InputPayload(ExtraVars):
         return values
 
     @model_validator(mode='before')
-    def validate_dependencies(cls, values) -> str:
+    def validate_dependencies(cls, values) -> list:
         """Validate required fields."""
 
         return values

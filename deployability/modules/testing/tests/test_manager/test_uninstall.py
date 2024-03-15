@@ -4,8 +4,10 @@ from ..helpers.manager import WazuhManager
 from ..helpers.generic import CheckFiles, HostInformation
 from ..helpers.constants import WAZUH_ROOT
 
+
 def uninstall_manager_callback(manager_params):
     WazuhManager.uninstall_manager(manager_params)
+
 
 def perform_action_and_scan_for_manager(manager_params):
     result = CheckFiles.perform_action_and_scan(manager_params, lambda: uninstall_manager_callback(manager_params))
@@ -31,6 +33,7 @@ def perform_action_and_scan_for_manager(manager_params):
         for action in actions:
             assert result[category][action] == []
 
+
 @pytest.fixture
 def wazuh_params(request):
     wazuh_version = request.config.getoption('--wazuh_version')
@@ -44,6 +47,7 @@ def wazuh_params(request):
         'dependencies': dependencies,
         'targets': targets
     }
+
 
 @pytest.fixture(autouse=True)
 def setup_test_environment(wazuh_params):
@@ -65,9 +69,11 @@ def setup_test_environment(wazuh_params):
 
     wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
 
+
 def test_uninstall(wazuh_params):
     for manager_name, manager_params in wazuh_params['managers'].items():
         perform_action_and_scan_for_manager(manager_params)
+
 
 def test_manager_uninstalled_directory(wazuh_params):
     for manager in wazuh_params['managers'].values():

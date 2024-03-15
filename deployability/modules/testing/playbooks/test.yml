@@ -4,6 +4,6 @@
   tasks:
 
     - name: Test {{ test }} for {{ component }}
-      command: "python3 -m pytest modules/testing/tests/test_{{component}}/test_{{ test }}.py  -v --wazuh_version={{ wazuh_version }} --component={{ component }} --dependencies='{{ dependencies }}' --targets='{{ targets }}' -s"
+      command: "python3 -m pytest modules/testing/tests/test_{{component}}/test_{{ test }}.py  -v --wazuh_version={{ wazuh_version }} --wazuh_revision={{ wazuh_revision }} --component={{ component }} --dependencies='{{ dependencies }}' --targets='{{ targets }}' -s"
       args:
         chdir: "{{ local_host_path }}"

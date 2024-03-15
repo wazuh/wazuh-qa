@@ -7,7 +7,7 @@ from pathlib import Path
 import os
 from .executor import Executor
 
-from .constants import WAZUH_CONTROL, CLUSTER_CONTROL, AGENT_CONTROL, CLIENT_KEYS, WAZUH_CONF, WAZUH_ROOT
+from .constants import WAZUH_CONTROL, CLIENT_KEYS
 
 
 class HostInformation:
@@ -22,7 +22,7 @@ class HostInformation:
             dir_path: path of the directory to be checked
 
         Returns:
-            str: type of host (windows, linux, macos)
+            bool: True or False
         """
         return 'true' in Executor.execute_command(inventory_path, f'test -d {dir_path} && echo "true" || echo "false"')
 
@@ -66,7 +66,7 @@ class HostInformation:
             inventory_path: host's inventory path
 
         Returns:
-            str: arch (aarch64, x86_64, intel, apple)
+            str: architecture (aarch64, x86_64, intel, apple)
         """
         return Executor.execute_command(inventory_path, 'uname -m')
 
@@ -80,7 +80,7 @@ class HostInformation:
             inventory_path: host's inventory path
 
         Returns:
-            str: linux distribution (deb, rpm, opensuse-leap, amazon)
+            str: linux distribution (deb, rpm)
         """
         os_name = re.search(r'/manager-linux-([^-]+)-', inventory_path).group(1)
 
@@ -118,7 +118,7 @@ class HostInformation:
         Returns:
             str: current directory
         """
-        return Executor.execute_command(inventory_path, 'pwd')
+        return Executor.execute_command(inventory_path, 'pwd').replace("\n","")
 
 class HostConfiguration:
 
@@ -136,7 +136,7 @@ class HostConfiguration:
 
     @staticmethod
     def certs_create(wazuh_version, master_path, dashboard_path, indexer_paths=[], worker_paths=[]) -> None:
-        current_directory = HostInformation.get_current_dir(master_path).replace("\n","")
+        current_directory = HostInformation.get_current_dir(master_path)
 
         wazuh_version = '.'.join(wazuh_version.split('.')[:2])
         with open(master_path, 'r') as yaml_file:
@@ -208,8 +208,8 @@ class HostConfiguration:
 
     @staticmethod
     def scp_to(from_inventory_path, to_inventory_path, file_name) -> None:
-        current_from_directory = HostInformation.get_current_dir(from_inventory_path).replace("\n","")
-        current_to_directory = HostInformation.get_current_dir(to_inventory_path).replace("\n","")
+        current_from_directory = HostInformation.get_current_dir(from_inventory_path)
+        current_to_directory = HostInformation.get_current_dir(to_inventory_path)
         with open(from_inventory_path, 'r') as yaml_file:
             from_inventory_data = yaml.safe_load(yaml_file)
 
@@ -229,7 +229,7 @@ class HostConfiguration:
             Executor.execute_command(from_inventory_path, f'chmod +rw {file_name}')
 
         # SCP
-        subprocess.run(f'scp -i {from_key} -o StrictHostKeyChecking=no {from_user}@{from_host}:{current_from_directory}/{file_name} {Path(__file__).parent}'  , shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        subprocess.run(f'scp -i {from_key} -o StrictHostKeyChecking=no {from_user}@{from_host}:{current_from_directory}/{file_name} {Path(__file__).parent}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         subprocess.run(f'scp -i {to_key} -o StrictHostKeyChecking=no {Path(__file__).parent}/{file_name} {to_user}@{to_host}:{current_to_directory}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         # Restoring permissions
@@ -242,10 +242,8 @@ class HostConfiguration:
 
         if os.path.exists(file_path):
             os.remove(file_path)
-            print(f"The file {file_name} has been deleted.")
         else:
             print(f"The file {file_name} does not exist.")
-
 
 class HostMonitor:
 
@@ -320,9 +318,7 @@ class CheckFiles:
             Dict: dict of directories:hash
         """
         if 'linux' in os_type or 'macos' in os_type:
-
             command = f'sudo find {directory} -type f -exec sha256sum {{}} + {filter}'
-
             result = Executor.execute_command(inventory_path, command)
 
         elif 'windows' in os_type:
@@ -363,11 +359,8 @@ class CheckFiles:
             filters+= f" | grep -v {filter_}"
 
         initial_scans = CheckFiles._perform_scan(inventory_path, os_type, directories, filters)
-
         callback()
-
         second_scans = CheckFiles._perform_scan(inventory_path, os_type, directories, filters)
-
         changes = {directory: CheckFiles._calculate_changes(initial_scans[directory], second_scans[directory]) for directory in directories}
 
         return changes
@@ -398,7 +391,6 @@ class GeneralComponentActions:
         Args:
             inventory_path: host's inventory path
             host_role: role of the component
-
         """
 
         Executor.execute_command(inventory_path, f'systemctl stop {host_role}')
@@ -412,7 +404,6 @@ class GeneralComponentActions:
         Args:
             inventory_path: host's inventory path
             host_role: role of the component
-
         """
 
         Executor.execute_command(inventory_path, f'systemctl restart {host_role}')
@@ -426,7 +417,6 @@ class GeneralComponentActions:
         Args:
             inventory_path: host's inventory path
             host_role: role of the component
-
         """
 
         Executor.execute_command(inventory_path, f'systemctl restart {host_role}')
@@ -435,7 +425,7 @@ class GeneralComponentActions:
     @staticmethod
     def get_component_version(inventory_path) -> str:
         """
-        It returns the installed component version
+        Returns the installed component version
 
         Args:
             inventory_path: host's inventory path
@@ -449,7 +439,7 @@ class GeneralComponentActions:
     @staticmethod
     def get_component_revision(inventory_path) -> str:
         """
-        It returns the Agent revision number
+        Returns the Agent revision number
 
         Args:
             inventory_path: host's inventory path
@@ -463,7 +453,7 @@ class GeneralComponentActions:
     @staticmethod
     def hasAgentClientKeys(inventory_path) -> bool:
         """
-        It returns the True of False depending if in the component Client.keys exists
+        Returns the True of False depending if in the component Client.keys exists
 
         Args:
             inventory_path: host's inventory path
@@ -477,7 +467,7 @@ class GeneralComponentActions:
     @staticmethod
     def isComponentActive(inventory_path, host_role) -> bool:
         """
-        It returns the True of False depending if the component is Active
+        Returns the True of False depending if the component is Active
 
         Args:
             inventory_path: host's inventory path

@@ -7,8 +7,18 @@ class WazuhManager:
 
     @staticmethod
     def install_manager(inventory_path, node_name, wazuh_version) -> None:
+        """
+        Installs Wazuh Manager in the host
+
+        Args:
+            inventory_path (str): host's inventory path
+            node_name (str): manager node name
+            wazuh_version (str): major.minor.patch
+
+        """
         wazuh_version = '.'.join(wazuh_version.split('.')[:2])
         os_name = HostInformation.get_os_name_from_inventory(inventory_path)
+
         if os_name == 'debian':
             commands = [
                     f"wget https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh",
@@ -25,6 +35,15 @@ class WazuhManager:
 
     @staticmethod
     def install_managers(inventories_paths=[], node_names=[], wazuh_versions=[]) -> None:
+        """
+        Install Wazuh Managers in the hosts
+
+        Args:
+            inventories_paths (list): list of hosts' inventory path
+            node_name (list): managers node names' in the same order than inventories_paths
+            wazuh_version (list): manager versions int he same order than inventories_paths
+
+        """
         for inventory in inventories_paths:
             for node_name in node_names:
                 for wazuh_version in wazuh_versions:
@@ -33,6 +52,12 @@ class WazuhManager:
 
     @staticmethod
     def uninstall_manager(inventory_path) -> None:
+        """
+        Unnstall Wazuh Manager in the host
+
+        Args:
+            inventory_paths (str): hosts' inventory path
+        """
         distribution = HostInformation.get_linux_distribution(inventory_path)
         commands = []
 
@@ -41,7 +66,6 @@ class WazuhManager:
                 "yum remove wazuh-manager -y",
                 f"rm -rf {WAZUH_ROOT}"
             ])
-
         elif distribution == 'deb':
             commands.extend([
                 "apt-get remove --purge wazuh-manager -y"
@@ -59,6 +83,12 @@ class WazuhManager:
 
     @staticmethod
     def uninstall_managers(inventories_paths=[]) -> None:
+        """
+        Unnstall Wazuh Managers in the hosts
+
+        Args:
+            inventories_paths (list): list of hosts' inventory path
+        """
         for inventory in inventories_paths:
             WazuhManager.uninstall_manager(inventory)
 
@@ -66,7 +96,7 @@ class WazuhManager:
     @staticmethod
     def get_cluster_info(inventory_path) -> None:
         """
-        It returns the cluster information
+        Returns the cluster information
 
         Args:
             inventory_path: host's inventory path
@@ -81,7 +111,7 @@ class WazuhManager:
     @staticmethod
     def get_agent_control_info(inventory_path) -> None:
         """
-        It returns the Agent information from the manager
+        Returns the Agent information from the manager
 
         Args:
             inventory_path: host's inventory path
@@ -96,7 +126,7 @@ class WazuhManager:
     @staticmethod
     def configuring_clusters(inventory_path, node_name, node_type, node_to_connect, key, disabled) -> None:
         """
-        It configures the cluster in ossec.conf
+        Configures the cluster in ossec.conf
 
         Args:
             inventory_path: host's inventory path
