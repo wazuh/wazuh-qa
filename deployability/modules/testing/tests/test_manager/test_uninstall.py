@@ -1,7 +1,7 @@
 import pytest
 
 from ..helpers.manager import WazuhManager
-from ..helpers.generic import CheckFiles, HostInformation
+from ..helpers.generic import CheckFiles, HostInformation, GeneralComponentActions
 from ..helpers.constants import WAZUH_ROOT
 
 
@@ -71,6 +71,9 @@ def setup_test_environment(wazuh_params):
 
 
 def test_uninstall(wazuh_params):
+    for manager in wazuh_params['managers'].values():
+        manager_status = GeneralComponentActions.get_component_status(manager, 'wazuh-manager')
+        assert 'active' in manager_status
     for manager_name, manager_params in wazuh_params['managers'].items():
         perform_action_and_scan_for_manager(manager_params)
 
