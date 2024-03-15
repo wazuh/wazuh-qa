@@ -17,6 +17,10 @@ class HostInformation:
         """
         It returns the True of False depending if the directory exists
 
+        Args:
+            inventory_path: host's inventory path
+            dir_path: path of the directory to be checked
+
         Returns:
             str: type of host (windows, linux, macos)
         """
@@ -28,6 +32,10 @@ class HostInformation:
         """
         It returns the True of False depending if the file exists
 
+        Args:
+            inventory_path: host's inventory path
+            file_path: path of the file to be checked
+
         Returns:
             bool: True or False
         """
@@ -38,6 +46,9 @@ class HostInformation:
     def get_os_type(inventory_path) -> str:
         """
         It returns the os_type of host
+
+        Args:
+            inventory_path: host's inventory path
 
         Returns:
             str: type of host (windows, linux, macos)
@@ -51,6 +62,9 @@ class HostInformation:
         """
         It returns the arch of host
 
+        Args:
+            inventory_path: host's inventory path
+
         Returns:
             str: arch (aarch64, x86_64, intel, apple)
         """
@@ -61,6 +75,9 @@ class HostInformation:
     def get_linux_distribution(inventory_path) -> str:
         """
         It returns the linux distribution of host
+
+        Args:
+            inventory_path: host's inventory path
 
         Returns:
             str: linux distribution (deb, rpm, opensuse-leap, amazon)
@@ -80,6 +97,9 @@ class HostInformation:
         """
         It returns the linux os_name host inventory
 
+        Args:
+            inventory_path: host's inventory path
+
         Returns:
             str: linux os name (debian, ubuntu, opensuse, amazon, centos, redhat)
         """
@@ -91,6 +111,9 @@ class HostInformation:
     def get_current_dir(inventory_path) -> str:
         """
         It returns the current directory
+
+        Args:
+            inventory_path: host's inventory path
 
         Returns:
             str: current directory
@@ -358,6 +381,7 @@ class GeneralComponentActions:
 
         Args:
             inventory_path: host's inventory path
+            host_role: role of the component
 
         Returns:
             str: Role status
@@ -373,6 +397,7 @@ class GeneralComponentActions:
 
         Args:
             inventory_path: host's inventory path
+            host_role: role of the component
 
         """
 
@@ -386,6 +411,7 @@ class GeneralComponentActions:
 
         Args:
             inventory_path: host's inventory path
+            host_role: role of the component
 
         """
 
@@ -399,6 +425,7 @@ class GeneralComponentActions:
 
         Args:
             inventory_path: host's inventory path
+            host_role: role of the component
 
         """
 
@@ -454,6 +481,7 @@ class GeneralComponentActions:
 
         Args:
             inventory_path: host's inventory path
+            host_role: role of the component
 
         Returns:
             bool: True/False

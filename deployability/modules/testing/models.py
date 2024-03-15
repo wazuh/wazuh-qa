@@ -6,7 +6,6 @@ from typing import Literal
 class ExtraVars(BaseModel):
     """Extra vars for testing module."""
     component: Literal['manager', 'agent']
-    dependencies: str | None = None
     wazuh_version: str
     wazuh_revision: str
     wazuh_branch: str | None = None
@@ -15,7 +14,7 @@ class ExtraVars(BaseModel):
 class InputPayload(ExtraVars):
     """Input payload for testing module."""
     tests: list[str]
-    targets: str
+    targets: list[str]
     dependencies: str
     cleanup: bool = True
 
@@ -29,11 +28,13 @@ class InputPayload(ExtraVars):
         return value
 
     @field_validator('targets', mode='before')
-    def validate_targets(cls, values) -> str:
+    def validate_targets(cls, values) -> list:
         """Validate required fields."""
+
         return values
 
     @model_validator(mode='before')
     def validate_dependencies(cls, values) -> str:
         """Validate required fields."""
+
         return values

@@ -10,7 +10,7 @@ from modules.testing import Tester, InputPayload
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Wazuh testing tool")
-    parser.add_argument("--targets", required=True)
+    parser.add_argument("--targets", action='append', default=[], required=True)
     parser.add_argument("--tests", required=True)
     parser.add_argument("--component", choices=['manager', 'agent'], required=True)
     parser.add_argument("--dependencies", required=False)

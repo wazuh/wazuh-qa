@@ -1,5 +1,6 @@
+import requests
 from .generic import HostInformation, HostConfiguration
-from .executor import Executor
+from .executor import Executor, WazuhAPI
 from .constants import WAZUH_CONTROL, CLUSTER_CONTROL, AGENT_CONTROL, CLIENT_KEYS, WAZUH_CONF, WAZUH_ROOT
 
 class WazuhManager:
@@ -116,3 +117,59 @@ class WazuhManager:
         ]
 
         Executor.execute_commands(inventory_path, commands)
+
+## ----------- api
+
+    def get_manager_version(wazuh_api: WazuhAPI) -> str:
+        """
+        Get the version of the manager.
+
+        Returns:
+            str: The version of the manager.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/?pretty=true", headers=wazuh_api.headers, verify=False)
+        return eval(response.text)['data']['api_version']
+
+
+    def get_manager_revision(wazuh_api: WazuhAPI) -> str:
+        """
+        Get the revision of the manager.
+
+        Returns:
+            str: The revision of the manager.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/?pretty=true", headers=wazuh_api.headers, verify=False)
+        return eval(response.text)['data']['revision']
+
+
+    def get_manager_host_name(wazuh_api: WazuhAPI) -> str:
+        """
+        Get the hostname of the manager.
+
+        Returns:
+            str: The hostname of the manager.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/?pretty=true", headers=wazuh_api.headers, verify=False)
+        return eval(response.text)['data']['hostname']
+
+
+    def get_manager_nodes_status(wazuh_api: WazuhAPI) -> dict:
+        """
+        Get the status of the manager's nodes.
+
+        Returns:
+            Dict: The status of the manager's nodes.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/manager/status", headers=wazuh_api.headers, verify=False)
+        return eval(response.text)['data']['affected_items'][0]
+
+
+    def get_manager_logs(wazuh_api: WazuhAPI) -> list:
+        """
+        Get the logs of the manager.
+
+        Returns:
+            List: The logs of the manager.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/manager/logs", headers=wazuh_api.headers, verify=False)
+        return eval(response.text)['data']['affected_items']

@@ -23,17 +23,32 @@ class Tester:
             payload (InputPayload): The payload containing the test parameters.
         """
         payload = InputPayload(**dict(payload))
-
         extra_vars = cls._get_extra_vars(payload).model_dump()
-        targets_paths = payload.targets
+        targets_paths = payload.targets # lista con 2 items
+        for target_path in targets_paths:
+            path = ', '.join(list(eval(target_path).values()))
+            target = Inventory(**Utils.load_from_yaml((path)))
+            logger.info(f"Running tests for {target.ansible_host}")  
 
-        json_targets_paths = eval(targets_paths)
+        print(targets_paths)
+        
+        for i in targets_paths:
+            assert isinstance(eval(i), dict)
 
-        payload.targets = json_targets_paths
+        resultado = {}
+        for item in targets_paths:
+            diccionario = eval(item)
+            resultado.update(diccionario)
+
+        # Convertir el resultado a string JSON
+        resultado_json = json.dumps(resultado)
+        print(type(resultado_json))
+
+        """
         for target_path in json_targets_paths.values():
             target = Inventory(**Utils.load_from_yaml((target_path)))
-            logger.info(f"Running tests for {target.ansible_host}")       
-        extra_vars['targets'] = targets_paths.replace('"',"")
+                 
+
 
         dependencies_paths = payload.dependencies
         json_dependencies_paths = eval(dependencies_paths)
@@ -57,7 +72,7 @@ class Tester:
             target_inventory = Inventory(**Utils.load_from_yaml(target))
             if payload.cleanup:
                 logger.info("Cleaning up")
-                cls._cleanup(ansible, extra_vars['working_dir'])
+                cls._cleanup(ansible, extra_vars['working_dir']) """
 
 
     @classmethod

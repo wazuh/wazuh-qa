@@ -1,4 +1,5 @@
-from .executor import Executor
+import requests
+from .executor import Executor, WazuhAPI
 from .generic import HostInformation
 from .constants import WAZUH_CONTROL, CLUSTER_CONTROL, AGENT_CONTROL, CLIENT_KEYS, WAZUH_CONF, WAZUH_ROOT
 
@@ -112,3 +113,71 @@ class WazuhAgent:
     def uninstall_agents( inventories_paths=[]) -> None:
         for inventory_path in inventories_paths:
             WazuhAgent.uninstall_agent(inventory_path)
+
+## ----------- api
+
+    def get_agents_information(wazuh_api: WazuhAPI) -> list:
+        """
+        Get information about agents.
+
+        Returns:
+            List: Information about agents.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/agents", headers=wazuh_api.headers, verify=False)
+        return eval(response.text)['data']['affected_items']
+
+
+    def get_agent_ip_status_and_name_by_id(wazuh_api: WazuhAPI, identifier):
+        """
+        Get IP status and name by ID.
+
+        Args:
+            identifier (str): Agent ID.
+
+        Returns:
+            List: IP, name, and status of the agent.
+        """
+        agents_information = wazuh_api.get_agents_information()
+        for element in agents_information:
+            if element['id'] == identifier:
+                return [element['ip'], element['name'], element['status']]
+        return [None, None, None]
+
+
+    def add_agent_to_manager(wazuh_api: WazuhAPI, name, ip) -> str:
+        """
+        Add an agent to the manager.
+
+        Args:
+            name (str): Name of the agent.
+            ip (str): IP address of the agent.
+
+        Returns:
+            str: Response text.
+        """
+        response = requests.post(f"{wazuh_api.api_url}/agents", json={"name": name ,"ip": ip}, headers=wazuh_api.headers, verify=False)
+        return response.text
+
+
+    def restart_agents(wazuh_api: WazuhAPI) -> str:
+        """
+        Restart agents.
+
+        Returns:
+            str: Response text.
+        """
+        response = requests.put(f"{wazuh_api.api_url}/agents/restart", headers=wazuh_api.headers, verify=False)
+        return response.text
+
+
+    def agent_status_report(wazuh_api: WazuhAPI) -> dict:
+        """
+        Get agent status report.
+
+        Returns:
+            Dict: Agent status report.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/agents/summary/status", headers=wazuh_api.headers, verify=False)
+        return eval(response.text)['data']
+
+
