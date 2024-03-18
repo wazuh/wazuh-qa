@@ -11,6 +11,7 @@ def pytest_addoption(parser):
         parser (argparsing.Parser): The parser for command line arguments and ini-file values.
     """
     group = parser.getgroup('influxdb', 'reporting test results to influxdb')
+    group.addoption('--execution-id', default=None, help='Execution id to use for the report.')
     group.addoption('--influxdb-report', default=False, action='store_true', help='send report to influxdb.')
     group.addoption('--influxdb-url', default="http://localhost:8086", help='Influxdb host url.')
     group.addoption('--influxdb-token', default=None, help='Token to use for influxdb connection.')
