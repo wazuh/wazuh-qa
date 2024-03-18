@@ -7,11 +7,11 @@ WAZUH_ROOT = Path("/var", "ossec")
 CONFIGURATIONS_DIR = Path(WAZUH_ROOT, "etc")
 WAZUH_CONF = Path(CONFIGURATIONS_DIR, "ossec.conf")
 CLIENT_KEYS = Path(CONFIGURATIONS_DIR, "client.keys")
-LOCAL_INTERNAL_OPTIONS = Path(CONFIGURATIONS_DIR, "local_internal_options.conf")
 # Binaries paths
 BINARIES_DIR = Path(WAZUH_ROOT, "bin")
 WAZUH_CONTROL = Path(BINARIES_DIR, "wazuh-control")
 AGENT_CONTROL = Path(BINARIES_DIR, "agent_control")
+CLUSTER_CONTROL = Path(BINARIES_DIR, "cluster_control")
 # Logs paths
 LOGS_DIR = Path(WAZUH_ROOT, "logs")
 WAZUH_LOG = Path(LOGS_DIR, "ossec.log")

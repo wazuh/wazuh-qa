@@ -1,5 +1,3 @@
-from .checkfiles import CheckFiles
-from .hostinformation import HostInformation
-from .installer import WazuhAgentInstaller
-from .uninstaller import WazuhAgentUninstaller
-from .wazuh_api.api import WazuhAPI
+from .manager import WazuhManager
+from .agent import WazuhAgent
+from .generic import HostConfiguration, HostInformation, HostMonitor, CheckFiles
