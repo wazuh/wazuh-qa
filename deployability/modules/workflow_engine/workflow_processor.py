@@ -21,14 +21,13 @@ class WorkflowFile:
     """Class for loading and processing a workflow file."""
     schema_path = Path(__file__).parent / 'schemas' / 'schema_v1.json'
 
-    def __init__(self, workflow_file_path: Path | str, schema_path: Path | str = None) -> None:
+    def __init__(self, workflow_file_path: Path | str, schema_path: Path | str = None, native_vars: dict = {}) -> None:
         self.schema_path = schema_path or self.schema_path
         self.__validate_schema(workflow_file_path)
         self.workflow_raw_data = self.__load_workflow(workflow_file_path)
         self.task_collection = self.__process_workflow()
         self.__static_workflow_validation()
-        # Set the internal attr execution ID.
-        self.__execution_id = self.__get_execution_id()
+        self.__native_vars = native_vars
 
     def __validate_schema(self, workflow_file: Path | str) -> None:
         """
@@ -69,8 +68,8 @@ class WorkflowFile:
         """Process the workflow and return a list of tasks."""
         logger.debug("Process workflow.")
         task_collection = []
-        variables = self.workflow_raw_data.get('variables', {})
-        variables['execution_id'] = self.__execution_id
+        workflow_vars = self.workflow_raw_data.get('variables', {})
+        variables = {**workflow_vars, **self.__native_vars}
         for task in self.workflow_raw_data.get('tasks', []):
             task_collection.extend(self.__expand_task(task, variables))
 
@@ -153,10 +152,6 @@ class WorkflowFile:
         validations = [check_duplicated_tasks, check_not_existing_tasks]
         for validation in validations:
             validation(self)
-    
-    def __get_execution_id(self):
-        """Retrieves a UUID as the execution ID."""
-        return str(uuid.uuid4())
 
 
 class DAG():
@@ -285,8 +280,10 @@ class WorkflowProcessor:
             schema_file (Path | str): Path to the schema file (YAML format).
         """
         logger.setLevel(log_level)
-        # Initialize the instance variables.
-        self.task_collection = WorkflowFile(workflow_file, schema_file).task_collection
+        # Initialize the intenal variables.
+        self.__execution_id = self.__generate_execution_id()
+        # Initialize the public variables.
+        self.task_collection = WorkflowFile(workflow_file, schema_file, self.get_native_vars()).task_collection
         self.dry_run = dry_run
         self.threads = threads
 
@@ -390,3 +387,21 @@ class WorkflowProcessor:
                 except Exception as e:
                     logger.error("Error in aborted task: %s", e)
             executor.shutdown(wait=False, cancel_futures=True)
+
+    def get_native_vars(self) -> dict:
+        """
+        Get native workflow variables.
+
+        Returns:
+            dict: Native workflow variables.
+        """
+        return {'execution_id': self.__execution_id}
+
+    def __generate_execution_id(self) -> str:
+        """
+        Retrieves a UUID as the execution ID.
+
+        Returns:
+            str: The execution ID.
+        """
+        return str(uuid.uuid4())
