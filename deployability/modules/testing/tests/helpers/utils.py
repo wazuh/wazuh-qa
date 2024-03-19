@@ -323,3 +323,22 @@ def is_process_alive(process_name: str) -> bool:
     """
 
     return process_name in (p.name() for p in psutil.process_iter())
+
+
+def dynamic_wait(expected_condition_func, cycles=10, waiting_time=10) -> None:
+    """
+    Waits the process during assigned cycles for the assigned seconds
+
+    Args:
+        expected_condition_func (function): The function that returns True when the expected condition is met
+        cycles(int): Number of cycles
+        waiting_Time(int): Number of seconds per cycle
+
+    """
+    for _ in range(cycles):
+        if expected_condition_func():
+            break
+        else:
+            time.sleep(waiting_time)
+    else:
+        raise RuntimeError(f'Time out')

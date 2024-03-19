@@ -74,7 +74,7 @@ def setup_test_environment(wazuh_params):
     wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
     wazuh_params['agents'] = {key: value for key, value in targets_dict.items() if key.startswith('agent-')}
 
-""" def test_installation(wazuh_params):
+def test_installation(wazuh_params):
     # Disabling firewall for all managers
     for manager_name, manager_params in wazuh_params['managers'].items():
         HostConfiguration.disable_firewall(manager_params)
@@ -91,7 +91,7 @@ def setup_test_environment(wazuh_params):
 
     # Testing installation directory
     for agent in wazuh_params['agents'].values():
-        assert HostInformation.dir_exists(agent, WAZUH_ROOT) """
+        assert HostInformation.dir_exists(agent, WAZUH_ROOT)
 
 def test_status(wazuh_params):
     for agent in wazuh_params['agents'].values():

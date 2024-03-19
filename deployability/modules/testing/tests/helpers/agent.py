@@ -24,7 +24,7 @@ class WazuhAgent:
             distribution = HostInformation.get_linux_distribution(inventory_path)
             architecture = HostInformation.get_architecture(inventory_path)
 
-            if distribution == 'rpm' or distribution == 'opensuse-leap' or distribution == 'amzn' and 'x86_64' in architecture:
+            if distribution == 'rpm' and 'x86_64' in architecture:
                 commands.extend([
                     f"curl -o wazuh-agent-{wazuh_version}-1.x86_64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.x86_64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.x86_64.rpm"
                 ])
@@ -104,16 +104,23 @@ class WazuhAgent:
         commands = []
         if 'linux' in os_type:
             distribution = HostInformation.get_linux_distribution(inventory_path)
-            if distribution == 'deb':
+            os_name = HostInformation.get_os_name_from_inventory(inventory_path)
+            if os_name == 'opensuse' or os_name == 'suse':
                     commands.extend([
-                        "apt-get remove --purge wazuh-agent -y"
-
+                        "zypper remove --no-confirm wazuh-agent",
+                        "rm -r /var/ossec"
                     ])
-            elif distribution == 'rpm':
-                commands.extend([
-                    "yum remove wazuh-agent -y",
-                    f"rm -rf {WAZUH_ROOT}"
-                ])
+            else:
+                if distribution == 'deb':
+                        commands.extend([
+                            "apt-get remove --purge wazuh-agent -y"
+
+                        ])
+                elif distribution == 'rpm':
+                    commands.extend([
+                        "yum remove wazuh-agent -y",
+                        f"rm -rf {WAZUH_ROOT}"
+                    ])
 
 
             system_commands = [
