@@ -72,14 +72,15 @@ def setup_test_environment(wazuh_params):
 
 
 def test_installation(wazuh_params):
-
     # Disabling firewall for all managers
     for manager_name, manager_params in wazuh_params['managers'].items():
         HostConfiguration.disable_firewall(manager_params)
 
     # Certs create and scp from master to worker
     HostConfiguration.certs_create(wazuh_params['wazuh_version'], wazuh_params['master'], wazuh_params['dashboard'], wazuh_params['indexers'], wazuh_params['workers'])
-    HostConfiguration.scp_to(wazuh_params['master'], wazuh_params['workers'][0], 'wazuh-install-files.tar')
+
+    for workers in wazuh_params['workers']:
+        HostConfiguration.scp_to(wazuh_params['master'], workers, 'wazuh-install-files.tar')
 
     # Install managers and perform checkfile testing
     for manager_name, manager_params in wazuh_params['managers'].items():
@@ -93,14 +94,15 @@ def test_installation(wazuh_params):
 
     # Cluster info check
     cluster_info = WazuhManager.get_cluster_info(wazuh_params['master'])
+    for manager_name, manager_params in wazuh_params['managers'].items():
+        assert manager_name in cluster_info
 
-    assert 'wazuh-1' in cluster_info
-    assert 'wazuh-2' in cluster_info
 
 def test_manager_status(wazuh_params):
     for manager in wazuh_params['managers'].values():
         manager_status = GeneralComponentActions.get_component_status(manager, 'wazuh-manager')
         assert 'active' in manager_status
+
 
 def test_manager_version(wazuh_params):
     for manager in wazuh_params['managers'].values():
@@ -109,12 +111,14 @@ def test_manager_version(wazuh_params):
         wazuh_api = WazuhAPI(manager)
         assert wazuh_params['wazuh_version'] in WazuhManager.get_manager_version(wazuh_api)
 
+
 def test_manager_revision(wazuh_params):
     for manager in wazuh_params['managers'].values():
         manager_status = GeneralComponentActions.get_component_revision(manager)
         assert wazuh_params['wazuh_revision'] in manager_status
         wazuh_api = WazuhAPI(manager)
         assert wazuh_params['wazuh_revision'] in str(WazuhManager.get_manager_revision(wazuh_api))
+
 
 def test_manager_installed_directory(wazuh_params):
     for manager in wazuh_params['managers'].values():
