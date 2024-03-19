@@ -144,7 +144,7 @@ class WazuhAgent:
                 "/usr/bin/dscl . -delete '/Groups/wazuh'",
                 "/usr/sbin/pkgutil --forget com.wazuh.pkg.wazuh-agent"
             ])
-        print(commands)
+
         Executor.execute_commands(inventory_path, commands)
 
 
@@ -165,7 +165,9 @@ class WazuhAgent:
             List: Information about agents.
         """
         response = requests.get(f"{wazuh_api.api_url}/agents", headers=wazuh_api.headers, verify=False)
+
         return eval(response.text)['data']['affected_items']
+
 
     def get_agent_status(wazuh_api: WazuhAPI, agent_name) -> str:
         """
@@ -182,6 +184,7 @@ class WazuhAgent:
         for agent in eval(response.text)['data']['affected_items']:
             if agent.get('name') == agent_name:
                 return agent.get('status')
+
         return None
 
 
@@ -198,7 +201,9 @@ class WazuhAgent:
         agents_information = wazuh_api.get_agents_information()
         for element in agents_information:
             if element['id'] == identifier:
+
                 return [element['ip'], element['name'], element['status']]
+
         return [None, None, None]
 
 
@@ -214,6 +219,7 @@ class WazuhAgent:
             str: Response text.
         """
         response = requests.post(f"{wazuh_api.api_url}/agents", json={"name": name ,"ip": ip}, headers=wazuh_api.headers, verify=False)
+
         return response.text
 
 
@@ -225,6 +231,7 @@ class WazuhAgent:
             str: Response text.
         """
         response = requests.put(f"{wazuh_api.api_url}/agents/restart", headers=wazuh_api.headers, verify=False)
+
         return response.text
 
 
@@ -236,4 +243,5 @@ class WazuhAgent:
             Dict: Agent status report.
         """
         response = requests.get(f"{wazuh_api.api_url}/agents/summary/status", headers=wazuh_api.headers, verify=False)
+
         return eval(response.text)['data']
