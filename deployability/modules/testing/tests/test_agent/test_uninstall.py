@@ -2,8 +2,7 @@ import pytest
 
 from ..helpers.manager import WazuhManager, WazuhAPI
 from ..helpers.agent import WazuhAgent
-from ..helpers.generic import CheckFiles, HostInformation, GeneralComponentActions
-from ..helpers.utils import dynamic_wait
+from ..helpers.generic import CheckFiles, HostInformation, GeneralComponentActions, Waits
 from ..helpers.constants import WAZUH_ROOT
 
 
@@ -43,7 +42,7 @@ def wazuh_params(request):
     targets = request.config.getoption('--targets')
     live = request.config.getoption('--live')
 
-    params = {
+    return {
         'wazuh_version': wazuh_version,
         'wazuh_revision': wazuh_revision,
         'dependencies': dependencies,
@@ -51,10 +50,6 @@ def wazuh_params(request):
         'live': live
     }
 
-    yield params
-
-    for agent_names, agent_params in params['agents'].items():
-        GeneralComponentActions.component_restart(agent_params, 'wazuh-agent')
 
 @pytest.fixture(autouse=True)
 def setup_test_environment(wazuh_params):
@@ -100,4 +95,4 @@ def test_isActive(wazuh_params):
         assert not GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent')
 
         expected_condition_func = lambda: 'disconnected' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
-        dynamic_wait(expected_condition_func, cycles=10, waiting_time=20)
+        Waits.dynamic_wait(expected_condition_func, cycles=10, waiting_time=20)

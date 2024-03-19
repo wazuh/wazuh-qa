@@ -61,26 +61,30 @@ class Executor:
 
 
 class WazuhAPI:
-    def __init__(self, inventory_path):
+    def __init__(self, inventory_path, wazuh_user='wazuh', wazuh_password='wazuh'):
         self.inventory_path = inventory_path
         self.api_url = None
         self.headers = None
+        self.wazuh_user = wazuh_user
+        self.wazuh_password = self._get_wazuh_api_password()
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self._authenticate()
+
+
+    def _get_wazuh_api_password(self):
+            #------------Patch issue https://github.com/wazuh/wazuh-packages/issues/2883---------------------
+            file_path = Executor.execute_command(self.inventory_path, 'pwd').replace("\n","") + '/wazuh-install-files/wazuh-passwords.txt '
+            if not 'true' in Executor.execute_command(self.inventory_path, f'test -f {file_path} && echo "true" || echo "false"'):
+                Executor.execute_command(self.inventory_path, 'tar -xvf wazuh-install-files.tar')
+            return Executor.execute_command(self.inventory_path, "grep api_password wazuh-install-files/wazuh-passwords.txt | head -n 1 | awk '{print $NF}'").replace("'","").replace("\n","")
+
 
     def _authenticate(self):
         with open(self.inventory_path, 'r') as yaml_file:
             inventory_data = yaml.safe_load(yaml_file)
 
-        user = 'wazuh'
-        
-        #----Patch issue https://github.com/wazuh/wazuh-packages/issues/2883-------------
-        file_path = Executor.execute_command(self.inventory_path, 'pwd').replace("\n","") + '/wazuh-install-files/wazuh-passwords.txt '
-        if not 'true' in Executor.execute_command(self.inventory_path, f'test -f {file_path} && echo "true" || echo "false"'):
-            Executor.execute_command(self.inventory_path, 'tar -xvf wazuh-install-files.tar')
-        password = Executor.execute_command(self.inventory_path, "grep api_password wazuh-install-files/wazuh-passwords.txt | head -n 1 | awk '{print $NF}'").replace("'","").replace("\n","")
-        #--------------------------------------------------------------------------------
-        
+        user = self.wazuh_user 
+        password = self.wazuh_password
         login_endpoint = 'security/user/authenticate'
         host = inventory_data.get('ansible_host')
         port = '55000'
@@ -96,3 +100,4 @@ class WazuhAPI:
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {token}'
         }
+
