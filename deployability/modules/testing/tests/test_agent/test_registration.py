@@ -1,10 +1,8 @@
 import pytest
-import time
 
 from ..helpers.manager import WazuhManager, WazuhAPI
 from ..helpers.agent import WazuhAgent, WazuhAPI
-from ..helpers.generic import HostConfiguration, CheckFiles, HostInformation, GeneralComponentActions
-from ..helpers.constants import WAZUH_ROOT
+from ..helpers.generic import GeneralComponentActions
 from ..helpers.utils import dynamic_wait
 
 @pytest.fixture
@@ -67,6 +65,7 @@ def test_isActive(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['master'])
     for agent_names, agent_params in wazuh_params['agents'].items():
         assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent')
+
         expected_condition_func = lambda: 'active' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         dynamic_wait(expected_condition_func, cycles=10, waiting_time=20)
 

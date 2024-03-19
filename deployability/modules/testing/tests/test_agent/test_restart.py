@@ -1,9 +1,7 @@
 import pytest
 
 from ..helpers.manager import WazuhManager
-from ..helpers.agent import WazuhAgent
-from ..helpers.generic import HostConfiguration, CheckFiles, HostInformation, GeneralComponentActions
-from ..helpers.constants import WAZUH_ROOT
+from ..helpers.generic import GeneralComponentActions
 
 
 @pytest.fixture

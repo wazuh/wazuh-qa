@@ -3,7 +3,6 @@ import pytest
 from ..helpers.manager import WazuhManager
 from ..helpers.agent import WazuhAgent
 from ..helpers.generic import HostConfiguration, CheckFiles, HostInformation, GeneralComponentActions
-from ..helpers.executor import WazuhAPI
 from ..helpers.constants import WAZUH_ROOT
 
 

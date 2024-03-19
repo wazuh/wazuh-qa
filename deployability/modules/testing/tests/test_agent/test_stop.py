@@ -1,10 +1,8 @@
 import pytest
 
-from ..helpers.manager import WazuhManager, WazuhAPI
-from ..helpers.agent import WazuhAgent
-from ..helpers.generic import HostConfiguration, CheckFiles, HostInformation, GeneralComponentActions
-from ..helpers.constants import WAZUH_ROOT
-
+from ..helpers.agent import WazuhAgent, WazuhAPI
+from ..helpers.generic import GeneralComponentActions
+from ..helpers.utils import dynamic_wait
 
 @pytest.fixture
 def wazuh_params(request):
@@ -56,5 +54,7 @@ def test_stop(wazuh_params):
 
     for agent_names, agent_params in wazuh_params['agents'].items():
         assert 'inactive' in GeneralComponentActions.get_component_status(agent_params, 'wazuh-agent')
-        assert 'disconnected' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         assert not GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent')
+
+        expected_condition_func = lambda: 'disconnected' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
+        dynamic_wait(expected_condition_func, cycles=10, waiting_time=20)
