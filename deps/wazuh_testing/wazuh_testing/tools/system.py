@@ -553,7 +553,7 @@ class HostManager:
 
         return master_node
 
-    def remove_package(self, host, system, package_uninstall_name=None, custom_uninstall_playbook=None):
+    def remove_package(self, host, system, package_uninstall_name=None, use_npm=False, custom_uninstall_playbook=None):
         """
         Removes a package from the specified host.
 
@@ -579,25 +579,28 @@ class HostManager:
         if custom_uninstall_playbook:
             remove_operation_result = self.run_playbook(host, custom_uninstall_playbook)
         elif package_uninstall_name:
-            if os_name == 'windows':
-                remove_operation_result = self.get_host(host).ansible("win_command",
-                                                                      f"{package_uninstall_name} /uninstall /quiet /S",
-                                                                      check=False)
-            elif os_name == 'linux':
-                os = self.get_host_variables(host)['os'].split('_')[0]
-                if os == 'centos':
-                    remove_operation_result = self.get_host(host).ansible("yum",
-                                                                          f"name={package_uninstall_name} state=absent",
-                                                                          check=False)
-                elif os == 'ubuntu':
-                    remove_operation_result = self.get_host(host).ansible("apt",
-                                                                          f"name={package_uninstall_name} state=absent",
-                                                                          check=False)
-            elif os_name == 'macos':
-                cmd = f"npm uninstall {package_uninstall_name}"
+            if use_npm:
+                cmd = f"npm uninstall -g {package_uninstall_name}"
                 remove_operation_result = self.get_host(host).ansible("shell", cmd, check=False)
-                if not remove_operation_result.get('failed'):
-                    remove_operation_result = True
+            else:
+                if os_name == 'windows':
+                    remove_operation_result = self.get_host(host).ansible("win_command",
+                                                                        f"{package_uninstall_name} /uninstall /quiet /S",
+                                                                        check=False)
+                elif os_name == 'linux':
+                    os = self.get_host_variables(host)['os'].split('_')[0]
+                    if os == 'centos':
+                        remove_operation_result = self.get_host(host).ansible("yum",
+                                                                            f"name={package_uninstall_name} state=absent",
+                                                                            check=False)
+                    elif os == 'ubuntu':
+                        remove_operation_result = self.get_host(host).ansible("apt",
+                                                                            f"name={package_uninstall_name} state=absent",
+                                                                            check=False)
+                elif os_name == 'macos':
+                    remove_operation_result = self.get_host(host).ansible("command",
+                                                                        f"brew uninstall {package_uninstall_name}",
+                                                                        check=False)
 
         logging.info(f"Package removed result {remove_operation_result}")
 
