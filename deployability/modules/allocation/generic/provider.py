@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from .instance import Instance
-from .models import CreationPayload, ProviderConfig
+from .models import CreationPayload, ProviderConfig, InstancePayload
 from .utils import logger
 
 
@@ -86,18 +86,16 @@ class Provider(ABC):
         return cls._load_instance(instance_dir, instance_id)
 
     @classmethod
-    def destroy_instance(cls, instance_dir: str | Path, identifier: str, key_path: str) -> None:
+    def destroy_instance(cls, destroy_parameters: InstancePayload) -> None:
         """
         Destroys an existing instance and removes its directory.
 
         Args:
-            instance_dir (str | Path): The directory of the instance.
-            identifier (str): The identifier of the instance.
-            key_path (str): The path to the key pair associated with the instance.
+            destroy_parameters (InstancePayload): The parameters for destroying the instance.
         """
-        instance_dir = Path(instance_dir)
-        cls._destroy_instance(instance_dir, identifier, key_path)
-        shutil.rmtree(instance_dir, ignore_errors=True)
+        destroy_parameters.instance_dir = Path(destroy_parameters.instance_dir)
+        cls._destroy_instance(destroy_parameters)
+        shutil.rmtree(destroy_parameters.instance_dir, ignore_errors=True)
 
     @classmethod
     @abstractmethod
@@ -133,14 +131,12 @@ class Provider(ABC):
 
     @classmethod
     @abstractmethod
-    def _destroy_instance(cls, instance_dir: Path, identifier: str, key_path: str) -> None:
+    def _destroy_instance(cls, destroy_parameters: InstancePayload) -> None:
         """
         Abstract method that destroys an existing instance.
 
         Args:
-            instance_dir (Path): The directory of the instance.
-            identifier (str): The identifier of the instance.
-            key_path (str): The path to the key pair associated with the instance.
+            destroy_parameters (InstancePayload): The parameters for destroying the instance.
         """
         pass
 

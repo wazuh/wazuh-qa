@@ -1,13 +1,15 @@
 from pathlib import Path
 from pydantic import BaseModel, IPvAnyAddress, field_validator, model_validator
 from typing_extensions import Literal
+from .credentials import Credentials
 
 
 class ConnectionInfo(BaseModel):
     hostname: str
     user: str
     port: int
-    private_key: str
+    private_key: str | None = None
+    password: str | None = None
 
     @field_validator('port', mode='before')
     @classmethod
@@ -24,6 +26,7 @@ class InventoryOutput(BaseModel):
     ansible_user: str
     ansible_port: int
     ansible_ssh_private_key_file: str
+    ansible_password: str | None = None
 
 
 class TrackOutput(BaseModel):
@@ -31,6 +34,11 @@ class TrackOutput(BaseModel):
     provider: str
     instance_dir: str
     key_path: str
+    host_identifier: str = None
+    host_instance_dir: str | Path = None
+    ssh_port: int | None = None
+    platform: str
+    arch: str
 
 
 class InputPayload(BaseModel):
@@ -46,6 +54,7 @@ class InputPayload(BaseModel):
     label_issue: str | None = None
     label_team: str | None = None
     label_termination_date: str | None = None
+    instance_name: str | None = None
 
 class CreationPayload(InputPayload):
     provider: str
@@ -95,5 +104,24 @@ class CreationPayload(InputPayload):
         return path
 
 
-class DeletionPayload(InputPayload):
+class TrackPayload(BaseModel):
     track_output: Path
+
+class InstancePayload(BaseModel):
+    identifier: str
+    instance_dir: str | Path
+    key_path: Path | None = None
+    host_identifier: str  | None = None
+    host_instance_dir: str | Path | None = None
+    macos_host_parameters: dict | None = None
+    ssh_port: str | None = None
+    platform: str
+    arch: str | None = None
+    user: str | None = None
+
+    @field_validator('ssh_port', mode='before')
+    def validate_port(cls, value) -> str | None:
+        if not value:
+            return
+
+        return str(value)

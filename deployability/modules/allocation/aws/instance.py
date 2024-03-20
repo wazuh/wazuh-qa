@@ -2,7 +2,7 @@ import boto3
 
 from pathlib import Path
 from modules.allocation.generic import Instance
-from modules.allocation.generic.models import ConnectionInfo
+from modules.allocation.generic.models import ConnectionInfo, InstancePayload
 from modules.allocation.generic.utils import logger
 from .credentials import AWSCredentials
 
@@ -19,23 +19,27 @@ class AWSInstance(Instance):
         user (str): User associated with the instance.
     """
 
-    def __init__(self, path: str | Path, identifier: str, credentials: AWSCredentials = None, user: str = None) -> None:
+    def __init__(self, instance_parameters: InstancePayload, credentials: AWSCredentials = None) -> None:
         """
         Initialize an AWSInstance object.
 
         Args:
-            path (str or Path): Directory where instance data is stored.
-            identifier (str): Identifier of the instance.
+            instance_parameters (InstancePayload): The parameters of the instance.
             credentials (AWSCredentials): AWS credentials object.
-            user (str): User associated with the instance.
         """
-        super().__init__(path, identifier, credentials)
-        self._user = user
+        super().__init__(instance_parameters, credentials)
         self._client = boto3.resource('ec2')
-        self._instance = self._client.Instance(self.identifier)
+        self._instance = self._client.Instance(instance_parameters.identifier)
+        self.platform = instance_parameters.platform
         if not self.credentials:
             logger.debug(f"No credentials found. Loading from instance directory.")
             self.credentials = self.__get_credentials()
+        self.host_identifier = instance_parameters.host_identifier
+        self.host_instance_dir = instance_parameters.host_instance_dir
+        self.macos_host_parameters = instance_parameters.macos_host_parameters
+        self.arch = instance_parameters.arch
+        self.ssh_port = instance_parameters.ssh_port
+        self._user = instance_parameters.user
 
     def start(self) -> None:
         """Start the AWS EC2 instance."""
@@ -68,9 +72,9 @@ class AWSInstance(Instance):
             ConnectionInfo: SSH connection information.
         """
         return ConnectionInfo(hostname=self._instance.public_dns_name,
-                              user=self._user,
-                              port=22,
-                              private_key=str(self.credentials.key_path))
+                                user=self._user,
+                                port=2200,
+                                private_key=str(self.credentials.key_path))
 
     def __get_credentials(self) -> AWSCredentials:
         """

@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
+from .utils import logger
 
 from .credentials import Credentials
-from .models import ConnectionInfo
+from .models import ConnectionInfo, InstancePayload
 
 
 class Instance(ABC):
@@ -18,28 +19,36 @@ class Instance(ABC):
         credentials (Credentials): The credentials of the instance.
     """
 
-    def __init__(self, path: str | Path, identifier: str, credentials: Credentials = None) -> None:
+    def __init__(self, instance_parameters: InstancePayload, credentials: Credentials = None) -> None:
         """
         Initializes an Instance object.
 
         Args:
-            path (str | Path): The path of the instance.
-            identifier (str): The identifier of the instance.
+            instance_parameters (InstancePayload): The parameters of the instance.
             credentials (Credentials, optional): The credentials of the instance. Defaults to None.
 
         Raises:
             ValueError: If the path does not exist or is not a directory.
             ValueError: If the credentials are not a subclass of Credentials.
         """
-        path = Path(path)
+        path = Path(instance_parameters.instance_dir)
         if not path.exists() or not path.is_dir():
-            raise ValueError(f"Invalid instance path: {path}")
+            logger.error(f"Invalid instance path: {path}")
+            exit(1)
         if credentials and not issubclass(type(credentials), Credentials):
-            raise ValueError(f"Invalid credentials.")
+            logger.error(f"Invalid credentials: {credentials}")
+            exit(1)
 
         self.path: Path = path
-        self.identifier: str = str(identifier)
+        self.identifier: str = str(instance_parameters.identifier)
         self.credentials: Credentials = credentials
+        self.host_identifier: str = instance_parameters.host_identifier
+        self.host_instance_dir: Path = instance_parameters.host_instance_dir
+        self.ssh_port: str = instance_parameters.ssh_port
+        self.macos_host_parameters: dict = instance_parameters.macos_host_parameters
+        self.platform: str = instance_parameters.platform
+        self.arch: str = instance_parameters.arch
+        self.user: str = instance_parameters.user
 
     @abstractmethod
     def start(self) -> None:
