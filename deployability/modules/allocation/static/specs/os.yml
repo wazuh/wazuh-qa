@@ -136,8 +136,16 @@ aws:
     ami: ami-0d23ec1228995e83b
     zone: us-east-1
     user: ubuntu
+  linux-ubuntu-18.04-arm64:
+    ami: ami-0c7625066eaff908f
+    zone: us-east-1
+    user: ubuntu
   linux-ubuntu-20.04-amd64:
     ami: ami-0261755bbcb8c4a84
+    zone: us-east-1
+    user: ubuntu
+  linux-ubuntu-20.04-arm64:
+    ami: ami-05f45f2e962205865
     zone: us-east-1
     user: ubuntu
   # Debian
@@ -145,12 +153,24 @@ aws:
     ami: ami-0aef3e5090bf17640
     zone: us-east-1
     user: admin
+  linux-debian-10-arm64:
+    ami: ami-0638210d31ea53567
+    zone: us-east-1
+    user: admin
   linux-debian-11-amd64:
     ami: ami-0f63aa666117f7cc1
     zone: us-east-1
     user: admin
+  linux-debian-11-arm64:
+    ami: ami-02a23764e4c26b541
+    zone: us-east-1
+    user: admin
   linux-debian-12-amd64:
     ami: ami-058bd2d568351da34
+    zone: us-east-1
+    user: admin
+  linux-debian-12-arm64:
+    ami: ami-0f58aa386a2280f35
     zone: us-east-1
     user: admin
   # Oracle Linux
@@ -176,13 +196,25 @@ aws:
     ami: ami-08f3662e2d5b3989a
     zone: us-east-1
     user: ec2-user
+  linux-suse-15-arm64:
+    ami: ami-0b9eb3aa813f0e4d7
+    zone: us-east-1
+    user: ec2-user
   # Centos
   linux-centos-7-amd64:
     ami: ami-0aedf6b1cb669b4c7
     zone: us-east-1
     user: ec2-user
+  linux-centos-7-arm64:
+    ami: ami-08dbbdbfc4fa2f393
+    zone: us-east-1
+    user: ec2-user
   linux-centos-8-amd64:
     ami: ami-0ee534f954d1b2c98
+    zone: us-east-1
+    user: ec2-user
+  linux-centos-8-arm64:
+    ami: ami-0c2b701a4792b179b
     zone: us-east-1
     user: ec2-user
   linux-centos-9-amd64:
@@ -202,8 +234,16 @@ aws:
     ami: ami-054333d53aa32850c
     zone: us-east-1
     user: ec2-user
+  linux-redhat-8-arm64:
+    ami: ami-05bcb9a3c5cfe07c9
+    zone: us-east-1
+    user: ec2-user
   linux-redhat-9-amd64:
     ami: ami-026ebd4cfe2c043b2
+    zone: us-east-1
+    user: ec2-user
+  linux-redhat-9-arm64:
+    ami: ami-03d6a5256a46c9feb
     zone: us-east-1
     user: ec2-user
   # Amazon
@@ -211,22 +251,58 @@ aws:
     ami: ami-0bb4c991fa89d4b9b
     zone: us-east-1
     user: ec2-user
+  linux-amazon-2-arm64:
+    ami: ami-03c5a38d438cf3d3e
+    zone: us-east-1
+    user: ec2-user
   linux-amazon-2023-amd64:
     ami: ami-067d1e60475437da2
     zone: us-east-1
     user: ec2-user
+  linux-amazon-2023-arm64:
+    ami: ami-08b46fd32a1a5be7f
+    zone: us-east-1
+    user: ec2-user
   # Fedora
+  linux-fedora-34-amd64:
+    ami: ami-00c998fee16a6efd1
+    zone: us-east-1
+    user: fedora
+  linux-fedora-35-amd64:
+    ami: ami-0009c66e36c13502d
+    zone: us-east-1
+    user: fedora
+  linux-fedora-36-amd64:
+    ami: ami-07299ccc184de5105
+    zone: us-east-1
+    user: fedora
   linux-fedora-37-amd64:
-    ami: ami-0a3279828fb6dad65
+    ami: ami-0aab397f94a2c8536
     zone: us-east-1
-    user: ec2-user
+    user: fedora
   linux-fedora-38-amd64:
-    ami:
+    ami: ami-00eda974dc333e48f
     zone: us-east-1
-    user: ec2-user
+    user: fedora
+  linux-fedora-39-amd64:
+    ami: ami-05e56180581b70076
+    zone: us-east-1
+    user: fedora
   # Rocky Linux
+  linux-rocky-8-amd64:
+    ami: ami-011ef2017d41cb239
+    zone: us-east-1
+    user: rocky
+  linux-rocky-8-arm64:
+    ami: ami-0ad512af1b9f6ef91
+    zone: us-east-1
+    user: rocky
   linux-rocky-9-amd64:
     ami: ami-09c77dc92e45bc3ea
+    zone: us-east-1
+    user: rocky
+  linux-rocky-9-arm64:
+    ami: ami-001f90eb122403b4c
     zone: us-east-1
     user: rocky
   # Macos
