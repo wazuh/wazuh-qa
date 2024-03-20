@@ -92,8 +92,7 @@ class AWSProvider(Provider):
             config = cls.__parse_config(params, credentials, issue, label_team, termination_date, name)
             #Generate dedicated host for macOS instances
             if platform == 'macos':
-                #host_identifier = cls._generate_dedicated_host(config, str(params.composite_name.split("-")[3]))
-                host_identifier = "h-063f33be1f52efbe9"
+                host_identifier = cls._generate_dedicated_host(config, str(params.composite_name.split("-")[3]))
                 config = cls.__parse_config(params, credentials, issue, label_team, termination_date, name, host_identifier)
         else:
             logger.debug(f"Using provided config")
