@@ -1,13 +1,12 @@
-import ast
-
-from pathlib import Path
+import json
+import os
 
 from modules.generic import Ansible, Inventory
 from modules.generic.utils import Utils
+from pathlib import Path
 from .models import InputPayload, ExtraVars
 from .utils import logger
-import os
-import json
+
 class Tester:
     _playbooks_dir = Path(__file__).parent / 'playbooks'
     _setup_playbook = _playbooks_dir / 'setup.yml'
@@ -24,48 +23,51 @@ class Tester:
         """
         payload = InputPayload(**dict(payload))
         extra_vars = cls._get_extra_vars(payload).model_dump()
-        targets_paths = payload.targets
-        for target_path in targets_paths:
-            path = ', '.join(list(eval(target_path).values()))
-            target = Inventory(**Utils.load_from_yaml((path)))
-            logger.info(f"Running tests for {target.ansible_host}")  
+
         targets = {}
-        for item in targets_paths:
-            dictionary = eval(item)
-            targets.update(dictionary)
-        target_string = json.dumps(targets)
-        extra_vars['targets'] = target_string.replace('"',"")
-        dependencies_paths = payload.dependencies
-        for dependency_path in dependencies_paths:
-            path = ', '.join(list(eval(dependency_path).values()))
-            dependency = Inventory(**Utils.load_from_yaml((path)))
-            logger.info(f"Dependencies {dependency.ansible_host}")  
         dependencies = {}
-        for item in targets_paths:
-            dictionary = eval(item)
-            dependencies.update(dictionary)
-        target_string = json.dumps(dependencies)
-        extra_vars['dependencies'] = target_string.replace('"',"")
+
+        # Process targets and dependencies
+        for path_type, paths_list in [("targets", payload.targets), ("dependencies", payload.dependencies)]:
+            for path in paths_list:
+                dictionary = eval(path)
+                inventory = Inventory(**Utils.load_from_yaml(', '.join(dictionary.values())))
+                logger.info(f"Running tests for {inventory.ansible_host}") if path_type == "targets" else logger.info(f"Dependencies {inventory.ansible_host}")
+                if path_type == "targets":
+                    targets.update(dictionary)
+                else:
+                    dependencies.update(dictionary)
+
+        extra_vars['targets'] = json.dumps(targets).replace('"', "")
+        extra_vars['dependencies'] = json.dumps(dependencies).replace('"', "")
+
+        # Set extra vars
         extra_vars['local_host_path'] = str(Path(__file__).parent.parent.parent)
         extra_vars['current_user'] = os.getlogin()
+
         logger.debug(f"Using extra vars: {extra_vars}")
-        for target in targets_paths:
-            target_value = eval(target).values()
+
+        ansible = None
+
+        # Setup Ansible and run tests
+        for target_path in payload.targets:
+            target_value = eval(target_path).values()
             target_inventory = Inventory(**Utils.load_from_yaml(str(list(target_value)[0])))
             ansible = Ansible(ansible_data=target_inventory.model_dump())
             cls._setup(ansible, extra_vars['working_dir'])
 
-        target_inventory = Inventory(**Utils.load_from_yaml(str(list(eval(targets_paths[0]).values())[0])))
+        # Run tests
+        target_inventory = Inventory(**Utils.load_from_yaml(str(list(eval(payload.targets[0]).values())[0])))
         ansible = Ansible(ansible_data=target_inventory.model_dump())
         cls._run_tests(payload.tests, ansible, extra_vars)
 
-        for target in targets_paths:
-            target_value = eval(target).values()
-            target_inventory = Inventory(**Utils.load_from_yaml(str(list(target_value)[0])))
-            if payload.cleanup:
+        # Clean up if required
+        if payload.cleanup:
+            for target_path in payload.targets:
+                target_value = eval(target_path).values()
+                target_inventory = Inventory(**Utils.load_from_yaml(str(list(target_value)[0])))
                 logger.info("Cleaning up")
                 cls._cleanup(ansible, extra_vars['working_dir'])
-
 
     @classmethod
     def _get_extra_vars(cls, payload: InputPayload) -> ExtraVars:

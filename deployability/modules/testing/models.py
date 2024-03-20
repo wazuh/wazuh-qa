@@ -1,6 +1,7 @@
 from pathlib import Path
-from pydantic import BaseModel, field_validator, model_validator
 from typing import Literal
+
+from pydantic import BaseModel, field_validator, model_validator
 
 
 class ExtraVars(BaseModel):
@@ -26,15 +27,3 @@ class InputPayload(ExtraVars):
             value = value.split(',')
 
         return value
-
-    @field_validator('targets', mode='before')
-    def validate_targets(cls, values) -> list:
-        """Validate required fields."""
-
-        return values
-
-    @model_validator(mode='before')
-    def validate_dependencies(cls, values) -> list:
-        """Validate required fields."""
-
-        return values

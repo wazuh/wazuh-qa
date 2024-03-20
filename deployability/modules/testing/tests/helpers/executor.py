@@ -1,9 +1,10 @@
-import yaml
-import subprocess
-import requests
-import urllib3
-from base64 import b64encode
 import json
+import requests
+import subprocess
+import urllib3
+import yaml
+
+from base64 import b64encode
 
 
 class Executor:
@@ -32,6 +33,7 @@ class Executor:
 
         return result.stdout
 
+
     @staticmethod
     def execute_commands(inventory_path, commands=[]) -> dict:
 
@@ -56,7 +58,6 @@ class Executor:
             ]
 
             results[command] = subprocess.run(ssh_command, stdout=subprocess.PIPE, text=True).stdout
-
         return results
 
 

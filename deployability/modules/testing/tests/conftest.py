@@ -1,7 +1,5 @@
-import os
-import re
-import json
 import pytest
+
 
 def pytest_addoption(parser):
     parser.addoption('--wazuh_version', required=False, help='Wazuh version to test files.')

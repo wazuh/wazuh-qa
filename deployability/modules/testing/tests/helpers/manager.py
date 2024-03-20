@@ -1,7 +1,9 @@
 import requests
-from .generic import HostInformation, HostConfiguration
+
+from .constants import CLUSTER_CONTROL, AGENT_CONTROL, WAZUH_CONF, WAZUH_ROOT
 from .executor import Executor, WazuhAPI
-from .constants import WAZUH_CONTROL, CLUSTER_CONTROL, AGENT_CONTROL, CLIENT_KEYS, WAZUH_CONF, WAZUH_ROOT
+from .generic import HostInformation, CheckFiles
+
 
 class WazuhManager:
 
@@ -94,6 +96,89 @@ class WazuhManager:
 
 
     @staticmethod
+    def install_manager_callback(wazuh_params, manager_name, manager_params):
+        WazuhManager.install_manager(manager_params, manager_name, wazuh_params['wazuh_version'])
+
+
+    @staticmethod
+    def uninstall_manager_callback(manager_params):
+        WazuhManager.uninstall_manager(manager_params)
+
+
+    @staticmethod
+    def perform_action_and_scan(manager_params, action_callback):
+        result = CheckFiles.perform_action_and_scan(manager_params, action_callback)
+        os_name = HostInformation.get_os_name_from_inventory(manager_params)
+        if 'debian' in os_name:
+            filter_data = {
+                '/boot': {'added': [], 'removed': [], 'modified': ['grubenv']},
+                '/usr/bin': {
+                    'added': [
+                        'unattended-upgrade', 'gapplication', 'add-apt-repository', 'gpg-wks-server', 'pkexec', 'gpgsplit',
+                        'watchgnupg', 'pinentry-curses', 'gpg-zip', 'gsettings', 'gpg-agent', 'gresource', 'gdbus',
+                        'gpg-connect-agent', 'gpgconf', 'gpgparsemail', 'lspgpot', 'pkaction', 'pkttyagent', 'pkmon',
+                        'dirmngr', 'kbxutil', 'migrate-pubring-from-classic-gpg', 'gpgcompose', 'pkcheck', 'gpgsm', 'gio',
+                        'pkcon', 'gpgtar', 'dirmngr-client', 'gpg', 'filebeat', 'gawk', 'curl', 'update-mime-database',
+                        'dh_installxmlcatalogs', 'appstreamcli', 'lspgpot'
+                    ],
+                    'removed': [],
+                    'modified': []
+                },
+                '/root': {'added': ['trustdb.gpg'], 'removed': [], 'modified': []},
+                '/usr/sbin': {
+                    'added': [
+                        'update-catalog', 'applygnupgdefaults', 'addgnupghome', 'install-sgmlcatalog', 'update-xmlcatalog'
+                    ],
+                    'removed': [],
+                    'modified': []
+                }
+            }
+        else:
+            filter_data = {
+                '/boot': {
+                    'added': ['grub2', 'loader', 'vmlinuz', 'System.map', 'config-', 'initramfs'],
+                    'removed': [],
+                    'modified': ['grubenv']
+                },
+                '/usr/bin': {'added': ['filebeat'], 'removed': [], 'modified': []},
+                '/root': {'added': ['trustdb.gpg'], 'removed': [], 'modified': []},
+                '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
+            }
+
+        # Use of filters
+        for directory, changes in result.items():
+            if directory in filter_data:
+                for change, files in changes.items():
+                    if change in filter_data[directory]:
+                        result[directory][change] = [file for file in files if file.split('/')[-1] not in filter_data[directory][change]]
+
+        return result
+
+    @staticmethod
+    def perform_install_and_scan_for_manager(manager_params, manager_name, wazuh_params):
+        action_callback = lambda: WazuhManager.install_manager_callback(wazuh_params, manager_name, manager_params)
+        result = WazuhManager.perform_action_and_scan(manager_params, action_callback)
+        WazuhManager.assert_results(result)
+
+
+    @staticmethod
+    def perform_uninstall_and_scan_for_manager(manager_params):
+        action_callback = lambda: WazuhManager.uninstall_manager_callback(manager_params)
+        result = WazuhManager.perform_action_and_scan(manager_params, action_callback)
+        WazuhManager.assert_results(result)
+
+
+    @staticmethod
+    def assert_results(result):
+        categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
+        actions = ['added', 'modified', 'removed']
+        # Testing the results
+        for category in categories:
+            for action in actions:
+                assert result[category][action] == []
+
+
+    @staticmethod
     def get_cluster_info(inventory_path) -> None:
         """
         Returns the cluster information
@@ -158,6 +243,7 @@ class WazuhManager:
             str: The version of the manager.
         """
         response = requests.get(f"{wazuh_api.api_url}/?pretty=true", headers=wazuh_api.headers, verify=False)
+
         return eval(response.text)['data']['api_version']
 
 
@@ -169,6 +255,7 @@ class WazuhManager:
             str: The revision of the manager.
         """
         response = requests.get(f"{wazuh_api.api_url}/?pretty=true", headers=wazuh_api.headers, verify=False)
+
         return eval(response.text)['data']['revision']
 
 
@@ -180,6 +267,7 @@ class WazuhManager:
             str: The hostname of the manager.
         """
         response = requests.get(f"{wazuh_api.api_url}/?pretty=true", headers=wazuh_api.headers, verify=False)
+
         return eval(response.text)['data']['hostname']
 
 
@@ -191,6 +279,7 @@ class WazuhManager:
             Dict: The status of the manager's nodes.
         """
         response = requests.get(f"{wazuh_api.api_url}/manager/status", headers=wazuh_api.headers, verify=False)
+
         return eval(response.text)['data']['affected_items'][0]
 
 
@@ -202,4 +291,5 @@ class WazuhManager:
             List: The logs of the manager.
         """
         response = requests.get(f"{wazuh_api.api_url}/manager/logs", headers=wazuh_api.headers, verify=False)
+
         return eval(response.text)['data']['affected_items']

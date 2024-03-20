@@ -1,7 +1,8 @@
 import requests
 from .executor import Executor, WazuhAPI
 from .generic import HostInformation
-from .constants import WAZUH_CONTROL, CLUSTER_CONTROL, AGENT_CONTROL, CLIENT_KEYS, WAZUH_CONF, WAZUH_ROOT
+from .constants import WAZUH_ROOT
+
 
 class WazuhAgent:
 

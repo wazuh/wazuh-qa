@@ -1,8 +1,6 @@
-import json
 import pytest
 
-from ..helpers.manager import WazuhManager
-from ..helpers.generic import HostConfiguration, GeneralComponentActions
+from ..helpers.generic import GeneralComponentActions
 
 
 @pytest.fixture

@@ -1,8 +1,5 @@
 import pytest
-import json
 
-
-from ..helpers.manager import WazuhManager
 from ..helpers.generic import GeneralComponentActions
 
 
