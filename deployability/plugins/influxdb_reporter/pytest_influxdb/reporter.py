@@ -41,7 +41,9 @@ class InfluxDBReporter:
             config_file (str | None): Path to the InfluxDB configuration file (default is None).
         """
         self.error: str = None
-        self.execution_id: str = config.getoption('--execution-id') or str(uuid.uuid4())
+        self.exec_id: str = config.getoption('--execution-id') \
+                            or os.getenv('execution_id') \
+                            or str(uuid.uuid4())
 
         if config_file:
             # When the config file is specified, it has the priority
@@ -180,7 +182,7 @@ class InfluxDBReporter:
             'stage': test_report.when,
         }
         tags = {
-            'execution_id': self.execution_id,
+            'execution_id': self.exec_id,
             'test': test_report.fspath,
             'markers': self.__get_pytest_marks(test_report.keywords),
             'when': test_report.when,
