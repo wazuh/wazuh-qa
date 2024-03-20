@@ -184,15 +184,15 @@ aws:
   linux-oracle-7-amd64:
     ami: ami-0fb08d5eb039a9ebd
     zone: us-east-1
-    user: admin
+    user: ec2-user
   linux-oracle-8-amd64:
     ami: ami-04921b5223c6ab7f0
     zone: us-east-1
-    user: admin
+    user: ec2-user
   linux-oracle-9-amd64:
     ami: ami-01453ca80e53609e3
     zone: us-east-1
-    user: admin
+    user: ec2-user
   # openSUSE Linux
   linux-opensuse-15-amd64:
     ami: ami-06b6eb8f8fb7f2916
@@ -211,7 +211,7 @@ aws:
   linux-centos-8-amd64:
     ami: ami-0ee534f954d1b2c98
     zone: us-east-1
-    user: ec2-user
+    user: centos
   linux-centos-9-amd64:
     ami: ami-0259c451b16b72e24
     zone: us-east-1
@@ -242,15 +242,15 @@ aws:
     ami: ami-067d1e60475437da2
     zone: us-east-1
     user: ec2-user
-  # Fedora
-  linux-fedora-37-amd64:
-    ami: ami-0a3279828fb6dad65
-    zone: us-east-1
-    user: ec2-user
-  linux-fedora-38-amd64:
-    ami:
-    zone: us-east-1
-    user: ec2-user
+  # Fedora AMIs does not have official support on AWS TODO create a new AMI
+  #linux-fedora-37-amd64:
+  #  ami: ami-0a3279828fb6dad65
+  #  zone: us-east-1
+  #  user: ec2-user
+  #linux-fedora-38-amd64:
+  #  ami:
+  #  zone: us-east-1
+  #  user: ec2-user
   # Rocky Linux
   linux-rocky-9-amd64:
     ami: ami-09c77dc92e45bc3ea
