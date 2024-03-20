@@ -29,6 +29,7 @@ class InfluxDBReporter:
         token (str): The token to authenticate with the InfluxDB server.
         bucket (str): The bucket to write data to.
         org (str): The organization to write data to.
+        exec_id (str): The execution id to use for the report.
         error (str): Any error that occurred while reporting.
     """
 
@@ -41,6 +42,7 @@ class InfluxDBReporter:
             config_file (str | None): Path to the InfluxDB configuration file (default is None).
         """
         self.error: str = None
+        # Get the execution id from the command line or environment variable
         self.exec_id: str = config.getoption('--execution-id') \
                             or os.getenv('execution_id') \
                             or str(uuid.uuid4())
