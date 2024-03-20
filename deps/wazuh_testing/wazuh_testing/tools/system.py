@@ -464,7 +464,7 @@ class HostManager:
 
         return result
 
-    def install_package(self, host, url, system='ubuntu'):
+    def install_package(self, host, url, system='ubuntu', use_npm=False):
         """
         Installs a package on the specified host.
 
@@ -479,31 +479,40 @@ class HostManager:
 
         Example:
             host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
+            # To install a package via npm:
+            host_manager.install_package('my_host', 'package_name', use_npm=True)
         """
-        result = False
-        extension = '.msi'
 
-        if system == 'windows':
-            if url.lower().endswith(extension):
-                result = self.get_host(host).ansible("win_package", f"path={url} arguments=/passive", check=False)
-            else:
-                result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
-        elif system == 'ubuntu':
-            result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
-            if result['changed'] and result['stderr'] == '':
-                result = True
-        elif system == 'centos':
-            result = self.get_host(host).ansible("yum", f"name={url} state=present "
+        if use_npm:
+            result = self.get_host(host).ansible("shell", f"npm install -g {url}", check=False)
+            logging.info(f"npm package installed result {result}")
+            return result
+
+        else:
+            result = False
+            extension = '.msi'
+
+            if system == 'windows':
+                if url.lower().endswith(extension):
+                    result = self.get_host(host).ansible("win_package", f"path={url} arguments=/passive", check=False)
+                else:
+                    result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
+            elif system == 'ubuntu':
+                result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
+                if result['changed'] and result['stderr'] == '':
+                    result = True
+            elif system == 'centos':
+                result = self.get_host(host).ansible("yum", f"name={url} state=present "
                                                  'sslverify=false disable_gpg_check=True', check=False)
-        elif system == 'macos':
-            cmd = f"npm install {url}"
-            result = self.get_host(host).ansible("shell", cmd, check=False)
-            if not result.get('failed'):
-                result = True
+            elif system == 'macos':
+                package_name = url.split('/')[-1]
+                result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
+                cmd = f"installer -pkg {package_name} -target /"
+                result = self.get_host(host).ansible("command", cmd, check=False)
 
-        logging.info(f"Package installed result {result}")
+            logging.info(f"Package installed result {result}")
 
-        return result
+            return result
 
     def get_master_ip(self):
         """
