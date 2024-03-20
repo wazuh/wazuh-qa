@@ -22,6 +22,7 @@ def parse_arguments():
     parser.add_argument("--label-issue", required=False, default=None)
     parser.add_argument("--label-team", required=False, default=None)
     parser.add_argument("--label-termination-date", required=False, default=None)
+    parser.add_argument("--instance-name", required=False, default=None)
     return parser.parse_args()
 
 

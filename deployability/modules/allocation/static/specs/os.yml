@@ -92,13 +92,40 @@ vagrant:
   linux-rocky-9-amd64:
     box: generic/rocky9
     box_version: 4.3.12
-  # # Macos
-  # macos-ventura-13.04-amd64:
-  #   box: logantbond/ventura
-  #   box_version: 1.0.4
-  # macos-sonoma-14.2-amd64:
-  #   box: barindersingh/sonoma
-  #   box_version: 1.0.6
+  # Macos
+  macos-bigsur-11.0-amd64:
+    box: development/macos-big-sur
+    box_version: 0.0.0
+  macos-catalina-10.15.1-amd64:
+    box: development/macos-catalina
+    box_version: 0.0.0
+  macos-highsierra-10.13.6-amd64:
+    box: development/macos-high-sierra
+    box_version: 0.0.0
+  macos-mojave-10.14.3-amd64:
+    box: development/macos-mojave
+    box_version: 0.0.0
+  macos-sierra-10.12.6-amd64:
+    box: development/macos-sierra
+    box_version: 0.0.0
+  macos-sierracmake-10.12.6-amd64:
+    box: development/macos-sierra_cmake
+    box_version: 0.0.0
+  macos-sierragcc9-10.12.6-amd64:
+    box: development/macos-sierra_gcc9
+    box_version: 0.0.0
+  macos-monterey-12.6-arm64:
+    box: macos-12
+    box_version: 0.0.0
+  macos-monterey-12.0.1-amd64:
+    box: development/macos-monterey
+    box_version: 0.0.0
+  macos-ventura-13.4.1-arm64:
+    box: macos-13
+    box_version: 0.0.0
+  macos-sonoma-14.0-arm64:
+    box: macos-14
+    box_version: 0.0.0
   # Windows
   windows-desktop-10-amd64:
     box: gusztavvargadr/windows-10
@@ -180,7 +207,7 @@ aws:
   linux-centos-7-amd64:
     ami: ami-0aedf6b1cb669b4c7
     zone: us-east-1
-    user: ec2-user
+    user: centos
   linux-centos-8-amd64:
     ami: ami-0ee534f954d1b2c98
     zone: us-east-1
@@ -230,24 +257,28 @@ aws:
     zone: us-east-1
     user: rocky
   # Macos
-  macos-ventura-13.04-amd64:
-    ami: ami-05f4e10ccf8272fba
+  macos-ventura-13.6.4-amd64:
+    ami: ami-0e94a57427e4e0611
     zone: us-east-1
     user: ec2-user
-  macos-ventura-13.04-arm64:
-    ami: ami-05acb4959a4fc514d
+  macos-ventura-13.6.4-arm64:
+    ami: ami-0b288e8fb0e803b12
     zone: us-east-1
     user: ec2-user
-  macos-sonoma-14.2.1-amd64:
-    ami: ami-0308cf13df41f942f
+  macos-sonoma-14.3-amd64:
+    ami: ami-0873bd33f11079049
     zone: us-east-1
     user: ec2-user
-  macos-sonoma-14.2.1-arm64:
-    ami: ami-088797a8c678dfc1a
+  macos-sonoma-14.3-arm64:
+    ami: ami-0dd07a50e5e3d3ccb
     zone: us-east-1
     user: ec2-user
-  macos-monterey-12.7.2-arm64:
-    ami: ami-040d932478899fea7
+  macos-monterey-12.7.3-arm64:
+    ami: ami-0225fc57a58689798
+    zone: us-east-1
+    user: ec2-user
+  macos-monterey-12.7.3-amd64:
+    ami: ami-0a410356d12928dbc
     zone: us-east-1
     user: ec2-user
   # Windows
