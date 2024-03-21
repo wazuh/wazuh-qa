@@ -14,7 +14,7 @@ In the event that the tests are to be executed using AWS EC2 instances:
 |------------------------------|-------------------------------------------|
 |Basic_cluster                 |Ubuntu 22.04.2 LTS C5.XLarge 15GB SSD      |
 |Big_cluster_40_agents         |Ubuntu 22.04.2 LTS T3.Large 60GB SSD       |
-|Agentless_cluster             |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
+|Agentless_cluster             |Ubuntu 22.04.2 LTS C5.Large 30GB SSD       |
 |Four_manager_disconnected_node|Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
 |One_manager_agent             |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
 |Manager_agent                 |Ubuntu 22.04.2 LTS T3.Large 30GB SSD       |
