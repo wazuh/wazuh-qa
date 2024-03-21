@@ -51,7 +51,6 @@ class Tester:
 
         logger.debug(f"Using extra vars: {extra_vars}")
 
-        ansible = None
 
         # Setup and run tests
         target_inventory = Inventory(**Utils.load_from_yaml(str(list(eval(payload.targets[0]).values())[0])))
