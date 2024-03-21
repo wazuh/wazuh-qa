@@ -1,10 +1,13 @@
-import yaml
 import requests
+import socket
+import yaml
 
-from .executor import Executor, WazuhAPI
-from .generic import HostInformation
-from .constants import WAZUH_CONTROL, CLUSTER_CONTROL, AGENT_CONTROL, CLIENT_KEYS, WAZUH_CONF, WAZUH_ROOT
 from typing import List, Optional
+from .constants import WAZUH_CONF, WAZUH_ROOT
+from .executor import Executor, WazuhAPI
+from .generic import HostInformation, CheckFiles
+
+
 
 class WazuhAgent:
 
@@ -28,7 +31,7 @@ class WazuhAgent:
                 commands.extend([
                     f"curl -o wazuh-agent-{wazuh_version}-1.x86_64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.x86_64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.x86_64.rpm"
                 ])
-            elif distribution == 'rpm' or distribution == 'opensuse-leap' or distribution == 'amzn' and 'aarch64' in architecture:
+            elif distribution == 'rpm' and 'aarch64' in architecture:
                 commands.extend([
                     f"curl -o wazuh-agent-{wazuh_version}-1aarch64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.aarch64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.aarch64.rpm"
                 ])
@@ -89,14 +92,15 @@ class WazuhAgent:
         with open(manager_path, 'r') as yaml_file:
             manager_path = yaml.safe_load(yaml_file)
         host = manager_path.get('ansible_host')
-        
+
+        internal_ip = HostInformation.get_internal_ip_from_aws_dns(host) if 'amazonaws' in host else host
+
         commands = [
-            f"sed -i 's/<address>MANAGER_IP<\/address>/<address>{host}<\/address>/g' {WAZUH_CONF}",
+            f"sed -i 's/<address>MANAGER_IP<\/address>/<address>{internal_ip}<\/address>/g' {WAZUH_CONF}",
             "systemctl restart wazuh-agent"
-            ]
+        ]
 
         Executor.execute_commands(inventory_path, commands)
-
 
     @staticmethod
     def uninstall_agent(inventory_path, wazuh_version=None, wazuh_revision=None) -> None:
@@ -152,6 +156,108 @@ class WazuhAgent:
     def uninstall_agents( inventories_paths=[], wazuh_version: Optional[List[str]]=None, wazuh_revision: Optional[List[str]]=None) -> None:
         for index, inventory_path in enumerate(inventories_paths):
             WazuhAgent.uninstall_agent(inventory_path, wazuh_version[index], wazuh_revision[index])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @staticmethod
+    def install_agent_callback(wazuh_params, agent_name, agent_params):
+        WazuhAgent.install_agent(agent_params, agent_name, wazuh_params['wazuh_version'], wazuh_params['wazuh_revision'], wazuh_params['live'])
+
+
+    @staticmethod
+    def uninstall_agent_callback(wazuh_params, agent_params):
+        WazuhAgent.uninstall_agent(agent_params, wazuh_params['wazuh_version'], wazuh_params['wazuh_revision'])
+
+
+    @staticmethod
+    def perform_action_and_scan(agent_params, action_callback):
+        result = CheckFiles.perform_action_and_scan(agent_params, action_callback)
+        os_name = HostInformation.get_os_name_from_inventory(agent_params)
+        if 'debian' in os_name:
+            filter_data = {
+                '/boot': {'added': [], 'removed': [], 'modified': ['grubenv']},
+                '/usr/bin': {
+                    'added': [
+                        'unattended-upgrade', 'gapplication', 'add-apt-repository', 'gpg-wks-server', 'pkexec', 'gpgsplit',
+                        'watchgnupg', 'pinentry-curses', 'gpg-zip', 'gsettings', 'gpg-agent', 'gresource', 'gdbus',
+                        'gpg-connect-agent', 'gpgconf', 'gpgparsemail', 'lspgpot', 'pkaction', 'pkttyagent', 'pkmon',
+                        'dirmngr', 'kbxutil', 'migrate-pubring-from-classic-gpg', 'gpgcompose', 'pkcheck', 'gpgsm', 'gio',
+                        'pkcon', 'gpgtar', 'dirmngr-client', 'gpg', 'filebeat', 'gawk', 'curl', 'update-mime-database',
+                        'dh_installxmlcatalogs', 'appstreamcli', 'lspgpot'
+                    ],
+                    'removed': [],
+                    'modified': []
+                },
+                '/root': {'added': ['trustdb.gpg'], 'removed': [], 'modified': []},
+                '/usr/sbin': {
+                    'added': [
+                        'update-catalog', 'applygnupgdefaults', 'addgnupghome', 'install-sgmlcatalog', 'update-xmlcatalog'
+                    ],
+                    'removed': [],
+                    'modified': []
+                }
+            }
+        else:
+            filter_data = {
+                '/boot': {
+                    'added': ['grub2', 'loader', 'vmlinuz', 'System.map', 'config-', 'initramfs'],
+                    'removed': [],
+                    'modified': ['grubenv']
+                },
+                '/usr/bin': {'added': ['filebeat'], 'removed': [], 'modified': []},
+                '/root': {'added': ['trustdb.gpg'], 'removed': [], 'modified': []},
+                '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
+            }
+
+        # Use of filters
+        for directory, changes in result.items():
+            if directory in filter_data:
+                for change, files in changes.items():
+                    if change in filter_data[directory]:
+                        result[directory][change] = [file for file in files if file.split('/')[-1] not in filter_data[directory][change]]
+
+        return result
+
+    @staticmethod
+    def perform_install_and_scan_for_agent(agent_params, agent_name, wazuh_params):
+        action_callback = lambda: WazuhAgent.install_agent_callback(wazuh_params, agent_name, agent_params)
+        result = WazuhAgent.perform_action_and_scan(agent_params, action_callback)
+        WazuhAgent.assert_results(result)
+
+
+    @staticmethod
+    def perform_uninstall_and_scan_for_agent(agent_params, wazuh_params):
+        action_callback = lambda: WazuhAgent.uninstall_agent_callback(wazuh_params, agent_params)
+        result = WazuhAgent.perform_action_and_scan(agent_params, action_callback)
+        WazuhAgent.assert_results(result)
+
+
+    @staticmethod
+    def assert_results(result):
+        categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
+        actions = ['added', 'modified', 'removed']
+        # Testing the results
+        for category in categories:
+            for action in actions:
+                assert result[category][action] == []
+
+
+
+
+
+
+
 
 
 

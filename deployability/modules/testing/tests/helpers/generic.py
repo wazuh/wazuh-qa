@@ -1,14 +1,16 @@
-import yaml
+import boto3
 import chardet
-import time
+import os
 import re
 import subprocess
+import time
+import yaml
+import socket
+
 from pathlib import Path
-import os
-from .executor import Executor
-
 from .constants import WAZUH_CONTROL, CLIENT_KEYS
-
+from .executor import Executor
+from .utils import Utils
 
 class HostInformation:
 
@@ -118,46 +120,76 @@ class HostInformation:
         Returns:
             str: current directory
         """
-        return Executor.execute_command(inventory_path, 'pwd')
 
+        return Executor.execute_command(inventory_path, 'pwd').replace("\n","")
+
+    @staticmethod
+    def get_internal_ip_from_aws_dns(dns_name):
+        """
+        It returns the private AWS IP from dns_name
+
+        Args:
+            dns_name (str): host's dns public dns name
+
+        Returns:
+            str: private ip
+        """
+        ec2 = boto3.client('ec2')
+        response = ec2.describe_instances(Filters=[{'Name': 'dns-name', 'Values': [dns_name]}])
+        if response['Reservations']:
+            instance = response['Reservations'][0]['Instances'][0]
+            return instance['PrivateIpAddress']
+        else:
+            return None
 class HostConfiguration:
 
     @staticmethod
     def sshd_config(inventory_path) -> None:
+        """
+        Configures sshd_config file to connect using password
+
+        Args:
+            inventory_path: host's inventory path
+
+        """
+
         commands = ["sudo sed -i '/^PasswordAuthentication/s/^/#/' /etc/ssh/sshd_config", "sudo sed -i '/^PermitRootLogin no/s/^/#/' /etc/ssh/sshd_config", 'echo -e "PasswordAuthentication yes\nPermitRootLogin yes" | sudo tee -a /etc/ssh/sshd_config', 'sudo systemctl restart sshd', 'cat /etc/ssh/sshd_config']
         Executor.execute_commands(inventory_path, commands)
 
 
     @staticmethod
     def disable_firewall(inventory_path) -> None:
+        """
+        Disables firewall
+
+        Args:
+            inventory_path: host's inventory path
+
+        """
         commands = ["sudo systemctl stop firewalld", "sudo systemctl disable firewalld"]
         Executor.execute_commands(inventory_path, commands)
 
 
     @staticmethod
     def certs_create(wazuh_version, master_path, dashboard_path, indexer_paths=[], worker_paths=[]) -> None:
+        """
+        Creates wazuh certificates
+
+        Args:
+            wazuh_version (str): wazuh version
+            master_path (str): wazuh master inventory_path
+            dashboard_path (str): wazuh dashboard inventory_path
+            indexer_paths (list): wazuh indexers list
+            workers_paths (list): wazuh worker paths list
+
+        """
         current_directory = HostInformation.get_current_dir(master_path)
 
         wazuh_version = '.'.join(wazuh_version.split('.')[:2])
-        with open(master_path, 'r') as yaml_file:
-            inventory_data = yaml.safe_load(yaml_file)
-        master = inventory_data.get('ansible_host')
-
-        with open(dashboard_path, 'r') as yaml_file:
-            inventory_data = yaml.safe_load(yaml_file)
-        dashboard = inventory_data.get('ansible_host')
-
-        indexers = []
-        for indexer_path in indexer_paths:
-            with open(indexer_path, 'r') as yaml_file:
-                inventory_data = yaml.safe_load(yaml_file)
-            indexers.append(inventory_data.get('ansible_host'))
-
-        workers = []
-        for worker_path in worker_paths:
-            with open(worker_path, 'r') as yaml_file:
-                inventory_data = yaml.safe_load(yaml_file)
-            workers.append(inventory_data.get('ansible_host'))
+        master = socket.gethostbyname(Utils.extract_ansible_host(master_path))
+        dashboard = socket.gethostbyname(Utils.extract_ansible_host(dashboard_path))
+        indexers = [socket.gethostbyname(Utils.extract_ansible_host(indexer_path)) for indexer_path in indexer_paths]
+        workers = [socket.gethostbyname(Utils.extract_ansible_host(worker_path)) for worker_path in worker_paths]
 
         ##Basic commands to setup the config file, add the ip for the master & dashboard
         os_name = HostInformation.get_os_name_from_inventory(master_path)
@@ -165,22 +197,24 @@ class HostConfiguration:
             commands = [
                 f'wget https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh',
                 f'wget https://packages.wazuh.com/{wazuh_version}/config.yml',
-                f"sed -i '/^\s*#/d' {current_directory}/config.yml",
-                f"sed -i '0,/<wazuh-manager-ip>/s//{master}/' {current_directory}/config.yml",
-                f"sed -i '0,/<dashboard-node-ip>/s//{dashboard}/' {current_directory}/config.yml"
+                f"sed -i '/^\s*#/d' {current_directory}/config.yml"
             ]
         else:
             commands = [
                 f'curl -sO https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh',
                 f'curl -sO https://packages.wazuh.com/{wazuh_version}/config.yml',
-                f"sed -i '/^\s*#/d' {current_directory}/config.yml",
-                f"sed -i '0,/<wazuh-manager-ip>/s//{master}/' {current_directory}/config.yml",
-                f"sed -i '0,/<dashboard-node-ip>/s//{dashboard}/' {current_directory}/config.yml"
+                f"sed -i '/^\s*#/d' {current_directory}/config.yml"
             ]
 
         # Add master tag if there are workers
         if len(worker_paths) != 0:
             commands.append(f"""sed -i '/ip: "<wazuh-manager-ip>"/a\      node_type: master' {current_directory}/config.yml""")
+
+        # Add manager and dashboard IP
+        commands.extend([
+            f"sed -i '0,/<wazuh-manager-ip>/s//{master}/' {current_directory}/config.yml",
+            f"sed -i '0,/<dashboard-node-ip>/s//{dashboard}/' {current_directory}/config.yml"
+        ])
 
         # Adding workers
         for index, element in reversed(list(enumerate(workers))):
@@ -210,6 +244,15 @@ class HostConfiguration:
 
     @staticmethod
     def scp_to(from_inventory_path, to_inventory_path, file_name) -> None:
+        """
+        Send via SCP from one host to another host
+
+        Args:
+            from_inventory_path (str): host that owns the file to be sent path
+            to_inventory_path (str): host that recieves the file path
+            file_name (str): file name that will be send to home/{user}
+
+        """
         current_from_directory = HostInformation.get_current_dir(from_inventory_path)
         current_to_directory = HostInformation.get_current_dir(to_inventory_path)
         with open(from_inventory_path, 'r') as yaml_file:
@@ -219,61 +262,23 @@ class HostConfiguration:
             to_inventory_data = yaml.safe_load(yaml_file)
 
         # Defining variables
-        from_host = from_inventory_data.get('ansible_host')
+        from_host = socket.gethostbyname(from_inventory_data.get('ansible_host'))
         from_key = from_inventory_data.get('ansible_ssh_private_key_file')
         from_user = from_inventory_data.get('ansible_user')
-        to_host = to_inventory_data.get('ansible_host')
+        from_port = from_inventory_data.get('ansible_port:')
+
+        to_host = socket.gethostbyname(to_inventory_data.get('ansible_host'))
         to_key = to_inventory_data.get('ansible_ssh_private_key_file')
         to_user = from_inventory_data.get('ansible_user')
+        to_port = to_inventory_data.get('ansible_port:')
 
         # Allowing handling permissions
         if file_name == 'wazuh-install-files.tar':
             Executor.execute_command(from_inventory_path, f'chmod +rw {file_name}')
 
         # SCP
-        subprocess.run(f'scp -i {from_key} -o StrictHostKeyChecking=no {from_user}@{from_host}:{current_from_directory}/{file_name} {Path(__file__).parent}'  , shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        subprocess.run(f'scp -i {to_key} -o StrictHostKeyChecking=no {Path(__file__).parent}/{file_name} {to_user}@{to_host}:{current_to_directory}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-        # Restoring permissions
-        if file_name == 'wazuh-install-files.tar':
-            Executor.execute_command(from_inventory_path, f'chmod 600 {file_name}')
-            Executor.execute_command(to_inventory_path, f'chmod 600 {file_name}')
-
-        # Deleting file from localhost
-        file_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), file_name)
-
-        if os.path.exists(file_path):
-            os.remove(file_path)
-            print(f"The file {file_name} has been deleted.")
-        else:
-            print(f"The file {file_name} does not exist.")
-
-
-    @staticmethod
-    def scp_to(from_inventory_path, to_inventory_path, file_name) -> None:
-        current_from_directory = HostInformation.get_current_dir(from_inventory_path)
-        current_to_directory = HostInformation.get_current_dir(to_inventory_path)
-        with open(from_inventory_path, 'r') as yaml_file:
-            from_inventory_data = yaml.safe_load(yaml_file)
-
-        with open(to_inventory_path, 'r') as yaml_file:
-            to_inventory_data = yaml.safe_load(yaml_file)
-
-        # Defining variables
-        from_host = from_inventory_data.get('ansible_host')
-        from_key = from_inventory_data.get('ansible_ssh_private_key_file')
-        from_user = from_inventory_data.get('ansible_user')
-        to_host = to_inventory_data.get('ansible_host')
-        to_key = to_inventory_data.get('ansible_ssh_private_key_file')
-        to_user = from_inventory_data.get('ansible_user')
-
-        # Allowing handling permissions
-        if file_name == 'wazuh-install-files.tar':
-            Executor.execute_command(from_inventory_path, f'chmod +rw {file_name}')
-
-        # SCP
-        subprocess.run(f'scp -i {from_key} -o StrictHostKeyChecking=no {from_user}@{from_host}:{current_from_directory}/{file_name} {Path(__file__).parent}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        subprocess.run(f'scp -i {to_key} -o StrictHostKeyChecking=no {Path(__file__).parent}/{file_name} {to_user}@{to_host}:{current_to_directory}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        subprocess.run(f'scp -i {from_key} -o StrictHostKeyChecking=no -P {from_port} {from_user}@{from_host}:{current_from_directory}/{file_name} {Path(__file__).parent}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        subprocess.run(f'scp -i {to_key} -o StrictHostKeyChecking=no -P {to_port} {Path(__file__).parent}/{file_name} {to_user}@{to_host}:{current_to_directory}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         # Restoring permissions
         if file_name == 'wazuh-install-files.tar':
@@ -379,6 +384,7 @@ class CheckFiles:
 
     @staticmethod
     def _perform_scan(inventory_path, os_type, directories, filters):
+
         return {directory: CheckFiles._checkfiles(inventory_path, os_type, directory, filters) for directory in directories}
 
 
@@ -387,11 +393,23 @@ class CheckFiles:
         added_files = list(set(second_scan) - set(initial_scan))
         removed_files = list(set(initial_scan) - set(second_scan))
         modified_files = [path for path in set(initial_scan) & set(second_scan) if initial_scan[path] != second_scan[path]]
+
         return {'added': added_files, 'removed': removed_files, 'modified': modified_files}
 
 
     @staticmethod
     def perform_action_and_scan(inventory_path, callback) -> dict:
+        """
+        Performs an action (callback) and scans pre and post action
+
+        Args:
+            inventory_path: host's inventory path
+            callback (callback): callback
+
+
+        Returns:
+            returns a dictionary that contains the changes between the pre and the post scan
+        """
         os_type = HostInformation.get_os_type(inventory_path)
 
         directories = ['/boot', '/usr/bin', '/root', '/usr/sbin']
@@ -519,9 +537,7 @@ class GeneralComponentActions:
         Returns:
             bool: True/False
         """
-        return 'active' == Executor.execute_command(inventory_path, f'systemctl is-active {host_role}')
-
-
+        return 'active' == Executor.execute_command(inventory_path, f'systemctl is-active {host_role}').replace("\n", "")
 
 class Waits:
 

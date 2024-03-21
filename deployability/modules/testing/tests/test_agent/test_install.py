@@ -2,37 +2,8 @@ import pytest
 
 from ..helpers.manager import WazuhManager
 from ..helpers.agent import WazuhAgent
-from ..helpers.generic import HostConfiguration, CheckFiles, HostInformation, GeneralComponentActions
+from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
 from ..helpers.constants import WAZUH_ROOT
-
-
-def install_agent_callback(wazuh_params, agent_name, agent_params):
-    WazuhAgent.install_agent(agent_params, agent_name, wazuh_params['wazuh_version'], wazuh_params['wazuh_revision'], wazuh_params['live'])
-
-
-def perform_action_and_scan_for_agent(agent_params, agent_name, wazuh_params):
-    result = CheckFiles.perform_action_and_scan(agent_params, lambda: install_agent_callback(wazuh_params, agent_name, agent_params))
-    categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
-    actions = ['added', 'modified', 'removed']
-
-    # Selecting filter
-    os_name = HostInformation.get_os_name_from_inventory(agent_params)
-    if 'debian' in os_name:
-        filter_data= {'/boot': {'added': [], 'removed': [], 'modified': ['grubenv']}, '/usr/bin': {'added': ['unattended-upgrade', 'gapplication', 'add-apt-repository', 'gpg-wks-server', 'pkexec', 'gpgsplit', 'watchgnupg', 'pinentry-curses', 'gpg-zip', 'gsettings', 'gpg-agent', 'gresource', 'gdbus', 'gpg-connect-agent', 'gpgconf', 'gpgparsemail', 'lspgpot', 'pkaction', 'pkttyagent', 'pkmon', 'dirmngr', 'kbxutil', 'migrate-pubring-from-classic-gpg', 'gpgcompose', 'pkcheck', 'gpgsm', 'gio', 'pkcon', 'gpgtar', 'dirmngr-client', 'gpg', 'filebeat', 'gawk', 'curl', 'update-mime-database', 'dh_installxmlcatalogs', 'appstreamcli','lspgpot'], 'removed': [], 'modified': []}, '/root': {'added': ['trustdb.gpg'], 'removed': [], 'modified': []}, '/usr/sbin': {'added': ['update-catalog', 'applygnupgdefaults', 'addgnupghome', 'install-sgmlcatalog', 'update-xmlcatalog'], 'removed': [], 'modified': []}}
-    else:
-        filter_data = {'/boot': {'added': [], 'removed': [], 'modified': ['grubenv']}, '/usr/bin': {'added': ['filebeat'], 'removed': [], 'modified': []}, '/root': {'added': ['trustdb.gpg'], 'removed': [], 'modified': []}, '/usr/sbin': {'added': [], 'removed': [], 'modified': []}}
-
-    # Use of filters
-    for directory, changes in result.items():
-        if directory in filter_data:
-            for change, files in changes.items():
-                if change in filter_data[directory]:
-                    result[directory][change] = [file for file in files if file.split('/')[-1] not in filter_data[directory][change]]
-
-    # Testing the results
-    for category in categories:
-        for action in actions:
-            assert result[category][action] == []
 
 @pytest.fixture
 def wazuh_params(request):
@@ -74,6 +45,7 @@ def setup_test_environment(wazuh_params):
     wazuh_params['agents'] = {key: value for key, value in targets_dict.items() if key.startswith('agent-')}
 
 def test_installation(wazuh_params):
+
     # Disabling firewall for all managers
     for manager_name, manager_params in wazuh_params['managers'].items():
         HostConfiguration.disable_firewall(manager_params)
@@ -86,7 +58,7 @@ def test_installation(wazuh_params):
 
     # Agent installation
     for agent_names, agent_params in wazuh_params['agents'].items():
-        perform_action_and_scan_for_agent(agent_params, agent_names, wazuh_params)
+        WazuhAgent.perform_install_and_scan_for_agent(agent_params, agent_names, wazuh_params)
 
     # Testing installation directory
     for agent in wazuh_params['agents'].values():

@@ -2,12 +2,6 @@
   become: true
   become_user: "{{ current_user }}"
   tasks:
-
-    - name: Cleaning old key ssh-keygen registries
-      ansible.builtin.command:
-        cmd: "ssh-keygen -f /home/{{ current_user }}/.ssh/known_hosts -R '{{ item }}'"
-      loop: {{ hosts_ip }}
-
     - name: Test {{ test }} for {{ component }}
       command: "python3 -m pytest modules/testing/tests/test_{{component}}/test_{{ test }}.py  -v --wazuh_version={{ wazuh_version }} --wazuh_revision={{ wazuh_revision }}  --component={{ component }} --dependencies='{{ dependencies }}' --targets='{{ targets }}' --live={{ live }} -s"
       args:

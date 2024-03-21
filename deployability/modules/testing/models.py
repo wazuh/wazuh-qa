@@ -28,15 +28,3 @@ class InputPayload(ExtraVars):
             value = value.split(',')
 
         return value
-
-    @field_validator('targets', mode='before')
-    def validate_targets(cls, values) -> list:
-        """Validate required fields."""
-
-        return values
-
-    @model_validator(mode='before')
-    def validate_dependencies(cls, values) -> list:
-        """Validate required fields."""
-
-        return values

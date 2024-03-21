@@ -1,9 +1,10 @@
-import yaml
-import subprocess
-import requests
-import urllib3
-from base64 import b64encode
 import json
+import requests
+import subprocess
+import urllib3
+import yaml
+
+from base64 import b64encode
 
 
 class Executor:
@@ -24,13 +25,15 @@ class Executor:
             "-i", private_key_path,
             "-o", "StrictHostKeyChecking=no",
             "-o", "UserKnownHostsFile=/dev/null",
+            "-p", str(port),
             f"{username}@{host}",
             "sudo", 
             command
         ]
         result = subprocess.run(ssh_command, stdout=subprocess.PIPE, text=True)
 
-        return result.stdout.replace("\n","")
+        return result.stdout
+
 
     @staticmethod
     def execute_commands(inventory_path, commands=[]) -> dict:
@@ -50,41 +53,37 @@ class Executor:
                 "-i", private_key_path,
                 "-o", "StrictHostKeyChecking=no",
                 "-o", "UserKnownHostsFile=/dev/null",
+                "-p", str(port),
                 f"{username}@{host}",
                 "sudo", 
                 command
             ]
 
             results[command] = subprocess.run(ssh_command, stdout=subprocess.PIPE, text=True).stdout
-
         return results
 
 
 class WazuhAPI:
-    def __init__(self, inventory_path, wazuh_user='wazuh', wazuh_password='wazuh'):
+    def __init__(self, inventory_path):
         self.inventory_path = inventory_path
         self.api_url = None
         self.headers = None
-        self.wazuh_user = wazuh_user
-        self.wazuh_password = self._get_wazuh_api_password()
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self._authenticate()
-
-
-    def _get_wazuh_api_password(self):
-            #------------Patch issue https://github.com/wazuh/wazuh-packages/issues/2883---------------------
-            file_path = Executor.execute_command(self.inventory_path, 'pwd').replace("\n","") + '/wazuh-install-files/wazuh-passwords.txt '
-            if not 'true' in Executor.execute_command(self.inventory_path, f'test -f {file_path} && echo "true" || echo "false"'):
-                Executor.execute_command(self.inventory_path, 'tar -xvf wazuh-install-files.tar')
-            return Executor.execute_command(self.inventory_path, "grep api_password wazuh-install-files/wazuh-passwords.txt | head -n 1 | awk '{print $NF}'").replace("'","").replace("\n","")
-
 
     def _authenticate(self):
         with open(self.inventory_path, 'r') as yaml_file:
             inventory_data = yaml.safe_load(yaml_file)
 
-        user = self.wazuh_user 
-        password = self.wazuh_password
+        user = 'wazuh'
+        
+        #----Patch issue https://github.com/wazuh/wazuh-packages/issues/2883-------------
+        file_path = Executor.execute_command(self.inventory_path, 'pwd').replace("\n","") + '/wazuh-install-files/wazuh-passwords.txt '
+        if not 'true' in Executor.execute_command(self.inventory_path, f'test -f {file_path} && echo "true" || echo "false"'):
+            Executor.execute_command(self.inventory_path, 'tar -xvf wazuh-install-files.tar')
+        password = Executor.execute_command(self.inventory_path, "grep api_password wazuh-install-files/wazuh-passwords.txt | head -n 1 | awk '{print $NF}'").replace("'","").replace("\n","")
+        #--------------------------------------------------------------------------------
+        
         login_endpoint = 'security/user/authenticate'
         host = inventory_data.get('ansible_host')
         port = '55000'
@@ -100,4 +99,3 @@ class WazuhAPI:
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {token}'
         }
-
