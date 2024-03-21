@@ -28,7 +28,7 @@ class AWSCredentials(Credentials):
         super().__init__()
         self._resource = boto3.resource('ec2')
 
-    def generate(self, base_dir: str | Path, name: str, overwrite: bool = False) -> Path:
+    def generate(self, base_dir: str | Path, name: str) -> Path:
         """
         Generates a new key pair and returns it.
 
@@ -56,11 +56,7 @@ class AWSCredentials(Credentials):
             # Check if the key pair already exists
             key_pair = self._resource.KeyPair(name)
             if key_pair.key_pair_id:
-                if not overwrite:
                     raise self.CredentialsError(f"Key pair {name} already exists.")
-                else:
-                    logger.warning(f"Key pair {name} already exists. Overwriting.")
-                    key_pair.delete()
         except ClientError:
             pass
 

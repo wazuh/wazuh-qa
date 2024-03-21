@@ -2,8 +2,9 @@ import boto3
 import fnmatch
 import os
 import re
-import sys
+import random
 from pathlib import Path
+from datetime import datetime, timedelta
 
 from modules.allocation.generic import Provider
 from modules.allocation.generic.models import CreationPayload, InstancePayload, InstancePayload
@@ -53,9 +54,13 @@ class AWSProvider(Provider):
             host_identifier = None
             date_regex = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"
             url_regex = "(https:\/\/|http:\/\/)?[github]{2,}(\.[com]{2,})?\/wazuh\/[a-zA-Z0-9_-]+(?:-[a-zA-Z0-9_-]+)?\/issues\/[0-9]{2,}"
-            if not termination_date or not re.match(date_regex, termination_date):
-                logger.error(f"The termination_date label was not provided or is of incorrect format, example: 2024-02-25 12:00:00.")
-                sys.exit(1)
+            if not termination_date:
+                raise ValueError(f"The termination_date label was not provided.")
+            elif re.match(r'^\d+d$', termination_date):
+                new_date = datetime.now() + timedelta(days=int(termination_date.split("d")[0]))
+                termination_date = new_date.strftime("%Y-%m-%d %H:%M:%S")
+            elif not re.match(date_regex, termination_date):
+                raise ValueError(f"The termination_date label was not provided or is of incorrect format, example: 2021-12-31 23:59:59 or 2d.")
             if label_team:
                 not_match = 0
                 for team in teams:
@@ -65,25 +70,24 @@ class AWSProvider(Provider):
                     else:
                         not_match += 1
                 if not_match == len(teams):
-                    logger.error(f"The team label provided does not match any of the available teams.")
-                    sys.exit(1)
+                    raise ValueError(f"The team label provided does not match any of the available teams. Available teams: {teams}.")
             else:
-                logger.error(f"The team label was not provided.")
-                sys.exit(1)
-            if not issue or not re.match(url_regex, issue):
-                logger.error(f"The issue label was not provided or is of incorrect format, example: https://github.com/wazuh/<repository>/issues/<issue-number>.")
-                sys.exit(1)
+                raise ValueError(f"The team label was not provided. Availables teams: {teams}.")
             if params.instance_name:
                 name = params.instance_name
-            else:
+            elif issue:
+                if not re.match(url_regex, issue):
+                    raise ValueError(f"The issue label was not provided or is of incorrect format, example: https://github.com/wazuh/<repository>/issues/<issue-number>.")
                 issue_name= re.search(r'github\.com\/wazuh\/([^\/]+)\/issues', issue)
                 repository = cls.generate_repository_name(str(issue_name.group(1)))
                 name = repository + "-" + str(re.search(r'(\d+)$', issue).group(1)) + "-" + str(params.composite_name.split("-")[1]) + "-" + str(params.composite_name.split("-")[2])
+            else:
+                name = str(params.composite_name.split("-")[1]) + "-" + str(params.composite_name.split("-")[2]) + "-" + str(params.composite_name.split("-")[3])
 
             # Keys.
             if not ssh_key:
                 logger.debug(f"Generating new key pair")
-                credentials.generate(temp_dir, str('-'.join(name.split("-")[:-2])))
+                credentials.generate(temp_dir, name + "-key-" + str(random.randint(1000, 9999)))
             else:
                 logger.debug(f"Using provided key pair")
                 key_id = credentials.ssh_key_interpreter(ssh_key)
@@ -195,7 +199,6 @@ class AWSProvider(Provider):
                 'Tags': [
                     {'Key': 'Name', 'Value': config.name},
                     {'Key': 'termination_date', 'Value': config.termination_date},
-                    {'Key': 'issue', 'Value': config.issue},
                     {'Key': 'team', 'Value': config.team}
                 ]
             }]
@@ -203,6 +206,9 @@ class AWSProvider(Provider):
 
         if config.host_identifier:
             params['Placement'] = {'AvailabilityZone': config.zone, 'HostId': config.host_identifier}
+
+        if config.issue:
+            params['TagSpecifications'][0]['Tags'].append({'Key': 'issue', 'Value': config.issue})
 
         instance = client.create_instances(**params)[0]
         # Wait until the instance is running.
@@ -230,7 +236,7 @@ class AWSProvider(Provider):
 
         # Get the specs from the yamls.
         size_specs = cls._get_size_specs()[params.size]
-        os_specs = cls._get_os_specs()[params.composite_name]
+        os_specs = cls._get_os_specs(params.composite_name)
         mics_specs = cls._get_misc_specs()
         arch = params.composite_name.split('-')[-1]
         platform = str(params.composite_name.split("-")[0])

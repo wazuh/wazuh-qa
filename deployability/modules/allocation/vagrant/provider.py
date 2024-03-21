@@ -196,7 +196,7 @@ class VagrantProvider(Provider):
         config = {}
         # Get the specs from the yamls.
         size_specs = cls._get_size_specs()[params.size]
-        os_specs = cls._get_os_specs()[params.composite_name]
+        os_specs = cls._get_os_specs(params.composite_name)
         # Parse the configuration.
         config['ip'] = cls.__get_available_ip()
         config['box'] = str(os_specs['box'])
@@ -303,16 +303,14 @@ class VagrantProvider(Provider):
                 ssh_password = client.get_secret_value(SecretId='devops_black_mini_jenkins_password')['SecretString']
                 ssh_user = client.get_secret_value(SecretId='devops_black_mini_jenkins_user')['SecretString']
             except Exception as e:
-                logger.error('Could not get macOS Black mini server IP: ' + str(e) + '.')
-                exit(1)
+                raise ValueError('Could not get macOS Black mini server IP: ' + str(e) + '.')
 
             try:
                 tn = Telnet(server_ip, server_port, timeout)
                 conn_ok = True
                 tn.close()
             except Exception as e:
-                logger.error('Could not connect to macOS Black mini server: ' + str(e) + '.')
-                exit(1)
+                raise ValueError('Could not connect to macOS Black mini server: ' + str(e) + '.')
 
             macos_host_parameters['server_ip'] = server_ip
             macos_host_parameters['ssh_password'] = ssh_password
@@ -332,7 +330,6 @@ class VagrantProvider(Provider):
                         logger.info(f"Using the black mini server to deploy.")
                         return macos_host_parameters
                     else:
-                        logger.error(f"Black mini server is under heavy load, use AWS provider.")
-                        exit(1)
+                        raise ValueError(f"Black mini server is under heavy load, use AWS provider.")
                 else:
                     return macos_host_parameters
