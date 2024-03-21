@@ -26,7 +26,7 @@ aws:
     amd64:
       type: t3a.medium
     arm64:
-      type: c7gn.medium
+      type: a1.xlarge
   large:
     amd64:
       type: c5ad.xlarge
