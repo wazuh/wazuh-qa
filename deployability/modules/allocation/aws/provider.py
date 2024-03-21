@@ -60,7 +60,7 @@ class AWSProvider(Provider):
                 new_date = datetime.now() + timedelta(days=int(termination_date.split("d")[0]))
                 termination_date = new_date.strftime("%Y-%m-%d %H:%M:%S")
             elif not re.match(date_regex, termination_date):
-                raise ValueError(f"The termination_date label was not provided or is of incorrect format, example: 2021-12-31 23:59:59 or 2d.")
+                raise ValueError(f"The termination_date label was not provided or is of incorrect format, example: 2021-12-31 23:59:59 or 2d")
             if label_team:
                 not_match = 0
                 for team in teams:
@@ -70,14 +70,14 @@ class AWSProvider(Provider):
                     else:
                         not_match += 1
                 if not_match == len(teams):
-                    raise ValueError(f"The team label provided does not match any of the available teams. Available teams: {teams}.")
+                    raise ValueError(f"The team label provided does not match any of the available teams. Available teams: {teams}")
             else:
                 raise ValueError(f"The team label was not provided. Availables teams: {teams}.")
             if params.instance_name:
                 name = params.instance_name
             elif issue:
                 if not re.match(url_regex, issue):
-                    raise ValueError(f"The issue label was not provided or is of incorrect format, example: https://github.com/wazuh/<repository>/issues/<issue-number>.")
+                    raise ValueError(f"The issue label was not provided or is of incorrect format, example: https://github.com/wazuh/<repository>/issues/<issue-number>")
                 issue_name= re.search(r'github\.com\/wazuh\/([^\/]+)\/issues', issue)
                 repository = cls.generate_repository_name(str(issue_name.group(1)))
                 name = repository + "-" + str(re.search(r'(\d+)$', issue).group(1)) + "-" + str(params.composite_name.split("-")[1]) + "-" + str(params.composite_name.split("-")[2])
