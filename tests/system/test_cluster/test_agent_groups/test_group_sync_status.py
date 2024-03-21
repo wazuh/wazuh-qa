@@ -147,27 +147,34 @@ def test_group_sync_status(metadata, target_node, clean_environment, group_creat
     first_time_check = 'synced'
     second_time_check = ''
 
-    # Check each 0.25 seconds/10 seconds sync_status
+    # Check each 0.10 seconds/10 seconds sync_status
     for _ in range(T_10):
-        time.sleep(T_025)
-        agent1_status = json.loads(execute_wdb_query(query, test_infra_hosts[0], host_manager))[1]['group_sync_status']
-        agent2_status = json.loads(execute_wdb_query(query, test_infra_hosts[0], host_manager))[2]['group_sync_status']
+        # Retrieve status information once to avoid redundant calls
+        status_info = json.loads(execute_wdb_query(query, test_infra_hosts[0], host_manager))[1:3]
+        agent1_status = status_info[0]['group_sync_status']
+        agent2_status = status_info[1]['group_sync_status']
 
+        # Determine the logic based on metadata['agent_in_group']
         if metadata['agent_in_group'] == 'agent1':
-            if 'syncreq' == agent1_status and 'synced' == agent2_status:
+            if agent1_status == 'syncreq' and agent2_status == 'synced':
                 first_time_check = "syncreq"
+                break
 
         elif metadata['agent_in_group'] == 'agent2':
-            if 'synced' == agent1_status and 'syncreq' == agent2_status:
+            if agent1_status == 'synced' and agent2_status == 'syncreq':
                 first_time_check = "syncreq"
+                break
 
         else:
             if agent1_status == 'syncreq' and agent2_status == 'syncreq':
                 first_time_check = 'syncreq'
+                break
 
-    time.sleep(T_5)
+        time.sleep(0.10)
 
     assert metadata['expected_first_check'] == first_time_check
+
+    time.sleep(T_5)
 
     # Check after 5 seconds, sync_status
     if 'syncreq' in execute_wdb_query(query, test_infra_hosts[0], host_manager):

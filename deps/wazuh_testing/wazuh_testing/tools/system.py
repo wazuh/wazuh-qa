@@ -374,7 +374,7 @@ class HostManager:
         Returns:
             stdout (str): The output of the command execution.
         """
-        return self.get_host(host).ansible("command", cmd, check=check)["stdout"]
+        return self.get_host(host).ansible("command", cmd, check=check)
 
     def run_shell(self, host: str, cmd: str, check: bool = False):
         """Run a shell command on the specified host and return its stdout.
