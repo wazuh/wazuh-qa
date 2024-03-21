@@ -122,14 +122,12 @@ class Allocator:
                                                 ansible_port=ssh_config.port,
                                                 ansible_connection='ssh',
                                                 ansible_password=ssh_config.password)
-            logger.info(f"SSH connection string: ssh {ssh_config.user}@{ssh_config.hostname} -p {ssh_config.port}")
         else:
             inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
                                                 ansible_user=ssh_config.user,
                                                 ansible_port=ssh_config.port,
                                                 ansible_connection='ssh',
                                                 ansible_ssh_private_key_file=str(ssh_config.private_key))
-            logger.info(f"SSH connection string: ssh {ssh_config.user}@{ssh_config.hostname} -p {ssh_config.port} -i {ssh_config.private_key}")
         with open(inventory_path, 'w') as f:
             yaml.dump(inventory.model_dump(exclude_none=True), f)
         logger.info(f"Inventory file generated at {inventory_path}")
