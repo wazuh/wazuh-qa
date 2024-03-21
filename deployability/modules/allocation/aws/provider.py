@@ -235,7 +235,7 @@ class AWSProvider(Provider):
         config = {}
 
         # Get the specs from the yamls.
-        size_specs = cls._get_size_specs()[params.size]
+        size_specs = cls._get_size_specs(params.size)
         os_specs = cls._get_os_specs(params.composite_name)
         mics_specs = cls._get_misc_specs()
         arch = params.composite_name.split('-')[-1]

@@ -174,15 +174,19 @@ class Provider(ABC):
             raise ValueError(f"OS {composite_name} not available for provider {cls.provider_name}. Available versions are {version_available}")
 
     @classmethod
-    def _get_size_specs(cls) -> dict:
+    def _get_size_specs(cls, size: str) -> dict:
         """
         Gets the size specifications for the provider.
+        size (str): The name of the size.
 
         Returns:
             dict: A dictionary containing the size specifications for the provider.
         """
         with open(cls.SIZE_PATH, "r") as f:
-            return yaml.safe_load(f).get(cls.provider_name)
+            size_list = yaml.safe_load(f).get(cls.provider_name)
+            for size in size_list:
+                if size == size:
+                    return size_list[size]
 
     @classmethod
     def _get_misc_specs(cls) -> dict:
