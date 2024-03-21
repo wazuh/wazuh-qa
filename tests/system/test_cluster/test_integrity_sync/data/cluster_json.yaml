@@ -1,5 +1,5 @@
 ---
 timeout_receiving_file: 1
-max_zip_size: 104857600    # 100 MB
-min_zip_size: 15728640    # 15 MB
+max_zip_size: 52428800    # 50 MB
+min_zip_size: 5242880    # 5 MB
 compress_level: 0

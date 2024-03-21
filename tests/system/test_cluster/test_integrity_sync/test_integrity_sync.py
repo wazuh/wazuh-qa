@@ -261,8 +261,8 @@ def test_zip_size_limit(clean_files, update_cluster_json):
         - The workers end up receiving all the files that do not exceed the maximum size.
     """
     too_big_size = configuration['max_zip_size'] + 1024
-    big_size = configuration['min_zip_size'] - 1024
-    big_filenames = {file_prefix + str(i) for i in range(10)}
+    big_size = 1048576  # 1 MB
+    big_filenames = {file_prefix + str(i) for i in range(60)}
 
     # Create a tmp folder and all files inside in the master node.
     host_manager.run_command(test_hosts[0], f"mkdir {tmp_size_test_path}")
