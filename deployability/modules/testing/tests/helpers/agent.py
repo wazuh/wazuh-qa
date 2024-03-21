@@ -1,12 +1,10 @@
 import requests
-import socket
 import yaml
 
 from typing import List, Optional
 from .constants import WAZUH_CONF, WAZUH_ROOT
 from .executor import Executor, WazuhAPI
 from .generic import HostInformation, CheckFiles
-
 
 
 class WazuhAgent:
@@ -158,30 +156,29 @@ class WazuhAgent:
             WazuhAgent.uninstall_agent(inventory_path, wazuh_version[index], wazuh_revision[index])
 
 
-
-
-
-
-
-
-
-
-
-
-
-
     @staticmethod
-    def install_agent_callback(wazuh_params, agent_name, agent_params):
+    def _install_agent_callback(wazuh_params, agent_name, agent_params):
         WazuhAgent.install_agent(agent_params, agent_name, wazuh_params['wazuh_version'], wazuh_params['wazuh_revision'], wazuh_params['live'])
 
 
     @staticmethod
-    def uninstall_agent_callback(wazuh_params, agent_params):
+    def _uninstall_agent_callback(wazuh_params, agent_params):
         WazuhAgent.uninstall_agent(agent_params, wazuh_params['wazuh_version'], wazuh_params['wazuh_revision'])
 
 
     @staticmethod
-    def perform_action_and_scan(agent_params, action_callback):
+    def perform_action_and_scan(agent_params, action_callback) -> dict:
+        """
+        Takes scans using filters, the callback action and compares the result
+        
+        Args:
+            agent_params (str): agent parameters
+            callbak (cb): callback (action)
+
+        Returns:
+            result (dict): comparison brief
+
+        """
         result = CheckFiles.perform_action_and_scan(agent_params, action_callback)
         os_name = HostInformation.get_os_name_from_inventory(agent_params)
         if 'debian' in os_name:
@@ -230,21 +227,44 @@ class WazuhAgent:
         return result
 
     @staticmethod
-    def perform_install_and_scan_for_agent(agent_params, agent_name, wazuh_params):
-        action_callback = lambda: WazuhAgent.install_agent_callback(wazuh_params, agent_name, agent_params)
+    def perform_install_and_scan_for_agent(agent_params, agent_name, wazuh_params) -> None:
+        """
+        Coordinates the action of install the agent and compares the checkfiles
+        
+        Args:
+            agent_params (str): agent parameters
+            wazuh_params (str): wazuh parameters
+
+        """
+        action_callback = lambda: WazuhAgent._install_agent_callback(wazuh_params, agent_name, agent_params)
         result = WazuhAgent.perform_action_and_scan(agent_params, action_callback)
         WazuhAgent.assert_results(result)
 
 
     @staticmethod
-    def perform_uninstall_and_scan_for_agent(agent_params, wazuh_params):
-        action_callback = lambda: WazuhAgent.uninstall_agent_callback(wazuh_params, agent_params)
+    def perform_uninstall_and_scan_for_agent(agent_params, wazuh_params) -> None:
+        """
+        Coordinates the action of uninstall the agent and compares the checkfiles
+        
+        Args:
+            agent_params (str): agent parameters
+            wazuh_params (str): wazuh parameters
+
+        """
+        action_callback = lambda: WazuhAgent._uninstall_agent_callback(wazuh_params, agent_params)
         result = WazuhAgent.perform_action_and_scan(agent_params, action_callback)
         WazuhAgent.assert_results(result)
 
 
     @staticmethod
-    def assert_results(result):
+    def assert_results(result) -> None:
+        """
+        Gets the status of an agent given its name.
+        
+        Args:
+            result (dict): result of comparison between pre and post action scan
+
+        """
         categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
         actions = ['added', 'modified', 'removed']
         # Testing the results
@@ -252,16 +272,6 @@ class WazuhAgent:
             for action in actions:
                 assert result[category][action] == []
 
-
-
-
-
-
-
-
-
-
-## ----------- api
 
     def get_agents_information(wazuh_api: WazuhAPI) -> list:
         """

@@ -2,10 +2,11 @@ import boto3
 import chardet
 import os
 import re
+import socket
 import subprocess
 import time
 import yaml
-import socket
+
 
 from pathlib import Path
 from .constants import WAZUH_CONTROL, CLIENT_KEYS
