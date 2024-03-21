@@ -187,10 +187,10 @@ class HostConfiguration:
         current_directory = HostInformation.get_current_dir(master_path)
 
         wazuh_version = '.'.join(wazuh_version.split('.')[:2])
-        master = socket.gethostbyname(Utils.extract_ansible_host(master_path))
-        dashboard = socket.gethostbyname(Utils.extract_ansible_host(dashboard_path))
-        indexers = [socket.gethostbyname(Utils.extract_ansible_host(indexer_path)) for indexer_path in indexer_paths]
-        workers = [socket.gethostbyname(Utils.extract_ansible_host(worker_path)) for worker_path in worker_paths]
+        master = HostInformation.get_internal_ip_from_aws_dns(Utils.extract_ansible_host(master_path))
+        dashboard = HostInformation.get_internal_ip_from_aws_dns(Utils.extract_ansible_host(dashboard_path))
+        indexers = [HostInformation.get_internal_ip_from_aws_dns(Utils.extract_ansible_host(indexer_path)) for indexer_path in indexer_paths]
+        workers = [HostInformation.get_internal_ip_from_aws_dns(Utils.extract_ansible_host(worker_path)) for worker_path in worker_paths]
 
         ##Basic commands to setup the config file, add the ip for the master & dashboard
         os_name = HostInformation.get_os_name_from_inventory(master_path)
