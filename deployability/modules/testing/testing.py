@@ -24,7 +24,6 @@ class Tester:
         """
         payload = InputPayload(**dict(payload))
         extra_vars = cls._get_extra_vars(payload).model_dump()
-        print(payload)
 
         targets = {}
         dependencies = {}
