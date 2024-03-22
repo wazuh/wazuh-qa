@@ -23,6 +23,7 @@ from typing import Dict, List
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from wazuh_testing.end_to_end import logs_filepath_os
+from wazuh_testing.end_to_end.regex import get_event_regex
 from wazuh_testing.tools.system import HostManager
 
 
@@ -219,3 +220,35 @@ def generate_monitoring_logs(host_manager: HostManager, regex_list: List[str], t
             })
 
     return monitoring_data
+
+
+def monitoring_syscollector_scan_agents(host_manager: HostManager, timeout: int, greater_than_timestamp: str = '') -> list:
+    """
+    Monitor syscollector scan on agents.
+
+    Args:
+        host_manager (HostManager): An instance of the HostManager class.
+        timeout (int): The timeout value for monitoring.
+
+    Returns:
+        list: A list of agents that were not scanned.
+    """
+    agents_not_scanned = []
+
+    logging.info("Monitoring syscollector first scan")
+    list_hosts = host_manager.get_group_hosts('agent')
+    monitoring_data = generate_monitoring_logs(host_manager,
+                                               [get_event_regex({'event': 'syscollector_scan_start'}),
+                                                get_event_regex({'event': 'syscollector_scan_end'})],
+                                               [timeout, timeout],
+                                               list_hosts, greater_than_timestamp=greater_than_timestamp)
+    monitoring_results = monitoring_events_multihost(host_manager, monitoring_data)
+
+    logging.info(f"Value of monitoring results is: {monitoring_results}")
+
+    for agent in monitoring_results:
+        if monitoring_results[agent]['not_found']:
+            agents_not_scanned.append(agent)
+
+    return agents_not_scanned
+
