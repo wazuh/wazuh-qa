@@ -7,6 +7,7 @@ from pathlib import Path
 from .models import InputPayload, ExtraVars
 from .utils import logger
 
+
 class Tester:
     _playbooks_dir = Path(__file__).parent / 'playbooks'
     _setup_playbook = _playbooks_dir / 'setup.yml'
@@ -26,13 +27,15 @@ class Tester:
 
         targets = {}
         dependencies = {}
+        extra_vars['hosts_ip'] = []
 
         # Process targets and dependencies
         for path_type, paths_list in [("targets", payload.targets), ("dependencies", payload.dependencies)]:
             for path in paths_list:
                 dictionary = eval(path)
                 inventory = Inventory(**Utils.load_from_yaml(', '.join(dictionary.values())))
-                logger.info(f"Running tests for {inventory.ansible_host}") if path_type == "targets" else logger.info(f"Dependencies {inventory.ansible_host}")
+                extra_vars['hosts_ip'].extend([inventory.ansible_host] if path_type == "targets" else [])
+                logger.info(f"Running tests for {(inventory.ansible_host)}") if path_type == "targets" else logger.info(f"Dependencies {inventory.ansible_host}")
                 if path_type == "targets":
                     targets.update(dictionary)
                 else:
@@ -47,18 +50,11 @@ class Tester:
 
         logger.debug(f"Using extra vars: {extra_vars}")
 
-        ansible = None
 
-        # Setup Ansible and run tests
-        for target_path in payload.targets:
-            target_value = eval(target_path).values()
-            target_inventory = Inventory(**Utils.load_from_yaml(str(list(target_value)[0])))
-            ansible = Ansible(ansible_data=target_inventory.model_dump())
-            cls._setup(ansible, extra_vars['working_dir'])
-
-        # Run tests
+        # Setup and run tests
         target_inventory = Inventory(**Utils.load_from_yaml(str(list(eval(payload.targets[0]).values())[0])))
         ansible = Ansible(ansible_data=target_inventory.model_dump())
+        cls._setup(ansible, extra_vars)
         cls._run_tests(payload.tests, ansible, extra_vars)
 
         # Clean up if required
@@ -103,17 +99,17 @@ class Tester:
             ansible.run_playbook(playbook, extra_vars)
 
     @classmethod
-    def _setup(cls, ansible: Ansible, remote_working_dir: str = '/tmp') -> None:
+    def _setup(cls, ansible: Ansible, extra_vars: ExtraVars) -> None:
         """
         Setup the environment for the tests.
 
         Args:
             ansible (Ansible): The Ansible object to run the setup.
-            remote_working_dir (str): The remote working directory.
+            extra_vars (str): The extra vars for the setup.
         """
-        extra_vars = {'local_path': str(Path(__file__).parent / 'tests'),
-                      'working_dir': remote_working_dir}
-        playbook = str(cls._setup_playbook)
+        rendering_var = {**extra_vars}
+        template = str(cls._setup_playbook)
+        playbook = ansible.render_playbook(template, rendering_var)
         ansible.run_playbook(playbook, extra_vars)
 
     @classmethod

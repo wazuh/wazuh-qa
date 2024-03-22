@@ -42,7 +42,6 @@ def setup_test_environment(wazuh_params):
     wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
 
 def test_stop(wazuh_params):
-
     for workers in wazuh_params['workers']:
         GeneralComponentActions.component_stop(workers, 'wazuh-manager')
 

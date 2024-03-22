@@ -1,9 +1,10 @@
 import requests
+import socket
 
 from .constants import CLUSTER_CONTROL, AGENT_CONTROL, WAZUH_CONF, WAZUH_ROOT
 from .executor import Executor, WazuhAPI
 from .generic import HostInformation, CheckFiles
-
+from .utils import Utils
 
 class WazuhManager:
 
@@ -96,17 +97,28 @@ class WazuhManager:
 
 
     @staticmethod
-    def install_manager_callback(wazuh_params, manager_name, manager_params):
+    def _install_manager_callback(wazuh_params, manager_name, manager_params):
         WazuhManager.install_manager(manager_params, manager_name, wazuh_params['wazuh_version'])
 
 
     @staticmethod
-    def uninstall_manager_callback(manager_params):
+    def _uninstall_manager_callback(manager_params):
         WazuhManager.uninstall_manager(manager_params)
 
 
     @staticmethod
-    def perform_action_and_scan(manager_params, action_callback):
+    def perform_action_and_scan(manager_params, action_callback) -> dict:
+        """
+        Takes scans using filters, the callback action and compares the result
+        
+        Args:
+            agent_params (str): agent parameters
+            callbak (cb): callback (action)
+
+        Returns:
+            result (dict): comparison brief
+
+        """
         result = CheckFiles.perform_action_and_scan(manager_params, action_callback)
         os_name = HostInformation.get_os_name_from_inventory(manager_params)
         if 'debian' in os_name:
@@ -119,12 +131,12 @@ class WazuhManager:
                         'gpg-connect-agent', 'gpgconf', 'gpgparsemail', 'lspgpot', 'pkaction', 'pkttyagent', 'pkmon',
                         'dirmngr', 'kbxutil', 'migrate-pubring-from-classic-gpg', 'gpgcompose', 'pkcheck', 'gpgsm', 'gio',
                         'pkcon', 'gpgtar', 'dirmngr-client', 'gpg', 'filebeat', 'gawk', 'curl', 'update-mime-database',
-                        'dh_installxmlcatalogs', 'appstreamcli', 'lspgpot'
+                        'dh_installxmlcatalogs', 'appstreamcli', 'lspgpot', 'symcryptrun'
                     ],
                     'removed': [],
                     'modified': []
                 },
-                '/root': {'added': ['trustdb.gpg'], 'removed': [], 'modified': []},
+                '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
                 '/usr/sbin': {
                     'added': [
                         'update-catalog', 'applygnupgdefaults', 'addgnupghome', 'install-sgmlcatalog', 'update-xmlcatalog'
@@ -141,7 +153,7 @@ class WazuhManager:
                     'modified': ['grubenv']
                 },
                 '/usr/bin': {'added': ['filebeat'], 'removed': [], 'modified': []},
-                '/root': {'added': ['trustdb.gpg'], 'removed': [], 'modified': []},
+                '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
                 '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
             }
 
@@ -155,26 +167,52 @@ class WazuhManager:
         return result
 
     @staticmethod
-    def perform_install_and_scan_for_manager(manager_params, manager_name, wazuh_params):
-        action_callback = lambda: WazuhManager.install_manager_callback(wazuh_params, manager_name, manager_params)
+    def perform_install_and_scan_for_manager(manager_params, manager_name, wazuh_params) -> None:
+        """
+        Coordinates the action of install the manager and compares the checkfiles
+        
+        Args:
+            manager_params (str): manager parameters
+            wazuh_params (str): wazuh parameters
+
+        """
+        action_callback = lambda: WazuhManager._install_manager_callback(wazuh_params, manager_name, manager_params)
         result = WazuhManager.perform_action_and_scan(manager_params, action_callback)
         WazuhManager.assert_results(result)
 
 
     @staticmethod
-    def perform_uninstall_and_scan_for_manager(manager_params):
-        action_callback = lambda: WazuhManager.uninstall_manager_callback(manager_params)
+    def perform_uninstall_and_scan_for_manager(manager_params) -> None:
+        """
+        Coordinates the action of uninstall the manager and compares the checkfiles
+        
+        Args:
+            manager_params (str): manager parameters
+            wazuh_params (str): wazuh parameters
+
+        """
+        action_callback = lambda: WazuhManager._uninstall_manager_callback(manager_params)
         result = WazuhManager.perform_action_and_scan(manager_params, action_callback)
         WazuhManager.assert_results(result)
 
 
     @staticmethod
-    def assert_results(result):
+    def assert_results(result) -> None:
+        """
+        Gets the status of an agent given its name.
+        
+        Args:
+            result (dict): result of comparison between pre and post action scan
+
+        """
         categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
         actions = ['added', 'modified', 'removed']
         # Testing the results
         for category in categories:
+            print(category)
             for action in actions:
+                print(action)
+                print(result[category][action])
                 assert result[category][action] == []
 
 
@@ -209,7 +247,7 @@ class WazuhManager:
 
 
     @staticmethod
-    def configuring_clusters(inventory_path, node_name, node_type, node_to_connect, key, disabled) -> None:
+    def configuring_clusters(inventory_path, node_name, node_type, node_to_connect_inventory, key, disabled) -> None:
         """
         Configures the cluster in ossec.conf
 
@@ -217,23 +255,23 @@ class WazuhManager:
             inventory_path: host's inventory path
             node_name: host's inventory path
             node_type: master/worker
-            node_to_connect: master/worker
+            node_to_connect_inventory: inventory path of the node to connect
             key: hexadecimal 16 key
             disabled: yes/no
 
         """
+        master_dns = Utils.extract_ansible_host(node_to_connect_inventory)
         commands = [
             f"sed -i 's/<node_name>node01<\/node_name>/<node_name>{node_name}<\/node_name>/' {WAZUH_CONF}",
             f"sed -i 's/<node_type>master<\/node_type>/<node_type>{node_type}<\/node_type>/'  {WAZUH_CONF}",
             f"sed -i 's/<key><\/key>/<key>{key}<\/key>/' {WAZUH_CONF}",
-            f"sed -i 's/<node>NODE_IP<\/node>/<node>{node_to_connect}<\/node>/' {WAZUH_CONF}",
+            f"sed -i 's/<node>NODE_IP<\/node>/<node>{HostInformation.get_internal_ip_from_aws_dns(master_dns)}<\/node>/' {WAZUH_CONF}",
             f"sed -i 's/<disabled>yes<\/disabled>/<disabled>{disabled}<\/disabled>/' {WAZUH_CONF}",
             "systemctl restart wazuh-manager"
         ]
 
         Executor.execute_commands(inventory_path, commands)
 
-## ----------- api
 
     def get_manager_version(wazuh_api: WazuhAPI) -> str:
         """

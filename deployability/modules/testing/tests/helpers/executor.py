@@ -25,6 +25,7 @@ class Executor:
             "-i", private_key_path,
             "-o", "StrictHostKeyChecking=no",
             "-o", "UserKnownHostsFile=/dev/null",
+            "-p", str(port),
             f"{username}@{host}",
             "sudo", 
             command
@@ -52,6 +53,7 @@ class Executor:
                 "-i", private_key_path,
                 "-o", "StrictHostKeyChecking=no",
                 "-o", "UserKnownHostsFile=/dev/null",
+                "-p", str(port),
                 f"{username}@{host}",
                 "sudo", 
                 command
@@ -97,4 +99,3 @@ class WazuhAPI:
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {token}'
         }
-

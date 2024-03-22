@@ -1,13 +1,23 @@
 import requests
+import yaml
+
+from typing import List, Optional
+from .constants import WAZUH_CONF, WAZUH_ROOT
 from .executor import Executor, WazuhAPI
-from .generic import HostInformation
-from .constants import WAZUH_ROOT
+from .generic import HostInformation, CheckFiles
 
 
 class WazuhAgent:
 
     @staticmethod
-    def install_agent(inventory_path) -> None:
+    def install_agent(inventory_path, agent_name, wazuh_version, wazuh_revision, live) -> None:
+
+        if live == True:
+            s3_url = 'packages'
+            release = wazuh_version[0:3]
+        else:
+            s3_url = 'packages-dev'
+            release = 'pre-release'
 
         os_type = HostInformation.get_os_type(inventory_path)
         commands = []
@@ -15,21 +25,21 @@ class WazuhAgent:
             distribution = HostInformation.get_linux_distribution(inventory_path)
             architecture = HostInformation.get_architecture(inventory_path)
 
-            if distribution == 'rpm' or distribution == 'opensuse-leap' or distribution == 'amzn' and 'x86_64' in architecture:
+            if distribution == 'rpm' and 'x86_64' in architecture:
                 commands.extend([
-                    "curl -o wazuh-agent-4.7.0-1.x86_64.rpm https://packages.wazuh.com/4.x/yum/wazuh-agent-4.7.0-1.x86_64.rpm && sudo WAZUH_MANAGER='192.168.57.2' WAZUH_AGENT_NAME='agente' rpm -ihv wazuh-agent-4.7.0-1.x86_64.rpm"
+                    f"curl -o wazuh-agent-{wazuh_version}-1.x86_64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.x86_64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.x86_64.rpm"
                 ])
-            elif distribution == 'rpm' or distribution == 'opensuse-leap' or distribution == 'amzn' and 'aarch64' in architecture:
+            elif distribution == 'rpm' and 'aarch64' in architecture:
                 commands.extend([
-                    "curl -o wazuh-agent-4.7.0-1.aarch64.rpm https://packages.wazuh.com/4.x/yum/wazuh-agent-4.7.0-1.aarch64.rpm && sudo WAZUH_MANAGER='192.168.57.2' WAZUH_AGENT_NAME='agente' rpm -ihv wazuh-agent-4.7.0-1.aarch64.rpm"
+                    f"curl -o wazuh-agent-{wazuh_version}-1aarch64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.aarch64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.aarch64.rpm"
                 ])
             elif distribution == 'deb' and 'x86_64' in architecture:
                 commands.extend([
-                    "wget https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.7.0-1_amd64.deb && sudo WAZUH_MANAGER='192.168.57.2' WAZUH_AGENT_NAME='agente' dpkg -i ./wazuh-agent_4.7.0-1_amd64.deb"
+                    f"wget https://{s3_url}.wazuh.com/{release}/apt/pool/main/w/wazuh-agent/wazuh-agent_{wazuh_version}-1_amd64.deb && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' dpkg -i ./wazuh-agent_{wazuh_version}-1_amd64.deb"
                 ])
             elif distribution == 'deb' and 'aarch64' in architecture:
                 commands.extend([
-                    "wget https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.7.0-1_arm64.deb && sudo WAZUH_MANAGER='192.168.57.2' WAZUH_AGENT_NAME='agente' dpkg -i ./wazuh-agent_4.7.0-1_arm64.deb"
+                    f"wget https://{s3_url}.wazuh.com/{release}/apt/pool/main/w/wazuh-agent/wazuh-agent_{wazuh_version}-1_arm64.deb && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' dpkg -i ./wazuh-agent_{wazuh_version}-1arm64.deb"
                 ])
             system_commands = [
                     "systemctl daemon-reload",
@@ -41,18 +51,23 @@ class WazuhAgent:
             commands.extend(system_commands)
         elif 'windows' in os_type :
             commands.extend([
-                "Invoke-WebRequest -Uri https://packages.wazuh.com/4.x/windows/wazuh-agent-4.7.0-1.msi -OutFile ${env.tmp}\wazuh-agent; msiexec.exe /i ${env.tmp}\wazuh-agent /q WAZUH_MANAGER='192.168.57.2' WAZUH_AGENT_NAME='agente' WAZUH_REGISTRATION_SERVER='192.168.57.2'",
+                f"Invoke-WebRequest -Uri https://packages.wazuh.com/{release}/windows/wazuh-agent-{wazuh_version}-1.msi"
+                "-OutFile ${env.tmp}\wazuh-agent;"
+                "msiexec.exe /i ${env.tmp}\wazuh-agent /q"
+                f"WAZUH_MANAGER='MANAGER_IP'"
+                f"WAZUH_AGENT_NAME='{agent_name}'"
+                f"WAZUH_REGISTRATION_SERVER='MANAGER_IP'",
                 "NET START WazuhSvc",
                 "NET STATUS WazuhSvc"
                 ])
         elif 'macos' in os_type:
             if 'intel' in architecture:
                 commands.extend([
-                    'curl -so wazuh-agent.pkg https://packages.wazuh.com/4.x/macos/wazuh-agent-4.7.0-1.intel64.pkg && echo "WAZUH_MANAGER=\'192.168.57.2\' && WAZUH_AGENT_NAME=\'agente\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
+                    f'curl -so wazuh-agent.pkg https://{s3_url}.wazuh.com/{release}/macos/wazuh-agent-{wazuh_version}-1.intel64.pkg && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
                 ])
             elif 'apple' in architecture:
                 commands.extend([
-                    'curl -so wazuh-agent.pkg https://packages.wazuh.com/4.x/macos/wazuh-agent-4.7.0-1.arm64.pkg && echo "WAZUH_MANAGER=\'192.168.57.2\' && WAZUH_AGENT_NAME=\'agente\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
+                    f'curl -so wazuh-agent.pkg https://{s3_url}.wazuh.com/{release}/macos/wazuh-agent-{wazuh_version}-1.arm64.pkg && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
                 ])
             system_commands = [
                     '/Library/Ossec/bin/wazuh-control start',
@@ -64,28 +79,52 @@ class WazuhAgent:
 
 
     @staticmethod
-    def install_agents(inventories_paths=[]) -> None:
-        for inventory_path in inventories_paths:
-            WazuhAgent.install_agent(inventory_path)
+    def install_agents(inventories_paths=[], wazuh_versions=[], wazuh_revisions=[], agent_names=[], live=[]) -> None:
+        for index, inventory_path in enumerate(inventories_paths):
+            WazuhAgent.install_agent(inventory_path, wazuh_versions[index], wazuh_revisions[index], agent_names[index], live[index])
 
 
     @staticmethod
-    def uninstall_agent(inventory_path) -> None:
+    def register_agent(inventory_path, manager_path):
+
+        with open(manager_path, 'r') as yaml_file:
+            manager_path = yaml.safe_load(yaml_file)
+        host = manager_path.get('ansible_host')
+
+        internal_ip = HostInformation.get_internal_ip_from_aws_dns(host) if 'amazonaws' in host else host
+
+        commands = [
+            f"sed -i 's/<address>MANAGER_IP<\/address>/<address>{internal_ip}<\/address>/g' {WAZUH_CONF}",
+            "systemctl restart wazuh-agent"
+        ]
+
+        Executor.execute_commands(inventory_path, commands)
+
+    @staticmethod
+    def uninstall_agent(inventory_path, wazuh_version=None, wazuh_revision=None) -> None:
         os_type = HostInformation.get_os_type(inventory_path)
         commands = []
         if 'linux' in os_type:
             distribution = HostInformation.get_linux_distribution(inventory_path)
-            if distribution == 'rpm' or distribution == 'opensuse-leap' or distribution == 'amzn':
-                commands.extend([
-                    "yum remove wazuh-agent -y",
-                    f"rm -rf {WAZUH_ROOT}"
-                ])
+            os_name = HostInformation.get_os_name_from_inventory(inventory_path)
+            if os_name == 'opensuse' or os_name == 'suse':
+                    commands.extend([
+                        "zypper remove --no-confirm wazuh-agent",
+                        "rm -r /var/ossec"
+                    ])
+            else:
+                if distribution == 'deb':
+                        commands.extend([
+                            "apt-get remove --purge wazuh-agent -y"
 
-            elif distribution == 'deb':
-                commands.extend([
-                    "apt-get remove --purge wazuh-agent -y"
+                        ])
+                elif distribution == 'rpm':
+                    commands.extend([
+                        "yum remove wazuh-agent -y",
+                        f"rm -rf {WAZUH_ROOT}"
+                    ])
 
-                ])
+
             system_commands = [
                     "systemctl disable wazuh-agent",
                     "systemctl daemon-reload"
@@ -94,7 +133,7 @@ class WazuhAgent:
             commands.extend(system_commands)
         elif 'windows' in os_type:
             commands.extend([
-                "msiexec.exe /x wazuh-agent-4.7.3-1.msi /qn"
+                f"msiexec.exe /x wazuh-agent-{wazuh_version}-1.msi /qn"
             ])
         elif 'macos' in os_type:
             commands.extend([
@@ -107,15 +146,132 @@ class WazuhAgent:
                 "/usr/bin/dscl . -delete '/Groups/wazuh'",
                 "/usr/sbin/pkgutil --forget com.wazuh.pkg.wazuh-agent"
             ])
+
         Executor.execute_commands(inventory_path, commands)
 
 
     @staticmethod
-    def uninstall_agents( inventories_paths=[]) -> None:
-        for inventory_path in inventories_paths:
-            WazuhAgent.uninstall_agent(inventory_path)
+    def uninstall_agents( inventories_paths=[], wazuh_version: Optional[List[str]]=None, wazuh_revision: Optional[List[str]]=None) -> None:
+        for index, inventory_path in enumerate(inventories_paths):
+            WazuhAgent.uninstall_agent(inventory_path, wazuh_version[index], wazuh_revision[index])
 
-## ----------- api
+
+    @staticmethod
+    def _install_agent_callback(wazuh_params, agent_name, agent_params):
+        WazuhAgent.install_agent(agent_params, agent_name, wazuh_params['wazuh_version'], wazuh_params['wazuh_revision'], wazuh_params['live'])
+
+
+    @staticmethod
+    def _uninstall_agent_callback(wazuh_params, agent_params):
+        WazuhAgent.uninstall_agent(agent_params, wazuh_params['wazuh_version'], wazuh_params['wazuh_revision'])
+
+
+    @staticmethod
+    def perform_action_and_scan(agent_params, action_callback) -> dict:
+        """
+        Takes scans using filters, the callback action and compares the result
+        
+        Args:
+            agent_params (str): agent parameters
+            callbak (cb): callback (action)
+
+        Returns:
+            result (dict): comparison brief
+
+        """
+        result = CheckFiles.perform_action_and_scan(agent_params, action_callback)
+        os_name = HostInformation.get_os_name_from_inventory(agent_params)
+        if 'debian' in os_name:
+            filter_data = {
+                '/boot': {'added': [], 'removed': [], 'modified': ['grubenv']},
+                '/usr/bin': {
+                    'added': [
+                        'unattended-upgrade', 'gapplication', 'add-apt-repository', 'gpg-wks-server', 'pkexec', 'gpgsplit',
+                        'watchgnupg', 'pinentry-curses', 'gpg-zip', 'gsettings', 'gpg-agent', 'gresource', 'gdbus',
+                        'gpg-connect-agent', 'gpgconf', 'gpgparsemail', 'lspgpot', 'pkaction', 'pkttyagent', 'pkmon',
+                        'dirmngr', 'kbxutil', 'migrate-pubring-from-classic-gpg', 'gpgcompose', 'pkcheck', 'gpgsm', 'gio',
+                        'pkcon', 'gpgtar', 'dirmngr-client', 'gpg', 'filebeat', 'gawk', 'curl', 'update-mime-database',
+                        'dh_installxmlcatalogs', 'appstreamcli', 'lspgpot', 'symcryptrun'
+                    ],
+                    'removed': [],
+                    'modified': []
+                },
+                '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
+                '/usr/sbin': {
+                    'added': [
+                        'update-catalog', 'applygnupgdefaults', 'addgnupghome', 'install-sgmlcatalog', 'update-xmlcatalog'
+                    ],
+                    'removed': [],
+                    'modified': []
+                }
+            }
+        else:
+            filter_data = {
+                '/boot': {
+                    'added': ['grub2', 'loader', 'vmlinuz', 'System.map', 'config-', 'initramfs'],
+                    'removed': [],
+                    'modified': ['grubenv']
+                },
+                '/usr/bin': {'added': ['filebeat'], 'removed': [], 'modified': []},
+                '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
+                '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
+            }
+
+        # Use of filters
+        for directory, changes in result.items():
+            if directory in filter_data:
+                for change, files in changes.items():
+                    if change in filter_data[directory]:
+                        result[directory][change] = [file for file in files if file.split('/')[-1] not in filter_data[directory][change]]
+
+        return result
+
+    @staticmethod
+    def perform_install_and_scan_for_agent(agent_params, agent_name, wazuh_params) -> None:
+        """
+        Coordinates the action of install the agent and compares the checkfiles
+        
+        Args:
+            agent_params (str): agent parameters
+            wazuh_params (str): wazuh parameters
+
+        """
+        action_callback = lambda: WazuhAgent._install_agent_callback(wazuh_params, agent_name, agent_params)
+        result = WazuhAgent.perform_action_and_scan(agent_params, action_callback)
+        WazuhAgent.assert_results(result)
+
+
+    @staticmethod
+    def perform_uninstall_and_scan_for_agent(agent_params, wazuh_params) -> None:
+        """
+        Coordinates the action of uninstall the agent and compares the checkfiles
+        
+        Args:
+            agent_params (str): agent parameters
+            wazuh_params (str): wazuh parameters
+
+        """
+        action_callback = lambda: WazuhAgent._uninstall_agent_callback(wazuh_params, agent_params)
+        result = WazuhAgent.perform_action_and_scan(agent_params, action_callback)
+        WazuhAgent.assert_results(result)
+
+
+    @staticmethod
+    def assert_results(result) -> None:
+        """
+        Gets the status of an agent given its name.
+        
+        Args:
+            result (dict): result of comparison between pre and post action scan
+
+        """
+        categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
+        actions = ['added', 'modified', 'removed']
+        # Testing the results
+        for category in categories:
+            for action in actions:
+                assert result[category][action] == []
+
 
     def get_agents_information(wazuh_api: WazuhAPI) -> list:
         """
@@ -125,7 +281,27 @@ class WazuhAgent:
             List: Information about agents.
         """
         response = requests.get(f"{wazuh_api.api_url}/agents", headers=wazuh_api.headers, verify=False)
+
         return eval(response.text)['data']['affected_items']
+
+
+    def get_agent_status(wazuh_api: WazuhAPI, agent_name) -> str:
+        """
+        Function to get the status of an agent given its name.
+        
+        Args:
+        - agents_data (list): List of dictionaries containing agents' data.
+        - agent_name (str): Name of the agent whose status is to be obtained.
+        
+        Returns:
+        - str: Status of the agent if found in the data, otherwise returns None.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/agents", headers=wazuh_api.headers, verify=False)
+        for agent in eval(response.text)['data']['affected_items']:
+            if agent.get('name') == agent_name:
+                return agent.get('status')
+
+        return None
 
 
     def get_agent_ip_status_and_name_by_id(wazuh_api: WazuhAPI, identifier):
@@ -141,7 +317,9 @@ class WazuhAgent:
         agents_information = wazuh_api.get_agents_information()
         for element in agents_information:
             if element['id'] == identifier:
+
                 return [element['ip'], element['name'], element['status']]
+
         return [None, None, None]
 
 
@@ -157,6 +335,7 @@ class WazuhAgent:
             str: Response text.
         """
         response = requests.post(f"{wazuh_api.api_url}/agents", json={"name": name ,"ip": ip}, headers=wazuh_api.headers, verify=False)
+
         return response.text
 
 
@@ -168,6 +347,7 @@ class WazuhAgent:
             str: Response text.
         """
         response = requests.put(f"{wazuh_api.api_url}/agents/restart", headers=wazuh_api.headers, verify=False)
+
         return response.text
 
 
@@ -179,6 +359,5 @@ class WazuhAgent:
             Dict: Agent status report.
         """
         response = requests.get(f"{wazuh_api.api_url}/agents/summary/status", headers=wazuh_api.headers, verify=False)
+
         return eval(response.text)['data']
-
-

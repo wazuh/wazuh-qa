@@ -47,6 +47,3 @@ def test_restart(wazuh_params):
 
     for workers in wazuh_params['workers']:
         assert 'active ' in GeneralComponentActions.get_component_status(workers, 'wazuh-manager')
-
-
-

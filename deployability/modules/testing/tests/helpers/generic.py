@@ -1,9 +1,11 @@
+import boto3
 import chardet
 import os
 import re
 import subprocess
 import time
 import yaml
+import socket
 
 from pathlib import Path
 from .constants import WAZUH_CONTROL, CLIENT_KEYS
@@ -121,6 +123,24 @@ class HostInformation:
 
         return Executor.execute_command(inventory_path, 'pwd').replace("\n","")
 
+    @staticmethod
+    def get_internal_ip_from_aws_dns(dns_name):
+        """
+        It returns the private AWS IP from dns_name
+
+        Args:
+            dns_name (str): host's dns public dns name
+
+        Returns:
+            str: private ip
+        """
+        ec2 = boto3.client('ec2')
+        response = ec2.describe_instances(Filters=[{'Name': 'dns-name', 'Values': [dns_name]}])
+        if response['Reservations']:
+            instance = response['Reservations'][0]['Instances'][0]
+            return instance['PrivateIpAddress']
+        else:
+            return None
 class HostConfiguration:
 
     @staticmethod
@@ -149,6 +169,11 @@ class HostConfiguration:
         commands = ["sudo systemctl stop firewalld", "sudo systemctl disable firewalld"]
         Executor.execute_commands(inventory_path, commands)
 
+    def _extract_hosts(paths, is_aws):
+        if is_aws:
+            return [HostInformation.get_internal_ip_from_aws_dns(Utils.extract_ansible_host(path)) for path in paths]
+        else:
+            return [Utils.extract_ansible_host(path) for path in paths]
 
     @staticmethod
     def certs_create(wazuh_version, master_path, dashboard_path, indexer_paths=[], worker_paths=[]) -> None:
@@ -166,10 +191,13 @@ class HostConfiguration:
         current_directory = HostInformation.get_current_dir(master_path)
 
         wazuh_version = '.'.join(wazuh_version.split('.')[:2])
-        master = Utils.extract_ansible_host(master_path)
-        dashboard = Utils.extract_ansible_host(dashboard_path)
-        indexers = [Utils.extract_ansible_host(indexer_path) for indexer_path in indexer_paths]
-        workers = [Utils.extract_ansible_host(worker_path) for worker_path in worker_paths]
+
+        is_aws = 'amazonaws' in master_path
+
+        master = HostConfiguration._extract_hosts([master_path], is_aws)[0]
+        dashboard = HostConfiguration._extract_hosts([dashboard_path], is_aws)[0]
+        indexers = HostConfiguration._extract_hosts(indexer_paths, is_aws)
+        workers = HostConfiguration._extract_hosts(worker_paths, is_aws)
 
         ##Basic commands to setup the config file, add the ip for the master & dashboard
         os_name = HostInformation.get_os_name_from_inventory(master_path)
@@ -242,20 +270,23 @@ class HostConfiguration:
             to_inventory_data = yaml.safe_load(yaml_file)
 
         # Defining variables
-        from_host = from_inventory_data.get('ansible_host')
+        from_host = socket.gethostbyname(from_inventory_data.get('ansible_host'))
         from_key = from_inventory_data.get('ansible_ssh_private_key_file')
         from_user = from_inventory_data.get('ansible_user')
-        to_host = to_inventory_data.get('ansible_host')
+        from_port = from_inventory_data.get('ansible_port')
+
+        to_host = socket.gethostbyname(to_inventory_data.get('ansible_host'))
         to_key = to_inventory_data.get('ansible_ssh_private_key_file')
-        to_user = from_inventory_data.get('ansible_user')
+        to_user = to_inventory_data.get('ansible_user')
+        to_port = to_inventory_data.get('ansible_port')
 
         # Allowing handling permissions
         if file_name == 'wazuh-install-files.tar':
             Executor.execute_command(from_inventory_path, f'chmod +rw {file_name}')
 
         # SCP
-        subprocess.run(f'scp -i {from_key} -o StrictHostKeyChecking=no {from_user}@{from_host}:{current_from_directory}/{file_name} {Path(__file__).parent}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        subprocess.run(f'scp -i {to_key} -o StrictHostKeyChecking=no {Path(__file__).parent}/{file_name} {to_user}@{to_host}:{current_to_directory}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        subprocess.run(f'scp -i {from_key} -o StrictHostKeyChecking=no -P {from_port} {from_user}@{from_host}:{current_from_directory}/{file_name} {Path(__file__).parent}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        subprocess.run(f'scp -i {to_key} -o StrictHostKeyChecking=no -P {to_port} {Path(__file__).parent}/{file_name} {to_user}@{to_host}:{current_to_directory}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         # Restoring permissions
         if file_name == 'wazuh-install-files.tar':
@@ -361,6 +392,7 @@ class CheckFiles:
 
     @staticmethod
     def _perform_scan(inventory_path, os_type, directories, filters):
+
         return {directory: CheckFiles._checkfiles(inventory_path, os_type, directory, filters) for directory in directories}
 
 
@@ -369,6 +401,7 @@ class CheckFiles:
         added_files = list(set(second_scan) - set(initial_scan))
         removed_files = list(set(initial_scan) - set(second_scan))
         modified_files = [path for path in set(initial_scan) & set(second_scan) if initial_scan[path] != second_scan[path]]
+
         return {'added': added_files, 'removed': removed_files, 'modified': modified_files}
 
 
@@ -512,4 +545,25 @@ class GeneralComponentActions:
         Returns:
             bool: True/False
         """
-        return Executor.execute_command(inventory_path, f'systemctl is-active {host_role}') == 'active'
+        return 'active' == Executor.execute_command(inventory_path, f'systemctl is-active {host_role}').replace("\n", "")
+
+class Waits:
+
+    @staticmethod
+    def dynamic_wait(expected_condition_func, cycles=10, waiting_time=10) -> None:
+        """
+        Waits the process during assigned cycles for the assigned seconds
+
+        Args:
+            expected_condition_func (lambda function): The function that returns True when the expected condition is met
+            cycles(int): Number of cycles
+            waiting_Time(int): Number of seconds per cycle
+
+        """
+        for _ in range(cycles):
+            if expected_condition_func():
+                break
+            else:
+                time.sleep(waiting_time)
+        else:
+            raise RuntimeError(f'Time out')

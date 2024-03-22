@@ -2,7 +2,7 @@ import pytest
 
 from ..helpers.constants import WAZUH_ROOT
 from ..helpers.executor import WazuhAPI
-from ..helpers.generic import HostConfiguration, CheckFiles, HostInformation, GeneralComponentActions
+from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
 from ..helpers.manager import WazuhManager
 
 
@@ -61,7 +61,7 @@ def test_installation(wazuh_params):
     hex16_code = 'eecda366dded9b32bcfbf3b057bf3ede'
     for manager_name, manager_params in wazuh_params['managers'].items():
         node_type = 'master' if manager_name == 'wazuh-1' else 'worker'
-        WazuhManager.configuring_clusters(manager_params, manager_name, node_type, 'master', hex16_code, 'no')
+        WazuhManager.configuring_clusters(manager_params, manager_name, node_type, wazuh_params['master'], hex16_code, 'no')
 
     # Cluster info check
     cluster_info = WazuhManager.get_cluster_info(wazuh_params['master'])
