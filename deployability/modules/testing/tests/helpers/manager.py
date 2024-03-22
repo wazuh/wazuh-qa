@@ -135,7 +135,7 @@ class WazuhManager:
                     'removed': [],
                     'modified': []
                 },
-                '/root': {'added': ['trustdb.gpg'], 'removed': [], 'modified': []},
+                '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
                 '/usr/sbin': {
                     'added': [
                         'update-catalog', 'applygnupgdefaults', 'addgnupghome', 'install-sgmlcatalog', 'update-xmlcatalog'
