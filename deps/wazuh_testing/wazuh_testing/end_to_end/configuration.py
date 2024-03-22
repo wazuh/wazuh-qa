@@ -18,12 +18,14 @@ This program is a free software; you can redistribute it and/or modify it under 
 """
 import xml.dom.minidom
 import logging
+import ast
 
 from multiprocessing.pool import ThreadPool
 from typing import Dict, List
 
 from wazuh_testing.end_to_end import configuration_filepath_os
 from wazuh_testing.tools.configuration import set_section_wazuh_conf
+from wazuh_testing.tools.configuration import load_configuration_template
 from wazuh_testing.tools.system import HostManager
 
 
@@ -240,4 +242,57 @@ def change_agent_manager_ip(host_manager: HostManager, agent: str, new_manager_i
     new_configuration = {f"{agent}": [configuration]}
 
     configure_host(agent, new_configuration, host_manager)
+
+
+def load_vulnerability_detector_configurations(host_manager, configurations_paths, enable=True, syscollector_interval='1m'):
+    """Return the configurations for Vulnerability testing for the agent and manager roles
+
+    Args:
+        host_manager (HostManager): An instance of the HostManager class containing information about hosts.
+        configurations_paths (Dict): The paths to the configuration templates for the agent and manager roles.
+        enable (bool, optional): Enable or disable the vulnerability detector. Defaults to True.
+        syscollector_interval (str, optional): The syscollector interval. Defaults to '1m'.
+
+    Return:
+        Dict: Configurations for each role
+    """
+    configurations = {}
+    vd_enable_value = 'yes' if enable else 'no'
+
+
+    for host in host_manager.get_group_hosts('all'):
+        if host in host_manager.get_group_hosts('agent'):
+            configurations[host] = load_configuration_template(configurations_paths['agent'], [{}], [{}])
+
+            configuration_template_str = str(configurations[host])
+            configuration_variables = {
+                    'SYSCOLLECTOR_INTERVAL': syscollector_interval
+            }
+
+            for key, value in configuration_variables.items():
+                configuration_template_str = configuration_template_str.replace(key, value)
+                configurations[host] = ast.literal_eval(configuration_template_str)
+
+        elif host in host_manager.get_group_hosts('manager'):
+            configuration_template = load_configuration_template(configurations_paths['manager'], [{}], [{}])
+
+            # Replace placeholders by real values
+            manager_index = host_manager.get_group_hosts('manager').index(host) + 2
+            indexer_server = host_manager.get_group_hosts('indexer')[0]
+            indexer_server_variables = host_manager.get_host_variables(indexer_server)
+            configuration_variables = {
+                'VULNERABILITY_DETECTOR_ENABLE': vd_enable_value,
+                'INDEXER_SERVER': indexer_server_variables['ip'],
+                'FILEBEAT_ROOT_CA': '/etc/pki/filebeat/root-ca.pem',
+                'FILEBEAT_CERTIFICATE': f"/etc/pki/filebeat/node-{manager_index}.pem",
+                'FILEBEAT_KEY': f"/etc/pki/filebeat/node-{manager_index}-key.pem"
+            }
+            configuration_template_str = str(configuration_template)
+
+            for key, value in configuration_variables.items():
+                configuration_template_str = configuration_template_str.replace(key, value)
+
+            configurations[host] = ast.literal_eval(configuration_template_str)
+
+    return configurations
 
