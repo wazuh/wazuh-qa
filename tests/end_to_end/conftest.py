@@ -358,3 +358,9 @@ def pytest_addoption(parser):
         default=False,
         help='Enable gather evidences when passed. Default: False',
     )
+    parser.addoption(
+        '--enable-verbose-evidences',
+        action='store_true',
+        default=False,
+        help='Enable verbose evidences. Default: False',
+    )
