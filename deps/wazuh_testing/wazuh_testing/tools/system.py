@@ -484,7 +484,16 @@ class HostManager:
         """
 
         if use_npm:
-            result = self.get_host(host).ansible("shell", f"npm install -g {url}", check=False)
+            if system == 'macos':
+                cmd = f"PATH=/opt/homebrew/bin:$PATH npm install -g {url}"
+                result = self.get_host(host).ansible("shell", cmd, check=False)
+            elif system == 'windows':
+                cmd = f"npm install -g {url}"
+                result = self.get_host(host).ansible("win_shell", cmd, check=False)
+            else:
+                cmd = f"npm install -g {url}"
+                result = self.get_host(host).ansible("shell", cmd, check=False)
+
             logging.info(f"npm package installed result {result}")
             return result
 
@@ -580,8 +589,18 @@ class HostManager:
             remove_operation_result = self.run_playbook(host, custom_uninstall_playbook)
         elif package_uninstall_name:
             if use_npm:
-                cmd = f"npm uninstall -g {package_uninstall_name}"
-                remove_operation_result = self.get_host(host).ansible("shell", cmd, check=False)
+                if system == 'macos':
+                    cmd = f"PATH=/opt/homebrew/bin:$PATH npm uninstall -g {package_uninstall_name}"
+                    remove_operation_result = self.get_host(host).ansible("shell", cmd, check=False)
+                elif system == 'windows':
+                    cmd = f"npm uninstall -g {package_uninstall_name}"
+                    remove_operation_result = self.get_host(host).ansible("win_shell", cmd, check=False)
+                else:
+                    cmd = f"npm uninstall -g {package_uninstall_name}"
+                    remove_operation_result = self.get_host(host).ansible("shell", cmd, check=False)
+
+                logging.info(f"npm package removed result {remove_operation_result}")
+                return remove_operation_result
             else:
                 if os_name == 'windows':
                     remove_operation_result = self.get_host(host).ansible("win_command",
