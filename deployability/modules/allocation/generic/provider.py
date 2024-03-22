@@ -184,9 +184,9 @@ class Provider(ABC):
         """
         with open(cls.SIZE_PATH, "r") as f:
             size_list = yaml.safe_load(f).get(cls.provider_name)
-            for size in size_list:
-                if size == size:
-                    return size_list[size]
+            for s in size_list:
+                if size == s:
+                    return size_list[s]
 
     @classmethod
     def _get_misc_specs(cls) -> dict:
