@@ -480,7 +480,7 @@ class HostManager:
         Example:
             host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
             # To install a package via npm:
-            host_manager.install_package('my_host', 'package_name', use_npm=True)
+            host_manager.install_package('my_host', 'package_name', 'system_name', use_npm=True)
         """
 
         if use_npm:
@@ -577,6 +577,8 @@ class HostManager:
 
         Example:
             host_manager.remove_package('my_host', 'my_package', system='ubuntu')
+            # To remove a package via npm:
+            host_manager.remove_package('my_host', 'system_name', 'package_name', use_npm=True)
         """
         logging.info(f"Removing package {package_uninstall_name} from host {host}")
         logging.info(f"System: {system}")
