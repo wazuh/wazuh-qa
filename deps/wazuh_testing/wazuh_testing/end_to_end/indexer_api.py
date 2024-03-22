@@ -13,7 +13,7 @@ This program is a free software; you can redistribute it and/or modify it under 
 """
 import requests
 import logging
-from typing import Dict
+from typing import Dict, List
 
 from wazuh_testing.tools.system import HostManager
 
