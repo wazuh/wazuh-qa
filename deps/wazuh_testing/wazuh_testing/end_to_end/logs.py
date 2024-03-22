@@ -14,6 +14,8 @@ Copyright (C) 2015, Wazuh Inc.
 Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
+import re
+from datetime import datetime
 from typing import Dict
 
 from wazuh_testing import ALERTS_JSON_PATH
@@ -59,3 +61,45 @@ def get_hosts_logs(host_manager: HostManager, host_group: str = 'all') -> Dict[s
         host_logs[host] = host_manager.get_file_content(host, logs_filepath_os[host_os_name])
 
     return host_logs
+
+
+def check_errors_in_environment(host_manager: HostManager, greater_than_timestamp: str='', expected_errors=None) -> dict:
+    """Check if there are errors in the environment
+
+    Args:
+        host_manager (HostManager): An instance of the HostManager class.
+        greater_than_timestamp (str): Timestamp to filter the logs
+
+    Returns:
+        dict: Errors found in the environment
+    """
+
+    error_level_to_search = ['ERROR', 'CRITICAL', 'WARNING']
+    expected_errors = expected_errors or []
+
+    environment_logs = get_hosts_logs(host_manager)
+    environment_level_logs = {}
+
+    for host, environment_log in environment_logs.items():
+        environment_level_logs[host] = {}
+        for level in error_level_to_search:
+            environment_level_logs[host][level] = []
+            regex = re.compile(fr'((\d{{4}}\/\d{{2}}\/\d{{2}} \d{{2}}:\d{{2}}:\d{{2}}) (.+): ({level}):(.*))')
+
+            matches = regex.findall(environment_log)
+
+            for match in matches:
+                if not any(re.search(error, match[0]) for error in expected_errors):
+                    if greater_than_timestamp:
+                        date_format = "%Y/%m/%d %H:%M:%S"
+                        default_tiemstamp_format = "%Y-%m-%dT%H:%M:%S.%f"
+
+                        date_filter_format = datetime.strptime(greater_than_timestamp, default_tiemstamp_format)
+                        log_date = datetime.strptime(match[1], date_format)
+
+                        if log_date > date_filter_format:
+                            environment_level_logs[host][level].append(match[0])
+                    else:
+                        environment_level_logs[host][level].append(match[0])
+
+    return environment_level_logs
