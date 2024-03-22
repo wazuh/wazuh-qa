@@ -130,7 +130,7 @@ class WazuhManager:
                         'gpg-connect-agent', 'gpgconf', 'gpgparsemail', 'lspgpot', 'pkaction', 'pkttyagent', 'pkmon',
                         'dirmngr', 'kbxutil', 'migrate-pubring-from-classic-gpg', 'gpgcompose', 'pkcheck', 'gpgsm', 'gio',
                         'pkcon', 'gpgtar', 'dirmngr-client', 'gpg', 'filebeat', 'gawk', 'curl', 'update-mime-database',
-                        'dh_installxmlcatalogs', 'appstreamcli', 'lspgpot'
+                        'dh_installxmlcatalogs', 'appstreamcli', 'lspgpot', 'symcryptrun'
                     ],
                     'removed': [],
                     'modified': []
