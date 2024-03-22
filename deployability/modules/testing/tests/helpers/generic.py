@@ -171,6 +171,12 @@ class HostConfiguration:
         Executor.execute_commands(inventory_path, commands)
 
 
+    def _extract_hosts(paths, is_aws):
+        if is_aws:
+            return [HostInformation.get_internal_ip_from_aws_dns(Utils.extract_ansible_host(path)) for path in paths]
+        else:
+            return [Utils.extract_ansible_host(path) for path in paths]
+
     @staticmethod
     def certs_create(wazuh_version, master_path, dashboard_path, indexer_paths=[], worker_paths=[]) -> None:
         """
@@ -187,10 +193,13 @@ class HostConfiguration:
         current_directory = HostInformation.get_current_dir(master_path)
 
         wazuh_version = '.'.join(wazuh_version.split('.')[:2])
-        master = HostInformation.get_internal_ip_from_aws_dns(Utils.extract_ansible_host(master_path))
-        dashboard = HostInformation.get_internal_ip_from_aws_dns(Utils.extract_ansible_host(dashboard_path))
-        indexers = [HostInformation.get_internal_ip_from_aws_dns(Utils.extract_ansible_host(indexer_path)) for indexer_path in indexer_paths]
-        workers = [HostInformation.get_internal_ip_from_aws_dns(Utils.extract_ansible_host(worker_path)) for worker_path in worker_paths]
+
+        is_aws = 'amazonaws' in master_path
+
+        master = HostConfiguration._extract_hosts([master_path], is_aws)[0]
+        dashboard = HostConfiguration._extract_hosts([dashboard_path], is_aws)[0]
+        indexers = HostConfiguration._extract_hosts(indexer_paths, is_aws)
+        workers = HostConfiguration._extract_hosts(worker_paths, is_aws)
 
         ##Basic commands to setup the config file, add the ip for the master & dashboard
         os_name = HostInformation.get_os_name_from_inventory(master_path)

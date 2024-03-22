@@ -152,7 +152,7 @@ class WazuhManager:
                     'modified': ['grubenv']
                 },
                 '/usr/bin': {'added': ['filebeat'], 'removed': [], 'modified': []},
-                '/root': {'added': ['trustdb.gpg'], 'removed': [], 'modified': []},
+                '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
                 '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
             }
 
