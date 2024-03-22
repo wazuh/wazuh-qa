@@ -192,7 +192,7 @@ class HostConfiguration:
 
         wazuh_version = '.'.join(wazuh_version.split('.')[:2])
 
-        is_aws = 'amazonaws' in master_path
+        is_aws = 'amazonaws' in Utils.extract_ansible_host(master_path)
 
         master = HostConfiguration._extract_hosts([master_path], is_aws)[0]
         dashboard = HostConfiguration._extract_hosts([dashboard_path], is_aws)[0]
