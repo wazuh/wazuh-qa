@@ -143,7 +143,7 @@ class Provision:
             component (ComponentInfo): Component to validate.
         """
         name = component.component
-        dependencies = component.dependencies
+        dependencies = component.dependencies or {}
         # Dependencies validations.
         if name == 'wazuh-agent' and not dependencies.get('manager'):
             raise ValueError('Dependency IP is required to install Wazuh Agent.')

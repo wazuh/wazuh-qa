@@ -1,4 +1,4 @@
-{% if ansible_os_family in ['Debian'] %}
+{% if ansible_os_family.lower() in ['debian'] %}
 - name: Update packages cache
   command: apt-get update -y
 
@@ -15,7 +15,7 @@
   command: "apt-get update"
 {% endif %}
 
-{% if ansible_os_family in ['RedHat', 'OracleLinux', 'Amazon'] %}
+{% if ansible_os_family.lower() in ['redhat', 'oraclelinux', 'amazon', 'centos'] %}
 - name: Update packages cache
   command: yum makecache
 
@@ -26,7 +26,7 @@
   shell: "echo -e '[wazuh]\ngpgcheck=1\ngpgkey=https://packages.wazuh.com/key/GPG-KEY-WAZUH\nenabled=1\nname=EL-$releasever - Wazuh\nbaseurl=https://packages.wazuh.com/4.x/yum/\nprotect=1' | tee /etc/yum.repos.d/wazuh.repo"
 {% endif %}
 
-{% if ansible_os_family in ['SUSE']%}
+{% if ansible_os_family.lower() in ['suse']%}
 - name: Import the GPG key
   command: "rpm --import https://packages.wazuh.com/key/GPG-KEY-WAZUH"
 - name: Add Wazuh repository

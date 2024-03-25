@@ -1,13 +1,14 @@
-{% if ansible_os_family == 'Debian' %}
+{% if ansible_os_family.lower() in ['debian'] %}
 - name: Uninstall {{ component }}
-  apt:
-    name: {{ component }}
-    state: absent
+  command: "apt-get remove -y {{ component }}"
 {% endif %}
 
-{% if ansible_os_family == 'RedHat' %}
+{% if ansible_os_family.lower() in ['redhat', 'oraclelinux', 'amazon', 'centos'] %}
 - name: Uninstall {{ component }}
-  yum:
-    name: {{ component }}
-    state: absent
+  command: "yum remove -y {{ component }}"
+{% endif %}
+
+{% if ansible_os_family.lower() in ['suse'] %}
+- name: Uninstall {{ component }}
+  command: "zypper remove -y {{ component }}"
 {% endif %}

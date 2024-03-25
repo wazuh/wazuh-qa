@@ -1,4 +1,4 @@
-{% if ansible_os_family in ['Debian'] %}
+{% if ansible_os_family.lower() in ['debian'] %}
 - name: Update apt cache
   shell: apt-get update
 
@@ -7,22 +7,19 @@
     apt-get install -y {{ component }}
 {% endif %}
 
-{% if ansible_os_family in ['RedHat'] %}
+{% if ansible_os_family.lower() in ['redhat'] %}
 - name: Install EPEL repository
   shell: |
     yum update -y
     yum install -y epel-release
 {% endif %}
 
-{% if ansible_os_family in ['RedHat', 'OracleLinux', 'Amazon'] %}
-
-- name: Update yum cache
-  shell: yum update
+{% if ansible_os_family.lower() in ['redhat', 'oraclelinux', 'amazon', 'centos'] %}
 - name: Install {{ component }}
   shell: yum install -y {{ component }}
 {% endif %}
 
-{% if ansible_os_family in ['SUSE'] %}
+{% if ansible_os_family.lower() in ['suse'] %}
 - name: Update zypper cache
   command: "zypper -n ref"
 - name: Install the {{ component }}

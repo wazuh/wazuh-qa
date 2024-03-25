@@ -1,21 +1,21 @@
 - name: Update repositories
-  {% if ansible_os_family == 'Debian' %}
+  {% if ansible_os_family == 'debian' %}
   shell: sudo apt-get update -y
   {% endif %}
-  {% if ansible_os_family in ['RedHat', 'OracleLinux'] %}
+  {% if ansible_os_family.lower() in ['redhat', 'centos', 'oraclelinux'] %}
   shell: sudo yum update -y
   {% endif %}
 
 - name: Upgrade packages
-  {% if ansible_os_family == 'Debian' %}
+  {% if ansible_os_family == 'debian' %}
   shell: sudo apt-get upgrade -y
   {% endif %}
-  {% if ansible_os_family in ['RedHat', 'OracleLinux'] %}
+  {% if ansible_os_family.lower() in ['redhat', 'centos', 'oraclelinux'] %}
   shell: sudo yum upgrade -y
   {% endif %}
 
 - name: Install dependencies
-  {% if ansible_os_family == 'Debian' %}
+  {% if ansible_os_family == 'debian' %}
   shell: |
     sudo apt-get install build-essential -y
     sudo apt-get install libreadline-dev -y
@@ -28,7 +28,7 @@
     sudo apt-get install libffi-dev -y
     sudo apt-get install zlib1g-dev -y
   {% endif %}
-  {% if ansible_os_family in ['RedHat', 'OracleLinux'] %}
+  {% if ansible_os_family.lower() in ['redhat', 'centos', 'oraclelinux'] %}
   shell: |
     sudo yum install zlib-devel -y
     sudo yum install gcc -y

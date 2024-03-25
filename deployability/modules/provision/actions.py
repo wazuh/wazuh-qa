@@ -67,7 +67,7 @@ class Action:
         status = self.ansible.run_playbook(playbook)
         fact_cache = status.get_fact_cache(host=self.ansible.ansible_data.ansible_host)
         logger.debug(f"OS family: {fact_cache.get('ansible_os_family')}.")
-        return fact_cache.get('ansible_os_family') or None
+        return fact_cache.get('ansible_os_family') or ''
 
     def _get_playbook(self, tasks: list[dict]) -> dict:
         """
