@@ -359,26 +359,26 @@ aws:
     user: ec2-user
   # Windows
   windows-desktop-10-amd64:
-    ami: ami-004ca0c10752e17ce
+    ami: ami-0a747df120215911a
     zone: us-east-1
     user: Administrator
-  windows-desktop-11-amd64:
+  windows-desktop-11-amd64: # update with the correct AMI for userData
     ami: ami-09d8cef159442d5b0
     zone: us-east-1
-    user: Administrator
+    user: Jenkins
   windows-server-2012r2-amd64:
-    ami: ami-0eb3cabd65ed56ee6
+    ami: ami-09a3ef2bc0c6a252f
     zone: us-east-1
     user: Administrator
   windows-server-2016-amd64:
-    ami: ami-0f8b5c22ce0a7cf3b
+    ami: ami-04d7825822fe66af3
     zone: us-east-1
     user: Administrator
   windows-server-2019-amd64:
-    ami: ami-0ffb936e0378c083f
+    ami: ami-06cc514f1012a7431
     zone: us-east-1
     user: Administrator
   windows-server-2022-amd64:
-    ami: ami-0ad422b1ff6909089
+    ami: ami-0f9c44e98edf38a2b
     zone: us-east-1
     user: Administrator

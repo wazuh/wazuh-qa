@@ -81,7 +81,9 @@ class AWSProvider(Provider):
                 name = repository + "-" + str(re.search(r'(\d+)$', issue).group(1)) + "-" + str(params.composite_name.split("-")[1]) + "-" + str(params.composite_name.split("-")[2])
 
             # Keys.
-            if not ssh_key:
+            if platform == "windows":
+                credentials.create_password()
+            elif not ssh_key:
                 logger.debug(f"Generating new key pair")
                 credentials.generate(temp_dir, str('-'.join(name.split("-")[:-2])))
             else:
@@ -179,13 +181,18 @@ class AWSProvider(Provider):
         client = boto3.resource('ec2')
 
         userData_file = Path(__file__).parent.parent / 'aws' / 'helpers' / 'userData.sh'
+        windosUserData_file = Path(__file__).parent.parent / 'aws' / 'helpers' / 'windowsUserData.ps1'
 
-        with open(userData_file, 'r') as file:
-            userData = file.read()
+        if config.platform == 'windows':
+            with open(windosUserData_file, 'r') as file:
+                userData = file.read()
+                userData = userData.replace('ChangeMe', config.key_name)
+        else:
+            with open(userData_file, 'r') as file:
+                userData = file.read()
         params = {
             'ImageId': config.ami,
             'InstanceType': config.type,
-            'KeyName': config.key_name,
             'SecurityGroupIds': config.security_groups,
             'MinCount': 1,
             'MaxCount': 1,
@@ -200,6 +207,9 @@ class AWSProvider(Provider):
                 ]
             }]
         }
+        if config.platform != 'windows':
+            params['KeyName'] = config.key_name
+
 
         if config.host_identifier:
             params['Placement'] = {'AvailabilityZone': config.zone, 'HostId': config.host_identifier}

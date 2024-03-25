@@ -71,10 +71,16 @@ class AWSInstance(Instance):
         Returns:
             ConnectionInfo: SSH connection information.
         """
-        return ConnectionInfo(hostname=self._instance.public_dns_name,
+        if self.platform == 'windows':
+            return ConnectionInfo(hostname=self._instance.public_dns_name,
                                 user=self._user,
-                                port=2200,
-                                private_key=str(self.credentials.key_path))
+                                port=3389,
+                                password=str(self.credentials.name))
+        else:
+            return ConnectionInfo(hostname=self._instance.public_dns_name,
+                                    user=self._user,
+                                    port=2200,
+                                    private_key=str(self.credentials.key_path))
 
     def __get_credentials(self) -> AWSCredentials:
         """
