@@ -1,0 +1,328 @@
+import requests
+
+from .constants import CLUSTER_CONTROL, AGENT_CONTROL, WAZUH_CONF, WAZUH_ROOT
+from .executor import Executor, WazuhAPI
+from .generic import HostInformation, CheckFiles
+
+
+class WazuhManager:
+
+    @staticmethod
+    def install_manager(inventory_path, node_name, wazuh_version) -> None:
+        """
+        Installs Wazuh Manager in the host
+
+        Args:
+            inventory_path (str): host's inventory path
+            node_name (str): manager node name
+            wazuh_version (str): major.minor.patch
+
+        """
+        wazuh_version = '.'.join(wazuh_version.split('.')[:2])
+        os_name = HostInformation.get_os_name_from_inventory(inventory_path)
+
+        if os_name == 'debian':
+            commands = [
+                    f"wget https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh",
+                    f"bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
+            ]
+        else:
+            commands = [
+                    f"curl -sO https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh",
+                    f"bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
+            ] 
+
+        Executor.execute_commands(inventory_path, commands)
+
+
+    @staticmethod
+    def install_managers(inventories_paths=[], node_names=[], wazuh_versions=[]) -> None:
+        """
+        Install Wazuh Managers in the hosts
+
+        Args:
+            inventories_paths (list): list of hosts' inventory path
+            node_name (list): managers node names' in the same order than inventories_paths
+            wazuh_version (list): manager versions int he same order than inventories_paths
+
+        """
+        for inventory in inventories_paths:
+            for node_name in node_names:
+                for wazuh_version in wazuh_versions:
+                    WazuhManager.install_manager(inventory, node_name, wazuh_version)
+
+
+    @staticmethod
+    def uninstall_manager(inventory_path) -> None:
+        """
+        Unnstall Wazuh Manager in the host
+
+        Args:
+            inventory_paths (str): hosts' inventory path
+        """
+        distribution = HostInformation.get_linux_distribution(inventory_path)
+        commands = []
+
+        if distribution == 'rpm':
+            commands.extend([
+                "yum remove wazuh-manager -y",
+                f"rm -rf {WAZUH_ROOT}"
+            ])
+        elif distribution == 'deb':
+            commands.extend([
+                "apt-get remove --purge wazuh-manager -y"
+            ])
+
+        system_commands = [
+                "systemctl disable wazuh-manager",
+                "systemctl daemon-reload"
+        ]
+
+        commands.extend(system_commands)
+
+        Executor.execute_commands(inventory_path, commands)
+
+
+    @staticmethod
+    def uninstall_managers(inventories_paths=[]) -> None:
+        """
+        Unnstall Wazuh Managers in the hosts
+
+        Args:
+            inventories_paths (list): list of hosts' inventory path
+        """
+        for inventory in inventories_paths:
+            WazuhManager.uninstall_manager(inventory)
+
+
+    @staticmethod
+    def _install_manager_callback(wazuh_params, manager_name, manager_params):
+        WazuhManager.install_manager(manager_params, manager_name, wazuh_params['wazuh_version'])
+
+
+    @staticmethod
+    def _uninstall_manager_callback(manager_params):
+        WazuhManager.uninstall_manager(manager_params)
+
+
+    @staticmethod
+    def perform_action_and_scan(manager_params, action_callback) -> dict:
+        """
+        Takes scans using filters, the callback action and compares the result
+        
+        Args:
+            agent_params (str): agent parameters
+            callbak (cb): callback (action)
+
+        Returns:
+            result (dict): comparison brief
+
+        """
+        result = CheckFiles.perform_action_and_scan(manager_params, action_callback)
+        os_name = HostInformation.get_os_name_from_inventory(manager_params)
+        if 'debian' in os_name:
+            filter_data = {
+                '/boot': {'added': [], 'removed': [], 'modified': ['grubenv']},
+                '/usr/bin': {
+                    'added': [
+                        'unattended-upgrade', 'gapplication', 'add-apt-repository', 'gpg-wks-server', 'pkexec', 'gpgsplit',
+                        'watchgnupg', 'pinentry-curses', 'gpg-zip', 'gsettings', 'gpg-agent', 'gresource', 'gdbus',
+                        'gpg-connect-agent', 'gpgconf', 'gpgparsemail', 'lspgpot', 'pkaction', 'pkttyagent', 'pkmon',
+                        'dirmngr', 'kbxutil', 'migrate-pubring-from-classic-gpg', 'gpgcompose', 'pkcheck', 'gpgsm', 'gio',
+                        'pkcon', 'gpgtar', 'dirmngr-client', 'gpg', 'filebeat', 'gawk', 'curl', 'update-mime-database',
+                        'dh_installxmlcatalogs', 'appstreamcli', 'lspgpot', 'symcryptrun'
+                    ],
+                    'removed': [],
+                    'modified': []
+                },
+                '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
+                '/usr/sbin': {
+                    'added': [
+                        'update-catalog', 'applygnupgdefaults', 'addgnupghome', 'install-sgmlcatalog', 'update-xmlcatalog'
+                    ],
+                    'removed': [],
+                    'modified': []
+                }
+            }
+        else:
+            filter_data = {
+                '/boot': {
+                    'added': ['grub2', 'loader', 'vmlinuz', 'System.map', 'config-', 'initramfs'],
+                    'removed': [],
+                    'modified': ['grubenv']
+                },
+                '/usr/bin': {'added': ['filebeat'], 'removed': [], 'modified': []},
+                '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
+                '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
+            }
+
+        # Use of filters
+        for directory, changes in result.items():
+            if directory in filter_data:
+                for change, files in changes.items():
+                    if change in filter_data[directory]:
+                        result[directory][change] = [file for file in files if file.split('/')[-1] not in filter_data[directory][change]]
+
+        return result
+
+    @staticmethod
+    def perform_install_and_scan_for_manager(manager_params, manager_name, wazuh_params) -> None:
+        """
+        Coordinates the action of install the manager and compares the checkfiles
+        
+        Args:
+            manager_params (str): manager parameters
+            wazuh_params (str): wazuh parameters
+
+        """
+        action_callback = lambda: WazuhManager._install_manager_callback(wazuh_params, manager_name, manager_params)
+        result = WazuhManager.perform_action_and_scan(manager_params, action_callback)
+        WazuhManager.assert_results(result)
+
+
+    @staticmethod
+    def perform_uninstall_and_scan_for_manager(manager_params) -> None:
+        """
+        Coordinates the action of uninstall the manager and compares the checkfiles
+        
+        Args:
+            manager_params (str): manager parameters
+            wazuh_params (str): wazuh parameters
+
+        """
+        action_callback = lambda: WazuhManager._uninstall_manager_callback(manager_params)
+        result = WazuhManager.perform_action_and_scan(manager_params, action_callback)
+        WazuhManager.assert_results(result)
+
+
+    @staticmethod
+    def assert_results(result) -> None:
+        """
+        Gets the status of an agent given its name.
+        
+        Args:
+            result (dict): result of comparison between pre and post action scan
+
+        """
+        categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
+        actions = ['added', 'modified', 'removed']
+        # Testing the results
+        for category in categories:
+            for action in actions:
+                assert result[category][action] == []
+
+
+    @staticmethod
+    def get_cluster_info(inventory_path) -> None:
+        """
+        Returns the cluster information
+
+        Args:
+            inventory_path: host's inventory path
+
+        Returns:
+            str: Cluster status
+        """
+
+        return Executor.execute_command(inventory_path, f'{CLUSTER_CONTROL} -l')
+
+
+    @staticmethod
+    def get_agent_control_info(inventory_path) -> None:
+        """
+        Returns the Agent information from the manager
+
+        Args:
+            inventory_path: host's inventory path
+
+        Returns:
+            str: Agents status
+        """
+
+        return Executor.execute_command(inventory_path, f'{AGENT_CONTROL} -l')
+
+
+    @staticmethod
+    def configuring_clusters(inventory_path, node_name, node_type, node_to_connect, key, disabled) -> None:
+        """
+        Configures the cluster in ossec.conf
+
+        Args:
+            inventory_path: host's inventory path
+            node_name: host's inventory path
+            node_type: master/worker
+            node_to_connect: master/worker
+            key: hexadecimal 16 key
+            disabled: yes/no
+
+        """
+        commands = [
+            f"sed -i 's/<node_name>node01<\/node_name>/<node_name>{node_name}<\/node_name>/' {WAZUH_CONF}",
+            f"sed -i 's/<node_type>master<\/node_type>/<node_type>{node_type}<\/node_type>/'  {WAZUH_CONF}",
+            f"sed -i 's/<key><\/key>/<key>{key}<\/key>/' {WAZUH_CONF}",
+            f"sed -i 's/<node>NODE_IP<\/node>/<node>{node_to_connect}<\/node>/' {WAZUH_CONF}",
+            f"sed -i 's/<disabled>yes<\/disabled>/<disabled>{disabled}<\/disabled>/' {WAZUH_CONF}",
+            "systemctl restart wazuh-manager"
+        ]
+
+        Executor.execute_commands(inventory_path, commands)
+
+
+    def get_manager_version(wazuh_api: WazuhAPI) -> str:
+        """
+        Get the version of the manager.
+
+        Returns:
+            str: The version of the manager.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/?pretty=true", headers=wazuh_api.headers, verify=False)
+
+        return eval(response.text)['data']['api_version']
+
+
+    def get_manager_revision(wazuh_api: WazuhAPI) -> str:
+        """
+        Get the revision of the manager.
+
+        Returns:
+            str: The revision of the manager.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/?pretty=true", headers=wazuh_api.headers, verify=False)
+
+        return eval(response.text)['data']['revision']
+
+
+    def get_manager_host_name(wazuh_api: WazuhAPI) -> str:
+        """
+        Get the hostname of the manager.
+
+        Returns:
+            str: The hostname of the manager.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/?pretty=true", headers=wazuh_api.headers, verify=False)
+
+        return eval(response.text)['data']['hostname']
+
+
+    def get_manager_nodes_status(wazuh_api: WazuhAPI) -> dict:
+        """
+        Get the status of the manager's nodes.
+
+        Returns:
+            Dict: The status of the manager's nodes.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/manager/status", headers=wazuh_api.headers, verify=False)
+
+        return eval(response.text)['data']['affected_items'][0]
+
+
+    def get_manager_logs(wazuh_api: WazuhAPI) -> list:
+        """
+        Get the logs of the manager.
+
+        Returns:
+            List: The logs of the manager.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/manager/logs", headers=wazuh_api.headers, verify=False)
+
+        return eval(response.text)['data']['affected_items']
