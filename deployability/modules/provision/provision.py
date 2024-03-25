@@ -5,13 +5,12 @@ from modules.generic.utils import Utils
 from modules.provision.actions import Action
 from modules.provision.utils import logger
 from modules.provision.models import InputPayload, ComponentInfo
-from modules.provision.provision_module import ProvisionModule
 
 
 PATH_BASE_DIR = Path(__file__).parents[2]
 
 
-class Provision(ProvisionModule):
+class Provision:
     """
     Provision class to install and uninstall components.
 
@@ -39,7 +38,6 @@ class Provision(ProvisionModule):
         Run the provision.
         """
         logger.info(f'Initiating provisionment.')
-        self.install_host_dependencies()
 
         logger.debug(f'Running action {self.action} for components: {self.components}')
         for component in self.components:
@@ -70,21 +68,6 @@ class Provision(ProvisionModule):
             component.dependencies = dependencies
             self.__validate_component_deps(component)
         return components
-
-    def install_host_dependencies(self) -> dict:
-        """
-        Install python dependencies on the host.
-
-        Returns:
-            dict: Status of the installation.
-        """
-        deps_path = PATH_BASE_DIR / "deps" / "remote_requirements.txt"
-        package = ComponentInfo(component=str(deps_path), type="dependencies")
-        logger.debug(f"Installing dependencies on guests: {package}")
-        action_class = Action("install", package, self.ansible_data)
-        status = action_class.execute()
-
-        return status
 
     def update_status(self, status: dict) -> None:
         """
@@ -159,7 +142,7 @@ class Provision(ProvisionModule):
             component (ComponentInfo): Component to validate.
         """
         name = component.component
-        dependencies = component.dependencies
+        dependencies = component.dependencies or {}
         # Dependencies validations.
         if name == 'wazuh-agent' and not dependencies.get('manager'):
             raise ValueError('Dependency IP is required to install Wazuh Agent.')

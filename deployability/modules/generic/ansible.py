@@ -17,10 +17,8 @@ class Inventory(BaseModel):
 
 
 class Ansible:
-    def __init__(self, ansible_data: dict | Inventory, path: str | Path = None):
-        self.path = path
-        self.modules_path = Path(__file__).parents[1]
-        self.provision_playbook_path = self.modules_path / 'provision/playbooks'
+    def __init__(self, ansible_data: dict | Inventory, playbooks_path: str | Path = None):
+        self.playbooks_path = playbooks_path
         self.ansible_data = Inventory(**dict(ansible_data))
         self.inventory = self.generate_inventory()
         self.logger = Logger(Path(__file__).stem).get_logger()
@@ -33,13 +31,13 @@ class Ansible:
             rendering_variables (dict): Extra variables to render the playbooks.
         """
         tasks = []
-        path_to_render_playbooks = self.provision_playbook_path / rendering_variables.get("templates_path")
+        path_to_render_playbooks = rendering_variables.get("templates_path")
         template_loader = jinja2.FileSystemLoader(searchpath=path_to_render_playbooks)
         template_env = jinja2.Environment(loader=template_loader)
 
         list_template_tasks = Utils.get_template_list(
             path_to_render_playbooks, rendering_variables.get("templates_order"))
-
+        self.logger.debug(f"Templates found: {list_template_tasks}")
         if list_template_tasks:
             for template in list_template_tasks:
                 loaded_template = template_env.get_template(template)
@@ -76,7 +74,7 @@ class Ansible:
 
         return yaml.safe_load(rendered)
 
-    def run_playbook(self, playbook: str | Path = None, extravars: dict = None, verbosity: int = 1, env_vars: dict = {}) -> ansible_runner.Runner:
+    def run_playbook(self, playbook: str | Path, extravars: dict = None, verbosity: int = 1, env_vars: dict = {}) -> ansible_runner.Runner:
         """
         Run the playbook with ansible_runner.
 
@@ -89,8 +87,8 @@ class Ansible:
         # Set the callback to yaml to env_vars
         env_vars['ANSIBLE_STDOUT_CALLBACK'] = 'community.general.yaml'
 
-        if self.path and (isinstance(playbook, str) or isinstance(playbook, Path)):
-            playbook = self.path + "/" + playbook
+        if self.playbooks_path and (isinstance(playbook, str) or isinstance(playbook, Path)):
+            playbook = Path(self.playbooks_path) / playbook
 
         self.logger.debug(f"Using inventory: {self.inventory}")
         self.logger.debug(f"Running playbook: {playbook}")

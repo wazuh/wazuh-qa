@@ -1,15 +1,16 @@
 from modules.generic import Ansible
 
-from modules.provision.component_type import Package, AIO, Generic, Dependencies
+from modules.provision.handler import ProvisionHandler
 from modules.provision.models import ComponentInfo
 from modules.provision.utils import logger
+
 
 class Action:
     """
     Class to define the action.
 
     Attributes:
-        component (Package | AIO | Generic | Dependencies): The component to execute.
+        handler (ProvisionHandler): The provision handler.
         ansible (Ansible): The Ansible instance.
     """
 
@@ -24,19 +25,8 @@ class Action:
         """
         component_info = ComponentInfo(**dict(component_info))
         action_type = component_info.type
-
-        if action_type == "package":
-            self.component = Package(component_info, action)
-        elif action_type == "aio":
-            self.component = AIO(component_info, action)
-        elif action_type == "generic":
-            self.component = Generic(component_info, action)
-        elif action_type == "dependencies":
-            self.component = Dependencies(component_info, action)
-        else:
-            raise ValueError(f"Unsupported action_type: {action_type}")
-
-        self.ansible = Ansible(ansible_data)
+        self.handler = ProvisionHandler(component_info, action, action_type)
+        self.ansible = Ansible(ansible_data, playbooks_path=self.handler.templates_path)
 
     def execute(self) -> dict:
         """
@@ -45,8 +35,26 @@ class Action:
         Returns:
             dict: The status of the executed action.
         """
-        status = {}
+        # Get the OS family variable.
+        self.handler.variables_dict['ansible_os_family'] = self._get_os_family()
+        # Render the playbook with the variables.
+        logger.debug(f"Render playbook with vars: {self.handler.variables_dict}.")
+        tasks = self.ansible.render_playbooks(self.handler.variables_dict)
+        # Get and execute the playbook.
+        logger.debug(f"Tasks to execute: {tasks}.")
+        playbook = self._get_playbook(tasks)
+        logger.info(f"Execute {self.handler.action} for {self.handler.component_info.component}.")
+        status = self.ansible.run_playbook(playbook)
 
+        return status
+
+    def _get_os_family(self) -> str:
+        """
+        Get the OS family.
+
+        Returns:
+            str: The OS family.
+        """
         ansible_task = [{
             'name': 'Capture ansible_os_family',
             'set_fact': {
@@ -54,22 +62,24 @@ class Action:
                 'cacheable': 'yes'
             }
         }]
+        logger.debug(f"Get OS family for {self.ansible.ansible_data.ansible_host}.")
+        playbook = self._get_playbook(ansible_task)
+        status = self.ansible.run_playbook(playbook)
+        fact_cache = status.get_fact_cache(host=self.ansible.ansible_data.ansible_host)
+        logger.debug(f"OS family: {fact_cache.get('ansible_os_family')}.")
+        return fact_cache.get('ansible_os_family') or ''
 
+    def _get_playbook(self, tasks: list[dict]) -> dict:
+        """
+        Get the playbook to execute.
+
+        Returns:
+            dict: The playbook to execute.
+        """
         playbook = {
             'hosts': self.ansible.ansible_data.ansible_host,
             'become': True,
             'gather_facts': True,
-            'tasks': ansible_task
+            'tasks': tasks,
         }
-        status = self.ansible.run_playbook(playbook)
-
-        self.component.variables_dict['ansible_os_family'] = status.get_fact_cache(host=self.ansible.ansible_data.ansible_host)['ansible_os_family']
-
-        logger.info(f"Executing {self.component.type} for {self.component.component}")
-
-        tasks = self.ansible.render_playbooks(self.component.variables_dict)
-        playbook['tasks'] = tasks
-
-        status = self.ansible.run_playbook(playbook)
-
-        return status
+        return playbook

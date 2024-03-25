@@ -1,0 +1,3 @@
+
+- name: Install {{ component }} with asistant
+  shell: "bash ./wazuh-install.sh {{ "--" + component + " " + component.split('-')[-1] if not 'aio' in component else '-a' }} -i"

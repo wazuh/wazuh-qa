@@ -5,7 +5,7 @@ from pydantic import BaseModel, validator, model_validator
 
 class ComponentInfo(BaseModel):
     component: str
-    type: str = ""
+    type: str = "package"
     version: str = ""
     dependencies: dict | None = None
 
@@ -61,13 +61,9 @@ class InputPayload(BaseModel):
     def validate_install_uninstall(cls, components) -> Union[None, List[str]]:
         if not components:
             return
-        component_info = []
+        component_list = []
         for item in components:
-            componentObj = ComponentInfo(**eval(item))
-            if not componentObj.type:
-                componentObj.type = "generic"
-            if "wazuh-agent" in componentObj.component:
-                componentObj.type = "package"
-            component_info.append(componentObj)
+            component_info = ComponentInfo(**eval(item))
+            component_list.append(component_info)
 
-        return component_info
+        return component_list
