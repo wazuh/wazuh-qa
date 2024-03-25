@@ -45,7 +45,7 @@ class Instance(ABC):
         self.host_identifier: str = instance_parameters.host_identifier
         self.host_instance_dir: Path = instance_parameters.host_instance_dir
         self.ssh_port: str = instance_parameters.ssh_port
-        self.macos_host_parameters: dict = instance_parameters.macos_host_parameters
+        self.remote_host_parameters: dict = instance_parameters.remote_host_parameters
         self.platform: str = instance_parameters.platform
         self.arch: str = instance_parameters.arch
         self.user: str = instance_parameters.user

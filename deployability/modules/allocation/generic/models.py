@@ -113,7 +113,7 @@ class InstancePayload(BaseModel):
     key_path: Path | None = None
     host_identifier: str  | None = None
     host_instance_dir: str | Path | None = None
-    macos_host_parameters: dict | None = None
+    remote_host_parameters: dict | None = None
     ssh_port: str | None = None
     platform: str
     arch: str | None = None

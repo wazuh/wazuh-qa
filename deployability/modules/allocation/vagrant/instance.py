@@ -22,7 +22,7 @@ class VagrantInstance(Instance):
         host_identifier (str, optional): The host for the instance. Defaults to None.
         host_instance_dir (str | Path, optional): The remote directory of the instance. Defaults to None.
         ssh_port (str): SSH port of the instance.
-        macos_host_parameters (dict): Parameters of the remote host.
+        remote_host_parameters (dict): Parameters of the remote host.
     """
     def __init__(self, instance_parameters: InstancePayload, credentials: VagrantCredentials = None) -> None:
         """
@@ -39,7 +39,7 @@ class VagrantInstance(Instance):
         self.host_identifier: str = instance_parameters.host_identifier
         self.host_instance_dir: str | Path = instance_parameters.host_instance_dir
         self.ssh_port: str = instance_parameters.ssh_port
-        self.macos_host_parameters: dict = instance_parameters.macos_host_parameters
+        self.remote_host_parameters: dict = instance_parameters.remote_host_parameters
         self.platform: str = instance_parameters.platform
 
     def start(self) -> None:
@@ -83,13 +83,13 @@ class VagrantInstance(Instance):
         self.__run_vagrant_command(['destroy', '-f'])
         if str(self.host_identifier) == "macstadium":
             logger.debug(f"Deleting remote directory {self.host_instance_dir}")
-            VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.macos_host_parameters)
+            VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.remote_host_parameters)
             logger.debug(f"Killing remote process on port {self.ssh_port}")
-            proccess = VagrantUtils.remote_command(f"sudo lsof -Pi :{self.ssh_port} -sTCP:LISTEN -t", self.macos_host_parameters)
-            VagrantUtils.remote_command(f"sudo kill -9 {proccess}", self.macos_host_parameters)
+            proccess = VagrantUtils.remote_command(f"sudo lsof -Pi :{self.ssh_port} -sTCP:LISTEN -t", self.remote_host_parameters)
+            VagrantUtils.remote_command(f"sudo kill -9 {proccess}", self.remote_host_parameters)
         if str(self.host_identifier) == "black_mini":
             logger.debug(f"Deleting remote directory {self.host_instance_dir}")
-            VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.macos_host_parameters)
+            VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.remote_host_parameters)
 
 
     def status(self) -> str:
@@ -125,13 +125,13 @@ class VagrantInstance(Instance):
                 match = re.search(pattern, output)
                 if match and key == 'hostname':
                     ip = match.group(1).strip()
-            server_ip = self.macos_host_parameters['server_ip']
+            server_ip = self.remote_host_parameters['server_ip']
             tmp_port_file = str(self.path) + "/port.txt"
             if str(self.host_identifier) == "macstadium":
                 if not Path(tmp_port_file).exists():
-                    port = VagrantUtils.get_port(self.macos_host_parameters)
+                    port = VagrantUtils.get_port(self.remote_host_parameters)
                     cmd = f"sudo /usr/bin/ssh -i /Users/jenkins/.ssh/localhost -L {server_ip}:{port}:{ip}:22 -N 127.0.0.1 -f"
-                    VagrantUtils.remote_command(cmd, self.macos_host_parameters)
+                    VagrantUtils.remote_command(cmd, self.remote_host_parameters)
                     with open(tmp_port_file, 'w') as f:
                         f.write(port)
                 else:
@@ -172,7 +172,7 @@ class VagrantInstance(Instance):
             command = [command]
         if self.platform == 'macos':
             cmd = f"sudo VAGRANT_CWD={self.host_instance_dir} /usr/local/bin/vagrant " + ' '.join(command)
-            output = VagrantUtils.remote_command(cmd, self.macos_host_parameters)
+            output = VagrantUtils.remote_command(cmd, self.remote_host_parameters)
             return output
         else:
             try:
