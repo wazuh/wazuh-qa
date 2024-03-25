@@ -38,7 +38,6 @@ class Provision:
         Run the provision.
         """
         logger.info(f'Initiating provisionment.')
-        # self.install_host_dependencies()
 
         logger.debug(f'Running action {self.action} for components: {self.components}')
         for component in self.components:
