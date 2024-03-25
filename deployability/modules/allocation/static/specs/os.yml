@@ -237,19 +237,19 @@ aws:
   linux-centos-7-amd64:
     ami: ami-0aedf6b1cb669b4c7
     zone: us-east-1
-    user: ec2-user
+    user: centos
   linux-centos-7-arm64:
     ami: ami-08dbbdbfc4fa2f393
     zone: us-east-1
-    user: ec2-user
+    user: centos
   linux-centos-8-amd64:
     ami: ami-0ee534f954d1b2c98
     zone: us-east-1
-    user: ec2-user
+    user: centos
   linux-centos-8-arm64:
-    ami: ami-0c2b701a4792b179b
+    ami: ami-012947942cdc60db6
     zone: us-east-1
-    user: ec2-user
+    user: centos
   linux-centos-9-amd64:
     ami: ami-0259c451b16b72e24
     zone: us-east-1
