@@ -17,7 +17,7 @@ class InputPayload(ExtraVars):
     """Input payload for testing module."""
     tests: list[str]
     targets: list[str]
-    dependencies: list[str]
+    dependencies: list[str] | None = None
     cleanup: bool = True
     live: bool = True
 
