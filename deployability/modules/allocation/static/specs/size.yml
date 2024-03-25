@@ -14,7 +14,7 @@ vagrant:
 aws:
   micro:
     amd64:
-      type: t3.micro
+      type: t2.small
     arm64:
       type: a1.medium
   small:

@@ -9,7 +9,7 @@ class AWSConfig(ProviderConfig):
     type: str
     security_groups: list[str]
     termination_date: str
-    issue: str
+    issue: str | None = None
     team: str
     name: str
     host_identifier: str | None = None
