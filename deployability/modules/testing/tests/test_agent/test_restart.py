@@ -1,34 +1,69 @@
 import pytest
 
-from ..helpers import utils
-from ..helpers.constants import DELETING_RESPONSES, RELEASING_RESOURCES, STARTED, WAZUH_CONTROL, WAZUH_LOG
+from ..helpers.generic import GeneralComponentActions
+from ..helpers.logger.logger import logger
+from ..helpers.manager import WazuhManager
 
 
-@pytest.fixture(scope='module', autouse=True)
-def restart_wazuh():
-    utils.run_command(WAZUH_CONTROL, ['restart'])
+@pytest.fixture
+def wazuh_params(request):
+    wazuh_version = request.config.getoption('--wazuh_version')
+    wazuh_revision = request.config.getoption('--wazuh_revision')
+    dependencies = request.config.getoption('--dependencies')
+    targets = request.config.getoption('--targets')
+    live = request.config.getoption('--live')
+
+    return {
+        'wazuh_version': wazuh_version,
+        'wazuh_revision': wazuh_revision,
+        'dependencies': dependencies,
+        'targets': targets,
+        'live': live
+    }
 
 
-def test_release_resources_shutdown_log_raised():
-    assert utils.file_monitor(
-        WAZUH_LOG, RELEASING_RESOURCES), "Release resources log not found."
+@pytest.fixture(autouse=True)
+def setup_test_environment(wazuh_params):
+    targets = wazuh_params['targets']
+    # Clean the string and split it into key-value pairs
+    targets = targets.replace(' ', '')
+    targets = targets.replace('  ', '')
+    pairs = [pair.strip() for pair in targets.strip('{}').split(',')]
+    targets_dict = dict(pair.split(':') for pair in pairs)
+
+    wazuh_params['master'] = targets_dict.get('wazuh-1')
+    wazuh_params['workers'] = [value for key, value in targets_dict.items() if key.startswith('wazuh-') and key != 'wazuh-1']
+    wazuh_params['agents'] = [value for key, value in targets_dict.items() if key.startswith('agent-')]
+    wazuh_params['indexers'] = [value for key, value in targets_dict.items() if key.startswith('node-')]
+    wazuh_params['dashboard'] = targets_dict.get('dashboard', wazuh_params['master'])
+
+    # If there are no indexers, we choose wazuh-1 by default
+    if not wazuh_params['indexers']:
+        wazuh_params['indexers'].append(wazuh_params['master'])
+
+    wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
+    wazuh_params['agents'] = {key: value for key, value in targets_dict.items() if key.startswith('agent-')}
+
+def test_restart(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        GeneralComponentActions.component_restart(agent_params, 'wazuh-agent')
 
 
-def test_deleting_responses_shutdown_log_raised():
-    assert utils.file_monitor(
-        WAZUH_LOG, DELETING_RESPONSES), "Deleting responses log not found."
+def test_status(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert 'active' in GeneralComponentActions.get_component_status(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by command')
 
 
-def test_start_log_raised():
-    assert utils.file_monitor(WAZUH_LOG, STARTED), "Start log not found."
+def test_connection(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert agent_names in WazuhManager.get_agent_control_info(wazuh_params['master']), logger.error(f'{agent_names} is not present in agent_control information')
 
 
-def test_service_started():
-    assert utils.get_service_status() == "active", "Service is not active after restart."
+def test_isActive(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by command')
 
 
-def test_agent_connection_status():
-    expected_status = "connected" 
-
-    assert utils.check_agent_is_connected("001")
-    assert utils.get_agent_connection_status("001") == expected_status
+def test_clientKeys(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert GeneralComponentActions.hasAgentClientKeys(agent_params), logger.error(f'{agent_names} has not ClientKeys file')
