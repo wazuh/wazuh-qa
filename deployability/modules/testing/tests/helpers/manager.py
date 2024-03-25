@@ -6,6 +6,7 @@ from .executor import Executor, WazuhAPI
 from .generic import HostInformation, CheckFiles
 from .utils import Utils
 
+
 class WazuhManager:
 
     @staticmethod
@@ -209,10 +210,7 @@ class WazuhManager:
         actions = ['added', 'modified', 'removed']
         # Testing the results
         for category in categories:
-            print(category)
             for action in actions:
-                print(action)
-                print(result[category][action])
                 assert result[category][action] == []
 
 
@@ -261,6 +259,7 @@ class WazuhManager:
 
         """
         master_dns = Utils.extract_ansible_host(node_to_connect_inventory)
+
         commands = [
             f"sed -i 's/<node_name>node01<\/node_name>/<node_name>{node_name}<\/node_name>/' {WAZUH_CONF}",
             f"sed -i 's/<node_type>master<\/node_type>/<node_type>{node_type}<\/node_type>/'  {WAZUH_CONF}",

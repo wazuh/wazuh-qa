@@ -2,10 +2,11 @@ import boto3
 import chardet
 import os
 import re
+import socket
 import subprocess
 import time
 import yaml
-import socket
+
 
 from pathlib import Path
 from .constants import WAZUH_CONTROL, CLIENT_KEYS
@@ -168,6 +169,7 @@ class HostConfiguration:
         """
         commands = ["sudo systemctl stop firewalld", "sudo systemctl disable firewalld"]
         Executor.execute_commands(inventory_path, commands)
+
 
     def _extract_hosts(paths, is_aws):
         if is_aws:

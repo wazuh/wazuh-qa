@@ -1,7 +1,8 @@
 import pytest
 
-from ..helpers.manager import WazuhManager
-from ..helpers.generic import GeneralComponentActions
+from ..helpers.manager import WazuhManager, WazuhAPI
+from ..helpers.agent import WazuhAgent, WazuhAPI
+from ..helpers.generic import GeneralComponentActions, Waits
 
 
 @pytest.fixture
@@ -43,9 +44,9 @@ def setup_test_environment(wazuh_params):
     wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
     wazuh_params['agents'] = {key: value for key, value in targets_dict.items() if key.startswith('agent-')}
 
-def test_restart(wazuh_params):
+def test_registration(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
-        GeneralComponentActions.component_restart(agent_params, 'wazuh-agent')
+        WazuhAgent.register_agent(agent_params, wazuh_params['master'])
 
 
 def test_status(wazuh_params):
@@ -56,11 +57,17 @@ def test_status(wazuh_params):
 def test_connection(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
         assert agent_names in WazuhManager.get_agent_control_info(wazuh_params['master'])
+    wazuh_api = WazuhAPI(wazuh_params['master'])
+    assert any(d.get('name') == agent_names for d in WazuhAgent.get_agents_information(wazuh_api))
 
 
 def test_isActive(wazuh_params):
-    for agent in wazuh_params['agents'].values():
-        assert GeneralComponentActions.isComponentActive(agent, 'wazuh-agent')
+    wazuh_api = WazuhAPI(wazuh_params['master'])
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent')
+
+        expected_condition_func = lambda: 'active' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
+        Waits.dynamic_wait(expected_condition_func, cycles=10, waiting_time=20)
 
 
 def test_clientKeys(wazuh_params):

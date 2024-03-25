@@ -1,6 +1,5 @@
 import pytest
 
-
 def pytest_addoption(parser):
     parser.addoption('--wazuh_version', required=False, help='Wazuh version to test files.')
     parser.addoption('--wazuh_revision', required=False, help='Wazuh revision to test.')
@@ -8,7 +7,7 @@ def pytest_addoption(parser):
     parser.addoption('--component', required=False, help='Component to be tested.')
     parser.addoption('--dependencies', required=False, help='Dependency to be tested.')
     parser.addoption('--targets', required=False, help='Targets to be tested.')
-
+    parser.addoption('--live', required=True, help='Packages repository.')
 
 @pytest.fixture(scope='session')
 def wazuh_version(request):
@@ -44,3 +43,10 @@ def dependencies(request) -> dict | None:
 def targets(request) -> dict | None:
 
     return request.config.getoption('targets')
+
+
+@pytest.fixture(scope='session')
+def live(request) -> bool | None:
+    live_value = request.config.getoption('live')
+
+    return live_value.lower() == 'true' if live_value else None
