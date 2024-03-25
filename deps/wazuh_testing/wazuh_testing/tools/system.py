@@ -495,7 +495,6 @@ class HostManager:
                 result = self.get_host(host).ansible("shell", cmd, check=False)
 
             logging.info(f"npm package installed result {result}")
-            return result
 
         else:
             result = False
@@ -521,7 +520,7 @@ class HostManager:
 
             logging.info(f"Package installed result {result}")
 
-            return result
+        return result
 
     def get_master_ip(self):
         """
@@ -602,7 +601,6 @@ class HostManager:
                     remove_operation_result = self.get_host(host).ansible("shell", cmd, check=False)
 
                 logging.info(f"npm package removed result {remove_operation_result}")
-                return remove_operation_result
             else:
                 if os_name == 'windows':
                     remove_operation_result = self.get_host(host).ansible("win_command",
@@ -623,7 +621,7 @@ class HostManager:
                                                                         f"brew uninstall {package_uninstall_name}",
                                                                         check=False)
 
-        logging.info(f"Package removed result {remove_operation_result}")
+                logging.info(f"Package removed result {remove_operation_result}")
 
         return remove_operation_result
 
