@@ -75,7 +75,7 @@ class WazuhAgent:
             ]
 
             commands.extend(system_commands)
-        logger.debug(f'Installing Agent in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        logger.info(f'Installing Agent in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_commands(inventory_path, commands)
 
 
@@ -101,7 +101,7 @@ class WazuhAgent:
 
         Executor.execute_commands(inventory_path, commands)
         if internal_ip in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'):
-            logger.debug(f'The Manager IP was configured in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+            logger.info(f'The Manager IP was configured in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
         else:
             logger.error(f'Error configuring the Manager IP in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
@@ -153,7 +153,7 @@ class WazuhAgent:
                 "/usr/sbin/pkgutil --forget com.wazuh.pkg.wazuh-agent"
             ])
 
-        logger.debug(f'Uninstalling Agent in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        logger.info(f'Uninstalling Agent in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_commands(inventory_path, commands)
 
 
@@ -188,7 +188,7 @@ class WazuhAgent:
         """
         result = CheckFiles.perform_action_and_scan(agent_params, action_callback)
         os_name = HostInformation.get_os_name_from_inventory(agent_params)
-        logger.debug(f'Applying filters in checkfiles in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
+        logger.info(f'Applying filters in checkfiles in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
 
         if 'debian' in os_name:
             filter_data = {
@@ -247,7 +247,7 @@ class WazuhAgent:
         """
         action_callback = lambda: WazuhAgent._install_agent_callback(wazuh_params, agent_name, agent_params)
         result = WazuhAgent.perform_action_and_scan(agent_params, action_callback)
-        logger.debug(f'Pre and post install checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}: {result}')
+        logger.info(f'Pre and post install checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}: {result}')
         WazuhAgent.assert_results(result)
 
 
@@ -263,7 +263,7 @@ class WazuhAgent:
         """
         action_callback = lambda: WazuhAgent._uninstall_agent_callback(wazuh_params, agent_params)
         result = WazuhAgent.perform_action_and_scan(agent_params, action_callback)
-        logger.debug(f'Pre and post uninstall checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}: {result}')
+        logger.info(f'Pre and post uninstall checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}: {result}')
         WazuhAgent.assert_results(result)
 
 

@@ -31,7 +31,7 @@ class WazuhManager:
                     f"curl -sO https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh",
                     f"bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
             ] 
-        logger.debug(f'Installing Manager in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        logger.info(f'Installing Manager in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_commands(inventory_path, commands)
 
 
@@ -80,7 +80,7 @@ class WazuhManager:
 
         commands.extend(system_commands)
 
-        logger.debug(f'Uninstalling Manager in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        logger.info(f'Uninstalling Manager in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_commands(inventory_path, commands)
 
 
@@ -121,7 +121,7 @@ class WazuhManager:
         """
         result = CheckFiles.perform_action_and_scan(manager_params, action_callback)
         os_name = HostInformation.get_os_name_from_inventory(manager_params)
-        logger.debug(f'Applying filters in checkfiles in {HostInformation.get_os_name_and_version_from_inventory(manager_params)}')
+        logger.info(f'Applying filters in checkfiles in {HostInformation.get_os_name_and_version_from_inventory(manager_params)}')
 
         if 'debian' in os_name:
             filter_data = {
@@ -180,7 +180,7 @@ class WazuhManager:
         """
         action_callback = lambda: WazuhManager._install_manager_callback(wazuh_params, manager_name, manager_params)
         result = WazuhManager.perform_action_and_scan(manager_params, action_callback)
-        logger.debug(f'Pre and post install checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(manager_params)}: {result}')
+        logger.info(f'Pre and post install checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(manager_params)}: {result}')
         WazuhManager.assert_results(result)
 
 
@@ -196,7 +196,7 @@ class WazuhManager:
         """
         action_callback = lambda: WazuhManager._uninstall_manager_callback(manager_params)
         result = WazuhManager.perform_action_and_scan(manager_params, action_callback)
-        logger.debug(f'Pre and post uninstall checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(manager_params)}: {result}')
+        logger.info(f'Pre and post uninstall checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(manager_params)}: {result}')
         WazuhManager.assert_results(result)
 
 
@@ -272,7 +272,7 @@ class WazuhManager:
 
         Executor.execute_commands(inventory_path, commands)
         if node_name in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'):
-            logger.debug(f'Cluster was configured in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+            logger.info(f'Cluster was configured in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         else:
             logger.error(f'Error configuring cluster information in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
 

@@ -38,28 +38,10 @@ class Executor:
     @staticmethod
     def execute_commands(inventory_path, commands=[]) -> dict:
 
-        with open(inventory_path, 'r') as yaml_file:
-            inventory_data = yaml.safe_load(yaml_file)
-
-        host = inventory_data.get('ansible_host')
-        port = inventory_data.get('ansible_port')
-        private_key_path = inventory_data.get('ansible_ssh_private_key_file')
-        username = inventory_data.get('ansible_user')
-
         results = {}
         for command in commands:
-            ssh_command = [
-                "ssh",
-                "-i", private_key_path,
-                "-o", "StrictHostKeyChecking=no",
-                "-o", "UserKnownHostsFile=/dev/null",
-                "-p", str(port),
-                f"{username}@{host}",
-                "sudo", 
-                command
-            ]
+            results[command] = Executor.execute_command(inventory_path, command)
 
-            results[command] = subprocess.run(ssh_command, stdout=subprocess.PIPE, text=True).stdout
         return results
 
 

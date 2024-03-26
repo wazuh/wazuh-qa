@@ -193,9 +193,9 @@ class HostConfiguration:
         if GeneralComponentActions.isComponentActive(inventory_path, 'firewalld'):
             Executor.execute_commands(inventory_path, commands)
 
-            logger.debug(f'Firewall disabled in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+            logger.info(f'Firewall disabled on {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         else:
-            logger.error(f'No Firewall detected in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+            logger.info(f'No Firewall to disable on {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
 
 
 
@@ -282,9 +282,9 @@ class HostConfiguration:
 
         current_from_directory = HostInformation.get_current_dir(master_path)
         if not HostInformation.file_exists(master_path, f'{current_from_directory}/wazuh-install-files.tar'):
-            logger.error('wazuh-install-files.tar was not created, check config.yml information')
+            logger.error('wazuh-install-files.tar not created, check config.yml information')
         else:
-            logger.debug('wazuh-install-files.tar is created')
+            logger.info('wazuh-install-files.tar created')
 
     @staticmethod
     def scp_to(from_inventory_path, to_inventory_path, file_name) -> None:
@@ -319,17 +319,17 @@ class HostConfiguration:
         # Allowing handling permissions
         if file_name == 'wazuh-install-files.tar':
             Executor.execute_command(from_inventory_path, f'chmod +rw {file_name}')
-            logger.debug('File permissions modified to be handled')
+            logger.info('File permissions modified to be handled')
 
         # SCP
         if HostInformation.file_exists(from_inventory_path, f'{current_from_directory}/{file_name}'):
             subprocess.run(f'scp -i {from_key} -o StrictHostKeyChecking=no -P {from_port} {from_user}@{from_host}:{current_from_directory}/{file_name} {Path(__file__).parent}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            logger.debug(f'File copied from {from_host} to {Path(__file__).parent}/{file_name}')
+            logger.info(f'File copied from {from_host} to {Path(__file__).parent}/{file_name}')
         else:
             logger.error(f'File is not present in {from_host} in {current_from_directory}/{file_name}')
         if os.path.exists(f'{Path(__file__).parent}/wazuh-install-files.tar'):
             subprocess.run(f'scp -i {to_key} -o StrictHostKeyChecking=no -P {to_port} {Path(__file__).parent}/{file_name} {to_user}@{to_host}:{current_to_directory}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            logger.debug(f'File was transfered from {from_host} to {current_from_directory}/{file_name}')
+            logger.info(f'File was transfered from {from_host} to {current_from_directory}/{file_name}')
         else:
             logger.error(f'File was not transfered from {from_host} to {current_from_directory}/{file_name}')
 
@@ -337,14 +337,14 @@ class HostConfiguration:
         if file_name == 'wazuh-install-files.tar':
             Executor.execute_command(from_inventory_path, f'chmod 600 {file_name}')
             Executor.execute_command(to_inventory_path, f'chmod 600 {file_name}')
-            logger.debug('File permissions were restablished')
+            logger.info('File permissions were restablished')
 
         # Deleting file from localhost
         file_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), file_name)
 
         if os.path.exists(file_path):
             os.remove(file_path)
-            logger.debug(f"The file {file_name} deleted in {Path(__file__).parent}")
+            logger.info(f"The file {file_name} deleted in {Path(__file__).parent}")
         else:
             logger.error(f"The file {file_name} does not exist")
 
@@ -420,7 +420,7 @@ class CheckFiles:
         Returns:
             Dict: dict of directories:hash
         """
-        logger.debug(f'Generating Snapshot for Checkfile of {directory} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        logger.info(f'Generating Snapshot for Checkfile of {directory} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         if 'linux' in os_type or 'macos' in os_type:
             command = f'sudo find {directory} -type f -exec sha256sum {{}} + {filter}'
             result = Executor.execute_command(inventory_path, command)
@@ -496,7 +496,7 @@ class GeneralComponentActions:
         Returns:
             str: Role status
         """
-        logger.debug(f'Getting status of {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        logger.info(f'Getting status of {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
 
         return Executor.execute_command(inventory_path, f'systemctl status {host_role}')
 
@@ -511,7 +511,7 @@ class GeneralComponentActions:
             host_role: role of the component
         """
 
-        logger.debug(f'Stopping {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        logger.info(f'Stopping {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_command(inventory_path, f'systemctl stop {host_role}')
 
 
@@ -525,7 +525,7 @@ class GeneralComponentActions:
             host_role: role of the component
         """
 
-        logger.debug(f'Restarting {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        logger.info(f'Restarting {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_command(inventory_path, f'systemctl restart {host_role}')
 
 
@@ -539,7 +539,7 @@ class GeneralComponentActions:
             host_role: role of the component
         """
 
-        logger.debug(f'Starting {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        logger.info(f'Starting {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_command(inventory_path, f'systemctl restart {host_role}')
 
 
