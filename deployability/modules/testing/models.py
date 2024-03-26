@@ -1,6 +1,7 @@
 from pathlib import Path
-from pydantic import BaseModel, field_validator, model_validator
 from typing import Literal
+
+from pydantic import BaseModel, field_validator, model_validator
 
 
 class ExtraVars(BaseModel):
@@ -16,9 +17,10 @@ class InputPayload(ExtraVars):
     """Input payload for testing module."""
     tests: list[str]
     targets: list[str]
-    dependencies: list[str]
+    dependencies: list[str] | None = None
     cleanup: bool = True
     live: bool = True
+
 
 
     @field_validator('tests', mode='before')

@@ -6,4 +6,5 @@ class Utils:
     def extract_ansible_host(file_path):
         with open(file_path, 'r') as yaml_file:
             inventory_data = yaml.safe_load(yaml_file)
+
         return inventory_data.get('ansible_host')

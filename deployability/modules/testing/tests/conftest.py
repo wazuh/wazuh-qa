@@ -38,6 +38,7 @@ def dependencies(request) -> dict | None:
 
     return request.config.getoption('dependencies')
 
+
 @pytest.fixture(scope='session')
 def targets(request) -> dict | None:
 

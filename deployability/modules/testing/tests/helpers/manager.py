@@ -1,8 +1,10 @@
 import requests
+import socket
 
 from .constants import CLUSTER_CONTROL, AGENT_CONTROL, WAZUH_CONF, WAZUH_ROOT
 from .executor import Executor, WazuhAPI
 from .generic import HostInformation, CheckFiles
+from .utils import Utils
 
 
 class WazuhManager:
@@ -243,7 +245,7 @@ class WazuhManager:
 
 
     @staticmethod
-    def configuring_clusters(inventory_path, node_name, node_type, node_to_connect, key, disabled) -> None:
+    def configuring_clusters(inventory_path, node_name, node_type, node_to_connect_inventory, key, disabled) -> None:
         """
         Configures the cluster in ossec.conf
 
@@ -251,16 +253,18 @@ class WazuhManager:
             inventory_path: host's inventory path
             node_name: host's inventory path
             node_type: master/worker
-            node_to_connect: master/worker
+            node_to_connect_inventory: inventory path of the node to connect
             key: hexadecimal 16 key
             disabled: yes/no
 
         """
+        master_dns = Utils.extract_ansible_host(node_to_connect_inventory)
+
         commands = [
             f"sed -i 's/<node_name>node01<\/node_name>/<node_name>{node_name}<\/node_name>/' {WAZUH_CONF}",
             f"sed -i 's/<node_type>master<\/node_type>/<node_type>{node_type}<\/node_type>/'  {WAZUH_CONF}",
             f"sed -i 's/<key><\/key>/<key>{key}<\/key>/' {WAZUH_CONF}",
-            f"sed -i 's/<node>NODE_IP<\/node>/<node>{node_to_connect}<\/node>/' {WAZUH_CONF}",
+            f"sed -i 's/<node>NODE_IP<\/node>/<node>{HostInformation.get_internal_ip_from_aws_dns(master_dns)}<\/node>/' {WAZUH_CONF}",
             f"sed -i 's/<disabled>yes<\/disabled>/<disabled>{disabled}<\/disabled>/' {WAZUH_CONF}",
             "systemctl restart wazuh-manager"
         ]

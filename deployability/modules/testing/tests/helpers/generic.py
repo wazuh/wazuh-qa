@@ -279,7 +279,7 @@ class HostConfiguration:
 
         to_host = socket.gethostbyname(to_inventory_data.get('ansible_host'))
         to_key = to_inventory_data.get('ansible_ssh_private_key_file')
-        to_user = from_inventory_data.get('ansible_user')
+        to_user = to_inventory_data.get('ansible_user')
         to_port = to_inventory_data.get('ansible_port')
 
         # Allowing handling permissions
