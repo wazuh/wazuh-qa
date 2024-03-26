@@ -59,7 +59,7 @@ agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                '..', '..', 'provisioning', 'enrollment_cluster', 'roles', 'agent-role',
                                'files', 'ossec.conf')
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(test_cases_yaml)
-
+TIMEOUT_SECOND_CHECK = 10
 
 @pytest.fixture()
 def group_creation_and_assignation(metadata, target_node):
@@ -141,6 +141,7 @@ def test_group_sync_status(metadata, target_node, clean_environment, group_creat
         cluster recreates groups without syncreq status.
     '''
     # Delete group folder
+
     delete_agent_group(metadata['delete_target'], metadata['group_folder_deleted'], host_manager, 'folder')
 
     # Set values
@@ -174,7 +175,7 @@ def test_group_sync_status(metadata, target_node, clean_environment, group_creat
 
     assert metadata['expected_first_check'] == first_time_check
 
-    time.sleep(T_5)
+    time.sleep(TIMEOUT_SECOND_CHECK)
 
     # Check after 5 seconds, sync_status
     if 'syncreq' in execute_wdb_query(query, test_infra_hosts[0], host_manager):
