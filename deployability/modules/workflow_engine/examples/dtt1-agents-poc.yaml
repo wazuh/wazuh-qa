@@ -20,10 +20,10 @@ tasks:
         path: python3
         args:
           - modules/testing/main.py
-          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
+          - inventory: "{working-dir}/agent-{agent}/inventory.yml"
           - dependencies:
-            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-            - agent: "{working-dir}/agent-{agent}/inventory.yaml"
+            - manager: "{working-dir}/manager-{manager-os}/inventory.yml"
+            - agent: "{working-dir}/agent-{agent}/inventory.yml"
           - tests: "install,register,stop"
           - component: "agent"
           - wazuh-version: "4.7.1"
@@ -44,9 +44,9 @@ tasks:
         path: python3
         args:
           - modules/testing/main.py
-          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
+          - inventory: "{working-dir}/agent-{agent}/inventory.yml"
           - dependencies:
-            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+            - manager: "{working-dir}/manager-{manager-os}/inventory.yml"
           - tests: "uninstall"
           - component: "agent"
           - wazuh-version: "4.7.1"
@@ -67,7 +67,7 @@ tasks:
         path: python3
         args:
           - modules/provision/main.py
-          - inventory: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - inventory: "{working-dir}/manager-{manager-os}/inventory.yml"
           - install:
             - component: wazuh-manager
               type: package
@@ -87,8 +87,8 @@ tasks:
           - provider: "{infra-provider}"
           - size: large
           - composite-name: "{manager-os}"
-          - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
-          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+          - inventory-output: "{working-dir}/manager-{manager-os}"
+          - track-output: "{working-dir}/manager-{manager-os}"
     cleanup:
       this: process
       with:
@@ -96,7 +96,7 @@ tasks:
         args:
           - modules/allocation/main.py
           - action: delete
-          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+          - track-output: "{working-dir}/manager-{manager-os}/track.yml"
 
   # Generic agent provision task
   - task: "provision-install-{agent}"
@@ -107,10 +107,10 @@ tasks:
         path: python3
         args:
           - modules/provision/main.py
-          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
+          - inventory: "{working-dir}/agent-{agent}/inventory.yml"
           - dependencies:
-            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-            - agent: "{working-dir}/agent-{agent}/inventory.yaml"
+            - manager: "{working-dir}/manager-{manager-os}/inventory.yml"
+            - agent: "{working-dir}/agent-{agent}/inventory.yml"
           - install:
             - component: wazuh-agent
               type: package
@@ -131,10 +131,10 @@ tasks:
         path: python3
         args:
           - modules/provision/main.py
-          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
+          - inventory: "{working-dir}/agent-{agent}/inventory.yml"
           - dependencies:
-            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-            - agent: "{working-dir}/agent-{agent}/inventory.yaml"
+            - manager: "{working-dir}/manager-{manager-os}/inventory.yml"
+            - agent: "{working-dir}/agent-{agent}/inventory.yml"
           - uninstall:
             - component: wazuh-agent
               type: package
@@ -157,8 +157,8 @@ tasks:
           - provider: "{infra-provider}"
           - size: small
           - composite-name: "{agent}"
-          - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
-          - track-output: "{working-dir}/agent-{agent}/track.yaml"
+          - inventory-output: "{working-dir}/agent-{agent}"
+          - track-output: "{working-dir}/agent-{agent}"
     cleanup:
       this: process
       with:
@@ -166,7 +166,7 @@ tasks:
         args:
           - modules/allocation/main.py
           - action: delete
-          - track-output: "{working-dir}/agent-{agent}/track.yaml"
+          - track-output: "{working-dir}/agent-{agent}/track.yml"
     foreach:
       - variable: agents-os
         as: agent
