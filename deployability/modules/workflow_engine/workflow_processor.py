@@ -6,6 +6,7 @@ import concurrent.futures
 import graphlib
 import json
 import time
+import uuid
 import yaml
 import os
 
@@ -20,8 +21,9 @@ class WorkflowFile:
     """Class for loading and processing a workflow file."""
     schema_path = Path(__file__).parent / 'schemas' / 'schema_v1.json'
 
-    def __init__(self, workflow_file_path: Path | str, schema_path: Path | str = None) -> None:
+    def __init__(self, workflow_file_path: Path | str, schema_path: Path | str = None, native_vars: dict = {}) -> None:
         self.schema_path = schema_path or self.schema_path
+        self.__native_vars = native_vars
         self.__validate_schema(workflow_file_path)
         self.workflow_raw_data = self.__load_workflow(workflow_file_path)
         self.task_collection = self.__process_workflow()
@@ -66,8 +68,10 @@ class WorkflowFile:
         """Process the workflow and return a list of tasks."""
         logger.debug("Process workflow.")
         task_collection = []
-        variables = self.workflow_raw_data.get('variables', {})
+        workflow_vars = self.workflow_raw_data.get('variables', {})
+        variables = {**workflow_vars, **self.__native_vars}
         for task in self.workflow_raw_data.get('tasks', []):
+            logger.debug(f"Processing task: {task}")
             task_collection.extend(self.__expand_task(task, variables))
 
         if not task_collection:
@@ -117,11 +121,37 @@ class WorkflowFile:
 
             for combination in product(*variable_values):
                 variables_with_items = {**variables, **dict(zip(as_identifiers, combination))}
-                expanded_tasks.append(self.__replace_placeholders(task, variables_with_items))
+                updated_task = self.__replace_placeholders(task, variables_with_items)
+                expanded_tasks.append(self.__inject_env_vars(updated_task, self.__native_vars))
         else:
-            expanded_tasks.append(self.__replace_placeholders(task, variables))
+            updated_task = self.__replace_placeholders(task, variables)
+            expanded_tasks.append(self.__inject_env_vars(updated_task, self.__native_vars))
 
         return expanded_tasks
+    
+    def __inject_env_vars(self, task: dict, env: dict) -> dict:
+        """
+        Inject environment variables into a task.
+
+        Args:
+            task (dict): The task to inject environment variables into.
+            env (dict): The environment variables to inject.
+
+        Returns:
+            dict: The task with injected environment variables.
+        """
+        logger.debug(f"Injecting environment variables into task: {task}")
+        for key, value in task.items():
+            if not isinstance(value, dict):
+                continue
+            elif not 'with' in value:
+                continue
+            envs = task[key]['with'].get('env', {})
+            if not isinstance(envs, dict):
+                raise ValueError(f"Environment variables must be a dictionary. Got: {envs}")
+            envs.update(env)
+            task[key]['with']['env'] = envs
+        return task
 
     def __static_workflow_validation(self):
         """Validate the workflow against static criteria."""
@@ -277,8 +307,10 @@ class WorkflowProcessor:
             schema_file (Path | str): Path to the schema file (YAML format).
         """
         logger.setLevel(log_level)
-        # Initialize the instance variables.
-        self.task_collection = WorkflowFile(workflow_file, schema_file).task_collection
+        # Initialize the intenal variables.
+        self.__execution_id = self.__generate_execution_id()
+        # Initialize the public variables.
+        self.task_collection = WorkflowFile(workflow_file, schema_file, self.get_native_vars()).task_collection
         self.dry_run = dry_run
         self.threads = threads
 
@@ -309,16 +341,18 @@ class WorkflowProcessor:
                 raise
 
 
-    def create_task_object(self, task: dict, action) -> Task:
+    def create_task_object(self, task: dict, action: dict, env: dict = None) -> Task:
         """Create and return a Task object based on task type."""
-        task_type = task[action]['this']
+        task_type = task.get(action, {}).get('this')
+        if not task_type:
+            raise ValueError(f"Unknown task type '{task_type}'.")
 
-        task_handler = TASKS_HANDLERS.get(task_type)
+        task_handler: Task = TASKS_HANDLERS.get(task_type)
+        if not task_handler:
+            raise ValueError(f"Unknown task type '{task_type}'.")
 
-        if task_handler is not None:
-            return task_handler(task['task'], task[action]['with'])
+        return task_handler(task['task'], task[action]['with'])
 
-        raise ValueError(f"Unknown task type '{task_type}'.")
 
     def execute_tasks_parallel(self, dag: DAG, reverse: bool = False) -> None:
         """Execute tasks in parallel."""
@@ -382,3 +416,21 @@ class WorkflowProcessor:
                 except Exception as e:
                     logger.error("Error in aborted task: %s", e)
             executor.shutdown(wait=False, cancel_futures=True)
+
+    def get_native_vars(self) -> dict:
+        """
+        Get native workflow variables.
+
+        Returns:
+            dict: Native workflow variables.
+        """
+        return {'execution_id': self.__execution_id}
+
+    def __generate_execution_id(self) -> str:
+        """
+        Retrieves a UUID as the execution ID.
+
+        Returns:
+            str: The execution ID.
+        """
+        return str(uuid.uuid4())

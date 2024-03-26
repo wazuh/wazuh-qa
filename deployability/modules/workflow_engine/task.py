@@ -7,31 +7,32 @@ import random
 import time
 
 from abc import ABC, abstractmethod
+
 from workflow_engine.logger.logger import logger
+
 
 class Task(ABC):
     """Abstract base class for tasks."""
+    
+    def __init__(self, task_name: str, task_parameters: dict):
+        """
+        Initialize Task.
+
+        Args:
+            task_name (str): Name of the task.
+            task_parameters (dict): Parameters for the task.
+        """
+        self.task_name = task_name
+        self.task_parameters = task_parameters
 
     @abstractmethod
     def execute(self) -> None:
         """Execute the task."""
         pass
 
+
 class ProcessTask(Task):
     """Task for executing a process."""
-
-    def __init__(self, task_name: str, task_parameters: dict):
-        """
-        Initialize ProcessTask.
-
-        Args:
-            task_name (str): Name of the task.
-            task_parameters (dict): Parameters for the task.
-            logger (logging.Logger): Logger instance.
-        """
-        self.task_name = task_name
-        self.task_parameters = task_parameters
-        self.logger = logger
 
     def execute(self) -> None:
         """Execute the process task."""
@@ -61,6 +62,7 @@ class ProcessTask(Task):
                 check=True,
                 capture_output=True,
                 text=True,
+                env=self.task_parameters.get('env', None)
             )
             logger.debug(f'Finished task "{self.task_name}" execution with result:\n{str(result.stdout)}')
 
@@ -72,19 +74,15 @@ class ProcessTask(Task):
                 raise KeyboardInterrupt(f"Error executing process task with keyboard interrupt.")
             raise Exception(f"Error executing process task {e.stderr}")
 
+
 class DummyTask(Task):
-    def __init__(self, task_name, task_parameters):
-        self.task_name = task_name
-        self.task_parameters = task_parameters
 
     def execute(self):
         message = self.task_parameters.get('message', 'No message provided')
         logger.info("%s: %s", message, self.task_name, extra={'tag': self.task_name})
 
+
 class DummyRandomTask(Task):
-    def __init__(self, task_name, task_parameters):
-        self.task_name = task_name
-        self.task_parameters = task_parameters
 
     def execute(self):
         time_interval = self.task_parameters.get('time-seconds', [1, 5])
@@ -94,6 +92,7 @@ class DummyRandomTask(Task):
         logger.info("%s: %s (Sleeping for %.2f seconds)", message, self.task_name, sleep_time, extra={'tag': self.task_name})
 
         time.sleep(sleep_time)
+
 
 TASKS_HANDLERS = {
     'process': ProcessTask,
