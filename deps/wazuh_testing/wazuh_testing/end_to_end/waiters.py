@@ -80,7 +80,8 @@ def wait_syscollector_and_vuln_scan(host_manager: HostManager, host: str,  opera
                                                [get_event_regex({'event': 'syscollector_scan_start'}),
                                                 get_event_regex({'event': 'syscollector_scan_end'})],
                                                [timeout_syscollector_scan, timeout_syscollector_scan],
-                                               host_manager.get_group_hosts('agent'))
+                                               host_manager.get_group_hosts('agent'),
+                                               greater_than_timestamp=current_datetime)
 
     truncate_remote_host_group_files(host_manager, host_manager.get_group_hosts('agent'))
 
