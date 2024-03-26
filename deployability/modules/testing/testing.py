@@ -50,7 +50,6 @@ class Tester:
 
         logger.debug(f"Using extra vars: {extra_vars}")
 
-
         # Setup and run tests
         target_inventory = Inventory(**Utils.load_from_yaml(str(list(eval(payload.targets[0]).values())[0])))
         ansible = Ansible(ansible_data=target_inventory.model_dump())
@@ -65,6 +64,7 @@ class Tester:
                 logger.info("Cleaning up")
                 cls._cleanup(ansible, extra_vars['working_dir'])
 
+
     @classmethod
     def _get_extra_vars(cls, payload: InputPayload) -> ExtraVars:
         """
@@ -78,6 +78,7 @@ class Tester:
         """
 
         return ExtraVars(**payload.model_dump())
+
 
     @classmethod
     def _run_tests(cls, test_list: list[str], ansible: Ansible, extra_vars: ExtraVars) -> None:
@@ -98,6 +99,7 @@ class Tester:
                 continue
             ansible.run_playbook(playbook, extra_vars)
 
+
     @classmethod
     def _setup(cls, ansible: Ansible, extra_vars: ExtraVars) -> None:
         """
@@ -111,6 +113,7 @@ class Tester:
         template = str(cls._setup_playbook)
         playbook = ansible.render_playbook(template, rendering_var)
         ansible.run_playbook(playbook, extra_vars)
+
 
     @classmethod
     def _cleanup(cls, ansible: Ansible, remote_working_dir: str = '/tmp') -> None:

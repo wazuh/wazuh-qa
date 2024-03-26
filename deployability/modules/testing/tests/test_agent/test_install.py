@@ -7,7 +7,6 @@ from ..helpers.logger.logger import logger
 from ..helpers.manager import WazuhManager
 
 
-
 @pytest.fixture
 def wazuh_params(request):
     wazuh_version = request.config.getoption('--wazuh_version')
@@ -48,7 +47,6 @@ def setup_test_environment(wazuh_params):
     wazuh_params['agents'] = {key: value for key, value in targets_dict.items() if key.startswith('agent-')}
 
 def test_installation(wazuh_params):
-
     # Disabling firewall for all managers
     for manager_name, manager_params in wazuh_params['managers'].items():
         HostConfiguration.disable_firewall(manager_params)

@@ -6,6 +6,7 @@ from ..helpers.generic import HostConfiguration, HostInformation, GeneralCompone
 from ..helpers.manager import WazuhManager
 from ..helpers.logger.logger import logger
 
+
 @pytest.fixture
 def wazuh_params(request):
     wazuh_version = request.config.getoption('--wazuh_version')
@@ -41,7 +42,6 @@ def setup_test_environment(wazuh_params):
 
     wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
 
-
 def test_installation(wazuh_params):
     # Disabling firewall for all managers
     for manager_name, manager_params in wazuh_params['managers'].items():
@@ -62,7 +62,6 @@ def test_installation(wazuh_params):
         manager_status = GeneralComponentActions.get_component_status(manager, 'wazuh-manager')
         assert 'active' in manager_status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(manager)} is not active')
         assert HostInformation.dir_exists(manager, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(manager)}')
-
 
     # Configuring cluster for all managers
     hex16_code = 'eecda366dded9b32bcfbf3b057bf3ede'

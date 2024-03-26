@@ -59,9 +59,11 @@ def test_uninstall(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
         assert 'Disconnected' in WazuhManager.get_agent_control_info(wazuh_params['master']), logger.error(f'{agent_names} is still connected in the Manager')
 
+
 def test_agent_uninstalled_directory(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
         assert not HostInformation.dir_exists(agent_params, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is still present in the agent {agent_names}')
+
 
 def test_isActive(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['master'])
