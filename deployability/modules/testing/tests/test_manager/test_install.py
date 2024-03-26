@@ -86,7 +86,7 @@ def test_manager_version(wazuh_params):
     for manager in wazuh_params['managers'].values():
         manager_status = GeneralComponentActions.get_component_version(manager)
         assert wazuh_params['wazuh_version'] in manager_status, logger.error(f"The version {HostInformation.get_os_name_and_version_from_inventory(manager)} is not {wazuh_params['wazuh_version']} by using commands")
-        wazuh_api = WazuhAPI(manager)
+        wazuh_api = WazuhAPI(wazuh_params['master'])
         assert wazuh_params['wazuh_version'] in WazuhManager.get_manager_version(wazuh_api), logger.error(f"The version {HostInformation.get_os_name_and_version_from_inventory(manager)} is not {wazuh_params['wazuh_version']} in the API")
 
 
@@ -94,7 +94,7 @@ def test_manager_revision(wazuh_params):
     for manager in wazuh_params['managers'].values():
         manager_status = GeneralComponentActions.get_component_revision(manager)
         assert wazuh_params['wazuh_revision'] in manager_status, logger.error(f"The revision {HostInformation.get_os_name_and_version_from_inventory(manager)} is not {wazuh_params['wazuh_revision']} by using commands")
-        wazuh_api = WazuhAPI(manager)
+        wazuh_api = WazuhAPI(wazuh_params['master'])
         assert wazuh_params['wazuh_revision'] in str(WazuhManager.get_manager_revision(wazuh_api)), logger.error(f"The revision {HostInformation.get_os_name_and_version_from_inventory(manager)} is not {wazuh_params['wazuh_revision']} in the API")
 
 

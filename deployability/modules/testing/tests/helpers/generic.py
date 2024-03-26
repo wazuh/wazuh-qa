@@ -313,7 +313,7 @@ class HostConfiguration:
 
         to_host = socket.gethostbyname(to_inventory_data.get('ansible_host'))
         to_key = to_inventory_data.get('ansible_ssh_private_key_file')
-        to_user = from_inventory_data.get('ansible_user')
+        to_user = to_inventory_data.get('ansible_user')
         to_port = to_inventory_data.get('ansible_port')
 
         # Allowing handling permissions
@@ -324,14 +324,14 @@ class HostConfiguration:
         # SCP
         if HostInformation.file_exists(from_inventory_path, f'{current_from_directory}/{file_name}'):
             subprocess.run(f'scp -i {from_key} -o StrictHostKeyChecking=no -P {from_port} {from_user}@{from_host}:{current_from_directory}/{file_name} {Path(__file__).parent}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            logger.info(f'File copied from {from_host} to {Path(__file__).parent}/{file_name}')
+            logger.info(f'File copied from {HostInformation.get_os_name_and_version_from_inventory(from_inventory_path)} ({from_host}) to {Path(__file__).parent}/{file_name}')
         else:
-            logger.error(f'File is not present in {from_host} in {current_from_directory}/{file_name}')
+            logger.error(f'File is not present in {HostInformation.get_os_name_and_version_from_inventory(from_inventory_path)} ({from_host}) in {current_from_directory}/{file_name}')
         if os.path.exists(f'{Path(__file__).parent}/wazuh-install-files.tar'):
             subprocess.run(f'scp -i {to_key} -o StrictHostKeyChecking=no -P {to_port} {Path(__file__).parent}/{file_name} {to_user}@{to_host}:{current_to_directory}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            logger.info(f'File was transfered from {from_host} to {current_from_directory}/{file_name}')
+            logger.info(f'File transfered from {current_from_directory}/{file_name} to {HostInformation.get_os_name_and_version_from_inventory(to_inventory_path)} ({to_host})')
         else:
-            logger.error(f'File was not transfered from {from_host} to {current_from_directory}/{file_name}')
+            logger.error(f'File was not transfered from {current_from_directory}/{file_name} to {HostInformation.get_os_name_and_version_from_inventory(to_inventory_path)} ({to_host})')
 
         # Restoring permissions
         if file_name == 'wazuh-install-files.tar':
@@ -348,6 +348,10 @@ class HostConfiguration:
         else:
             logger.error(f"The file {file_name} does not exist")
 
+        if HostInformation.file_exists(to_inventory_path, f'{current_to_directory}/{file_name}'):
+            logger.info(f'{file_name} transfered to {HostInformation.get_os_name_and_version_from_inventory(from_inventory_path)}')
+        else:
+            logger.error(f'Failure sending the file: {file_name} to {HostInformation.get_os_name_and_version_from_inventory(from_inventory_path)}')
 class HostMonitor:
 
     @staticmethod
