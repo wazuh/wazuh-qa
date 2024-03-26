@@ -42,8 +42,7 @@ def wait_until_vd_is_updated(host_manager: HostManager) -> None:
     Args:
         host_manager (HostManager): Host manager instance to handle the environment.
     """
-
-    monitoring_data = generate_monitoring_logs(host_manager, ["vulnerability-scanner: INFO: Message processed"],
+    monitoring_data = generate_monitoring_logs(host_manager, ["Vulnerability scanner module started"],
                                                [VD_FEED_UPDATE_TIMEOUT], host_manager.get_group_hosts('manager'))
     monitoring_events_multihost(host_manager, monitoring_data)
 
