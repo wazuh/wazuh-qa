@@ -329,9 +329,9 @@ class HostConfiguration:
             logger.error(f'File is not present in {HostInformation.get_os_name_and_version_from_inventory(from_inventory_path)} ({from_host}) in {current_from_directory}/{file_name}')
         if os.path.exists(f'{Path(__file__).parent}/wazuh-install-files.tar'):
             subprocess.run(f'scp -i {to_key} -o StrictHostKeyChecking=no -P {to_port} {Path(__file__).parent}/{file_name} {to_user}@{to_host}:{current_to_directory}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            logger.info(f'File transfered from {current_from_directory}/{file_name} to {HostInformation.get_os_name_and_version_from_inventory(to_inventory_path)} ({to_host})')
+            logger.info(f'Sending file from {current_from_directory}/{file_name} to {HostInformation.get_os_name_and_version_from_inventory(to_inventory_path)} ({to_host})')
         else:
-            logger.error(f'File was not transfered from {current_from_directory}/{file_name} to {HostInformation.get_os_name_and_version_from_inventory(to_inventory_path)} ({to_host})')
+            logger.error(f'Failure sending the file from {current_from_directory}/{file_name} to {HostInformation.get_os_name_and_version_from_inventory(to_inventory_path)} ({to_host})')
 
         # Restoring permissions
         if file_name == 'wazuh-install-files.tar':
@@ -349,9 +349,9 @@ class HostConfiguration:
             logger.error(f"The file {file_name} does not exist")
 
         if HostInformation.file_exists(to_inventory_path, f'{current_to_directory}/{file_name}'):
-            logger.info(f'{file_name} transfered to {HostInformation.get_os_name_and_version_from_inventory(from_inventory_path)}')
+            logger.info(f'{file_name} transfered to {HostInformation.get_os_name_and_version_from_inventory(to_inventory_path)} confirmed')
         else:
-            logger.error(f'Failure sending the file: {file_name} to {HostInformation.get_os_name_and_version_from_inventory(from_inventory_path)}')
+            logger.error(f'Failure sending the file: {file_name} to {HostInformation.get_os_name_and_version_from_inventory(to_inventory_path)}')
 class HostMonitor:
 
     @staticmethod
@@ -424,7 +424,6 @@ class CheckFiles:
         Returns:
             Dict: dict of directories:hash
         """
-        logger.info(f'Generating Snapshot for Checkfile of {directory} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         if 'linux' in os_type or 'macos' in os_type:
             command = f'sudo find {directory} -type f -exec sha256sum {{}} + {filter}'
             result = Executor.execute_command(inventory_path, command)
@@ -444,7 +443,7 @@ class CheckFiles:
 
     @staticmethod
     def _perform_scan(inventory_path, os_type, directories, filters):
-
+        logger.info(f'Generating Snapshot for Checkfile in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         return {directory: CheckFiles._checkfiles(inventory_path, os_type, directory, filters) for directory in directories}
 
 
