@@ -1,4 +1,8 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 import pytest
+
 
 def pytest_addoption(parser):
     parser.addoption('--wazuh_version', required=False, help='Wazuh version to test files.')
@@ -8,6 +12,7 @@ def pytest_addoption(parser):
     parser.addoption('--dependencies', required=False, help='Dependency to be tested.')
     parser.addoption('--targets', required=False, help='Targets to be tested.')
     parser.addoption('--live', required=True, help='Packages repository.')
+
 
 @pytest.fixture(scope='session')
 def wazuh_version(request):

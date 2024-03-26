@@ -1,9 +1,13 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 import json
 import os
 
+from pathlib import Path
+
 from modules.generic import Ansible, Inventory
 from modules.generic.utils import Utils
-from pathlib import Path
 from .models import InputPayload, ExtraVars
 from .utils import logger
 
