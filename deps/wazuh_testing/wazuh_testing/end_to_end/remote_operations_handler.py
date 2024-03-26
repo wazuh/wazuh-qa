@@ -164,37 +164,43 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
     package_id = None
 
     if host_os_name in install_package_data:
-        if host_os_arch in install_package_data[host_os_name]:
-            package_id = install_package_data[host_os_name][host_os_arch]
-        else:
-            raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found")
+        try:
+            if host_os_arch in install_package_data[host_os_name]:
+                package_id = install_package_data[host_os_name][host_os_arch]
+        
+                package_data = load_packages_metadata()[package_id]
+                package_url = package_data['urls'][host_os_name][host_os_arch]
 
-        package_data = load_packages_metadata()[package_id]
-        package_url = package_data['urls'][host_os_name][host_os_arch]
+                logging.info(f"Installing package on {host}")
+                logging.info(f"Package URL: {package_url}")
 
-        logging.info(f"Installing package on {host}")
-        logging.info(f"Package URL: {package_url}")
+                current_datetime = datetime.utcnow().isoformat()
 
-        current_datetime = datetime.utcnow().isoformat()
+                host_manager.install_package(host, package_url, system)
 
-        host_manager.install_package(host, package_url, system)
+                logging.info(f"Package {package_url} installed on {host}")
 
-        logging.info(f"Package {package_url} installed on {host}")
+                logging.info(f"Package installed on {host}")
 
-        logging.info(f"Package installed on {host}")
+                results['checks']['all_successfull'] = True
 
-        results['checks']['all_successfull'] = True
+                wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
+                                                                operation_data['check']['state_index'] or
+                                                                operation_data['check']['no_alerts'] or
+                                                                operation_data['check']['no_indices'])
 
-        wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
-                                                          operation_data['check']['state_index'] or
-                                                          operation_data['check']['no_alerts'] or
-                                                          operation_data['check']['no_indices'])
+                if wait_is_required:
+                    wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
 
-        if wait_is_required:
-            wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
+                    check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
+                                                package_data, operation='install')
+            
+            else:
+                logging.error(f"Package for {host_os_name} and {host_os_arch} not found")
+                
+        except Exception as e:
+            logging.critical(f"Error searching package: {e}")
 
-            check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
-                                       package_data, operation='install')
     else:
         logging.info(f"No operation to perform on {host}")
 
