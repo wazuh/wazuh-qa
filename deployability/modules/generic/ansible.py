@@ -52,7 +52,7 @@ class Ansible:
         else:
             self.logger.error(
                 f"No templates found in {path_to_render_playbooks}")
-
+        self.logger.debug(tasks)
         return tasks
 
     def render_playbook(self, playbook: str | Path, rendering_variables: dict = {}) -> str | None:
@@ -107,7 +107,7 @@ class Ansible:
         Generate the inventory for ansible.
 
         Returns:
-            dict: Inventory for ansible.        
+            dict: Inventory for ansible.
         """
         inventory_data = {
             'all': {

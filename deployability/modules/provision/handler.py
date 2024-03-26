@@ -93,6 +93,7 @@ class ProvisionHandler:
         variables = {
             'component': self.component_info.component,
             'version': self.component_info.version,
+            'live': self.component_info.live,
             'type': self.component_info.type,
             'dependencies': self.component_info.dependencies or None,
             'templates_path': self.templates_path,
