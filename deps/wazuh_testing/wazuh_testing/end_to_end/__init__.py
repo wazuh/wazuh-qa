@@ -153,19 +153,18 @@ class Check:
         provided_evidences_names = [evidence.name for evidence in provided_evidences]
 
         if provided_evidences_names != self.expected_evidences:
-            raise ValueError('Evidences should match the expected ones.\n'
-                             f"Expected evidences: {self.expected_evidences}. Evidences found: {provided_evidences}")
+            raise ValueError('Evidences should match the expected ones.\n' f"Expected evidences: {self.expected_evidences}. Evidences found: {provided_evidences}")
 
         self.result = self.assert_function(*[evidence.value for evidence in provided_evidences])
         self.evidences = evidences
 
-        logging.error(f"Marked check {self.name} result to {self.result} with evidences {provided_evidences}")
+        logging.error(f"Marked check {self.name} result to {self.result} with evidences {provided_evidences_names}")
 
         return self.result
 
     def get_result(self):
         if self.result is None:
-            raise ValueError("Check has not been executed yet")
+            raise ValueError(f"Check {self.name} has not been executed yet")
         
         return self.result
 
@@ -217,6 +216,11 @@ class TestResult:
             message += "-----\n"
 
         return message
+
+    def validate_check(self, check_name: str, evidences: List[Evidence]):
+        check = self.get_check(check_name)
+
+        return check.validate(evidences)
 
     def get_check(self, check_name: str):
         for check in self.checks:
