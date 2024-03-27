@@ -1,7 +1,6 @@
 import yaml
 
 from pathlib import Path
-import os
 
 from .aws.provider import AWSProvider, AWSConfig
 from .generic import Instance, Provider, models
