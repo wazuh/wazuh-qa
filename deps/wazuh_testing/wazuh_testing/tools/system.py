@@ -466,7 +466,7 @@ class HostManager:
 
         return result
 
-    def install_package(self, host, url, system='ubuntu'):
+    def install_package(self, host, url, system):
         """
         Installs a package on the specified host.
 
@@ -482,8 +482,8 @@ class HostManager:
         Example:
             host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
         """
-        result = False
         extension = '.msi'
+        result = None
 
         if system == 'windows':
             if url.lower().endswith(extension):
@@ -492,8 +492,6 @@ class HostManager:
                 result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
         elif system == 'ubuntu':
             result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
-            if result['changed'] and result['stderr'] == '':
-                result = True
         elif system == 'centos':
             result = self.get_host(host).ansible("yum", f"name={url} state=present "
                                                  'sslverify=false disable_gpg_check=True', check=False)
@@ -502,10 +500,13 @@ class HostManager:
             result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
             cmd = f"installer -pkg {package_name} -target /"
             result = self.get_host(host).ansible("command", cmd, check=False)
+        else:
+            raise ValueError(f"Unsupported system: {system}")
 
         logging.info(f"Package installed result {result}")
 
-        return result
+        if not (result['changed'] or result['rc'] == 0) or not (result['changed'] or result.get('stderr', None) == ''):
+            raise RuntimeError(f"Failed to install package in {host}: {result}")
 
     def get_master_ip(self):
         """
@@ -590,6 +591,8 @@ class HostManager:
                 remove_operation_result = self.get_host(host).ansible("command",
                                                                       f"brew uninstall {package_uninstall_name}",
                                                                       check=False)
+
+
 
         logging.info(f"Package removed result {remove_operation_result}")
 
