@@ -1,3 +1,7 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import pytest
 
 from ..helpers.agent import WazuhAgent
@@ -23,6 +27,9 @@ def wazuh_params(request):
         'live': live
     }
 
+    # If there are no indexers, we choose wazuh-1 by default
+    if not wazuh_params['indexers']:
+        wazuh_params['indexers'].append(wazuh_params['master'])
 
 @pytest.fixture(autouse=True)
 def setup_test_environment(wazuh_params):
@@ -71,6 +78,12 @@ def test_status(wazuh_params):
     for agent in wazuh_params['agents'].values():
         agent_status = GeneralComponentActions.get_component_status(agent, 'wazuh-agent')
         assert 'loaded' in agent_status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} status is not loaded')
+
+
+def test_status(wazuh_params):
+    for agent in wazuh_params['agents'].values():
+        agent_status = GeneralComponentActions.get_component_status(agent, 'wazuh-agent')
+        assert 'loaded' in agent_status
 
 
 def test_version(wazuh_params):

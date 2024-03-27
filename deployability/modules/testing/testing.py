@@ -1,3 +1,7 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import json
 import os
 
@@ -64,7 +68,6 @@ class Tester:
                 logger.info("Cleaning up")
                 cls._cleanup(ansible, extra_vars['working_dir'])
 
-
     @classmethod
     def _get_extra_vars(cls, payload: InputPayload) -> ExtraVars:
         """
@@ -78,7 +81,6 @@ class Tester:
         """
 
         return ExtraVars(**payload.model_dump())
-
 
     @classmethod
     def _run_tests(cls, test_list: list[str], ansible: Ansible, extra_vars: ExtraVars) -> None:

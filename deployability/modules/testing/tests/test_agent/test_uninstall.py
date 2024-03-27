@@ -1,3 +1,7 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import pytest
 
 from ..helpers.agent import WazuhAgent
@@ -63,6 +67,9 @@ def test_uninstall(wazuh_params):
 def test_agent_uninstalled_directory(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
         assert not HostInformation.dir_exists(agent_params, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is still present in the agent {agent_names}')
+
+    wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
+    wazuh_params['agents'] = {key: value for key, value in targets_dict.items() if key.startswith('agent-')}
 
 
 def test_isActive(wazuh_params):
