@@ -103,10 +103,7 @@ class WazuhAgent:
         ]
 
         Executor.execute_commands(inventory_path, commands)
-        if internal_ip in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'):
-            logger.info(f'The Manager IP was configured in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
-        else:
-            logger.error(f'Error configuring the Manager IP in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+        assert internal_ip in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the Manager IP ({internal_ip})in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
 
     @staticmethod

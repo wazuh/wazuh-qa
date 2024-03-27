@@ -285,10 +285,8 @@ class HostConfiguration:
         Executor.execute_commands(master_path, commands)
 
         current_from_directory = HostInformation.get_current_dir(master_path)
-        if not HostInformation.file_exists(master_path, f'{current_from_directory}/wazuh-install-files.tar'):
-            logger.error('wazuh-install-files.tar not created, check config.yml information')
-        else:
-            logger.info('wazuh-install-files.tar created')
+
+        assert HostInformation.file_exists(master_path, f'{current_from_directory}/wazuh-install-files.tar'), logger.error('wazuh-install-files.tar not created, check config.yml information')
 
     @staticmethod
     def scp_to(from_inventory_path, to_inventory_path, file_name) -> None:
@@ -352,10 +350,7 @@ class HostConfiguration:
         else:
             logger.error(f"The file {file_name} does not exist")
 
-        if HostInformation.file_exists(to_inventory_path, f'{current_to_directory}/{file_name}'):
-            logger.info(f'{file_name} transfered to {HostInformation.get_os_name_and_version_from_inventory(to_inventory_path)} confirmed')
-        else:
-            logger.error(f'Failure sending the file: {file_name} to {HostInformation.get_os_name_and_version_from_inventory(to_inventory_path)}')
+        assert HostInformation.file_exists(to_inventory_path, f'{current_to_directory}/{file_name}'), logger.error(f'Failure sending the file: {file_name} to {HostInformation.get_os_name_and_version_from_inventory(to_inventory_path)}')
 class HostMonitor:
 
     @staticmethod
