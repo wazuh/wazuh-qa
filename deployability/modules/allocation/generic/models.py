@@ -1,8 +1,10 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 from pathlib import Path
 from pydantic import BaseModel, IPvAnyAddress, field_validator, model_validator
 from typing_extensions import Literal
-from .credentials import Credentials
-
 
 class ConnectionInfo(BaseModel):
     hostname: str
