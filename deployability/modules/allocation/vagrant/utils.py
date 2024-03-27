@@ -89,13 +89,12 @@ class VagrantUtils:
             output = cls.remote_command(cmd, remote_host_parameters)
             if not output:
                 return str(8080)
-            else:
-                cmd = "sudo lsof -i:2222"
-                output = cls.remote_command(cmd, remote_host_parameters)
-                if not output:
-                    return str(2222)
-                else:
-                    raise ValueError(f"ppc64 server has no available SSH ports.")
+            cmd = "sudo lsof -i:2222"
+            output = cls.remote_command(cmd, remote_host_parameters)
+            if not output:
+                return str(2222)
+
+            raise ValueError(f"ppc64 server has no available SSH ports.")
         else:
             for i in range(20, 40):
                 port = f"432{i}"

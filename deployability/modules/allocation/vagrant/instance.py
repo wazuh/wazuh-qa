@@ -184,11 +184,10 @@ class VagrantInstance(Instance):
             else:
                 for key, pattern in patterns.items():
                     match = re.search(pattern, output)
-                    if match:
-                        ssh_config[key] = str(match.group(1)).strip("\r")
-                    else:
+                    if not match:
                         logger.error(f"Couldn't find {key} in ssh-config")
                         return None
+                    ssh_config[key] = str(match.group(1)).strip("\r")
                 if self.credentials:
                     ssh_config['private_key'] = str(self.credentials.key_path)
         return ConnectionInfo(**ssh_config)
