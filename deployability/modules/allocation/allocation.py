@@ -111,7 +111,7 @@ class Allocator:
         """
         if inventory_path is None:
             inventory_path = Path(instance.path, 'inventory.yml')
-        else:
+        if not str(inventory_path).endswith('.yml') and not str(inventory_path).endswith('.yaml'):
             inventory_path = Path(inventory_path, 'inventory.yml')
         if not inventory_path.parent.exists():
             inventory_path.parent.mkdir(parents=True, exist_ok=True)
@@ -151,7 +151,7 @@ class Allocator:
         """
         if track_path is None:
             track_path = Path(instance.path, 'track.yml')
-        else:
+        if not str(track_path).endswith('.yml') and not str(track_path).endswith('.yaml'):
             track_path = Path(track_path, 'track.yml')
         if not track_path.parent.exists():
             track_path.parent.mkdir(parents=True, exist_ok=True)
