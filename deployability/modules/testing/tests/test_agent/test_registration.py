@@ -1,11 +1,13 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import pytest
 
-from ..helpers.manager import WazuhManager, WazuhAPI
 from ..helpers.agent import WazuhAgent, WazuhAPI
-from ..helpers.generic import GeneralComponentActions, Waits
+from ..helpers.generic import HostInformation, GeneralComponentActions, Waits
+from ..helpers.manager import WazuhManager, WazuhAPI
+from ..helpers.logger.logger import logger
 
 
 @pytest.fixture
@@ -54,20 +56,20 @@ def test_registration(wazuh_params):
 
 def test_status(wazuh_params):
     for agent in wazuh_params['agents'].values():
-        assert 'active' in GeneralComponentActions.get_component_status(agent, 'wazuh-agent')
+        assert 'active' in GeneralComponentActions.get_component_status(agent, 'wazuh-agent'), logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} is not active')
 
 
 def test_connection(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert agent_names in WazuhManager.get_agent_control_info(wazuh_params['master'])
+        assert agent_names in WazuhManager.get_agent_control_info(wazuh_params['master']), f'The {agent_names} is not present in the master by command'
     wazuh_api = WazuhAPI(wazuh_params['master'])
-    assert any(d.get('name') == agent_names for d in WazuhAgent.get_agents_information(wazuh_api))
+    assert any(d.get('name') == agent_names for d in WazuhAgent.get_agents_information(wazuh_api)), logger.error(f'The {agent_names} is not present in the master by API')
 
 
 def test_isActive(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['master'])
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent')
+        assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by API')
 
         expected_condition_func = lambda: 'active' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         Waits.dynamic_wait(expected_condition_func, cycles=10, waiting_time=20)
@@ -75,4 +77,4 @@ def test_isActive(wazuh_params):
 
 def test_clientKeys(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert GeneralComponentActions.hasAgentClientKeys(agent_params)
+        assert GeneralComponentActions.hasAgentClientKeys(agent_params), logger.error(f'{agent_names} has not ClientKeys file')

@@ -1,10 +1,12 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import pytest
 
 from ..helpers.agent import WazuhAgent, WazuhAPI
 from ..helpers.generic import GeneralComponentActions, Waits
+from ..helpers.logger.logger import logger
 
 
 @pytest.fixture
@@ -56,8 +58,8 @@ def test_stop(wazuh_params):
         GeneralComponentActions.component_stop(agent_params, 'wazuh-agent')
 
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert 'inactive' in GeneralComponentActions.get_component_status(agent_params, 'wazuh-agent')
-        assert not GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent')
+        assert 'inactive' in GeneralComponentActions.get_component_status(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is still active by command')
+        assert not GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is still active by command')
 
         expected_condition_func = lambda: 'disconnected' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         Waits.dynamic_wait(expected_condition_func, cycles=10, waiting_time=20)

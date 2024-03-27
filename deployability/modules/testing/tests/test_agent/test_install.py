@@ -1,12 +1,15 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import pytest
 
-from ..helpers.manager import WazuhManager
 from ..helpers.agent import WazuhAgent
-from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
 from ..helpers.constants import WAZUH_ROOT
+from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
+from ..helpers.logger.logger import logger
+from ..helpers.manager import WazuhManager
+
 
 @pytest.fixture
 def wazuh_params(request):
@@ -24,6 +27,9 @@ def wazuh_params(request):
         'live': live
     }
 
+    # If there are no indexers, we choose wazuh-1 by default
+    if not wazuh_params['indexers']:
+        wazuh_params['indexers'].append(wazuh_params['master'])
 
 @pytest.fixture(autouse=True)
 def setup_test_environment(wazuh_params):
@@ -48,7 +54,6 @@ def setup_test_environment(wazuh_params):
     wazuh_params['agents'] = {key: value for key, value in targets_dict.items() if key.startswith('agent-')}
 
 def test_installation(wazuh_params):
-
     # Disabling firewall for all managers
     for manager_name, manager_params in wazuh_params['managers'].items():
         HostConfiguration.disable_firewall(manager_params)
@@ -58,6 +63,7 @@ def test_installation(wazuh_params):
     # Certs create and Manager installation
     HostConfiguration.certs_create(wazuh_params['wazuh_version'], wazuh_params['master'], wazuh_params['dashboard'], wazuh_params['indexers'], wazuh_params['workers'])
     WazuhManager.install_manager(wazuh_params['master'], 'wazuh-1', wazuh_params['wazuh_version'])
+    assert HostInformation.dir_exists(wazuh_params['master'], WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])}')
 
     # Agent installation
     for agent_names, agent_params in wazuh_params['agents'].items():
@@ -65,17 +71,20 @@ def test_installation(wazuh_params):
 
     # Testing installation directory
     for agent in wazuh_params['agents'].values():
-        assert HostInformation.dir_exists(agent, WAZUH_ROOT)
+        assert HostInformation.dir_exists(agent, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(agent)}')
+
 
 def test_status(wazuh_params):
     for agent in wazuh_params['agents'].values():
         agent_status = GeneralComponentActions.get_component_status(agent, 'wazuh-agent')
-        assert 'loaded' in agent_status
+        assert 'loaded' in agent_status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} status is not loaded')
+
 
 def test_version(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert wazuh_params['wazuh_version'] in GeneralComponentActions.get_component_version(agent_params)
+        assert wazuh_params['wazuh_version'] in GeneralComponentActions.get_component_version(agent_params), logger.error(f"The version {HostInformation.get_os_name_and_version_from_inventory(agent_params)} is not {wazuh_params['wazuh_version']} by command")
+
 
 def test_revision(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert wazuh_params['wazuh_revision'] in GeneralComponentActions.get_component_revision(agent_params)
+        assert wazuh_params['wazuh_revision'] in GeneralComponentActions.get_component_revision(agent_params), logger.error(f"The revision {HostInformation.get_os_name_and_version_from_inventory(agent_params)} is not {wazuh_params['wazuh_revision']} by command")

@@ -1,13 +1,13 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import json
 import os
 
-from pathlib import Path
-
 from modules.generic import Ansible, Inventory
 from modules.generic.utils import Utils
+from pathlib import Path
 from .models import InputPayload, ExtraVars
 from .utils import logger
 
@@ -53,7 +53,6 @@ class Tester:
         extra_vars['current_user'] = os.getlogin()
 
         logger.debug(f"Using extra vars: {extra_vars}")
-
 
         # Setup and run tests
         target_inventory = Inventory(**Utils.load_from_yaml(str(list(eval(payload.targets[0]).values())[0])))
@@ -102,6 +101,7 @@ class Tester:
                 continue
             ansible.run_playbook(playbook, extra_vars)
 
+
     @classmethod
     def _setup(cls, ansible: Ansible, extra_vars: ExtraVars) -> None:
         """
@@ -115,6 +115,7 @@ class Tester:
         template = str(cls._setup_playbook)
         playbook = ansible.render_playbook(template, rendering_var)
         ansible.run_playbook(playbook, extra_vars)
+
 
     @classmethod
     def _cleanup(cls, ansible: Ansible, remote_working_dir: str = '/tmp') -> None:

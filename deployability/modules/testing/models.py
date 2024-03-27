@@ -5,7 +5,6 @@ from typing import Literal
 
 from pydantic import BaseModel, field_validator
 
-
 class ExtraVars(BaseModel):
     """Extra vars for testing module."""
     component: Literal['manager', 'agent']
@@ -22,7 +21,6 @@ class InputPayload(ExtraVars):
     dependencies: list[str] | None = None
     cleanup: bool = True
     live: bool = True
-
 
 
     @field_validator('tests', mode='before')

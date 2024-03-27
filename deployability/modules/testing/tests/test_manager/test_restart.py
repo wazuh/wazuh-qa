@@ -1,9 +1,11 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import pytest
 
-from ..helpers.generic import GeneralComponentActions
+from ..helpers.generic import HostInformation, GeneralComponentActions
+from ..helpers.logger.logger import logger
 
 
 @pytest.fixture
@@ -41,12 +43,11 @@ def setup_test_environment(wazuh_params):
 
     wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
 
-
 def test_restart(wazuh_params):
     for worker in wazuh_params['workers']:
         GeneralComponentActions.component_restart(worker, 'wazuh-manager')
 
-    assert 'active ' in GeneralComponentActions.get_component_status(wazuh_params['master'], 'wazuh-manager')
+    assert 'active ' in GeneralComponentActions.get_component_status(wazuh_params['master'], 'wazuh-manager'), logger.error(f"The {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is not active")
 
-    for workers in wazuh_params['workers']:
-        assert 'active ' in GeneralComponentActions.get_component_status(workers, 'wazuh-manager')
+    for worker in wazuh_params['workers']:
+        assert 'active ' in GeneralComponentActions.get_component_status(worker, 'wazuh-manager'), logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(worker)} is not active')

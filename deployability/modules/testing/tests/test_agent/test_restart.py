@@ -1,10 +1,12 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import pytest
 
-from ..helpers.manager import WazuhManager
 from ..helpers.generic import GeneralComponentActions
+from ..helpers.logger.logger import logger
+from ..helpers.manager import WazuhManager
 
 
 @pytest.fixture
@@ -52,20 +54,20 @@ def test_restart(wazuh_params):
 
 
 def test_status(wazuh_params):
-    for agent in wazuh_params['agents'].values():
-        assert 'active' in GeneralComponentActions.get_component_status(agent, 'wazuh-agent')
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert 'active' in GeneralComponentActions.get_component_status(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by command')
 
 
 def test_connection(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert agent_names in WazuhManager.get_agent_control_info(wazuh_params['master'])
+        assert agent_names in WazuhManager.get_agent_control_info(wazuh_params['master']), logger.error(f'{agent_names} is not present in agent_control information')
 
 
 def test_isActive(wazuh_params):
-    for agent in wazuh_params['agents'].values():
-        assert GeneralComponentActions.isComponentActive(agent, 'wazuh-agent')
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by command')
 
 
 def test_clientKeys(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert GeneralComponentActions.hasAgentClientKeys(agent_params)
+        assert GeneralComponentActions.hasAgentClientKeys(agent_params), logger.error(f'{agent_names} has not ClientKeys file')

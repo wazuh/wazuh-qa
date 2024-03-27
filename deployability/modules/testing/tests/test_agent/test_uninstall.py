@@ -1,12 +1,14 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import pytest
 
-from ..helpers.manager import WazuhManager, WazuhAPI
 from ..helpers.agent import WazuhAgent
-from ..helpers.generic import HostInformation, GeneralComponentActions, Waits
 from ..helpers.constants import WAZUH_ROOT
+from ..helpers.generic import HostInformation, GeneralComponentActions, Waits
+from ..helpers.manager import WazuhManager, WazuhAPI
+from ..helpers.logger.logger import logger
 
 
 @pytest.fixture
@@ -49,8 +51,9 @@ def setup_test_environment(wazuh_params):
     wazuh_params['agents'] = {key: value for key, value in targets_dict.items() if key.startswith('agent-')}
 
 def test_uninstall(wazuh_params):
-    for agent in wazuh_params['agents'].values():
-        assert GeneralComponentActions.isComponentActive(agent, 'wazuh-agent')
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not Active before the installation')
+        assert HostInformation.dir_exists(agent_params, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in the host {agent_names}')
 
     # Agent installation
     for agent_names, agent_params in wazuh_params['agents'].items():
@@ -58,16 +61,18 @@ def test_uninstall(wazuh_params):
 
     # Manager uninstallation status check
     for agent_names, agent_params in wazuh_params['agents'].items():
-        'Disconnected' in WazuhManager.get_agent_control_info(wazuh_params['master'])
+        assert 'Disconnected' in WazuhManager.get_agent_control_info(wazuh_params['master']), logger.error(f'{agent_names} is still connected in the Manager')
+
 
 def test_agent_uninstalled_directory(wazuh_params):
-    for agent in wazuh_params['agents'].values():
-        assert not HostInformation.dir_exists(agent, WAZUH_ROOT)
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert not HostInformation.dir_exists(agent_params, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is still present in the agent {agent_names}')
+
 
 def test_isActive(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['master'])
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert not GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent')
+        assert not GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not inactive by command')
 
         expected_condition_func = lambda: 'disconnected' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         Waits.dynamic_wait(expected_condition_func, cycles=10, waiting_time=20)

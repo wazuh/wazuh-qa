@@ -1,6 +1,7 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import boto3
 import chardet
 import os
@@ -10,11 +11,12 @@ import subprocess
 import time
 import yaml
 
-
 from pathlib import Path
 from .constants import WAZUH_CONTROL, CLIENT_KEYS
 from .executor import Executor
+from ..helpers.logger.logger import logger
 from .utils import Utils
+
 
 class HostInformation:
 
@@ -114,6 +116,25 @@ class HostInformation:
         return os_name
 
     @staticmethod
+    def get_os_name_and_version_from_inventory(inventory_path) -> tuple:
+        """
+        It returns the linux os_name and version host inventory
+
+        Args:
+            inventory_path: host's inventory path
+
+        Returns:
+            tuple: linux os name and version (e.g., ('ubuntu', '22.04'))
+        """
+        match = re.search(r'/manager-linux-([^-]+)-([^-]+)-', inventory_path)
+        if match:
+            os_name = match.group(1)
+            version = match.group(2)
+            return os_name+'-'+version
+        else:
+            return None
+
+    @staticmethod
     def get_current_dir(inventory_path) -> str:
         """
         It returns the current directory
@@ -145,6 +166,8 @@ class HostInformation:
             return instance['PrivateIpAddress']
         else:
             return None
+
+
 class HostConfiguration:
 
     @staticmethod
@@ -171,7 +194,13 @@ class HostConfiguration:
 
         """
         commands = ["sudo systemctl stop firewalld", "sudo systemctl disable firewalld"]
-        Executor.execute_commands(inventory_path, commands)
+        if GeneralComponentActions.isComponentActive(inventory_path, 'firewalld'):
+            Executor.execute_commands(inventory_path, commands)
+
+            logger.info(f'Firewall disabled on {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        else:
+            logger.info(f'No Firewall to disable on {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+
 
 
     def _extract_hosts(paths, is_aws):
@@ -252,8 +281,12 @@ class HostConfiguration:
         ]
 
         commands.extend(certs_creation)
+
         Executor.execute_commands(master_path, commands)
 
+        current_from_directory = HostInformation.get_current_dir(master_path)
+
+        assert HostInformation.file_exists(master_path, f'{current_from_directory}/wazuh-install-files.tar'), logger.error('wazuh-install-files.tar not created, check config.yml information')
 
     @staticmethod
     def scp_to(from_inventory_path, to_inventory_path, file_name) -> None:
@@ -288,24 +321,36 @@ class HostConfiguration:
         # Allowing handling permissions
         if file_name == 'wazuh-install-files.tar':
             Executor.execute_command(from_inventory_path, f'chmod +rw {file_name}')
+            logger.info('File permissions modified to be handled')
 
         # SCP
-        subprocess.run(f'scp -i {from_key} -o StrictHostKeyChecking=no -P {from_port} {from_user}@{from_host}:{current_from_directory}/{file_name} {Path(__file__).parent}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        subprocess.run(f'scp -i {to_key} -o StrictHostKeyChecking=no -P {to_port} {Path(__file__).parent}/{file_name} {to_user}@{to_host}:{current_to_directory}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if HostInformation.file_exists(from_inventory_path, f'{current_from_directory}/{file_name}'):
+            subprocess.run(f'scp -i {from_key} -o StrictHostKeyChecking=no -P {from_port} {from_user}@{from_host}:{current_from_directory}/{file_name} {Path(__file__).parent}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            logger.info(f'File copied from {HostInformation.get_os_name_and_version_from_inventory(from_inventory_path)} ({from_host}) to {Path(__file__).parent}/{file_name}')
+        else:
+            logger.error(f'File is not present in {HostInformation.get_os_name_and_version_from_inventory(from_inventory_path)} ({from_host}) in {current_from_directory}/{file_name}')
+        if os.path.exists(f'{Path(__file__).parent}/wazuh-install-files.tar'):
+            subprocess.run(f'scp -i {to_key} -o StrictHostKeyChecking=no -P {to_port} {Path(__file__).parent}/{file_name} {to_user}@{to_host}:{current_to_directory}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            logger.info(f'Sending file from {current_from_directory}/{file_name} to {HostInformation.get_os_name_and_version_from_inventory(to_inventory_path)} ({to_host})')
+        else:
+            logger.error(f'Failure sending the file from {current_from_directory}/{file_name} to {HostInformation.get_os_name_and_version_from_inventory(to_inventory_path)} ({to_host})')
 
         # Restoring permissions
         if file_name == 'wazuh-install-files.tar':
             Executor.execute_command(from_inventory_path, f'chmod 600 {file_name}')
             Executor.execute_command(to_inventory_path, f'chmod 600 {file_name}')
+            logger.info('File permissions were restablished')
 
         # Deleting file from localhost
         file_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), file_name)
 
         if os.path.exists(file_path):
             os.remove(file_path)
+            logger.info(f"The file {file_name} deleted in {Path(__file__).parent}")
         else:
-            print(f"The file {file_name} does not exist.")
+            logger.error(f"The file {file_name} does not exist")
 
+        assert HostInformation.file_exists(to_inventory_path, f'{current_to_directory}/{file_name}'), logger.error(f'Failure sending the file: {file_name} to {HostInformation.get_os_name_and_version_from_inventory(to_inventory_path)}')
 class HostMonitor:
 
     @staticmethod
@@ -385,7 +430,7 @@ class CheckFiles:
         elif 'windows' in os_type:
             command = 'dir /a-d /b /s | findstr /v /c:"\\.$" /c:"\\..$"| find /c ":"'
         else:
-            print("Unsupported operating system.")
+            logger.info(f'Unsupported operating system')
             return None
         snapshot = {}
         for line in result.splitlines():
@@ -397,7 +442,7 @@ class CheckFiles:
 
     @staticmethod
     def _perform_scan(inventory_path, os_type, directories, filters):
-
+        logger.info(f'Generating Snapshot for Checkfile in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         return {directory: CheckFiles._checkfiles(inventory_path, os_type, directory, filters) for directory in directories}
 
 
@@ -453,6 +498,7 @@ class GeneralComponentActions:
         Returns:
             str: Role status
         """
+        logger.info(f'Getting status of {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
 
         return Executor.execute_command(inventory_path, f'systemctl status {host_role}')
 
@@ -467,6 +513,7 @@ class GeneralComponentActions:
             host_role: role of the component
         """
 
+        logger.info(f'Stopping {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_command(inventory_path, f'systemctl stop {host_role}')
 
 
@@ -480,6 +527,7 @@ class GeneralComponentActions:
             host_role: role of the component
         """
 
+        logger.info(f'Restarting {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_command(inventory_path, f'systemctl restart {host_role}')
 
 
@@ -493,6 +541,7 @@ class GeneralComponentActions:
             host_role: role of the component
         """
 
+        logger.info(f'Starting {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_command(inventory_path, f'systemctl restart {host_role}')
 
 
@@ -571,4 +620,5 @@ class Waits:
             else:
                 time.sleep(waiting_time)
         else:
+            logger.error('Time out, Expected condition was not met')
             raise RuntimeError(f'Time out')

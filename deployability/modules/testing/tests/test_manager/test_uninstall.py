@@ -1,11 +1,13 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import pytest
 
 from ..helpers.constants import WAZUH_ROOT
-from ..helpers.generic import CheckFiles, HostInformation, GeneralComponentActions
+from ..helpers.generic import HostInformation, GeneralComponentActions
 from ..helpers.manager import WazuhManager
+from ..helpers.logger.logger import logger
 
 
 @pytest.fixture
@@ -47,11 +49,11 @@ def setup_test_environment(wazuh_params):
 def test_uninstall(wazuh_params):
     for manager in wazuh_params['managers'].values():
         manager_status = GeneralComponentActions.get_component_status(manager, 'wazuh-manager')
-        assert 'active' in manager_status
+        assert 'active' in manager_status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(manager)} is not active')
     for manager_name, manager_params in wazuh_params['managers'].items():
         WazuhManager.perform_uninstall_and_scan_for_manager(manager_params)
 
 
 def test_manager_uninstalled_directory(wazuh_params):
     for manager in wazuh_params['managers'].values():
-        assert not HostInformation.dir_exists(manager, WAZUH_ROOT)
+        assert not HostInformation.dir_exists(manager, WAZUH_ROOT), logger.error(f'In {HostInformation.get_os_name_and_version_from_inventory(manager)} {WAZUH_ROOT} is still present')

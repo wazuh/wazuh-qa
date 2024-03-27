@@ -1,12 +1,14 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import requests
 import socket
 
 from .constants import CLUSTER_CONTROL, AGENT_CONTROL, WAZUH_CONF, WAZUH_ROOT
 from .executor import Executor, WazuhAPI
 from .generic import HostInformation, CheckFiles
+from .logger.logger import logger
 from .utils import Utils
 
 
@@ -36,7 +38,7 @@ class WazuhManager:
                     f"curl -sO https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh",
                     f"bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
             ] 
-
+        logger.info(f'Installing Manager in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_commands(inventory_path, commands)
 
 
@@ -85,6 +87,7 @@ class WazuhManager:
 
         commands.extend(system_commands)
 
+        logger.info(f'Uninstalling Manager in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_commands(inventory_path, commands)
 
 
@@ -125,6 +128,8 @@ class WazuhManager:
         """
         result = CheckFiles.perform_action_and_scan(manager_params, action_callback)
         os_name = HostInformation.get_os_name_from_inventory(manager_params)
+        logger.info(f'Applying filters in checkfiles in {HostInformation.get_os_name_and_version_from_inventory(manager_params)}')
+
         if 'debian' in os_name:
             filter_data = {
                 '/boot': {'added': [], 'removed': [], 'modified': ['grubenv']},
@@ -182,6 +187,7 @@ class WazuhManager:
         """
         action_callback = lambda: WazuhManager._install_manager_callback(wazuh_params, manager_name, manager_params)
         result = WazuhManager.perform_action_and_scan(manager_params, action_callback)
+        logger.info(f'Pre and post install checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(manager_params)}: {result}')
         WazuhManager.assert_results(result)
 
 
@@ -197,6 +203,7 @@ class WazuhManager:
         """
         action_callback = lambda: WazuhManager._uninstall_manager_callback(manager_params)
         result = WazuhManager.perform_action_and_scan(manager_params, action_callback)
+        logger.info(f'Pre and post uninstall checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(manager_params)}: {result}')
         WazuhManager.assert_results(result)
 
 
@@ -214,7 +221,7 @@ class WazuhManager:
         # Testing the results
         for category in categories:
             for action in actions:
-                assert result[category][action] == []
+                assert result[category][action] == [], logger.error(f'{result[category][action]} was found in: {category}{action}')
 
 
     @staticmethod
@@ -262,7 +269,6 @@ class WazuhManager:
 
         """
         master_dns = Utils.extract_ansible_host(node_to_connect_inventory)
-
         commands = [
             f"sed -i 's/<node_name>node01<\/node_name>/<node_name>{node_name}<\/node_name>/' {WAZUH_CONF}",
             f"sed -i 's/<node_type>master<\/node_type>/<node_type>{node_type}<\/node_type>/'  {WAZUH_CONF}",
@@ -273,6 +279,10 @@ class WazuhManager:
         ]
 
         Executor.execute_commands(inventory_path, commands)
+        if node_name in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'):
+            logger.info(f'Cluster configured in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        else:
+            logger.error(f'Error configuring cluster information in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
 
 
     def get_manager_version(wazuh_api: WazuhAPI) -> str:
@@ -282,9 +292,12 @@ class WazuhManager:
         Returns:
             str: The version of the manager.
         """
-        response = requests.get(f"{wazuh_api.api_url}/?pretty=true", headers=wazuh_api.headers, verify=False)
-
-        return eval(response.text)['data']['api_version']
+        try:
+            response = requests.get(f"{wazuh_api.api_url}/?pretty=true", headers=wazuh_api.headers, verify=False)
+            return eval(response.text)['data']['api_version']
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return f"Unexpected error: {e}"
 
 
     def get_manager_revision(wazuh_api: WazuhAPI) -> str:
@@ -294,10 +307,12 @@ class WazuhManager:
         Returns:
             str: The revision of the manager.
         """
-        response = requests.get(f"{wazuh_api.api_url}/?pretty=true", headers=wazuh_api.headers, verify=False)
-
-        return eval(response.text)['data']['revision']
-
+        try:
+            response = requests.get(f"{wazuh_api.api_url}/?pretty=true", headers=wazuh_api.headers, verify=False)
+            return eval(response.text)['data']['revision']
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return f"Unexpected error: {e}"
 
     def get_manager_host_name(wazuh_api: WazuhAPI) -> str:
         """
@@ -306,9 +321,12 @@ class WazuhManager:
         Returns:
             str: The hostname of the manager.
         """
-        response = requests.get(f"{wazuh_api.api_url}/?pretty=true", headers=wazuh_api.headers, verify=False)
-
-        return eval(response.text)['data']['hostname']
+        try:
+            response = requests.get(f"{wazuh_api.api_url}/?pretty=true", headers=wazuh_api.headers, verify=False)
+            return eval(response.text)['data']['hostname']
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return f"Unexpected error: {e}"
 
 
     def get_manager_nodes_status(wazuh_api: WazuhAPI) -> dict:
@@ -318,10 +336,12 @@ class WazuhManager:
         Returns:
             Dict: The status of the manager's nodes.
         """
-        response = requests.get(f"{wazuh_api.api_url}/manager/status", headers=wazuh_api.headers, verify=False)
-
-        return eval(response.text)['data']['affected_items'][0]
-
+        try:
+            response = requests.get(f"{wazuh_api.api_url}/manager/status", headers=wazuh_api.headers, verify=False)
+            return eval(response.text)['data']['affected_items'][0]
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return f"Unexpected error: {e}"
 
     def get_manager_logs(wazuh_api: WazuhAPI) -> list:
         """
@@ -330,6 +350,9 @@ class WazuhManager:
         Returns:
             List: The logs of the manager.
         """
-        response = requests.get(f"{wazuh_api.api_url}/manager/logs", headers=wazuh_api.headers, verify=False)
-
-        return eval(response.text)['data']['affected_items']
+        try:
+            response = requests.get(f"{wazuh_api.api_url}/manager/logs", headers=wazuh_api.headers, verify=False)
+            return eval(response.text)['data']['affected_items']
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return f"Unexpected error: {e}"

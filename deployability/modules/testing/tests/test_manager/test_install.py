@@ -1,12 +1,14 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import pytest
 
 from ..helpers.constants import WAZUH_ROOT
 from ..helpers.executor import WazuhAPI
 from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
 from ..helpers.manager import WazuhManager
+from ..helpers.logger.logger import logger
 
 
 @pytest.fixture
@@ -44,7 +46,6 @@ def setup_test_environment(wazuh_params):
 
     wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
 
-
 def test_installation(wazuh_params):
     # Disabling firewall for all managers
     for manager_name, manager_params in wazuh_params['managers'].items():
@@ -60,6 +61,12 @@ def test_installation(wazuh_params):
     for manager_name, manager_params in wazuh_params['managers'].items():
         WazuhManager.perform_install_and_scan_for_manager(manager_params, manager_name, wazuh_params)
 
+    # Validation of activity and directory of the managers
+    for manager in wazuh_params['managers'].values():
+        manager_status = GeneralComponentActions.get_component_status(manager, 'wazuh-manager')
+        assert 'active' in manager_status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(manager)} is not active')
+        assert HostInformation.dir_exists(manager, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(manager)}')
+
     # Configuring cluster for all managers
     hex16_code = 'eecda366dded9b32bcfbf3b057bf3ede'
     for manager_name, manager_params in wazuh_params['managers'].items():
@@ -69,31 +76,32 @@ def test_installation(wazuh_params):
     # Cluster info check
     cluster_info = WazuhManager.get_cluster_info(wazuh_params['master'])
     for manager_name, manager_params in wazuh_params['managers'].items():
-        assert manager_name in cluster_info
+        rest_of_managers = [k for k in wazuh_params['managers'].keys() if k != manager_name]
+        assert manager_name in cluster_info, logger.error(f'The cluster {manager_name} is not connected to {rest_of_managers}')
 
 
 def test_manager_status(wazuh_params):
     for manager in wazuh_params['managers'].values():
         manager_status = GeneralComponentActions.get_component_status(manager, 'wazuh-manager')
-        assert 'active' in manager_status
+        assert 'active' in manager_status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(manager)} is not active')
 
 
 def test_manager_version(wazuh_params):
     for manager in wazuh_params['managers'].values():
         manager_status = GeneralComponentActions.get_component_version(manager)
-        assert wazuh_params['wazuh_version'] in manager_status
-        wazuh_api = WazuhAPI(manager)
-        assert wazuh_params['wazuh_version'] in WazuhManager.get_manager_version(wazuh_api)
+        assert wazuh_params['wazuh_version'] in manager_status, logger.error(f"The version {HostInformation.get_os_name_and_version_from_inventory(manager)} is not {wazuh_params['wazuh_version']} by using commands")
+        wazuh_api = WazuhAPI(wazuh_params['master'])
+        assert wazuh_params['wazuh_version'] in WazuhManager.get_manager_version(wazuh_api), logger.error(f"The version {HostInformation.get_os_name_and_version_from_inventory(manager)} is not {wazuh_params['wazuh_version']} in the API")
 
 
 def test_manager_revision(wazuh_params):
     for manager in wazuh_params['managers'].values():
         manager_status = GeneralComponentActions.get_component_revision(manager)
-        assert wazuh_params['wazuh_revision'] in manager_status
-        wazuh_api = WazuhAPI(manager)
-        assert wazuh_params['wazuh_revision'] in str(WazuhManager.get_manager_revision(wazuh_api))
+        assert wazuh_params['wazuh_revision'] in manager_status, logger.error(f"The revision {HostInformation.get_os_name_and_version_from_inventory(manager)} is not {wazuh_params['wazuh_revision']} by using commands")
+        wazuh_api = WazuhAPI(wazuh_params['master'])
+        assert wazuh_params['wazuh_revision'] in str(WazuhManager.get_manager_revision(wazuh_api)), logger.error(f"The revision {HostInformation.get_os_name_and_version_from_inventory(manager)} is not {wazuh_params['wazuh_revision']} in the API")
 
 
 def test_manager_installed_directory(wazuh_params):
     for manager in wazuh_params['managers'].values():
-        assert HostInformation.dir_exists(manager, WAZUH_ROOT)
+        assert HostInformation.dir_exists(manager, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(manager)}')

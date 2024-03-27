@@ -8,7 +8,7 @@ from typing import List, Optional
 from .constants import WAZUH_CONF, WAZUH_ROOT
 from .executor import Executor, WazuhAPI
 from .generic import HostInformation, CheckFiles
-
+from .logger.logger import logger
 
 class WazuhAgent:
 
@@ -78,6 +78,7 @@ class WazuhAgent:
             ]
 
             commands.extend(system_commands)
+        logger.info(f'Installing Agent in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_commands(inventory_path, commands)
 
 
@@ -102,6 +103,8 @@ class WazuhAgent:
         ]
 
         Executor.execute_commands(inventory_path, commands)
+        assert internal_ip in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the Manager IP ({internal_ip})in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+
 
     @staticmethod
     def uninstall_agent(inventory_path, wazuh_version=None, wazuh_revision=None) -> None:
@@ -150,6 +153,7 @@ class WazuhAgent:
                 "/usr/sbin/pkgutil --forget com.wazuh.pkg.wazuh-agent"
             ])
 
+        logger.info(f'Uninstalling Agent in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_commands(inventory_path, commands)
 
 
@@ -184,6 +188,8 @@ class WazuhAgent:
         """
         result = CheckFiles.perform_action_and_scan(agent_params, action_callback)
         os_name = HostInformation.get_os_name_from_inventory(agent_params)
+        logger.info(f'Applying filters in checkfiles in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
+
         if 'debian' in os_name:
             filter_data = {
                 '/boot': {'added': [], 'removed': [], 'modified': ['grubenv']},
@@ -241,6 +247,7 @@ class WazuhAgent:
         """
         action_callback = lambda: WazuhAgent._install_agent_callback(wazuh_params, agent_name, agent_params)
         result = WazuhAgent.perform_action_and_scan(agent_params, action_callback)
+        logger.info(f'Pre and post install checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}: {result}')
         WazuhAgent.assert_results(result)
 
 
@@ -256,6 +263,7 @@ class WazuhAgent:
         """
         action_callback = lambda: WazuhAgent._uninstall_agent_callback(wazuh_params, agent_params)
         result = WazuhAgent.perform_action_and_scan(agent_params, action_callback)
+        logger.info(f'Pre and post uninstall checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}: {result}')
         WazuhAgent.assert_results(result)
 
 
@@ -273,7 +281,7 @@ class WazuhAgent:
         # Testing the results
         for category in categories:
             for action in actions:
-                assert result[category][action] == []
+                assert result[category][action] == [], logger.error(f'{result[category][action]} was found in: {category}{action}')
 
 
     def get_agents_information(wazuh_api: WazuhAPI) -> list:
@@ -285,7 +293,11 @@ class WazuhAgent:
         """
         response = requests.get(f"{wazuh_api.api_url}/agents", headers=wazuh_api.headers, verify=False)
 
-        return eval(response.text)['data']['affected_items']
+        try:
+            return eval(response.text)['data']['affected_items']
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return f"Unexpected error: {e}"
 
 
     def get_agent_status(wazuh_api: WazuhAPI, agent_name) -> str:
@@ -317,50 +329,88 @@ class WazuhAgent:
         Returns:
             List: IP, name, and status of the agent.
         """
-        agents_information = wazuh_api.get_agents_information()
-        for element in agents_information:
-            if element['id'] == identifier:
+        try:
+            agents_information = wazuh_api.get_agents_information()
+            for element in agents_information:
+                if element['id'] == identifier:
+                    return [element['ip'], element['name'], element['status']]
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return [None, None, None]
 
-                return [element['ip'], element['name'], element['status']]
 
-        return [None, None, None]
-
-
-    def add_agent_to_manager(wazuh_api: WazuhAPI, name, ip) -> str:
+    def get_agent_ip_status_and_name_by_id(wazuh_api: WazuhAPI, identifier):
         """
-        Add an agent to the manager.
+        Get IP status and name by ID.
 
         Args:
-            name (str): Name of the agent.
-            ip (str): IP address of the agent.
+            identifier (str): Agent ID.
 
         Returns:
-            str: Response text.
+            List: IP, name, and status of the agent.
         """
-        response = requests.post(f"{wazuh_api.api_url}/agents", json={"name": name ,"ip": ip}, headers=wazuh_api.headers, verify=False)
+        try:
+            agents_information = wazuh_api.get_agents_information()
+            for element in agents_information:
+                if element['id'] == identifier:
+                    return [element['ip'], element['name'], element['status']]
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return [None, None, None]
 
+
+def add_agent_to_manager(wazuh_api: WazuhAPI, name, ip) -> str:
+    """
+    Add an agent to the manager.
+
+    Args:
+        wazuh_api (WazuhAPI): Instance of WazuhAPI class.
+        name (str): Name of the agent.
+        ip (str): IP address of the agent.
+
+    Returns:
+        str: Response text.
+    """
+    try:
+        response = requests.post(f"{wazuh_api.api_url}/agents", json={"name": name, "ip": ip}, headers=wazuh_api.headers, verify=False)
         return response.text
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        return f"Unexpected error: {e}"
 
 
-    def restart_agents(wazuh_api: WazuhAPI) -> str:
-        """
-        Restart agents.
+def restart_agents(wazuh_api: WazuhAPI) -> str:
+    """
+    Restart agents.
 
-        Returns:
-            str: Response text.
-        """
+    Args:
+        wazuh_api (WazuhAPI): Instance of WazuhAPI class.
+
+    Returns:
+        str: Response text.
+    """
+    try:
         response = requests.put(f"{wazuh_api.api_url}/agents/restart", headers=wazuh_api.headers, verify=False)
-
         return response.text
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        return f"Unexpected error: {e}"
 
 
-    def agent_status_report(wazuh_api: WazuhAPI) -> dict:
-        """
-        Get agent status report.
+def agent_status_report(wazuh_api: WazuhAPI) -> dict:
+    """
+    Get agent status report.
 
-        Returns:
-            Dict: Agent status report.
-        """
+    Args:
+        wazuh_api (WazuhAPI): Instance of WazuhAPI class.
+
+    Returns:
+        Dict: Agent status report.
+    """
+    try:
         response = requests.get(f"{wazuh_api.api_url}/agents/summary/status", headers=wazuh_api.headers, verify=False)
-
         return eval(response.text)['data']
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}")
+        return {}
+
