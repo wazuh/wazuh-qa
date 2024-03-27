@@ -20,8 +20,28 @@ from workflow_engine.task import ProcessTask, TASKS_HANDLERS
 @patch("workflow_engine.workflow_processor.logger")
 @patch("workflow_engine.workflow_processor.WorkflowFile")
 def test_workflow_processor_constructor(file_mock: MagicMock, logger_mock: MagicMock,
-                                        workflow_file, dry_run, threads, log_level, schema_file):
-    """Test WorkflowProcessor constructor."""
+                                        workflow_file:str, dry_run: bool, threads: int, log_level: str,
+                                        schema_file:str):
+    """Test WorkflowProcessor constructor.
+    Check the workflowprocessor instance variables after construction.
+
+    Parameters
+    ----------
+    file_mock : MagicMock
+        Mock of a WorkflowFile Constructor.
+    logger_mock : MagicMock
+        The logger fixture defined in conftest.py.
+    workflow_file : str
+        Path to workflow yaml file.
+    dry_run : bool
+        Define if the workflow will run or not
+    threads : int
+        number of threads
+    log_level : str
+        Log level string
+    schema_file : str
+        Path to the schema.yml file
+    """
     task_collection = [
         {'task': 'task1', 'path': '/cmd1', 'args': [{"param1": "value1"}]},
         {'task': 'task2', 'path': '/cmd2', 'args': [{"param1": "value1"}]},
@@ -44,7 +64,28 @@ def test_workflow_processor_constructor(file_mock: MagicMock, logger_mock: Magic
                          indirect=["dag", "w_processor", "logger_mock"])
 def test_execute_task(logger_mock: MagicMock, w_processor: WorkflowProcessor, dag: DAG, action: str,
                       should_be_canceled: bool):
-    """Test WorflowProcessor.execute_task function normal."""
+    """Test WorflowProcessor.execute_task function normal
+    Check the execute_task method when log messages and function calls when the should_be_canceled return value 
+    is True or False.
+
+    Parameters
+    ----------
+    logger_mock : MagicMock
+        The logger fixture defined in conftest.py.
+    w_processor : WorkflowProcessor
+        The workflow processor fixture defined in conftest.py.
+    dag : DAG
+        The dag  fixture defined in conftest.py.
+    action : str
+        action name
+    should_be_canceled : bool
+        should_be_canceled method patched return value.
+
+    Returns
+    -------
+    [type]
+        [description]
+    """
     start_time = time.time()
     elapsed_time = 10
     def time_side_effect():
@@ -84,7 +125,22 @@ def test_execute_task(logger_mock: MagicMock, w_processor: WorkflowProcessor, da
                          indirect=["dag", "w_processor", "logger_mock"])
 def test_execute_task_ko(logger_mock: MagicMock, w_processor: WorkflowProcessor, dag: DAG, exception,
                          on_error: str):
-    """Test WorflowProcessor.execute_task function, error flows."""
+    """Test WorflowProcessor.execute_task function, error flows.
+    Check logged messages, set_status call and cancel_dependant_tasks in the failure flow.
+
+    Parameters
+    ----------
+    logger_mock : MagicMock
+        The logger fixture defined in conftest.py.
+    w_processor : WorkflowProcessor
+        The workflow processor fixture defined in conftest.py.
+    dag : DAG
+        The dag  fixture defined in conftest.py.
+    exception : [type]
+        Expected exception.
+    on_error : str
+        set on-error of the task.
+    """
     task = {'task': 'task1'}
     task.update({'on-error': on_error} if on_error else {})
     p_task = ProcessTask('task1', {})
@@ -106,7 +162,16 @@ def test_execute_task_ko(logger_mock: MagicMock, w_processor: WorkflowProcessor,
 @pytest.mark.parametrize('task_type', ['process', 'dummy', 'dummy-random'])
 @pytest.mark.parametrize('w_processor', [{}], indirect=True)
 def test_create_task_object(w_processor: WorkflowProcessor, task_type: str):
-    """Test WorkfowProcess.create_task_object function normal flow."""
+    """Test WorkfowProcess.create_task_object function normal flow.
+    Check the task type returned by the method.
+
+    Parameters
+    ----------
+    w_processor : WorkflowProcessor
+        The workflow processor fixture defined in conftest.py.
+    task_type : str
+        type of task
+    """
     task_dict = {'task': 'task1', 'action': {'this': task_type, 'with': {'param'}}}
     task = w_processor.create_task_object(task_dict, 'action')
     assert isinstance(task, TASKS_HANDLERS.get(task_type))
@@ -114,7 +179,14 @@ def test_create_task_object(w_processor: WorkflowProcessor, task_type: str):
 
 @pytest.mark.parametrize('w_processor', [{}], indirect=True)
 def test_create_task_object_ko(w_processor: WorkflowProcessor):
-    """Test WorkfowProcess.create_task_object function error flow."""
+    """Test WorkfowProcess.create_task_object function error flow.
+    Check that the create_task_object raise a ValueError exception for invalid types.}
+
+    Parameters
+    ----------
+    w_processor : WorkflowProcessor
+        The workflow processor fixture defined in conftest.py.
+    """
     task_type = 'unknown'
     task_dict = {'task': 'task1', 'action': {'this': task_type, 'with': {'param'}}}
     with pytest.raises(ValueError, match=f"Unknown task type '{task_type}'."):
@@ -127,7 +199,22 @@ def test_create_task_object_ko(w_processor: WorkflowProcessor):
 @patch('workflow_engine.workflow_processor.concurrent.futures.ThreadPoolExecutor')
 def test_execute_tasks_parallel(executor_mock: MagicMock, logger_mock: MagicMock, w_processor: WorkflowProcessor,
                                 dag: DAG, reverse: bool):
-    """Test WorkfowProcess.execute_task_parallel function."""
+    """Test WorkfowProcess.execute_task_parallel function.
+    Check if the logged messages and function calls of the method with reverse True and False cases.
+
+    Parameters
+    ----------
+    executor_mock : MagicMock
+        Mock of the ThreadPoolExecutor.
+    logger_mock : MagicMock
+        The logger fixture defined in conftest.py.
+    w_processor : WorkflowProcessor
+        The workflow processor fixture defined in conftest.py.
+    dag : DAG
+        The dag fixture defined in conftest.py.
+    reverse : bool
+        Parameterized value for the execute__tasks_parallel reverse parameter.
+    """
     futures = MagicMock()
     futures.values = MagicMock(return_value = (x := MagicMock()))
     y = MagicMock()
@@ -148,7 +235,23 @@ def test_execute_tasks_parallel(executor_mock: MagicMock, logger_mock: MagicMock
 @patch('workflow_engine.workflow_processor.concurrent.futures.ThreadPoolExecutor')
 def test_execute_tasks_parallel_ko(executor_mock: MagicMock, logger_mock: MagicMock, w_processor: WorkflowProcessor,
                                 dag: DAG, reverse: bool):
-    """Test WorkfowProcess.execute_task_parallel function error flow."""
+    """Test WorkfowProcess.execute_task_parallel function error flow.
+    Check function call message loggin and calls when the KeyboardInterrupt is generated while waiting the subprocess
+    to finish execution.
+
+    Parameters
+    ----------
+    executor_mock : MagicMock
+        not used, just patched
+    logger_mock : MagicMock
+        The logger fixture defined in conftest.py.
+    w_processor : WorkflowProcessor
+        The workflow processor fixture defined in conftest.py.
+    dag : DAG
+        The dag fixture defined in conftest.py.
+    reverse : bool
+        Parameterized value for the execute__tasks_parallel reverse parameter.
+    """
     execute_parallel_mock = MagicMock()
     def patch_recursive_and_return_exception(_):
         w_processor.execute_tasks_parallel = execute_parallel_mock
@@ -173,8 +276,14 @@ def test_execute_tasks_parallel_ko(executor_mock: MagicMock, logger_mock: MagicM
                          ],
                          indirect=True)
 def test_generate_futures(w_processor: WorkflowProcessor):
-    """Test WorkfowProcess.generate_futures function without reverse."""
+    """Test WorkfowProcess.generate_futures function without reverse.
+    Check the futures returned by the method.
 
+    Parameters
+    ----------
+    w_processor : WorkflowProcessor
+        The workflow processor fixture defined in conftest.py.
+    """
     def submit_execute_task_side_effect(_, dag: DAG, task, __):
         dag.set_status(task['task'], 'successful')
         return Future()
@@ -197,7 +306,14 @@ def test_generate_futures(w_processor: WorkflowProcessor):
                          ],
                          indirect=True)
 def test_generate_futures_reverse(w_processor: WorkflowProcessor):
-    """Test WorkfowProcess.generate_futures function with reverse True."""
+    """Test WorkfowProcess.generate_futures function with reverse True.
+    Check that set_status with successful is called for the tasks.
+
+    Parameters
+    ----------
+    w_processor : WorkflowProcessor
+        The workflow processor fixture defined in conftest.py.
+    """
 
     def set_status_side_effect(task, status):
         dag.finished_tasks_status[status].add(task)
@@ -222,7 +338,18 @@ def test_generate_futures_reverse(w_processor: WorkflowProcessor):
                                     {'task': 'task5', 'depends-on': ['task2', 'task3', 'task4']}],})],
                          indirect=True)
 def test_run(logger_mock: MagicMock, w_processor: WorkflowProcessor, dry_run: bool):
-    """Test WorkfowProcess.run function."""
+    """Test WorkfowProcess.run function.
+    Check log message and execute_tasks_parallel call.
+
+    Parameters
+    ----------
+    logger_mock : MagicMock
+        The logger fixture defined in conftest.py.
+    w_processor : WorkflowProcessor
+        The workflow processor fixture defined in conftest.py.
+    dry_run : bool
+        Parameterized value to test the run method.
+    """
     def dag_constructor(_, reverse=False):
         return reverse_dag if reverse else dag
 
@@ -243,8 +370,16 @@ def test_run(logger_mock: MagicMock, w_processor: WorkflowProcessor, dry_run: bo
 
 @pytest.mark.parametrize('logger_mock, w_processor', [({}, {})], indirect=['logger_mock', 'w_processor'])
 def test_handle_interrupt(logger_mock: MagicMock, w_processor: WorkflowProcessor):
-    """Test WorkfowProcess.handle_interrupt function."""
+    """Test WorkfowProcess.handle_interrupt function.
+    Check logging when the handle_interrupt is called.
+    
+    Parameters
+    ----------
+    logger_mock : MagicMock
+        The logger fixture defined in conftest.py.
+    w_processor : WorkflowProcessor
+        The workflow processor fixture defined in conftest.py.
+    """
     with pytest.raises(KeyboardInterrupt, match="User interrupt detected. End process..."):
         w_processor.handle_interrupt(0, 0)
     logger_mock.error.assert_called_once_with("User interrupt detected. End process...")
-
