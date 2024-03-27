@@ -33,12 +33,16 @@ class ProvisionHandler:
             raise ValueError(f"Unsupported action: {action}")
         if not method in self._methods:
             raise ValueError(f"Unsupported method: {method}")
-        if not "wazuh" in component_info.component and method.lower() == 'aio':
+        if not "wazuh" in component_info.component and method.lower() == 'assistant':
             raise ValueError(f"Assistant actions is only supported for Wazuh components.")
 
         # We cant uninstall from source.
         if action == "uninstall" and method.lower() == "source":
             logger.warning(f"Uninstall from source not supported. Using package.")
+            method = "package"
+        # Agent can not be installed from assistant.
+        if 'wazuh-agent' in component_info.component and method.lower() == "assistant":
+            logger.warning(f"Agent can not be installed from assistant. Using package.")
             method = "package"
 
         self.action = action.lower()
@@ -93,6 +97,7 @@ class ProvisionHandler:
         variables = {
             'component': self.component_info.component,
             'version': self.component_info.version,
+            'live': self.component_info.live,
             'type': self.component_info.type,
             'dependencies': self.component_info.dependencies or None,
             'templates_path': self.templates_path,
