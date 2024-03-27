@@ -23,6 +23,7 @@ def parse_arguments():
     parser.add_argument("--label-team", required=False, default=None)
     parser.add_argument("--label-termination-date", required=False, default=None)
     parser.add_argument("--instance-name", required=False, default=None)
+    parser.add_argument("--aws-profile", choices=['wazuh-qa', 'wazuh-dev', None], required=False, default=None)
     return parser.parse_args()
 
 

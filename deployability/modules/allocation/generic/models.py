@@ -57,6 +57,7 @@ class InputPayload(BaseModel):
     label_team: str | None = None
     label_termination_date: str | None = None
     instance_name: str | None = None
+    aws_profile: Literal['wazuh-qa', 'wazuh-dev', None] = None
 
 class CreationPayload(InputPayload):
     provider: str

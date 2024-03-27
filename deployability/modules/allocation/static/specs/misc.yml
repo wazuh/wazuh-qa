@@ -8,10 +8,27 @@ vagrant:
       type: qa
 
 aws:
-  security-group: [sg-023fd37c4e5b679de]
-  key:
-    type: dynamic
-    name: ${uuid}
-  tags:
-    type: qa
-    name: ddt1-{name}
+  qa:
+    security-group: [sg-023fd37c4e5b679de]
+    key:
+      type: dynamic
+      name: ${uuid}
+    tags:
+      type: qa
+      name: ddt1-{name}
+  dev:
+    security-group: [sg-023fd37c4e5b679de]
+    key:
+      type: dynamic
+      name: ${uuid}
+    tags:
+      type: dev
+      name: ddt1-{name}
+#  prod:
+#    security-group: []
+#    key:
+#      type: dynamic
+#      name: ${uuid}
+#    tags:
+#      type: prod
+#      name: ddt1-{name}
