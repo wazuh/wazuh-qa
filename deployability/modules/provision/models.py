@@ -11,6 +11,7 @@ class ComponentInfo(BaseModel):
     type: str = "package"
     version: str = ""
     dependencies: dict | None = None
+    live : bool = False
 
 
 class InputPayload(BaseModel):
@@ -35,10 +36,10 @@ class InputPayload(BaseModel):
     @validator('dependencies', pre=True)
     def validate_inventory(cls, v) -> dict | None:
         """
-        Validate inventory recived. 
+        Validate inventory recived.
         It expects a list or dict of dictionaries with the dependencies.
 
-        Example: 
+        Example:
             list: [{'manager': 'path/to/inventory.yaml'}, {'agent': 'path/to/inventory.yaml'}]
             dict:  {'manager': 'path/to/inventory.yaml', 'agent': 'path/to/inventory.yaml'}
         """
