@@ -431,7 +431,7 @@ class CheckFiles:
         elif 'windows' in os_type:
             command = 'dir /a-d /b /s | findstr /v /c:"\\.$" /c:"\\..$"| find /c ":"'
         else:
-            print("Unsupported operating system.")
+            logger.info(f'Unsupported operating system')
             return None
         snapshot = {}
         for line in result.splitlines():
