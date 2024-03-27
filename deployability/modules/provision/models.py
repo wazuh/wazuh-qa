@@ -1,3 +1,6 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 from pathlib import Path
 from typing import List, Union
 from pydantic import BaseModel, validator, model_validator
@@ -5,9 +8,10 @@ from pydantic import BaseModel, validator, model_validator
 
 class ComponentInfo(BaseModel):
     component: str
-    type: str = ""
+    type: str = "package"
     version: str = ""
     dependencies: dict | None = None
+    live : bool = False
 
 
 class InputPayload(BaseModel):
@@ -32,10 +36,10 @@ class InputPayload(BaseModel):
     @validator('dependencies', pre=True)
     def validate_inventory(cls, v) -> dict | None:
         """
-        Validate inventory recived. 
+        Validate inventory recived.
         It expects a list or dict of dictionaries with the dependencies.
 
-        Example: 
+        Example:
             list: [{'manager': 'path/to/inventory.yaml'}, {'agent': 'path/to/inventory.yaml'}]
             dict:  {'manager': 'path/to/inventory.yaml', 'agent': 'path/to/inventory.yaml'}
         """
@@ -61,13 +65,9 @@ class InputPayload(BaseModel):
     def validate_install_uninstall(cls, components) -> Union[None, List[str]]:
         if not components:
             return
-        component_info = []
+        component_list = []
         for item in components:
-            componentObj = ComponentInfo(**eval(item))
-            if not componentObj.type:
-                componentObj.type = "generic"
-            if "wazuh-agent" in componentObj.component:
-                componentObj.type = "package"
-            component_info.append(componentObj)
+            component_info = ComponentInfo(**eval(item))
+            component_list.append(component_info)
 
-        return component_info
+        return component_list
