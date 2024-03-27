@@ -27,6 +27,7 @@ def test_workflow_file_constructor():
     static_validation_mock.assert_called_once()
 
 
+@pytest.mark.parametrize('logger_mock', [{}], indirect=True)
 def test_workflow_file_validate_schema(logger_mock: MagicMock):
     """Test WorkflowFile.__validate_schema.
     Check debug messages and function called by the method.
