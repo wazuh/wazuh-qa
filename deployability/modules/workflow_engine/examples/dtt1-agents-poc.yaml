@@ -96,10 +96,10 @@ tasks:
         path: python3
         args:
           - modules/provision/main.py
-          - inventory: "{working-dir}/agent-{agent}/inventory.yml"
+          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
           - dependencies:
             - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-            - agent: "{working-dir}/agent-{agent}/inventory.yml"
+            - agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - install:
             - component: wazuh-agent
               type: assistant
