@@ -61,6 +61,9 @@ class VagrantProvider(Provider):
             host_identifier = remote_host_parameters['host_provider']
             VagrantUtils.remote_command(cmd, remote_host_parameters)
         credentials = VagrantCredentials()
+        if arch == 'ppc64':
+            remote_host_parameters = cls.__remote_host(arch, 'create', params.composite_name.split("-")[1], instance_dir)
+            host_identifier = remote_host_parameters['host_provider']
         if not config:
             logger.debug(f"No config provided. Generating from payload")
             # Keys.
@@ -76,14 +79,14 @@ class VagrantProvider(Provider):
         else:
             logger.debug(f"Using provided config")
             credentials.load(config.public_key)
-        # Create the Vagrantfile.
-        cls.__create_vagrantfile(instance_dir, config)
-        logger.debug(f"Vagrantfile created. Creating instance.")
+
+        if arch != 'ppc64':
+            # Create the Vagrantfile.
+            cls.__create_vagrantfile(instance_dir, config)
+            logger.debug(f"Vagrantfile created. Creating instance.")
         if platform == 'macos':
             vagrant_file = str(instance_dir) + '/Vagrantfile'
             VagrantUtils.remote_copy(vagrant_file, host_instance_dir, remote_host_parameters)
-        if arch == 'ppc64':
-            remote_host_parameters = cls.__remote_host(arch, 'create')
 
         instance_params = {}
         instance_params['instance_dir'] = instance_dir
@@ -93,6 +96,8 @@ class VagrantProvider(Provider):
         instance_params['host_instance_dir'] = host_instance_dir
         instance_params['remote_host_parameters'] = remote_host_parameters
         instance_params['arch'] = arch
+        instance_params['docker_image'] = config.box
+        instance_params['ssh_port'] = config.port
         return VagrantInstance(InstancePayload(**instance_params), credentials)
 
     @staticmethod
@@ -129,13 +134,13 @@ class VagrantProvider(Provider):
             if os.path.dirname(destroy_parameters.key_path) != str(destroy_parameters.instance_dir):
                 logger.debug(f"The key {destroy_parameters.key_path} will not be deleted. It is the user's responsibility to delete it.")
         else:
-            remote_host_parameters = cls.__remote_host(str(destroy_parameters.arch), 'delete')
             instance_params = {}
             instance_params['instance_dir'] = destroy_parameters.instance_dir
             instance_params['identifier'] = destroy_parameters.identifier
             instance_params['platform'] = destroy_parameters.platform
             instance_params['host_identifier'] = destroy_parameters.host_identifier
             instance_params['host_instance_dir'] = destroy_parameters.host_instance_dir
+            remote_host_parameters = cls.__remote_host(str(destroy_parameters.arch), 'delete', destroy_parameters.host_identifier, destroy_parameters.instance_dir)
             instance_params['remote_host_parameters'] = remote_host_parameters
             instance_params['arch'] = destroy_parameters.arch
             instance_params['ssh_port'] = destroy_parameters.ssh_port
@@ -211,9 +216,9 @@ class VagrantProvider(Provider):
         config['platform'] = params.composite_name.split("-")[0]
         config['arch'] = params.composite_name.split("-")[3]
 
-        if params.composite_name.startswith("macos") and params.composite_name.endswith("amd64"):
+        if params.composite_name.startswith("macos") and params.composite_name.endswith("amd64") or params.composite_name.split("-")[3] == 'ppc64':
             tmp_port_file = str(instance_dir) + "/port.txt"
-            config['port'] = VagrantUtils.get_port(remote_host_parameters)
+            config['port'] = VagrantUtils.get_port(remote_host_parameters, config['arch'])
             with open(tmp_port_file, 'w') as f:
                 f.write(config['port'])
 
@@ -244,15 +249,18 @@ class VagrantProvider(Provider):
         raise cls.ProvisioningError("No available IP address found.")
 
     @staticmethod
-    def __remote_host(arch: str, action: str) -> str:
+    def __remote_host(arch: str, action: str, os: str = None, instance_dir: Path = None) -> str:
         """
         Returns the host parameters for macOS instances.
 
         Args:
             arch (str): The architecture of the instance.
+            action (str): The action to perform.
+            os (str, optional): The operating system of the instance. Defaults to None.
+            instance_dir (Path, optional): The directory of the instance. Defaults to None.
 
         Returns:
-            str: The provider name.
+            dict: The host parameters for the remote instance.
         """
         client = boto3.client('secretsmanager')
         server_port = 22
@@ -266,16 +274,14 @@ class VagrantProvider(Provider):
                 ssh_password = client.get_secret_value(SecretId='devops_macstadium_m1_jenkins_password')['SecretString']
                 ssh_user = client.get_secret_value(SecretId='devops_macstadium_m1_jenkins_user')['SecretString']
             except Exception as e:
-                logger.error('Could not get macOS macStadium server IP: ' + str(e) + '.')
-                exit(1)
+                raise ValueError('Could not get macOS macStadium server IP: ' + str(e) + '.')
 
             try:
                 tn = Telnet(server_ip, server_port, timeout)
                 conn_ok = True
                 tn.close()
             except Exception as e:
-                logger.error('Could not connect to macOS macStadium server: ' + str(e) + '.')
-                exit(1)
+                raise ValueError('Could not connect to macOS macStadium server: ' + str(e) + '.')
 
             remote_host_parameters['server_ip'] = server_ip
             remote_host_parameters['ssh_password'] = ssh_password
@@ -295,8 +301,7 @@ class VagrantProvider(Provider):
                         logger.info(f"macStadium server has less than 2 VMs running, deploying in this host.")
                         return remote_host_parameters
                     else:
-                        logger.error(f"macStadium server is full capacity, use AWS provider.")
-                        exit(1)
+                        raise ValueError(f"macStadium server is full capacity, use AWS provider.")
                 else:
                     return remote_host_parameters
         if arch == 'amd64':
@@ -337,34 +342,46 @@ class VagrantProvider(Provider):
                     return remote_host_parameters
 
         if arch == 'ppc64':
-            try:
-                server_ip = client.get_secret_value(SecretId='devops_ppc64_jenkins_ip')['SecretString']
-                ssh_password = client.get_secret_value(SecretId='devops_ppc64_jenkins_password')['SecretString']
-                ssh_user = client.get_secret_value(SecretId='devops_ppc64_jenkins_user')['SecretString']
-            except Exception as e:
-                logger.error('Could not get ppc64 server IP: ' + str(e) + '.')
-                exit(1)
+            if os == 'debian':
+                try:
+                    server_ip = client.get_secret_value(SecretId='devops_ppc64_debian_jenkins_ip')['SecretString']
+                    ssh_key = client.get_secret_value(SecretId='devops_ppc64_jenkins_key')['SecretString']
+                    ssh_user = client.get_secret_value(SecretId='devops_ppc64_debian_jenkins_user')['SecretString']
+                    remote_host_parameters['host_provider'] = 'debian'
+                except Exception as e:
+                    raise ValueError('Could not get Debian ppc64 server IP: ' + str(e) + '.')
+            if os == 'centos':
+                try:
+                    server_ip = client.get_secret_value(SecretId='devops_ppc64_centos_jenkins_ip')['SecretString']
+                    ssh_key = client.get_secret_value(SecretId='devops_ppc64_jenkins_key')['SecretString']
+                    ssh_user = client.get_secret_value(SecretId='devops_ppc64_centos_jenkins_user')['SecretString']
+                    remote_host_parameters['host_provider'] = 'centos'
+                except Exception as e:
+                    raise ValueError('Could not get Centos ppc64 server IP: ' + str(e) + '.')
 
             try:
                 tn = Telnet(server_ip, server_port, timeout)
                 conn_ok = True
                 tn.close()
             except Exception as e:
-                logger.error('Could not connect to ppc64 server: ' + str(e) + '.')
-                exit(1)
+                raise ValueError('Could not connect to ppc64 server: ' + str(e) + '.')
+
+            key_path = instance_dir / 'ppc-key'
+            with open(key_path, 'w') as f:
+                f.write(ssh_key)
+            ssh_key = key_path
+            subprocess.call(['chmod', '0400', key_path])
 
             remote_host_parameters['server_ip'] = server_ip
-            remote_host_parameters['ssh_password'] = ssh_password
+            remote_host_parameters['ssh_key'] = ssh_key
             remote_host_parameters['ssh_user'] = ssh_user
-            remote_host_parameters['host_provider'] = 'ppc64'
 
             if conn_ok:
                 if action == 'create':
-                    cmd = "sudo /usr/bin/lparstat -i"
-                    lparstat_output = subprocess.Popen(f"sshpass -p {ssh_password} ssh {ssh_user}@{server_ip} {cmd}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
-                    if 'lparstat: command not found' in lparstat_output:
-                        logger.error(f"ppc64 server does not have lparstat command, use AWS provider.")
-                        exit(1)
+                    cmd = "sudo docker ps -a"
+                    output = subprocess.Popen(f"ssh -i {ssh_key} {ssh_user}@{server_ip} {cmd}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
+                    if '2222' in output and '8080' in output:
+                        raise ValueError(f"ppc64 server has full capacity, cannot host a new container")
                     else:
                         return remote_host_parameters
                 else:

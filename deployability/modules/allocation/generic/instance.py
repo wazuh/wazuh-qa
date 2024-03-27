@@ -33,11 +33,9 @@ class Instance(ABC):
         """
         path = Path(instance_parameters.instance_dir)
         if not path.exists() or not path.is_dir():
-            logger.error(f"Invalid instance path: {path}")
-            exit(1)
+            raise ValueError(f"Invalid instance path: {path}")
         if credentials and not issubclass(type(credentials), Credentials):
-            logger.error(f"Invalid credentials: {credentials}")
-            exit(1)
+            raise ValueError(f"Invalid credentials: {credentials}")
 
         self.path: Path = path
         self.identifier: str = str(instance_parameters.identifier)

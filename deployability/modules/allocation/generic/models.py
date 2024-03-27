@@ -120,6 +120,7 @@ class InstancePayload(BaseModel):
     platform: str
     arch: str | None = None
     user: str | None = None
+    docker_image: str | None = None
 
     @field_validator('ssh_port', mode='before')
     def validate_port(cls, value) -> str | None:
