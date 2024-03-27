@@ -243,7 +243,6 @@ class HostManager:
 
         return result['stdout']
 
-
     def apply_config(self, config_yml_path: str, dest_path: str = WAZUH_CONF, clear_files: list = None,
                      restart_services: list = None):
         """Apply the configuration described in the config_yml_path to the environment.
@@ -465,7 +464,7 @@ class HostManager:
 
         return result
 
-    def install_package(self, host, url, system='ubuntu'):
+    def install_package(self, host, url, system='ubuntu', use_npm=False):
         """
         Installs a package on the specified host.
 
@@ -480,29 +479,46 @@ class HostManager:
 
         Example:
             host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
+            # To install a package via npm:
+            host_manager.install_package('my_host', 'package_name', 'system_name', use_npm=True)
         """
-        result = False
-        extension = '.msi'
 
-        if system == 'windows':
-            if url.lower().endswith(extension):
-                result = self.get_host(host).ansible("win_package", f"path={url} arguments=/passive", check=False)
+        if use_npm:
+            if system == 'macos':
+                cmd = f"PATH=/opt/homebrew/bin:$PATH npm install -g {url}"
+                result = self.get_host(host).ansible("shell", cmd, check=False)
+            elif system == 'windows':
+                cmd = f"npm install -g {url}"
+                result = self.get_host(host).ansible("win_shell", cmd, check=False)
             else:
-                result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
-        elif system == 'ubuntu':
-            result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
-            if result['changed'] and result['stderr'] == '':
-                result = True
-        elif system == 'centos':
-            result = self.get_host(host).ansible("yum", f"name={url} state=present "
-                                                 'sslverify=false disable_gpg_check=True', check=False)
-        elif system == 'macos':
-            package_name = url.split('/')[-1]
-            result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
-            cmd = f"installer -pkg {package_name} -target /"
-            result = self.get_host(host).ansible("command", cmd, check=False)
+                cmd = f"npm install -g {url}"
+                result = self.get_host(host).ansible("shell", cmd, check=False)
 
-        logging.info(f"Package installed result {result}")
+            logging.info(f"npm package installed result {result}")
+
+        else:
+            result = False
+            extension = '.msi'
+
+            if system == 'windows':
+                if url.lower().endswith(extension):
+                    result = self.get_host(host).ansible("win_package", f"path={url} arguments=/passive", check=False)
+                else:
+                    result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
+            elif system == 'ubuntu':
+                result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
+                if result['changed'] and result['stderr'] == '':
+                    result = True
+            elif system == 'centos':
+                result = self.get_host(host).ansible("yum", f"name={url} state=present "
+                                                 'sslverify=false disable_gpg_check=True', check=False)
+            elif system == 'macos':
+                package_name = url.split('/')[-1]
+                result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
+                cmd = f"installer -pkg {package_name} -target /"
+                result = self.get_host(host).ansible("command", cmd, check=False)
+
+            logging.info(f"Package installed result {result}")
 
         return result
 
@@ -545,7 +561,7 @@ class HostManager:
 
         return master_node
 
-    def remove_package(self, host, system, package_uninstall_name=None, custom_uninstall_playbook=None):
+    def remove_package(self, host, system, package_uninstall_name=None, use_npm=False, custom_uninstall_playbook=None):
         """
         Removes a package from the specified host.
 
@@ -560,6 +576,8 @@ class HostManager:
 
         Example:
             host_manager.remove_package('my_host', 'my_package', system='ubuntu')
+            # To remove a package via npm:
+            host_manager.remove_package('my_host', 'system_name', 'package_name', use_npm=True)
         """
         logging.info(f"Removing package {package_uninstall_name} from host {host}")
         logging.info(f"System: {system}")
@@ -571,26 +589,39 @@ class HostManager:
         if custom_uninstall_playbook:
             remove_operation_result = self.run_playbook(host, custom_uninstall_playbook)
         elif package_uninstall_name:
-            if os_name == 'windows':
-                remove_operation_result = self.get_host(host).ansible("win_command",
-                                                                      f"{package_uninstall_name} /uninstall /quiet /S",
-                                                                      check=False)
-            elif os_name == 'linux':
-                os = self.get_host_variables(host)['os'].split('_')[0]
-                if os == 'centos':
-                    remove_operation_result = self.get_host(host).ansible("yum",
-                                                                          f"name={package_uninstall_name} state=absent",
-                                                                          check=False)
-                elif os == 'ubuntu':
-                    remove_operation_result = self.get_host(host).ansible("apt",
-                                                                          f"name={package_uninstall_name} state=absent",
-                                                                          check=False)
-            elif os_name == 'macos':
-                remove_operation_result = self.get_host(host).ansible("command",
-                                                                      f"brew uninstall {package_uninstall_name}",
-                                                                      check=False)
+            if use_npm:
+                if system == 'macos':
+                    cmd = f"PATH=/opt/homebrew/bin:$PATH npm uninstall -g {package_uninstall_name}"
+                    remove_operation_result = self.get_host(host).ansible("shell", cmd, check=False)
+                elif system == 'windows':
+                    cmd = f"npm uninstall -g {package_uninstall_name}"
+                    remove_operation_result = self.get_host(host).ansible("win_shell", cmd, check=False)
+                else:
+                    cmd = f"npm uninstall -g {package_uninstall_name}"
+                    remove_operation_result = self.get_host(host).ansible("shell", cmd, check=False)
 
-        logging.info(f"Package removed result {remove_operation_result}")
+                logging.info(f"npm package removed result {remove_operation_result}")
+            else:
+                if os_name == 'windows':
+                    remove_operation_result = self.get_host(host).ansible("win_command",
+                                                                        f"{package_uninstall_name} /uninstall /quiet /S",
+                                                                        check=False)
+                elif os_name == 'linux':
+                    os = self.get_host_variables(host)['os'].split('_')[0]
+                    if os == 'centos':
+                        remove_operation_result = self.get_host(host).ansible("yum",
+                                                                            f"name={package_uninstall_name} state=absent",
+                                                                            check=False)
+                    elif os == 'ubuntu':
+                        remove_operation_result = self.get_host(host).ansible("apt",
+                                                                            f"name={package_uninstall_name} state=absent",
+                                                                            check=False)
+                elif os_name == 'macos':
+                    remove_operation_result = self.get_host(host).ansible("command",
+                                                                        f"brew uninstall {package_uninstall_name}",
+                                                                        check=False)
+
+                logging.info(f"Package removed result {remove_operation_result}")
 
         return remove_operation_result
 
@@ -670,7 +701,7 @@ class HostManager:
             if os == 'linux':
                 result = binary_path = f"/var/ossec/bin/wazuh-control"
             elif os == 'macos':
-                result= binary_path = f"/Library/Ossec/bin/wazuh-control"
+                result = binary_path = f"/Library/Ossec/bin/wazuh-control"
 
             result = self.get_host(host).ansible('shell', f"{binary_path} {operation}", check=False)
 
