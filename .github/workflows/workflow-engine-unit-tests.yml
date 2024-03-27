@@ -1,4 +1,4 @@
-name: Workflow Engine unit tests
+name: Workflow engine unit tests
 
 on:
   workflow_dispatch:

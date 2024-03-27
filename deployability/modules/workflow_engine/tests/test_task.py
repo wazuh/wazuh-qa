@@ -1,6 +1,7 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+from typing import List, Tuple
 from subprocess import CompletedProcess, CalledProcessError
 from unittest.mock import patch, MagicMock, call
 import pytest
@@ -16,7 +17,14 @@ def task(request) -> ProcessTask:
 
 @pytest.mark.parametrize("task", [('task1', {"param1": "value1"})], indirect=True)
 def test_process_task_constructor(task: ProcessTask):
-    """Test ProcessTask constructor."""
+    """Test ProcessTask constructor.
+    Check the task instance varialbes after constructing the ProcessTask.
+
+    Parameters
+    ----------
+    task : ProcessTask
+        The task fixture.
+    """
     assert task.task_name == 'task1'
     assert task.task_parameters == {"param1": "value1"}
 
@@ -34,7 +42,17 @@ def test_process_task_constructor(task: ProcessTask):
                                   ], indirect=True)
 @patch("workflow_engine.task.logger")
 def test_process_task_execute(logger_mock: MagicMock, task: ProcessTask):
-    """Test ProcessTask.execute method normal flow."""
+    """Test ProcessTask.execute method normal flow.
+    Check that ProcessTask.execute calls subprocess.run to run commands with the defined parameters. The
+    task mock in conftest.py is used to thy diferent command argument formats.
+
+    Parameters
+    ----------
+    logger_mock : MagicMock
+        The logger mock defined in conftest.py
+    task : ProcessTask
+        The task fixture.
+    """
     results = {}
     results["task1"] = {"parm_list": [task.task_parameters['path'],  "--param1=value1"]}
     results["task2"] = {"parm_list": [task.task_parameters['path'], "param1"]}
@@ -63,11 +81,21 @@ def test_process_task_execute(logger_mock: MagicMock, task: ProcessTask):
                                              "args": [{"param1": "value1"}]}),
                                   ], indirect=True)
 @pytest.mark.parametrize("subproc_retval", [1, 0])
-@pytest.mark.parametrize("subproc_run_exc", [(False, None),
-                                             (True, KeyboardInterrupt, "KeyboardInterrupt error"),
+@pytest.mark.parametrize("subproc_run_exc", [(True, KeyboardInterrupt, "KeyboardInterrupt error"),
                                              (True, Exception, "Other Error")])
-def test_process_task_execute_ko(subproc_retval: int, subproc_run_exc: bool, task: ProcessTask):
-    """Test ProcessTask.execute method exception flows."""
+def test_process_task_execute_ko(subproc_retval: int, subproc_run_exc: List[Tuple], task: ProcessTask):
+    """Test ProcessTask.execute method exception flows.
+    Check ProcessTask.execute flow when the subprocess.run returns errors.
+
+    Parameters
+    ----------
+    subproc_retval : int
+        return code from subprocess.run
+    subproc_run_exc : bool
+        Tuple
+    task : ProcessTask
+        The task fixture.
+    """
     raise_exc, exception_type, stderr = subproc_run_exc
     if exception_type is Exception:
         match = f"Error executing process task {stderr}"
