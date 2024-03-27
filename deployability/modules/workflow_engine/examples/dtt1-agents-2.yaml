@@ -5,35 +5,15 @@ version: 0.1
 description: This workflow is used to test agents deployment por DDT1 PoC
 variables:
   agents-os:
+    - linux-ubuntu-22.04-amd64
     - linux-debian-10-amd64
-  manager-os: linux-debian-11-amd64
-  infra-provider: vagrant
+    - linux-oracle-8-amd64
+    - linux-redhat-8-amd64
+  manager-os: linux-centos-8-amd64
+  infra-provider: aws
   working-dir: /tmp/dtt1-poc
 
 tasks:
-  # Generic agent test task
-  #- task: "run-agent-tests-uninstall-{agent}"
-  #  description: "Run tests uninstall for the {agent} agent."
-  #  do:
-  #    this: process
-  #    with:
-  #      path: python3
-  #      args:
-  #        - modules/testing/main.py
-  #        - inventory: "{working-dir}/agent-{agent}/inventory.yml"
-  #        - dependencies:
-  #          - manager: "{working-dir}/manager-{manager-os}/inventory.yml"
-  #        - tests: "uninstall"
-  #        - component: "agent"
-  #        - wazuh-version: "4.7.1"
-  #        - wazuh-revision: "40709"
-  #  depends-on:
-  #    - "run-agent-tests-{agent}"
-  #    - "provision-uninstall-{agent}"
-  #  foreach:
-  #    - variable: agents-os
-  #      as: agent
-
   # Unique manager provision task
   - task: "provision-manager"
     description: "Provision the manager."
@@ -48,7 +28,7 @@ tasks:
             - component: wazuh-manager
               type: assistant
               version: 4.7.3
-              live: False
+              live: True
     depends-on:
       - "allocate-manager"
 
@@ -67,6 +47,9 @@ tasks:
           - composite-name: "{manager-os}"
           - inventory-output: "{working-dir}/manager-{manager-os}"
           - track-output: "{working-dir}/manager-{manager-os}"
+          - label-termination-date: "2024-03-27 20:00:00"
+          - label-team: "qa"
+          - label-issue: "https://github.com/wazuh/wazuh-qa/issues/222222"
     cleanup:
       this: process
       with:
@@ -91,7 +74,7 @@ tasks:
             - agent: "{working-dir}/agent-{agent}/inventory.yml"
           - install:
             - component: wazuh-agent
-              type: assistant
+              type: package
               version: 4.7.3
               live: True
     depends-on:
@@ -116,6 +99,9 @@ tasks:
           - composite-name: "{agent}"
           - inventory-output: "{working-dir}/agent-{agent}"
           - track-output: "{working-dir}/agent-{agent}"
+          - label-termination-date: "2024-03-27 20:00:00"
+          - label-team: "qa"
+          - label-issue: "https://github.com/wazuh/wazuh-qa/issues/111111"
     cleanup:
       this: process
       with:

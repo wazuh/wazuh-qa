@@ -11,29 +11,6 @@ variables:
   working-dir: /tmp/dtt1-poc
 
 tasks:
-  # Generic agent test task
-  #- task: "run-agent-tests-uninstall-{agent}"
-  #  description: "Run tests uninstall for the {agent} agent."
-  #  do:
-  #    this: process
-  #    with:
-  #      path: python3
-  #      args:
-  #        - modules/testing/main.py
-  #        - inventory: "{working-dir}/agent-{agent}/inventory.yml"
-  #        - dependencies:
-  #          - manager: "{working-dir}/manager-{manager-os}/inventory.yml"
-  #        - tests: "uninstall"
-  #        - component: "agent"
-  #        - wazuh-version: "4.7.1"
-  #        - wazuh-revision: "40709"
-  #  depends-on:
-  #    - "run-agent-tests-{agent}"
-  #    - "provision-uninstall-{agent}"
-  #  foreach:
-  #    - variable: agents-os
-  #      as: agent
-
   # Unique manager provision task
   - task: "provision-manager"
     description: "Provision the manager."
@@ -46,9 +23,9 @@ tasks:
           - inventory: "{working-dir}/manager-{manager-os}/inventory.yml"
           - install:
             - component: wazuh-manager
-              type: assistant
+              type: package
               version: 4.7.3
-              live: False
+              live: True
     depends-on:
       - "allocate-manager"
 
@@ -91,7 +68,7 @@ tasks:
             - agent: "{working-dir}/agent-{agent}/inventory.yml"
           - install:
             - component: wazuh-agent
-              type: assistant
+              type: package
               version: 4.7.3
               live: True
     depends-on:

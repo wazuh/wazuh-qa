@@ -5,35 +5,17 @@ version: 0.1
 description: This workflow is used to test agents deployment por DDT1 PoC
 variables:
   agents-os:
+    - linux-ubuntu-18.04-amd64
+    - linux-ubuntu-20.04-amd64
     - linux-ubuntu-22.04-amd64
-  manager-os: linux-ubuntu-20.04-amd64
+    - linux-debian-10-amd64
+    - linux-debian-11-amd64
+    - linux-debian-12-amd64
+  manager-os: linux-oracle-9-amd64
   infra-provider: vagrant
   working-dir: /tmp/dtt1-poc
 
 tasks:
-  # Generic agent test task
-  #- task: "run-agent-tests-uninstall-{agent}"
-  #  description: "Run tests uninstall for the {agent} agent."
-  #  do:
-  #    this: process
-  #    with:
-  #      path: python3
-  #      args:
-  #        - modules/testing/main.py
-  #        - inventory: "{working-dir}/agent-{agent}/inventory.yml"
-  #        - dependencies:
-  #          - manager: "{working-dir}/manager-{manager-os}/inventory.yml"
-  #        - tests: "uninstall"
-  #        - component: "agent"
-  #        - wazuh-version: "4.7.1"
-  #        - wazuh-revision: "40709"
-  #  depends-on:
-  #    - "run-agent-tests-{agent}"
-  #    - "provision-uninstall-{agent}"
-  #  foreach:
-  #    - variable: agents-os
-  #      as: agent
-
   # Unique manager provision task
   - task: "provision-manager"
     description: "Provision the manager."
@@ -48,7 +30,7 @@ tasks:
             - component: wazuh-manager
               type: assistant
               version: 4.7.3
-              live: False
+              live: True
     depends-on:
       - "allocate-manager"
 
@@ -74,7 +56,7 @@ tasks:
         args:
           - modules/allocation/main.py
           - action: delete
-          - track-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - track-output: "{working-dir}/manager-{manager-os}/inventory.yml"
 
   # Generic agent provision task
   - task: "provision-install-{agent}"
@@ -123,7 +105,7 @@ tasks:
         args:
           - modules/allocation/main.py
           - action: delete
-          - track-output: "{working-dir}/agent-{agent}/inventory.yaml"
+          - track-output: "{working-dir}/agent-{agent}/inventory.yml"
     foreach:
       - variable: agents-os
         as: agent
