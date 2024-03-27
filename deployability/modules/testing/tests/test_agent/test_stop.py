@@ -1,14 +1,12 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import pytest
 
 from ..helpers.agent import WazuhAgent, WazuhAPI
 from ..helpers.generic import GeneralComponentActions, Waits
-<<<<<<< HEAD
 from ..helpers.logger.logger import logger
-=======
->>>>>>> enhancement/4848-dtt1-iteration-3-test-module
 
 
 @pytest.fixture
