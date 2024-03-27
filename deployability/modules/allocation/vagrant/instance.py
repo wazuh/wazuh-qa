@@ -26,7 +26,7 @@ class VagrantInstance(Instance):
         host_identifier (str, optional): The host for the instance. Defaults to None.
         host_instance_dir (str | Path, optional): The remote directory of the instance. Defaults to None.
         ssh_port (str): SSH port of the instance.
-        macos_host_parameters (dict): Parameters of the remote host.
+        remote_host_parameters (dict): Parameters of the remote host.
     """
     def __init__(self, instance_parameters: InstancePayload, credentials: VagrantCredentials = None) -> None:
         """
@@ -43,8 +43,10 @@ class VagrantInstance(Instance):
         self.host_identifier: str = instance_parameters.host_identifier
         self.host_instance_dir: str | Path = instance_parameters.host_instance_dir
         self.ssh_port: str = instance_parameters.ssh_port
-        self.macos_host_parameters: dict = instance_parameters.macos_host_parameters
+        self.remote_host_parameters: dict = instance_parameters.remote_host_parameters
         self.platform: str = instance_parameters.platform
+        self.arch: str = instance_parameters.arch
+        self.docker_image: str = instance_parameters.docker_image
 
     def start(self) -> None:
         """
@@ -53,7 +55,18 @@ class VagrantInstance(Instance):
         Returns:
             None
         """
-        self.__run_vagrant_command('up')
+        if self.arch == 'ppc64':
+            cmd = f"sudo docker run -itd --name={self.identifier} -p {self.ssh_port}:22 {self.docker_image}"
+            output = VagrantUtils.remote_command(cmd, self.remote_host_parameters)
+            container_id = output.split("\n")[0]
+            public_key = subprocess.run(["cat", str(self.credentials.key_path) + ".pub"],
+                                        stdout=subprocess.PIPE).stdout.decode("utf-8")
+            public_key = public_key.strip("\n")
+            cmd = f"sudo docker exec -i {container_id} /bin/bash -c 'echo \"{public_key}\" >> /root/.ssh/authorized_keys'"
+            output = VagrantUtils.remote_command(cmd, self.remote_host_parameters)
+            return output
+        else:
+            self.__run_vagrant_command('up')
 
     def reload(self) -> None:
         """
@@ -80,6 +93,10 @@ class VagrantInstance(Instance):
         Returns:
             None
         """
+        if str(self.arch) == 'ppc64':
+            cmd = f"sudo docker rm -f {self.identifier}"
+            VagrantUtils.remote_command(cmd, self.remote_host_parameters)
+            return
         if "not created" in self.status():
             logger.warning(f"Instance {self.identifier} is not created.\
                             Skipping deletion.")
@@ -87,13 +104,13 @@ class VagrantInstance(Instance):
         self.__run_vagrant_command(['destroy', '-f'])
         if str(self.host_identifier) == "macstadium":
             logger.debug(f"Deleting remote directory {self.host_instance_dir}")
-            VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.macos_host_parameters)
+            VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.remote_host_parameters)
             logger.debug(f"Killing remote process on port {self.ssh_port}")
-            proccess = VagrantUtils.remote_command(f"sudo lsof -Pi :{self.ssh_port} -sTCP:LISTEN -t", self.macos_host_parameters)
-            VagrantUtils.remote_command(f"sudo kill -9 {proccess}", self.macos_host_parameters)
+            proccess = VagrantUtils.remote_command(f"sudo lsof -Pi :{self.ssh_port} -sTCP:LISTEN -t", self.remote_host_parameters)
+            VagrantUtils.remote_command(f"sudo kill -9 {proccess}", self.remote_host_parameters)
         if str(self.host_identifier) == "black_mini":
             logger.debug(f"Deleting remote directory {self.host_instance_dir}")
-            VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.macos_host_parameters)
+            VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.remote_host_parameters)
 
 
     def status(self) -> str:
@@ -113,61 +130,70 @@ class VagrantInstance(Instance):
         Returns:
             ConnectionInfo: The SSH configuration of the VM.
         """
-        if not 'running' in self.status():
-            logger.debug(f"Instance {self.identifier} is not running.\
-                            Starting it.")
-            self.start()
-        output = self.__run_vagrant_command('ssh-config')
-        patterns = {'hostname': r'HostName (.*)',
-                    'user': r'User (.*)',
-                    'port': r'Port (.*)',
-                    'private_key': r'IdentityFile (.*)'}
         # Parse the ssh-config.
         ssh_config = {}
-        if self.platform == 'macos':
-            for key, pattern in patterns.items():
-                match = re.search(pattern, output)
-                if match and key == 'hostname':
-                    ip = match.group(1).strip()
-            server_ip = self.macos_host_parameters['server_ip']
+        if self.arch == 'ppc64':
+            ssh_config['hostname'] = self.remote_host_parameters['server_ip']
             tmp_port_file = str(self.path) + "/port.txt"
-            if str(self.host_identifier) == "macstadium":
-                if not Path(tmp_port_file).exists():
-                    port = VagrantUtils.get_port(self.macos_host_parameters)
-                    cmd = f"sudo /usr/bin/ssh -i /Users/jenkins/.ssh/localhost -L {server_ip}:{port}:{ip}:22 -N 127.0.0.1 -f"
-                    VagrantUtils.remote_command(cmd, self.macos_host_parameters)
-                    with open(tmp_port_file, 'w') as f:
-                        f.write(port)
+            with open(tmp_port_file, 'r') as f:
+                port = f.read()
+            ssh_config['port'] = port
+            ssh_config['user'] = 'root'
+            if self.credentials:
+                ssh_config['private_key'] = str(self.credentials.key_path)
+        else:
+            if not 'running' in self.status():
+                logger.debug(f"Instance {self.identifier} is not running.\
+                                Starting it.")
+                self.start()
+            output = self.__run_vagrant_command('ssh-config')
+            patterns = {'hostname': r'HostName (.*)',
+                        'user': r'User (.*)',
+                        'port': r'Port (.*)',
+                        'private_key': r'IdentityFile (.*)'}
+            if self.platform == 'macos':
+                for key, pattern in patterns.items():
+                    match = re.search(pattern, output)
+                    if match and key == 'hostname':
+                        ip = match.group(1).strip()
+                server_ip = self.remote_host_parameters['server_ip']
+                tmp_port_file = str(self.path) + "/port.txt"
+                if str(self.host_identifier) == "macstadium":
+                    if not Path(tmp_port_file).exists():
+                        port = VagrantUtils.get_port(self.remote_host_parameters)
+                        cmd = f"sudo /usr/bin/ssh -i /Users/jenkins/.ssh/localhost -L {server_ip}:{port}:{ip}:22 -N 127.0.0.1 -f"
+                        VagrantUtils.remote_command(cmd, self.remote_host_parameters)
+                        with open(tmp_port_file, 'w') as f:
+                            f.write(port)
+                    else:
+                        with open(tmp_port_file, 'r') as f:
+                            port = f.read()
+                    ssh_config['port'] = port
                 else:
                     with open(tmp_port_file, 'r') as f:
                         port = f.read()
-                ssh_config['port'] = port
+                    ssh_config['port'] = port
+                ssh_config['hostname'] = server_ip
+                ssh_config['user'] = 'vagrant'
+                ssh_config['password'] = 'vagrant'
+            elif self.platform == 'windows':
+                for key, pattern in patterns.items():
+                    match = re.search(pattern, output)
+                    if match and key == 'hostname':
+                        ip = match.group(1).strip()
+                ssh_config['hostname'] = ip
+                ssh_config['port'] = 3389
+                ssh_config['user'] = 'vagrant'
+                ssh_config['password'] = 'vagrant'
             else:
-                with open(tmp_port_file, 'r') as f:
-                    port = f.read()
-                ssh_config['port'] = port
-            ssh_config['hostname'] = server_ip
-            ssh_config['user'] = 'vagrant'
-            ssh_config['password'] = 'vagrant'
-        elif self.platform == 'windows':
-            for key, pattern in patterns.items():
-                match = re.search(pattern, output)
-                if match and key == 'hostname':
-                    ip = match.group(1).strip()
-            ssh_config['hostname'] = ip
-            ssh_config['port'] = 3389
-            ssh_config['user'] = 'vagrant'
-            ssh_config['password'] = 'vagrant'
-        else:
-            for key, pattern in patterns.items():
-                match = re.search(pattern, output)
-                if match:
+                for key, pattern in patterns.items():
+                    match = re.search(pattern, output)
+                    if not match:
+                        logger.error(f"Couldn't find {key} in ssh-config")
+                        return None
                     ssh_config[key] = str(match.group(1)).strip("\r")
-                else:
-                    logger.error(f"Couldn't find {key} in ssh-config")
-                    return None
-            if self.credentials:
-                ssh_config['private_key'] = str(self.credentials.key_path)
+                if self.credentials:
+                    ssh_config['private_key'] = str(self.credentials.key_path)
         return ConnectionInfo(**ssh_config)
 
     def __run_vagrant_command(self, command: str | list) -> str:
@@ -184,7 +210,7 @@ class VagrantInstance(Instance):
             command = [command]
         if self.platform == 'macos':
             cmd = f"sudo VAGRANT_CWD={self.host_instance_dir} /usr/local/bin/vagrant " + ' '.join(command)
-            output = VagrantUtils.remote_command(cmd, self.macos_host_parameters)
+            output = VagrantUtils.remote_command(cmd, self.remote_host_parameters)
             return output
         else:
             try:

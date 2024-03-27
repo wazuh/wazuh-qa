@@ -39,7 +39,7 @@ class AWSInstance(Instance):
             self.credentials = self.__get_credentials()
         self.host_identifier = instance_parameters.host_identifier
         self.host_instance_dir = instance_parameters.host_instance_dir
-        self.macos_host_parameters = instance_parameters.macos_host_parameters
+        self.remote_host_parameters = instance_parameters.remote_host_parameters
         self.arch = instance_parameters.arch
         self.ssh_port = instance_parameters.ssh_port
         self._user = instance_parameters.user

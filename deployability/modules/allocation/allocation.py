@@ -169,4 +169,6 @@ class Allocator:
             yaml.dump(track.model_dump(), f)
         if Path(str(instance.path) + "/port.txt").exists():
             Path(str(instance.path) + "/port.txt").unlink()
+        if Path(str(instance.path) + "/ppc-key").exists():
+            Path(str(instance.path) + "/ppc-key").unlink()
         logger.info(f"Track file generated at {track_path}")
