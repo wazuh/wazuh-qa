@@ -1,3 +1,7 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import re
 import subprocess
 
@@ -145,6 +149,15 @@ class VagrantInstance(Instance):
             ssh_config['hostname'] = server_ip
             ssh_config['user'] = 'vagrant'
             ssh_config['password'] = 'vagrant'
+        elif self.platform == 'windows':
+            for key, pattern in patterns.items():
+                match = re.search(pattern, output)
+                if match and key == 'hostname':
+                    ip = match.group(1).strip()
+            ssh_config['hostname'] = ip
+            ssh_config['port'] = 3389
+            ssh_config['user'] = 'vagrant'
+            ssh_config['password'] = 'vagrant'
         else:
             for key, pattern in patterns.items():
                 match = re.search(pattern, output)
@@ -154,7 +167,6 @@ class VagrantInstance(Instance):
                     logger.error(f"Couldn't find {key} in ssh-config")
                     return None
             if self.credentials:
-                logger.debug(f"Using provided credentials")
                 ssh_config['private_key'] = str(self.credentials.key_path)
         return ConnectionInfo(**ssh_config)
 

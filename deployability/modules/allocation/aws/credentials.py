@@ -1,5 +1,11 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import os
 import boto3
+import random
+import string
 
 from botocore.exceptions import ClientError
 from pathlib import Path
@@ -28,7 +34,7 @@ class AWSCredentials(Credentials):
         super().__init__()
         self._resource = boto3.resource('ec2')
 
-    def generate(self, base_dir: str | Path, name: str, overwrite: bool = False) -> Path:
+    def generate(self, base_dir: str | Path, name: str) -> Path:
         """
         Generates a new key pair and returns it.
 
@@ -56,11 +62,7 @@ class AWSCredentials(Credentials):
             # Check if the key pair already exists
             key_pair = self._resource.KeyPair(name)
             if key_pair.key_pair_id:
-                if not overwrite:
                     raise self.CredentialsError(f"Key pair {name} already exists.")
-                else:
-                    logger.warning(f"Key pair {name} already exists. Overwriting.")
-                    key_pair.delete()
         except ClientError:
             pass
 
@@ -153,3 +155,32 @@ class AWSCredentials(Credentials):
         else:
             key_id = ssh_key_name
         return key_id
+
+    def create_password(self) -> str:
+        """
+        Creates a password for the instance.
+
+        Returns:
+            str: The password for the instance.
+        """
+        # Define character sets
+        uppercase_letters = string.ascii_uppercase
+        lowercase_letters = string.ascii_lowercase
+        numbers = string.digits
+
+        # Combine all character sets
+        all_characters = uppercase_letters + lowercase_letters + numbers
+
+        # Ensure each set contributes at least one character
+        password = [random.choice(uppercase_letters),
+                    random.choice(lowercase_letters),
+                    random.choice(numbers)]
+
+        # Fill up the rest of the password length
+        password.extend(random.choice(all_characters) for _ in range(12 - 4))
+
+        # Shuffle the password to ensure randomness
+        random.shuffle(password)
+
+        # Convert list to string
+        self.name = ''.join(password)

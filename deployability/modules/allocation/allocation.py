@@ -1,3 +1,7 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import yaml
 
 from pathlib import Path
@@ -107,18 +111,32 @@ class Allocator:
         """
         if inventory_path is None:
             inventory_path = Path(instance.path, 'inventory.yml')
-        else:
+        if not str(inventory_path).endswith('.yml') and not str(inventory_path).endswith('.yaml'):
             inventory_path = Path(inventory_path, 'inventory.yml')
         if not inventory_path.parent.exists():
             inventory_path.parent.mkdir(parents=True, exist_ok=True)
         ssh_config = instance.ssh_connection_info()
-        inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
-                                            ansible_user=ssh_config.user,
-                                            ansible_port=ssh_config.port,
-                                            ansible_ssh_private_key_file=str(ssh_config.private_key),
-                                            ansible_password=str(ssh_config.password))
+        if instance.platform == 'windows':
+            inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
+                                                ansible_user=ssh_config.user,
+                                                ansible_port=ssh_config.port,
+                                                ansible_password=ssh_config.password,
+                                                ansible_connection='winrm',
+                                                ansible_winrm_server_cert_validation='ignore')
+        elif not ssh_config.private_key:
+            inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
+                                                ansible_user=ssh_config.user,
+                                                ansible_port=ssh_config.port,
+                                                ansible_connection='ssh',
+                                                ansible_password=ssh_config.password)
+        else:
+            inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
+                                                ansible_user=ssh_config.user,
+                                                ansible_port=ssh_config.port,
+                                                ansible_connection='ssh',
+                                                ansible_ssh_private_key_file=str(ssh_config.private_key))
         with open(inventory_path, 'w') as f:
-            yaml.dump(inventory.model_dump(), f)
+            yaml.dump(inventory.model_dump(exclude_none=True), f)
         logger.info(f"Inventory file generated at {inventory_path}")
 
     @staticmethod
@@ -133,7 +151,7 @@ class Allocator:
         """
         if track_path is None:
             track_path = Path(instance.path, 'track.yml')
-        else:
+        if not str(track_path).endswith('.yml') and not str(track_path).endswith('.yaml'):
             track_path = Path(track_path, 'track.yml')
         if not track_path.parent.exists():
             track_path.parent.mkdir(parents=True, exist_ok=True)

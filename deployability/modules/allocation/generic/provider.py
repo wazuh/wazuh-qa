@@ -1,3 +1,7 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import shutil
 import uuid
 import yaml
@@ -154,26 +158,39 @@ class Provider(ABC):
         return f"{prefix}-{uuid.uuid4()}".upper()
 
     @classmethod
-    def _get_os_specs(cls) -> dict:
+    def _get_os_specs(cls, composite_name: str) -> dict:
         """
         Gets the OS specifications for the provider.
+        composite_name (str): The name of the composite OS.
 
         Returns:
             dict: A dictionary containing the OS specifications for the provider.
         """
         with open(cls.OS_PATH, "r") as f:
-            return yaml.safe_load(f).get(cls.provider_name)
+            version_available = []
+            os_list = yaml.safe_load(f).get(cls.provider_name)
+            for os in os_list:
+                if os.split("-")[1] == composite_name.split("-")[1]:
+                    version_available.append(os)
+                if str(os) == composite_name:
+                    return os_list[os]
+
+            raise ValueError(f"OS {composite_name} not available for provider {cls.provider_name}. Available versions are {version_available}")
 
     @classmethod
-    def _get_size_specs(cls) -> dict:
+    def _get_size_specs(cls, size: str) -> dict:
         """
         Gets the size specifications for the provider.
+        size (str): The name of the size.
 
         Returns:
             dict: A dictionary containing the size specifications for the provider.
         """
         with open(cls.SIZE_PATH, "r") as f:
-            return yaml.safe_load(f).get(cls.provider_name)
+            size_list = yaml.safe_load(f).get(cls.provider_name)
+            for s in size_list:
+                if size == s:
+                    return size_list[s]
 
     @classmethod
     def _get_misc_specs(cls) -> dict:
