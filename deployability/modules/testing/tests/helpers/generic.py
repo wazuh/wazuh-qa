@@ -7,12 +7,12 @@ import subprocess
 import time
 import yaml
 
-
 from pathlib import Path
 from .constants import WAZUH_CONTROL, CLIENT_KEYS
 from .executor import Executor
 from ..helpers.logger.logger import logger
 from .utils import Utils
+
 
 class HostInformation:
 
