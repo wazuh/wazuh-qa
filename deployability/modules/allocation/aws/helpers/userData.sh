@@ -1,13 +1,8 @@
 #!/bin/sh
 
-# Wazuh Distribution Detector
 # Copyright (C) 2015, Wazuh Inc.
-# November 18, 2016.
-#
-# This program is free software; you can redistribute it
-# and/or modify it under the terms of the GNU General Public
-# License (version 2) as published by the FSF - Free Software
-# Foundation.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 # Default values
 DIST_NAME="Linux"
