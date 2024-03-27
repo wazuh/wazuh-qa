@@ -1,3 +1,7 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import argparse
 import os
 import sys
@@ -16,12 +20,13 @@ def parse_arguments():
     parser.add_argument("--action", choices=['create', 'delete'], required=False, default='create')
     parser.add_argument("--ssh-key", required=False, default=None)
     parser.add_argument("--custom-provider-config", required=False, default=None)
-    parser.add_argument("--track-output", required=False, default='/tmp/wazuh-qa/track.yml')
-    parser.add_argument("--inventory-output", required=False, default='/tmp/wazuh-qa/inventory.yml')
+    parser.add_argument("--track-output", required=False, default=None)
+    parser.add_argument("--inventory-output", required=False, default=None)
     parser.add_argument("--working-dir", required=False, default='/tmp/wazuh-qa')
     parser.add_argument("--label-issue", required=False, default=None)
     parser.add_argument("--label-team", required=False, default=None)
     parser.add_argument("--label-termination-date", required=False, default=None)
+    parser.add_argument("--instance-name", required=False, default=None)
     return parser.parse_args()
 
 

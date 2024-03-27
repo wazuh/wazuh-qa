@@ -1,10 +1,11 @@
-
-# Copyright (C) 2015-2024, Wazuh Inc.
+# Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 import json
-from setuptools import setup, find_packages
 import os
+
+from setuptools import setup
+
 
 def get_files_from_directory(directory):
     paths = []
@@ -12,6 +13,7 @@ def get_files_from_directory(directory):
         for filename in filenames:
             paths.append(os.path.join('..', path, filename))
     return paths
+
 
 def get_version():
     script_path = os.path.dirname(__file__)
@@ -21,6 +23,7 @@ def get_version():
     data = json.load(f)
     version = data['version']
     return version
+
 
 package_data_list = get_files_from_directory("workflow_engine")
 scripts_list = ['engine=workflow_engine.__main__:main']
