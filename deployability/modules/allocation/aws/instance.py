@@ -1,6 +1,9 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import boto3
 
-from pathlib import Path
 from modules.allocation.generic import Instance
 from modules.allocation.generic.models import ConnectionInfo, InstancePayload
 from modules.allocation.generic.utils import logger
@@ -71,10 +74,16 @@ class AWSInstance(Instance):
         Returns:
             ConnectionInfo: SSH connection information.
         """
-        return ConnectionInfo(hostname=self._instance.public_dns_name,
+        if self.platform == 'windows':
+            return ConnectionInfo(hostname=self._instance.public_dns_name,
                                 user=self._user,
-                                port=2200,
-                                private_key=str(self.credentials.key_path))
+                                port=3389,
+                                password=str(self.credentials.name))
+        else:
+            return ConnectionInfo(hostname=self._instance.public_dns_name,
+                                    user=self._user,
+                                    port=2200,
+                                    private_key=str(self.credentials.key_path))
 
     def __get_credentials(self) -> AWSCredentials:
         """
