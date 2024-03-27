@@ -196,7 +196,7 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
                                                 package_data, operation='install')
             
             else:
-                logging.error(f"Package for {host_os_name} and {host_os_arch} not found")
+                logging.error(f"Error: Package for {host_os_name} and {host_os_arch} not found")
                 
         except Exception as e:
             logging.critical(f"Error searching package: {e}")
@@ -273,7 +273,7 @@ def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
                                             package_data, operation='remove')
             
             else:
-                logging.error(f"Package for {host_os_name} and {host_os_arch} not found")
+                logging.error(f"Error: Package for {host_os_name} and {host_os_arch} not found")
         
         except Exception as e:
             logging.critical(f"Error searching package: {e}")
@@ -331,7 +331,7 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
             if host_os_arch in install_package_data_from[host_os_name]:
                 package_id_from = install_package_data_from[host_os_name][host_os_arch]
             else:
-                logging.error(f"Package for {host_os_name} and {host_os_arch} not found")
+                logging.error(f"Error: Package for {host_os_name} and {host_os_arch} not found")
         except Exception as e:
             logging.critical(f"Error searching package: {e}")
 
@@ -366,7 +366,7 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
                                             {'from': package_data_from, 'to': package_data_to}, operation='update')
                 
             else:
-                logging.error(f"Package for {host_os_name} and {host_os_arch} not found")
+                logging.error(f"Error: Package for {host_os_name} and {host_os_arch} not found")
 
         except Exception as e:
             logging.critical(f"Error searching package: {e}")
