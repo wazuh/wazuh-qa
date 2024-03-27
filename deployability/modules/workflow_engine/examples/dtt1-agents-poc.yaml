@@ -31,9 +31,9 @@ tasks:
         path: python3
         args:
           - modules/testing/main.py
-          - inventory: "{working-dir}/agent-{agent}/inventory.yml"
+          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
           - dependencies:
-            - manager: "{working-dir}/manager-{manager-os}/inventory.yml"
+            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - tests: "uninstall"
           - component: "agent"
           - wazuh-version: "4.7.1"
@@ -54,7 +54,7 @@ tasks:
         path: python3
         args:
           - modules/provision/main.py
-          - inventory: "{working-dir}/manager-{manager-os}/inventory.yml"
+          - inventory: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - install:
             - component: wazuh-manager
               type: assistant
@@ -98,7 +98,7 @@ tasks:
           - modules/provision/main.py
           - inventory: "{working-dir}/agent-{agent}/inventory.yml"
           - dependencies:
-            - manager: "{working-dir}/manager-{manager-os}/inventory.yml"
+            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
             - agent: "{working-dir}/agent-{agent}/inventory.yml"
           - install:
             - component: wazuh-agent
