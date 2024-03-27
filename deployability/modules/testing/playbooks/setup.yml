@@ -1,13 +1,12 @@
-- hosts: all
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+- hosts: localhost
   become: true
+  become_user: "{{ current_user }}"
   tasks:
-    - name: Clone tests into the endpoint
-      block:
-      - name: Create test directory
-        file:
-          path: "{{ working_dir }}"
-          state: directory
-      - name: Copy files to endpoints
-        copy:
-          src: "{{ local_path }}/"
-          dest: "{{ working_dir }}"
+    - name: Cleaning old key ssh-keygen registries
+      ansible.builtin.command:
+        cmd: "ssh-keygen -f /home/{{ current_user }}/.ssh/known_hosts -R '{{ item }}'"
+      loop: {{ hosts_ip }}
