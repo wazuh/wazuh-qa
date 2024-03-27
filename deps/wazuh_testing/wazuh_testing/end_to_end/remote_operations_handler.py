@@ -12,7 +12,6 @@ Functions:
     - check_vuln_state_index: Check the vulnerability state index for a host.
     - check_vuln_alert_indexer: Check vulnerability alerts in the indexer for a host.
     - check_vuln_alert_api: Check vulnerability alerts via API for a host.
-    - launch_remote_sequential_operation_on_agent: Launch sequential remote operations on a specific agent.
     - launch_parallel_operations: Launch parallel remote operations on multiple hosts.
 
 
@@ -21,16 +20,102 @@ Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
 import logging
-from typing import Dict, List
+import threading
+
+from typing import Dict, List, Any
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 
 from wazuh_testing.end_to_end.waiters import wait_syscollector_and_vuln_scan
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.end_to_end.vulnerability_detector import check_vuln_alert_indexer, check_vuln_state_index, \
-        load_packages_metadata, parse_vulnerability_detector_alerts
+        load_packages_metadata, get_vulnerabilities_from_states_by_agent, get_vulnerabilities_from_alerts_by_agent
 from wazuh_testing.end_to_end.indexer_api import get_indexer_values
+from wazuh_testing.modules.syscollector import TIMEOUT_SYSCOLLECTOR_SCAN
 
+def get_vulnerabilities_not_found(vulnerabilities_found: List, expected_vulnerabilities: List) -> List:
+    """
+    Get the vulnerabilities not found in the list of expected vulnerabilities.
+
+    Args:
+        vulnerabilities_found (list): List of vulnerabilities found.
+        expected_vulnerabilities (list): List of expected vulnerabilities.
+
+    Returns:
+        list: List of vulnerabilities not found.
+    """
+    vulnerabilities_not_found = []
+    for vulnerability in expected_vulnerabilities:
+        if vulnerability not in vulnerabilities_found:
+            vulnerabilities_not_found.append(vulnerability)
+
+    return vulnerabilities_not_found
+
+
+def get_missing_vulnerabilities(vulnerabilities_by_agent: Dict, expected_vulnerabilities_by_agent: Dict) -> Dict:  
+    """
+    Get the missing vulnerabilities in the list of expected vulnerabilities.
+
+    Args:
+        vulnerabilities_by_agent (dict): Dictionary containing the vulnerabilities found by agent.
+        expected_vulnerabilities_by_agent (dict): Dictionary containing the expected vulnerabilities by agent.
+
+    Returns:
+        dict: Dictionary containing the missing vulnerabilities.
+    """
+    missing_vulnerabilities = {}
+    for agent, vulnerabilities in expected_vulnerabilities_by_agent.items():
+        missing_vulnerabilities[agent] = get_vulnerabilities_not_found(vulnerabilities_by_agent[agent], vulnerabilities)
+
+    return missing_vulnerabilities
+
+
+def calculate_expected_vulnerabilities_by_agent(host_manager: HostManager, packages_data: Dict) -> Dict:
+    """
+    Calculate the expected vulnerabilities by agent.
+
+    Args:
+        host_manager (HostManager): An instance of the HostManager class containing information about hosts.
+        packages_data (dict): Dictionary containing package data.
+
+    Returns:
+        dict: Dictionary containing the expected vulnerabilities by agent.
+    """
+    expected_vulnerabilities_by_agent = {}
+    for agent in host_manager.get_group_hosts('agent'):
+        expected_vulnerabilities_by_agent[agent] = []
+        for package_id in packages_data:
+            expected_vulnerabilities_by_agent[agent].extend(packages_data[package_id]['CVE'])
+
+    return expected_vulnerabilities_by_agent
+
+
+
+def check_vulnerabilities_in_environment(host_manager: HostManager, packages_data: Dict, greater_than_timestamp: str,
+                                         check_alerts: bool = True, check_states: bool = True) -> Dict:
+
+    # Set-TimeZone -Id "UTC"
+
+    # Wait for syscollector and vulnerability scan to finish
+    wait_syscollector_and_vuln_scan(host_manager, TIMEOUT_SYSCOLLECTOR_SCAN, 
+                                    greater_than_timestamp=greater_than_timestamp)
+
+    vulnerabilities_by_agent = get_vulnerabilities_from_states_by_agent(host_manager, host_manager.get_group_hosts('agent'), 
+                                                                        greater_than_timestamp=greater_than_timestamp)
+
+    alerts_vulnerabilities_by_agent = get_vulnerabilities_from_alerts_by_agent(host_manager, host_manager.get_group_hosts('agent'),
+                                                                               greater_than_timestamp=greater_than_timestamp)
+
+    expected_vulnerabilities_index_by_agent = calculate_expected_vulnerabilities_by_agent(host_manager, packages_data)
+    expected_vulnerabilities_alerts_by_agent = calculate_expected_vulnerabilities_alerts_by_agent(host_manager, packages_data)
+
+    missing_vulnerabilities = get_missing_vulnerabilities(vulnerabilities_by_agent, expected_vulnerabilities_index_by_agent)
+    missing_alerts = get_missing_vulnerabilities(alerts_vulnerabilities_by_agent, expected_vulnerabilities_alerts_by_agent)
+
+    return {
+        'missing_vulnerabilities': missing_vulnerabilities,
+        'missing_alerts': missing_alerts
+    }
 
 def check_vulnerability_alerts(results: Dict, check_data: Dict, current_datetime: str, host_manager: HostManager,
                                host: str,
@@ -125,33 +210,8 @@ def check_vulnerability_alerts(results: Dict, check_data: Dict, current_datetime
                 results['checks']['all_successfull'] = False
 
 
-def install_package(host: str, operation_data: Dict[str, Dict], host_manager: HostManager):
-    """
-    Install a package on the specified host.
-
-    Args:
-        host (str): The target host on which to perform the operation.
-        operation_data (dict): Dictionary containing operation details.
-        host_manager (HostManager): An instance of the HostManager class containing information about hosts.
-
-    Raises:
-        ValueError: If the specified operation is not recognized.
-    """
-    results = {
-            'evidences': {
-                "alerts_not_found": [],
-                "states_not_found": [],
-                "alerts_found": [],
-                "states_found": [],
-                "alerts_found_unexpected": [],
-                "states_found_unexpected": []
-            },
-            'checks': {
-                'all_successfull': True
-            }
-    }
-
-    logging.info(f"Installing package on {host}")
+def get_package_url_for_host(host: str, package_id: str, host_manager: HostManager, 
+                             operation_data: Dict[str, Any]) -> str:
 
     host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
     host_os_arch = host_manager.get_host_variables(host)['architecture']
@@ -161,49 +221,24 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
         system = host_manager.get_host_variables(host)['os'].split('_')[0]
 
     install_package_data = operation_data['package']
-    package_id = None
-
-    if host_os_name in install_package_data:
-        if host_os_arch in install_package_data[host_os_name]:
-            package_id = install_package_data[host_os_name][host_os_arch]
-        else:
-            raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found")
-
+    
+    try:
+        package_id = install_package_data[host_os_name][host_os_arch]
         package_data = load_packages_metadata()[package_id]
         package_url = package_data['urls'][host_os_name][host_os_arch]
 
-        logging.info(f"Installing package on {host}")
-        logging.info(f"Package URL: {package_url}")
+        return package_url
+    except KeyError:
+        raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found. Maybe {host} OS is not supported.")
 
-        current_datetime = datetime.utcnow().isoformat()
+def get_package_system(host: str, host_manager: HostManager) -> str:
+    system = host_manager.get_host_variables(host)['os_name']
+    if system == 'linux':
+        system = host_manager.get_host_variables(host)['os'].split('_')[0]
 
-        host_manager.install_package(host, package_url, system)
+    return system
 
-        logging.info(f"Package {package_url} installed on {host}")
-
-        logging.info(f"Package installed on {host}")
-
-        results['checks']['all_successfull'] = True
-
-        wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
-                                                          operation_data['check']['state_index'] or
-                                                          operation_data['check']['no_alerts'] or
-                                                          operation_data['check']['no_indices'])
-
-        if wait_is_required:
-            wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
-
-            check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
-                                       package_data, operation='install')
-    else:
-        logging.info(f"No operation to perform on {host}")
-
-    return {
-            f"{host}": results
-    }
-
-
-def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: HostManager):
+def install_package(host: str, operation_data: Dict[str, Any], host_manager: HostManager) -> bool:
     """
     Install a package on the specified host.
 
@@ -215,167 +250,45 @@ def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
     Raises:
         ValueError: If the specified operation is not recognized.
     """
+    print("Install package")
+    install_result = True
+    logging.info(f"Installing package on {host}")
+    package_url = get_package_url_for_host(host, operation_data['package'], 
+                                           host_manager, operation_data)
+    package_system = get_package_system(host, host_manager)
+    try:
+        r = host_manager.install_package(host, package_url, package_system)
+        print(r)
+    except Exception as e:
+        logging.error(f"Error installing package on {host}: {e}")
+        install_result = False
+
+    return install_result
+
+def remove_package(host: str, operation_data: Dict[str, Any], host_manager: HostManager):
+    """
+    Install a package on the specified host.
+
+    Args:
+        host (str): The target host on which to perform the operation.
+        operation_data (dict): Dictionary containing operation details.
+        host_manager (HostManager): An instance of the HostManager class containing information about hosts.
+
+    Raises:
+        ValueError: If the specified operation is not recognized.
+    """
+    remove_result = True
     logging.info(f"Removing package on {host}")
-    results = {
-            'evidences': {
-                "alerts_not_found": [],
-                "states_not_found": [],
-                "alerts_found": [],
-                "states_found": [],
-                "alerts_found_unexpected": [],
-                "states_found_unexpected": []
-            },
-            'checks': {
-                'all_successfull': True
-            }
-    }
-    host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
-    host_os_arch = host_manager.get_host_variables(host)['architecture']
-    system = host_manager.get_host_variables(host)['os_name']
-    if system == 'linux':
-        system = host_manager.get_host_variables(host)['os'].split('_')[0]
+    package_system = get_package_system(host, host_manager)
+    try:
+        package_uninstall_name = operation_data['package']['uninstall_name'] if 'uninstall_name' in operation_data['package'] else None
+        custom_uninstall_playbook = operation_data['package']['uninstall_playbook'] if 'uninstall_playbook' in operation_data['package'] else None
+        host_manager.remove_package(host, package_system, package_uninstall_name, custom_uninstall_playbook)
+    except Exception as e:
+        logging.error(f"Error installing package on {host}: {e}")
+        remove_result = False
 
-    package_data = operation_data['package']
-    package_id = None
-
-    if host_os_name in package_data:
-        if host_os_arch in package_data[host_os_name]:
-            package_id = package_data[host_os_name][host_os_arch]
-        else:
-            raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found")
-
-        package_data = load_packages_metadata()[package_id]
-
-        current_datetime = datetime.utcnow().isoformat()
-
-        logging.info(f"Removing package on {host}")
-        if 'uninstall_name' in package_data:
-            uninstall_name = package_data['uninstall_name']
-            host_manager.remove_package(host, system, package_uninstall_name=uninstall_name)
-        elif 'uninstall_custom_playbook' in package_data:
-            host_manager.remove_package(host, system,
-                                        custom_uninstall_playbook=package_data['uninstall_custom_playbook'])
-
-        wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
-                                                          operation_data['check']['state_index'] or
-                                                          operation_data['check']['no_alerts'] or
-                                                          operation_data['check']['no_indices'])
-
-        if wait_is_required:
-            wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
-
-            check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
-                                       package_data, operation='remove')
-
-    else:
-        logging.info(f"No operation to perform on {host}")
-
-    return {
-            f"{host}": results
-        }
-
-
-def update_package(host: str, operation_data: Dict[str, Dict], host_manager: HostManager):
-    """
-    Install a package on the specified host.
-
-    Args:
-        host (str): The target host on which to perform the operation.
-        operation_data (dict): Dictionary containing operation details.
-        host_manager (HostManager): An instance of the HostManager class containing information about hosts.
-
-    Raises:
-        ValueError: If the specified operation is not recognized.
-    """
-    logging.info(f"Updating package on {host}")
-    results = {
-            'evidences': {
-                "alerts_not_found_from": [],
-                'alerts_found_from': [],
-                "alerts_found": [],
-                "states_found": [],
-                "alerts_found_unexpected": [],
-                "states_found_unexpected": []
-            },
-            'checks': {
-                'all_successfull': True
-            }
-
-    }
-
-    host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
-    host_os_arch = host_manager.get_host_variables(host)['architecture']
-    system = host_manager.get_host_variables(host)['os_name']
-    if system == 'linux':
-        system = host_manager.get_host_variables(host)['os'].split('_')[0]
-
-    install_package_data_from = operation_data['package']['from']
-    install_package_data_to = operation_data['package']['to']
-
-    package_id_from = None
-    package_id_to = None
-
-    if host_os_name in install_package_data_from:
-        if host_os_arch in install_package_data_from[host_os_name]:
-            package_id_from = install_package_data_from[host_os_name][host_os_arch]
-        else:
-            raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found")
-
-    if host_os_name in install_package_data_to:
-        if host_os_arch in install_package_data_to[host_os_name]:
-            package_id_to = install_package_data_to[host_os_name][host_os_arch]
-        else:
-            raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found")
-
-        package_data_from = load_packages_metadata()[package_id_from]
-        package_data_to = load_packages_metadata()[package_id_to]
-
-        package_url_to = package_data_to['urls'][host_os_name][host_os_arch]
-
-        logging.info(f"Installing package on {host}")
-        logging.info(f"Package URL: {package_url_to}")
-
-        current_datetime = datetime.utcnow().isoformat()
-        host_manager.install_package(host, package_url_to, system)
-
-        logging.info(f"Package {package_url_to} installed on {host}")
-
-        logging.info(f"Package installed on {host}")
-
-        wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
-                                                          operation_data['check']['state_index'] or
-                                                          operation_data['check']['no_alerts'] or
-                                                          operation_data['check']['no_indices'])
-        if wait_is_required:
-            wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
-
-            check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
-                                       {'from': package_data_from, 'to': package_data_to}, operation='update')
-    else:
-        logging.info(f"No operation to perform on {host}")
-
-    return {
-            f"{host}": results
-        }
-
-
-def launch_remote_sequential_operation_on_agent(agent: str, task_list: List[Dict], host_manager: HostManager):
-    """
-    Launch sequential remote operations on an agent.
-
-    Args:
-        agent (str): The target agent on which to perform the operations.
-        task_list (list): List of dictionaries containing operation details.
-        host_manager (HostManager): An instance of the HostManager class containing information about hosts.
-    """
-    # Convert datetime to Unix timestamp (integer)
-    timestamp = datetime.utcnow().isoformat()
-
-    if task_list:
-        for task in task_list:
-            operation = task['operation']
-            if operation in locals():
-                locals()[operation](agent, task, host_manager, timestamp)
+    return remove_result
 
 
 def launch_remote_operation(host: str, operation_data: Dict[str, Dict], host_manager: HostManager):
@@ -388,7 +301,8 @@ def launch_remote_operation(host: str, operation_data: Dict[str, Dict], host_man
         raise ValueError(f"Operation {operation} not recognized")
 
 
-def launch_parallel_operations(task_list: List[Dict], host_manager: HostManager, target_to_ignore: List[str] = []):
+def launch_parallel_operations(task_list: Dict[str, List], host_manager: HostManager, 
+                               target_to_ignore: List[str] = []):
     """
     Launch parallel remote operations on multiple hosts.
 
@@ -397,32 +311,48 @@ def launch_parallel_operations(task_list: List[Dict], host_manager: HostManager,
         host_manager (HostManager): An instance of the HostManager class containing information about hosts.
     """
     results = {}
-
-    if target_to_ignore:
-        for target in results:
-            results[target]['checks']['all_successfull'] = False
+    lock = threading.Lock()
 
     def launch_and_store_result(args):
         host, task, manager = args
         result = launch_remote_operation(host, task, manager)
-        results.update(result)
+
+        with lock:
+            if host not in results:
+                results[host] = []
+
+            results[host].append({task['operation']: result})
+
 
     with ThreadPoolExecutor() as executor:
         # Submit tasks asynchronously
-        futures = []
-        for task in task_list:
-            hosts_target = host_manager.get_group_hosts(task['target'])
-            if target_to_ignore:
-                hosts_target = [host for host in hosts_target if host not in target_to_ignore]
+        for target, tasks in task_list.items():
+            hosts_target = host_manager.get_group_hosts(target)
+            hosts_to_ignore = target_to_ignore
+            for task in tasks:
+                futures = []
 
-            logging.info("Hosts target after removing ignored targets: {}".format(hosts_target))
+                # Calculate the hosts to ignore based on previous operations results
+                if target_to_ignore:
+                    hosts_target = [host for host in hosts_target if host not in target_to_ignore]
 
-            for host in hosts_target:
-                futures.append(executor.submit(launch_and_store_result, (host, task, host_manager)))
+                logging.info(f"Launching operation {task['operation']} on {hosts_target}")
 
-        # Wait for all tasks to complete
-        for future in futures:
-            future.result()
+                for host in hosts_target:
+                    futures.append(executor.submit(launch_and_store_result, (host, task, host_manager)))
+
+                # Wait for all tasks to complete
+                for future in futures:
+                    future.result()
+
+                # If the operation is not successful, stop the execution of the rest of the operations in host 
+                for host, operation_results in results.items():
+                    last_operation_result = operation_results[-1]
+                    if not all(last_operation_result.values()):
+                        logging.critical(f"Operation {last_operation_result} failed."
+                                         f"Stopping execution of the rest of the operations in host {host}")
+                        hosts_to_ignore.append(host)
+
 
     logging.info("Results in parallel operations: {}".format(results))
 
