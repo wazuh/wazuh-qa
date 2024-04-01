@@ -35,7 +35,7 @@ Initially, Python libraries must be installed. we recommended the use of virtual
 	Navigate to the project directory and switch to the project branch:
 
 	```bash
-   https://github.com/wazuh/wazuh-qa.git
+   git clone https://github.com/wazuh/wazuh-qa.git
 	cd wazuh-qa
 	git checkout {project-branch}
 	```
