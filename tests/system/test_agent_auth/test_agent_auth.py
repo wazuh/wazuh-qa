@@ -36,6 +36,7 @@ from wazuh_testing.tools.utils import format_ipv6_long
 
 
 pytestmark = [pytest.mark.basic_environment_env]
+TIMEOUT_AFTER_RESTART = 5
 
 # Hosts
 testinfra_hosts = ["wazuh-manager", "wazuh-agent1"]
@@ -113,7 +114,7 @@ def configure_network(test_case):
             host_manager.run_command('wazuh-agent1', 'ip route add 172.24.27.0/24 via 0.0.0.0 dev eth0')
         elif 'ipv4' in configuration['agent_network']:
             host_manager.run_command('wazuh-agent1', f"ip addr add {network['agent_network'][1]} dev eth0")
-            host_manager.run_command('wazuh-agent1', f"ip addr add {network['manager_network'][2]} dev eth0")
+            host_manager.run_command('wazuh-agent1', f"ip addr add {network['agent_network'][2]} dev eth0")
 
 
 @pytest.fixture(scope='function')
@@ -237,6 +238,8 @@ def test_agent_auth(test_case, get_ip_directions, configure_network, modify_ip_a
     host_manager.clear_file(host='wazuh-manager', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
     host_manager.control_service(host='wazuh-manager', service='wazuh', state="restarted")
 
+    sleep(TIMEOUT_AFTER_RESTART)
+
     # Start the agent enrollment process using agent-auth
     for configuration in test_case['test_case']:
         if 'ipv4' in configuration['ip_type']:
@@ -261,6 +264,8 @@ def test_agent_auth(test_case, get_ip_directions, configure_network, modify_ip_a
 
     # Check if the agent is active
     agent_id = host_manager.run_command('wazuh-manager', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
+
     sleep(wait_agent_start)
+
     agent_info = host_manager.run_command('wazuh-manager', f'{WAZUH_PATH}/bin/agent_control -i {agent_id}')
     assert 'Active' in agent_info
