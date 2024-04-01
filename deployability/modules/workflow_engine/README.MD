@@ -192,7 +192,7 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
             with:
               path: python3
               args:
-                - allocation/main.py
+                - modules/allocation/main.py
                 - action: create
                 - provider: "{infra-provider}"
                 - size: small
