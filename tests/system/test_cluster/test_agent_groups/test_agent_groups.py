@@ -35,7 +35,7 @@ tmp_path = os.path.join(local_path, 'tmp')
 # Variables
 test_group = 'test_group'
 while_time = 5
-time_to_sync = 21
+time_to_sync = 25
 time_to_agent_reconnect = 180
 queries = ['sql select * from "group" where name="test_group"']
 

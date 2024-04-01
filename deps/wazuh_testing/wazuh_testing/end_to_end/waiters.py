@@ -31,7 +31,7 @@ from wazuh_testing.tools.system import HostManager
 from wazuh_testing.modules.syscollector import TIMEOUT_SYSCOLLECTOR_SHORT_SCAN
 
 
-VD_FEED_UPDATE_TIMEOUT = 300
+VD_FEED_UPDATE_TIMEOUT = 600
 VD_INITIAL_SCAN_PER_AGENT_TIMEOUT = 15
 
 

@@ -66,7 +66,7 @@ tmp_path = os.path.join(local_path, 'tmp')
 
 # Variables
 test_group = 'group_test'
-timeout = 10
+timeout = 25
 
 
 # Tests

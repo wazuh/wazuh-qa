@@ -22,9 +22,9 @@ ERR_MSG_FAILED_TO_SET_AGENT_GROUP = 'Failed when trying to set agent group'
 
 
 # Functions
-def get_agent_id(host_manager):
+def get_agent_id(host_manager, node='wazuh-master'):
     # Gets the first agent id in the master's client.keys file
-    return host_manager.run_command('wazuh-master', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
+    return host_manager.run_command(node, f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
 
 
 def get_id_from_agent(agent, host_manager):
