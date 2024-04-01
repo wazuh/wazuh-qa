@@ -94,6 +94,9 @@ Initially, Python libraries must be installed. we recommended the use of virtual
                 - wazuh-version: "4.7.1"
                 - wazuh-revision: "40709"
                 - live: "True"
+          depends-on:
+            - "allocate-{agent}"
+            - "allocate-manager"
 
         # Unique manager allocate task
         - task: "allocate-manager"
@@ -253,8 +256,8 @@ Its function is to allow the ordered and structured execution in steps of alloca
           - wazuh-revision: "40709"
           - live: "True"
     depends-on:
-      - "provision-install-{agent}"
-      - "provision-manager"
+      - "allocate-{agent}"
+      - "allocate-manager"
 ```
 In the exposed fixture fragment, it can be observed that for the execution of the testing module launcher ('[testing/main.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/main.py)'), it is necessary to provide the inventory, dependencies, component, tests to execute, Wazuh version, Wazuh revision, and whether the repository is live or not (if not, it will look for information in packages-dev pre-release).
 
