@@ -100,6 +100,7 @@ def test_remove_group(metadata, group, target_node, pre_configured_groups, clean
     '''
     # Get group IDs
     group_ids = {}
+    timeout_get_groups_id = 3
     for manager in test_infra_managers:
         group_ids[manager] = str(get_group_id(group, manager, host_manager))
 
@@ -111,6 +112,8 @@ def test_remove_group(metadata, group, target_node, pre_configured_groups, clean
         HostMonitor(inventory_path=inventory_path,
                     messages_path=messages_path,
                     tmp_path=tmp_path).run(update_position=True)
+
+        sleep(timeout_get_groups_id)
 
         for manager in test_infra_managers:
             group_ids[manager] = str(get_group_id(group, manager, host_manager))
