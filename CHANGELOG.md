@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Add alert.json file to Vulnerability Detector E2E test report ([#5105](https://github.com/wazuh/wazuh-qa/issues/5105)) \- (Framework)
+- Add alert.json file to Vulnerability Detector E2E test report ([#5147](https://github.com/wazuh/wazuh-qa/pull/5147)) \- (Framework)
 - Add documentation about markers for system tests ([#5080](https://github.com/wazuh/wazuh-qa/pull/5080)) \- (Documentation)
 - Add AWS Custom Buckets Integration tests ([#4675](https://github.com/wazuh/wazuh-qa/pull/4675)) \- (Framework + Tests)
 - Add Vulnerability Detector end to end tests ([#4878](https://github.com/wazuh/wazuh-qa/pull/4878)) \- (Framework + Tests)
