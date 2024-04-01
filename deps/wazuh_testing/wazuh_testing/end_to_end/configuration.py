@@ -27,7 +27,7 @@ from wazuh_testing.tools.configuration import set_section_wazuh_conf
 from wazuh_testing.tools.system import HostManager
 
 
-def backup_configurations(host_manager: HostManager) -> Dict[str, str]:
+def backup_configurations(host_manager: HostManager) -> Dict[str, List]:
     """
     Backup configurations for all hosts in the specified host manager.
 
@@ -45,6 +45,7 @@ def backup_configurations(host_manager: HostManager) -> Dict[str, str]:
     """
     logging.info("Backing up configurations")
     backup_configurations = {}
+
     for host in host_manager.get_group_hosts('all'):
         host_os_name = host_manager.get_host_variables(host)['os_name']
         configuration_filepath = configuration_filepath_os[host_os_name]
@@ -52,6 +53,7 @@ def backup_configurations(host_manager: HostManager) -> Dict[str, str]:
         backup_configurations[host] = host_manager.get_file_content(str(host),
                                                                     configuration_filepath)
     logging.info("Configurations backed up")
+
     return backup_configurations
 
 

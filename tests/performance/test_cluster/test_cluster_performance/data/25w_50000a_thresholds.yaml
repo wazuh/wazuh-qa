@@ -56,13 +56,13 @@ resources:
           reg_cof: 0.1
       FD:
         master:
-          max: 160
-          mean: 103.4
-          reg_cof: 0.05
+          max: 208
+          mean: 170
+          reg_cof: 0.1
         workers:
-          max: 72.6
-          mean: 70
-          reg_cof: 0.02
+          max: 94.4
+          mean: 91
+          reg_cof: 0.05
       USS(KB):
         master:
           max: 1069926          # (1 GB)
@@ -85,13 +85,13 @@ resources:
           reg_cof: 0.1
       FD:
         master:
-          max: 70.5
-          mean: 59
-          reg_cof: 0.11
+          max: 180
+          mean: 176.8
+          reg_cof: 0.6
         workers:
-          max: 72.6
-          mean: 72
-          reg_cof: 0.33
+          max: 94.5
+          mean: 93.6
+          reg_cof: 0.9
       USS(KB):
         master:
           max: 300000           # (290 MB)
