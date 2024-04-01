@@ -230,7 +230,7 @@ The module is composed of:
   Entry point for the workflow or the user who wishes to execute a provision.
 
 - Parameter validator ('[/wazuh-qa/deployability/modules/provision/models.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/provision/models.py)')
-  Validator for parameters entered by the Workflow or the user.
+  Validator for parameters entered by the Workflow engine or the user.
 
 - Module functions ('[/wazuh-qa/deployability/modules/provision/provision.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/provision/provision.py)')
   Module-specific functions responsible for triggering the provision.
