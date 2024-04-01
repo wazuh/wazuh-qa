@@ -261,7 +261,7 @@ The module is composed of:
   
 - **Module functions** ('[/wazuh-qa/deployability/modules/testing/testing.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/testing.py)'): Module-specific functions responsible for triggering the test.
   
-- **Executor** ('[/wazuh-qa/deployability/modules/provision/actions.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/provision/actions)'): Executes the provision using Actions in the generic module.
+- **Executor** ('[/wazuh-qa/deployability/modules/provision/actions.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/provision/actions.py)'): Executes the provision using Actions in the generic module.
   
 - **Playbooks** ('[/wazuh-qa/deployability/modules/tests/playbooks](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/tests/playbooks)'): Contains setup, execution, and post-test cleanup playbooks.
   
