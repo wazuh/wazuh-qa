@@ -1,50 +1,67 @@
 ## Testing Module
+            
+### User documentation     
 
-### User documentation
+The test module runs tests on the different components of Wazuh.
+It is designed so that you can perform installations, actions on components and uninstallations, performing validations at each step.
+This module must receive allocated and provisioned infrastructure. (From Allocation and Provision modules)
 
-The execution of the tests is carried out through the Workflow library, or by executing them manually through commands.
-Execution can be done from any operating system.
+This module can be executed as follows:
+  A. Installing and using Workflow engine
+  B. Direct execution
 
-Initially, Python libraries must be installed. It is recommended to use virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
 
-1. Activate the environment:
+#### A. Installing and using Workflow engine
 
-  ```bash
-  source {venv directory}/bin/activate
-  ```
+The execution of the workflow is done through the installation of its library.
 
-2. Clone the `wazuh-qa` repository:
+Initially, Python libraries must be installed. we recommended the use of virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
 
-  Navigate to the project directory and switch to the project branch:
+1. Create the python environment:
 
-  ```bash
-  cd wazuh-qa
-  git checkout {project-branch}
-  ```
-> Note: temporary dev project-branch is `enhancement/4495-DTT1`
+	```bash
+   python3 -m venv {environment_name}
+	```
 
-3. Install requirements:
 
-  ```bash
-  pip3 install -r deployability/deps/requirements.txt
-  ```
+2. Activate the environment:
 
-Now, it is possible to use worklow engine library to launch provision module doing the following steps:
+	```bash
+	 source {venv directory}/bin/activate
+	```
 
-1. Install the Workflow engine library and its launcher:
+3. Clone the `wazuh-qa` repository:
 
-  While in wazuh-qa:
+	Navigate to the project directory and switch to the project branch:
 
-  ```bash
-  cd modules
-  pip3 uninstall -y workflow_engine && pip3 install .
-  ```
+	```bash
+   https://github.com/wazuh/wazuh-qa.git
+	cd wazuh-qa
+	git checkout {project-branch}
+	```
 
-2. Test Fixture to Execute:
+4. Install requirements:
 
-      It will be necessary to create a fixture (yaml file) where the infrastructure, provisioning, and tests to be executed will be declared.
+	```bash
+	pip3 install -r deployability/deps/requirements.txt
+	```
 
-      >Note: It is possible to find some fixture examples in deployability/modules/workflow_engine/examples/ 
+5. Install the Workflow engine library and its launcher:
+
+	While in wazuh-qa:
+
+	```bash
+	cd modules
+	pip3 uninstall -y workflow_engine && pip3 install .
+	```
+
+  Run the module by doing the following steps:
+
+6. Test fixture to execute:
+
+      It will be necessary to create a fixture (YAML file) where the infrastructure, provisioning, and tests to be executed will be declared.
+
+      >Note: It is possible to find some fixture examples in '[deployability/modules/workflow_engine/examples/](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/workflow_engine/examples)'
 
       Example:
       
@@ -54,74 +71,33 @@ Now, it is possible to use worklow engine library to launch provision module doi
       variables:
         agents-os:
           - linux-ubuntu-22.04-amd64
-        manager-os: linux-ubuntu-22.04-amd64
+        manager-os: 
+          - linux-redhat-8-amd64
         infra-provider: vagrant
         working-dir: /tmp/dtt1-poc
-      
+
       tasks:
         # Generic agent test task
-        - task: "run-agent-tests-{agent}"
-          description: "Run tests uninstall for the {agent} agent."
+        - task: "run-agent-tests"
+          description: "Run tests install for the agent."
           do:
             this: process
             with:
               path: python3
               args:
                 - modules/testing/main.py
-                - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-                - dependencies:
-                  - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-                  - agent: "{working-dir}/agent-{agent}/inventory.yaml"
-                - tests: "install,register,stop"
+                - targets:
+                  - wazuh-1: "{working-dir}/manager-linux-ubuntu-22.04-amd64/inventory.yaml"
+                  - agent-1: "{working-dir}/agent-linux-redhat-8-amd64/inventory.yaml"
+                - tests: "install,registration,restart,stop,uninstall"
                 - component: "agent"
                 - wazuh-version: "4.7.1"
                 - wazuh-revision: "40709"
+                - live: "True"
           depends-on:
-            - "provision-install-{agent}"
-            - "provision-manager"
-          foreach:
-            - variable: agents-os
-              as: agent
-      
-        # Generic agent test task
-        - task: "run-agent-tests-uninstall-{agent}"
-          description: "Run tests uninstall for the {agent} agent."
-          do:
-            this: process
-            with:
-              path: python3
-              args:
-                - modules/testing/main.py
-                - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-                - dependencies:
-                  - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-                - tests: "uninstall"
-                - component: "agent"
-                - wazuh-version: "4.7.1"
-                - wazuh-revision: "40709"
-          depends-on:
-            - "run-agent-tests-{agent}"
-            - "provision-uninstall-{agent}"
-          foreach:
-            - variable: agents-os
-              as: agent
-      
-        # Unique manager provision task
-        - task: "provision-manager"
-          description: "Provision the manager."
-          do:
-            this: process
-            with:
-              path: python3
-              args:
-                - modules/provision/main.py
-                - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-                - install:
-                  - component: wazuh-manager
-                    type: package
-          depends-on:
+            - "allocate-{agent}"
             - "allocate-manager"
-      
+
         # Unique manager allocate task
         - task: "allocate-manager"
           description: "Allocate resources for the manager."
@@ -145,49 +121,7 @@ Now, it is possible to use worklow engine library to launch provision module doi
                 - modules/allocation/main.py
                 - action: delete
                 - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
-      
-        # Generic agent provision task
-        - task: "provision-install-{agent}"
-          description: "Provision resources for the {agent} agent."
-          do:
-            this: process
-            with:
-              path: python3
-              args:
-                - modules/provision/main.py
-                - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
-                - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-                - install:
-                  - component: wazuh-agent
-                    type: package
-                  - component: curl
-          depends-on:
-            - "allocate-{agent}"
-            - "provision-manager"
-          foreach:
-            - variable: agents-os
-              as: agent
-      
-        # Generic agent provision task
-        - task: "provision-uninstall-{agent}"
-          description: "Provision resources for the {agent} agent."
-          do:
-            this: process
-            with:
-              path: python3
-              args:
-                - modules/provision/main.py
-                - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
-                - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-                - uninstall:
-                  - component: wazuh-agent
-                    type: package
-          depends-on:
-            - "provision-install-{agent}"
-          foreach:
-            - variable: agents-os
-              as: agent
-      
+
         # Generic agent allocate task
         - task: "allocate-{agent}"
           description: "Allocate resources for the {agent} agent."
@@ -237,38 +171,48 @@ Now, it is possible to use worklow engine library to launch provision module doi
 
       >Note: In args, configure the launcher's path correctly (main.py files in each module), and to fill `depends-on`, consider the steps of your test (allocation, provision, and test) 
 
-3. Execution of Command (local):
+7. Command execution (local):
 
-  Execute the command by referencing the parameters required by the library (launcher).
-  
-  ```bash
-  python3 -m workflow_engine {.yaml fixture path} 
-  ```
+	Execute the command by referencing the parameters required by the library (launcher).
+	
+	```bash
+	python3 -m workflow_engine {.yaml fixture path} 
+	```
 
-  Example
+	Example
 
-  ```bash
-  python3 -m workflow_engine modules/workflow_engine/examples/dtt1-agents-poc.yaml
-  ```
+	```bash
+	python3 -m workflow_engine modules/workflow_engine/examples/dtt1-agents-poc.yaml
+	```
 
-  > Note The command execution can also be mediated through Jenkins.
+#### B. Direct execution
 
-
-If one wishes to execute the testing module without installing the workflow engine, they can proceed by using the launcher (module/testing/main.py):
+To execute the testing module without installing the Workflow engine, it can be done by using the launcher ('[module/testing/main.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/main.py)'):
 
 1. Execution
 
-  While in wazuh-qa/deployability
-
+  While in 'wazuh-qa/deployability'
+	
   ```bash
-  python3 modules/testing/main.py --inventory '{{ inventory }}' --component {{ component }} --wazuh-version '{{ wazuh_version }}' --wazuh-revision '{{ wazuh_revision }}' --tests install --dependencies '{{ dependencies }}' --live {{ live }}
-
+  python3  modules/testing/main.py --wazuh-revision '{{ wazuh_revision }}' --wazuh-version '{{ wazuh_version }}' --component {{ component }} --tests 'install,restart,stop,uninstall' --targets '{"wazuh-1":"{{ inventory }}"}' --targets '{"wazuh-2":"{{ inventory }}"}' --live 'True'
   ```
 
-  Example:
+  Examples:
   ```bash
-  python3 modules/testing/main.py --inventory "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml" --component "agent" --wazuh-version "4.7.2" --wazuh-revision "1" --tests install --dependencies '{"manager":"/tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml"}' --live False
+  python3  modules/testing/main.py --wazuh-revision '40714' --wazuh-version '4.7.3' --component 'manager' --tests 'install,restart,stop,uninstall' --targets '{"wazuh-1":"/tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yml"}' --targets '{"wazuh-2":"/tmp/dtt1-poc/manager-linux-redhat-8-amd64/inventory.yml"}' --live 'True'
   ```
+
+  ```bash
+  python3  modules/testing/main.py --wazuh-revision '40714' --wazuh-version '4.7.3' --component 'agent' --tests 'install,registration,restart,stop,uninstall' --targets '{"wazuh-1":"/tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yml"}' --targets '{"agent-1":"/tmp/dtt1-poc/agent-linux-redhat-8-amd64/inventory.yml"}' --targets '{"agent-2":"/tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yml"}' --targets '{"agent-3":"/tmp/dtt1-poc/agent-linux-centos-7-amd64/inventory.yml"}' --live 'True'
+  ```
+
+  #### To be considered:
+  wazuh-1: This is the master node
+  wazuh-{number}: They are the workers
+  agent-{number}: They are the agents
+
+  >If the manager component is tested, 'wazuh-' components must be entered in target.
+   If the agent component is tested, there must be a master and the rest must be 'agent-'s
 
 ---
 
@@ -280,62 +224,71 @@ Instructions can be received from the fixture and executed through the Workflow 
 
 In both cases, the following information will be required:
 
-```yaml
-# Generic agent test task
-- task: "run-agent-tests-{agent}"
-  description: "Run tests uninstall for the {agent} agent."
-  do:
-    this: process
-    with:
-      path: python3
-      args:
-        - modules/testing/main.py
-        - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-        - dependencies:
-          - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-          - agent: "{working-dir}/agent-{agent}/inventory.yaml"
-        - tests: "install,basic_info,connection,register,repo,restart,stop,uninstall"
-        - component: "agent"
-        - wazuh-version: "4.7.2"
-        - wazuh-revision: "1"
-        - live: False
+```bash
+  - task: "run-agent-tests"
+    description: "Run tests install for the agent."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/testing/main.py
+          - targets:
+            - wazuh-1: "{working-dir}/manager-linux-ubuntu-22.04-amd64/inventory.yaml"
+            - agent-1: "{working-dir}/agent-linux-redhat-8-amd64/inventory.yaml"
+          - tests: "install,registration,restart,stop,uninstall"
+          - component: "agent"
+          - wazuh-version: "4.7.3"
+          - wazuh-revision: "40714"
+          - live: "True"
+    depends-on:
+      - "allocate-{agent}"
+      - "allocate-manager"
 ```
-
-In the exposed fixture fragment, it can be observed that for the execution of the testing module launcher (`testing/main.py`), it is necessary to provide the inventory, dependencies, component, tests to execute, Wazuh version, Wazuh revision, and whether the repository is live or not (if not, it will look for information in `packages-dev` pre-release).
+In the exposed fixture fragment, the execution of the testing module launcher (`testing/main.py`), it is necessary to provide the inventory, dependencies, component, tests to execute, Wazuh version, Wazuh revision, and whether the repository is live or not (if not, it will look for information in packages-dev pre-release).
 
 For manual execution, an example command would be:
 
-```bash
-python3 modules/testing/main.py --inventory "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml" --component "agent" --wazuh-version "4.7.2" --wazuh-revision "1" --tests install --dependencies '{"manager":"/tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml"}' --live False
-```
+  ```bash
+  python3  modules/testing/main.py --wazuh-revision '40714' --wazuh-version '4.7.3' --component 'agent' --tests 'install,registration,restart,stop,uninstall' --targets '{"wazuh-1":"/tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yml"}' --targets '{"agent-1":"/tmp/dtt1-poc/agent-linux-redhat-8-amd64/inventory.yml"}' --live 'True'
+  ```
 
 The module is composed of:
 
-- **Launcher** (`/wazuh-qa/deployability/modules/testing/main.py`): Entry point for the workflow or the user who wishes to execute a test.
+- **Launcher** ('[/wazuh-qa/deployability/modules/testing/main.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/main.py)'): Entry point for the workflow or the user who wishes to execute a test.
   
-- **Parameter validator** (`/wazuh-qa/deployability/modules/testing/models.py`): Validator for parameters entered by the Workflow or the user.
+- **Parameter validator** ('[/wazuh-qa/deployability/modules/testing/models.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/models.py)'): Validator for parameters entered by the Workflow or the user.
   
-- **Module functions** (`/wazuh-qa/deployability/modules/testing/testing.py`): Module-specific functions responsible for triggering the test.
+- **Module functions** ('[/wazuh-qa/deployability/modules/testing/testing.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/testing.py)'): Module-specific functions responsible for triggering the test.
   
-- **Executor** (`/wazuh-qa/deployability/modules/provision/actions.py`): Executes the provision using Actions in the generic module.
+- **Executor** ('[/wazuh-qa/deployability/modules/provision/actions.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/provision/actions)'): Executes the provision using Actions in the generic module.
   
-- **Playbooks** (`/wazuh-qa/deployability/modules/playbooks`): Contains setup, execution, and post-test cleanup playbooks.
+- **Playbooks** ('[/wazuh-qa/deployability/modules/tests/playbooks](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/tests/playbooks)'): Contains setup, execution, and post-test cleanup playbooks.
   
-- **Tests** (`/wazuh-qa/deployability/modules/tests`): Contains the test_agent and test_manager directories where the tests to be executed are located.
+- **Tests** ('[/wazuh-qa/deployability/modules/tests](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/tests/)'): Contains the test_agent and test_manager directories where the tests to be executed are located.
   
-- **Helpers** (`/wazuh-qa/deployability/modules/tests/helpers`): Contains files that enable the execution of the test.
+- **Helpers** ('[/wazuh-qa/deployability/modules/tests/helpers](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/tests/helpers)'): Contains files that enable the execution of the test.
   
-- **Conftest** (`/wazuh-qa/deployability/modules/tests/conftest.py`): Contains information that will be transferred from the parameter validator to the tests.
+- **Conftest** ('[/wazuh-qa/deployability/modules/tests/conftest.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/tests/conftest.py)'): Contains information that will be transferred from the parameter validator to the tests.
 
 
 ![image](https://github.com/wazuh/wazuh-qa/assets/125690423/58332378-489a-49da-a73a-4d87d6bed3bc)
 
 
-The testing module should receive the infrastructure generated and provisioned by the allocation and provision modules. The module has the ability to execute actions on the hosts as well as perform the necessary validation.
-
-In the case of agent tests, the provisioning of the manager must be done by the provisioner. The install test will perform both installation and validation, so it should always be placed as the first test in the test list. The same situation will occur with the uninstall test, which will go to the end of the test list because it will execute the uninstallation prior to validation.
+The testing module receives the infrastructure generated and provisioned by the allocation and provision modules. The module has the ability to execute actions on the hosts as well as perform the necessary validation.
 
 [Testing.drawio.zip](https://github.com/wazuh/wazuh-qa/files/14372508/Testing.drawio.zip)
 
+The test module must recieve the infrastructure generated and provisioned by the allocation and provision modules. The module can execute actions on the hosts as well as perform the necessary validation.
+
+Testing of the manager component includes:
+`install`, `restart`, `stop` and `uninstall`
+Install should come at the beginning and uninstall at the end, other tests can change their order
+ 
+Testing of the agent component includes:
+`install`, `registration`, `restart`, `stop` and `uninstall`
+Install must come at the beginning followed by registration Uninstall must come at the end and the other tests can change their order
+
 ### License
-WAZUH Copyright (C) 2015 Wazuh Inc. (License GPLv2)
+
+WAZUH Copyright (C) 2015 Wazuh Inc.  (License GPLv2)
