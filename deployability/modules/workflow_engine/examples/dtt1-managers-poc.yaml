@@ -1,8 +1,6 @@
 version: 0.1
 description: This workflow is used to test agents deployment por DDT1 PoC
 variables:
-  #agents-os:
-  #  - linux-ubuntu-22.04-amd64
   manager-os:
     - linux-ubuntu-20.04-amd64
     - linux-oracle-9-amd64
