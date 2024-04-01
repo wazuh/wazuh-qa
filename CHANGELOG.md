@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Add documentation about markers for system tests ([#5080](https://github.com/wazuh/wazuh-qa/pull/5080)) \- (Documentation)
 - Add AWS Custom Buckets Integration tests ([#4675](https://github.com/wazuh/wazuh-qa/pull/4675)) \- (Framework + Tests)
 - Add Vulnerability Detector end to end tests ([#4878](https://github.com/wazuh/wazuh-qa/pull/4878)) \- (Framework + Tests)
 - Agent Simulator: Syscollector message generation refactoring ([#4868](https://github.com/wazuh/wazuh-qa/pull/4868)) \- (Framework)
@@ -31,6 +32,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Refactor initial scan Vulnerability E2E tests ([#5081](https://github.com/wazuh/wazuh-qa/pull/5081)) \- (Framework + Tests)
+- Update Packages in TestScanSyscollectorCases ([#4997](https://github.com/wazuh/wazuh-qa/pull/4997)) \- (Framework + Tests)
 - Reduced test_shutdown_message runtime ([#4986](https://github.com/wazuh/wazuh-qa/pull/4986)) \- (Tests)
 - Change e2e vd configuration keystore ([#4952](https://github.com/wazuh/wazuh-qa/pull/4952)) \- (Framework)
 - Updating tests after removing references to the legacy vulnerability detector module ([#4872](https://github.com/wazuh/wazuh-qa/pull/4872)) \- (Tests)
@@ -53,9 +56,16 @@ All notable changes to this project will be documented in this file.
 - Update the JSON schema with the required fields for the output content of the migration tool ([#4375](https://github.com/wazuh/wazuh-qa/pull/4375)) \- (Tests)
 - Update framework known flaws file ([#4443](https://github.com/wazuh/wazuh-qa/pull/4443)) \- (Tests)
 - Align migration tool system tests to the tool's new output directory structure ([#4561](https://github.com/wazuh/wazuh-qa/pull/4561)) \- (Tests)
+- Update file descriptors threshold values used in cluster performance tests ([#5073](https://github.com/wazuh/wazuh-qa/pull/5073)) \- (Tests)
 
 ### Fixed
 
+- Fix `test_synchronization` system test ([#5089](https://github.com/wazuh/wazuh-qa/pull/5089)) \- (Framework + Tests)
+- Fix number of files and their size for `test_zip_size_limit` ([#5133](https://github.com/wazuh/wazuh-qa/pull/5133)) \- (Tests)
+- Fix test_shutdown_message system test ([#5087](https://github.com/wazuh/wazuh-qa/pull/5087)) \- (Tests)
+- Include timeout to test_authd system tests ([#5083](https://github.com/wazuh/wazuh-qa/pull/5083)) \- (Tests)
+- Fix Vulnerability Detection mismatch in scans ([#5053](https://github.com/wazuh/wazuh-qa/pull/5053)) \- (Tests)
+- Fix agent groups tests for enrollment_cluster environment ([#5086](https://github.com/wazuh/wazuh-qa/pull/5086)) \- (Framework + Tests)
 - Fix initial scans tests ([5032](https://github.com/wazuh/wazuh-qa/pull/5032)) \- (Framework + Tests)
 - Handle VDT data missing in wazuh-db API ([5014](https://github.com/wazuh/wazuh-qa/pull/5014)) \- (Framework + Tests)
 - Fixed x-axis labels in data-visualizer script ([#4987 ](https://github.com/wazuh/wazuh-qa/pull/4987)) \- (Framework)
@@ -76,6 +86,7 @@ All notable changes to this project will be documented in this file.
 - Fix duplicated jq dependency ([#4678](https://github.com/wazuh/wazuh-qa/pull/4678)) \- (Framework)
 - Fix test_file_checker in check_mtime case ([#4873](https://github.com/wazuh/wazuh-qa/pull/4873)) \- (Tests)
 - Fix test cluster performance. ([#4780](https://github.com/wazuh/wazuh-qa/pull/4780)) \- (Framework)
+- Fixed the graphic generation for the logcollectord statistics files. ([#5021](https://github.com/wazuh/wazuh-qa/pull/5021)) \- (Framework)
 
 ## [4.7.3] - 04/03/2024
 
@@ -149,6 +160,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Change expected database version ([#5111](https://github.com/wazuh/wazuh-qa/pull/5111)) \- (Tests)
 - `Agentless_cluster` system tests timeout changed in order to reduce EC2 requirements ([#4534](https://github.com/wazuh/wazuh-qa/pull/4534)) \- (Tests)
 - Skip `test_authd_ssl_options` cases that use TLS 1.1 causing errors on several OpenSSL versions. ([#4229](https://github.com/wazuh/wazuh-qa/pull/4229)) \- (Tests)
 - Update database version ([#4467](https://github.com/wazuh/wazuh-qa/pull/4467)) \- (Tests)
