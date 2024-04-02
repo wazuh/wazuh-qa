@@ -280,12 +280,25 @@ def load_vulnerability_detector_configurations(host_manager, configurations_path
             manager_index = host_manager.get_group_hosts('manager').index(host) + 2
             indexer_server = host_manager.get_group_hosts('indexer')[0]
             indexer_server_variables = host_manager.get_host_variables(indexer_server)
+
+            default_filebeat_key_path = '/etc/pki/filebeat/node-{manager_index}-key.pem'
+            filebeat_key = indexer_server_variables['filebeat_key_path'] if 'filebeat_key_path' in indexer_server_variables \
+                    else default_filebeat_key_path
+
+            default_filebeat_certificate_path = '/etc/pki/filebeat/node-{manager_index}.pem'
+            filebeat_certificate = indexer_server_variables['filebeat_certificate_path'] if 'filebeat_certificate_path' in indexer_server_variables \
+                    else default_filebeat_certificate_path
+
+            default_filebeat_root_ca_path = '/etc/pki/filebeat/root-ca.pem'
+            filebeat_root_ca = indexer_server_variables['filebeat_root_ca_path'] if 'filebeat_root_ca_path' in indexer_server_variables \
+                    else default_filebeat_root_ca_path
+
             configuration_variables = {
                 'VULNERABILITY_DETECTOR_ENABLE': vd_enable_value,
                 'INDEXER_SERVER': indexer_server_variables['ip'],
-                'FILEBEAT_ROOT_CA': '/etc/pki/filebeat/root-ca.pem',
-                'FILEBEAT_CERTIFICATE': f"/etc/pki/filebeat/node-{manager_index}.pem",
-                'FILEBEAT_KEY': f"/etc/pki/filebeat/node-{manager_index}-key.pem"
+                'FILEBEAT_ROOT_CA': filebeat_root_ca,
+                'FILEBEAT_CERTIFICATE': filebeat_certificate,
+                'FILEBEAT_KEY': filebeat_key,
             }
             configuration_template_str = str(configuration_template)
 
@@ -295,4 +308,3 @@ def load_vulnerability_detector_configurations(host_manager, configurations_path
             configurations[host] = ast.literal_eval(configuration_template_str)
 
     return configurations
-
