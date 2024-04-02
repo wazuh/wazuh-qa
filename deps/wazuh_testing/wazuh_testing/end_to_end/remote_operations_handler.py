@@ -177,7 +177,12 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
 
         current_datetime = datetime.utcnow().isoformat()
 
-        host_manager.install_package(host, package_url, system)
+        use_npm = package_data.get('use_npm', False)
+
+        if use_npm:
+            host_manager.install_npm_package(host, package_url, system)
+        else:
+            host_manager.install_package(host, package_url, system, use_npm=use_npm)
 
         logging.info(f"Package {package_url} installed on {host}")
 
@@ -245,13 +250,17 @@ def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
             raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found")
 
         package_data = load_packages_metadata()[package_id]
+        use_npm = package_data.get('use_npm', False)
 
         current_datetime = datetime.utcnow().isoformat()
 
         logging.info(f"Removing package on {host}")
         if 'uninstall_name' in package_data:
             uninstall_name = package_data['uninstall_name']
-            host_manager.remove_package(host, system, package_uninstall_name=uninstall_name)
+            if use_npm:
+                host_manager.remove_npm_package(host, system, package_uninstall_name=uninstall_name)
+            else:
+                host_manager.remove_package(host, system, package_uninstall_name=uninstall_name, use_npm=use_npm)
         elif 'uninstall_custom_playbook' in package_data:
             host_manager.remove_package(host, system,
                                         custom_uninstall_playbook=package_data['uninstall_custom_playbook'])
@@ -336,7 +345,13 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
         logging.info(f"Package URL: {package_url_to}")
 
         current_datetime = datetime.utcnow().isoformat()
-        host_manager.install_package(host, package_url_to, system)
+
+        use_npm = package_data_to.get('use_npm', False)
+
+        if use_npm:
+            host_manager.install_npm_package(host, package_url_to, system)
+        else:
+            host_manager.install_package(host, package_url_to, system, use_npm=use_npm)
 
         logging.info(f"Package {package_url_to} installed on {host}")
 
