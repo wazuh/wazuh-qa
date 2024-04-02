@@ -293,6 +293,9 @@ def load_vulnerability_detector_configurations(host_manager, configurations_path
             filebeat_root_ca = indexer_server_variables['filebeat_root_ca_path'] if 'filebeat_root_ca_path' in indexer_server_variables \
                     else default_filebeat_root_ca_path
 
+            default_indexer_server = indexer_server_variables['indexer_server'] if 'indexer_server' in indexer_server_variables \
+                    else indexer_server_variables['ip']
+
             configuration_variables = {
                 'VULNERABILITY_DETECTOR_ENABLE': vd_enable_value,
                 'INDEXER_SERVER': indexer_server_variables['ip'],
