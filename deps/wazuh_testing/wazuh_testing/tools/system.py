@@ -716,7 +716,9 @@ class HostManager:
         Returns:
             str: The ID of the agent.
         """
-        token = self.get_api_token(self.get_master())
+        user, password = self.get_api_credentials()
+
+        token = self.get_api_token(self.get_master(), user=user, password=password)
         agents = self.make_api_call(self.get_master(), endpoint='/agents/', token=token)['json']['data']
 
         agents_ids = []
@@ -726,6 +728,17 @@ class HostManager:
                 agents_ids.append(agent['id'])
 
         return agents_ids
+
+    def get_api_credentials(self):
+        default_user = 'wazuh'
+        default_password = 'wazuh'
+
+        master_variables = self.get_host_variables(self.get_master())
+
+        user = master_variables.get('api_user', default_user)
+        password = master_variables.get('api_password', default_password)
+
+        return user, password
 
     def remove_agents(self):
         """
@@ -737,7 +750,10 @@ class HostManager:
         Example:
             host_manager.remove_agent('my_host', 'my_agent_id')
         """
-        token = self.get_api_token(self.get_master())
+        user, password = self.get_api_credentials()
+
+        token = self.get_api_token(self.get_master(), user=user, password=password)
+
         agents_ids = self.get_agents_ids()
         result = self.make_api_call(
             host=self.get_master(),
