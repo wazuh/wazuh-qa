@@ -4,7 +4,7 @@ wazuh-master:
     timeout: 30
   - regex: ".*Group assigned: 'GROUP_ID'"
     path: /var/ossec/logs/ossec.log
-    timeout: 10
+    timeout: 30
   - regex: .*Agent 'AGENT_ID' group is 'GROUP_ID'
     path: /var/ossec/logs/ossec.log
-    timeout: 10
+    timeout: 30

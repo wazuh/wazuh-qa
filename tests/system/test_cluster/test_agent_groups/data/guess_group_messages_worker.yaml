@@ -5,14 +5,14 @@ wazuh-worker1:
     timeout: 30
   - regex: ".*Message received from master node: '{\"error\":0,\"message\":\"ok\",\"data\":{\"group\":\"GROUP_ID\"}}'"
     path: /var/ossec/logs/ossec.log
-    timeout: 10
+    timeout: 30
   - regex: .*Agent 'AGENT_ID' group is 'GROUP_ID'
     path: /var/ossec/logs/ossec.log
-    timeout: 10
+    timeout: 30
 wazuh-master:
   - regex: .*Agent 'AGENT_ID' with file 'merged.mg' MD5 .*
     path: /var/ossec/logs/ossec.log
     timeout: 30
   - regex: ".*Group assigned: 'GROUP_ID'"
     path: /var/ossec/logs/ossec.log
-    timeout: 10
+    timeout: 30
