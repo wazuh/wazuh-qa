@@ -473,6 +473,7 @@ class HostManager:
             url (str): The URL or name of the package to be installed.
             system (str, optional): The operating system type. Defaults to 'ubuntu'.
                 Supported values: 'windows', 'ubuntu', 'centos'.
+            use_npm (bool): Determinates whether to use npm for the installation.
 
         Returns:
             Dict: Testinfra Ansible Response of the operation
@@ -484,18 +485,20 @@ class HostManager:
         """
 
         if use_npm:
+            # Define the npm install command
+            cmd = f"npm install -g {url}"
+
             if system == 'macos':
-                cmd = f"PATH=/opt/homebrew/bin:$PATH npm install -g {url}"
-                result = self.get_host(host).ansible("shell", cmd, check=False)
+                cmd = f"PATH=/opt/homebrew/bin:$PATH {cmd}"
+                shell_type = "shell"
             elif system == 'windows':
-                cmd = f"npm install -g {url}"
-                result = self.get_host(host).ansible("win_shell", cmd, check=False)
+                shell_type = "win_shell"
             else:
-                cmd = f"npm install -g {url}"
-                result = self.get_host(host).ansible("shell", cmd, check=False)
+                shell_type = "shell"
 
+            # Execute the command and log the result
+            result = self.get_host(host).ansible(shell_type, cmd, check=False)
             logging.info(f"npm package installed result {result}")
-
         else:
             result = False
             extension = '.msi'
@@ -604,6 +607,7 @@ def install_npm_package(self, host, url, system='ubuntu'):
             package_name (str): The name of the package to be removed.
             system (str): The operating system type.
                 Supported values: 'windows', 'ubuntu', 'centos'.
+            use_npm (bool): Determinates whether to use npm for the uninstallation.
 
         Returns:
             Dict: Testinfra Ansible Response of the operation
