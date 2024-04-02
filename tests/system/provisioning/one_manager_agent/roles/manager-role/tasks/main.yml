@@ -79,7 +79,10 @@
 - name: Start Wazuh
   command: /var/ossec/bin/wazuh-control restart
 
-- name: Create script to check BD
+- name: Copy wdb-query.py script
   copy:
-    src: ../../../../../scripts/system_query_db.py
-    dest: /var/
+    src: ../../../../scripts/wdb-query.py
+    dest: /var/ossec/bin/wdb-query.py
+    owner: root
+    group: root
+    mode: '0644'
