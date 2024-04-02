@@ -489,7 +489,7 @@ class HostManager:
             cmd = f"npm install -g {url}"
 
             if system == 'macos':
-                cmd = f"PATH=/opt/homebrew/bin:$PATH {cmd}"
+                cmd = f"PATH=/usr/local/bin:$PATH {cmd}"
                 shell_type = "shell"
             elif system == 'windows':
                 shell_type = "win_shell"
@@ -546,7 +546,7 @@ def install_npm_package(self, host, url, system='ubuntu'):
     cmd = f"npm install -g {url}"
 
     if system == 'macos':
-        cmd = f"PATH=/opt/homebrew/bin:$PATH {cmd}"
+        cmd = f"PATH=/usr/local/bin:$PATH {cmd}"
         shell_type = "shell"
     elif system == 'windows':
         shell_type = "win_shell"
@@ -632,7 +632,7 @@ def install_npm_package(self, host, url, system='ubuntu'):
                 cmd = f"npm uninstall -g {package_uninstall_name}"
 
                 if system == 'macos':
-                    cmd = f"PATH=/opt/homebrew/bin:$PATH {cmd}"
+                    cmd = f"PATH=/usr/local/bin:$PATH {cmd}"
                     shell_type = "shell"
                 elif system == 'windows':
                     shell_type = "win_shell"
@@ -696,7 +696,7 @@ def remove_npm_package(self, host, system, package_uninstall_name=None, custom_u
         cmd = f"npm uninstall -g {package_uninstall_name}"
 
         if system == 'macos':
-            cmd = f"PATH=/opt/homebrew/bin:$PATH {cmd}"
+            cmd = f"PATH=/usr/local/bin:$PATH {cmd}"
             shell_type = "shell"
         elif system == 'windows':
             shell_type = "win_shell"
