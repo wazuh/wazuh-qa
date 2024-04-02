@@ -590,21 +590,20 @@ class HostManager:
             remove_operation_result = self.run_playbook(host, custom_uninstall_playbook)
         elif package_uninstall_name:
             if use_npm:
-# Define the npm uninstall command
-cmd = f"npm uninstall -g {package_uninstall_name}"
+                # Define the npm uninstall command
+                cmd = f"npm uninstall -g {package_uninstall_name}"
 
-if system == 'macos':
-    cmd = f"PATH=/opt/homebrew/bin:$PATH {cmd}"
-    shell_type = "shell"
-elif system == 'windows':
-    shell_type = "win_shell"
-else:
-    shell_type = "shell"
+                if system == 'macos':
+                    cmd = f"PATH=/opt/homebrew/bin:$PATH {cmd}"
+                    shell_type = "shell"
+                elif system == 'windows':
+                    shell_type = "win_shell"
+                else:
+                    shell_type = "shell"
 
-# Execute the command and log the result
-remove_operation_result = self.get_host(host).ansible(shell_type, cmd, check=False)
-logging.info(f"npm package removed result {remove_operation_result}")
-
+                # Execute the command and log the result
+                remove_operation_result = self.get_host(host).ansible(shell_type, cmd, check=False)
+                logging.info(f"npm package removed result {remove_operation_result}")
             else:
                 if os_name == 'windows':
                     remove_operation_result = self.get_host(host).ansible("win_command",
