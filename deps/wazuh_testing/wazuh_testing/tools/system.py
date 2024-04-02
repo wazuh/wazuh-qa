@@ -691,7 +691,7 @@ def remove_npm_package(self, host, system, package_uninstall_name=None, custom_u
 
     if custom_uninstall_playbook:
         remove_operation_result = self.run_playbook(host, custom_uninstall_playbook)
-    else package_uninstall_name:
+    else:
         # Define the npm uninstall command
         cmd = f"npm uninstall -g {package_uninstall_name}"
 
