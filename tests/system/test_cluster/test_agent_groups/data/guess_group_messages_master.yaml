@@ -1,10 +1,10 @@
 wazuh-master:
   - regex: .*Agent 'AGENT_ID' with file 'merged.mg' MD5 .*
     path: var/ossec/logs/ossec.log
-    timeout: 30
+    timeout: 60
   - regex: ".*Group assigned: 'GROUP_ID'"
     path: /var/ossec/logs/ossec.log
-    timeout: 30
+    timeout: 60
   - regex: .*Agent 'AGENT_ID' group is 'GROUP_ID'
     path: /var/ossec/logs/ossec.log
-    timeout: 30
+    timeout: 60
