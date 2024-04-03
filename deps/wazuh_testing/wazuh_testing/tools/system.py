@@ -505,7 +505,7 @@ class HostManager:
 
         logging.info(f"Package installed result {result}")
 
-        if not (result['changed'] or result['rc'] == 0) or not (result['changed'] or result.get('stderr', None) == ''):
+        if not (result['changed'] or result.get('rc') == 0) or not (result['changed'] or result.get('stderr', None) == ''):
             raise RuntimeError(f"Failed to install package in {host}: {result}")
 
     def get_master_ip(self):
