@@ -153,7 +153,6 @@ def get_expected_vulnerabilities_by_agent(host_manager: HostManager, agents_list
         host_os_arch = host_manager.get_host_variables(agent)['architecture']
 
         expected_vulnerabilities_by_agent[agent] = []
-        print(packages_data)
         package_id = packages_data[host_os_name][host_os_arch]
         expected_vulnerabilities = get_expected_vulnerabilities_for_package(host_manager, agent, package_id)
 
@@ -251,7 +250,7 @@ def install_package(host: str, operation_data: Dict[str, Any], host_manager: Hos
                                                         operation_data['package'],
                                                         current_datetime)
 
-    result['expected_vulnerabilities'] = get_expected_vulnerabilities_for_package(host_manager, host, operation_data['package'])
+    result['expected_vulnerabilities'] = get_expected_vulnerabilities_by_agent(host_manager, [host], operation_data['package'])
 
     return result
 
@@ -288,7 +287,7 @@ def remove_package(host: str, operation_data: Dict[str, Any], host_manager: Host
                                                         operation_data['package'],
                                                         greater_than_timestamp=current_datetime)
 
-    result['expected_vulnerabilities'] = get_expected_vulnerabilities_for_package(host_manager, host, operation_data['package'])
+    result['expected_vulnerabilities'] = get_expected_vulnerabilities_by_agent(host_manager, [host], operation_data['package'])
 
     return result
 
@@ -325,8 +324,8 @@ def update_package(host: str, operation_data: Dict[str, Any], host_manager: Host
                                                           operation_data['package']['from'],
                                                           greater_than_timestamp=datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
     
-    expected_vulnerabilities_to = get_expected_vulnerabilities_for_package(host_manager, host, operation_data['package']['to'])
-    expected_vulnerabilities_from = get_expected_vulnerabilities_for_package(host_manager, host, operation_data['package']['from'])
+    expected_vulnerabilities_to = get_expected_vulnerabilities_by_agent(host_manager, [host], operation_data['package']['to'])
+    expected_vulnerabilities_from = get_expected_vulnerabilities_by_agent(host_manager, [host], operation_data['package']['from'])
 
     result['expected_vulnerabilities']['to'] = expected_vulnerabilities_to
     result['expected_vulnerabilities']['from'] = expected_vulnerabilities_from
