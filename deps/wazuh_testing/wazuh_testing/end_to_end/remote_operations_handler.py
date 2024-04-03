@@ -29,7 +29,8 @@ from concurrent.futures import ThreadPoolExecutor
 from wazuh_testing.end_to_end.waiters import wait_syscollector_and_vuln_scan
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.end_to_end.vulnerability_detector import check_vuln_alert_indexer, check_vuln_state_index, \
-        load_packages_metadata, get_vulnerabilities_from_states_by_agent, get_vulnerabilities_from_alerts_by_agent
+        load_packages_metadata, get_vulnerabilities_from_states_by_agent, get_vulnerabilities_from_alerts_by_agent, \
+        Vulnerability
 from wazuh_testing.end_to_end.indexer_api import get_indexer_values
 from wazuh_testing.modules.syscollector import TIMEOUT_SYSCOLLECTOR_SCAN
 
@@ -90,124 +91,67 @@ def calculate_expected_vulnerabilities_by_agent(host_manager: HostManager, packa
     return expected_vulnerabilities_by_agent
 
 
+def get_expected_vulnerabilities_for_package(host_manager: HostManager, host: str, 
+                                             package_id: str) -> List:
 
-def check_vulnerabilities_in_environment(host_manager: HostManager, packages_data: Dict, greater_than_timestamp: str,
-                                         check_alerts: bool = True, check_states: bool = True) -> Dict:
+    package_data = load_packages_metadata()[package_id]
+    vulnerabilities_list = []
 
-    # Set-TimeZone -Id "UTC"
+    host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
+    host_os_arch = host_manager.get_host_variables(host)['architecture']
+    system = host_manager.get_host_variables(host)['os_name']
 
-    # Wait for syscollector and vulnerability scan to finish
-    wait_syscollector_and_vuln_scan(host_manager, TIMEOUT_SYSCOLLECTOR_SCAN, 
-                                    greater_than_timestamp=greater_than_timestamp)
+    if system == 'linux':
+        system = host_manager.get_host_variables(host)['os'].split('_')[0]
 
-    vulnerabilities_by_agent = get_vulnerabilities_from_states_by_agent(host_manager, host_manager.get_group_hosts('agent'), 
-                                                                        greater_than_timestamp=greater_than_timestamp)
+    # Vulnerability = namedtuple('Vulnerability', ['cve', 'package_name', 'package_version', 'type', 'architecture'])
+    package_system = get_package_system(host, host_manager)
+    package_type = None
 
-    alerts_vulnerabilities_by_agent = get_vulnerabilities_from_alerts_by_agent(host_manager, host_manager.get_group_hosts('agent'),
-                                                                               greater_than_timestamp=greater_than_timestamp)
+    if package_system == 'ubuntu':
+        package_type = 'deb'
+    elif package_system == 'centos':
+        package_type = 'rpm'
+    elif package_system == 'windows':
+        package_type = 'msi'
+    elif package_system == 'darwin':
+        package_type = 'dmg'
 
-    expected_vulnerabilities_index_by_agent = calculate_expected_vulnerabilities_by_agent(host_manager, packages_data)
-    expected_vulnerabilities_alerts_by_agent = calculate_expected_vulnerabilities_alerts_by_agent(host_manager, packages_data)
+    for cve in package_data['CVE']:
+        vulnerability = Vulnerability(cve, package_data['package_name'], package_data['package_version'], package_type, host_os_arch)
+        vulnerabilities_list.append(vulnerability)
 
-    missing_vulnerabilities = get_missing_vulnerabilities(vulnerabilities_by_agent, expected_vulnerabilities_index_by_agent)
-    missing_alerts = get_missing_vulnerabilities(alerts_vulnerabilities_by_agent, expected_vulnerabilities_alerts_by_agent)
+    vulnerabilities = sorted(vulnerabilities_list, 
+                             key=lambda x: (x.cve, x.package_name, x.package_version, x.architecture))
 
-    return {
-        'missing_vulnerabilities': missing_vulnerabilities,
-        'missing_alerts': missing_alerts
-    }
+    return vulnerabilities
 
-def check_vulnerability_alerts(results: Dict, check_data: Dict, current_datetime: str, host_manager: HostManager,
-                               host: str,
-                               package_data: Dict,
-                               operation: str = 'install') -> None:
 
-    # Get all the alerts generated in the timestamp
-    vulnerability_alerts = {}
-    vulnerability_alerts_mitigated = {}
-    vulnerability_index = {}
+def get_expected_vulnerabilities_by_agent(host_manager: HostManager, agents_list: List, packages_data: Dict) -> Dict:
+    """
+    Get the expected vulnerabilities by agent.
 
-    for agent in host_manager.get_group_hosts('agent'):
-        agent_all_alerts = parse_vulnerability_detector_alerts(get_indexer_values(host_manager,
-                                              greater_than_timestamp=current_datetime,
-                                              agent=agent)['hits']['hits'])
+    Args:
+        host_manager (HostManager): An instance of the HostManager class containing information about hosts.
+        packages_data (dict): Dictionary containing package data.
 
-        agent_all_vulnerabilities = get_indexer_values(host_manager, greater_than_timestamp=current_datetime,
-                                                       agent=agent,
-                                                       index='wazuh-states-vulnerabilities')['hits']['hits']
+    Returns:
+        dict: Dictionary containing the expected vulnerabilities by agent.
+    """
 
-        vulnerability_alerts[agent] = agent_all_alerts['affected']
-        vulnerability_alerts_mitigated[agent] = agent_all_alerts['mitigated']
+    expected_vulnerabilities_by_agent = {}
+    for agent in agents_list:
+        host_os_name = host_manager.get_host_variables(agent)['os'].split('_')[0]
+        host_os_arch = host_manager.get_host_variables(agent)['architecture']
 
-        vulnerability_index[agent] = agent_all_vulnerabilities
+        expected_vulnerabilities_by_agent[agent] = []
+        print(packages_data)
+        package_id = packages_data[host_os_name][host_os_arch]
+        expected_vulnerabilities = get_expected_vulnerabilities_for_package(host_manager, agent, package_id)
 
-    results['evidences']['all_alerts_found'] = vulnerability_alerts
-    results['evidences']['all_alerts_found_mitigated'] = vulnerability_alerts_mitigated
-    results['evidences']['all_states_found'] = vulnerability_index
+        expected_vulnerabilities_by_agent[agent].extend(expected_vulnerabilities)
 
-    # Check unexpected alerts. For installation/removal non vulnerable package
-    if 'no_alerts' in check_data and check_data['no_alerts']:
-        logging.info(f'Checking unexpected vulnerability alerts in the indexer for {host}')
-        results['evidences']["alerts_found_unexpected"] = {
-                "mitigated": vulnerability_alerts_mitigated,
-                "vulnerabilities": vulnerability_alerts
-        }
-        if len(results['evidences']['alerts_found_unexpected'].get('mitigated', [])) > 0 or \
-                len(results['evidences']['alerts_found_unexpected'].get('vulnerabilities', [])) > 0:
-            results['checks']['all_successfull'] = False
-
-    # Check expected alerts
-    elif check_data['alerts']:
-        logging.info(f'Checking vulnerability alerts for {host}')
-        if operation == 'update' or operation == 'remove':
-            evidence_key = "alerts_not_found_from" if operation == 'update' else "alerts_not_found"
-            package_data_to_use = package_data['from'] if operation == 'update' else package_data
-            # Check alerts from previous package are mitigated
-            results['evidences'][evidence_key] = check_vuln_alert_indexer(vulnerability_alerts_mitigated,
-                                                                          host,
-                                                                          package_data_to_use,
-                                                                          current_datetime)
-        elif operation == 'install' or operation == 'update':
-            # Check alerts from new package are found
-            evidence_key = "alerts_not_found_to" if operation == 'update' else "alerts_not_found"
-            package_data_to_use = package_data['to'] if operation == 'update' else package_data
-            results['evidences'][evidence_key] = check_vuln_alert_indexer(vulnerability_alerts,
-                                                                          host,
-                                                                          package_data_to_use,
-                                                                          current_datetime)
-
-        if len(results['evidences'].get('alerts_not_found_from', [])) > 0 or \
-                len(results['evidences'].get('alerts_not_found_to', [])) > 0 or \
-                len(results['evidences'].get('alerts_not_found', [])) > 0:
-            results['checks']['all_successfull'] = False
-
-    # Check unexpected states
-    if 'no_indices' in check_data and check_data['no_indices']:
-        logging.info(f'Checking vulnerability state index for {host}')
-        results['evidences']["states_found_unexpected"] = vulnerability_index
-
-        if len(results['evidences']['states_found_unexpected']) > 0:
-            results['checks']['all_successfull'] = False
-
-    elif check_data['state_index']:
-        if operation == 'update' or operation == 'remove':
-            evidence_key = 'states_found_unexpected_from' if operation == 'update' else 'states_found_unexpected'
-            package_data_to_use = package_data['from'] if operation == 'update' else package_data
-            # Check states from previous package are mitigated
-            results['evidences'][evidence_key] = check_vuln_state_index(host_manager, host, package_data_to_use,
-                                                                        current_datetime)
-            if len(results['evidences'][evidence_key]) != len(package_data_to_use['CVE']):
-                results['checks']['all_successfull'] = False
-
-        elif operation == 'install' or operation == 'update':
-            # Check states from new package are found
-            evidence_key = 'states_not_found_to' if operation == 'update' else 'states_not_found'
-            package_data_to_use = package_data['to'] if operation == 'update' else package_data
-            results['evidences'][evidence_key] = check_vuln_state_index(host_manager, host, package_data_to_use,
-                                                                        current_datetime)
-
-            if len(results['evidences'][evidence_key]) != 0:
-                results['checks']['all_successfull'] = False
+    return expected_vulnerabilities_by_agent
 
 
 def get_package_url_for_host(host: str, package_id: str, host_manager: HostManager, 
@@ -231,12 +175,14 @@ def get_package_url_for_host(host: str, package_id: str, host_manager: HostManag
     except KeyError:
         raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found. Maybe {host} OS is not supported.")
 
+
 def get_package_system(host: str, host_manager: HostManager) -> str:
     system = host_manager.get_host_variables(host)['os_name']
     if system == 'linux':
         system = host_manager.get_host_variables(host)['os'].split('_')[0]
 
     return system
+
 
 def install_package(host: str, operation_data: Dict[str, Any], host_manager: HostManager) -> bool:
     """
