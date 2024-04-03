@@ -104,7 +104,6 @@ def get_expected_vulnerabilities_for_package(host_manager: HostManager, host: st
     if system == 'linux':
         system = host_manager.get_host_variables(host)['os'].split('_')[0]
 
-    # Vulnerability = namedtuple('Vulnerability', ['cve', 'package_name', 'package_version', 'type', 'architecture'])
     package_system = get_package_system(host, host_manager)
     package_type = None
 
@@ -118,7 +117,7 @@ def get_expected_vulnerabilities_for_package(host_manager: HostManager, host: st
         package_type = 'dmg'
 
     for cve in package_data['CVE']:
-        vulnerability = Vulnerability(cve, package_data['package_name'], package_data['package_version'], package_type, host_os_arch)
+        vulnerability = Vulnerability(cve, package_data['package_name'], package_data['package_version'], host_os_arch)
         vulnerabilities_list.append(vulnerability)
 
     vulnerabilities = sorted(vulnerabilities_list, 
