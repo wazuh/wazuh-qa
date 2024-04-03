@@ -740,6 +740,21 @@ class HostManager:
 
         return user, password
 
+    def get_indexer_credentials(self):
+        default_user = 'admin'
+        default_password = 'changeme'
+
+        try:
+            indexer_variables = self.get_host_variables(self.get_group_hosts('indexer')[0])
+        except IndexError:
+            logging.critical("Indexer not found in inventory")
+            raise
+
+        user = indexer_variables.get('indexer_user', default_user)
+        password = indexer_variables.get('indexer_password', default_password)
+
+        return user, password
+
     def remove_agents(self):
         """
         Removes all the agents from the API.
