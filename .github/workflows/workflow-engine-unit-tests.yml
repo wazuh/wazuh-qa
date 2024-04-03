@@ -5,7 +5,7 @@ on:
   pull_request:
     paths:
       - '.github/workflows/workflow-engine-unit-tests.yml'
-      - 'depoyability/modules/workflow_engine/**'
+      - 'deployability/modules/workflow_engine/**'
 
 jobs:
   build: 
