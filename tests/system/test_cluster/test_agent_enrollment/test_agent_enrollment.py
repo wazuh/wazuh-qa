@@ -35,7 +35,6 @@ def setup_environment():
                                                   check=False)
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
-    host_manager.control_service(host='wazuh-agent1', service='wazuh', state="start")
 
 
 
