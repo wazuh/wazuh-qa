@@ -90,7 +90,10 @@ class HostInformation:
         Returns:
             str: linux distribution (deb, rpm)
         """
-        os_name = re.search(r'/manager-linux-([^-]+)-', inventory_path).group(1)
+        if 'manager' in inventory_path:
+            os_name = re.search(r'/manager-linux-([^-]+)-', inventory_path).group(1)
+        elif 'agent' in inventory_path:
+            os_name = re.search(r'/agent-linux-([^-]+)-', inventory_path).group(1)
 
         if os_name == 'ubuntu' or os_name == 'debian':
             linux_distribution = 'deb'
@@ -111,7 +114,10 @@ class HostInformation:
         Returns:
             str: linux os name (debian, ubuntu, opensuse, amazon, centos, redhat)
         """
-        os_name = re.search(r'/manager-linux-([^-]+)-', inventory_path).group(1)
+        if 'manager' in inventory_path:
+            os_name = re.search(r'/manager-linux-([^-]+)-', inventory_path).group(1)
+        elif 'agent' in inventory_path:
+            os_name = re.search(r'/agent-linux-([^-]+)-', inventory_path).group(1)
 
         return os_name
 
@@ -126,7 +132,10 @@ class HostInformation:
         Returns:
             tuple: linux os name and version (e.g., ('ubuntu', '22.04'))
         """
-        match = re.search(r'/manager-linux-([^-]+)-([^-]+)-', inventory_path)
+        if 'manager' in inventory_path:
+            match = re.search(r'/manager-linux-([^-]+)-([^-]+)-', inventory_path)
+        elif 'agent' in inventory_path:
+            match = re.search(r'/agent-linux-([^-]+)-([^-]+)-', inventory_path)
         if match:
             os_name = match.group(1)
             version = match.group(2)

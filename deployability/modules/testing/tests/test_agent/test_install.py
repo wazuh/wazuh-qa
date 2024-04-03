@@ -9,6 +9,7 @@ from ..helpers.constants import WAZUH_ROOT
 from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
 from ..helpers.logger.logger import logger
 from ..helpers.manager import WazuhManager
+from ..helpers.utils import Utils
 
 
 @pytest.fixture
@@ -27,9 +28,6 @@ def wazuh_params(request):
         'live': live
     }
 
-    # If there are no indexers, we choose wazuh-1 by default
-    if not wazuh_params['indexers']:
-        wazuh_params['indexers'].append(wazuh_params['master'])
 
 @pytest.fixture(autouse=True)
 def setup_test_environment(wazuh_params):
@@ -56,8 +54,10 @@ def setup_test_environment(wazuh_params):
 def test_installation(wazuh_params):
     # Disabling firewall for all managers
     for manager_name, manager_params in wazuh_params['managers'].items():
+        Utils.check_inventory_connection(manager_params)
         HostConfiguration.disable_firewall(manager_params)
     for agent_name, agent_params in wazuh_params['agents'].items():
+        Utils.check_inventory_connection(agent_params)
         HostConfiguration.disable_firewall(agent_params)
 
     # Certs create and Manager installation
