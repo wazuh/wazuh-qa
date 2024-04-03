@@ -128,13 +128,15 @@ def get_expected_vulnerabilities_for_package(host_manager: HostManager, host: st
 
 
 def filter_vulnerabilities_by_packages(host_manager: HostManager, vulnerabilities: Dict, 
-                                       package_data: Dict) -> List:
+                                       packages_data: Dict) -> List:
     filtered_vulnerabilities = []
     for host in vulnerabilities.keys():
         host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
         host_os_arch = host_manager.get_host_variables(host)['architecture']
 
-        package_name = package_data[host_os_name][host_os_arch]['package_name']
+        package_id = packages_data[host_os_name][host_os_arch]
+        package_data = load_packages_metadata()[package_id]
+        package_name = package_data['package_name']
 
         for vulnerability in vulnerabilities[host]:
             if vulnerability.package_name == package_name:
