@@ -37,11 +37,9 @@ class Instance(ABC):
         """
         path = Path(instance_parameters.instance_dir)
         if not path.exists() or not path.is_dir():
-            logger.error(f"Invalid instance path: {path}")
-            exit(1)
+            raise ValueError(f"Invalid instance path: {path}")
         if credentials and not issubclass(type(credentials), Credentials):
-            logger.error(f"Invalid credentials: {credentials}")
-            exit(1)
+            raise ValueError(f"Invalid credentials: {credentials}")
 
         self.path: Path = path
         self.identifier: str = str(instance_parameters.identifier)
@@ -49,7 +47,7 @@ class Instance(ABC):
         self.host_identifier: str = instance_parameters.host_identifier
         self.host_instance_dir: Path = instance_parameters.host_instance_dir
         self.ssh_port: str = instance_parameters.ssh_port
-        self.macos_host_parameters: dict = instance_parameters.macos_host_parameters
+        self.remote_host_parameters: dict = instance_parameters.remote_host_parameters
         self.platform: str = instance_parameters.platform
         self.arch: str = instance_parameters.arch
         self.user: str = instance_parameters.user

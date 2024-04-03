@@ -117,11 +117,12 @@ class InstancePayload(BaseModel):
     key_path: Path | None = None
     host_identifier: str  | None = None
     host_instance_dir: str | Path | None = None
-    macos_host_parameters: dict | None = None
+    remote_host_parameters: dict | None = None
     ssh_port: str | None = None
     platform: str
     arch: str | None = None
     user: str | None = None
+    docker_image: str | None = None
 
     @field_validator('ssh_port', mode='before')
     def validate_port(cls, value) -> str | None:

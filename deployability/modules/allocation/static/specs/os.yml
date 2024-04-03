@@ -16,6 +16,9 @@ vagrant:
   linux-debian-9-amd64:
     box: generic/debian9
     box_version: 4.3.8
+  linux-debian-9-ppc64:
+    box: testing-debian-image
+    box_version: latest
   linux-debian-10-amd64:
     box: generic/debian10
     box_version: 4.3.8
@@ -46,6 +49,9 @@ vagrant:
   linux-centos-7-amd64:
     box: centos/7
     box_version: 2004.01
+  linux-centos-7-ppc64:
+    box: testing-centos-image
+    box_version: latest
   linux-centos-8-amd64:
     box: generic/centos8
     box_version: 4.3.8
