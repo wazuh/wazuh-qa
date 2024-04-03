@@ -238,7 +238,9 @@ def install_package(host: str, operation_data: Dict[str, Any], host_manager: Hos
                                            host_manager, operation_data)
     package_system = get_package_system(host, host_manager)
 
-    current_datetime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+    utc_now_timestamp = datetime.utcnow()
+    current_datetime = utc_now_timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
+
     try:
         host_manager.install_package(host, package_url, package_system)
     except Exception as e:
@@ -273,7 +275,10 @@ def remove_package(host: str, operation_data: Dict[str, Any], host_manager: Host
 
     logging.info(f"Removing package on {host}")
     package_system = get_package_system(host, host_manager)
-    current_datetime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+
+    utc_now_timestamp = datetime.utcnow()
+    current_datetime = utc_now_timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
+
     try:
         package_uninstall_name = operation_data['package']['uninstall_name'] if 'uninstall_name' in operation_data['package'] else None
         custom_uninstall_playbook = operation_data['package']['uninstall_playbook'] if 'uninstall_playbook' in operation_data['package'] else None
@@ -309,6 +314,9 @@ def update_package(host: str, operation_data: Dict[str, Any], host_manager: Host
     package_url = get_package_url_for_host(host, operation_data['package']['to'], 
                                            host_manager, operation_data)
     package_system = get_package_system(host, host_manager)
+
+    utc_now_timestamp = datetime.utcnow()
+    current_datetime = utc_now_timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
     try:
         host_manager.install_package(host, package_url, package_system)
     except Exception as e:
@@ -318,11 +326,11 @@ def update_package(host: str, operation_data: Dict[str, Any], host_manager: Host
     if result['success']:
         result['vulnerabilities']['to'] = get_vulnerabilities(host_manager, [host], 
                                                           operation_data['package']['to'],
-                                                          greater_than_timestamp=datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
+                                                          greater_than_timestamp=current_datetime)
 
         result['vulnerabilities']['from'] = get_vulnerabilities(host_manager, [host], 
                                                           operation_data['package']['from'],
-                                                          greater_than_timestamp=datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
+                                                          greater_than_timestamp=current_datetime)
     
     expected_vulnerabilities_to = get_expected_vulnerabilities_by_agent(host_manager, [host], operation_data['package']['to'])
     expected_vulnerabilities_from = get_expected_vulnerabilities_by_agent(host_manager, [host], operation_data['package']['from'])
