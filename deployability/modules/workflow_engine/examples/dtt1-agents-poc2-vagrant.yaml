@@ -44,7 +44,8 @@ tasks:
           - composite-name: "{manager}"
           - inventory-output: "{working-dir}/manager-{manager}/inventory.yaml"
           - track-output: "{working-dir}/manager-{manager}/track.yaml"
-          #- ssh-key: "/home/akim/Desktop/personal/Ephemeral"
+          - label-termination-date: "1d"
+          - label-team: "QA"
     foreach:
       - variable: manager-os
         as: manager
@@ -64,7 +65,8 @@ tasks:
           - composite-name: "{agent}"
           - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
-          #- ssh-key: "/home/akim/Desktop/personal/Ephemeral"
+          - label-termination-date: "1d"
+          - label-team: "QA"
     foreach:
       - variable: agent-os
         as: agent

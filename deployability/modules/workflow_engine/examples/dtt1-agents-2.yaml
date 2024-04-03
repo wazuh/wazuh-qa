@@ -47,9 +47,8 @@ tasks:
           - composite-name: "{manager-os}"
           - inventory-output: "{working-dir}/manager-{manager-os}"
           - track-output: "{working-dir}/manager-{manager-os}"
-          - label-termination-date: "2024-03-27 20:00:00"
-          - label-team: "qa"
-          - label-issue: "https://github.com/wazuh/wazuh-qa/issues/222222"
+          - label-termination-date: "1d"
+          - label-team: "QA"
     cleanup:
       this: process
       with:
@@ -99,9 +98,8 @@ tasks:
           - composite-name: "{agent}"
           - inventory-output: "{working-dir}/agent-{agent}"
           - track-output: "{working-dir}/agent-{agent}"
-          - label-termination-date: "2024-03-27 20:00:00"
-          - label-team: "qa"
-          - label-issue: "https://github.com/wazuh/wazuh-qa/issues/111111"
+          - label-termination-date: "1d"
+          - label-team: "QA"
     cleanup:
       this: process
       with:
