@@ -40,7 +40,6 @@ def clean_environment():
 def test_agent_enrollment(clean_environment):
     """Check agent enrollment process works as expected. An agent pointing to a worker should be able to register itself
     into the master by starting Wazuh-agent process."""
-
     # Clean ossec.log and cluster.log
     host_manager.clear_file(host='wazuh-master', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
     host_manager.clear_file(host='wazuh-worker1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
