@@ -150,12 +150,10 @@ def test_group_sync_status(metadata, target_node, clean_environment, group_creat
 
     # Check each 0.10 seconds/10 seconds sync_status
     for _ in range(T_10):
-        # Retrieve status information once to avoid redundant calls
         status_info = json.loads(execute_wdb_query(query, test_infra_hosts[0], host_manager))[1:3]
         agent1_status = status_info[0]['group_sync_status']
         agent2_status = status_info[1]['group_sync_status']
 
-        # Determine the logic based on metadata['agent_in_group']
         if metadata['agent_in_group'] == 'agent1':
             if agent1_status == 'syncreq' and agent2_status == 'synced':
                 first_time_check = "syncreq"
