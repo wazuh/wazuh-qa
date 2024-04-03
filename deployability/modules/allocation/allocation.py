@@ -160,7 +160,8 @@ class Allocator:
                                     host_instance_dir=str(instance.host_instance_dir),
                                     ssh_port=ssh_config.port,
                                     platform=instance.platform,
-                                    arch=instance.arch)
+                                    arch=instance.arch,
+                                    aws_profile=instance.aws_profile)
         with open(track_path, 'w') as f:
             yaml.dump(track.model_dump(), f)
         if Path(str(instance.path) + "/port.txt").exists():

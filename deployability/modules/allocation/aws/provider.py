@@ -41,7 +41,10 @@ class AWSProvider(Provider):
         """
         temp_id = cls._generate_instance_id(cls.provider_name)
         temp_dir = base_dir / temp_id
-        credentials = AWSCredentials()
+        if params.aws_profile is None:
+            raise ValueError(f"The AWS profile was not provided, use --aws-profile.")
+        boto3.setup_default_session(profile_name=params.aws_profile,region_name="us-east-1")
+        credentials = AWSCredentials(params.aws_profile)
         teams = ['qa', 'core', 'framework', 'devops', 'frontend', 'operations', 'cloud', 'threat-intel', 'marketing', 'documentation']
         platform = str(params.composite_name.split("-")[0])
         arch = str(params.composite_name.split("-")[3])
@@ -127,6 +130,7 @@ class AWSProvider(Provider):
         instance_params['host_identifier'] = host_identifier
         instance_params['arch'] = arch
         instance_params['user'] = config.user
+        instance_params['aws_profile'] = params.aws_profile
         return AWSInstance(InstancePayload(**instance_params), credentials)
 
     @staticmethod
@@ -247,7 +251,7 @@ class AWSProvider(Provider):
         # Get the specs from the yamls.
         size_specs = cls._get_size_specs(params.size)
         os_specs = cls._get_os_specs(params.composite_name)
-        mics_specs = cls._get_misc_specs()
+        mics_specs = cls._get_misc_specs(params.aws_profile)
         arch = params.composite_name.split('-')[-1]
         platform = str(params.composite_name.split("-")[0])
 

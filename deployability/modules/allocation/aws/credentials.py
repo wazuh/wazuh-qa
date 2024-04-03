@@ -23,11 +23,12 @@ class AWSCredentials(Credentials):
         CredentialsError: An error occurred while creating the key.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, aws_profile: str ) -> None:
         """
         Initializes the AWSCredentials object.
         """
-        super().__init__()
+        super().__init__(aws_profile)
+        boto3.setup_default_session(profile_name=aws_profile,region_name="us-east-1")
         self._resource = boto3.resource('ec2')
 
     def generate(self, base_dir: str | Path, name: str) -> Path:

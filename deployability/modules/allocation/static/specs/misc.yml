@@ -8,7 +8,7 @@ vagrant:
       type: qa
 
 aws:
-  qa:
+  wazuh-qa:
     security-group: [sg-023fd37c4e5b679de]
     key:
       type: dynamic
@@ -16,8 +16,8 @@ aws:
     tags:
       type: qa
       name: ddt1-{name}
-  dev:
-    security-group: [sg-023fd37c4e5b679de]
+  wazuh-dev:
+    security-group: [sg-065ed4a1191a1442d]
     key:
       type: dynamic
       name: ${uuid}

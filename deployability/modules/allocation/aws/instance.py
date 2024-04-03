@@ -28,6 +28,7 @@ class AWSInstance(Instance):
             credentials (AWSCredentials): AWS credentials object.
         """
         super().__init__(instance_parameters, credentials)
+        boto3.setup_default_session(profile_name=instance_parameters.aws_profile,region_name="us-east-1")
         self._client = boto3.resource('ec2')
         self._instance = self._client.Instance(instance_parameters.identifier)
         self.platform = instance_parameters.platform

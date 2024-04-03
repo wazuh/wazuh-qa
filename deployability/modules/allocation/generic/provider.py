@@ -189,12 +189,17 @@ class Provider(ABC):
                     return size_list[s]
 
     @classmethod
-    def _get_misc_specs(cls) -> dict:
+    def _get_misc_specs(cls, aws_profile: str = None) -> dict:
         """
         Gets the miscellaneous specifications for the provider.
+
+        aws_profile (str, optional): The AWS profile to use. Defaults to None.
 
         Returns:
             dict: A dictionary containing the miscellaneous specifications for the provider.
         """
         with open(cls.MISC_PATH, "r") as f:
-            return yaml.safe_load(f).get(cls.provider_name)
+            misc_list = yaml.safe_load(f).get(cls.provider_name)
+            if aws_profile:
+                return misc_list.get(aws_profile)
+            return misc_list
