@@ -48,20 +48,22 @@ def wait_until_vd_is_updated(host_manager: HostManager) -> None:
     monitoring_events_multihost(host_manager, monitoring_data, ignore_timeout_error=False)
 
 
-def wait_until_vuln_scan_agents_finished(host_manager: HostManager) -> None:
+def wait_until_vuln_scan_agents_finished(host_manager: HostManager, agent_list: list = None) -> None:
     """
     Wait until vulnerability scans for all agents are finished.
 
     Args:
         host_manager (HostManager): Host manager instance to handle the environment.
     """
-    final_timeout = VD_INITIAL_SCAN_PER_AGENT_TIMEOUT * len(host_manager.get_group_hosts('agent'))
+    hosts_to_wait = agent_list if agent_list else host_manager.get_group_hosts('agent')
+    final_timeout = VD_INITIAL_SCAN_PER_AGENT_TIMEOUT * len(hosts_to_wait)
 
     time.sleep(final_timeout)
 
 
 def wait_syscollector_and_vuln_scan(host_manager: HostManager, syscollector_scan: int, 
-                                    greater_than_timestamp: str = '') -> None:
+                                    greater_than_timestamp: str = '', 
+                                    agent_list: list = None) -> None:
     """
     Wait until syscollector and vulnerability scans are finished for a specific host.
 
@@ -72,17 +74,18 @@ def wait_syscollector_and_vuln_scan(host_manager: HostManager, syscollector_scan
         current_datetime (str): Current datetime to use in the operation.
     """
     logging.info(f"Waiting for syscollector scan to finish in all hosts")
+    hosts_to_wait = agent_list if agent_list else host_manager.get_group_hosts('agent')
 
     # Wait until syscollector
     monitoring_data = generate_monitoring_logs(host_manager,
                                                [get_event_regex({'event': 'syscollector_scan_start'}),
                                                 get_event_regex({'event': 'syscollector_scan_end'})],
                                                [syscollector_scan, syscollector_scan],
-                                               host_manager.get_group_hosts('agent'),
-                                               greater_than_timestamp=greater_than_timestamp)
+                                               hosts_to_wait, greater_than_timestamp=greater_than_timestamp)
+
     monitoring_events_multihost(host_manager, monitoring_data)
 
     logging.info(f"Waiting for vulnerability scan to finish")
 
-    wait_until_vuln_scan_agents_finished(host_manager)
+    wait_until_vuln_scan_agents_finished(host_manager, agent_list=agent_list)
 
