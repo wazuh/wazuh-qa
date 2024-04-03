@@ -243,6 +243,7 @@ class HostManager:
 
         return result['stdout']
 
+
     def apply_config(self, config_yml_path: str, dest_path: str = WAZUH_CONF, clear_files: list = None,
                      restart_services: list = None):
         """Apply the configuration described in the config_yml_path to the environment.
@@ -483,7 +484,6 @@ class HostManager:
             # To install a package via npm:
             host_manager.install_package('my_host', 'package_name', 'system_name', use_npm=True)
         """
-
         if use_npm:
             # Define the npm install command
             cmd = f"npm install -g {url}"
@@ -514,7 +514,7 @@ class HostManager:
                     result = True
             elif system == 'centos':
                 result = self.get_host(host).ansible("yum", f"name={url} state=present "
-                                                 'sslverify=false disable_gpg_check=True', check=False)
+                                                'sslverify=false disable_gpg_check=True', check=False)
             elif system == 'macos':
                 package_name = url.split('/')[-1]
                 result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
@@ -525,39 +525,39 @@ class HostManager:
 
         return result
 
-def install_npm_package(self, host, url, system='ubuntu'):
-    """
-    Installs a package on the specified host using npm.
+    def install_npm_package(self, host, url, system='ubuntu'):
+        """
+        Installs a package on the specified host using npm.
 
-    Args:
-        host (str): The target host on which to install the package.
-        url (str): The URL or name of the package to be installed.
-        system (str, optional): The operating system type. Defaults to 'ubuntu'.
-            Supported values: 'windows', 'ubuntu', 'centos', 'macos'.
+        Args:
+            host (str): The target host on which to install the package.
+            url (str): The URL or name of the package to be installed.
+            system (str, optional): The operating system type. Defaults to 'ubuntu'.
+                Supported values: 'windows', 'ubuntu', 'centos', 'macos'.
 
-    Returns:
-        Dict: Testinfra Ansible Response of the operation
+        Returns:
+            Dict: Testinfra Ansible Response of the operation
 
-    Example:
-        host_manager.install_package('my_host', 'package_name', 'system_name')
-    """
+        Example:
+            host_manager.install_package('my_host', 'package_name', 'system_name')
+        """
 
-    # Define the npm install command
-    cmd = f"npm install -g {url}"
+        # Define the npm install command
+        cmd = f"npm install -g {url}"
 
-    if system == 'macos':
-        cmd = f"PATH=/usr/local/bin:$PATH {cmd}"
-        shell_type = "shell"
-    elif system == 'windows':
-        shell_type = "win_shell"
-    else:
-        shell_type = "shell"
+        if system == 'macos':
+            cmd = f"PATH=/usr/local/bin:$PATH {cmd}"
+            shell_type = "shell"
+        elif system == 'windows':
+            shell_type = "win_shell"
+        else:
+            shell_type = "shell"
 
-    # Execute the command and log the result
-    result = self.get_host(host).ansible(shell_type, cmd, check=False)
-    logging.info(f"npm package installed result {result}")
+        # Execute the command and log the result
+        result = self.get_host(host).ansible(shell_type, cmd, check=False)
+        logging.info(f"npm package installed result {result}")
 
-    return result
+        return result
 
     def get_master_ip(self):
         """
@@ -666,48 +666,48 @@ def install_npm_package(self, host, url, system='ubuntu'):
 
         return remove_operation_result
 
-def remove_npm_package(self, host, system, package_uninstall_name=None, custom_uninstall_playbook=None):
-    """
-    Removes a package from the specified host using npm.
+    def remove_npm_package(self, host, system, package_uninstall_name=None, custom_uninstall_playbook=None):
+        """
+        Removes a package from the specified host using npm.
 
-    Args:
-        host (str): The target host from which to remove the package.
-        package_name (str): The name of the package to be removed.
-        system (str): The operating system type.
-            Supported values: 'windows', 'ubuntu', 'centos', 'macos'.
+        Args:
+            host (str): The target host from which to remove the package.
+            package_name (str): The name of the package to be removed.
+            system (str): The operating system type.
+                Supported values: 'windows', 'ubuntu', 'centos', 'macos'.
 
-    Returns:
-        Dict: Testinfra Ansible Response of the operation
+        Returns:
+            Dict: Testinfra Ansible Response of the operation
 
-    Example:
-        host_manager.remove_npm_package('my_host', 'system_name', 'package_name')
-    """
-    logging.info(f"Removing package {package_uninstall_name} from host {host}")
-    logging.info(f"System: {system}")
+        Example:
+            host_manager.remove_npm_package('my_host', 'system_name', 'package_name')
+        """
+        logging.info(f"Removing package {package_uninstall_name} from host {host}")
+        logging.info(f"System: {system}")
 
-    remove_operation_result = False
+        remove_operation_result = False
 
-    os_name = self.get_host_variables(host)['os_name']
+        os_name = self.get_host_variables(host)['os_name']
 
-    if custom_uninstall_playbook:
-        remove_operation_result = self.run_playbook(host, custom_uninstall_playbook)
-    else:
-        # Define the npm uninstall command
-        cmd = f"npm uninstall -g {package_uninstall_name}"
-
-        if system == 'macos':
-            cmd = f"PATH=/usr/local/bin:$PATH {cmd}"
-            shell_type = "shell"
-        elif system == 'windows':
-            shell_type = "win_shell"
+        if custom_uninstall_playbook:
+            remove_operation_result = self.run_playbook(host, custom_uninstall_playbook)
         else:
-            shell_type = "shell"
+            # Define the npm uninstall command
+            cmd = f"npm uninstall -g {package_uninstall_name}"
 
-        # Execute the command and log the result
-        remove_operation_result = self.get_host(host).ansible(shell_type, cmd, check=False)
-        logging.info(f"npm package removed result {remove_operation_result}")
+            if system == 'macos':
+                cmd = f"PATH=/usr/local/bin:$PATH {cmd}"
+                shell_type = "shell"
+            elif system == 'windows':
+                shell_type = "win_shell"
+            else:
+                shell_type = "shell"
 
-    return remove_operation_result
+            # Execute the command and log the result
+            remove_operation_result = self.get_host(host).ansible(shell_type, cmd, check=False)
+            logging.info(f"npm package removed result {remove_operation_result}")
+
+        return remove_operation_result
 
     def run_playbook(self, host, playbook_name, params=None):
         """
