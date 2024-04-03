@@ -1,93 +1,151 @@
-# Description: Provision module for Wazuh deployability
-from modules.generic.utils import Utils
-from modules.provision.models import InputPayload
-from modules.provision.provisionModule import ProvisionModule
-from modules.provision.actions import Action
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 from pathlib import Path
-import os, subprocess, sys
+
+from modules.generic.utils import Utils
+from modules.provision.actions import Action
+from modules.provision.utils import logger
+from modules.provision.models import InputPayload, ComponentInfo
+
 
 PATH_BASE_DIR = Path(__file__).parents[2]
 
-class Provision(ProvisionModule):
 
-  def __init__(self, payload: InputPayload):
-    if payload.install:
-      self.component_info = payload.install
-      self.action = "install"
-    if payload.uninstall:
-      self.component_info = payload.uninstall
-      self.action = "uninstall"
-
-    self.validateManagerIp(self.component_info, payload.manager_ip)
-    self.ansible_data = Utils.load_from_yaml(
-        payload.inventory,
-        map_keys={
-            'ansible_host': 'ansible_host',
-            'ansible_user': 'ansible_user',
-            'ansible_port': 'ansible_port',
-            'ansible_ssh_private_key_file': 'ansible_ssh_private_key_file'
-        }
-    )
-    self.summary = {}
-
-  # -------------------------------------
-  #   Methods
-  # -------------------------------------
-
-  def run(self) -> None:
+class Provision:
     """
-    Run the provision.
+    Provision class to install and uninstall components.
+
+    Attributes:
+        components (list[ComponentInfo]): List of components to install or uninstall.
+        ansible_data (dict): Ansible data to render the playbooks.
+        summary (dict): Summary of the provision.
     """
 
-    #self.node_dependencies()
+    def __init__(self, payload: InputPayload):
+        """
+        Initialize the provision.
 
-    #self.install_host_dependencies()
+        Args:
+            payload (InputPayload): Payload with the provision information.
+        """
+        self.summary = {}
 
-    for item in self.component_info:
-      action_class = Action(self.action, item, self.ansible_data)
-      status = action_class.execute()
+        self.action = 'install' if payload.install else 'uninstall'
+        self.components = self.get_components(payload)
+        self.ansible_data = self.__load_ansible_data(payload.inventory)
 
-      self.update_status(status)
+    def run(self) -> None:
+        """
+        Run the provision.
+        """
+        logger.info(f'Initiating provisionment.')
 
-    print("summary")
-    print(self.summary)
+        logger.debug(f'Running action {self.action} for components: {self.components}')
+        for component in self.components:
+            try:
+                logger.info(f'Provisioning "{component.component}"...')
+                self.__provision(component)
+                logger.info(f'Provision of "{component.component}" complete successfully.')
+            except Exception as e:
+                logger.error(f'Error while provisioning "{component.component}": {e}')
+                raise
+        logger.info('All components provisioned successfully.')
+        logger.debug(f'Provision summary: {self.summary}')
 
-  def validateManagerIp(self, components, ip):
-    if ip:
-      for component in components:
-        if component.component == 'wazuh-agent':
-            component.manager_ip = ip
+    def get_components(self, payload: InputPayload) -> list[ComponentInfo]:
+        """
+        Validate the component and adds its dependency IP if required.
 
-  @staticmethod
-  def node_dependencies():
-    """
-    Install python dependencies on Worker node.
-    """
-    venv_path = PATH_BASE_DIR / 'venv'
-    if not os.path.exists(venv_path):
-        subprocess.run(['python3', '-m', 'venv', str(venv_path)], check=True)
-    activate_script = os.path.join(venv_path, 'bin', 'activate')
-    command = f"source {activate_script}" if sys.platform != 'win32' else f"call {activate_script}"
-    subprocess.run(command, shell=True, executable="/bin/bash")
-    subprocess.run(['python3', '-m', 'pip', 'install', '--upgrade', 'pip'], check=True)
-    command = f"pip install -r {PATH_BASE_DIR}/deps/requirements.txt"
-    subprocess.run(command, shell=True, executable="/bin/bash")
+        Args:
+            payload (InputPayload): Payload with the provision information.
 
-  def install_host_dependencies(self):
-    """
-    Install python dependencies on host.
-    """
-    status = {}
+        Returns:
+            list[ComponentInfo]: List of components with the dependency IP.
+        """
+        components = payload.install or payload.uninstall
+        dependencies = self.__get_deps_ips(payload.dependencies)
+        # Check each component and add the dependency IP if required
+        for component in components:
+            component.dependencies = dependencies
+            self.__validate_component_deps(component)
+        return components
 
-    package = {
-      'component': os.path.join(str(PATH_BASE_DIR), "deps", "remote_requirements.txt"),
-      'action_type': "dependencies"
-    }
+    def update_status(self, status: dict) -> None:
+        """
+        Update the status of the provision.
 
-    action_class = Action("install", package, self.ansible_data)
-    status = action_class.execute()
+        Args:
+            status (dict): The status of the executed action.
+        """
+        self.summary.update(status.stats)
 
-    return status
+    def __provision(self, component: ComponentInfo) -> None:
+        """
+        Provision the components.
 
-  def update_status(self, status):
-    self.summary.update(status.stats)
+        Args:
+            component (ComponentInfo): Component to provision.
+        """
+        action = Action(self.action, component, self.ansible_data)
+        status = action.execute()
+        self.update_status(status)
+
+    def __load_ansible_data(self, inventory: str | Path) -> dict:
+        """
+        Load the ansible data from the inventory file.
+
+        Args:
+            inventory (str | Path): Path to the inventory file.
+
+        Returns:
+            dict: Ansible data to render the playbooks.
+        """
+        try:
+            return Utils.load_from_yaml(inventory)
+        except FileNotFoundError:
+            logger.error(f'Inventory file "{inventory}" not found.')
+            raise
+        except Exception as e:
+            logger.error(f'Error loading inventory file "{inventory}": {e}')
+            raise
+
+    def __get_deps_ips(self, dependencies: dict) -> dict | None:
+        """
+        Get the list of dependencies IPs from reading each dependency`s
+        inventory file and returning its ansible_host as IP.
+        
+        Args:
+            dependencies (list[dict]): List of dependencies.
+            
+        Returns:
+            dict: Dictionary with the dependencies IPs.
+        """
+        if not dependencies:
+            return
+        dependencies_ips = {}
+        for key, value in dependencies.items():
+            try:
+                inventory = Path(value)
+                if not inventory.exists():
+                    raise FileNotFoundError(f'Inventory file "{inventory}" not found.')
+                dep_ip = Utils.load_from_yaml(inventory, specific_key='ansible_host')
+                dependencies_ips[key] = dep_ip
+            except Exception as e:
+                logger.error(f'Error getting dependency IP: {e}')
+                raise
+        return dependencies_ips
+    
+    def __validate_component_deps(self, component: ComponentInfo) -> None:
+        """
+        Validate the component dependencies.
+
+        Args:
+            component (ComponentInfo): Component to validate.
+        """
+        name = component.component
+        dependencies = component.dependencies or {}
+        # Dependencies validations.
+        if name == 'wazuh-agent' and not dependencies.get('manager'):
+            raise ValueError('Dependency IP is required to install Wazuh Agent.')
+        logger.debug(f"Setting dependencies: {dependencies} for {name} component.")

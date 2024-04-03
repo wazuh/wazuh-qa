@@ -1,16 +1,12 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
-
-from abc import ABC, abstractmethod
 import subprocess
-import logging
 import random
 import time
-import json
-import shlex
 
-logger = (lambda: logging.getLogger())()
+from abc import ABC, abstractmethod
+from workflow_engine.logger.logger import logger
 
 class Task(ABC):
     """Abstract base class for tasks."""
@@ -19,7 +15,6 @@ class Task(ABC):
     def execute(self) -> None:
         """Execute the task."""
         pass
-
 
 class ProcessTask(Task):
     """Task for executing a process."""
@@ -41,18 +36,23 @@ class ProcessTask(Task):
         """Execute the process task."""
 
         task_args = []
+        if self.task_parameters.get('args') is None:
+            raise ValueError(f'Not argument found in {self.task_name}')
+
         for arg in self.task_parameters['args']:
             if isinstance(arg, str):
                 task_args.append(arg)
             elif isinstance(arg, dict):
                 key, value = list(arg.items())[0]
                 if isinstance(value, list):
-                    for argvalue in value:
-                        print(f"argvalue {argvalue}")
                     task_args.extend([f"--{key}={argvalue}" for argvalue in value])
                 else:
                     task_args.append(f"--{key}={value}")
-        print(f"task_args {task_args}")
+            else:
+                logger.error(f'Could not parse arguments {arg}')
+
+        logger.debug(f'Running task "{self.task_name}" with arguments: {task_args}')
+
         result = None
         try:
             result = subprocess.run(
@@ -61,14 +61,14 @@ class ProcessTask(Task):
                 capture_output=True,
                 text=True,
             )
-
-            logger.info(str(result.stdout))
-            logger.info("%s: %s", "Finish task: ", self.task_name, extra={'tag': self.task_name})
-
+            logger.debug(f'Finished task "{self.task_name}" execution with result:\n{str(result.stdout)}')
 
             if result.returncode != 0:
                 raise subprocess.CalledProcessError(returncode=result.returncode, cmd=result.args, output=result.stdout)
         except subprocess.CalledProcessError as e:
+            error_msg = e.stderr
+            if "KeyboardInterrupt" in error_msg:
+                raise KeyboardInterrupt(f"Error executing process task with keyboard interrupt.")
             raise Exception(f"Error executing process task {e.stderr}")
 
 class DummyTask(Task):
@@ -79,7 +79,6 @@ class DummyTask(Task):
     def execute(self):
         message = self.task_parameters.get('message', 'No message provided')
         logger.info("%s: %s", message, self.task_name, extra={'tag': self.task_name})
-
 
 class DummyRandomTask(Task):
     def __init__(self, task_name, task_parameters):
@@ -94,7 +93,6 @@ class DummyRandomTask(Task):
         logger.info("%s: %s (Sleeping for %.2f seconds)", message, self.task_name, sleep_time, extra={'tag': self.task_name})
 
         time.sleep(sleep_time)
-
 
 TASKS_HANDLERS = {
     'process': ProcessTask,

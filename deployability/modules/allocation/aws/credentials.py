@@ -1,10 +1,17 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import os
 import boto3
+import random
+import string
 
 from botocore.exceptions import ClientError
 from pathlib import Path
 
 from modules.allocation.generic import Credentials
+from modules.allocation.generic.utils import logger
 
 
 class AWSCredentials(Credentials):
@@ -27,7 +34,7 @@ class AWSCredentials(Credentials):
         super().__init__()
         self._resource = boto3.resource('ec2')
 
-    def generate(self, base_dir: str | Path, name: str, overwrite: bool = False) -> Path:
+    def generate(self, base_dir: str | Path, name: str) -> Path:
         """
         Generates a new key pair and returns it.
 
@@ -46,6 +53,7 @@ class AWSCredentials(Credentials):
 
         # Validate base directory
         if not base_dir.exists():
+            logger.debug(f"Creating base directory: {base_dir}")
             base_dir.mkdir(parents=True, exist_ok=True)
         elif base_dir.is_file():
             raise self.CredentialsError(f"Invalid base directory: {base_dir}")
@@ -54,10 +62,7 @@ class AWSCredentials(Credentials):
             # Check if the key pair already exists
             key_pair = self._resource.KeyPair(name)
             if key_pair.key_pair_id:
-                if not overwrite:
                     raise self.CredentialsError(f"Key pair {name} already exists.")
-                else:
-                    key_pair.delete()
         except ClientError:
             pass
 
@@ -112,6 +117,7 @@ class AWSCredentials(Credentials):
     def delete(self) -> None:
         """Deletes the key pair."""
         if not self.name:
+            logger.warning(f"Key pair doesn't exist. Skipping deletion.")
             return
 
         try:
@@ -122,9 +128,59 @@ class AWSCredentials(Credentials):
 
         # Remove the local private key file
         if self.key_path:
+            logger.debug(f"Deleting private key: {self.key_path}")
             Path(self.key_path).unlink()
 
         # Clear instance attributes
         self.name = None
         self.key_id = None
         self.key_path = None
+
+    def ssh_key_interpreter(self, ssh_key_path: str | Path) -> str:
+        """
+        Gets the id of the SSH Key stored in AWS from the provisioned public or private key
+
+        Args:
+            public_key_path (str): The public or private key path or aws key id.
+
+        Returns:
+            str: The ID of the key pair.
+
+        Raises:
+            CredentialsError: An error occurred during key pair loading.
+        """
+        ssh_key_name = os.path.basename(ssh_key_path)
+        if ssh_key_name.endswith('.pub'):
+            key_id = os.path.splitext(ssh_key_name)[0]
+        else:
+            key_id = ssh_key_name
+        return key_id
+
+    def create_password(self) -> str:
+        """
+        Creates a password for the instance.
+
+        Returns:
+            str: The password for the instance.
+        """
+        # Define character sets
+        uppercase_letters = string.ascii_uppercase
+        lowercase_letters = string.ascii_lowercase
+        numbers = string.digits
+
+        # Combine all character sets
+        all_characters = uppercase_letters + lowercase_letters + numbers
+
+        # Ensure each set contributes at least one character
+        password = [random.choice(uppercase_letters),
+                    random.choice(lowercase_letters),
+                    random.choice(numbers)]
+
+        # Fill up the rest of the password length
+        password.extend(random.choice(all_characters) for _ in range(12 - 4))
+
+        # Shuffle the password to ensure randomness
+        random.shuffle(password)
+
+        # Convert list to string
+        self.name = ''.join(password)

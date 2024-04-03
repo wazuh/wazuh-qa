@@ -1,9 +1,0 @@
-
-- name: Install the {{ component }}
-  command: "apt-get -y install {{ component }}"
-  when: ansible_os_family == "Debian"
-
-- name: Install the {{ component }}
-  command: "yum -y install {{ component }}"
-  when: ansible_os_family == "RedHat"
-

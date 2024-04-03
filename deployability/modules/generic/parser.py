@@ -1,3 +1,6 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 from argparse import ArgumentParser
 from pydantic import BaseModel
 
@@ -14,12 +17,3 @@ def pydantic_argument_parser(parser: ArgumentParser, model: BaseModel):
             help=field.field_info.description,
         )
     return parser.parse_args()
-
-# 1. Create and parse command line arguments
-# parser = ArgumentParser()
-
-# 2. Turn the fields of the model as arguments of the parser
-# add_model(parser, MyItem)
-
-# 3. Parse the command-line arguments
-# args = parser.parse_args()

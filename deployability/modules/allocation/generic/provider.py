@@ -1,3 +1,7 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import shutil
 import uuid
 import yaml
@@ -6,14 +10,15 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from .instance import Instance
-from .models import CreationPayload, ProviderConfig
+from .models import CreationPayload, ProviderConfig, InstancePayload
+from .utils import logger
 
 
 class Provider(ABC):
     """
     An abstract base class for providers.
 
-    This class provides an interface for creating, loading, and destroying instances. 
+    This class provides an interface for creating, loading, and destroying instances.
     It also provides methods to get OS, size, and miscellaneous specifications for the provider.
 
     Attributes:
@@ -27,8 +32,8 @@ class Provider(ABC):
     OS_PATH = SPECS_DIR / 'os.yml'
     SIZE_PATH = SPECS_DIR / 'size.yml'
     MISC_PATH = SPECS_DIR / 'misc.yml'
-    
-    
+
+
     class ProvisioningError(Exception):
         """
         Exception raised for errors in the provisioning process.
@@ -47,7 +52,7 @@ class Provider(ABC):
         pass
 
     @classmethod
-    def create_instance(cls, base_dir: str | Path, params: CreationPayload, config: ProviderConfig = None) -> Instance:
+    def create_instance(cls, base_dir: str | Path, params: CreationPayload, config: ProviderConfig = None, ssh_key: str = None) -> Instance:
         """
         Creates a new instance.
 
@@ -55,13 +60,14 @@ class Provider(ABC):
             base_dir (str | Path): The base directory for the instance.
             params (CreationPayload): The parameters for creating the instance.
             config (ProviderConfig, optional): The configuration for the instance. Defaults to None.
+            ssh_key (str, optional): Public or private key for the instance. For example, we assume that if the public key is provided, the private key is located in the same directory and has the same name as the public key. Defaults to None.
 
         Returns:
             Instance: The created instance.
         """
         params = CreationPayload(**dict(params))
         base_dir = Path(base_dir)
-        return cls._create_instance(base_dir, params, config)
+        return cls._create_instance(base_dir, params, config, ssh_key)
 
     @classmethod
     def load_instance(cls, instance_dir: str | Path, instance_id: str) -> Instance:
@@ -76,29 +82,28 @@ class Provider(ABC):
             Instance: The loaded instance.
 
         Raises:
-            Exception: If the instance directory does not exist.
+            ValueError: If the instance directory does not exist.
         """
         instance_dir = Path(instance_dir)
         if not instance_dir.exists():
-            raise Exception(f"Instance path {instance_dir} does not exist")
+            raise ValueError(f"Instance path {instance_dir} does not exist")
         return cls._load_instance(instance_dir, instance_id)
 
     @classmethod
-    def destroy_instance(cls, instance_dir: str | Path, identifier: str) -> None:
+    def destroy_instance(cls, destroy_parameters: InstancePayload) -> None:
         """
         Destroys an existing instance and removes its directory.
 
         Args:
-            instance_dir (str | Path): The directory of the instance.
-            identifier (str): The identifier of the instance.
+            destroy_parameters (InstancePayload): The parameters for destroying the instance.
         """
-        instance_dir = Path(instance_dir)
-        cls._destroy_instance(instance_dir, identifier)
-        shutil.rmtree(instance_dir, ignore_errors=True)
+        destroy_parameters.instance_dir = Path(destroy_parameters.instance_dir)
+        cls._destroy_instance(destroy_parameters)
+        shutil.rmtree(destroy_parameters.instance_dir, ignore_errors=True)
 
     @classmethod
     @abstractmethod
-    def _create_instance(cls, base_dir: Path, params: CreationPayload, config: ProviderConfig = None) -> Instance:
+    def _create_instance(cls, base_dir: Path, params: CreationPayload, config: ProviderConfig = None, ssh_key: str = None) -> Instance:
         """
         Abstract method that creates a new instance.
 
@@ -106,6 +111,7 @@ class Provider(ABC):
             base_dir (Path): The base directory for the instance.
             params (CreationPayload): The parameters for creating the instance.
             config (ProviderConfig, optional): The configuration for the instance. Defaults to None.
+            ssh_key (str, optional): Public or private key for the instance. Defaults to None.
 
         Returns:
             Instance: The created instance.
@@ -129,13 +135,12 @@ class Provider(ABC):
 
     @classmethod
     @abstractmethod
-    def _destroy_instance(cls, instance_dir: Path, identifier: str) -> None:
+    def _destroy_instance(cls, destroy_parameters: InstancePayload) -> None:
         """
         Abstract method that destroys an existing instance.
 
         Args:
-            instance_dir (Path): The directory of the instance.
-            identifier (str): The identifier of the instance.
+            destroy_parameters (InstancePayload): The parameters for destroying the instance.
         """
         pass
 
@@ -153,26 +158,39 @@ class Provider(ABC):
         return f"{prefix}-{uuid.uuid4()}".upper()
 
     @classmethod
-    def _get_os_specs(cls) -> dict:
+    def _get_os_specs(cls, composite_name: str) -> dict:
         """
         Gets the OS specifications for the provider.
+        composite_name (str): The name of the composite OS.
 
         Returns:
             dict: A dictionary containing the OS specifications for the provider.
         """
         with open(cls.OS_PATH, "r") as f:
-            return yaml.safe_load(f).get(cls.provider_name)
+            version_available = []
+            os_list = yaml.safe_load(f).get(cls.provider_name)
+            for os in os_list:
+                if os.split("-")[1] == composite_name.split("-")[1]:
+                    version_available.append(os)
+                if str(os) == composite_name:
+                    return os_list[os]
+
+            raise ValueError(f"OS {composite_name} not available for provider {cls.provider_name}. Available versions are {version_available}")
 
     @classmethod
-    def _get_size_specs(cls) -> dict:
+    def _get_size_specs(cls, size: str) -> dict:
         """
         Gets the size specifications for the provider.
+        size (str): The name of the size.
 
         Returns:
             dict: A dictionary containing the size specifications for the provider.
         """
         with open(cls.SIZE_PATH, "r") as f:
-            return yaml.safe_load(f).get(cls.provider_name)
+            size_list = yaml.safe_load(f).get(cls.provider_name)
+            for s in size_list:
+                if size == s:
+                    return size_list[s]
 
     @classmethod
     def _get_misc_specs(cls) -> dict:

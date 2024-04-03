@@ -1,7 +1,0 @@
-- hosts: all
-  become: true
-  tasks:
-    - name: Clean test directory
-      file:
-        path: "{{ working_dir }}"
-        state: absent

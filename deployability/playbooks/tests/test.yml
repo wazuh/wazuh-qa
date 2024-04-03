@@ -1,7 +1,0 @@
-- hosts: all
-  become: true
-  tasks:
-    - name: Test {{ test }} for {{ component }}
-      command: "pytest test_{{component}}/test_{{ test }}.py  -v --wazuh_version={{ wazuh_version }} --component={{ component }} --dependencies={{ dependencies }}"
-      args:
-        chdir: "{{ working_dir }}"

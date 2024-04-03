@@ -1,9 +1,0 @@
-
-- name: Uninstall the {{ component }}
-  command: "apt-get remove --purge {{ component }} -y"
-  when: ansible_os_family == "Debian"
-
-- name: Uninstall the {{ component }}
-  command: "yum -y remove {{ component }}"
-  when: ansible_os_family == "RedHat"
-
