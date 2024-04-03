@@ -1,41 +1,52 @@
-# Copyright (C) 2015, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 version: 0.1
 description: This workflow is used to test agents deployment por DDT1 PoC
 variables:
-  agents-os:
-    - linux-ubuntu-18.04-amd64
+  agent-os:
     - linux-ubuntu-20.04-amd64
-    - linux-ubuntu-22.04-amd64
+    - linux-oracle-9-amd64
+    - linux-amazon-2-amd64
+    - linux-redhat-7-amd64
+    - linux-redhat-8-amd64
+    - linux-redhat-9-amd64
+    - linux-centos-7-amd64
+    - linux-centos-8-amd64
     - linux-debian-10-amd64
     - linux-debian-11-amd64
     - linux-debian-12-amd64
-  manager-os: linux-oracle-9-amd64
-  infra-provider: vagrant
+    - linux-opensuse-15-amd64
+
+  manager-os:
+    - linux-ubuntu-22.04-amd64
+  infra-provider: aws
   working-dir: /tmp/dtt1-poc
 
 tasks:
-  # Unique manager provision task
-  - task: "provision-manager"
-    description: "Provision the manager."
+
+
+  # Generic agent provision task
+  - task: "provision-pytest-{agent}"
+    description: "Provision resources for the {agent} agent."
     do:
       this: process
       with:
         path: python3
         args:
           - modules/provision/main.py
-          - inventory: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
           - install:
-            - component: wazuh-manager
-              type: assistant
-              version: 4.7.3
-              live: True
+            - component: python3
+            - component: python3-pip
+            - component: python3-venv
+            - component: python3-pytest
     depends-on:
-      - "allocate-manager"
+      - "allocate-{agent}"
+      - "provision-manager"
+    foreach:
+      - variable: agents-os
+        as: agent
 
   # Unique manager allocate task
-  - task: "allocate-manager"
+  - task: "allocate-manager-{manager}"
     description: "Allocate resources for the manager."
     do:
       this: process
@@ -46,48 +57,18 @@ tasks:
           - action: create
           - provider: "{infra-provider}"
           - size: large
-          - composite-name: "{manager-os}"
-          - inventory-output: "{working-dir}/manager-{manager-os}"
-          - track-output: "{working-dir}/manager-{manager-os}"
+          - composite-name: "{manager}"
+          - inventory-output: "{working-dir}/manager-{manager}/inventory.yaml"
+          - track-output: "{working-dir}/manager-{manager}/track.yaml"
           - label-termination-date: "1d"
-          - label-team: "QA"
-    cleanup:
-      this: process
-      with:
-        path: python3
-        args:
-          - modules/allocation/main.py
-          - action: delete
-          - track-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
-
-  # Generic agent provision task
-  - task: "provision-install-{agent}"
-    description: "Provision resources for the {agent} agent."
-    do:
-      this: process
-      with:
-        path: python3
-        args:
-          - modules/provision/main.py
-          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-          - dependencies:
-            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-            - agent: "{working-dir}/agent-{agent}/inventory.yaml"
-          - install:
-            - component: wazuh-agent
-              type: assistant
-              version: 4.7.3
-              live: True
-    depends-on:
-      - "allocate-{agent}"
-      - "provision-manager"
+          - label-team: "qa"
     foreach:
-      - variable: agents-os
-        as: agent
+      - variable: manager-os
+        as: manager
 
-  # Generic agent allocate task
-  - task: "allocate-{agent}"
-    description: "Allocate resources for the {agent} agent."
+  # Unique agent allocate task
+  - task: "allocate-agent-{agent}"
+    description: "Allocate resources for the agent."
     do:
       this: process
       with:
@@ -96,20 +77,41 @@ tasks:
           - modules/allocation/main.py
           - action: create
           - provider: "{infra-provider}"
-          - size: small
+          - size: large
           - composite-name: "{agent}"
-          - inventory-output: "{working-dir}/agent-{agent}"
-          - track-output: "{working-dir}/agent-{agent}"
+          - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
+          - track-output: "{working-dir}/agent-{agent}/track.yaml"
           - label-termination-date: "1d"
-          - label-team: "QA"
-    cleanup:
+          - label-team: "qa"
+    foreach:
+      - variable: agent-os
+        as: agent
+
+  # Generic agent test task
+  - task: "run-agent-tests"
+    description: "Run tests install for the agent."
+    do:
       this: process
       with:
         path: python3
         args:
-          - modules/allocation/main.py
-          - action: delete
-          - track-output: "{working-dir}/agent-{agent}/inventory.yaml"
-    foreach:
-      - variable: agents-os
-        as: agent
+          - modules/testing/main.py
+          - targets:
+            - wazuh-1: "{working-dir}/manager-linux-ubuntu-22.04-amd64/inventory.yaml"
+            - agent-1: "{working-dir}/agent-linux-ubuntu-20.04-amd64/inventory.yaml"
+            - agent-2: "{working-dir}/agent-linux-oracle-9-amd64/inventory.yaml"
+            - agent-3: "{working-dir}/agent-linux-amazon-2-amd64/inventory.yaml"
+            - agent-4: "{working-dir}/agent-linux-centos-7-amd64/inventory.yaml"
+            - agent-5: "{working-dir}/agent-linux-centos-8-amd64/inventory.yaml"
+            - agent-6: "{working-dir}/agent-linux-redhat-7-amd64/inventory.yaml"
+            - agent-7: "{working-dir}/agent-linux-redhat-8-amd64/inventory.yaml"
+            - agent-8: "{working-dir}/agent-linux-redhat-9-amd64/inventory.yaml"
+            - agent-9: "{working-dir}/agent-linux-debian-10-amd64/inventory.yaml"
+            - agent-10: "{working-dir}/agent-linux-debian-11-amd64/inventory.yaml"
+            - agent-11: "{working-dir}/agent-linux-debian-12-amd64/inventory.yaml"
+            - agent-12: "{working-dir}/agent-linux-opensuse-15-amd64/inventory.yaml"
+          - tests: "install,registration,restart,stop,uninstall"
+          - component: "agent"
+          - wazuh-version: "4.7.3"
+          - wazuh-revision: "40714"
+          - live: "True"
