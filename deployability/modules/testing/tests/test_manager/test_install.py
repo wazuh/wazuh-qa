@@ -9,6 +9,7 @@ from ..helpers.executor import WazuhAPI
 from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
 from ..helpers.manager import WazuhManager
 from ..helpers.logger.logger import logger
+from ..helpers.utils import Utils
 
 
 @pytest.fixture
@@ -49,6 +50,7 @@ def setup_test_environment(wazuh_params):
 def test_installation(wazuh_params):
     # Disabling firewall for all managers
     for manager_name, manager_params in wazuh_params['managers'].items():
+        Utils.check_inventory_connection(manager_params)
         HostConfiguration.disable_firewall(manager_params)
 
     # Certs create and scp from master to worker
