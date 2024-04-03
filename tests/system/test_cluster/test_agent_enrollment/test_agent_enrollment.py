@@ -25,7 +25,7 @@ tmp_path = os.path.join(local_path, 'tmp')
 
 # Remove the agent once the test has finished
 @pytest.fixture(scope='module')
-def setup_environment():
+def clean_environment():
 
     yield
 
@@ -37,8 +37,7 @@ def setup_environment():
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
 
 
-
-def test_agent_enrollment(setup_environment):
+def test_agent_enrollment(clean_environment):
     """Check agent enrollment process works as expected. An agent pointing to a worker should be able to register itself
     into the master by starting Wazuh-agent process."""
 
