@@ -244,10 +244,9 @@ def install_package(host: str, operation_data: Dict[str, Any], host_manager: Hos
         host_manager.install_package(host, package_url, package_system)
     except Exception as e:
         logging.error(f"Error installing package on {host}: {e}")
-        result['installation'] = False
+        result['success'] = False
 
-    if result['installation']:
-        check_mitigated = operation_data.get('vuln_mitigated', False)
+    if result['success']:
         result['vulnerabilities'] = get_vulnerabilities(host_manager, [host], 
                                                         operation_data['package'],
                                                         current_datetime)
@@ -284,7 +283,7 @@ def remove_package(host: str, operation_data: Dict[str, Any], host_manager: Host
         logging.error(f"Error installing package on {host}: {e}")
         result['success'] = False
 
-    if result['installation']:
+    if result['success']:
         result['vulnerabilities'] = get_vulnerabilities(host_manager, [host], 
                                                         operation_data['package'],
                                                         greater_than_timestamp=current_datetime)
@@ -315,10 +314,9 @@ def update_package(host: str, operation_data: Dict[str, Any], host_manager: Host
         host_manager.install_package(host, package_url, package_system)
     except Exception as e:
         logging.error(f"Error installing package on {host}: {e}")
-        result['installation'] = False
+        result['success'] = False
 
-    if result['installation']:
-
+    if result['success']:
         result['vulnerabilities']['to'] = get_vulnerabilities(host_manager, [host], 
                                                           operation_data['package']['to'],
                                                           greater_than_timestamp=datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
