@@ -53,19 +53,19 @@ def setup_test_environment(wazuh_params):
     wazuh_params['agents'] = {key + '-' + re.findall(r'agent-(.*?)/', value)[0].replace('.',''): value for key, value in targets_dict.items() if key.startswith('agent')}
 
 def test_installation(wazuh_params):
-    # Disabling firewall for all managers
+    # Checking connection
     for manager_name, manager_params in wazuh_params['managers'].items():
         Utils.check_inventory_connection(manager_params)
-        HostConfiguration.disable_firewall(manager_params)
     for agent_name, agent_params in wazuh_params['agents'].items():
         Utils.check_inventory_connection(agent_params)
         HostConfiguration.disable_firewall(agent_params)
 
-    # Certs create and Manager installation
-    HostConfiguration.certs_create(wazuh_params['wazuh_version'], wazuh_params['master'], wazuh_params['dashboard'], wazuh_params['indexers'], wazuh_params['workers'])
+    # Certs creation, firewall management and Manager installation
     if HostInformation.dir_exists(wazuh_params['master'], WAZUH_ROOT):
         logger.info(f'Manager is already installed in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])}')
     else:
+        HostConfiguration.disable_firewall(manager_params)
+        HostConfiguration.certs_create(wazuh_params['wazuh_version'], wazuh_params['master'], wazuh_params['dashboard'], wazuh_params['indexers'], wazuh_params['workers'])
         WazuhManager.install_manager(wazuh_params['master'], 'wazuh-1', wazuh_params['wazuh_version'])
     assert HostInformation.dir_exists(wazuh_params['master'], WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])}')
 
