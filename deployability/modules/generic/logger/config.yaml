@@ -23,7 +23,7 @@ handlers:
     class: logging.FileHandler
     level: DEBUG
     formatter: simple
-    filename: /tmp/deployability.log
+    filename: /tmp/workflow.log
     filters: [uppercase]
 root:
   level: DEBUG

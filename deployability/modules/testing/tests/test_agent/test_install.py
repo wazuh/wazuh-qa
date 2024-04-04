@@ -62,7 +62,10 @@ def test_installation(wazuh_params):
 
     # Certs create and Manager installation
     HostConfiguration.certs_create(wazuh_params['wazuh_version'], wazuh_params['master'], wazuh_params['dashboard'], wazuh_params['indexers'], wazuh_params['workers'])
-    WazuhManager.install_manager(wazuh_params['master'], 'wazuh-1', wazuh_params['wazuh_version'])
+    if HostInformation.dir_exists(wazuh_params['master'], WAZUH_ROOT):
+        logger.info(f'Manager is already installed in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])}')
+    else:
+        WazuhManager.install_manager(wazuh_params['master'], 'wazuh-1', wazuh_params['wazuh_version'])
     assert HostInformation.dir_exists(wazuh_params['master'], WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])}')
 
     # Agent installation

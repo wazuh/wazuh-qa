@@ -25,7 +25,7 @@ handlers:
     class: logging.FileHandler
     level: DEBUG
     formatter: simple
-    filename: /tmp/flowbacca.log
+    filename: /tmp/workflow.log
 root:
   level: DEBUG
   handlers: [console, file]
