@@ -3,8 +3,6 @@
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import pytest
-import random
-import time
 import re
 
 from ..helpers.agent import WazuhAgent
