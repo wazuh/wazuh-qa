@@ -162,7 +162,7 @@ def get_expected_vulnerabilities_by_agent(host_manager: HostManager, agents_list
         package_id = packages_data[host_os_name][host_os_arch]
 
         expected_vulnerabilities = get_expected_vulnerabilities_for_package(host_manager, agent, package_id, check)
-        expected_vulnerabilities_by_agent[agent].extend(expected_vulnerabilities)
+        expected_vulnerabilities_by_agent[agent] = expected_vulnerabilities
 
     return expected_vulnerabilities_by_agent
 
@@ -387,7 +387,7 @@ def update_package(host: str, operation_data: Dict[str, Any], host_manager: Host
                                                           operation_data['package']['from'],
                                                           greater_than_timestamp=current_datetime)
 
-    expected_vulnerabilities_to = get_expected_vulnerabilities_by_agent(host_manager, [host], ,
+    expected_vulnerabilities_to = get_expected_vulnerabilities_by_agent(host_manager, [host],
                                                                         operation_data['package']['to'],
                                                                         operation_data['check'])
 
