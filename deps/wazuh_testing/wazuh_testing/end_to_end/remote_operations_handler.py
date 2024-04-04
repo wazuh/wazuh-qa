@@ -174,7 +174,7 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
                 logging.info(f"Installing package on {host}")
                 logging.info(f"Package URL: {package_url}")
 
-                current_datetime = datetime.now(timezone.utc).isoformat()[:-6]
+                current_datetime = datetime.now(timezone.utc).isoformat()[:-6]  # Delete timezone offset
                 host_manager.install_package(host, package_url, system)
 
                 logging.info(f"Package {package_url} installed on {host}")
@@ -250,7 +250,7 @@ def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
 
                 package_data = load_packages_metadata()[package_id]
 
-                current_datetime = datetime.now(timezone.utc).isoformat()[:-6]
+                current_datetime = datetime.now(timezone.utc).isoformat()[:-6]  # Delete timezone offset
 
                 logging.info(f"Removing package on {host}")
                 if 'uninstall_name' in package_data:
@@ -347,7 +347,7 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
                 logging.info(f"Installing package on {host}")
                 logging.info(f"Package URL: {package_url_to}")
 
-                current_datetime = datetime.now(timezone.utc).isoformat()[:-6]
+                current_datetime = datetime.now(timezone.utc).isoformat()[:-6]  # Delete timezone offset
                 host_manager.install_package(host, package_url_to, system)
 
                 logging.info(f"Package {package_url_to} installed on {host}")
@@ -388,7 +388,7 @@ def launch_remote_sequential_operation_on_agent(agent: str, task_list: List[Dict
         host_manager (HostManager): An instance of the HostManager class containing information about hosts.
     """
     # Convert datetime to Unix timestamp (integer)
-    timestamp = datetime.now(timezone.utc).isoformat()[:-6]
+    timestamp = datetime.now(timezone.utc).isoformat()[:-6]  # Delete timezone offset
 
     if task_list:
         for task in task_list:
