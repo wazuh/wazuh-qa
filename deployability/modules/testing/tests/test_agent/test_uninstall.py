@@ -3,6 +3,7 @@
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import pytest
+import re
 
 from ..helpers.agent import WazuhAgent
 from ..helpers.constants import WAZUH_ROOT
@@ -39,7 +40,7 @@ def setup_test_environment(wazuh_params):
 
     wazuh_params['master'] = targets_dict.get('wazuh-1')
     wazuh_params['workers'] = [value for key, value in targets_dict.items() if key.startswith('wazuh-') and key != 'wazuh-1']
-    wazuh_params['agents'] = [value for key, value in targets_dict.items() if key.startswith('agent-')]
+    wazuh_params['agents'] = [value for key, value in targets_dict.items() if key.startswith('agent')]
     wazuh_params['indexers'] = [value for key, value in targets_dict.items() if key.startswith('node-')]
     wazuh_params['dashboard'] = targets_dict.get('dashboard', wazuh_params['master'])
 
@@ -48,7 +49,7 @@ def setup_test_environment(wazuh_params):
         wazuh_params['indexers'].append(wazuh_params['master'])
 
     wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
-    wazuh_params['agents'] = {key: value for key, value in targets_dict.items() if key.startswith('agent-')}
+    wazuh_params['agents'] = {key + '-' + re.findall(r'agent-(.*?)/', value)[0].replace('.',''): value for key, value in targets_dict.items() if key.startswith('agent')}
 
 def test_uninstall(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
