@@ -32,7 +32,7 @@ def main() -> None:
         signal.signal(signal.SIGINT, processor.handle_interrupt)
         processor.run()
     except Exception as e:
-        sys.exit(f"Error while provisioning: {e}")
+        sys.exit(f"Error executing workflow: {e}")
 
 if __name__ == "__main__":
     main()
