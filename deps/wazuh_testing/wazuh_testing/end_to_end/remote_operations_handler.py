@@ -167,7 +167,7 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
         try:
             if host_os_arch in install_package_data[host_os_name]:
                 package_id = install_package_data[host_os_name][host_os_arch]
-        
+
                 package_data = load_packages_metadata()[package_id]
                 package_url = package_data['urls'][host_os_name][host_os_arch]
 
@@ -181,7 +181,7 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
                 if use_npm:
                   host_manager.install_npm_package(host, package_url, system)
                 else:
-                  host_manager.install_package(host, package_url, system, use_npm=use_npm)
+                  host_manager.install_package(host, package_url, system)
 
                 logging.info(f"Package {package_url} installed on {host}")
 
@@ -199,10 +199,10 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
 
                     check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
                                                 package_data, operation='install')
-            
+
             else:
                 logging.error(f"Error: Package for {host_os_name} and {host_os_arch} not found")
-                
+
         except Exception as e:
             logging.critical(f"Error searching package: {e}")
 
@@ -266,7 +266,7 @@ def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
             if use_npm:
                 host_manager.remove_npm_package(host, system, package_uninstall_name=uninstall_name)
             else:
-                host_manager.remove_package(host, system, package_uninstall_name=uninstall_name, use_npm=use_npm)
+                host_manager.remove_package(host, system, package_uninstall_name=uninstall_name)
         elif 'uninstall_custom_playbook' in package_data:
             host_manager.remove_package(host, system,
                                         custom_uninstall_playbook=package_data['uninstall_custom_playbook'])
@@ -343,7 +343,7 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
         try:
             if host_os_arch in install_package_data_to[host_os_name]:
                 package_id_to = install_package_data_to[host_os_name][host_os_arch]
-            
+
                 package_data_from = load_packages_metadata()[package_id_from]
                 package_data_to = load_packages_metadata()[package_id_to]
 
@@ -359,7 +359,7 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
                 if use_npm:
                   host_manager.install_npm_package(host, package_url_to, system)
                 else:
-                  host_manager.install_package(host, package_url_to, system, use_npm=use_npm)
+                  host_manager.install_package(host, package_url_to, system)
 
                 logging.info(f"Package {package_url_to} installed on {host}")
 
@@ -374,7 +374,7 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
 
                     check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
                                             {'from': package_data_from, 'to': package_data_to}, operation='update')
-                
+
             else:
                 logging.error(f"Error: Package for {host_os_name} and {host_os_arch} not found")
 
