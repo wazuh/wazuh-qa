@@ -118,7 +118,7 @@ def get_expected_vulnerabilities_for_package(host_manager: HostManager, host: st
         'index': vulnerabilities if check.get('index', True) else []
     }
 
-    return vulnerabilities
+    return expected_vuln
 
 
 def filter_vulnerabilities_by_packages(host_manager: HostManager, vulnerabilities: Dict,
@@ -297,7 +297,7 @@ def install_package(host: str, operation_data: Dict[str, Any], host_manager: Hos
 
     result['expected_vulnerabilities'] = get_expected_vulnerabilities_by_agent(host_manager, [host],
                                                                                operation_data['package'],
-                                                                               operation_data['check'])
+                                                                               operation_data['check'])[host]
 
     return result
 
@@ -347,7 +347,7 @@ def remove_package(host: str, operation_data: Dict[str, Any], host_manager: Host
 
     result['expected_vulnerabilities'] = get_expected_vulnerabilities_by_agent(host_manager, [host],
                                                                                operation_data['package'],
-                                                                               operation_data['check'])
+                                                                               operation_data['check'])[host]
 
     return result
 
@@ -389,11 +389,11 @@ def update_package(host: str, operation_data: Dict[str, Any], host_manager: Host
 
     expected_vulnerabilities_to = get_expected_vulnerabilities_by_agent(host_manager, [host],
                                                                         operation_data['package']['to'],
-                                                                        operation_data['check'])
+                                                                        operation_data['check'])[host]
 
     expected_vulnerabilities_from = get_expected_vulnerabilities_by_agent(host_manager, [host],
                                                                           operation_data['package']['from'],
-                                                                          operation_data['check'])
+                                                                          operation_data['check'])[host]
 
     result['expected_vulnerabilities']['to'] = expected_vulnerabilities_to
     result['expected_vulnerabilities']['from'] = expected_vulnerabilities_from
