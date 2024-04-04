@@ -99,7 +99,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
                     timestamp_str = match
 
                 timestamp_format = "%Y/%m/%d %H:%M:%S"
-                timestamp_format_parameter = "%Y-%m-%dT%H:%M:%S.%f"
+                timestamp_format_parameter = "%Y-%m-%dT%H:%M:%S"
 
                 try:
                     timestamp_datetime = datetime.strptime(timestamp_str, timestamp_format)
@@ -162,7 +162,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
     with ThreadPoolExecutor() as executor:
         futures = []
         for host, data in monitoring_data.items():
-            futures.append(executor.submit(monitoring_event, host_manager, host, data, ignore_timeout_error, 
+            futures.append(executor.submit(monitoring_event, host_manager, host, data, ignore_timeout_error,
                                            scan_interval))
 
         results = {}
@@ -251,4 +251,3 @@ def monitoring_syscollector_scan_agents(host_manager: HostManager, timeout: int,
             agents_not_scanned.append(agent)
 
     return agents_not_scanned
-

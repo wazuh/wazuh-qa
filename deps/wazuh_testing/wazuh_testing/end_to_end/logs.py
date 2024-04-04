@@ -92,7 +92,7 @@ def check_errors_in_environment(host_manager: HostManager, greater_than_timestam
                 if not any(re.search(error, match[0]) for error in expected_errors):
                     if greater_than_timestamp:
                         date_format = "%Y/%m/%d %H:%M:%S"
-                        default_tiemstamp_format = "%Y-%m-%dT%H:%M:%S.%f"
+                        default_tiemstamp_format = "%Y-%m-%dT%H:%M:%S"
 
                         date_filter_format = datetime.strptime(greater_than_timestamp, default_tiemstamp_format)
                         log_date = datetime.strptime(match[1], date_format)
