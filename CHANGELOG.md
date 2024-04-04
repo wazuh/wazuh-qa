@@ -49,6 +49,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix enrollment cluster system tests ([#5134](https://github.com/wazuh/wazuh-qa/pull/5134/)) \- (Tests)
 - Fix `test_synchronization` system test ([#5089](https://github.com/wazuh/wazuh-qa/pull/5089)) \- (Framework + Tests)
 - Fix number of files and their size for `test_zip_size_limit` ([#5133](https://github.com/wazuh/wazuh-qa/pull/5133)) \- (Tests)
 - Fix test_shutdown_message system test ([#5087](https://github.com/wazuh/wazuh-qa/pull/5087)) \- (Tests)

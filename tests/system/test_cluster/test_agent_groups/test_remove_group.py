@@ -29,7 +29,7 @@ messages_path = os.path.join(data_path, 'remove_group_messages.yaml')
 # Variables
 t1_configuration_parameters, t1_configuration_metadata, t1_case_ids = get_test_cases_data(t1_cases_path)
 queries = ['sql select `group` from agent;', 'sql select name from `group`;', 'sql select id_group from belongs;']
-
+TIMEOUT_GET_GROUPS_ID = 3
 
 # Fixtures
 @pytest.fixture()
@@ -111,6 +111,8 @@ def test_remove_group(metadata, group, target_node, pre_configured_groups, clean
         HostMonitor(inventory_path=inventory_path,
                     messages_path=messages_path,
                     tmp_path=tmp_path).run(update_position=True)
+
+        sleep(TIMEOUT_GET_GROUPS_ID)
 
         for manager in test_infra_managers:
             group_ids[manager] = str(get_group_id(group, manager, host_manager))
