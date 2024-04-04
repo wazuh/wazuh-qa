@@ -289,7 +289,9 @@ def install_package(host: str, operation_data: Dict[str, Any], host_manager: Hos
         logging.error(f"Error installing package on {host}: {e}")
         result['success'] = False
 
-    if result['success'] and operation_data('check'):
+    check_options = operation_data('check')
+    check_vuln = check_options('alert') or check_options('index')
+    if result['success'] and check_vuln:
         result['vulnerabilities'] = get_vulnerabilities(host_manager, [host],
                                                         operation_data['package'],
                                                         current_datetime)
@@ -337,7 +339,9 @@ def remove_package(host: str, operation_data: Dict[str, Any], host_manager: Host
         logging.error(f"Error removing package on {host}: {e}")
         result['success'] = False
 
-    if result['success'] and operation_data('check'):
+    check_options = operation_data('check')
+    check_vuln = check_options('alert') or check_options('index')
+    if result['success'] and check_vuln:
         result['vulnerabilities'] = get_vulnerabilities(host_manager, [host],
                                                         operation_data['package'],
                                                         greater_than_timestamp=current_datetime)
@@ -374,7 +378,9 @@ def update_package(host: str, operation_data: Dict[str, Any], host_manager: Host
         logging.error(f"Error installing package on {host}: {e}")
         result['success'] = False
 
-    if result['success'] and operation_data('check'):
+    check_options = operation_data('check')
+    check_vuln = check_options('alert') or check_options('index')
+    if result['success'] and check_vuln:
         result['vulnerabilities']['to'] = get_vulnerabilities(host_manager, [host],
                                                           operation_data['package']['to'],
                                                           greater_than_timestamp=current_datetime)
