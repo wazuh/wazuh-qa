@@ -50,6 +50,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix Vulnerability Detector E2E tests by adding description to all tests ([#5151](https://github.com/wazuh/wazuh-qa/pull/5151)) \- (Tests)
 - Fix parser for non package vulnerabilities ([#5146](https://github.com/wazuh/wazuh-qa/pull/5146)) \- (Framework)
 - Fix remote_operations_handler functions to Vulnerability Detector E2E tests ([#5155](https://github.com/wazuh/wazuh-qa/pull/5155)) \- (Framework)
 - Fix test_shutdown_message system test ([#5087](https://github.com/wazuh/wazuh-qa/pull/5087)) \- (Tests)
