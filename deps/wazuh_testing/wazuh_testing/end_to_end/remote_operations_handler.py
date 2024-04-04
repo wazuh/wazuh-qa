@@ -115,7 +115,7 @@ def get_expected_vulnerabilities_for_package(host_manager: HostManager, host: st
 
     expected_vuln = {
         'alerts': vulnerabilities if check.get('alerts', True) else [],
-        'index': vulnerabilities if check.get('index', True) else []
+        'index': vulnerabilities if check.get('states', True) else []
     }
 
     return expected_vuln
@@ -289,7 +289,7 @@ def install_package(host: str, operation_data: Dict[str, Any], host_manager: Hos
         logging.error(f"Error installing package on {host}: {e}")
         result['success'] = False
 
-    check_options = operation_data.get('check')
+    check_options = operation_data.get('check', {})
     check_vuln = check_options.get('alert') or check_options.get('index') if check_options else False
     if result['success'] and check_vuln:
         result['vulnerabilities'] = get_vulnerabilities(host_manager, host,
@@ -339,7 +339,7 @@ def remove_package(host: str, operation_data: Dict[str, Any], host_manager: Host
         logging.error(f"Error removing package on {host}: {e}")
         result['success'] = False
 
-    check_options = operation_data.get('check')
+    check_options = operation_data.get('check', {})
     check_vuln = check_options.get('alert') or check_options.get('index')
     if result['success'] and check_vuln:
         result['vulnerabilities'] = get_vulnerabilities(host_manager, host,
@@ -378,7 +378,7 @@ def update_package(host: str, operation_data: Dict[str, Any], host_manager: Host
         logging.error(f"Error installing package on {host}: {e}")
         result['success'] = False
 
-    check_options = operation_data.get('check')
+    check_options = operation_data.get('check', {})
     check_vuln = check_options.get('alert') or check_options.get('index')
     if result['success'] and check_vuln:
         result['vulnerabilities']['to'] = get_vulnerabilities(host_manager, host,
