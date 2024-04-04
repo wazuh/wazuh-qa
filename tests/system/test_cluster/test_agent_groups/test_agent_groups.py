@@ -7,7 +7,7 @@ import re
 from time import sleep
 
 import pytest
-from wazuh_testing.tools.monitoring import HostMonitor
+from wazuh_testing.tools.system_monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 from system.test_cluster.test_agent_groups.common import register_agent
 from system import AGENT_STATUS_ACTIVE, check_agent_status, restart_cluster, execute_wdb_query
@@ -35,7 +35,7 @@ tmp_path = os.path.join(local_path, 'tmp')
 # Variables
 test_group = 'test_group'
 while_time = 5
-time_to_sync = 21
+time_to_sync = 25
 time_to_agent_reconnect = 180
 queries = ['sql select * from "group" where name="test_group"']
 

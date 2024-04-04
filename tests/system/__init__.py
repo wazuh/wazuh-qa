@@ -4,6 +4,7 @@
 
 import os
 import json
+from multiprocessing.pool import ThreadPool
 
 from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH, CLUSTER_LOGS_PATH, AGENT_GROUPS_BINARY_PATH
 
@@ -21,9 +22,9 @@ ERR_MSG_FAILED_TO_SET_AGENT_GROUP = 'Failed when trying to set agent group'
 
 
 # Functions
-def get_agent_id(host_manager):
+def get_agent_id(host_manager, node='wazuh-master'):
     # Gets the first agent id in the master's client.keys file
-    return host_manager.run_command('wazuh-master', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
+    return host_manager.run_command(node, f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
 
 
 def get_id_from_agent(agent, host_manager):
@@ -31,12 +32,17 @@ def get_id_from_agent(agent, host_manager):
     return host_manager.run_command(agent, f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
 
 
-def restart_cluster(hosts_list, host_manager):
+def restart_cluster(hosts_list, host_manager, parallel=False):
+    service = 'wazuh'
+    state = 'restarted'
     # Restart the cluster's hosts
-    for host in hosts_list:
-        if "agent" in host:
-            host_manager.get_host(host).ansible('command', f'service wazuh-agent restart', check=False)
-        host_manager.control_service(host=host, service='wazuh', state="restarted")
+    if parallel:
+        with ThreadPool() as pool:
+            pool.starmap(host_manager.control_service,
+                         [(host, service, state) for host in hosts_list])
+    else:
+        for host in hosts_list:
+            host_manager.control_service(host=host, service=service, state=state)
 
 
 def clean_cluster_logs(hosts_list, host_manager):

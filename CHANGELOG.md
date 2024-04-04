@@ -11,10 +11,18 @@ All notable changes to this project will be documented in this file.
 - Removed configobj library from requirements.txt ([#4803](https://github.com/wazuh/wazuh-qa/pull/4803)) \- (Framework)
 - Updated integration tests README ([#4742](https://github.com/wazuh/wazuh-qa/pull/4742)) \- (Framework)
 
+### Fixed
+
+- Fix manager_agent system tests environment ([#4808](https://github.com/wazuh/wazuh-qa/pull/4808)) \- (Framework)
+
 ## [4.8.0] - TBD
 
 ### Added
 
+- Add documentation about markers for system tests ([#5080](https://github.com/wazuh/wazuh-qa/pull/5080)) \- (Documentation)
+- Add AWS Custom Buckets Integration tests ([#4675](https://github.com/wazuh/wazuh-qa/pull/4675)) \- (Framework + Tests)
+- Add Vulnerability Detector end to end tests ([#4878](https://github.com/wazuh/wazuh-qa/pull/4878)) \- (Framework + Tests)
+- Agent Simulator: Syscollector message generation refactoring ([#4868](https://github.com/wazuh/wazuh-qa/pull/4868)) \- (Framework)
 - Migrate Wazuh Ansibles Roles. ([#4642](https://github.com/wazuh/wazuh-qa/pull/4642)) \- (Framework)
 - Add scans environment setup documentation. ([#4444](https://github.com/wazuh/wazuh-qa/pull/4444)) \- (Tests)
 - Add system test for global group hash ([#4015](https://github.com/wazuh/wazuh-qa/pull/4015)) \- (Tests)
@@ -26,6 +34,13 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Refactor initial scan Vulnerability E2E tests ([#5081](https://github.com/wazuh/wazuh-qa/pull/5081)) \- (Framework + Tests)
+- Update Packages in TestScanSyscollectorCases ([#4997](https://github.com/wazuh/wazuh-qa/pull/4997)) \- (Framework + Tests)
+- Reduced test_shutdown_message runtime ([#4986](https://github.com/wazuh/wazuh-qa/pull/4986)) \- (Tests)
+- Change e2e vd configuration keystore ([#4952](https://github.com/wazuh/wazuh-qa/pull/4952)) \- (Framework)
+- Updating tests after removing references to the legacy vulnerability detector module ([#4872](https://github.com/wazuh/wazuh-qa/pull/4872)) \- (Tests)
+- Fix wazuhdb API statistics parsing ([#5007](https://github.com/wazuh/wazuh-qa/pull/5007)) \- (Framework)
+- Enhance StatisticMonitor with API support ([#4970](https://github.com/wazuh/wazuh-qa/pull/4970)) \- (Framework)
 - Deactivate tests and update vulnerability-detector configuration ([#4784](https://github.com/wazuh/wazuh-qa/pull/4784)) \- (Framework + Tests)
 - Fix body format for get_api_token ([#4797](https://github.com/wazuh/wazuh-qa/pull/4797)) \- (Framework)
 - Fix one_manager_agent_env pytest marker for System Tests ([#4782](https://github.com/wazuh/wazuh-qa/pull/4782)) \- (Tests)
@@ -41,15 +56,44 @@ All notable changes to this project will be documented in this file.
 - Update the JSON schema with the required fields for the output content of the migration tool ([#4375](https://github.com/wazuh/wazuh-qa/pull/4375)) \- (Tests)
 - Update framework known flaws file ([#4443](https://github.com/wazuh/wazuh-qa/pull/4443)) \- (Tests)
 - Align migration tool system tests to the tool's new output directory structure ([#4561](https://github.com/wazuh/wazuh-qa/pull/4561)) \- (Tests)
+- Update file descriptors threshold values used in cluster performance tests ([#5073](https://github.com/wazuh/wazuh-qa/pull/5073)) \- (Tests)
 
 ### Fixed
 
+- Fix `test_synchronization` system test ([#5089](https://github.com/wazuh/wazuh-qa/pull/5089)) \- (Framework + Tests)
+- Fix number of files and their size for `test_zip_size_limit` ([#5133](https://github.com/wazuh/wazuh-qa/pull/5133)) \- (Tests)
+- Fix test_shutdown_message system test ([#5087](https://github.com/wazuh/wazuh-qa/pull/5087)) \- (Tests)
+- Include timeout to test_authd system tests ([#5083](https://github.com/wazuh/wazuh-qa/pull/5083)) \- (Tests)
+- Fix Vulnerability Detection mismatch in scans ([#5053](https://github.com/wazuh/wazuh-qa/pull/5053)) \- (Tests)
+- Fix agent groups tests for enrollment_cluster environment ([#5086](https://github.com/wazuh/wazuh-qa/pull/5086)) \- (Framework + Tests)
+- Fix initial scans tests ([5032](https://github.com/wazuh/wazuh-qa/pull/5032)) \- (Framework + Tests)
+- Handle VDT data missing in wazuh-db API ([5014](https://github.com/wazuh/wazuh-qa/pull/5014)) \- (Framework + Tests)
+- Fixed x-axis labels in data-visualizer script ([#4987 ](https://github.com/wazuh/wazuh-qa/pull/4987)) \- (Framework)
+- Fix monitoring module for e2e tests ([#4959](https://github.com/wazuh/wazuh-qa/pull/4959)) \- (Framework)
+- Fix get_host_variables for system tests ([#4958](https://github.com/wazuh/wazuh-qa/pull/4958)) \- (Framework)
+- Fix install package HostManager method ([#4954](https://github.com/wazuh/wazuh-qa/pull/4954)) \- (Framework)
+- Fix Modify file method in system module ([#4953](https://github.com/wazuh/wazuh-qa/pull/4953)) \- (Framework)
+- Fix timeout and performance issues in E2E Vulnerability Detector tests ([#5003](https://github.com/wazuh/wazuh-qa/pull/5003)) \- (Framework)
+- Fixed Filebeat provisioning role with pre-release and staging URLs ([#4950](https://github.com/wazuh/wazuh-qa/pull/4950)) \- (Framework)
+- Fix macOS Vulnerability Detection handler provision in E2E tests ([#4948](https://github.com/wazuh/wazuh-qa/pull/4948)) \- (Framework)
+- Migrate Vulnerability Detection timeouts variables to the waiters module ([#4949](https://github.com/wazuh/wazuh-qa/pull/4949)) \- (Framework)
+- Migrate HostMonitor to system_monitoring to avoid Windows import of ansible module ([#4917](https://github.com/wazuh/wazuh-qa/pull/4917/)) \- (Framework)
+- Fixed ansible_runner import conditional to avoid errors on Windows and python 3.6 ([#4916](https://github.com/wazuh/wazuh-qa/pull/4916)) \- (Framework)
 - Fixed IT control_service Windows loop ([#4765](https://github.com/wazuh/wazuh-qa/pull/4765)) \- (Framework)
 - Fix macOS agents provision to enable registration and connection with managers. ([#4770](https://github.com/wazuh/wazuh-qa/pull/4770/)) \- (Framework)
 - Fix hardcoded python interpreter in qa_framework role. ([#4658](https://github.com/wazuh/wazuh-qa/pull/4658)) \- (Framework)
 - Fix duplicated jq dependency ([#4678](https://github.com/wazuh/wazuh-qa/pull/4678)) \- (Framework)
+- Fix test_file_checker in check_mtime case ([#4873](https://github.com/wazuh/wazuh-qa/pull/4873)) \- (Tests)
+- Fix test cluster performance. ([#4780](https://github.com/wazuh/wazuh-qa/pull/4780)) \- (Framework)
+- Fixed the graphic generation for the logcollectord statistics files. ([#5021](https://github.com/wazuh/wazuh-qa/pull/5021)) \- (Framework)
 
-## [4.7.2] - TBD
+## [4.7.3] - 04/03/2024
+
+### Changed
+
+- Upgrade wazuh-db agent database version. ([#4992](https://github.com/wazuh/wazuh-qa/pull/4992)) \- (Tests)
+
+## [4.7.2] - 10/01/2024
 
 ### Fixed
 
@@ -115,6 +159,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Change expected database version ([#5111](https://github.com/wazuh/wazuh-qa/pull/5111)) \- (Tests)
 - `Agentless_cluster` system tests timeout changed in order to reduce EC2 requirements ([#4534](https://github.com/wazuh/wazuh-qa/pull/4534)) \- (Tests)
 - Skip `test_authd_ssl_options` cases that use TLS 1.1 causing errors on several OpenSSL versions. ([#4229](https://github.com/wazuh/wazuh-qa/pull/4229)) \- (Tests)
 - Update database version ([#4467](https://github.com/wazuh/wazuh-qa/pull/4467)) \- (Tests)

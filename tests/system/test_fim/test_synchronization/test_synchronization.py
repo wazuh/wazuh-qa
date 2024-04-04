@@ -41,15 +41,16 @@ tags:
 """
 
 import os
-import json
 import pytest
+import re
 from time import sleep
 
 
-from wazuh_testing.tools.monitoring import HostMonitor
+from system import execute_wdb_query, get_agent_id
+from wazuh_testing.tools.system_monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager, clean_environment
 from wazuh_testing.tools import WAZUH_LOGS_PATH
-from wazuh_testing.fim import create_folder_file, query_db
+from wazuh_testing.fim import create_folder_file
 
 
 pytestmark = [pytest.mark.one_manager_agent_env]
@@ -67,8 +68,6 @@ messages_path = [os.path.join(local_path, 'data/messages.yml'),
                  ]
 tmp_path = os.path.join(local_path, 'tmp')
 scheduled_mode = 'testdir1'
-db_path = '/var/ossec/queue/db/001.db'
-db_script = '/var/system_query_db.py'
 enviroment_files = [('wazuh-manager', os.path.join(WAZUH_LOGS_PATH, 'ossec.log')),
                     ('wazuh-agent1', os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))]
 
@@ -136,6 +135,7 @@ def test_synchronization(folder_path, case, host):
         host_manager.run_command('wazuh-agent1', f'rm -rf {folder_path}')
         folder_path = f"'/{folder_path}/{folder_path}.txt'"
         query = " select * from fim_entry where full_path='\"{}\"'".format(folder_path)
+        agent_id = get_agent_id(host_manager, 'wazuh-manager')
 
     # Start host
     host_manager.run_command(host, '/var/ossec/bin/wazuh-control start')
@@ -150,8 +150,9 @@ def test_synchronization(folder_path, case, host):
         if (case == 'delete'):
             # Execute query to DB
             sleep(5)
-            result = query_db(host_manager, db_script, db_path, f'\"{query}\"')
-            assert not json.loads(result)
+            result = execute_wdb_query(f"{agent_id} {query}", 'wazuh-manager', host_manager)
+
+            assert result == '[]'
 
     finally:
         host_manager.run_command('wazuh-agent1', f'rm -rf {folder_path}')

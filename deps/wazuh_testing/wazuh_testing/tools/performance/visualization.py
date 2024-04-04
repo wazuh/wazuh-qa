@@ -6,6 +6,7 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from matplotlib.ticker import LinearLocator
 
 BINARY_NON_PRINTABLE_HEADERS = ['PID', 'Daemon', 'Version']
 
@@ -16,13 +17,13 @@ ANALYSISD_CSV_HEADERS = {
                                    'sca_events_decoded', 'hostinfo_events_decoded', 'winevt_events_decoded',
                                    'other_events_decoded', 'dbsync_messages_dispatched'],
                        },
-    'queue_usage': { 'title': 'Queue usage during the test',
-                     'columns': ['syscheck_queue_usage', 'syscollector_queue_usage', 'rootcheck_queue_usage',
-                                 'sca_queue_usage', 'hostinfo_queue_usage', 'winevt_queue_usage',
-                                 'dbsync_queue_usage', 'upgrade_queue_usage', 'event_queue_usage',
-                                 'rule_matching_queue_usage', 'alerts_queue_usage', 'firewall_queue_usage',
-                                 'statistical_queue_usage', 'archives_queue_usage'],
-                     },
+    'queue_usage': {'title': 'Queue usage during the test',
+                    'columns': ['syscheck_queue_usage', 'syscollector_queue_usage', 'rootcheck_queue_usage',
+                                'sca_queue_usage', 'hostinfo_queue_usage', 'winevt_queue_usage',
+                                'dbsync_queue_usage', 'upgrade_queue_usage', 'event_queue_usage',
+                                'rule_matching_queue_usage', 'alerts_queue_usage', 'firewall_queue_usage',
+                                'statistical_queue_usage', 'archives_queue_usage'],
+                    },
     'events_decoded_per_second': {'title': 'Events decoded per second',
                                   'columns': ['syscheck_edps', 'syscollector_edps', 'rootcheck_edps',
                                               'sca_edps', 'hostinfo_edps', 'winevt_edps',
@@ -54,9 +55,9 @@ AGENTD_CSV_HEADERS = {
 }
 
 LOGCOLLECTOR_CSV_HEADERS = {
-    'events': {'title': 'Events generated', 'columns': ['events']},
-    'bytes_sent': {'title': 'Bytes sent', 'columns': ['bytes']},
-    'drops': {'title': 'Events dropped', 'columns': ['target_drops']},
+    'events': {'title': 'Events generated', 'columns': ['Events']},
+    'bytes_sent': {'title': 'Bytes sent', 'columns': ['Bytes']},
+    'drops': {'title': 'Events dropped', 'columns': ['Target Drops']},
 }
 
 
@@ -122,9 +123,9 @@ class DataVisualizer:
             ax (axes.SubplotBase): subplot base where the data will be printed.
         """
         if self.x_ticks_granularity == 'seconds':
-            ax.xaxis.set_major_locator(mdates.SecondLocator(interval=self.x_ticks_interval))
+            ax.xaxis.set_major_locator(LinearLocator(30))
         elif self.x_ticks_granularity == 'minutes':
-            ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=self.x_ticks_interval))
+            ax.xaxis.set_major_locator(LinearLocator(30))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
 
     @staticmethod
@@ -209,7 +210,7 @@ class DataVisualizer:
                 targets = self._get_logcollector_targets()
                 colors = self._color_palette(len(targets))
                 for target, color in zip(targets, colors):
-                    self._basic_plot(ax, self.dataframe[self.dataframe.target == target][element],
+                    self._basic_plot(ax, self.dataframe[self.dataframe.Target == target][element],
                                      label=target, color=color)
                 self._save_custom_plot(ax, element, title)
 
@@ -314,4 +315,4 @@ class DataVisualizer:
 
     def _get_logcollector_targets(self):
         """Get the list of unique logcollector targets (sockets) in the dataset."""
-        return self.dataframe.target.unique()
+        return self.dataframe.Target.unique()

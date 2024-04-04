@@ -72,7 +72,7 @@ def validate_inventory(inventory_path, target_hosts):
                         f"Read the {readme_file} file inside the E2E suite to build a valid inventory.")
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='session')
 def validate_environments(request):
     """Fixture with session scope to validate the environments before run the E2E tests.
 
@@ -155,7 +155,7 @@ def validate_environments(request):
     # -------------------------------------------------- End of Step 4 -------------------------------------------------
 
 
-@pytest.fixture(scope='module', autouse=True)
+@pytest.fixture(scope='module')
 def run_specific_validations(request):
     """Fixture with module scope to validate the environment of an specific tests with specific validation tasks.
 

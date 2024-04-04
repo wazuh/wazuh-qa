@@ -12,7 +12,7 @@ import pytest
 import yaml
 
 from wazuh_testing.tools import WAZUH_PATH, PYTHON_PATH, WAZUH_LOGS_PATH
-from wazuh_testing.tools.monitoring import HostMonitor
+from wazuh_testing.tools.system_monitoring import HostMonitor
 from wazuh_testing.tools.system import HostManager
 
 
@@ -57,25 +57,11 @@ files_not_to_sync = [os.path.join(WAZUH_PATH, 'etc', 'test_file'),
 tmp_size_test_path = os.path.join(WAZUH_PATH, 'tmp')
 dst_size_test_path = os.path.join(WAZUH_PATH, 'etc', 'rules')
 big_file_name = 'test_file_too_big'
-file_prefix = 'test_file_big_'
+file_prefix = 'test_file_'
 
 # merged.mg and agent.conf files that must be created after creating a group folder.
 merged_mg_file = os.path.join(directories_to_create[0], 'merged.mg')
 agent_conf_file = os.path.join(directories_to_create[0], 'agent.conf')
-
-
-# Functions
-
-def create_file(host, path, size):
-    """Create file of fixed size.
-
-    Args:
-        host (str): Host where the file should be created.
-        path (str): Path and name where to create the file.
-        size (int, str): Size of the file (if nothing specified, in bytes)
-    """
-    host_manager.run_command(host, f"fallocate -l {size} {path}")
-    host_manager.run_command(host, f"chown wazuh:wazuh {path}")
 
 
 # Fixtures
@@ -261,14 +247,16 @@ def test_zip_size_limit(clean_files, update_cluster_json):
         - The workers end up receiving all the files that do not exceed the maximum size.
     """
     too_big_size = configuration['max_zip_size'] + 1024
-    big_size = configuration['min_zip_size'] - 1024
-    big_filenames = {file_prefix + str(i) for i in range(10)}
+    big_filenames = {file_prefix + str(i+1) for i in range(140)}
 
     # Create a tmp folder and all files inside in the master node.
     host_manager.run_command(test_hosts[0], f"mkdir {tmp_size_test_path}")
-    create_file(test_hosts[0], os.path.join(tmp_size_test_path, big_file_name), too_big_size)
-    for filename in big_filenames:
-        create_file(test_hosts[0], os.path.join(tmp_size_test_path, filename), big_size)
+    host_manager.run_command(test_hosts[0], f"fallocate -l {too_big_size} {tmp_size_test_path}/{big_file_name}")
+    host_manager.run_command(test_hosts[0], f"chown wazuh:wazuh {tmp_size_test_path}/{big_file_name}")
+    host_manager.run_shell(test_hosts[0],
+                           f"for i in `seq 1 140`; do fallocate -l 1M {tmp_size_test_path}/{file_prefix}$i; done")
+    host_manager.run_shell(test_hosts[0],
+                           f"for i in `seq 1 140`; do chown wazuh:wazuh {tmp_size_test_path}/{file_prefix}$i; done")
 
     # Move files from tmp folder to destination folder. This way, all files are synced at the same time.
     host_manager.run_shell(test_hosts[0], f"mv {os.path.join(tmp_size_test_path, 'test_*')} {dst_size_test_path}")

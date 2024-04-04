@@ -50,7 +50,7 @@ from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups,
                     assign_agent_to_new_group, restart_cluster)
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.file import replace_regex_in_file
-from wazuh_testing.tools.monitoring import HostMonitor
+from wazuh_testing.tools.system_monitoring import HostMonitor
 from wazuh_testing.tools import WAZUH_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
 
 
@@ -150,7 +150,7 @@ def test_guess_single_group(target_node, status_guess_agent_group, clean_environ
     assert check_keys_file(test_infra_agents[0], host_manager), ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND
 
     try:
-        # Create new group and assign agent
+        # Assign agent to group
         assign_agent_to_new_group(test_infra_managers[0], group_id, agent_id, host_manager)
 
         # Remove agent from default to test single group guess (not multigroup)

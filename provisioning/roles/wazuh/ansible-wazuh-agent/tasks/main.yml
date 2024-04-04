@@ -24,7 +24,7 @@
 - include_tasks: "Linux.yml"
   when: ansible_system == "Linux"
 
-- include_tasks: "MacOS.yml"
+- include_tasks: "macos.yml"
   when: ansible_system == "Darwin"
 
 - include_tasks: "Solaris.yml"

@@ -1,0 +1,20 @@
+- name: Uninstall VLC
+  hosts: HOSTS
+  become_method: runas
+  tasks:
+    - name: Run VLC uninstall
+      ansible.windows.win_powershell: 
+        script: |
+          $VLCver = Get-ChildItem -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall, HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall |
+                     Get-ItemProperty |
+                     Where-Object {$_.DisplayName -match 'VLC'} |
+                     Select-Object -Property DisplayName, UninstallString, DisplayVersion
+
+          ForEach ($ver in $VLCver) {
+              If ($ver.UninstallString) {
+                  $uninst = $ver.UninstallString
+                  & cmd /c $uninst /norestart /S -wait 
+              }
+          }
+          Start-Process '{{uninstall_script_path}}\\uninstall.exe' -ArgumentList '/S /c /norestart -wait /L-1033 /S'
+

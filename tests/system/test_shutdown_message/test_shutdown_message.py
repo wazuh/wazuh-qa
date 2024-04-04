@@ -25,7 +25,8 @@ import os
 import pytest
 import re
 import time
-from wazuh_testing import T_1, T_3
+import threading
+from wazuh_testing import T_1
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
 from system import restart_cluster
@@ -40,26 +41,35 @@ agent_conf_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'
 testinfra_hosts = ['wazuh-master', 'wazuh-worker1', 'wazuh-worker2']
 workers = ['wazuh-worker1', 'wazuh-worker2']
 agents = []
+
+TIMEOUT_AGENT = 8
+
 number_agents = 40
 for number_agent in range(number_agents):
     agents.append(f'wazuh-agent{number_agent+1}')
 
 pytestmark = [pytest.mark.cluster, pytest.mark.big_cluster_40_agents_env]
 
-
 @pytest.fixture()
 def restart_all_agents():
-    restart_cluster(testinfra_hosts + agents, host_manager)
+    restart_cluster(agents, host_manager, parallel=True)
     time.sleep(T_1)
 
     yield
-    restart_cluster(testinfra_hosts + agents, host_manager)
+
+    restart_cluster(testinfra_hosts + agents, host_manager, parallel=True)
 
 
 @pytest.fixture()
 def stop_gracefully_all_agents():
+    threads = []
     for agent in agents:
-        host_manager.run_command(agent, f'{WAZUH_PATH}/bin/wazuh-control stop')
+        thread = threading.Thread(target=host_manager.run_command, args=(agent, f'{WAZUH_PATH}/bin/wazuh-control stop',))
+        thread.start()
+        threads.append(thread)
+
+    for thread in threads:
+        thread.join()
 
 
 def test_shut_down_message_gracefully_stopped_agent(restart_all_agents, stop_gracefully_all_agents):
@@ -81,7 +91,7 @@ def test_shut_down_message_gracefully_stopped_agent(restart_all_agents, stop_gra
         expected_output:
             - Gracefully closed, it is expected to find agents 'Disconected' in agent-manager
     '''
-    time.sleep(T_3)
+    time.sleep(TIMEOUT_AGENT)
 
     matches = re.findall(r"Disconnected", host_manager.run_command(testinfra_hosts[0],
                                                                    f'{WAZUH_PATH}/bin/agent_control -l'))
