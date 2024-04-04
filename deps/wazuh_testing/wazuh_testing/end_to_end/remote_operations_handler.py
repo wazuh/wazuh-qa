@@ -53,7 +53,7 @@ def get_vulnerabilities_not_found(vulnerabilities_found: List, expected_vulnerab
     return vulnerabilities_not_found
 
 
-def get_missing_vulnerabilities(vulnerabilities_by_agent: Dict, expected_vulnerabilities_by_agent: Dict) -> Dict:  
+def get_missing_vulnerabilities(vulnerabilities_by_agent: Dict, expected_vulnerabilities_by_agent: Dict) -> Dict:
     """
     Get the missing vulnerabilities in the list of expected vulnerabilities.
 
@@ -91,7 +91,7 @@ def calculate_expected_vulnerabilities_by_agent(host_manager: HostManager, packa
     return expected_vulnerabilities_by_agent
 
 
-def get_expected_vulnerabilities_for_package(host_manager: HostManager, host: str, 
+def get_expected_vulnerabilities_for_package(host_manager: HostManager, host: str,
                                              package_id: str) -> List:
 
     package_data = load_packages_metadata()[package_id]
@@ -110,13 +110,13 @@ def get_expected_vulnerabilities_for_package(host_manager: HostManager, host: st
         vulnerability = Vulnerability(cve, package_data['package_name'], package_data['package_version'], host_os_arch)
         vulnerabilities_list.append(vulnerability)
 
-    vulnerabilities = sorted(vulnerabilities_list, 
+    vulnerabilities = sorted(vulnerabilities_list,
                              key=lambda x: (x.cve, x.package_name, x.package_version, x.architecture))
 
     return vulnerabilities
 
 
-def filter_vulnerabilities_by_packages(host_manager: HostManager, vulnerabilities: Dict, 
+def filter_vulnerabilities_by_packages(host_manager: HostManager, vulnerabilities: Dict,
                                        packages_data: Dict) -> Dict:
     filtered_vulnerabilities = {}
     for host in vulnerabilities.keys():
@@ -161,7 +161,7 @@ def get_expected_vulnerabilities_by_agent(host_manager: HostManager, agents_list
     return expected_vulnerabilities_by_agent
 
 
-def get_package_url_for_host(host: str, package_id: str, host_manager: HostManager, 
+def get_package_url_for_host(host: str, package_id: str, host_manager: HostManager,
                              operation_data: Dict[str, Any]) -> str:
 
     host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
@@ -172,7 +172,7 @@ def get_package_url_for_host(host: str, package_id: str, host_manager: HostManag
         system = host_manager.get_host_variables(host)['os'].split('_')[0]
 
     install_package_data = operation_data['package']
-    
+
     try:
         package_id = install_package_data[host_os_name][host_os_arch]
         package_data = load_packages_metadata()[package_id]
@@ -191,7 +191,7 @@ def get_package_system(host: str, host_manager: HostManager) -> str:
     return system
 
 
-def get_vulnerabilities(host_manager: HostManager, agents_list: List, packages_data: Dict, 
+def get_vulnerabilities(host_manager: HostManager, agents_list: List, packages_data: Dict,
                           greater_than_timestamp: str = '') -> Dict:
 
     result = {}
@@ -207,7 +207,7 @@ def get_vulnerabilities(host_manager: HostManager, agents_list: List, packages_d
     alerts_vulnerabilities = filter_vulnerabilities_by_packages(host_manager, alerts['affected'] , packages_data)
     alerts_vulnerabilities_mitigated = filter_vulnerabilities_by_packages(host_manager, alerts['mitigated'] , packages_data)
 
-    # expected_vulnerabilities = get_expected_vulnerabilities_by_agent(host_manager, 
+    # expected_vulnerabilities = get_expected_vulnerabilities_by_agent(host_manager,
     #                                                                  host_manager.get_group_hosts('agent'),
     #                                                                  packages_data)
     result['index_vulnerabilities'] = package_vulnerabilities
@@ -234,12 +234,12 @@ def install_package(host: str, operation_data: Dict[str, Any], host_manager: Hos
     }
 
     logging.info(f"Installing package on {host}")
-    package_url = get_package_url_for_host(host, operation_data['package'], 
+    package_url = get_package_url_for_host(host, operation_data['package'],
                                            host_manager, operation_data)
     package_system = get_package_system(host, host_manager)
 
     utc_now_timestamp = datetime.utcnow()
-    current_datetime = utc_now_timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
+    current_datetime = utc_now_timestamp.strftime("%Y-%m-%dT%H:%M:%S.%f")
 
     try:
         host_manager.install_package(host, package_url, package_system)
@@ -248,7 +248,7 @@ def install_package(host: str, operation_data: Dict[str, Any], host_manager: Hos
         result['success'] = False
 
     if result['success']:
-        result['vulnerabilities'] = get_vulnerabilities(host_manager, [host], 
+        result['vulnerabilities'] = get_vulnerabilities(host_manager, [host],
                                                         operation_data['package'],
                                                         current_datetime)
 
@@ -277,7 +277,7 @@ def remove_package(host: str, operation_data: Dict[str, Any], host_manager: Host
     package_system = get_package_system(host, host_manager)
 
     utc_now_timestamp = datetime.utcnow()
-    current_datetime = utc_now_timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
+    current_datetime = utc_now_timestamp.strftime("%Y-%m-%dT%H:%M:%S.%f")
 
     try:
         package_uninstall_name = operation_data['package']['uninstall_name'] if 'uninstall_name' in operation_data['package'] else None
@@ -288,7 +288,7 @@ def remove_package(host: str, operation_data: Dict[str, Any], host_manager: Host
         result['success'] = False
 
     if result['success']:
-        result['vulnerabilities'] = get_vulnerabilities(host_manager, [host], 
+        result['vulnerabilities'] = get_vulnerabilities(host_manager, [host],
                                                         operation_data['package'],
                                                         greater_than_timestamp=current_datetime)
 
@@ -311,12 +311,12 @@ def update_package(host: str, operation_data: Dict[str, Any], host_manager: Host
     }
 
     logging.info(f"Installing package on {host}")
-    package_url = get_package_url_for_host(host, operation_data['package']['to'], 
+    package_url = get_package_url_for_host(host, operation_data['package']['to'],
                                            host_manager, operation_data)
     package_system = get_package_system(host, host_manager)
 
     utc_now_timestamp = datetime.utcnow()
-    current_datetime = utc_now_timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
+    current_datetime = utc_now_timestamp.strftime("%Y-%m-%dT%H:%M:%S.%f")
     try:
         host_manager.install_package(host, package_url, package_system)
     except Exception as e:
@@ -324,14 +324,14 @@ def update_package(host: str, operation_data: Dict[str, Any], host_manager: Host
         result['success'] = False
 
     if result['success']:
-        result['vulnerabilities']['to'] = get_vulnerabilities(host_manager, [host], 
+        result['vulnerabilities']['to'] = get_vulnerabilities(host_manager, [host],
                                                           operation_data['package']['to'],
                                                           greater_than_timestamp=current_datetime)
 
-        result['vulnerabilities']['from'] = get_vulnerabilities(host_manager, [host], 
+        result['vulnerabilities']['from'] = get_vulnerabilities(host_manager, [host],
                                                           operation_data['package']['from'],
                                                           greater_than_timestamp=current_datetime)
-    
+
     expected_vulnerabilities_to = get_expected_vulnerabilities_by_agent(host_manager, [host], operation_data['package']['to'])
     expected_vulnerabilities_from = get_expected_vulnerabilities_by_agent(host_manager, [host], operation_data['package']['from'])
 
@@ -351,7 +351,7 @@ def launch_remote_operation(host: str, operation_data: Dict[str, Dict], host_man
         raise ValueError(f"Operation {operation} not recognized")
 
 
-def launch_parallel_operations(task_list: Dict[str, List], host_manager: HostManager, 
+def launch_parallel_operations(task_list: Dict[str, List], host_manager: HostManager,
                                target_to_ignore: List[str] = None):
     """
     Launch parallel remote operations on multiple hosts.
@@ -397,7 +397,7 @@ def launch_parallel_operations(task_list: Dict[str, List], host_manager: HostMan
                 for future in futures:
                     future.result()
 
-                # If the operation is not successful, stop the execution of the rest of the operations in host 
+                # If the operation is not successful, stop the execution of the rest of the operations in host
                 for host, operation_results in results.items():
                     last_operation_result = operation_results[-1]
                     if not all(last_operation_result.values()):
