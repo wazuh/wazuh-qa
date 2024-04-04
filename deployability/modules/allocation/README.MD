@@ -2,10 +2,14 @@
 
 ### User documentation
 
+The Allocation module allows you to create and destroy VMs both locally and in AWS, it also gives the possibility of creating macOS VMs on Wazuh infrastructure or PowerPC VMs, as long as you have the necessary permissions to do so. VMs can be AMD64, ARM64, Windows, macOS (Intel and ARM), and powerPC (Centos and Debian).
+
+#### Set the environment
+
 The execution of the allocation is carried out through the Workflow library, or by executing them manually through commands.
 Execution can be done from any operating system.
 
-Initially, Python libraries must be installed. It is recommended to use virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
+Initially, You must install Python libraries. We recommend to use virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
 
 1. Activate the environment:
 
@@ -21,13 +25,15 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
   cd wazuh-qa
   git checkout {project-branch}
   ```
-> Note: temporary dev project-branch is `enhancement/4495-DTT1`
+> Note: temporary dev project-branch is [enhancement/4495-DTT1](https://github.com/wazuh/wazuh-qa/tree/enhancement/4495-DTT1)
 
 3. Install requirements:
 
   ```bash
   pip3 install -r deployability/deps/requirements.txt
   ```
+
+#### Use the Allocation module through the Workflow
 
 Now, it is possible to use worklow engine library to launch provision module doing the following steps:
 
@@ -44,7 +50,7 @@ Now, it is possible to use worklow engine library to launch provision module doi
 
       It will be necessary to create a fixture (yaml file) where the infrastructure, provisioning, and tests to be executed will be declared.
 
-      >Note: It is possible to find some fixture examples in deployability/modules/workflow_engine/examples/
+      >Note: It is possible to find some fixture examples in [deployability/modules/workflow_engine/examples/](https://github.com/wazuh/wazuh-qa/tree/enhancement/4495-DTT1/deployability/modules/workflow_engine/examples)
 
       Example:
 
@@ -253,17 +259,18 @@ Now, it is possible to use worklow engine library to launch provision module doi
 
   > Note The command execution can also be mediated through Jenkins.
 
+#### Manual execution of the Allocation module
 
-If one wishes to execute the allocaation module without installing the workflow engine, they can proceed by using the launcher (module/allocation/main.py):
+If one wishes to execute the allocaation module without installing the workflow engine, they can proceed by using the launcher ([module/allocation/main.py](https://github.com/wazuh/wazuh-qa/blob/enhancement/4495-DTT1/deployability/modules/allocation/main.py)):
 
-1. Execution
+1. Create
 
   While in wazuh-qa/deployability
 
 - Local deployment (Vagrant)
 
   ```bash
-  python3 modules/allocation/main.py --action '{{}}' --provider '{{ vagrant }}' --size '{{ large }}' --composite-name '{{ composite-name }}' --inventory-output '{{ inventory }}' --track-output '{{ track }}'
+  python3 modules/allocation/main.py --action create --provider '{{ vagrant }}' --size '{{ large }}' --composite-name '{{ composite-name }}' --inventory-output '{{ inventory }}' --track-output '{{ track }}'
 
   ```
 
@@ -275,7 +282,7 @@ If one wishes to execute the allocaation module without installing the workflow 
 - AWS deployment
 
   ```bash
-  python3 modules/allocation/main.py --action '{{}}' --provider '{{ aws }}' --size '{{ large }}' --composite-name '{{ composite-name }}' --inventory-output '{{ inventory }}' --track-output '{{ track }}' --label-termination-date '{{ termination-date }}' --label-team  '{{ team }}'
+  python3 modules/allocation/main.py --action create --provider '{{ aws }}' --size '{{ large }}' --composite-name '{{ composite-name }}' --inventory-output '{{ inventory }}' --track-output '{{ track }}' --label-termination-date '{{ termination-date }}' --label-team  '{{ team }}'
 
   ```
 
@@ -290,7 +297,7 @@ If one wishes to execute the allocaation module without installing the workflow 
   python3 modules/allocation/main.py --action create --provider aws --size large --composite-name linux-ubuntu-22.04-amd64 --inventory-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml" --track-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml" --label-termination-date "2024-03-20 21:00:00"  --label-team devops
   ```
 
-2. Destroy
+2. Delete
 
   While in wazuh-qa/deployability
 
@@ -303,6 +310,8 @@ If one wishes to execute the allocaation module without installing the workflow 
   ```bash
   python3 modules/allocation/main.py --action delete --track-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml"
   ```
+
+  >Note: The --track-output argument is mandatory for the delete action because this file contains all information of the VM that will be destroyed
 
 3. Arguments
 
@@ -342,6 +351,8 @@ If one wishes to execute the allocaation module without installing the workflow 
 
   - --track-output
     This argument allows us to define which path we want the track file to write to. By default, it is saved in the instance directory, for example: /tmp/wazuh-qa/VAGRANT-F0753C57-713E-4294-9EA9-89D93D384844/track.yml
+
+    >Note: this argument is mandatory for delete action.
 
   - --inventory-output
     This argument allows us to define which path we want the inventory file to write to. By default, it is saved in the instance directory, for example: /tmp/wazuh-qa/VAGRANT-F0753C57-713E-4294-9EA9-89D93D384844/inventory.yml
@@ -388,7 +399,7 @@ In either case, the following information will be needed:
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 ```
 
-In the provided fixture fragment, it is evident that to execute the Allocation module launcher (`allocation/main.py`), the action, provider, size, composite-name, inventory-output, and track-output must be specified.
+In the provided fixture fragment, it is evident that to execute the Allocation module launcher ([allocation/main.py](https://github.com/wazuh/wazuh-qa/blob/enhancement/4495-DTT1/deployability/modules/allocation/main.py)), the action, provider, size, composite-name, inventory-output, and track-output must be specified.
 
 For manual execution, an example command would be:
 
@@ -396,35 +407,35 @@ For manual execution, an example command would be:
 python3 modules/allocation/main.py --action create --provider vagrant --size large --composite-name linux-ubuntu-22.04-amd64 --inventory-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml" --track-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml"
 ```
 
-The module is comprised of:
+#### General-specific functions
 
-General-specific functions:
+- **Launcher** ([/wazuh-qa/deployability/modules/allocation/main.py](https://github.com/wazuh/wazuh-qa/blob/enhancement/4495-DTT1/deployability/modules/allocation/main.py)): The entry point for the workflow or the user who wishes to execute a test.
 
-- **Launcher** (`/wazuh-qa/deployability/modules/allocation/main.py`): The entry point for the workflow or the user who wishes to execute a test.
+- **Module functions** ([/wazuh-qa/deployability/modules/allocation/allocation.py](https://github.com/wazuh/wazuh-qa/blob/enhancement/4495-DTT1/deployability/modules/allocation/allocation.py)): Module-specific functions responsible for triggering the allocation.
 
-- **Module functions** (`/wazuh-qa/deployability/modules/allocation/allocation.py`): Module-specific functions responsible for triggering the allocation.
+- **Static functions** ([/wazuh-qa/deployability/modules/allocation/static](https://github.com/wazuh/wazuh-qa/tree/enhancement/4495-DTT1/deployability/modules/allocation/static)): Templates and static information for infrastructure creation.
 
-- **Static functions** (`/wazuh-qa/deployability/modules/allocation/static`): Templates and static information for infrastructure creation.
+#### Provider-specific functions
 
-Provider-specific functions:
+- **AWS functions** ([/wazuh-qa/deployability/modules/allocation/aws](https://github.com/wazuh/wazuh-qa/tree/enhancement/4495-DTT1/deployability/modules/allocation/aws)): Module-specific functions responsible for triggering the allocation.
 
-- **AWS functions** (`/wazuh-qa/deployability/modules/allocation/aws`): Module-specific functions responsible for triggering the allocation.
+- **Vagrant functions** ([/wazuh-qa/deployability/modules/allocation/vagrant](https://github.com/wazuh/wazuh-qa/tree/enhancement/4495-DTT1/deployability/modules/allocation/vagrant)): Module-specific functions responsible for triggering the allocation.
 
-- **Vagrant functions** (`/wazuh-qa/deployability/modules/allocation/vagrant`): Module-specific functions responsible for triggering the allocation.
+- **Generic functions** ([/wazuh-qa/deployability/modules/allocation/generic](https://github.com/wazuh/wazuh-qa/tree/enhancement/4495-DTT1/deployability/modules/allocation/generic)): Module-specific functions responsible for triggering the allocation.
 
-- **Generic functions** (`/wazuh-qa/deployability/modules/allocation/generic`): Module-specific functions responsible for triggering the allocation.
-
-Each provider will contain:
+#### Each provider will contain
 
 - **Modeler** (`/wazuh-qa/deployability/modules/allocation/{provider}/models.py`)
 - **Credentials** (`/wazuh-qa/deployability/modules/allocation/{provider}/credentials.py`)
 - **Provider** (`/wazuh-qa/deployability/modules/allocation/{provider}/provider.py`)
 - **Information regarding the instance** (`/wazuh-qa/deployability/modules/allocation/{provider}/instance.py`)
 
-![image](https://github.com/wazuh/wazuh-qa/assets/125690423/b79e2561-e675-4608-823d-ebc87de0555f)
+#### Diagram
+
+![image](https://github.com/wazuh/wazuh-qa/assets/64099752/d302f96b-70c0-4fbc-869b-914973ee8186)
 
 
-[Allocation.drawio.zip](https://github.com/wazuh/wazuh-qa/files/14480890/Allocation.drawio.zip)
+[Allocation.drawio.zip](https://github.com/wazuh/wazuh-qa/files/14868775/Allocation.drawio.zip)
 
 
 ### License
