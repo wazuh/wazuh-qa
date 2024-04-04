@@ -183,6 +183,46 @@ def get_package_url_for_host(host: str, package_id: str, host_manager: HostManag
         raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found. Maybe {host} OS is not supported.")
 
 
+def get_package_uninstallation_name(host: str, package_id: str, host_manager: HostManager,
+                             operation_data: Dict[str, Any]) -> str:
+    host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
+    host_os_arch = host_manager.get_host_variables(host)['architecture']
+    system = host_manager.get_host_variables(host)['os_name']
+
+    if system == 'linux':
+        system = host_manager.get_host_variables(host)['os'].split('_')[0]
+
+    install_package_data = operation_data['package']
+    try:
+        package_id = install_package_data[host_os_name][host_os_arch]
+        package_data = load_packages_metadata()[package_id]
+        package_uninstall_name = package_data['uninstall_name']
+
+        return package_uninstall_name
+    except KeyError:
+        raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found uninstall name.")
+
+
+def get_package_uninstallation_playbook(host: str, package_id: str, host_manager: HostManager,
+                             operation_data: Dict[str, Any]) -> str:
+    host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
+    host_os_arch = host_manager.get_host_variables(host)['architecture']
+    system = host_manager.get_host_variables(host)['os_name']
+
+    if system == 'linux':
+        system = host_manager.get_host_variables(host)['os'].split('_')[0]
+
+    install_package_data = operation_data['package']
+    try:
+        package_id = install_package_data[host_os_name][host_os_arch]
+        package_data = load_packages_metadata()[package_id]
+        package_uninstall_name = package_data['uninstall_custom_playbook']
+
+        return package_uninstall_name
+    except KeyError:
+        raise ValueError(f"Custom installation playbook for {host_os_name} and {host_os_arch} not found uninstall name.")
+
+
 def get_package_system(host: str, host_manager: HostManager) -> str:
     system = host_manager.get_host_variables(host)['os_name']
     if system == 'linux':
@@ -280,9 +320,17 @@ def remove_package(host: str, operation_data: Dict[str, Any], host_manager: Host
     current_datetime = utc_now_timestamp.strftime("%Y-%m-%dT%H:%M:%S")
 
     try:
-        package_uninstall_name = operation_data['package']['uninstall_name'] if 'uninstall_name' in operation_data['package'] else None
-        custom_uninstall_playbook = operation_data['package']['uninstall_playbook'] if 'uninstall_playbook' in operation_data['package'] else None
+        package_uninstall_name = None
+        custom_uninstall_playbook = None
+        try:
+            package_uninstall_name = get_package_uninstallation_name(host, operation_data['package'],
+                                           host_manager, operation_data)
+        except ValueError:
+            logging.info(f"No uninstall name found for {operation_data['package']}. Searching for custom playbook")
+            custom_uninstall_playbook = operation_data['package']['uninstall_playbook'] if 'uninstall_playbook' in operation_data['package'] else None
+
         host_manager.remove_package(host, package_system, package_uninstall_name, custom_uninstall_playbook)
+
     except Exception as e:
         logging.error(f"Error removing package on {host}: {e}")
         result['success'] = False
