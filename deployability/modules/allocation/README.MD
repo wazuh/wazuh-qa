@@ -50,7 +50,7 @@ Now, it is possible to use worklow engine library to launch provision module doi
 
       It will be necessary to create a fixture (yaml file) where the infrastructure, provisioning, and tests to be executed will be declared.
 
-      >Note: It is possible to find some fixture examples in [deployability/modules/workflow_engine/examples/](https://github.com/wazuh/wazuh-qa/tree/enhancement/4495-DTT1/deployability/modules/workflow_engine/examples)
+      >Note: It is possible to find some fixture examples in [deployability/modules/workflow_engine/examples/](../workflow_engine/examples)
 
       Example:
 
@@ -261,7 +261,7 @@ Now, it is possible to use worklow engine library to launch provision module doi
 
 #### Manual execution of the Allocation module
 
-If one wishes to execute the allocaation module without installing the workflow engine, they can proceed by using the launcher ([module/allocation/main.py](https://github.com/wazuh/wazuh-qa/blob/enhancement/4495-DTT1/deployability/modules/allocation/main.py)):
+If one wishes to execute the allocaation module without installing the workflow engine, they can proceed by using the launcher ([module/allocation/main.py](main.py)):
 
 1. Create
 
@@ -399,7 +399,7 @@ In either case, the following information will be needed:
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 ```
 
-In the provided fixture fragment, it is evident that to execute the Allocation module launcher ([allocation/main.py](https://github.com/wazuh/wazuh-qa/blob/enhancement/4495-DTT1/deployability/modules/allocation/main.py)), the action, provider, size, composite-name, inventory-output, and track-output must be specified.
+In the provided fixture fragment, it is evident that to execute the Allocation module launcher ([allocation/main.py](main.py)), the action, provider, size, composite-name, inventory-output, and track-output must be specified.
 
 For manual execution, an example command would be:
 
@@ -409,19 +409,19 @@ python3 modules/allocation/main.py --action create --provider vagrant --size lar
 
 #### General-specific functions
 
-- **Launcher** ([/wazuh-qa/deployability/modules/allocation/main.py](https://github.com/wazuh/wazuh-qa/blob/enhancement/4495-DTT1/deployability/modules/allocation/main.py)): The entry point for the workflow or the user who wishes to execute a test.
+- **Launcher** ([/wazuh-qa/deployability/modules/allocation/main.py](main.py)): The entry point for the workflow or the user who wishes to execute a test.
 
-- **Module functions** ([/wazuh-qa/deployability/modules/allocation/allocation.py](https://github.com/wazuh/wazuh-qa/blob/enhancement/4495-DTT1/deployability/modules/allocation/allocation.py)): Module-specific functions responsible for triggering the allocation.
+- **Module functions** ([/wazuh-qa/deployability/modules/allocation/allocation.py](allocation.py)): Module-specific functions responsible for triggering the allocation.
 
-- **Static functions** ([/wazuh-qa/deployability/modules/allocation/static](https://github.com/wazuh/wazuh-qa/tree/enhancement/4495-DTT1/deployability/modules/allocation/static)): Templates and static information for infrastructure creation.
+- **Static functions** ([/wazuh-qa/deployability/modules/allocation/static](static)): Templates and static information for infrastructure creation.
 
 #### Provider-specific functions
 
-- **AWS functions** ([/wazuh-qa/deployability/modules/allocation/aws](https://github.com/wazuh/wazuh-qa/tree/enhancement/4495-DTT1/deployability/modules/allocation/aws)): Module-specific functions responsible for triggering the allocation.
+- **AWS functions** ([/wazuh-qa/deployability/modules/allocation/aws](aws)): Module-specific functions responsible for triggering the allocation.
 
-- **Vagrant functions** ([/wazuh-qa/deployability/modules/allocation/vagrant](https://github.com/wazuh/wazuh-qa/tree/enhancement/4495-DTT1/deployability/modules/allocation/vagrant)): Module-specific functions responsible for triggering the allocation.
+- **Vagrant functions** ([/wazuh-qa/deployability/modules/allocation/vagrant](vagrant)): Module-specific functions responsible for triggering the allocation.
 
-- **Generic functions** ([/wazuh-qa/deployability/modules/allocation/generic](https://github.com/wazuh/wazuh-qa/tree/enhancement/4495-DTT1/deployability/modules/allocation/generic)): Module-specific functions responsible for triggering the allocation.
+- **Generic functions** ([/wazuh-qa/deployability/modules/allocation/generic](generic)): Module-specific functions responsible for triggering the allocation.
 
 #### Each provider will contain
 
