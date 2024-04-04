@@ -237,25 +237,25 @@ def get_package_system(host: str, host_manager: HostManager) -> str:
     return system
 
 
-def get_vulnerabilities(host_manager: HostManager, agents_list: List, packages_data: Dict,
+def get_vulnerabilities(host_manager: HostManager, agent, packages_data: Dict,
                           greater_than_timestamp: str = '') -> Dict:
 
     result = {}
     wait_syscollector_and_vuln_scan(host_manager, TIMEOUT_SYSCOLLECTOR_SCAN, greater_than_timestamp=greater_than_timestamp,
-                                    agent_list=agents_list)
+                                    agent_list=[agent])
 
-    vulnerabilities = get_vulnerabilities_from_states_by_agent(host_manager, agents_list,
+    vulnerabilities = get_vulnerabilities_from_states_by_agent(host_manager, [agent],
                                              greater_than_timestamp=greater_than_timestamp)
-    alerts = get_vulnerabilities_from_alerts_by_agent(host_manager, agents_list,
+    alerts = get_vulnerabilities_from_alerts_by_agent(host_manager, [agent],
                                                       greater_than_timestamp=greater_than_timestamp)
 
     package_vulnerabilities = filter_vulnerabilities_by_packages(host_manager, vulnerabilities, packages_data)
     alerts_vulnerabilities = filter_vulnerabilities_by_packages(host_manager, alerts['affected'] , packages_data)
     alerts_vulnerabilities_mitigated = filter_vulnerabilities_by_packages(host_manager, alerts['mitigated'] , packages_data)
 
-    result['index_vulnerabilities'] = package_vulnerabilities
-    result['alerts_vulnerabilities'] = alerts_vulnerabilities
-    result['mitigated_vulnerabilities'] = alerts_vulnerabilities_mitigated
+    result['index_vulnerabilities'] = package_vulnerabilities[agent]
+    result['alerts_vulnerabilities'] = alerts_vulnerabilities[agent]
+    result['mitigated_vulnerabilities'] = alerts_vulnerabilities_mitigated[agent]
 
     return result
 
@@ -290,9 +290,9 @@ def install_package(host: str, operation_data: Dict[str, Any], host_manager: Hos
         result['success'] = False
 
     check_options = operation_data.get('check')
-    check_vuln = check_options('alert') or check_options('index')
+    check_vuln = check_options.get('alert') or check_options.get('index') if check_options else False
     if result['success'] and check_vuln:
-        result['vulnerabilities'] = get_vulnerabilities(host_manager, [host],
+        result['vulnerabilities'] = get_vulnerabilities(host_manager, host,
                                                         operation_data['package'],
                                                         current_datetime)
         result['expected_vulnerabilities'] = get_expected_vulnerabilities_by_agent(host_manager, [host],
@@ -340,9 +340,9 @@ def remove_package(host: str, operation_data: Dict[str, Any], host_manager: Host
         result['success'] = False
 
     check_options = operation_data.get('check')
-    check_vuln = check_options('alert') or check_options('index')
+    check_vuln = check_options.get('alert') or check_options.get('index')
     if result['success'] and check_vuln:
-        result['vulnerabilities'] = get_vulnerabilities(host_manager, [host],
+        result['vulnerabilities'] = get_vulnerabilities(host_manager, host,
                                                         operation_data['package'],
                                                         greater_than_timestamp=current_datetime)
         result['expected_vulnerabilities'] = get_expected_vulnerabilities_by_agent(host_manager, [host],
@@ -379,13 +379,13 @@ def update_package(host: str, operation_data: Dict[str, Any], host_manager: Host
         result['success'] = False
 
     check_options = operation_data.get('check')
-    check_vuln = check_options('alert') or check_options('index')
+    check_vuln = check_options.get('alert') or check_options.get('index')
     if result['success'] and check_vuln:
-        result['vulnerabilities']['to'] = get_vulnerabilities(host_manager, [host],
+        result['vulnerabilities']['to'] = get_vulnerabilities(host_manager, host,
                                                           operation_data['package']['to'],
                                                           greater_than_timestamp=current_datetime)
 
-        result['vulnerabilities']['from'] = get_vulnerabilities(host_manager, [host],
+        result['vulnerabilities']['from'] = get_vulnerabilities(host_manager, host,
                                                           operation_data['package']['from'],
                                                           greater_than_timestamp=current_datetime)
 
