@@ -284,7 +284,7 @@ def remove_package(host: str, operation_data: Dict[str, Any], host_manager: Host
         custom_uninstall_playbook = operation_data['package']['uninstall_playbook'] if 'uninstall_playbook' in operation_data['package'] else None
         host_manager.remove_package(host, package_system, package_uninstall_name, custom_uninstall_playbook)
     except Exception as e:
-        logging.error(f"Error installing package on {host}: {e}")
+        logging.error(f"Error removing package on {host}: {e}")
         result['success'] = False
 
     if result['success']:

@@ -592,7 +592,9 @@ class HostManager:
                                                                       f"brew uninstall {package_uninstall_name}",
                                                                       check=False)
 
-
+        if not (remove_operation_result['changed'] or remove_operation_result.get('rc') == 0) \
+            or not (remove_operation_result['changed'] or remove_operation_result.get('stderr', None) == ''):
+            raise RuntimeError(f"Failed to remove package in {host}: {remove_operation_result}")
 
         logging.info(f"Package removed result {remove_operation_result}")
 
