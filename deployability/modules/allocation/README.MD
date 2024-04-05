@@ -36,7 +36,7 @@ Initially, You must install Python libraries. We recommend to use virtual enviro
 
 #### Use the Allocation module through the Workflow engine
 
-Now, it is possible to use the worklow engine library to launch the provision module by doing the following steps:
+Now, it is possible to use the Worklow engine library to launch the provision module by doing the following steps:
 
 1. Install the Workflow engine library and its launcher:
 
@@ -57,80 +57,18 @@ Now, it is possible to use the worklow engine library to launch the provision mo
 
       ```bash
       version: 0.1
-      description: This workflow is used to test agents' deployment for DDT1 PoC
+      description: This workflow is used to test agents deployment por DDT1 PoC
       variables:
-        agents-os:
-          - linux-ubuntu-22.04-amd64
+        agent-os:
+          - linux-ubuntu-18.04-amd64
+          - linux-ubuntu-20.04-amd64
         manager-os: linux-ubuntu-22.04-amd64
-        infra-provider: vagrant
+        infra-provider: aws
         working-dir: /tmp/dtt1-poc
 
       tasks:
-        # Generic agent test task
-        - task: "run-agent-tests-{agent}"
-          description: "Run tests uninstall for the {agent} agent."
-          do:
-            this: process
-            with:
-              path: python3
-              args:
-                - modules/testing/main.py
-                - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-                - dependencies:
-                  - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-                  - agent: "{working-dir}/agent-{agent}/inventory.yaml"
-                - tests: "install,register,stop"
-                - component: "agent"
-                - wazuh-version: "4.7.1"
-                - wazuh-revision: "40709"
-          depends-on:
-            - "provision-install-{agent}"
-            - "provision-manager"
-          foreach:
-            - variable: agents-os
-              as: agent
-
-        # Generic agent test task
-        - task: "run-agent-tests-uninstall-{agent}"
-          description: "Run tests uninstall for the {agent} agent."
-          do:
-            this: process
-            with:
-              path: python3
-              args:
-                - modules/testing/main.py
-                - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-                - dependencies:
-                  - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-                - tests: "uninstall"
-                - component: "agent"
-                - wazuh-version: "4.7.1"
-                - wazuh-revision: "40709"
-          depends-on:
-            - "run-agent-tests-{agent}"
-            - "provision-uninstall-{agent}"
-          foreach:
-            - variable: agents-os
-              as: agent
-
-        # Unique manager provision task
-        - task: "provision-manager"
-          description: "Provision the manager."
-          do:
-            this: process
-            with:
-              path: python3
-              args:
-                - modules/provision/main.py
-                - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-                - install:
-                  - component: wazuh-manager
-                    type: package
-          depends-on:
-            - "allocate-manager"
-
         # Unique manager allocate task
-        - task: "allocate-manager"
+        - task: "allocate-manager-{manager-os}"
           description: "Allocate resources for the manager."
           do:
             this: process
@@ -144,6 +82,8 @@ Now, it is possible to use the worklow engine library to launch the provision mo
                 - composite-name: "{manager-os}"
                 - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
                 - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+                - label-termination-date: "1d"
+                - label-team: "qa"
           cleanup:
             this: process
             with:
@@ -153,51 +93,9 @@ Now, it is possible to use the worklow engine library to launch the provision mo
                 - action: delete
                 - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 
-        # Generic agent provision task
-        - task: "provision-install-{agent}"
-          description: "Provision resources for the {agent} agent."
-          do:
-            this: process
-            with:
-              path: python3
-              args:
-                - modules/provision/main.py
-                - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
-                - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-                - install:
-                  - component: wazuh-agent
-                    type: package
-                  - component: curl
-          depends-on:
-            - "allocate-{agent}"
-            - "provision-manager"
-          foreach:
-            - variable: agents-os
-              as: agent
-
-        # Generic agent provision task
-        - task: "provision-uninstall-{agent}"
-          description: "Provision resources for the {agent} agent."
-          do:
-            this: process
-            with:
-              path: python3
-              args:
-                - modules/provision/main.py
-                - inventory-agent: "{working-dir}/agent-{agent}/inventory.yaml"
-                - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-                - uninstall:
-                  - component: wazuh-agent
-                    type: package
-          depends-on:
-            - "provision-install-{agent}"
-          foreach:
-            - variable: agents-os
-              as: agent
-
-        # Generic agent allocate task
-        - task: "allocate-{agent}"
-          description: "Allocate resources for the {agent} agent."
+        # Unique agent allocate task
+        - task: "allocate-agent-{agent}"
+          description: "Allocate resources for the agent."
           do:
             this: process
             with:
@@ -210,6 +108,11 @@ Now, it is possible to use the worklow engine library to launch the provision mo
                 - composite-name: "{agent}"
                 - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
                 - track-output: "{working-dir}/agent-{agent}/track.yaml"
+                - label-termination-date: "1d"
+                - label-team: "qa"
+          foreach:
+            - variable: agent-os
+              as: agent
           cleanup:
             this: process
             with:
@@ -218,9 +121,6 @@ Now, it is possible to use the worklow engine library to launch the provision mo
                 - modules/allocation/main.py
                 - action: delete
                 - track-output: "{working-dir}/agent-{agent}/track.yaml"
-          foreach:
-            - variable: agents-os
-              as: agent
       ```
 
       Following the schema of the example:
