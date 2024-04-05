@@ -11,7 +11,7 @@ The provision module includes pytest unit tests.
 git clone https://github.com/wazuh/wazuh-qa.git -b [your-branch]
 cd wazuh-qa
 pip install -r deployability/deps/requirements.txt
-pip install -r deployability/deps/remote-requirements.txt
+pip install -r deployability/deps/remote_requirements.txt
 ```
 - Configure the `PYTHONPATH` variable with the full path to the directory `deployability`, for example if you've
 cloned the `wazuh-qa` repository into `/wazuh/wazuh-qa`, configure the `PYTHONPATH` in this way:
