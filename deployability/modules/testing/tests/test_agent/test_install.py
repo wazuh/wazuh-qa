@@ -54,6 +54,8 @@ def setup_test_environment(wazuh_params):
     updated_agents = {}
 
     for agent_name, agent_params in wazuh_params['agents'].items():
+        Utils.check_inventory_connection(agent_params)
+
         if GeneralComponentActions.hasAgentClientKeys(agent_params):
             client_name = HostInformation.get_client_keys(agent_params)[0]['name']
             updated_agents[client_name] = agent_params
@@ -66,11 +68,11 @@ def test_installation(wazuh_params):
     # Checking connection
     for manager_name, manager_params in wazuh_params['managers'].items():
         Utils.check_inventory_connection(manager_params)
-    for agent_name, agent_params in wazuh_params['agents'].items():
-        Utils.check_inventory_connection(agent_params)
-        HostConfiguration.disable_firewall(agent_params)
 
     # Certs creation, firewall management and Manager installation
+    for agent_name, agent_params in wazuh_params['agents'].items():
+        HostConfiguration.disable_firewall(agent_params)
+
     if HostInformation.dir_exists(wazuh_params['master'], WAZUH_ROOT):
         logger.info(f'Manager is already installed in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])}')
     else:
