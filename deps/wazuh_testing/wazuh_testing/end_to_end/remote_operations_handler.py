@@ -290,7 +290,7 @@ def install_package(host: str, operation_data: Dict[str, Any], host_manager: Hos
         result['success'] = False
 
     check_options = operation_data.get('check', {})
-    check_vuln = check_options.get('alert') or check_options.get('index') if check_options else False
+    check_vuln = check_options.get('alerts') or check_options.get('states') if check_options else False
     if result['success'] and check_vuln:
         result['vulnerabilities'] = get_vulnerabilities(host_manager, host,
                                                         operation_data['package'],
@@ -340,7 +340,8 @@ def remove_package(host: str, operation_data: Dict[str, Any], host_manager: Host
         result['success'] = False
 
     check_options = operation_data.get('check', {})
-    check_vuln = check_options.get('alert') or check_options.get('index')
+    check_vuln = check_options.get('alerts') or check_options.get('states') if check_options else False
+
     if result['success'] and check_vuln:
         result['vulnerabilities'] = get_vulnerabilities(host_manager, host,
                                                         operation_data['package'],
@@ -379,7 +380,7 @@ def update_package(host: str, operation_data: Dict[str, Any], host_manager: Host
         result['success'] = False
 
     check_options = operation_data.get('check', {})
-    check_vuln = check_options.get('alert') or check_options.get('index')
+    check_vuln = check_options.get('alerts') or check_options.get('states') if check_options else False
     if result['success'] and check_vuln:
         result['vulnerabilities']['to'] = get_vulnerabilities(host_manager, host,
                                                           operation_data['package']['to'],
