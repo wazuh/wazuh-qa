@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Add alert.json file to Vulnerability Detector E2E test report ([#5147](https://github.com/wazuh/wazuh-qa/pull/5147)) \- (Framework)
 - Add documentation about markers for system tests ([#5080](https://github.com/wazuh/wazuh-qa/pull/5080)) \- (Documentation)
 - Add AWS Custom Buckets Integration tests ([#4675](https://github.com/wazuh/wazuh-qa/pull/4675)) \- (Framework + Tests)
 - Add Vulnerability Detector end to end tests ([#4878](https://github.com/wazuh/wazuh-qa/pull/4878)) \- (Framework + Tests)
@@ -50,7 +51,12 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Fix timestamps alerts and logs filter ([#5157](https://github.com/wazuh/wazuh-qa/pull/5157)) \- (Framework + Tests)
+- Fix Vulnerability Detector E2E tests by adding description to all tests ([#5151](https://github.com/wazuh/wazuh-qa/pull/5151)) \- (Tests)
+- Fix parser for non package vulnerabilities ([#5146](https://github.com/wazuh/wazuh-qa/pull/5146)) \- (Framework)
 - Fix remote_operations_handler functions to Vulnerability Detector E2E tests ([#5155](https://github.com/wazuh/wazuh-qa/pull/5155)) \- (Framework)
+- Fix enrollment cluster system tests ([#5134](https://github.com/wazuh/wazuh-qa/pull/5134/)) \- (Tests)
+- Fix `test_synchronization` system test ([#5089](https://github.com/wazuh/wazuh-qa/pull/5089)) \- (Framework + Tests)
+- Fix number of files and their size for `test_zip_size_limit` ([#5133](https://github.com/wazuh/wazuh-qa/pull/5133)) \- (Tests)
 - Fix test_shutdown_message system test ([#5087](https://github.com/wazuh/wazuh-qa/pull/5087)) \- (Tests)
 - Include timeout to test_authd system tests ([#5083](https://github.com/wazuh/wazuh-qa/pull/5083)) \- (Tests)
 - Fix Vulnerability Detection mismatch in scans ([#5053](https://github.com/wazuh/wazuh-qa/pull/5053)) \- (Tests)
@@ -149,6 +155,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Change expected database version ([#5111](https://github.com/wazuh/wazuh-qa/pull/5111)) \- (Tests)
 - `Agentless_cluster` system tests timeout changed in order to reduce EC2 requirements ([#4534](https://github.com/wazuh/wazuh-qa/pull/4534)) \- (Tests)
 - Skip `test_authd_ssl_options` cases that use TLS 1.1 causing errors on several OpenSSL versions. ([#4229](https://github.com/wazuh/wazuh-qa/pull/4229)) \- (Tests)
 - Update database version ([#4467](https://github.com/wazuh/wazuh-qa/pull/4467)) \- (Tests)

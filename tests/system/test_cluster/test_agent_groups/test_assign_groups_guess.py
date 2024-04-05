@@ -276,6 +276,7 @@ def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clea
         # Run the callback checks for the ossec.log
         messages_path = master_messages_path if target_node == 'wazuh-master' else worker_messages_path
         replace_regex_in_file(['AGENT_ID', 'GROUP_ID'], [agent1_id, expected_group], messages_path)
+
         HostMonitor(inventory_path=inventory_path,
                     messages_path=messages_path,
                     tmp_path=tmp_path).run(update_position=True)
