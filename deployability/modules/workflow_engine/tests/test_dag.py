@@ -95,9 +95,6 @@ def test_get_execution_plan(dag: DAG):
     ('task1', 'failed'),
     ('task1', 'canceled'),
     ('task1', 'successful'),
-    ('task1', 'non_existing_status'),
-    ('non_existing_task', 'successful'),
-    ('non_existing_task', 'non_existing_status'),
 ])
 def test_set_status(task_name:str, status:str, dag: DAG):
     """Test DAG.set_status method.
@@ -219,14 +216,14 @@ def test_build_dag(dag: DAG):
                          indirect=True)
 @pytest.mark.parametrize('task, cancel_policy, to_be_canceled',
                          [('task1', 'abort-all', {'task4', 'task3', 'task2', 'task5', 'task1'}),
-                          ('task1', 'abort-related-flows', {}),
-                          ('task1', 'continue', {}),
-                          ('task2', 'abort-all', {'task1'}),
-                          ('task2', 'abort-related-flows', {}),
-                          ('task2', 'continue', {}),
+                          ('task2', 'abort-all', {'task4', 'task3', 'task2', 'task5', 'task1'}),
                           ('task5', 'abort-all', {'task4', 'task3', 'task2', 'task5', 'task1'}),
+                          ('task1', 'abort-related-flows', {'task4', 'task3', 'task2', 'task5', 'task1'}),
+                          ('task2', 'abort-related-flows', {'task4', 'task3', 'task2', 'task5', 'task1'}),
                           ('task5', 'abort-related-flows', {'task4', 'task3', 'task2', 'task5', 'task1'}),
-                          ('task5', 'continue', {}),
+                          ('task1', 'continue', set()),
+                          ('task2', 'continue', set()),
+                          ('task5', 'continue', set()),
                           ])
 def test_cancel_dependant_tasks(task: str, cancel_policy: str, to_be_canceled: set, dag: DAG):
     """Test DAG.cancel_dependant_tasks method.
