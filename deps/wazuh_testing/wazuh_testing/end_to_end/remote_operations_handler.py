@@ -261,7 +261,10 @@ def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
                 logging.info(f"Removing package on {host}")
                 if 'uninstall_name' in package_data:
                     uninstall_name = package_data['uninstall_name']
-                    host_manager.remove_package(host, system, package_uninstall_name=uninstall_name)
+                    if use_npm:
+                        host_manager.remove_npm_package(host, system, package_uninstall_name=uninstall_name)
+                    else:
+                        host_manager.remove_package(host, system, package_uninstall_name=uninstall_name)
                 elif 'uninstall_custom_playbook' in package_data:
                     host_manager.remove_package(host, system,
                                                 custom_uninstall_playbook=package_data['uninstall_custom_playbook'])
