@@ -362,7 +362,7 @@ class HostManager:
                                                   f'method={method} headers="{headers}" {request_body} '
                                                   f'validate_certs=no', check=check)
 
-    def run_command(self, host: str, cmd: str, check: bool = False):
+    def run_command(self, host: str, cmd: str, check: bool = False, system: str = 'linux'):
         """Run a command on the specified host and return its stdout.
 
         Args:
@@ -370,13 +370,18 @@ class HostManager:
             cmd (str): Command to execute
             check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
                 applied. Default `False`
+            system (str): The operating system type. Defaults to 'linux'.
+                Supported values: 'windows', 'macos', 'linux'.
 
         Returns:
             stdout (str): The output of the command execution.
         """
-        return self.get_host(host).ansible("command", cmd, check=check)["stdout"]
+        if system == 'windows':
+            return self.get_host(host).ansible("win_command", cmd, check=check)
+        else:
+            return self.get_host(host).ansible("command", cmd, check=check)["stdout"]
 
-    def run_shell(self, host: str, cmd: str, check: bool = False):
+    def run_shell(self, host: str, cmd: str, check: bool = False, system: str = 'linux'):
         """Run a shell command on the specified host and return its stdout.
 
         The difference with run_command is that here, shell symbols like &, |, etc. are interpreted.
@@ -386,11 +391,16 @@ class HostManager:
             cmd (str): Shell command to execute
             check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
                 applied. Default `False`
+            system (str): The operating system type. Defaults to 'linux'.
+                Supported values: 'windows', 'macos', 'linux'.
 
         Returns:
             stdout (str): The output of the command execution.
         """
-        return self.get_host(host).ansible('shell', cmd, check=check)['stdout']
+        if system == 'windows':
+            return self.get_host(host).ansible("win_shell", cmd, check=check)
+        else:
+            return self.get_host(host).ansible('shell', cmd, check=check)['stdout']
 
     def get_host_ip(self, host: str, interface: str):
         """Get the Ansible object for communicating with the specified host.
