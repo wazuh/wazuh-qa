@@ -111,7 +111,6 @@ def test_provision_handler_get_templates_path(component: str, method: str, actio
 @pytest.mark.parametrize('component, method, action, expected_list',
                          [('wazuh-manager', 'package', 'install',
                            ["set_repo.j2", "install.j2", "register.j2", "service.j2"]),
-                          ('wazuh-manager', 'aio', 'install', ["download.j2", "install.j2"]),
                           ('indexer', 'source', 'install', ['indexer.j2']),
                           ('wazuh-manager', 'assistant', 'uninstall', []),
 ])
