@@ -289,15 +289,15 @@ def install_package(host: str, operation_data: Dict[str, Any], host_manager: Hos
         logging.error(f"Error installing package on {host}: {e}")
         result['success'] = False
 
-    check_options = operation_data.get('check', {})
-    check_vuln = check_options.get('alerts') or check_options.get('states') if check_options else False
-    if result['success'] and check_vuln:
-        result['vulnerabilities'] = get_vulnerabilities(host_manager, host,
-                                                        operation_data['package'],
-                                                        current_datetime)
-        result['expected_vulnerabilities'] = get_expected_vulnerabilities_by_agent(host_manager, [host],
-                                                                                operation_data['package'],
-                                                                                operation_data['check'])[host]
+    # check_options = operation_data.get('check', {})
+    # check_vuln = check_options.get('alerts') or check_options.get('states') if check_options else False
+    # if result['success'] and check_vuln:
+    #     result['vulnerabilities'] = get_vulnerabilities(host_manager, host,
+    #                                                     operation_data['package'],
+    #                                                     current_datetime)
+    #     result['expected_vulnerabilities'] = get_expected_vulnerabilities_by_agent(host_manager, [host],
+    #                                                                             operation_data['package'],
+    #                                                                             operation_data['check'])[host]
 
     return result
 
@@ -339,16 +339,16 @@ def remove_package(host: str, operation_data: Dict[str, Any], host_manager: Host
         logging.error(f"Error removing package on {host}: {e}")
         result['success'] = False
 
-    check_options = operation_data.get('check', {})
-    check_vuln = check_options.get('alerts') or check_options.get('states') if check_options else False
+    # check_options = operation_data.get('check', {})
+    # check_vuln = check_options.get('alerts') or check_options.get('states') if check_options else False
 
-    if result['success'] and check_vuln:
-        result['vulnerabilities'] = get_vulnerabilities(host_manager, host,
-                                                        operation_data['package'],
-                                                        greater_than_timestamp=current_datetime)
-        result['expected_vulnerabilities'] = get_expected_vulnerabilities_by_agent(host_manager, [host],
-                                                                                operation_data['package'],
-                                                                                operation_data['check'])[host]
+    # if result['success'] and check_vuln:
+    #     result['vulnerabilities'] = get_vulnerabilities(host_manager, host,
+    #                                                     operation_data['package'],
+    #                                                     greater_than_timestamp=current_datetime)
+    #     result['expected_vulnerabilities'] = get_expected_vulnerabilities_by_agent(host_manager, [host],
+    #                                                                             operation_data['package'],
+    #                                                                             operation_data['check'])[host]
 
     return result
 
@@ -381,25 +381,25 @@ def update_package(host: str, operation_data: Dict[str, Any], host_manager: Host
 
     check_options = operation_data.get('check', {})
     check_vuln = check_options.get('alerts') or check_options.get('states') if check_options else False
-    if result['success'] and check_vuln:
-        result['vulnerabilities']['to'] = get_vulnerabilities(host_manager, host,
-                                                          operation_data['package']['to'],
-                                                          greater_than_timestamp=current_datetime)
+    # if result['success'] and check_vuln:
+    #     result['vulnerabilities']['to'] = get_vulnerabilities(host_manager, host,
+    #                                                       operation_data['package']['to'],
+    #                                                       greater_than_timestamp=current_datetime)
 
-        result['vulnerabilities']['from'] = get_vulnerabilities(host_manager, host,
-                                                          operation_data['package']['from'],
-                                                          greater_than_timestamp=current_datetime)
+    #     result['vulnerabilities']['from'] = get_vulnerabilities(host_manager, host,
+    #                                                       operation_data['package']['from'],
+    #                                                       greater_than_timestamp=current_datetime)
 
-        expected_vulnerabilities_to = get_expected_vulnerabilities_by_agent(host_manager, [host],
-                                                                            operation_data['package']['to'],
-                                                                            operation_data['check'])[host]
+    #     expected_vulnerabilities_to = get_expected_vulnerabilities_by_agent(host_manager, [host],
+    #                                                                         operation_data['package']['to'],
+    #                                                                         operation_data['check'])[host]
 
-        expected_vulnerabilities_from = get_expected_vulnerabilities_by_agent(host_manager, [host],
-                                                                            operation_data['package']['from'],
-                                                                            operation_data['check'])[host]
+    #     expected_vulnerabilities_from = get_expected_vulnerabilities_by_agent(host_manager, [host],
+    #                                                                         operation_data['package']['from'],
+    #                                                                         operation_data['check'])[host]
 
-        result['expected_vulnerabilities']['to'] = expected_vulnerabilities_to
-        result['expected_vulnerabilities']['from'] = expected_vulnerabilities_from
+    #     result['expected_vulnerabilities']['to'] = expected_vulnerabilities_to
+    #     result['expected_vulnerabilities']['from'] = expected_vulnerabilities_from
 
     return result
 
@@ -441,10 +441,11 @@ def launch_parallel_operations(task_list: Dict[str, List], host_manager: HostMan
 
     with ThreadPoolExecutor() as executor:
         # Submit tasks asynchronously
-        for target, tasks in task_list.items():
-            hosts_target = host_manager.get_group_hosts(target)
-            hosts_to_ignore = target_to_ignore
-            for task in tasks:
+        for task in task_list:
+            for target, operation in task.items():
+                hosts_target = host_manager.get_group_hosts(target)
+                hosts_to_ignore = target_to_ignore
+
                 futures = []
 
                 # Calculate the hosts to ignore based on previous operations results
@@ -454,7 +455,7 @@ def launch_parallel_operations(task_list: Dict[str, List], host_manager: HostMan
                 logging.info(f"Launching operation {task['operation']} on {hosts_target}")
 
                 for host in hosts_target:
-                    futures.append(executor.submit(launch_and_store_result, (host, task, host_manager)))
+                    futures.append(executor.submit(launch_and_store_result, (host, operation, host_manager)))
 
                 # Wait for all tasks to complete
                 for future in futures:
@@ -465,7 +466,7 @@ def launch_parallel_operations(task_list: Dict[str, List], host_manager: HostMan
                     last_operation_result = operation_results[-1]
                     if not all(last_operation_result.values()):
                         logging.critical(f"Operation {last_operation_result} failed."
-                                         f"Stopping execution of the rest of the operations in host {host}")
+                                        f"Stopping execution of the rest of the operations in host {host}")
                         hosts_to_ignore.append(host)
 
 
