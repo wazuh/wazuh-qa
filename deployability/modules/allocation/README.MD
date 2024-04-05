@@ -261,7 +261,7 @@ Now, it is possible to use worklow engine library to launch provision module doi
 
 #### Manual execution of the Allocation module
 
-If one wishes to execute the allocaation module without installing the workflow engine, they can proceed by using the launcher ([module/allocation/main.py](main.py)):
+If one wishes to execute the allocation module without installing the workflow engine, they can proceed by using the launcher ([module/allocation/main.py](main.py)):
 
 1. Create
 
