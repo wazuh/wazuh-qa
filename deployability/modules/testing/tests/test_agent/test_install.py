@@ -48,9 +48,19 @@ def setup_test_environment(wazuh_params):
     # If there are no indexers, we choose wazuh-1 by default
     if not wazuh_params['indexers']:
         wazuh_params['indexers'].append(wazuh_params['master'])
-
     wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
     wazuh_params['agents'] = {key + '-' + re.findall(r'agent-(.*?)/', value)[0].replace('.',''): value for key, value in targets_dict.items() if key.startswith('agent')}
+
+    updated_agents = {}
+
+    for agent_name, agent_params in wazuh_params['agents'].items():
+        if GeneralComponentActions.hasAgentClientKeys(agent_params):
+            client_name = HostInformation.get_client_keys(agent_params)[0]['name']
+            updated_agents[client_name] = agent_params
+        else:
+            updated_agents[agent_name] = agent_params
+
+    wazuh_params['agents'] = updated_agents
 
 def test_installation(wazuh_params):
     # Checking connection
