@@ -414,16 +414,17 @@ def launch_remote_operation(host: str, operation_data: Dict[str, Dict], host_man
         raise ValueError(f"Operation {operation} not recognized")
 
 
-def launch_parallel_operations(task_list: Dict[str, List], host_manager: HostManager,
+def launch_parallel_operations(task: Dict[str, List], host_manager: HostManager,
                                target_to_ignore: List[str] = None):
     """
     Launch parallel remote operations on multiple hosts.
 
     Args:
-        task_list (list): List of dictionaries containing operation details.
+        operation (list): List of dictionaries containing operation details.
         host_manager (HostManager): An instance of the HostManager class containing information about hosts.
     """
     hosts_to_ignore = target_to_ignore if target_to_ignore else []
+    target = 'agent'
     results = {}
     lock = threading.Lock()
 
@@ -441,34 +442,23 @@ def launch_parallel_operations(task_list: Dict[str, List], host_manager: HostMan
 
     with ThreadPoolExecutor() as executor:
         # Submit tasks asynchronously
-        for task in task_list:
-            for target, operation in task.items():
-                hosts_target = host_manager.get_group_hosts(target)
-                hosts_to_ignore = target_to_ignore
+        hosts_target = host_manager.get_group_hosts(target)
+        hosts_to_ignore = target_to_ignore
 
-                futures = []
+        futures = []
 
-                # Calculate the hosts to ignore based on previous operations results
-                if target_to_ignore:
-                    hosts_target = [host for host in hosts_target if host not in target_to_ignore]
+        # Calculate the hosts to ignore based on previous operations results
+        if target_to_ignore:
+            hosts_target = [host for host in hosts_target if host not in target_to_ignore]
 
-                logging.info(f"Launching operation {task['operation']} on {hosts_target}")
+        logging.info(f"Launching operation {task['operation']} on {hosts_target}")
 
-                for host in hosts_target:
-                    futures.append(executor.submit(launch_and_store_result, (host, operation, host_manager)))
+        for host in hosts_target:
+            futures.append(executor.submit(launch_and_store_result, (host, task, host_manager)))
 
-                # Wait for all tasks to complete
-                for future in futures:
-                    future.result()
-
-                # If the operation is not successful, stop the execution of the rest of the operations in host
-                for host, operation_results in results.items():
-                    last_operation_result = operation_results[-1]
-                    if not all(last_operation_result.values()):
-                        logging.critical(f"Operation {last_operation_result} failed."
-                                        f"Stopping execution of the rest of the operations in host {host}")
-                        hosts_to_ignore.append(host)
-
+        # Wait for all tasks to complete
+        for future in futures:
+            future.result()
 
     logging.info("Results in parallel operations: {}".format(results))
 
