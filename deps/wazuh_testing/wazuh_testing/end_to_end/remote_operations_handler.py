@@ -22,7 +22,7 @@ This program is a free software; you can redistribute it and/or modify it under 
 """
 import logging
 from typing import Dict, List
-from datetime import datetime
+from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor
 
 from wazuh_testing.end_to_end.waiters import wait_syscollector_and_vuln_scan
@@ -164,37 +164,47 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
     package_id = None
 
     if host_os_name in install_package_data:
-        if host_os_arch in install_package_data[host_os_name]:
-            package_id = install_package_data[host_os_name][host_os_arch]
-        else:
-            raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found")
+        try:
+            if host_os_arch in install_package_data[host_os_name]:
+                package_id = install_package_data[host_os_name][host_os_arch]
 
-        package_data = load_packages_metadata()[package_id]
-        package_url = package_data['urls'][host_os_name][host_os_arch]
+                package_data = load_packages_metadata()[package_id]
+                package_url = package_data['urls'][host_os_name][host_os_arch]
 
-        logging.info(f"Installing package on {host}")
-        logging.info(f"Package URL: {package_url}")
+                logging.info(f"Installing package on {host}")
+                logging.info(f"Package URL: {package_url}")
 
-        current_datetime = datetime.utcnow().isoformat()
+                current_datetime = datetime.now(timezone.utc).isoformat()[:-6]  # Delete timezone offset
+                use_npm = package_data.get('use_npm', False)
 
-        host_manager.install_package(host, package_url, system)
+                if use_npm:
+                  host_manager.install_npm_package(host, package_url, system)
+                else:
+                  host_manager.install_package(host, package_url, system)
 
-        logging.info(f"Package {package_url} installed on {host}")
+                logging.info(f"Package {package_url} installed on {host}")
 
-        logging.info(f"Package installed on {host}")
+                logging.info(f"Package installed on {host}")
 
-        results['checks']['all_successfull'] = True
+                results['checks']['all_successfull'] = True
 
-        wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
-                                                          operation_data['check']['state_index'] or
-                                                          operation_data['check']['no_alerts'] or
-                                                          operation_data['check']['no_indices'])
+                wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
+                                                                operation_data['check']['state_index'] or
+                                                                operation_data['check']['no_alerts'] or
+                                                                operation_data['check']['no_indices'])
 
-        if wait_is_required:
-            wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
+                if wait_is_required:
+                    wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
 
-            check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
-                                       package_data, operation='install')
+                    check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
+                                                package_data, operation='install')
+
+            else:
+                logging.error(f"Error: Package for {host_os_name} and {host_os_arch} not found")
+
+        except Exception as e:
+            logging.critical(f"Error searching package: {e}")
+
     else:
         logging.info(f"No operation to perform on {host}")
 
@@ -239,33 +249,42 @@ def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
     package_id = None
 
     if host_os_name in package_data:
-        if host_os_arch in package_data[host_os_name]:
-            package_id = package_data[host_os_name][host_os_arch]
-        else:
-            raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found")
+        try:
+            if host_os_arch in package_data[host_os_name]:
+                package_id = package_data[host_os_name][host_os_arch]
 
-        package_data = load_packages_metadata()[package_id]
+                package_data = load_packages_metadata()[package_id]
+                use_npm = package_data.get('use_npm', False)
 
-        current_datetime = datetime.utcnow().isoformat()
+                current_datetime = datetime.now(timezone.utc).isoformat()[:-6]  # Delete timezone offset
 
-        logging.info(f"Removing package on {host}")
-        if 'uninstall_name' in package_data:
-            uninstall_name = package_data['uninstall_name']
-            host_manager.remove_package(host, system, package_uninstall_name=uninstall_name)
-        elif 'uninstall_custom_playbook' in package_data:
-            host_manager.remove_package(host, system,
-                                        custom_uninstall_playbook=package_data['uninstall_custom_playbook'])
+                logging.info(f"Removing package on {host}")
+                if 'uninstall_name' in package_data:
+                    uninstall_name = package_data['uninstall_name']
+                    if use_npm:
+                        host_manager.remove_npm_package(host, system, package_uninstall_name=uninstall_name)
+                    else:
+                        host_manager.remove_package(host, system, package_uninstall_name=uninstall_name)
+                elif 'uninstall_custom_playbook' in package_data:
+                    host_manager.remove_package(host, system,
+                                                custom_uninstall_playbook=package_data['uninstall_custom_playbook'])
 
-        wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
-                                                          operation_data['check']['state_index'] or
-                                                          operation_data['check']['no_alerts'] or
-                                                          operation_data['check']['no_indices'])
+                wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
+                                                                operation_data['check']['state_index'] or
+                                                                operation_data['check']['no_alerts'] or
+                                                                operation_data['check']['no_indices'])
 
-        if wait_is_required:
-            wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
+                if wait_is_required:
+                    wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
 
-            check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
-                                       package_data, operation='remove')
+                    check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
+                                            package_data, operation='remove')
+
+            else:
+                logging.error(f"Error: Package for {host_os_name} and {host_os_arch} not found")
+
+        except Exception as e:
+            logging.critical(f"Error searching package: {e}")
 
     else:
         logging.info(f"No operation to perform on {host}")
@@ -316,41 +335,55 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
     package_id_to = None
 
     if host_os_name in install_package_data_from:
-        if host_os_arch in install_package_data_from[host_os_name]:
-            package_id_from = install_package_data_from[host_os_name][host_os_arch]
-        else:
-            raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found")
+        try:
+            if host_os_arch in install_package_data_from[host_os_name]:
+                package_id_from = install_package_data_from[host_os_name][host_os_arch]
+            else:
+                logging.error(f"Error: Package for {host_os_name} and {host_os_arch} not found")
+        except Exception as e:
+            logging.critical(f"Error searching package: {e}")
 
     if host_os_name in install_package_data_to:
-        if host_os_arch in install_package_data_to[host_os_name]:
-            package_id_to = install_package_data_to[host_os_name][host_os_arch]
-        else:
-            raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found")
+        try:
+            if host_os_arch in install_package_data_to[host_os_name]:
+                package_id_to = install_package_data_to[host_os_name][host_os_arch]
 
-        package_data_from = load_packages_metadata()[package_id_from]
-        package_data_to = load_packages_metadata()[package_id_to]
+                package_data_from = load_packages_metadata()[package_id_from]
+                package_data_to = load_packages_metadata()[package_id_to]
 
-        package_url_to = package_data_to['urls'][host_os_name][host_os_arch]
+                package_url_to = package_data_to['urls'][host_os_name][host_os_arch]
 
-        logging.info(f"Installing package on {host}")
-        logging.info(f"Package URL: {package_url_to}")
+                logging.info(f"Installing package on {host}")
+                logging.info(f"Package URL: {package_url_to}")
 
-        current_datetime = datetime.utcnow().isoformat()
-        host_manager.install_package(host, package_url_to, system)
+                current_datetime = datetime.now(timezone.utc).isoformat()[:-6]  # Delete timezone offset
+                use_npm = package_data_to.get('use_npm', False)
 
-        logging.info(f"Package {package_url_to} installed on {host}")
+                if use_npm:
+                  host_manager.install_npm_package(host, package_url_to, system)
+                else:
+                  host_manager.install_package(host, package_url_to, system)
 
-        logging.info(f"Package installed on {host}")
+                logging.info(f"Package {package_url_to} installed on {host}")
 
-        wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
-                                                          operation_data['check']['state_index'] or
-                                                          operation_data['check']['no_alerts'] or
-                                                          operation_data['check']['no_indices'])
-        if wait_is_required:
-            wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
+                logging.info(f"Package installed on {host}")
 
-            check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
-                                       {'from': package_data_from, 'to': package_data_to}, operation='update')
+                wait_is_required = 'check' in operation_data and (operation_data['check']['alerts'] or
+                                                                operation_data['check']['state_index'] or
+                                                                operation_data['check']['no_alerts'] or
+                                                                operation_data['check']['no_indices'])
+                if wait_is_required:
+                    wait_syscollector_and_vuln_scan(host_manager, host, operation_data, current_datetime)
+
+                    check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
+                                            {'from': package_data_from, 'to': package_data_to}, operation='update')
+
+            else:
+                logging.error(f"Error: Package for {host_os_name} and {host_os_arch} not found")
+
+        except Exception as e:
+            logging.critical(f"Error searching package: {e}")
+
     else:
         logging.info(f"No operation to perform on {host}")
 
@@ -369,7 +402,7 @@ def launch_remote_sequential_operation_on_agent(agent: str, task_list: List[Dict
         host_manager (HostManager): An instance of the HostManager class containing information about hosts.
     """
     # Convert datetime to Unix timestamp (integer)
-    timestamp = datetime.utcnow().isoformat()
+    timestamp = datetime.now(timezone.utc).isoformat()[:-6]  # Delete timezone offset
 
     if task_list:
         for task in task_list:

@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Add support for the installation/uninstallation of npm packages ([#5092](https://github.com/wazuh/wazuh-qa/pull/5092)) \- (Tests)
+- Add alert.json file to Vulnerability Detector E2E test report ([#5147](https://github.com/wazuh/wazuh-qa/pull/5147)) \- (Framework)
 - Add documentation about markers for system tests ([#5080](https://github.com/wazuh/wazuh-qa/pull/5080)) \- (Documentation)
 - Add AWS Custom Buckets Integration tests ([#4675](https://github.com/wazuh/wazuh-qa/pull/4675)) \- (Framework + Tests)
 - Add Vulnerability Detector end to end tests ([#4878](https://github.com/wazuh/wazuh-qa/pull/4878)) \- (Framework + Tests)
@@ -21,6 +23,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Changes macOS packages with new ones that generate vulnerabilities ([#5174](https://github.com/wazuh/wazuh-qa/pull/5174)) \- (Tests)
 - Refactor initial scan Vulnerability E2E tests ([#5081](https://github.com/wazuh/wazuh-qa/pull/5081)) \- (Framework + Tests)
 - Update Packages in TestScanSyscollectorCases ([#4997](https://github.com/wazuh/wazuh-qa/pull/4997)) \- (Framework + Tests)
 - Reduced test_shutdown_message runtime ([#4986](https://github.com/wazuh/wazuh-qa/pull/4986)) \- (Tests)
@@ -49,7 +52,13 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-- Fix enrollment cluster system tests ([#5134](https://github.com/wazuh/wazuh-qa/pull/5134/)) \- (Tests)
+- Fix provision macOS endpoints with npm ([#5128](https://github.com/wazuh/wazuh-qa/pull/5158)) \- (Tests)
+- Fix timestamps alerts and logs filter ([#5157](https://github.com/wazuh/wazuh-qa/pull/5157)) \- (Framework + Tests)
+- Fix macOS and Windows agents timezone ([#5178](https://github.com/wazuh/wazuh-qa/pull/5178)) \- (Framework)
+- Fix Vulnerability Detector E2E tests by adding description to all tests ([#5151](https://github.com/wazuh/wazuh-qa/pull/5151)) \- (Tests)
+- Fix parser for non package vulnerabilities ([#5146](https://github.com/wazuh/wazuh-qa/pull/5146)) \- (Framework)
+- Fix remote_operations_handler functions to Vulnerability Detector E2E tests ([#5155](https://github.com/wazuh/wazuh-qa/pull/5155)) \- (Framework)
+- Fix enrollment cluster system tests ([#5134](https://github.com/wazuh/wazuh-qa/pull/5134)) \- (Tests)
 - Fix `test_synchronization` system test ([#5089](https://github.com/wazuh/wazuh-qa/pull/5089)) \- (Framework + Tests)
 - Fix number of files and their size for `test_zip_size_limit` ([#5133](https://github.com/wazuh/wazuh-qa/pull/5133)) \- (Tests)
 - Fix test_shutdown_message system test ([#5087](https://github.com/wazuh/wazuh-qa/pull/5087)) \- (Tests)
