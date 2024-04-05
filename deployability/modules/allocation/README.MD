@@ -2,11 +2,11 @@
 
 ### User documentation
 
-The Allocation module allows you to create and destroy VMs both locally and in AWS, it also gives the possibility of creating macOS VMs on Wazuh infrastructure or PowerPC VMs, as long as you have the necessary permissions to do so. VMs can be AMD64, ARM64, Windows, macOS (Intel and ARM), and powerPC (Centos and Debian).
+The Allocation module allows you to create and destroy VMs both locally and in AWS, it also gives the possibility of creating macOS VMs on Wazuh infrastructure or PowerPC VMs, as long as you have the necessary permissions to do so. VMs can be AMD64, ARM64, Windows, macOS (Intel and ARM), and powerPC (CentOS and Debian).
 
 #### Set the environment
 
-The execution of the allocation is carried out through the Workflow library, or by executing them manually through commands.
+The execution of the allocation is carried out through the Workflow engine library, or by executing them manually through commands.
 Execution can be done from any operating system.
 
 Initially, You must install Python libraries. We recommend to use virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
@@ -22,6 +22,7 @@ Initially, You must install Python libraries. We recommend to use virtual enviro
   Navigate to the project directory and switch to the project branch:
 
   ```bash
+  git clone https://github.com/wazuh/wazuh-qa.git
   cd wazuh-qa
   git checkout {project-branch}
   ```
@@ -33,7 +34,7 @@ Initially, You must install Python libraries. We recommend to use virtual enviro
   pip3 install -r deployability/deps/requirements.txt
   ```
 
-#### Use the Allocation module through the Workflow
+#### Use the Allocation module through the Workflow engine
 
 Now, it is possible to use worklow engine library to launch provision module doing the following steps:
 
@@ -261,7 +262,7 @@ Now, it is possible to use worklow engine library to launch provision module doi
 
 #### Manual execution of the Allocation module
 
-If one wishes to execute the allocaation module without installing the workflow engine, they can proceed by using the launcher ([module/allocation/main.py](main.py)):
+If one wishes to execute the allocaation module without installing the Workflow engine, they can proceed by using the launcher ([module/allocation/main.py](main.py)):
 
 1. Create
 
@@ -286,9 +287,9 @@ If one wishes to execute the allocaation module without installing the workflow 
 
   ```
 
-  >Note: In the case of AWS it is mandatory to define 2 arguments that are not necessary for Vagrant, --label-termination-date and --label-team.
-   --label-termination-date: This argument allows you to define the date on which the machine can be deleted. The allowed values are 1d (where the 1 refers to the number of days the machine is needed) or with the following format "2024-03-20 21:00:00"
-   --label-team: This argument allows you to set the team that owns the VM to be able to track it. The valid options are: 'qa', 'core', 'framework', 'devops', 'frontend', 'operations', 'cloud', 'threat-intel', 'marketing', 'documentation'
+  >Note: In the case of AWS it is mandatory to define two arguments that are not necessary for Vagrant, --label-termination-date and --label-team.
+   --label-termination-date: This argument allows you to define the date on which the machine can be deleted. The allowed values are **1d** (where the **1** refers to the number of days the machine is needed) or with the following format **"2024-03-20 21:00:00"**
+   --label-team: This argument allows you to set the team that owns the VM to be able to track it. The valid options are: **qa**, **core**, **framework**, **devops**, **frontend**, **operations**, **cloud**, **threat-intel**, **marketing**, **documentation**
 
 
 
@@ -316,10 +317,10 @@ If one wishes to execute the allocaation module without installing the workflow 
 3. Arguments
 
   - --provider
-    This argument allows us to choose on with platform we will deploy our VM. The allowed values are aws or vagrant.
+    This argument allows us to choose on with platform we will deploy our VM. The allowed values are **aws** or **vagrant**.
 
   - --size
-    This argument allows us to choose the resources of the VM. The allowed values are micro, small, medium, and large.
+    This argument allows us to choose the resources of the VM. The allowed values are **micro**, **small**, **medium**, and **large**.
 
     - Vagrant equivalences
       micro: CPU 1 - Memory 1024
@@ -334,40 +335,40 @@ If one wishes to execute the allocaation module without installing the workflow 
       large: c5ad.xlarge (AMD64) - c6g.xlarge (ARM64)
 
   - --composite-name
-    This argument allows us to choose the OS, version, and architecture of the VM, example: linux-centos-7-amd64
+    This argument allows us to choose the OS, version, and architecture of the VM, example: **linux-centos-7-amd64**
 
   - --action
-    This argument defines the action that the module will perform. Allowed values are create or delete. By default: create
+    This argument defines the action that the module will perform. Allowed values are **create** or **delete**. By default: **create**
 
   - --ssh-key
     This argument allows us to use a custom ssh key for the VM.
     Considerations:
-    - must enter the path where the key is located, with the name of the complete key: ~/.ssh/allocation_test
-    - on the same path you have to have the pair of keys (private and public key with the same name): ~/.ssh/allocation_test ~/.ssh/allocation_test.pub
+    - must enter the path where the key is located, with the name of the complete key: **~/.ssh/allocation_test**
+    - on the same path you have to have the pair of keys (private and public key with the same name): **~/.ssh/allocation_test** **~/.ssh/allocation_test.pub**
     - In the case of AWS, you must first create the key in the same region where you are going to deploy the instance. It is important that the key in AWS has the same name as your private key file.
 
   - --custom-provider-config
     This argument allows us to provide a configuration file with all the VM definitions.
 
   - --track-output
-    This argument allows us to define which path we want the track file to write to. By default, it is saved in the instance directory, for example: /tmp/wazuh-qa/VAGRANT-F0753C57-713E-4294-9EA9-89D93D384844/track.yml
+    This argument allows us to define which path we want the track file to write to. By default, it is saved in the instance directory, for example: **/tmp/wazuh-qa/VAGRANT-F0753C57-713E-4294-9EA9-89D93D384844/track.yml**
 
     >Note: this argument is mandatory for delete action.
 
   - --inventory-output
-    This argument allows us to define which path we want the inventory file to write to. By default, it is saved in the instance directory, for example: /tmp/wazuh-qa/VAGRANT-F0753C57-713E-4294-9EA9-89D93D384844/inventory.yml
+    This argument allows us to define which path we want the inventory file to write to. By default, it is saved in the instance directory, for example: **/tmp/wazuh-qa/VAGRANT-F0753C57-713E-4294-9EA9-89D93D384844/inventory.yml**
 
   - --working-dir
-    This argument allows us to define in which directory the files referring to the VM will be generated. By default, /tmp/wazuh-qa
+    This argument allows us to define in which directory the files referring to the VM will be generated. By default, **/tmp/wazuh-qa**
 
   - --label-issue
-    This argument is only used in the case of AWS and is not mandatory, it allows us to create a label to reference the created instance to an issue on GitHub. It has to be a GitHub URL of the Wazuh repository, for example: https://github.com/wazuh/internal-devel-requests/issues/1008
+    This argument is only used in the case of AWS and is not mandatory, it allows us to create a label to reference the created instance to an issue on GitHub. It has to be a GitHub URL of the Wazuh repository, for example: **https://github.com/wazuh/internal-devel-requests/issues/1008**
 
   - --label-team
-    This argument it is mandatory for AWS deploy, allows you to set the team that owns the VM to be able to track it. The valid options are: 'qa', 'core', 'framework', 'devops', 'frontend', 'operations', 'cloud', 'threat-intel', 'marketing', 'documentation'
+    This argument it is mandatory for AWS deploy, allows you to set the team that owns the VM to be able to track it. The valid options are: **qa**, **core**, **framework**, **devops**, **frontend**, **operations**, **cloud**, **threat-intel**, **marketing**, **documentation**
 
   - --label-termination-date
-    This argument it is mandatory for AWS deploy, allows you to define the date on which the machine can be deleted. The allowed values are 1d (where the 1 refers to the number of days the machine is needed) or with the following format "2024-03-20 21:00:00"
+    This argument it is mandatory for AWS deploy, allows you to define the date on which the machine can be deleted. The allowed values are **1d** (where the **1** refers to the number of days the machine is needed) or with the following format **"2024-03-20 21:00:00"**
 
   - --instance-name
     This argument allows us to define a custom name for the instance, if this argument is not used, the instance name is defined by other parameters entered, such as --label-issue or --composite-name.
@@ -377,7 +378,7 @@ If one wishes to execute the allocaation module without installing the workflow 
 
 The allocation module allows creating infrastructure on both AWS and locally (using Vagrant).
 
-Instructions can be initiated from the fixture and executed through the Workflow Engine or executed using Python commands.
+Instructions can be initiated from the fixture and executed through the Workflow engine or executed using Python commands.
 
 In either case, the following information will be needed:
 
