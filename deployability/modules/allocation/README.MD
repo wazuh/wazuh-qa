@@ -367,7 +367,7 @@ If one wishes to execute the allocation module without installing the workflow e
     This argument is mandatory for AWS deployment, it allows you to set the team that owns the VM to be able to track it. The valid options are: 'qa', 'core', 'framework', 'devops', 'frontend', 'operations', 'cloud', 'threat-intel', 'marketing', 'documentation'
 
   - --label-termination-date
-    This argument it is mandatory for AWS deploy, allows you to define the date on which the machine can be deleted. The allowed values are 1d (where the 1 refers to the number of days the machine is needed) or with the following format "2024-03-20 21:00:00"
+    This argument is mandatory for AWS deployment, it allows you to define the date on which the machine can be deleted. The allowed values are 1d (where the 1 refers to the number of days the machine is needed) or with the following format "2024-03-20 21:00:00"
 
   - --instance-name
     This argument allows us to define a custom name for the instance, if this argument is not used, the instance name is defined by other parameters entered, such as --label-issue or --composite-name.
