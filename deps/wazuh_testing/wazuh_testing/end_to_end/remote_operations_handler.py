@@ -22,7 +22,7 @@ This program is a free software; you can redistribute it and/or modify it under 
 """
 import logging
 from typing import Dict, List
-from datetime import datetime
+from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor
 
 from wazuh_testing.end_to_end.waiters import wait_syscollector_and_vuln_scan
@@ -167,16 +167,20 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
         try:
             if host_os_arch in install_package_data[host_os_name]:
                 package_id = install_package_data[host_os_name][host_os_arch]
-        
+
                 package_data = load_packages_metadata()[package_id]
                 package_url = package_data['urls'][host_os_name][host_os_arch]
 
                 logging.info(f"Installing package on {host}")
                 logging.info(f"Package URL: {package_url}")
 
-                current_datetime = datetime.utcnow().isoformat()
+                current_datetime = datetime.now(timezone.utc).isoformat()[:-6]  # Delete timezone offset
+                use_npm = package_data.get('use_npm', False)
 
-                host_manager.install_package(host, package_url, system)
+                if use_npm:
+                  host_manager.install_npm_package(host, package_url, system)
+                else:
+                  host_manager.install_package(host, package_url, system)
 
                 logging.info(f"Package {package_url} installed on {host}")
 
@@ -194,10 +198,10 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
 
                     check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
                                                 package_data, operation='install')
-            
+
             else:
                 logging.error(f"Error: Package for {host_os_name} and {host_os_arch} not found")
-                
+
         except Exception as e:
             logging.critical(f"Error searching package: {e}")
 
@@ -250,8 +254,9 @@ def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
                 package_id = package_data[host_os_name][host_os_arch]
 
                 package_data = load_packages_metadata()[package_id]
+                use_npm = package_data.get('use_npm', False)
 
-                current_datetime = datetime.utcnow().isoformat()
+                current_datetime = datetime.now(timezone.utc).isoformat()[:-6]  # Delete timezone offset
 
                 logging.info(f"Removing package on {host}")
                 if 'uninstall_name' in package_data:
@@ -271,10 +276,10 @@ def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
 
                     check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
                                             package_data, operation='remove')
-            
+
             else:
                 logging.error(f"Error: Package for {host_os_name} and {host_os_arch} not found")
-        
+
         except Exception as e:
             logging.critical(f"Error searching package: {e}")
 
@@ -339,7 +344,7 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
         try:
             if host_os_arch in install_package_data_to[host_os_name]:
                 package_id_to = install_package_data_to[host_os_name][host_os_arch]
-            
+
                 package_data_from = load_packages_metadata()[package_id_from]
                 package_data_to = load_packages_metadata()[package_id_to]
 
@@ -348,8 +353,13 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
                 logging.info(f"Installing package on {host}")
                 logging.info(f"Package URL: {package_url_to}")
 
-                current_datetime = datetime.utcnow().isoformat()
-                host_manager.install_package(host, package_url_to, system)
+                current_datetime = datetime.now(timezone.utc).isoformat()[:-6]  # Delete timezone offset
+                use_npm = package_data_to.get('use_npm', False)
+
+                if use_npm:
+                  host_manager.install_npm_package(host, package_url_to, system)
+                else:
+                  host_manager.install_package(host, package_url_to, system)
 
                 logging.info(f"Package {package_url_to} installed on {host}")
 
@@ -364,7 +374,7 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
 
                     check_vulnerability_alerts(results, operation_data['check'], current_datetime, host_manager, host,
                                             {'from': package_data_from, 'to': package_data_to}, operation='update')
-                
+
             else:
                 logging.error(f"Error: Package for {host_os_name} and {host_os_arch} not found")
 
@@ -389,7 +399,7 @@ def launch_remote_sequential_operation_on_agent(agent: str, task_list: List[Dict
         host_manager (HostManager): An instance of the HostManager class containing information about hosts.
     """
     # Convert datetime to Unix timestamp (integer)
-    timestamp = datetime.utcnow().isoformat()
+    timestamp = datetime.now(timezone.utc).isoformat()[:-6]  # Delete timezone offset
 
     if task_list:
         for task in task_list:
