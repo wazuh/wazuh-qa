@@ -334,7 +334,7 @@ If one wishes to execute the allocation module without installing the workflow e
       large: c5ad.xlarge (AMD64) - c6g.xlarge (ARM64)
 
   - --composite-name
-    This argument allows us to choose the OS, version, and architecture of the VM, example: linux-centos-7-amd64
+    This argument allows us to choose the OS, version, and architecture of the VM, for example: linux-centos-7-amd64
 
   - --action
     This argument defines the action that the module will perform. Allowed values are create or delete. By default: create
