@@ -36,7 +36,7 @@ Initially, You must install Python libraries. We recommend to use virtual enviro
 
 #### Use the Allocation module through the Workflow engine
 
-Now, it is possible to use worklow engine library to launch provision module doing the following steps:
+Now, it is possible to use the worklow engine library to launch the provision module by doing the following steps:
 
 1. Install the Workflow engine library and its launcher:
 
@@ -57,7 +57,7 @@ Now, it is possible to use worklow engine library to launch provision module doi
 
       ```bash
       version: 0.1
-      description: This workflow is used to test agents deployment por DDT1 PoC
+      description: This workflow is used to test agents' deployment for DDT1 PoC
       variables:
         agents-os:
           - linux-ubuntu-22.04-amd64
