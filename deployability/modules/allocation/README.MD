@@ -56,7 +56,7 @@ Now, it is possible to use the worklow engine library to launch the provision mo
 
       ```bash
       version: 0.1
-      description: This workflow is used to test agents deployment por DDT1 PoC
+      description: This workflow is used to test agents' deployment for DDT1 PoC
       variables:
         agents-os:
           - linux-ubuntu-22.04-amd64
