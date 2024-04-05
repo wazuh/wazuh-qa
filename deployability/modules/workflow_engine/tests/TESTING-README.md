@@ -13,15 +13,19 @@ git clone https://github.com/wazuh/wazuh-qa.git -b [your-branch]
 cd wazuh-qa
 pip install -r deployability/modules/workflow_engine/requirements-dev.txt
 ```
-- Configure the `PYTHONPATH` variable to include the directory `deployability/modules`, for example if you've cloned
-the wazuh-qa repository to /wazuh/wazuh-qa, use this commando to configure the PYTHONPATH:
+- Configure the `PYTHONPATH` variable with the full path to the directory `deployability/modules`, for example if you've
+cloned the `wazuh-qa` repository into `/wazuh/wazuh-qa`, configure the `PYTHONPATH` in this way:
 ```bash
-export PYTHONPATH=$PYTHONPATH:/wazuh/wazuh-qa/deployability/modules
+> pwd
+/wazuh/wazuh-qa
+> export PYTHONPATH=$PYTHONPATH:$PWD/deployability/modules
+> echo $PYTHONPATH
+/wazuh/wazuh-qa/deployability/modules
 ```
 
 ## Test Structure
-The directory `deployability/modules/workflow_engine/tests/` contains the unit test files for the 
-`workflow_engine` module.
+The directory `deployability/modules/workflow_engine/tests/` contains the unit test files for the `workflow_engine`
+module.
 
 ## Running Tests
 To run the tests, make sure that your system meets the requirements by executing the following command from the project 
