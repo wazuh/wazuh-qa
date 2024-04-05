@@ -175,7 +175,12 @@ def install_package(host: str, operation_data: Dict[str, Dict], host_manager: Ho
                 logging.info(f"Package URL: {package_url}")
 
                 current_datetime = datetime.now(timezone.utc).isoformat()[:-6]  # Delete timezone offset
-                host_manager.install_package(host, package_url, system)
+                use_npm = package_data.get('use_npm', False)
+
+                if use_npm:
+                  host_manager.install_npm_package(host, package_url, system)
+                else:
+                  host_manager.install_package(host, package_url, system)
 
                 logging.info(f"Package {package_url} installed on {host}")
 
@@ -249,6 +254,7 @@ def remove_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
                 package_id = package_data[host_os_name][host_os_arch]
 
                 package_data = load_packages_metadata()[package_id]
+                use_npm = package_data.get('use_npm', False)
 
                 current_datetime = datetime.now(timezone.utc).isoformat()[:-6]  # Delete timezone offset
 
@@ -348,7 +354,12 @@ def update_package(host: str, operation_data: Dict[str, Dict], host_manager: Hos
                 logging.info(f"Package URL: {package_url_to}")
 
                 current_datetime = datetime.now(timezone.utc).isoformat()[:-6]  # Delete timezone offset
-                host_manager.install_package(host, package_url_to, system)
+                use_npm = package_data_to.get('use_npm', False)
+
+                if use_npm:
+                  host_manager.install_npm_package(host, package_url_to, system)
+                else:
+                  host_manager.install_package(host, package_url_to, system)
 
                 logging.info(f"Package {package_url_to} installed on {host}")
 
