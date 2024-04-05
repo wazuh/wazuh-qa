@@ -107,13 +107,13 @@ def test_group_hash(target_node, group, n_agents, configure_groups, clean_enviro
 
     # Restart agent
     restart_cluster(test_infra_agents, host_manager)
-    time.sleep(fw.T_10)
+    time.sleep(fw.T_20)
 
     # Assing group for multigroups case
     for agent in range(n_agents):
         if group != 'default':
             assign_agent_to_new_group(test_infra_managers[0], group, agents_data[agent][1], host_manager)
-    time.sleep(fw.T_10)
+    time.sleep(fw.T_20)
 
     # Calculate global hash
     expected_global_hash = calculate_global_hash(test_infra_managers[0], host_manager)
@@ -129,7 +129,7 @@ def test_group_hash(target_node, group, n_agents, configure_groups, clean_enviro
         # Unassign one agent from group
 
         unassign_agent_from_group(test_infra_managers[0], group, agents_data[0][1], host_manager)
-        time.sleep(fw.T_10)
+        time.sleep(fw.T_20)
 
         # Calculate global hash
         expected_global_hash = calculate_global_hash(test_infra_managers[0], host_manager)
