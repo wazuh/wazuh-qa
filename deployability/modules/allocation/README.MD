@@ -2,7 +2,7 @@
 
 ### User documentation
 
-The Allocation module allows you to create and destroy VMs both locally and in AWS, it also gives the possibility of creating macOS VMs on Wazuh infrastructure or PowerPC VMs, as long as you have the necessary permissions to do so. VMs can be AMD64, ARM64, Windows, macOS (Intel and ARM), and powerPC (CentOS and Debian).
+The Allocation module allows you to create and destroy VMs both locally and in AWS, it also gives the possibility of creating macOS VMs on Wazuh infrastructure or PowerPC VMs, as long as you have the necessary permissions to do so. VMs can be AMD64, ARM64, Windows, macOS (Intel and ARM), and PowerPC (CentOS and Debian).
 
 #### Set the environment
 
