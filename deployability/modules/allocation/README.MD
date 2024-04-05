@@ -364,7 +364,7 @@ If one wishes to execute the allocation module without installing the workflow e
     This argument is only used in the case of AWS and is not mandatory, it allows us to create a label to reference the created instance to an issue on GitHub. It has to be a GitHub URL of the Wazuh repository, for example: https://github.com/wazuh/internal-devel-requests/issues/1008
 
   - --label-team
-    This argument it is mandatory for AWS deploy, allows you to set the team that owns the VM to be able to track it. The valid options are: 'qa', 'core', 'framework', 'devops', 'frontend', 'operations', 'cloud', 'threat-intel', 'marketing', 'documentation'
+    This argument is mandatory for AWS deployment, it allows you to set the team that owns the VM to be able to track it. The valid options are: 'qa', 'core', 'framework', 'devops', 'frontend', 'operations', 'cloud', 'threat-intel', 'marketing', 'documentation'
 
   - --label-termination-date
     This argument it is mandatory for AWS deploy, allows you to define the date on which the machine can be deleted. The allowed values are 1d (where the 1 refers to the number of days the machine is needed) or with the following format "2024-03-20 21:00:00"
