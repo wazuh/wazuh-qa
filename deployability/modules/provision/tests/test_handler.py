@@ -147,7 +147,17 @@ def test_provision_handler_get_templates_order_fail():
                           ('indexer', 'source', 'install'),
 ])
 def test_provision_handler_generate_dict(component: str, method: str, action:str):
-    """Test AIO.get_template_order method."""
+    """Test ProvisionHandler._generate_dict method.
+
+    Parameters
+    ----------
+    component : str
+        component type
+    method : str
+        valid values are package, assistant, source
+    action : str
+        valid values are install or uninstall
+    """
     info = ComponentInfo(component=component, version='version', dependencies={})
     with patch('pathlib.Path.exists', return_value=True):
         handler = ProvisionHandler(component_info=info, action=action, method=method)
