@@ -23,6 +23,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Changes macOS packages with new ones that generate vulnerabilities ([#5174](https://github.com/wazuh/wazuh-qa/pull/5174)) \- (Tests)
 - Refactor initial scan Vulnerability E2E tests ([#5081](https://github.com/wazuh/wazuh-qa/pull/5081)) \- (Framework + Tests)
 - Update Packages in TestScanSyscollectorCases ([#4997](https://github.com/wazuh/wazuh-qa/pull/4997)) \- (Framework + Tests)
 - Reduced test_shutdown_message runtime ([#4986](https://github.com/wazuh/wazuh-qa/pull/4986)) \- (Tests)
