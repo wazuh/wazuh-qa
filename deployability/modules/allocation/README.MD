@@ -316,7 +316,7 @@ If one wishes to execute the allocation module without installing the workflow e
 3. Arguments
 
   - --provider
-    This argument allows us to choose on with platform we will deploy our VM. The allowed values are aws or vagrant.
+    This argument allows us to choose on which platform we will deploy our VM. The allowed values are aws or vagrant.
 
   - --size
     This argument allows us to choose the resources of the VM. The allowed values are micro, small, medium, and large.
