@@ -1,36 +1,15 @@
-# Copyright (C) 2015, Wazuh Inc.
-# Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 version: 0.1
 description: This workflow is used to test agents deployment por DDT1 PoC
 variables:
-  agents-os:
-    - linux-oracle-9-amd64
-  manager-os: linux-oracle-9-amd64
-  infra-provider: vagrant
+  agent-os:
+    - linux-ubuntu-18.04-amd64
+  manager-os: linux-ubuntu-22.04-amd64
+  infra-provider: aws
   working-dir: /tmp/dtt1-poc
 
 tasks:
-  # Unique manager provision task
-  - task: "provision-manager"
-    description: "Provision the manager."
-    do:
-      this: process
-      with:
-        path: python3
-        args:
-          - modules/provision/main.py
-          - inventory: "{working-dir}/manager-{manager-os}/inventory.yaml"
-          - install:
-            - component: wazuh-manager
-              type: package
-              version: 4.7.3
-              live: True
-    depends-on:
-      - "allocate-manager"
-
   # Unique manager allocate task
-  - task: "allocate-manager"
+  - task: "allocate-manager-{manager-os}"
     description: "Allocate resources for the manager."
     do:
       this: process
@@ -42,10 +21,10 @@ tasks:
           - provider: "{infra-provider}"
           - size: large
           - composite-name: "{manager-os}"
-          - inventory-output: "{working-dir}/manager-{manager-os}"
-          - track-output: "{working-dir}/manager-{manager-os}"
+          - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
           - label-termination-date: "1d"
-          - label-team: "QA"
+          - label-team: "qa"
     cleanup:
       this: process
       with:
@@ -53,36 +32,11 @@ tasks:
         args:
           - modules/allocation/main.py
           - action: delete
-          - track-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
 
-  # Generic agent provision task
-  - task: "provision-install-{agent}"
-    description: "Provision resources for the {agent} agent."
-    do:
-      this: process
-      with:
-        path: python3
-        args:
-          - modules/provision/main.py
-          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-          - dependencies:
-            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-            - agent: "{working-dir}/agent-{agent}/inventory.yaml"
-          - install:
-            - component: wazuh-agent
-              type: package
-              version: 4.7.3
-              live: True
-    depends-on:
-      - "allocate-{agent}"
-      - "provision-manager"
-    foreach:
-      - variable: agents-os
-        as: agent
-
-  # Generic agent allocate task
-  - task: "allocate-{agent}"
-    description: "Allocate resources for the {agent} agent."
+  # Unique agent allocate task
+  - task: "allocate-agent-{agent}"
+    description: "Allocate resources for the agent."
     do:
       this: process
       with:
@@ -93,10 +47,13 @@ tasks:
           - provider: "{infra-provider}"
           - size: small
           - composite-name: "{agent}"
-          - inventory-output: "{working-dir}/agent-{agent}"
-          - track-output: "{working-dir}/agent-{agent}"
+          - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
+          - track-output: "{working-dir}/agent-{agent}/track.yaml"
           - label-termination-date: "1d"
-          - label-team: "QA"
+          - label-team: "qa"
+    foreach:
+      - variable: agent-os
+        as: agent
     cleanup:
       this: process
       with:
@@ -104,7 +61,70 @@ tasks:
         args:
           - modules/allocation/main.py
           - action: delete
-          - track-output: "{working-dir}/agent-{agent}/inventory.yaml"
+          - track-output: "{working-dir}/agent-{agent}/track.yaml"
+
+  # Unique manager provision task
+  - task: "provision-manager-{manager-os}"
+    description: "Provision the manager."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/provision/main.py
+          - inventory: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - install:
+            - component: wazuh-manager
+              type: assistant
+              version: 4.7.3
+              live: True
+    depends-on:
+      - "allocate-manager-{manager-os}"
+
+  # Generic agent provision task
+  - task: "provision-agent-{agent}"
+    description: "Provision resources for the {agent} agent."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/provision/main.py
+          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
+          - dependencies:
+            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - install:
+            - component: wazuh-agent
+              type: package
+              version: 4.7.3
+              live: True
+    depends-on:
+      - "allocate-agent-{agent}"
+
     foreach:
-      - variable: agents-os
+      - variable: agent-os
         as: agent
+
+  # Generic agent test task
+  - task: "run-agent-{agent}-tests"
+    description: "Run tests install for the agent {agent}."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/testing/main.py
+          - targets:
+            - wazuh-1: "{working-dir}/manager-{manager-os}/inventory.yaml"
+            - agent: "{working-dir}/agent-{agent}/inventory.yaml"
+          - tests: "stop,uninstall"
+          - component: "agent"
+          - wazuh-version: "4.7.3"
+          - wazuh-revision: "40714"
+          - live: "True"
+    foreach:
+      - variable: agent-os
+        as: agent
+    depends-on:
+      - "provision-manager-{manager-os}"
+      - "provision-agent-{agent}"

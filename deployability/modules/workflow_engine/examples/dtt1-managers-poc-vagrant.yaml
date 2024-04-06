@@ -49,6 +49,14 @@ tasks:
           - track-output: "{working-dir}/manager-linux-ubuntu-20.04-amd64/track.yaml"
           - label-termination-date: "1d"
           - label-team: "qa"
+    cleanup:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: delete
+          - track-output: "{working-dir}/manager-linux-centos-7-amd64/track.yaml"
 
 
 

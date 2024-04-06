@@ -4,7 +4,17 @@ variables:
   agent-os:
     - linux-ubuntu-18.04-amd64
     - linux-ubuntu-20.04-amd64
-
+    - linux-ubuntu-22.04-amd64
+    - linux-debian-10-amd64
+    - linux-debian-11-amd64
+    - linux-debian-12-amd64
+    - linux-oracle-9-amd64
+    - linux-centos-7-amd64
+    - linux-centos-8-amd64
+    - linux-redhat-7-amd64
+    - linux-redhat-8-amd64
+    - linux-redhat-9-amd64
+    - linux-amazon-2-amd64
   manager-os: linux-ubuntu-22.04-amd64
   infra-provider: aws
   working-dir: /tmp/dtt1-poc
@@ -56,7 +66,14 @@ tasks:
     foreach:
       - variable: agent-os
         as: agent
-
+    cleanup:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: delete
+          - track-output: "{working-dir}/agent-{agent}/track.yaml"
 
   # Unique manager provision task
   - task: "provision-manager-{manager-os}"
@@ -75,6 +92,30 @@ tasks:
               live: True
     depends-on:
       - "allocate-manager-{manager-os}"
+
+  # Generic agent provision task
+  - task: "provision-install-{agent}"
+    description: "Provision resources for the {agent} agent."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/provision/main.py
+          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
+          - dependencies:
+            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - install:
+            - component: wazuh-agent
+              type: package
+              version: 4.7.3
+              live: True
+    depends-on:
+      - "allocate-agent-{agent}"
+      - "provision-manager-{manager-os}"
+    foreach:
+      - variable: agents-os
+        as: agent
 
   # Generic agent test task
   - task: "run-agent-{agent}-tests"
