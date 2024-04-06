@@ -8,7 +8,7 @@ import re
 from ..helpers.generic import GeneralComponentActions, HostInformation
 from ..helpers.logger.logger import logger
 from ..helpers.manager import WazuhManager
-
+from ..helpers.utils import Utils
 
 @pytest.fixture
 def wazuh_params(request):
@@ -51,6 +51,7 @@ def setup_test_environment(wazuh_params):
 
     updated_agents = {}
     for agent_name, agent_params in wazuh_params['agents'].items():
+        Utils.check_inventory_connection(agent_params)
         if GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent') and GeneralComponentActions.hasAgentClientKeys(agent_params):
             if HostInformation.get_client_keys(agent_params) != []:
                 client_name = HostInformation.get_client_keys(agent_params)[0]['name']
