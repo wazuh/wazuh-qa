@@ -52,17 +52,15 @@ def setup_test_environment(wazuh_params):
     wazuh_params['agents'] = {key + '-' + re.findall(r'agent-(.*?)/', value)[0].replace('.',''): value for key, value in targets_dict.items() if key.startswith('agent')}
 
     updated_agents = {}
-
     for agent_name, agent_params in wazuh_params['agents'].items():
-        Utils.check_inventory_connection(agent_params)
-
-        if GeneralComponentActions.hasAgentClientKeys(agent_params):
-            client_name = HostInformation.get_client_keys(agent_params)[0]['name']
-            updated_agents[client_name] = agent_params
-        else:
-            updated_agents[agent_name] = agent_params
-
-    wazuh_params['agents'] = updated_agents
+        if GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent') and GeneralComponentActions.hasAgentClientKeys(agent_params):
+            if HostInformation.get_client_keys(agent_params) != []:
+                client_name = HostInformation.get_client_keys(agent_params)[0]['name']
+                updated_agents[client_name] = agent_params
+            else:
+                updated_agents[agent_name] = agent_params
+        if updated_agents != {}:
+            wazuh_params['agents'] = updated_agents
 
 def test_installation(wazuh_params):
     # Checking connection
