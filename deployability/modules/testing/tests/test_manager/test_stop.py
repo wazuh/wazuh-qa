@@ -8,7 +8,7 @@ from ..helpers.generic import HostInformation, GeneralComponentActions
 from ..helpers.logger.logger import logger
 
 
-@pytest.fixture
+@pytest.fixture(scope="module", autouse=True)
 def wazuh_params(request):
     wazuh_version = request.config.getoption('--wazuh_version')
     wazuh_revision = request.config.getoption('--wazuh_revision')
@@ -26,7 +26,7 @@ def wazuh_params(request):
         GeneralComponentActions.component_restart(worker, 'wazuh-manager')
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def setup_test_environment(wazuh_params):
     targets = wazuh_params['targets']
     # Clean the string and split it into key-value pairs
