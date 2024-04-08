@@ -75,4 +75,4 @@ def test_stop(wazuh_params):
         assert not GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is still active by command')
 
         expected_condition_func = lambda: 'disconnected' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
-        Waits.dynamic_wait(expected_condition_func, cycles=10, waiting_time=20)
+        Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)

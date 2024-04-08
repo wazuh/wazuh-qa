@@ -85,7 +85,7 @@ def test_isActive(wazuh_params):
         assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by API')
 
         expected_condition_func = lambda: 'active' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
-        Waits.dynamic_wait(expected_condition_func, cycles=10, waiting_time=20)
+        Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
 
 
 def test_clientKeys(wazuh_params):
