@@ -330,7 +330,7 @@ class WorkflowProcessor:
             logger.error("User interrupt detected. Aborting execution...")
             self.execute_tasks_parallel(dag, reverse=True)
 
-    def generate_futures(self, dag, executor, reverse: bool = False):
+    def generate_futures(self, dag: DAG, executor, reverse: bool = False):
         futures = {}
 
         while True:
