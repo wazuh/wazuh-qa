@@ -128,7 +128,7 @@ if [ ! -r "/etc/os-release" ] || [ "$DIST_NAME" = "centos" ]; then
     fi
 fi
 
-if [ "$DIST_NAME" = "amzn" ] || [ "$DIST_NAME" = "sles" ]; then
+if [ "$DIST_NAME" = "amzn" ] || [ "$DIST_NAME" = "sles" ] || [ "$DIST_NAME" = "opensuse-leap" ]; then
     sudo sed -i "s/#Port\s22/Port ${SSH_PORT}/" /etc/ssh/sshd_config
     sudo systemctl restart sshd.service
 fi
