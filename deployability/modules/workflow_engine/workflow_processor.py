@@ -364,6 +364,7 @@ class WorkflowProcessor:
                 dag = DAG(self.task_collection)
                 logger.info("Execution plan: %s", json.dumps(dag.get_execution_plan(), indent=2))
 
+
         except Exception as e:
             logger.error("Error in Workflow: %s", e)
 

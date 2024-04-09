@@ -176,6 +176,31 @@ class HostInformation:
         else:
             return None
 
+    @staticmethod
+    def get_client_keys(inventory_path) -> list[dict]:
+        """
+        Get the client keys from the client.keys file in the host.
+
+        Args:
+            inventory_path (str): host's inventory path
+
+        Returns:
+            list: List of dictionaries with the client keys.
+        """
+        clients = []
+        client_key = Executor.execute_command(inventory_path, f'cat {CLIENT_KEYS}')
+        lines = client_key.split('\n')[:-1]
+        for line in lines:
+            _id, name, address, password = line.strip().split()
+            client_info = {
+                "id": _id,
+                "name": name,
+                "address": address,
+                "password": password
+            }
+            clients.append(client_info)
+        return clients
+
 
 class HostConfiguration:
 

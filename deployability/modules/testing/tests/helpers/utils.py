@@ -18,13 +18,13 @@ paramiko_logger.setLevel(logging.CRITICAL)
 class Utils:
     
     @staticmethod
-    def extract_ansible_host(file_path):
+    def extract_ansible_host(file_path) -> str:
         with open(file_path, 'r') as yaml_file:
             inventory_data = yaml.safe_load(yaml_file)
         return inventory_data.get('ansible_host')
 
     @staticmethod
-    def check_inventory_connection(inventory_path, attempts=10, sleep=30):
+    def check_inventory_connection(inventory_path, attempts=10, sleep=30) -> bool:
         if 'manager' in inventory_path:
             match = re.search(r'/manager-linux-([^-]+)-([^-]+)-', inventory_path)
         elif 'agent' in inventory_path:

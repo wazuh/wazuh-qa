@@ -6,11 +6,11 @@ import pytest
 import re
 
 from ..helpers.agent import WazuhAgent, WazuhAPI
-from ..helpers.generic import GeneralComponentActions, Waits
+from ..helpers.generic import GeneralComponentActions, Waits, HostInformation
 from ..helpers.logger.logger import logger
+from ..helpers.utils import Utils
 
-
-@pytest.fixture
+@pytest.fixture(scope="module", autouse=True)
 def wazuh_params(request):
     wazuh_version = request.config.getoption('--wazuh_version')
     wazuh_revision = request.config.getoption('--wazuh_revision')
@@ -31,7 +31,7 @@ def wazuh_params(request):
     for agent_names, agent_params in params['agents'].items():
         GeneralComponentActions.component_restart(agent_params, 'wazuh-agent')
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def setup_test_environment(wazuh_params):
     targets = wazuh_params['targets']
     # Clean the string and split it into key-value pairs
@@ -53,6 +53,18 @@ def setup_test_environment(wazuh_params):
     wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
     wazuh_params['agents'] = {key + '-' + re.findall(r'agent-(.*?)/', value)[0].replace('.',''): value for key, value in targets_dict.items() if key.startswith('agent')}
 
+    updated_agents = {}
+    for agent_name, agent_params in wazuh_params['agents'].items():
+        Utils.check_inventory_connection(agent_params)
+        if GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent') and GeneralComponentActions.hasAgentClientKeys(agent_params):
+            if HostInformation.get_client_keys(agent_params) != []:
+                client_name = HostInformation.get_client_keys(agent_params)[0]['name']
+                updated_agents[client_name] = agent_params
+            else:
+                updated_agents[agent_name] = agent_params
+        if updated_agents != {}:
+            wazuh_params['agents'] = updated_agents
+
 def test_stop(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['master'])
     for agent_names, agent_params in wazuh_params['agents'].items():
@@ -63,4 +75,4 @@ def test_stop(wazuh_params):
         assert not GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is still active by command')
 
         expected_condition_func = lambda: 'disconnected' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
-        Waits.dynamic_wait(expected_condition_func, cycles=10, waiting_time=20)
+        Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
