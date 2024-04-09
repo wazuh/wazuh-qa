@@ -15,7 +15,7 @@ variables:
     - linux-redhat-8-amd64
     - linux-redhat-9-amd64
     - linux-amazon-2-amd64
-  manager-os: linux-ubuntu-22.04-amd64
+  manager-os: linux-ubuntu-20.04-amd64
   infra-provider: aws
   working-dir: /tmp/dtt1-poc
 
@@ -37,6 +37,7 @@ tasks:
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
           - label-termination-date: "1d"
           - label-team: "qa"
+    on-error: "abort-all"
     cleanup:
       this: process
       with:
@@ -92,9 +93,10 @@ tasks:
               live: True
     depends-on:
       - "allocate-manager-{manager-os}"
+    on-error: "abort-all"
 
   # Generic agent provision task
-  - task: "provision-agent-{agent}"
+  - task: "provision-install-{agent}"
     description: "Provision resources for the {agent} agent."
     do:
       this: process
@@ -112,7 +114,7 @@ tasks:
               live: True
     depends-on:
       - "allocate-agent-{agent}"
-
+      - "provision-manager-{manager-os}"
     foreach:
       - variable: agent-os
         as: agent
@@ -129,7 +131,7 @@ tasks:
           - targets:
             - wazuh-1: "{working-dir}/manager-{manager-os}/inventory.yaml"
             - agent: "{working-dir}/agent-{agent}/inventory.yaml"
-          - tests: "stop,uninstall"
+          - tests: "stop"
           - component: "agent"
           - wazuh-version: "4.7.3"
           - wazuh-revision: "40714"
@@ -138,4 +140,4 @@ tasks:
       - variable: agent-os
         as: agent
     depends-on:
-      - "provision-agent-{agent}"
+      - "provision-install-{agent}"
