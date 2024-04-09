@@ -1,7 +1,6 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
-
 import os
 import sys
 import argparse
@@ -33,7 +32,7 @@ def main() -> None:
         signal.signal(signal.SIGINT, processor.handle_interrupt)
         processor.run()
     except Exception as e:
-        sys.exit(f"Error while provisioning: {e}")
+        sys.exit(f"Error executing workflow: {e}")
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,17 @@
+vagrant:
+    key:
+      type: dynamic
+      name: ${uuid}
+    instance-name:
+      format: ${uuid}
+    tags:
+      type: qa
+
+aws:
+  security-group: [sg-023fd37c4e5b679de]
+  key:
+    type: dynamic
+    name: ${uuid}
+  tags:
+    type: qa
+    name: ddt1-{name}

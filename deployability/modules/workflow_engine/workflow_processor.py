@@ -1,7 +1,6 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
-
 import concurrent.futures
 import graphlib
 import json
@@ -364,6 +363,7 @@ class WorkflowProcessor:
             else:
                 dag = DAG(self.task_collection)
                 logger.info("Execution plan: %s", json.dumps(dag.get_execution_plan(), indent=2))
+
 
         except Exception as e:
             logger.error("Error in Workflow: %s", e)
