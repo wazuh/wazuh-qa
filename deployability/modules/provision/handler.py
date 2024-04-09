@@ -78,7 +78,7 @@ class ProvisionHandler:
         match self.method:
             case 'package' if self.action == "install":
                 return ["set_repo.j2", "install.j2", "register.j2", "service.j2"]
-            case 'aio':
+            case 'assistant':
                 return ["download.j2", f"{self.action}.j2"]
             case 'source':
                 # This will be kept as it could be used in the wazuh installation from sources.
