@@ -140,8 +140,7 @@ def filter_vulnerabilities_by_packages(host_manager: HostManager, vulnerabilitie
     return filtered_vulnerabilities
 
 
-def get_expected_vulnerabilities_by_agent(host_manager: HostManager, agents_list: List, packages_data: Dict,
-                                          check: Dict) -> Dict:
+def get_expected_vulnerabilities_by_agent(host_manager: HostManager, agents_list: List, packages_data: Dict) -> Dict:
     """
     Get the expected vulnerabilities by agent.
 
@@ -161,7 +160,7 @@ def get_expected_vulnerabilities_by_agent(host_manager: HostManager, agents_list
         expected_vulnerabilities_by_agent[agent] = []
         package_id = packages_data[host_os_name][host_os_arch]
 
-        expected_vulnerabilities = get_expected_vulnerabilities_for_package(host_manager, agent, package_id, check)
+        expected_vulnerabilities = get_expected_vulnerabilities_for_package(host_manager, agent, package_id,)
         expected_vulnerabilities_by_agent[agent] = expected_vulnerabilities
 
     return expected_vulnerabilities_by_agent
@@ -237,25 +236,23 @@ def get_package_system(host: str, host_manager: HostManager) -> str:
     return system
 
 
-def get_vulnerabilities(host_manager: HostManager, agent, packages_data: Dict,
+def get_vulnerabilities(host_manager: HostManager, agent_list, packages_data: Dict,
                           greater_than_timestamp: str = '') -> Dict:
 
     result = {}
     wait_syscollector_and_vuln_scan(host_manager, TIMEOUT_SYSCOLLECTOR_SCAN, greater_than_timestamp=greater_than_timestamp,
-                                    agent_list=[agent])
-
-    vulnerabilities = get_vulnerabilities_from_states_by_agent(host_manager, [agent],
-                                             greater_than_timestamp=greater_than_timestamp)
-    alerts = get_vulnerabilities_from_alerts_by_agent(host_manager, [agent],
-                                                      greater_than_timestamp=greater_than_timestamp)
-
+                                    agent_list=agent_list)
+    vulnerabilities = get_vulnerabilities_from_states_by_agent(host_manager, agent_list,
+                                            greater_than_timestamp=greater_than_timestamp)
+    alerts = get_vulnerabilities_from_alerts_by_agent(host_manager, agent_list,
+                                                    greater_than_timestamp=greater_than_timestamp)
     package_vulnerabilities = filter_vulnerabilities_by_packages(host_manager, vulnerabilities, packages_data)
     alerts_vulnerabilities = filter_vulnerabilities_by_packages(host_manager, alerts['affected'] , packages_data)
     alerts_vulnerabilities_mitigated = filter_vulnerabilities_by_packages(host_manager, alerts['mitigated'] , packages_data)
 
-    result['index_vulnerabilities'] = package_vulnerabilities[agent]
-    result['alerts_vulnerabilities'] = alerts_vulnerabilities[agent]
-    result['mitigated_vulnerabilities'] = alerts_vulnerabilities_mitigated[agent]
+    result['index_vulnerabilities'] = package_vulnerabilities
+    result['alerts_vulnerabilities'] = alerts_vulnerabilities
+    result['mitigated_vulnerabilities'] = alerts_vulnerabilities_mitigated
 
     return result
 
@@ -428,17 +425,12 @@ def launch_parallel_operations(task: Dict[str, List], host_manager: HostManager,
     results = {}
     lock = threading.Lock()
 
-
     def launch_and_store_result(args):
         host, task, manager = args
         result = launch_remote_operation(host, task, manager)
-
+        results[task['operation']] = {}
         with lock:
-            if host not in results:
-                results[host] = []
-
-            results[host].append({task['operation']: result})
-
+            results[task['operation']][host] = result
 
     with ThreadPoolExecutor() as executor:
         # Submit tasks asynchronously

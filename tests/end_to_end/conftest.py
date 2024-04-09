@@ -349,18 +349,18 @@ def pytest_addoption(parser):
     parser.addoption(
         '--enable-modulesd-debug',
         action='store_true',
-        default=False,
+        default=True,
         help='Enable modulesd debug mode. Default: False',
     )
     parser.addoption(
         '--gather-evidences-when-passed',
         action='store_true',
-        default=False,
+        default=True,
         help='Enable gather evidences when passed. Default: False',
     )
     parser.addoption(
         '--enable-verbose-evidences',
         action='store_true',
-        default=False,
+        default=True,
         help='Enable verbose evidences. Default: False',
     )
