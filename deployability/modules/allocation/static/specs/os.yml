@@ -368,7 +368,7 @@ aws:
     ami: ami-0a747df120215911a
     zone: us-east-1
     user: Administrator
-  windows-desktop-11-amd64: # update with the correct AMI for userData
+  windows-desktop-11-amd64:
     ami: ami-09d8cef159442d5b0
     zone: us-east-1
     user: Jenkins

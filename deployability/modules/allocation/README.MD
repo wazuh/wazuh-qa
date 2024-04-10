@@ -331,10 +331,10 @@ python3 modules/allocation/main.py --action create --provider vagrant --size lar
 
 #### Diagram
 
-![image](Allocation.jpg)
+![image](https://github.com/wazuh/wazuh-qa/assets/64099752/d302f96b-70c0-4fbc-869b-914973ee8186)
 
 
-[Allocation.drawio.zip](Allocation.drawio.zip)
+[Allocation.drawio.zip](https://github.com/wazuh/wazuh-qa/files/14868775/Allocation.drawio.zip)
 
 
 ### License
