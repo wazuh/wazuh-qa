@@ -9,7 +9,7 @@ The Allocation module allows you to create and destroy VMs both locally and in A
 The execution of the allocation is carried out through the Workflow engine library, or by executing them manually through commands.
 Execution can be done from any operating system.
 
-Initially, You must install Python libraries. We recommend to use virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
+Initially, you have to install the required Python libraries. We recommend using virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
 
 1. Activate the environment:
 
