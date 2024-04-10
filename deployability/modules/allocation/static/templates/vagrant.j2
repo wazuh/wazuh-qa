@@ -17,8 +17,6 @@ Vagrant.configure("2") do |config|
     config.vm.network "private_network", ip:"{{ config.ip }}"
     config.ssh.forward_agent = true
     # Create a file to indicate that the VM has been initialized
-    # This is required to correctly get the ssh-config of the VM
-    # TODO: find a better solution
     init_indicator = "./init"
     if not ::File.exists?(init_indicator)
         File.write(init_indicator, "initialized")

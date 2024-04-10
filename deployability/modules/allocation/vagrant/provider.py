@@ -361,7 +361,7 @@ class VagrantProvider(Provider):
                     ssh_user = client.get_secret_value(SecretId='devops_ppc64_centos_jenkins_user')['SecretString']
                     remote_host_parameters['host_provider'] = 'centos'
                 except Exception as e:
-                    raise ValueError('Could not get Centos ppc64 server IP: ' + str(e) + '.')
+                    raise ValueError('Could not get CentOS ppc64 server IP: ' + str(e) + '.')
 
             try:
                 tn = Telnet(server_ip, server_port, timeout)
