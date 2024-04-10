@@ -157,7 +157,6 @@ Now, it is possible to use the Worklow engine library to launch the provision mo
   python3 -m workflow_engine modules/workflow_engine/examples/dtt1-agents-poc.yaml
   ```
 
-  > Note The command execution can also be mediated through Jenkins.
 
 #### Manual execution of the Allocation module
 
