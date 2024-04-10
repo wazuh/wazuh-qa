@@ -26,7 +26,6 @@ Initially, you have to install the required Python libraries. We recommend using
   cd wazuh-qa
   git checkout {project-branch}
   ```
-> Note: temporary dev project-branch is [enhancement/4495-DTT1](https://github.com/wazuh/wazuh-qa/tree/enhancement/4495-DTT1)
 
 3. Install requirements:
 
