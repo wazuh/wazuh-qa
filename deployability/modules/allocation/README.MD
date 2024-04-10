@@ -260,7 +260,7 @@ If one wishes to execute the allocaation module without installing the Workflow 
     This argument allows us to define in which directory the files referring to the VM will be generated. By default, **/tmp/wazuh-qa**
 
   - --label-issue
-    This argument is only used in the case of AWS and is not mandatory, it allows us to create a label to reference the created instance to an issue on GitHub. It has to be a GitHub URL of the Wazuh repository, for example: **https://github.com/wazuh/internal-devel-requests/issues/1008**
+    This argument is only used in the case of AWS and is not mandatory, it allows us to create a label to reference the created instance to an issue on GitHub. It has to be a GitHub URL of a Wazuh repository, for example: **https://github.com/wazuh/internal-devel-requests/issues/1008**
 
   - --label-team
     This argument it is mandatory for AWS deploy, allows you to set the team that owns the VM to be able to track it. The valid options are: **qa**, **core**, **framework**, **devops**, **frontend**, **operations**, **cloud**, **threat-intel**, **marketing**, **documentation**
