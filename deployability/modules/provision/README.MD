@@ -60,10 +60,10 @@ Initially, Python libraries must be installed. we recommended the use of virtual
       >Note: You can find some fixture examples in '[deployability/modules/workflow_engine/examples/](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/workflow_engine/examples)'
 
       Example:
-      
+
       ```bash
       version: 0.1
-      description: This workflow is used to provision agents hosts por DDT1 PoC
+      description: This workflow is used to provision agent hosts for DDT1 PoC
       variables:
         agents-os:
           - linux-ubuntu-22.04-amd64
@@ -146,12 +146,12 @@ Initially, Python libraries must be installed. we recommended the use of virtual
       depends-on
       ```
 
-      >Note: In args, configure the launcher's path correctly (main.py files in each module), and to fill `depends-on`, consider the steps of your provision (allocation and provision) 
+      >Note: In args, configure the launcher's path correctly (main.py files in each module), and to fill `depends-on`, consider the steps of your provision (allocation and provision)
 
 7. Command execution (local):
 
 	Execute the command by referencing the parameters required by the library (launcher).
-	
+
 	```bash
 	python3 -m workflow_engine {.yaml fixture path}
 	```
@@ -171,12 +171,12 @@ To execute the Allocation module without installing the Workflow engine, you can
   While in wazuh-qa/deployability
 
   ```bash
-  python3 module/provision/main.py --inventory-manager { inventory .yaml} --install "{'component': '{component}', 'type': '{type}', 'version': '{version}'}" 
+  python3 module/provision/main.py --inventory-manager { inventory .yaml} --install "{'component': '{component}', 'type': '{type}', 'version': '{version}'}"
   ```
 
   Example:
   ```bash
-  python3 module/provision/main.py --inventory-manager /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml --install "{'component': 'pyyaml', 'type': 'pip', 'version' : '6.0.1'}" 
+  python3 module/provision/main.py --inventory-manager /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml --install "{'component': 'pyyaml', 'type': 'pip', 'version' : '6.0.1'}"
   ```
 
 ---
@@ -247,7 +247,7 @@ The module is composed of:
 
 ![image](https://github.com/wazuh/wazuh-qa/assets/125690423/e06fb59c-6497-4396-b20c-a21a68a5e883)
 
- 
+
 [Provision.drawio.zip](https://github.com/wazuh/wazuh-qa/files/14241269/Provision.drawio.zip)
 
 

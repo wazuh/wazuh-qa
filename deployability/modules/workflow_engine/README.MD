@@ -1,7 +1,7 @@
 ## Workflow engine
-            
-### User documentation     
-   
+
+### User documentation
+
 The execution of the Workflow is done through the installation of its library.
 
 Initially, Python libraries must be installed. It is recommended to use virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
@@ -40,13 +40,13 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
 
       It will be necessary to create a fixture (yaml file) where the infrastructure, provisioning, and tests to be executed will be declared.
 
-      >Note: It is possible to find some fixture examples in deployability/modules/workflow_engine/examples/ 
+      >Note: It is possible to find some fixture examples in deployability/modules/workflow_engine/examples/
 
       Example:
-      
+
       ```bash
       version: 0.1
-      description: This workflow is used to test agents deployment por DDT1 PoC
+      description: This workflow is used to test agents' deployment for DDT1 PoC
       variables:
         agents-os:
           - linux-ubuntu-22.04-amd64
@@ -231,14 +231,14 @@ Initially, Python libraries must be installed. It is recommended to use virtual 
       depends-on
       ```
 
-      >Note: In args, configure the launcher's path correctly (main.py files in each module), and to fill `depends-on`, consider the steps of your test (allocation, provision, and test) 
+      >Note: In args, configure the launcher's path correctly (main.py files in each module), and to fill `depends-on`, consider the steps of your test (allocation, provision, and test)
 
 7. Execution of Command (local):
 
 	Execute the command by referencing the parameters required by the library (launcher).
-	
+
 	```bash
-	python3 -m workflow_engine {.yaml fixture path} 
+	python3 -m workflow_engine {.yaml fixture path}
 	```
 
 	Example
@@ -286,7 +286,7 @@ tasks:
         args:
           - modules/testing/main.py
           - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-          - dependencies: 
+          - dependencies:
             - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
             - agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - tests: "install,register,stop"

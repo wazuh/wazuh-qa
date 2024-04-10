@@ -1,13 +1,7 @@
 version: 0.1
-description: This workflow is used to test agents deployment por DDT1 PoC
+description: This workflow is used to test agents' deployment for DDT1 PoC
 variables:
   agent-os:
-    - linux-ubuntu-18.04-amd64
-    - linux-ubuntu-20.04-amd64
-    - linux-ubuntu-22.04-amd64
-    - linux-debian-10-amd64
-    - linux-debian-11-amd64
-    - linux-debian-12-amd64
     - linux-oracle-9-amd64
     - linux-centos-7-amd64
     - linux-centos-8-amd64
@@ -16,7 +10,7 @@ variables:
     - linux-redhat-9-amd64
     - linux-amazon-2-amd64
   manager-os: linux-ubuntu-22.04-amd64
-  infra-provider: aws
+  infra-provider: vagrant
   working-dir: /tmp/dtt1-poc
 
 tasks:
@@ -37,6 +31,7 @@ tasks:
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
           - label-termination-date: "1d"
           - label-team: "qa"
+    on-error: "abort-all"
     cleanup:
       this: process
       with:
@@ -74,6 +69,8 @@ tasks:
           - modules/allocation/main.py
           - action: delete
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
+    depends-on:
+      - "provision-manager-{manager-os}"
 
   # Unique manager provision task
   - task: "provision-manager-{manager-os}"
@@ -93,29 +90,6 @@ tasks:
     depends-on:
       - "allocate-manager-{manager-os}"
 
-  # Generic agent provision task
-  - task: "provision-install-{agent}"
-    description: "Provision resources for the {agent} agent."
-    do:
-      this: process
-      with:
-        path: python3
-        args:
-          - modules/provision/main.py
-          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
-          - dependencies:
-            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
-          - install:
-            - component: wazuh-agent
-              type: package
-              version: 4.7.3
-              live: True
-    depends-on:
-      - "allocate-agent-{agent}"
-      - "provision-manager-{manager-os}"
-    foreach:
-      - variable: agents-os
-        as: agent
 
   # Generic agent test task
   - task: "run-agent-{agent}-tests"
@@ -138,5 +112,4 @@ tasks:
       - variable: agent-os
         as: agent
     depends-on:
-      - "provision-manager-{manager-os}"
       - "allocate-agent-{agent}"

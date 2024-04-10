@@ -10,7 +10,7 @@ from modules.provision.models import InputPayload, ComponentInfo
 
 @pytest.mark.parametrize('install', [(True), (False)])
 def test_input_payload_constructor_components(install:bool):
-    """Test InputPayload constructor install and unininstall parameters.
+    """Test InputPayload constructor install and uninstall parameters.
 
     Parameters
     ----------
@@ -26,7 +26,7 @@ def test_input_payload_constructor_components(install:bool):
                            install=components if install else [],
                            uninstall=[] if install else components)
     assert payload.inventory == Path(path)
-    comp_list = payload.install if install else payload.uninstall 
+    comp_list = payload.install if install else payload.uninstall
     assert comp_list[0] == ComponentInfo(component='component_1', type='component_type_1')
     assert comp_list[1] == ComponentInfo(component='component_2', type='package')
     assert comp_list[2] == ComponentInfo(component='linux wazuh-agent', type='package')

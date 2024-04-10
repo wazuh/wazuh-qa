@@ -70,7 +70,7 @@ tasks:
           - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - install:
             - component: wazuh-manager
-              type: aio
+              type: assistant
               version: "4.7.0"
     depends-on:
       - "allocate-manager"
@@ -111,7 +111,7 @@ tasks:
           - inventory-manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - install:
             - component: wazuh-agent
-              type: aio
+              type: assistant
               version: "4.8.0"
               live: False
     depends-on:

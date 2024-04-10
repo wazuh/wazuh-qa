@@ -37,7 +37,7 @@ class WazuhManager:
             commands = [
                     f"curl -sO https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh",
                     f"bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
-            ] 
+            ]
         logger.info(f'Installing Manager in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_commands(inventory_path, commands)
 
@@ -62,7 +62,7 @@ class WazuhManager:
     @staticmethod
     def uninstall_manager(inventory_path) -> None:
         """
-        Unnstall Wazuh Manager in the host
+        Uninstall Wazuh Manager in the host
 
         Args:
             inventory_paths (str): hosts' inventory path
@@ -94,7 +94,7 @@ class WazuhManager:
     @staticmethod
     def uninstall_managers(inventories_paths=[]) -> None:
         """
-        Unnstall Wazuh Managers in the hosts
+        Uninstall Wazuh Managers in the hosts
 
         Args:
             inventories_paths (list): list of hosts' inventory path
@@ -117,7 +117,7 @@ class WazuhManager:
     def perform_action_and_scan(manager_params, action_callback) -> dict:
         """
         Takes scans using filters, the callback action and compares the result
-        
+
         Args:
             agent_params (str): agent parameters
             callbak (cb): callback (action)
@@ -179,7 +179,7 @@ class WazuhManager:
     def perform_install_and_scan_for_manager(manager_params, manager_name, wazuh_params) -> None:
         """
         Coordinates the action of install the manager and compares the checkfiles
-        
+
         Args:
             manager_params (str): manager parameters
             wazuh_params (str): wazuh parameters
@@ -195,7 +195,7 @@ class WazuhManager:
     def perform_uninstall_and_scan_for_manager(manager_params) -> None:
         """
         Coordinates the action of uninstall the manager and compares the checkfiles
-        
+
         Args:
             manager_params (str): manager parameters
             wazuh_params (str): wazuh parameters
@@ -211,7 +211,7 @@ class WazuhManager:
     def assert_results(result) -> None:
         """
         Gets the status of an agent given its name.
-        
+
         Args:
             result (dict): result of comparison between pre and post action scan
 

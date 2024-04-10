@@ -8,7 +8,7 @@ This is a plugin to send the results of the tests to an InfluxDB database.
 
 1. Clone the repository
     ```shellsession
-    $ git clone https://github.com/wazuh/wazuh-qa.git -b enhancement/4736-dtt1-influxdb-plugin
+    $ git clone https://github.com/wazuh/wazuh-qa.git -b <YOUR_BRANCH>
     ```
 2. Open the repository folder
     ```shellsession

@@ -1,6 +1,6 @@
 ## Deployability general documentation
 
-### User documentation   
+### User documentation
 
 To perform Deployability type tests, it is necessary to:
 
@@ -55,7 +55,7 @@ Example:
 
 ```
 version: 0.1
-description: This workflow is used to test agents deployment por DDT1 PoC
+description: This workflow is used to test agents' deployment for DDT1 PoC
 variables:
   agents-os:
     - linux-ubuntu-22.04-amd64
@@ -247,7 +247,7 @@ depends-on
 Execute the command by referencing the parameters required by the library (launcher).
 
 ```
-python3 -m workflow_engine {.yaml fixture path} 
+python3 -m workflow_engine {.yaml fixture path}
 ```
 
 Example
@@ -256,7 +256,6 @@ Example
 python3 -m workflow_engine modules/workflow_engine/examples/dtt1-agents-poc.yaml
 ```
 
-> Note: The command execution can also be mediated through Jenkins.
 
 ---
 
@@ -269,9 +268,9 @@ The framework has 4 modules (`allocation`, `provision`, `testing`, `observabilit
 |Module|Description
 |--|--|
 |Workflow (Orchestrator)|Receives a YAML containing all the instructions to execute for the test development. It contains instructions for allocation, provision, and testing.
-|Allocation| Receives instructions for the desired architecture and creates the structures, generating IPs, ports either in AWS or locally with Vagrant.
+|Allocation| Receives instructions for the desired architecture and creates the structures, generating IPs, and ports either in AWS or locally with Vagrant.
 |Provision| Installs applications on the structures created in allocation.
-|Testing| Executes tests on the previously defined structures and trigger actions depending the test.
+|Testing| Executes tests on the previously defined structures and triggers actions depending on the test.
 |Observability| Allows the ordered and indexed visualization of data obtained in the 3 previous modules.
 
 - Directory Structure
@@ -308,12 +307,12 @@ Deployability contains the following directories:
 
 
 
----- 
+----
 
 
 [draw-plot.zip](https://github.com/wazuh/wazuh-qa/files/14330528/plot.zip)
 
- 
+
 
 ### License
 

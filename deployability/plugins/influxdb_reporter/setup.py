@@ -14,8 +14,8 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     packages=['pytest_influxdb'],
-    author='quebim',
-    author_email='kevinledesmam95@gmail.com',
+    author='AUTHOR',
+    author_email='EMAIL',
     install_requires=[
         'pytest>=3.8.0',
         'influxdb-client>=1.38.0'

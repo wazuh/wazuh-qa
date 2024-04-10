@@ -27,13 +27,13 @@ cloned the `wazuh-qa` repository into `/wazuh/wazuh-qa`, configure the `PYTHONPA
 The directory `deployability/modules/provision/tests/` contains the unit test files for the `provision` module.
 
 ## Running Tests
-To run the tests, make sure that your system meets the requirements by executing the following command from the project 
+To run the tests, make sure that your system meets the requirements by executing the following command from the project
 root:
 
 ```bash
 pytest -vv deployability/modules/provision
 ```
-This command will run all tests in the `tests/` directory.  Using additional arguments, You can also run specific tests 
+This command will run all tests in the `tests/` directory.  Using additional arguments, you can also run specific tests
 or directories. The output of this command looks like this:
 ```bash
 pytest -vv deployability/modules/provision/
@@ -41,7 +41,7 @@ pytest -vv deployability/modules/provision/
 platform linux -- Python 3.10.13, pytest-8.0.1, pluggy-1.4.0 -- /home/marcelo/.pyenv/versions/wazuh-qa/bin/python
 cachedir: .pytest_cache
 rootdir: /home/marcelo/wazuh/wazuh-qa/deployability/modules
-collected 51 items                                                                                                                                                                        
+collected 51 items
 
 deployability/modules/provision/tests/test_actions.py::test_action_constructor[install-package0] PASSED                                                                             [  1%]
 deployability/modules/provision/tests/test_actions.py::test_action_constructor[install-package1] PASSED                                                                             [  3%]
@@ -112,22 +112,22 @@ The `.github/workflow/provision-unit-tests.yaml` automatically runs the unit tes
 The run results are shown in the `checks` tab or your GitHub pull request.
 
 ## Relevant Files
-- `tests/test_[test name].py`: all the unit test files start with a `test_` prefix. There is one unit test file for 
-  each tested class. 
+- `tests/test_[test name].py`: all the unit test files start with a `test_` prefix. There is one unit test file for
+  each tested class.
 - `tests/conftest.py`: contains the fixtures used throughout the unit tests.
 
 ## Unit test development guidelines and recommendations
-- Use Python coding style standards and recommendations to develop unit tests: snake case for all variable and function 
-  names, maximum line length of 120 characters, two empty lines must separate each function, typing all your functions 
+- Use Python coding style standards and recommendations to develop unit tests: snake case for all variable and function
+  names, maximum line length of 120 characters, two empty lines must separate each function, typing all your functions
   and return values, create Docstring for each function or method with numpy style.
 - Develop unit tests for each function or method of the module.
-- Error flows are usually created in a second unit test with the suffix `_fail`. For example, the 
-  `test_provision_handler_constructor` found in the `deployability/modules/provision/tests/test_handler.py` is the 
+- Error flows are usually created in a second unit test with the suffix `_fail`. For example, the
+  `test_provision_handler_constructor` found in the `deployability/modules/provision/tests/test_handler.py` is the
   unit test normal flow for the `ProvisionHandler` class constructor method. The
   `test_provision_handler_constructor_fail` unit test implements the error flow.
 - Use the pytest's decorator `@pytest.mark.parametrize` to implement test cases for the same unit test.
-- Mock the object instance and functions used by your tested function using the `unitest.mock.patch` and 
+- Mock the object instance and functions used by your tested function using the `unitest.mock.patch` and
   `unitest.mock.patch.object` functions or decorators.
 - Try to factorize your testing code using `pytest.fixtures`. The shared fixtures are in the `conftest.py` file. In
-  many unit tests of this project, the fixtures implement a `request` object that receives parameters from the 
+  many unit tests of this project, the fixtures implement a `request` object that receives parameters from the
   `pytest.mark.parametrize`.

@@ -1,6 +1,6 @@
 ## Testing Module
-            
-### User documentation     
+
+### User documentation
 
 The test module runs tests on the different components of Wazuh.
 It is designed so that you can perform installations, actions on components and uninstallations, performing validations at each step.
@@ -15,7 +15,7 @@ This module can be executed as follows:
 
 The execution of the workflow is done through the installation of its library.
 
-Initially, Python libraries must be installed. we recommended the use of virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
+Initially, Python libraries must be installed, we recommended the use of virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
 
 1. Create the python environment:
 
@@ -64,14 +64,14 @@ Initially, Python libraries must be installed. we recommended the use of virtual
       >Note: It is possible to find some fixture examples in '[deployability/modules/workflow_engine/examples/](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/workflow_engine/examples)'
 
       Example:
-      
+
       ```bash
       version: 0.1
-      description: This workflow is used to test agents deployment por DDT1 PoC
+      description: This workflow is used to test agents' deployment for DDT1 PoC
       variables:
         agents-os:
           - linux-ubuntu-22.04-amd64
-        manager-os: 
+        manager-os:
           - linux-redhat-8-amd64
         infra-provider: vagrant
         working-dir: /tmp/dtt1-poc
@@ -169,14 +169,14 @@ Initially, Python libraries must be installed. we recommended the use of virtual
       depends-on
       ```
 
-      >Note: In args, configure the launcher's path correctly (main.py files in each module), and to fill `depends-on`, consider the steps of your test (allocation, provision, and test) 
+      >Note: In args, configure the launcher's path correctly (main.py files in each module), and to fill `depends-on`, consider the steps of your test (allocation, provision, and test)
 
 7. Command execution (local):
 
 	Execute the command by referencing the parameters required by the library (launcher).
-	
+
 	```bash
-	python3 -m workflow_engine {.yaml fixture path} 
+	python3 -m workflow_engine {.yaml fixture path}
 	```
 
 	Example
@@ -192,7 +192,7 @@ To execute the testing module without installing the Workflow engine, it can be 
 1. Execution
 
   While in 'wazuh-qa/deployability'
-	
+
   ```bash
   python3  modules/testing/main.py --wazuh-revision '{{ wazuh_revision }}' --wazuh-version '{{ wazuh_version }}' --component {{ component }} --tests 'install,restart,stop,uninstall' --targets '{"wazuh-1":"{{ inventory }}"}' --targets '{"wazuh-2":"{{ inventory }}"}' --live 'True'
   ```
@@ -212,7 +212,7 @@ To execute the testing module without installing the Workflow engine, it can be 
   agent-{number}: They are the agents
 
   >If the manager component is tested, 'wazuh-' components must be entered in target.
-   If the agent component is tested, there must be a master and the rest must be 'agent-'s
+   If the agent component is tested, there must be a master and the rest must be 'agent-'
 
 ---
 
@@ -256,19 +256,19 @@ For manual execution, an example command would be:
 The module is composed of:
 
 - **Launcher** ('[/wazuh-qa/deployability/modules/testing/main.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/main.py)'): Entry point for the workflow or the user who wishes to execute a test.
-  
+
 - **Parameter validator** ('[/wazuh-qa/deployability/modules/testing/models.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/models.py)'): Validator for parameters entered by the Workflow or the user.
-  
+
 - **Module functions** ('[/wazuh-qa/deployability/modules/testing/testing.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/testing.py)'): Module-specific functions responsible for triggering the test.
-  
+
 - **Executor** ('[/wazuh-qa/deployability/modules/provision/actions.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/provision/actions.py)'): Executes the provision using Actions in the generic module.
-  
+
 - **Playbooks** ('[/wazuh-qa/deployability/modules/tests/playbooks](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/tests/playbooks)'): Contains setup, execution, and post-test cleanup playbooks.
-  
+
 - **Tests** ('[/wazuh-qa/deployability/modules/tests](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/tests/)'): Contains the test_agent and test_manager directories where the tests to be executed are located.
-  
+
 - **Helpers** ('[/wazuh-qa/deployability/modules/tests/helpers](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/tests/helpers)'): Contains files that enable the execution of the test.
-  
+
 - **Conftest** ('[/wazuh-qa/deployability/modules/tests/conftest.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/tests/conftest.py)'): Contains information that will be transferred from the parameter validator to the tests.
 
 
@@ -284,7 +284,7 @@ The test module must recieve the infrastructure generated and provisioned by the
 Testing of the manager component includes:
 `install`, `restart`, `stop` and `uninstall`
 Install should come at the beginning and uninstall at the end, other tests can change their order
- 
+
 Testing of the agent component includes:
 `install`, `registration`, `restart`, `stop` and `uninstall`
 Install must come at the beginning followed by registration Uninstall must come at the end and the other tests can change their order

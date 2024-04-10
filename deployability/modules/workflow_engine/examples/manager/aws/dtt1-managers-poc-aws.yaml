@@ -1,5 +1,5 @@
 version: 0.1
-description: This workflow is used to test agents deployment por DDT1 PoC
+description: This workflow is used to test manager deployment for DDT1 PoC
 variables:
   infra-provider: aws
   working-dir: /tmp/dtt1-poc
@@ -64,7 +64,7 @@ tasks:
           - targets:
             - wazuh-1: "{working-dir}/manager-linux-centos-7-amd64/inventory.yaml"
             - wazuh-2: "{working-dir}/manager-linux-ubuntu-20.04-amd64/inventory.yaml"
-          - tests: "stop"
+          - tests: "install,registration,restart,stop,uninstall"
           - component: "manager"
           - wazuh-version: "4.7.3"
           - wazuh-revision: "40714"
