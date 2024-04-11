@@ -3,6 +3,7 @@ import logging
 
 from typing import Union
 from datetime import datetime
+import uuid
 
 import pytest
 
@@ -28,6 +29,7 @@ class InfluxDBReporter:
         token (str): The token to authenticate with the InfluxDB server.
         bucket (str): The bucket to write data to.
         org (str): The organization to write data to.
+        exec_id (str): The execution id to use for the report.
         error (str): Any error that occurred while reporting.
     """
 
@@ -40,6 +42,10 @@ class InfluxDBReporter:
             config_file (str | None): Path to the InfluxDB configuration file (default is None).
         """
         self.error: str = None
+        # Get the execution id from the command line or environment variable
+        self.exec_id: str = config.getoption('--execution-id') \
+                            or os.getenv('execution_id') \
+                            or str(uuid.uuid4())
 
         if config_file:
             # When the config file is specified, it has the priority
@@ -171,13 +177,14 @@ class InfluxDBReporter:
         """
         fields = {
             'test_name': test_report.head_line,
-            'node_id': test_report.nodeid,
+            'test_id': test_report.nodeid,
             'date': datetime,
             'duration': test_report.duration,
             'result': test_report.outcome,
             'stage': test_report.when,
         }
         tags = {
+            'execution_id': self.exec_id,
             'test': test_report.fspath,
             'markers': self.__get_pytest_marks(test_report.keywords),
             'when': test_report.when,
