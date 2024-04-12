@@ -1,5 +1,5 @@
 version: 0.1
-description: This workflow is used to test agents deployment por DDT1 PoC
+description: This workflow is used to test manager deployment for DDT1 PoC
 variables:
   manager-os:
     - linux-ubuntu-20.04-amd64

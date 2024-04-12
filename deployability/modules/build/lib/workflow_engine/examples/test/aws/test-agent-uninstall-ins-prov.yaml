@@ -1,5 +1,5 @@
 version: 0.1
-description: Test agent stop with provisioning agents' with provision module
+description: This workflow is used to test agents deployment por DDT1 PoC
 variables:
   agent-os:
     - linux-ubuntu-18.04-amd64
@@ -131,7 +131,7 @@ tasks:
           - targets:
             - wazuh-1: "{working-dir}/manager-{manager-os}/inventory.yaml"
             - agent: "{working-dir}/agent-{agent}/inventory.yaml"
-          - tests: "stop"
+          - tests: "uninstall"
           - component: "agent"
           - wazuh-version: "4.7.3"
           - wazuh-revision: "40714"
