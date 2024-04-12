@@ -1,14 +1,15 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 """Unit Tests for the Provision class"""
 
 from typing import List
 from unittest.mock import patch, MagicMock, call
 import pytest
 
-from modules.provision.models import InputPayload, ComponentInfo
-from modules.provision.provision import Provision
+from ..models import InputPayload, ComponentInfo
+from ..provision import Provision
 
 
 def test_provision_constructor():

@@ -1,11 +1,12 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 """modules.provision.models Unit tests."""
 from pathlib import Path
 import pytest
 
-from modules.provision.models import InputPayload, ComponentInfo
+from ..models import InputPayload, ComponentInfo
 
 
 @pytest.mark.parametrize('install', [(True), (False)])

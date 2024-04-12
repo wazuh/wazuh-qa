@@ -1,11 +1,12 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
-from modules.generic import Ansible
 
-from modules.provision.handler import ProvisionHandler
-from modules.provision.models import ComponentInfo
-from modules.provision.utils import logger
+from ..generic import Ansible
+
+from .handler import ProvisionHandler
+from .models import ComponentInfo
+from .utils import logger
 
 
 class Action:

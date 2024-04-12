@@ -5,3 +5,4 @@
 from .credentials import Credentials
 from .instance import Instance
 from .provider import Provider
+from ...generic.logger import Logger

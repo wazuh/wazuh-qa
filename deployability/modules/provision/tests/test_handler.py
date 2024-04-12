@@ -1,12 +1,13 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 """Unit Tests for the ProvisionHandler class."""
 from unittest.mock import patch, MagicMock
 import pytest
 
-from modules.provision.handler import ProvisionHandler
-from modules.provision.models import ComponentInfo
+from ..handler import ProvisionHandler
+from ..models import ComponentInfo
 
 @pytest.mark.parametrize('component, action, method',
                          [('wazuh-manager', 'install', 'package'),

@@ -1,6 +1,7 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 version: 1
 formatters:
   simple:
@@ -23,7 +24,7 @@ handlers:
     class: logging.FileHandler
     level: DEBUG
     formatter: simple
-    filename: /tmp/workflow.log
+    filename: /tmp/workflow2.log
     filters: [uppercase]
 root:
   level: DEBUG

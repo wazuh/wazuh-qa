@@ -11,7 +11,6 @@ from pathlib import Path
 from .models import InputPayload, ExtraVars
 from .utils import logger
 
-
 class Tester:
     _playbooks_dir = Path(__file__).parent / 'playbooks'
     _setup_playbook = _playbooks_dir / 'setup.yml'

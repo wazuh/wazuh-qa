@@ -1,6 +1,7 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 import argparse
 import os
 import sys
@@ -9,9 +10,11 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 sys.path.append(project_root)
 
 from modules.provision import Provision, models
+from modules.generic.logger.logger import Logger
 
+
+logger = Logger('provision-module').get_logger()
 # ---------------- Methods ---------------------
-
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -24,8 +27,9 @@ def parse_arguments():
 
 
 if __name__ == "__main__":
+    logger.info(f'Initiating provisionment.')
     try:
         provision = Provision(models.InputPayload(**vars(parse_arguments())))
         provision.run()
     except Exception as e:
-        sys.exit(f"Error while provisioning: {e}")
+        logger.error(f"Error while provisioning: {e}")

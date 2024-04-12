@@ -1,12 +1,13 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 """Common unit test fixtures."""
 from unittest.mock import patch
 import pytest
 
-from modules.provision.models import InputPayload
-from modules.provision.provision import Provision
+from ..models import InputPayload
+from ..provision import Provision
 
 
 @pytest.fixture

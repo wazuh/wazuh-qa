@@ -1,15 +1,16 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 """Unit Tests for the Action class"""
 
 from unittest.mock import patch, MagicMock, call
 import pytest
 
-from modules.generic import Ansible
-from modules.provision.actions import Action
-from modules.provision.models import ComponentInfo
-from modules.provision.handler import ProvisionHandler
+from ...generic import Ansible
+from ..actions import Action
+from ..models import ComponentInfo
+from ..handler import ProvisionHandler
 
 
 @pytest.mark.parametrize('action, component_type',

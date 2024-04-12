@@ -4,4 +4,4 @@
 
 from modules.generic.logger import Logger
 
-logger = Logger("tester").get_logger()
+logger = Logger("test-module").get_logger()

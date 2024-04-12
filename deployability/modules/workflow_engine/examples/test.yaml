@@ -7,15 +7,9 @@ variables:
     - linux-ubuntu-22.04-amd64
     - linux-debian-10-amd64
     - linux-debian-11-amd64
-    - linux-debian-12-amd64
     - linux-oracle-9-amd64
-    - linux-centos-7-amd64
-    - linux-centos-8-amd64
-    - linux-redhat-7-amd64
-    - linux-redhat-8-amd64
-    - linux-redhat-9-amd64
-    - linux-amazon-2-amd64
-  manager-os: linux-ubuntu-22.04-amd64
+
+  manager-os: linux-debian-12-amd64
   infra-provider: vagrant
   working-dir: /tmp/dtt1-poc
 
@@ -35,6 +29,9 @@ tasks:
           - composite-name: "{manager-os}"
           - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+          - label-termination-date: "1d"
+          - label-team: "qa"
+    on-error: "abort-all"
     cleanup:
       this: process
       with:
@@ -59,6 +56,8 @@ tasks:
           - composite-name: "{agent}"
           - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
+          - label-termination-date: "1d"
+          - label-team: "qa"
     foreach:
       - variable: agent-os
         as: agent
@@ -88,6 +87,7 @@ tasks:
               live: True
     depends-on:
       - "allocate-manager-{manager-os}"
+    on-error: "abort-all"
 
   # Generic agent provision task
   - task: "provision-install-{agent}"

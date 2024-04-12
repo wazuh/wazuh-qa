@@ -1,15 +1,16 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
 from pathlib import Path
 
-from modules.generic.utils import Utils
-from modules.provision.actions import Action
-from modules.provision.utils import logger
-from modules.provision.models import InputPayload, ComponentInfo
-
+from ..generic.utils import Utils
+from .actions import Action
+from .models import InputPayload, ComponentInfo
+from .utils import logger
 
 PATH_BASE_DIR = Path(__file__).parents[2]
+
 
 
 class Provision:
@@ -35,12 +36,11 @@ class Provision:
         self.components = self.get_components(payload)
         self.ansible_data = self.__load_ansible_data(payload.inventory)
 
+
     def run(self) -> None:
         """
         Run the provision.
         """
-        logger.info(f'Initiating provisionment.')
-
         logger.debug(f'Running action {self.action} for components: {self.components}')
         for component in self.components:
             try:
