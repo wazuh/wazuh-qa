@@ -12,12 +12,27 @@ try {
   $_.Exception.Message
   "Error enabling WinRM on HTTPS."
 }
-New-LocalUser "Administrator" -Password ChangeMe -FullName "Administrator" -Description "Administrator user for remote desktop"
-Add-LocalGroupMember -Group "Remote Desktop Users" -Member "Administrator"
-# Set Administrator user to administrator group
-Add-LocalGroupMember -Group "Administrators" -Member "Administrator"
-# Set the password for the Administrator account
-$admin = [ADSI]"WinNT://./Administrator, user"
-$admin.SetPassword("ChangeMe")
-$admin.SetInfo()
+# Check if Administrator user exists
+if (-not (Get-LocalUser -Name "Administrator" -ErrorAction SilentlyContinue)) {
+    # Create Administrator user
+    Write-Output "Creating Administrator user"
+    $password = ConvertTo-SecureString "ChangeMe" -AsPlainText -Force
+    New-LocalUser "Administrator" -Password $password -FullName "Administrator" -Description "Administrator user for remote desktop"
+
+    Write-Output "Adding Administrator user to RDP group."
+    # Add Administrator to Remote Desktop Users group
+    Add-LocalGroupMember -Group "Remote Desktop Users" -Member "Administrator"
+
+    Write-Output "Adding Administrator user to Administrators group."
+    # Add Administrator to Administrators group
+    Add-LocalGroupMember -Group "Administrators" -Member "Administrator"
+} else {
+    Write-Output "Administrator user already exists."
+    # Set the password for the Administrator account
+    $admin = [ADSI]"WinNT://./Administrator, user"
+    $password = "ChangeMe"
+    $admin.SetPassword($password)
+    $admin.SetInfo()
+    Write-Output "Administrator password changed successfully."
+}
 </powershell>
