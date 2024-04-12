@@ -3,6 +3,8 @@
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import yaml
+import paramiko, logging, time
+import winrm
 
 from pathlib import Path
 
@@ -58,8 +60,18 @@ class Allocator:
         instance.start()
         logger.info(f"Instance {instance.identifier} started.")
         # Generate the inventory and track files.
-        cls.__generate_inventory(instance, payload.inventory_output)
-        cls.__generate_track_file(instance, payload.provider, payload.track_output)
+        inventory = cls.__generate_inventory(instance, payload.inventory_output)
+        # Validate connection
+        check_connection = cls.__check_connection(inventory)
+        track_file = cls.__generate_track_file(instance, payload.provider, payload.track_output)
+        if check_connection:
+            if payload.rollback:
+                logger.warning(f"Rolling back instance creation.")
+                track_payload = {'track_output': track_file}
+                cls.__delete(track_payload)
+                logger.info(f"Instance {instance.identifier} deleted.")
+            else:
+                logger.warning(f'The VM will not be automatically removed. Please remove it executing Allocation module with --action delete.')
 
     @classmethod
     def __delete(cls, payload: models.InstancePayload) -> None:
@@ -138,6 +150,7 @@ class Allocator:
         with open(inventory_path, 'w') as f:
             yaml.dump(inventory.model_dump(exclude_none=True), f)
         logger.info(f"Inventory file generated at {inventory_path}")
+        return inventory
 
     @staticmethod
     def __generate_track_file(instance: Instance, provider_name: str,  track_path: Path) -> None:
@@ -172,3 +185,68 @@ class Allocator:
         if Path(str(instance.path) + "/ppc-key").exists():
             Path(str(instance.path) + "/ppc-key").unlink()
         logger.info(f"Track file generated at {track_path}")
+        return track_path
+
+    @staticmethod
+    def __check_connection(inventory: models.InventoryOutput, attempts=10, sleep=60) -> None:
+        """
+        Checks if the ssh connection is successful.
+
+        Args:
+            inventory (InventoryOutput): The inventory object.
+            attempts (int): The number of attempts to try the connection.
+            sleep (int): The time to wait between attempts.
+
+        """
+
+        for attempt in range(1, attempts + 1):
+            if inventory.ansible_connection == 'winrm':
+                if inventory.ansible_port == 5986:
+                    protocol = 'https'
+                else:
+                    protocol = 'http'
+                endpoint_url = f'{protocol}://{inventory.ansible_host}:{inventory.ansible_port}'
+                try:
+                    session = winrm.Session(endpoint_url, auth=(inventory.ansible_user, inventory.ansible_password),transport='ntlm', server_cert_validation='ignore')
+                    cmd = session.run_cmd('ipconfig')
+                    if cmd.status_code == 0:
+                        logger.info("WinRM connection successful.")
+                        return False
+                    else:
+                        logger.error(f'WinRM connection failed. Check the credentials in the inventory file.')
+                        return True
+                except Exception as e:
+                    logger.warning(f'Error on attempt {attempt} of {attempts}: {e}')
+                time.sleep(sleep)
+            else:
+                ssh = paramiko.SSHClient()
+                paramiko.util.get_logger("paramiko").setLevel(logging.WARNING)
+                ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                if inventory.ansible_ssh_private_key_file:
+                    ssh_parameters = {
+                        'hostname': inventory.ansible_host,
+                        'port': inventory.ansible_port,
+                        'username': inventory.ansible_user,
+                        'key_filename': inventory.ansible_ssh_private_key_file
+                    }
+                else:
+                    ssh_parameters = {
+                        'hostname': inventory.ansible_host,
+                        'port': inventory.ansible_port,
+                        'username': inventory.ansible_user,
+                        'password': inventory.ansible_password
+                    }
+                try:
+                    ssh.connect(**ssh_parameters)
+                    logger.info("SSH connection successful.")
+                    ssh.close()
+                    return False
+                except paramiko.AuthenticationException:
+                    logger.error(f'Authentication error. Check the credentials in the inventory file.')
+                    return True
+                except Exception as e:
+                    logger.warning(f'Error on attempt {attempt} of {attempts}: {e}')
+                time.sleep(sleep)
+
+        logger.error(f'Connection attempts failed after {attempts} tries. Connection timeout.')
+        return True

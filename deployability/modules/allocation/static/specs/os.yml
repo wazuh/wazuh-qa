@@ -377,7 +377,7 @@ aws:
     zone: us-east-1
     user: Administrator
   windows-server-2016-amd64:
-    ami: ami-04d7825822fe66af3
+    ami: ami-0f8b5c22ce0a7cf3b
     zone: us-east-1
     user: Administrator
   windows-server-2019-amd64:
