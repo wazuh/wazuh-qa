@@ -3,7 +3,7 @@
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import json
-import os
+import getpass
 
 from modules.generic import Ansible, Inventory
 from modules.generic.utils import Utils
@@ -50,7 +50,7 @@ class Tester:
 
         # Set extra vars
         extra_vars['local_host_path'] = str(Path(__file__).parent.parent.parent)
-        extra_vars['current_user'] = os.getlogin()
+        extra_vars['current_user'] = getpass.getuser()
 
         logger.debug(f"Using extra vars: {extra_vars}")
 
