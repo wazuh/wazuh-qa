@@ -15,7 +15,7 @@ variables:
     - linux-redhat-8-amd64
     - linux-redhat-9-amd64
     - linux-amazon-2-amd64
-  manager-os: linux-ubuntu-22.04-amd64
+  manager-os: linux-ubuntu-20.04-amd64
   infra-provider: aws
   working-dir: /tmp/dtt1-poc
 
