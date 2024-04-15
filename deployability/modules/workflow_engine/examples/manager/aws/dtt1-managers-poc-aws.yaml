@@ -34,6 +34,7 @@ tasks:
           - track-output: "{working-dir}/manager-{manager}/track.yaml"
           - label-termination-date: "1d"
           - label-team: "qa"
+    on-error: "abort-all"
     foreach:
       - variable: manager-os
         as: manager

@@ -33,6 +33,7 @@ tasks:
           - composite-name: "{manager}"
           - inventory-output: "{working-dir}/manager-{manager}/inventory.yaml"
           - track-output: "{working-dir}/manager-{manager}/track.yaml"
+    on-error: "abort-all"
     foreach:
       - variable: manager-os
         as: manager

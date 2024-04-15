@@ -1,8 +1,7 @@
 version: 0.1
-description: This workflow is used to test agents' deployment for DDT1 PoC
+description: Test agent stop with provisioning agents' with provision module
 variables:
   agent-os:
-    - linux-oracle-9-amd64
     - linux-centos-7-amd64
     - linux-centos-8-amd64
     - linux-redhat-7-amd64
@@ -29,8 +28,6 @@ tasks:
           - composite-name: "{manager-os}"
           - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
-          - label-termination-date: "1d"
-          - label-team: "qa"
     on-error: "abort-all"
     cleanup:
       this: process
@@ -56,8 +53,7 @@ tasks:
           - composite-name: "{agent}"
           - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
-          - label-termination-date: "1d"
-          - label-team: "qa"
+    on-error: "abort-all"
     foreach:
       - variable: agent-os
         as: agent
@@ -69,8 +65,6 @@ tasks:
           - modules/allocation/main.py
           - action: delete
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
-    depends-on:
-      - "provision-manager-{manager-os}"
 
   # Unique manager provision task
   - task: "provision-manager-{manager-os}"
@@ -89,7 +83,32 @@ tasks:
               live: True
     depends-on:
       - "allocate-manager-{manager-os}"
+    on-error: "abort-all"
 
+  # Generic agent provision task
+  - task: "provision-install-{agent}"
+    description: "Provision resources for the {agent} agent."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/provision/main.py
+          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
+          - dependencies:
+            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - install:
+            - component: wazuh-agent
+              type: package
+              version: 4.7.3
+              live: True
+    depends-on:
+      - "allocate-agent-{agent}"
+      - "provision-manager-{manager-os}"
+    on-error: "abort-all"
+    foreach:
+      - variable: agent-os
+        as: agent
 
   # Generic agent test task
   - task: "run-agent-{agent}-tests"
@@ -103,7 +122,7 @@ tasks:
           - targets:
             - wazuh-1: "{working-dir}/manager-{manager-os}/inventory.yaml"
             - agent: "{working-dir}/agent-{agent}/inventory.yaml"
-          - tests: "install,registration,restart,stop,uninstall"
+          - tests: "stop"
           - component: "agent"
           - wazuh-version: "4.7.3"
           - wazuh-revision: "40714"
@@ -112,4 +131,4 @@ tasks:
       - variable: agent-os
         as: agent
     depends-on:
-      - "allocate-agent-{agent}"
+      - "provision-install-{agent}"

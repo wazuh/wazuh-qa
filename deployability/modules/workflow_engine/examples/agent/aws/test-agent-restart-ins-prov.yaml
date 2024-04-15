@@ -64,6 +64,7 @@ tasks:
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
           - label-termination-date: "1d"
           - label-team: "qa"
+    on-error: "abort-all"
     foreach:
       - variable: agent-os
         as: agent
@@ -115,6 +116,7 @@ tasks:
     depends-on:
       - "allocate-agent-{agent}"
       - "provision-manager-{manager-os}"
+    on-error: "abort-all"
     foreach:
       - variable: agent-os
         as: agent
