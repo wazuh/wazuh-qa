@@ -39,7 +39,9 @@ class Provision:
         """
         Run the provision.
         """
-        logger.info(f'Initiating provisionment.')
+        logger.error("PROVISION")
+        print(logger)
+        """ logger.info(f'Initiating provisionment.')
 
         logger.debug(f'Running action {self.action} for components: {self.components}')
         for component in self.components:
@@ -51,7 +53,7 @@ class Provision:
                 logger.error(f'Error while provisioning "{component.component}": {e}')
                 raise
         logger.info('All components provisioned successfully.')
-        logger.debug(f'Provision summary: {self.summary}')
+        logger.debug(f'Provision summary: {self.summary}') """
 
     def get_components(self, payload: InputPayload) -> list[ComponentInfo]:
         """

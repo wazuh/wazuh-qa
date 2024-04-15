@@ -3,4 +3,4 @@
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 from modules.generic.logger import Logger
 
-logger = Logger("provisioner").get_logger()
+logger = Logger("aaaaaaa").get_logger()

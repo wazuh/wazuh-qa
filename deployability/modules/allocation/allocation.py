@@ -28,14 +28,16 @@ class Allocator:
         Args:
             payload (InputPayload): The payload containing the action parameters.
         """
-        payload = models.InputPayload(**dict(payload))
+        logger.error("ALLOCATION")
+        print(logger)
+        """ payload = models.InputPayload(**dict(payload))
         # Detect the action and call the appropriate method.
         if payload.action == 'create':
             logger.info(f"Creating instance at {payload.working_dir}")
             return cls.__create(payload)
         elif payload.action == 'delete':
             logger.info(f"Deleting instance from trackfile {payload.track_output}")
-            return cls.__delete(payload)
+            return cls.__delete(payload) """
 
     # Internal methods
 

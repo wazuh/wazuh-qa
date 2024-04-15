@@ -26,7 +26,9 @@ class Tester:
         Args:
             payload (InputPayload): The payload containing the test parameters.
         """
-        payload = InputPayload(**dict(payload))
+        logger.error("TEST")
+        print(logger)
+        """  payload = InputPayload(**dict(payload))
         extra_vars = cls._get_extra_vars(payload).model_dump()
 
         targets = {}
@@ -66,7 +68,7 @@ class Tester:
                 target_value = eval(target_path).values()
                 target_inventory = Inventory(**Utils.load_from_yaml(str(list(target_value)[0])))
                 logger.info("Cleaning up")
-                cls._cleanup(ansible, extra_vars['working_dir'])
+                cls._cleanup(ansible, extra_vars['working_dir']) """
 
     @classmethod
     def _get_extra_vars(cls, payload: InputPayload) -> ExtraVars:
