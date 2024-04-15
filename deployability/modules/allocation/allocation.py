@@ -64,7 +64,7 @@ class Allocator:
         # Validate connection
         check_connection = cls.__check_connection(inventory)
         track_file = cls.__generate_track_file(instance, payload.provider, payload.track_output)
-        if check_connection:
+        if check_connection is False:
             if payload.rollback:
                 logger.warning(f"Rolling back instance creation.")
                 track_payload = {'track_output': track_file}
@@ -211,10 +211,10 @@ class Allocator:
                     cmd = session.run_cmd('ipconfig')
                     if cmd.status_code == 0:
                         logger.info("WinRM connection successful.")
-                        return False
+                        return True
                     else:
                         logger.error(f'WinRM connection failed. Check the credentials in the inventory file.')
-                        return True
+                        return False
                 except Exception as e:
                     logger.warning(f'Error on attempt {attempt} of {attempts}: {e}')
                 time.sleep(sleep)
@@ -240,13 +240,13 @@ class Allocator:
                     ssh.connect(**ssh_parameters)
                     logger.info("SSH connection successful.")
                     ssh.close()
-                    return False
+                    return True
                 except paramiko.AuthenticationException:
                     logger.error(f'Authentication error. Check the credentials in the inventory file.')
-                    return True
+                    return False
                 except Exception as e:
                     logger.warning(f'Error on attempt {attempt} of {attempts}: {e}')
                 time.sleep(sleep)
 
         logger.error(f'Connection attempts failed after {attempts} tries. Connection timeout.')
-        return True
+        return False
