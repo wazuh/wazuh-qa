@@ -25,6 +25,19 @@ handlers:
     formatter: simple
     filename: /tmp/workflow.log
     filters: [uppercase]
+loggers:
+  allocator:
+    level: DEBUG
+    handlers: [console, file]
+    propagate: no
+  provisioner:
+    level: DEBUG
+    handlers: [console, file]
+    propagate: no
+  tester:
+    level: DEBUG
+    handlers: [console, file]
+    propagate: no
 root:
   level: DEBUG
   handlers: [console, file]

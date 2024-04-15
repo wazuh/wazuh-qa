@@ -56,7 +56,7 @@ class Tester:
 
         # Setup and run tests
         target_inventory = Inventory(**Utils.load_from_yaml(str(list(eval(payload.targets[0]).values())[0])))
-        ansible = Ansible(ansible_data=target_inventory.model_dump())
+        ansible = Ansible(ansible_data=target_inventory.model_dump(), logger=logger)
         cls._setup(ansible, extra_vars)
         cls._run_tests(payload.tests, ansible, extra_vars)
 

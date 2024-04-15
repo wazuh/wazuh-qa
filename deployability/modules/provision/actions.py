@@ -29,7 +29,7 @@ class Action:
         component_info = ComponentInfo(**dict(component_info))
         action_type = component_info.type
         self.handler = ProvisionHandler(component_info, action, action_type)
-        self.ansible = Ansible(ansible_data, playbooks_path=self.handler.templates_path)
+        self.ansible = Ansible(ansible_data, logger=logger, playbooks_path=self.handler.templates_path)
 
     def execute(self) -> dict:
         """
