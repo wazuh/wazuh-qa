@@ -297,19 +297,23 @@ class AWSProvider(Provider):
         client = boto3.client('ec2')
         dedicated_host_name = str(config.name) + '-Host-' + arch
         logger.info(f"Creating dedicated host: {dedicated_host_name}")
-        host = client.allocate_hosts(InstanceType=config.type,
-                                        AutoPlacement='on',
-                                        AvailabilityZone=config.zone,
-                                        Quantity=1,
-                                        TagSpecifications=[{
-                                            'ResourceType': 'dedicated-host',
-                                            'Tags': [
-                                                {'Key': 'Name', 'Value': dedicated_host_name},
-                                                {'Key': 'termination_date', 'Value': config.termination_date},
-                                                {'Key': 'issue', 'Value': config.issue},
-                                                {'Key': 'team', 'Value': config.team}
-                                            ]
-                                        }])
+        params = {
+            'InstanceType': config.type,
+            'AutoPlacement': 'on',
+            'AvailabilityZone': config.zone,
+            'Quantity': 1,
+            'TagSpecifications': [{
+                'ResourceType': 'dedicated-host',
+                'Tags': [
+                    {'Key': 'Name', 'Value': config.name},
+                    {'Key': 'termination_date', 'Value': config.termination_date},
+                    {'Key': 'team', 'Value': config.team}
+                ]
+            }]
+        }
+        if config.issue:
+            params['TagSpecifications'][0]['Tags'].append({'Key': 'issue', 'Value': config.issue})
+        host = client.allocate_hosts(**params)
         logger.info(f"Dedicated host created: {host['HostIds'][0]}")
         return host['HostIds'][0]
 
@@ -330,7 +334,7 @@ class AWSProvider(Provider):
         if host['Unsuccessful']:
             unsuccessful_messages = [item['Error']['Message'] for item in host['Unsuccessful']]
             for message in unsuccessful_messages:
-                logger.info(f"{message}")
+                logger.warning(f"{message}")
         else:
             logger.info(f"Dedicated host released: {host_identifier}")
 
