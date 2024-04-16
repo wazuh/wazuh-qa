@@ -780,6 +780,7 @@ class GeneratorSyscollector:
         self.old_format = old_format
         self.agent_name = agent_name
         self.batch_size = batch_size
+        self.osinfo_batch_size = batch_size
         self.syscollector_tag = 'syscollector'
         self.syscollector_mq = 'd'
         self.current_id = 1
@@ -949,9 +950,17 @@ class GeneratorSyscollector:
          Returns:
             str: generated event with the desired format for syscollector
         """
+        if len(self.list_events) == 1 and self.list_events[0] == 'packages':
+            self.list_events.insert(0, 'osinfo')
+            self.osinfo_batch_size = 1
+
         if self.current_batch_events_size == 0:
             self.current_batch_events = (self.current_batch_events + 1) % len(self.list_events)
-            self.current_batch_events_size = self.batch_size
+
+            if self.list_events[self.current_batch_events] != 'osinfo':
+                self.current_batch_events_size = self.batch_size
+            else:
+                self.current_batch_events_size = self.osinfo_batch_size
 
         if self.list_events[self.current_batch_events] not in ['network', 'port', 'process'] \
                 or self.current_batch_events_size > 1 or not self.old_format:
