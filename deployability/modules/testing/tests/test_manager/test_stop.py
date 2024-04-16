@@ -5,7 +5,7 @@
 import pytest
 
 from ..helpers.generic import HostInformation, GeneralComponentActions
-from ..helpers.logger.logger import logger
+from modules.generic.logger import logger
 
 
 @pytest.fixture(scope="module", autouse=True)

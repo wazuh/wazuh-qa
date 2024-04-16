@@ -20,11 +20,11 @@ class Inventory(BaseModel):
 
 
 class Ansible:
-    def __init__(self, ansible_data: dict | Inventory, playbooks_path: str | Path = None):
+    def __init__(self, ansible_data: dict | Inventory, logger: Logger, playbooks_path: str | Path = None):
         self.playbooks_path = playbooks_path
         self.ansible_data = Inventory(**dict(ansible_data))
         self.inventory = self.generate_inventory()
-        self.logger = Logger(Path(__file__).stem).get_logger()
+        self.logger = logger
 
     def render_playbooks(self, rendering_variables: dict) -> list[str]:
         """
