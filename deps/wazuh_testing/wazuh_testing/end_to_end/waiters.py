@@ -31,7 +31,7 @@ from wazuh_testing.tools.system import HostManager
 from wazuh_testing.modules.syscollector import TIMEOUT_SYSCOLLECTOR_SHORT_SCAN
 
 
-VD_FEED_UPDATE_TIMEOUT = 600
+VD_FEED_UPDATE_TIMEOUT = 6000
 VD_INITIAL_SCAN_PER_AGENT_TIMEOUT = 15
 
 
@@ -43,7 +43,9 @@ def wait_until_vd_is_updated(host_manager: HostManager) -> None:
         host_manager (HostManager): Host manager instance to handle the environment.
     """
 
-    monitoring_data = generate_monitoring_logs(host_manager, ["INFO: Vulnerability scanner module started"],
+    feed_update_complete_message = ["INFO: Feed update process completed"]
+
+    monitoring_data = generate_monitoring_logs(host_manager, feed_update_complete_message,
                                                [VD_FEED_UPDATE_TIMEOUT], host_manager.get_group_hosts('manager'))
     monitoring_events_multihost(host_manager, monitoring_data, ignore_timeout_error=False)
 
