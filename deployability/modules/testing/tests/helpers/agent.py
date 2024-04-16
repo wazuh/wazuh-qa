@@ -318,7 +318,7 @@ class WazuhAgent:
         Returns:
             str: Os name.
         """
-        return 'ESTABLISHED' in Executor.execute_command(agent_params, 'lsof -i -P | grep ESTABLISHED | grep 1514')
+        return 'ESTAB' in Executor.execute_command(agent_params, 'ss -t -a -n | grep ":1514" | grep ESTAB')
 
 
     def get_agents_information(wazuh_api: WazuhAPI) -> list:

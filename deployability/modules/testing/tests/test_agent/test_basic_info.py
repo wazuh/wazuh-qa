@@ -69,8 +69,8 @@ def test_wazuh_os_version(wazuh_params):
         assert HostInformation.dir_exists(agent_params, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
         expected_condition_func = lambda: 'active' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
-        assert HostInformation.get_os_version_from_inventory(agent_params) in WazuhAgent.get_agent_os_version_by_name(wazuh_api, agent_names), logger.error('There is a mismatch between the OS and the OS of the installed agent')
-        assert HostInformation.get_os_name_from_inventory(agent_params) in WazuhAgent.get_agent_os_name_by_name(wazuh_api, agent_names),  logger.error('There is a mismatch between the OS version and the OS version of the installed agent')
+        assert HostInformation.get_os_version_from_inventory(agent_params) in WazuhAgent.get_agent_os_version_by_name(wazuh_api, agent_names), logger.error('There is a mismatch between the OS version and the OS  version of the installed agent')
+        assert HostInformation.get_os_name_from_inventory(agent_params) in WazuhAgent.get_agent_os_name_by_name(wazuh_api, agent_names).replace(' ', ''),  logger.error('There is a mismatch between the OS name and the OS name of the installed agent')
 
 
 def test_wazuh_version(wazuh_params):
