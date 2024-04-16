@@ -65,14 +65,23 @@ def setup_test_environment(wazuh_params):
         if updated_agents != {}:
             wazuh_params['agents'] = updated_agents
 
-def test_stop(wazuh_params):
+
+def test_service(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['master'])
     for agent_names, agent_params in wazuh_params['agents'].items():
         GeneralComponentActions.component_stop(agent_params, 'wazuh-agent')
-
     for agent_names, agent_params in wazuh_params['agents'].items():
         assert 'inactive' in GeneralComponentActions.get_component_status(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is still active by command')
         assert not GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is still active by command')
-
         expected_condition_func = lambda: 'disconnected' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
+
+
+def test_port(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert not WazuhAgent.isAgent_port_open(agent_params), logger.error('Port is still opened')
+
+
+def test_processes(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert not WazuhAgent.areAgent_processes_active(agent_params), logger.error('Agent processes are still active')
