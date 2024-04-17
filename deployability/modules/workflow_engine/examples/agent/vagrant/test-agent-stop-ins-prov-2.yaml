@@ -53,6 +53,7 @@ tasks:
           - composite-name: "{agent}"
           - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
+    on-error: "abort-all"
     foreach:
       - variable: agent-os
         as: agent
@@ -104,6 +105,7 @@ tasks:
     depends-on:
       - "allocate-agent-{agent}"
       - "provision-manager-{manager-os}"
+    on-error: "abort-all"
     foreach:
       - variable: agent-os
         as: agent

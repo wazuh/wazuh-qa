@@ -37,6 +37,7 @@ tasks:
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
           - label-termination-date: "1d"
           - label-team: "qa"
+    on-error: "abort-all"
     cleanup:
       this: process
       with:
@@ -63,6 +64,7 @@ tasks:
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
           - label-termination-date: "1d"
           - label-team: "qa"
+    on-error: "abort-all"
     foreach:
       - variable: agent-os
         as: agent
@@ -94,7 +96,7 @@ tasks:
               live: True
     depends-on:
       - "allocate-manager-{manager-os}"
-
+    on-error: "abort-all"
 
   # Generic agent test task
   - task: "run-agent-{agent}-tests"

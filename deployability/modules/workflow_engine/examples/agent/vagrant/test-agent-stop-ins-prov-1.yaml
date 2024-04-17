@@ -1,20 +1,13 @@
 version: 0.1
-description: Test agent restart with provisioning agents' with provision module
+description: Test agent stop with provisioning agents' with provision module
 variables:
   agent-os:
     - linux-ubuntu-18.04-amd64
     - linux-ubuntu-20.04-amd64
-    - linux-ubuntu-22.04-amd64
     - linux-debian-10-amd64
     - linux-debian-11-amd64
     - linux-debian-12-amd64
     - linux-oracle-9-amd64
-    - linux-centos-7-amd64
-    - linux-centos-8-amd64
-    - linux-redhat-7-amd64
-    - linux-redhat-8-amd64
-    - linux-redhat-9-amd64
-    - linux-amazon-2-amd64
   manager-os: linux-ubuntu-22.04-amd64
   infra-provider: vagrant
   working-dir: /tmp/dtt1-poc
@@ -35,8 +28,6 @@ tasks:
           - composite-name: "{manager-os}"
           - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
-          - label-termination-date: "1d"
-          - label-team: "qa"
     on-error: "abort-all"
     cleanup:
       this: process
@@ -62,8 +53,7 @@ tasks:
           - composite-name: "{agent}"
           - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
-          - label-termination-date: "1d"
-          - label-team: "qa"
+    on-error: "abort-all"
     foreach:
       - variable: agent-os
         as: agent
@@ -115,6 +105,7 @@ tasks:
     depends-on:
       - "allocate-agent-{agent}"
       - "provision-manager-{manager-os}"
+    on-error: "abort-all"
     foreach:
       - variable: agent-os
         as: agent
@@ -131,7 +122,7 @@ tasks:
           - targets:
             - wazuh-1: "{working-dir}/manager-{manager-os}/inventory.yaml"
             - agent: "{working-dir}/agent-{agent}/inventory.yaml"
-          - tests: "restart"
+          - tests: "stop"
           - component: "agent"
           - wazuh-version: "4.7.3"
           - wazuh-revision: "40714"
