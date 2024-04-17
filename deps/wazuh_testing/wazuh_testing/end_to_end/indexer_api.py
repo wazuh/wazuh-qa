@@ -93,3 +93,25 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
                             json=data)
 
     return response.json()
+
+
+def delete_index(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'},
+                 index: str = 'wazuh-alerts*'):
+    """
+    Delete index from the Wazuh Indexer API.
+
+    Args:
+        host_manager: An instance of the HostManager class containing information about hosts.
+        credentials (Optional): A dictionary containing the Indexer credentials. Defaults to
+                                 {'user': 'admin', 'password': 'changeme'}.
+        index (Optional): The Indexer index name. Defaults to 'wazuh-alerts*'.
+    """
+    logging.info(f"Deleting {index} index")
+
+    url = f"https://{host_manager.get_master_ip()}:9200/{index}/"
+    headers = {
+        'Content-Type': 'application/json',
+    }
+
+    requests.delete(url=url, verify=False,
+                    auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']), headers=headers)

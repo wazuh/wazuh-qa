@@ -23,7 +23,7 @@ import logging
 import threading
 
 from typing import Dict, List, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor
 
 from wazuh_testing.end_to_end.waiters import wait_syscollector_and_vuln_scan
@@ -420,6 +420,7 @@ def launch_parallel_operations(task: Dict[str, List], host_manager: HostManager,
         operation (list): List of dictionaries containing operation details.
         host_manager (HostManager): An instance of the HostManager class containing information about hosts.
     """
+
     hosts_to_ignore = target_to_ignore if target_to_ignore else []
     target = 'agent'
     results = {}

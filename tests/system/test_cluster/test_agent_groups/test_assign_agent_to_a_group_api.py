@@ -63,7 +63,7 @@ local_path = os.path.dirname(os.path.abspath(__file__))
 tmp_path = os.path.join(local_path, 'tmp')
 
 # Variables
-timeout = 10
+timeout = 30
 test_group = 'group_test'
 
 

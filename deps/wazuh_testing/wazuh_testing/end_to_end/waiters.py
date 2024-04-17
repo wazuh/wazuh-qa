@@ -31,8 +31,8 @@ from wazuh_testing.tools.system import HostManager
 from wazuh_testing.modules.syscollector import TIMEOUT_SYSCOLLECTOR_SHORT_SCAN
 
 
-VD_FEED_UPDATE_TIMEOUT = 600
-VD_INITIAL_SCAN_PER_AGENT_TIMEOUT = 10
+VD_FEED_UPDATE_TIMEOUT = 6000
+VD_INITIAL_SCAN_PER_AGENT_TIMEOUT = 15
 
 
 def wait_until_vd_is_updated(host_manager: HostManager) -> None:
@@ -42,9 +42,11 @@ def wait_until_vd_is_updated(host_manager: HostManager) -> None:
     Args:
         host_manager (HostManager): Host manager instance to handle the environment.
     """
-    monitoring_data = generate_monitoring_logs(host_manager, ["Vulnerability scanner module started"],
-                                               [VD_FEED_UPDATE_TIMEOUT], host_manager.get_group_hosts('manager'))
 
+    feed_update_complete_message = ["INFO: Feed update process completed"]
+
+    monitoring_data = generate_monitoring_logs(host_manager, feed_update_complete_message,
+                                               [VD_FEED_UPDATE_TIMEOUT], host_manager.get_group_hosts('manager'))
     monitoring_events_multihost(host_manager, monitoring_data, ignore_timeout_error=False)
 
 
@@ -61,8 +63,8 @@ def wait_until_vuln_scan_agents_finished(host_manager: HostManager, agent_list: 
     time.sleep(final_timeout)
 
 
-def wait_syscollector_and_vuln_scan(host_manager: HostManager, syscollector_scan: int, 
-                                    greater_than_timestamp: str = '', 
+def wait_syscollector_and_vuln_scan(host_manager: HostManager, syscollector_scan: int,
+                                    greater_than_timestamp: str = '',
                                     agent_list: list = None) -> None:
     """
     Wait until syscollector and vulnerability scans are finished for a specific host.
@@ -83,9 +85,8 @@ def wait_syscollector_and_vuln_scan(host_manager: HostManager, syscollector_scan
                                                [syscollector_scan, syscollector_scan],
                                                hosts_to_wait, greater_than_timestamp=greater_than_timestamp)
 
-    monitoring_events_multihost(host_manager, monitoring_data)
+    monitoring_events_multihost(host_manager, monitoring_data, ignore_timeout_error=False)
 
     logging.info(f"Waiting for vulnerability scan to finish")
 
     wait_until_vuln_scan_agents_finished(host_manager, agent_list=agent_list)
-
