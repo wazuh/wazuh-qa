@@ -56,6 +56,8 @@ import pytest
 import time
 import numbers
 
+import shutil
+
 from wazuh_testing.tools.configuration import load_wazuh_configurations
 from wazuh_testing.tools.services import restart_wazuh_function
 from wazuh_testing.tools.monitoring import FileMonitor, generate_monitoring_callback
@@ -112,6 +114,21 @@ def get_configuration(request):
     """Get configurations from the module."""
     return request.param
 
+@pytest.fixture(scope="function")
+def remove_backups(backups_path):
+    # Create the folder where the backups will be stored if it doesn't exist
+    os.makedirs(backups_path, exist_ok=True)
+
+    # Clear the directory
+    for filename in os.listdir(backups_path):
+        file_path = os.path.join(backups_path, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print(f"Failed to delete {file_path}. Reason: {e}")
 
 # Tests
 @pytest.mark.parametrize('backups_path', [backups_path])
@@ -163,6 +180,7 @@ def test_wdb_backup_configs(get_configuration, configure_environment, clear_logs
     '''
     test_interval = get_configuration['metadata']['INTERVAL']
     test_max_files = get_configuration['metadata']['MAX_FILES']
+
     try:
         restart_wazuh_function()
     except (subprocess.CalledProcessError, ValueError) as err:
@@ -186,7 +204,10 @@ def test_wdb_backup_configs(get_configuration, configure_environment, clear_logs
     if get_configuration['metadata']['ENABLED'] == 'no':
         # Fail the test if a file or more were found in the backups_path
         if os.listdir(backups_path):
-            pytest.fail("Error: A file was found in backups_path. No backups where expected when enabled is 'no'.")
+            # Concatenate filenames into a comma-separated string
+            file_names = ', '.join(os.listdir(backups_path))
+            pytest.fail(f"Error: Found the following files in backups_path: {file_names}. No backups were expected when enabled is 'no'.")
+
     # Manage if backup generation is enabled - one or more backups expected
     else:
         result= wazuh_log_monitor.start(timeout=timeout, accum_results=test_max_files+1,
@@ -199,3 +220,4 @@ def test_wdb_backup_configs(get_configuration, configure_environment, clear_logs
             total_files = total_files+1
         assert total_files == test_max_files, f'Wrong backup file ammount, expected {test_max_files} \
                                                 but {total_files} are present in folder.'
+
