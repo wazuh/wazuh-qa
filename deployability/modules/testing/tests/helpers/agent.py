@@ -430,7 +430,7 @@ class WazuhAgent:
         try:
             for agent_data in eval(response.text)['data']['affected_items']:
                 if agent_data.get('name') == agent_name:
-                    return agent_data.get('os', {}).get('name').lower()
+                    return 'suse' if agent_data.get('os', {}).get('name', '').lower() == 'sles' else agent_data.get('os', {}).get('name', '').lower()
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             return f"Unexpected error: {e}"

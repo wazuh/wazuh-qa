@@ -63,6 +63,7 @@ def setup_test_environment(wazuh_params):
         if updated_agents != {}:
             wazuh_params['agents'] = updated_agents
 
+
 def test_wazuh_os_version(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['master'])
     for agent_names, agent_params in wazuh_params['agents'].items():
