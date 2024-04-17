@@ -188,7 +188,7 @@ class Allocator:
         return track_path
 
     @staticmethod
-    def __check_connection(inventory: models.InventoryOutput, attempts=15, sleep=60) -> None:
+    def __check_connection(inventory: models.InventoryOutput, attempts=30, sleep=30) -> None:
         """
         Checks if the ssh connection is successful.
 
