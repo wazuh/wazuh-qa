@@ -122,8 +122,9 @@ class Agent:
                  fixed_message_size=None, registration_address=None, retry_enrollment=False,
                  logcollector_msg_number=None, custom_logcollector_message='',
                  syscollector_event_types=['network', 'port', 'hotfix', 'process', 'packages', 'osinfo', 'hwinfo'],
-                 syscollector_packages_vuln_content=None,
-                 syscollector_legacy_messages=False):
+                 syscollector_packages_vuln_content=None, syscollector_legacy_messages=False,
+                 vulnerability_packages_vuln_content=None, vulnerability_legacy_messages=False,
+                 vulnerability_batch_size=10):
         self.id = id
         self.name = name
         self.key = key
@@ -142,6 +143,10 @@ class Agent:
         self.syscollector_event_types = syscollector_event_types
         self.syscollector_legacy_messages = syscollector_legacy_messages
         self.syscollector_packages_vuln_content = syscollector_packages_vuln_content
+
+        self.vulnerability_legacy_messages = vulnerability_legacy_messages
+        self.vulnerability_batch_size = vulnerability_batch_size
+        self.vulnerability_packages_vuln_content = vulnerability_packages_vuln_content
 
         self.rootcheck_eps = rootcheck_eps
         self.logcollector_eps = logcollector_eps
@@ -170,6 +175,7 @@ class Agent:
         self.fim = None
         self.fim_integrity = None
         self.syscollector = None
+        self.vulnerability = None
         self.modules = {
             'keepalive': {'status': 'enabled', 'frequency': self.keepalive_frequency},
             'fim': {'status': 'enabled', 'eps': self.fim_eps},
@@ -693,6 +699,16 @@ class Agent:
         """Initialize winevt module."""
         if self.winevt is None:
             self.winevt = GeneratorWinevt(self.name, self.id)
+
+    def init_vulnerability(self):
+        """Initialize vulnerability module."""
+        if self.vulnerability is None:
+            self.vulnerability = GeneratorVulnerabilityEvents(
+                self.name,
+                self.vulnerability_legacy_messages,
+                self.vulnerability_batch_size,
+                self.vulnerability_packages_vuln_content
+            )
 
     def get_agent_info(self, field):
         agent_info = wdb.query_wdb(f"global get-agent-info {self.id}")
@@ -1980,6 +1996,9 @@ class InjectorThread(threading.Thread):
         elif module == 'logcollector':
             self.agent.init_logcollector()
             module_event_generator = self.agent.logcollector.generate_event
+        elif module == 'vulnerability':
+            self.agent.init_vulnerability()
+            module_event_generator = self.agent.vulnerability.generate_event
         else:
             raise ValueError('Invalid module selected')
 
