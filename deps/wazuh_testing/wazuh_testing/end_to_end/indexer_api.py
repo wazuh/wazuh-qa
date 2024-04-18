@@ -22,7 +22,7 @@ STATE_INDEX_NAME = 'wazuh-vulnerabilities-states'
 
 
 def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'},
-                       index: str = 'wazuh-alerts*', greater_than_timestamp=None, agent: str = '') -> Dict:
+                       index: str = 'wazuh-alerts*', filter: dict | None = None, size: int = 10000) -> Dict:
     """
     Get values from the Wazuh Indexer API.
 
@@ -44,47 +44,11 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
         'Content-Type': 'application/json',
     }
 
-    data = {
-        "query": {
-            "match_all": {}
-        }
-    }
-
-    if greater_than_timestamp and agent:
-        query = {
-                "bool": {
-                    "must": [
-                        {"range": {"@timestamp": {"gte": f"{greater_than_timestamp}"}}},
-                        {"match": {"agent.name": f"{agent}"}}
-                    ]
-                }
-        }
-
-        data['query'] = query
-    elif greater_than_timestamp:
-        query = {
-                "bool": {
-                    "must": [
-                        {"range": {"@timestamp": {"gte": f"{greater_than_timestamp}"}}}
-                    ]
-                }
-        }
-
-        data['query'] = query
-    elif agent:
-        query = {
-                "bool": {
-                    "must": [
-                        {"match": {"agent.name": f"{agent}"}}
-                    ]
-                }
-        }
-
-        data['query'] = query
+    data = {}
+    data['query'] = filter
 
     param = {
-        'pretty': 'true',
-        'size': 10000,
+        'size': size,
     }
 
     response = requests.get(url=url, params=param, verify=False,
