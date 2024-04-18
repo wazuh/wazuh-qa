@@ -392,8 +392,10 @@ class WazuhAgent:
     def get_agent_os_version_by_name(wazuh_api: WazuhAPI, agent_name):
         """
         Get Agent os version by Agent name
+
         Args:
             agent_name (str): Agent name.
+
         Returns:
             str: Os version.
         """
@@ -410,8 +412,10 @@ class WazuhAgent:
     def get_agent_os_name_by_name(wazuh_api: WazuhAPI, agent_name):
         """
         Get Agent os name by Agent name
+
         Args:
             agent_name (str): Agent name.
+
         Returns:
             str: Os name.
         """
