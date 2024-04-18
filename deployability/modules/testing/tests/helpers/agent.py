@@ -368,6 +368,42 @@ class WazuhAgent:
             logger.error(f"Unexpected error: {e}")
             return [None, None, None]
 
+    def get_agent_os_version_by_name(wazuh_api: WazuhAPI, agent_name):
+        """
+        Get Agent os version by Agent name
+        Args:
+            agent_name (str): Agent name.
+        Returns:
+            str: Os version.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/agents", headers=wazuh_api.headers, verify=False)
+        try:
+            for agent_data in eval(response.text)['data']['affected_items']:
+                if agent_data.get('name') == agent_name:
+                    return agent_data.get('os', {}).get('version')
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return f"Unexpected error: {e}"
+
+
+    def get_agent_os_name_by_name(wazuh_api: WazuhAPI, agent_name):
+        """
+        Get Agent os name by Agent name
+        Args:
+            agent_name (str): Agent name.
+        Returns:
+            str: Os name.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/agents", headers=wazuh_api.headers, verify=False)
+        try:
+            for agent_data in eval(response.text)['data']['affected_items']:
+                if agent_data.get('name') == agent_name:
+                    return 'suse' if agent_data.get('os', {}).get('name', '').lower() == 'sles' else agent_data.get('os', {}).get('name', '').lower()
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return f"Unexpected error: {e}"
+        return None
+
 
     def get_agent_ip_status_and_name_by_id(wazuh_api: WazuhAPI, identifier):
         """
@@ -387,6 +423,43 @@ class WazuhAgent:
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             return [None, None, None]
+
+
+    def get_agent_os_version_by_name(wazuh_api: WazuhAPI, agent_name):
+        """
+        Get Agent os version by Agent name
+        Args:
+            agent_name (str): Agent name.
+        Returns:
+            str: Os version.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/agents", headers=wazuh_api.headers, verify=False)
+        try:
+            for agent_data in eval(response.text)['data']['affected_items']:
+                if agent_data.get('name') == agent_name:
+                    return agent_data.get('os', {}).get('version')
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return f"Unexpected error: {e}"
+
+
+    def get_agent_os_name_by_name(wazuh_api: WazuhAPI, agent_name):
+        """
+        Get Agent os name by Agent name
+        Args:
+            agent_name (str): Agent name.
+        Returns:
+            str: Os name.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/agents", headers=wazuh_api.headers, verify=False)
+        try:
+            for agent_data in eval(response.text)['data']['affected_items']:
+                if agent_data.get('name') == agent_name:
+                    return 'suse' if agent_data.get('os', {}).get('name', '').lower() == 'sles' else agent_data.get('os', {}).get('name', '').lower()
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return f"Unexpected error: {e}"
+        return None
 
 
 def add_agent_to_manager(wazuh_api: WazuhAPI, name, ip) -> str:
