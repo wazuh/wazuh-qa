@@ -66,11 +66,15 @@ def setup_test_environment(wazuh_params):
 def test_uninstall(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
         assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not Active before the installation')
-        assert HostInformation.dir_exists(agent_params, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in the host {agent_names}')
+        if 'linux' in agent_params:
+            assert HostInformation.dir_exists(agent_params, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in the host {agent_names}')
+        elif 'macos' in wazuh_params:
+            assert HostInformation.dir_exists(agent_params, '/Library/Ossec'), logger.error(f'The /Library/Ossec is not present in the host {agent_names}')
 
-    # Agent installation
+    # Agent uninstallation
     for agent_names, agent_params in wazuh_params['agents'].items():
         WazuhAgent.perform_uninstall_and_scan_for_agent(agent_params,wazuh_params)
+
 
     # Manager uninstallation status check
     for agent_names, agent_params in wazuh_params['agents'].items():

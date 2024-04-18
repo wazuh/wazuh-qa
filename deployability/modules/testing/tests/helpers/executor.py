@@ -3,6 +3,7 @@
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import json
+import paramiko
 import requests
 import subprocess
 import urllib3
@@ -19,24 +20,41 @@ class Executor:
         with open(inventory_path, 'r') as yaml_file:
             inventory_data = yaml.safe_load(yaml_file)
 
-        host = inventory_data.get('ansible_host')
-        port = inventory_data.get('ansible_port')
-        private_key_path = inventory_data.get('ansible_ssh_private_key_file')
-        username = inventory_data.get('ansible_user')
+        if 'ansible_ssh_private_key_file' in inventory_data:
+            host = inventory_data.get('ansible_host')
+            port = inventory_data.get('ansible_port')
+            private_key_path = inventory_data.get('ansible_ssh_private_key_file')
+            username = inventory_data.get('ansible_user')
 
-        ssh_command = [
-            "ssh",
-            "-i", private_key_path,
-            "-o", "StrictHostKeyChecking=no",
-            "-o", "UserKnownHostsFile=/dev/null",
-            "-p", str(port),
-            f"{username}@{host}",
-            "sudo", 
-            command
-        ]
-        result = subprocess.run(ssh_command, stdout=subprocess.PIPE, text=True)
+            ssh_command = [
+                "ssh",
+                "-i", private_key_path,
+                "-o", "StrictHostKeyChecking=no",
+                "-o", "UserKnownHostsFile=/dev/null",
+                "-p", str(port),
+                f"{username}@{host}",
+                "sudo", 
+                command
+            ]
+            result = subprocess.run(ssh_command, stdout=subprocess.PIPE, text=True)
 
-        return result.stdout
+            return result.stdout
+        else:
+            host = inventory_data.get('ansible_host', None)
+            port = inventory_data.get('ansible_port', 22)
+            user = inventory_data.get('ansible_user', None)
+            password = inventory_data.get('ansible_password', None)
+
+            ssh_client = paramiko.SSHClient()
+            ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh_client.connect(hostname=host, port=port, username=user, password=password)
+            stdin, stdout, stderr = ssh_client.exec_command(f"sudo {command}")
+            
+            result = ''.join(stdout.readlines())
+
+            ssh_client.close()
+            
+            return result
 
 
     @staticmethod
