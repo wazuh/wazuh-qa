@@ -499,13 +499,13 @@ class CheckFiles:
         Returns:
             Dict: dict of directories:hash
         """
-        if 'linux' in os_type:
+        if 'linux' == os_type:
             command = f'sudo find {directory} -type f -exec sha256sum {{}} + {filter}'
             result = Executor.execute_command(inventory_path, command)
-        elif 'macos' in os_type:
+        elif 'macos' == os_type:
             command = f'sudo find {directory} -type f -exec shasum -a 256 {{}} \; {filter}'
             result = Executor.execute_command(inventory_path, command)
-        elif 'windows' in os_type:
+        elif 'windows' == os_type:
             command = 'dir /a-d /b /s | findstr /v /c:"\\.$" /c:"\\..$"| find /c ":"'
         else:
             logger.info(f'Unsupported operating system')

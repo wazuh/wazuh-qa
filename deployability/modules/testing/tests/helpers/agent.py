@@ -94,9 +94,11 @@ class WazuhAgent:
 
         with open(manager_path, 'r') as yaml_file:
             manager_path = yaml.safe_load(yaml_file)
+
         host = manager_path.get('ansible_host')
 
-        if 'linux' in inventory_path:
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
             host_ip = HostInformation.get_internal_ip_from_aws_dns(host) if 'amazonaws' in host else host
             commands = [
                 f"sed -i 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' {WAZUH_CONF}",
@@ -105,7 +107,7 @@ class WazuhAgent:
             Executor.execute_commands(inventory_path, commands)
             assert host_ip in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the Manager IP ({host_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
-        elif 'macos' in inventory_path:
+        elif os_type == 'macos':
             host_ip = HostInformation.get_public_ip_from_aws_dns(host) if 'amazonaws' in host else host
             commands = [
                 f"sed -i '.bak' 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' /Library/Ossec/etc/ossec.conf",
@@ -199,7 +201,7 @@ class WazuhAgent:
         os_name = HostInformation.get_os_name_from_inventory(agent_params)
         logger.info(f'Applying filters in checkfiles in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
 
-        if 'linux' in agent_params:
+        if 'linux' == HostInformation.get_os_type(agent_params):
             if 'debian' in os_name:
                 filter_data = {
                     '/boot': {'added': [], 'removed': [], 'modified': ['grubenv']},
@@ -235,7 +237,7 @@ class WazuhAgent:
                     '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
                     '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
                 }
-        elif 'macos' in agent_params:
+        elif 'macos' == HostInformation.get_os_type(agent_params):
                 filter_data = {
                     '/usr/bin': {'added': [], 'removed': [], 'modified': []},
                     '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
@@ -291,11 +293,13 @@ class WazuhAgent:
             result (dict): result of comparison between pre and post action scan
 
         """
-        if 'linux' in agent_params:
+        os_name = HostInformation.get_os_name_from_inventory(agent_params)
+        if os_name == 'linux':
             categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
-        elif 'macos' in agent_params:
+        elif os_name == 'macos':
             categories = ['/usr/bin', '/usr/sbin']
         actions = ['added', 'modified', 'removed']
+
         # Testing the results
         for category in categories:
             for action in actions:
