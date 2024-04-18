@@ -14,7 +14,7 @@ import yaml
 from pathlib import Path
 from .constants import WAZUH_CONTROL, CLIENT_KEYS
 from .executor import Executor
-from modules.generic.logger import logger
+from modules.testing.utils import logger
 from .utils import Utils
 
 
