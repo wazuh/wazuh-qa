@@ -63,7 +63,7 @@ def setup_test_environment(wazuh_params):
         if updated_agents != {}:
             wazuh_params['agents'] = updated_agents
 
-def test_installation(wazuh_params):
+def test_installation(wazuh_params): 
     # Checking connection
     for manager_name, manager_params in wazuh_params['managers'].items():
         Utils.check_inventory_connection(manager_params)
