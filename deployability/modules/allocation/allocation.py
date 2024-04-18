@@ -140,13 +140,15 @@ class Allocator:
                                                 ansible_user=ssh_config.user,
                                                 ansible_port=ssh_config.port,
                                                 ansible_connection='ssh',
-                                                ansible_password=ssh_config.password)
+                                                ansible_password=ssh_config.password,
+                                                ansible_ssh_common_args='-o StrictHostKeyChecking=no')
         else:
             inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
                                                 ansible_user=ssh_config.user,
                                                 ansible_port=ssh_config.port,
                                                 ansible_connection='ssh',
-                                                ansible_ssh_private_key_file=str(ssh_config.private_key))
+                                                ansible_ssh_private_key_file=str(ssh_config.private_key),
+                                                ansible_ssh_common_args='-o StrictHostKeyChecking=no')
         with open(inventory_path, 'w') as f:
             yaml.dump(inventory.model_dump(exclude_none=True), f)
         logger.info(f"Inventory file generated at {inventory_path}")

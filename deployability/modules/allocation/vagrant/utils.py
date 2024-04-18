@@ -23,7 +23,7 @@ class VagrantUtils:
         ssh_user = remote_host_parameters['ssh_user']
         if remote_host_parameters.get('ssh_password'):
             ssh_password = remote_host_parameters['ssh_password']
-            ssh_command = f"sshpass -p {ssh_password} ssh {ssh_user}@{server_ip} {command}"
+            ssh_command = f"sshpass -p {ssh_password} ssh -o 'StrictHostKeyChecking no' {ssh_user}@{server_ip} {command}"
         if remote_host_parameters.get('ssh_key'):
             ssh_key = remote_host_parameters['ssh_key']
             ssh_command = f"ssh -i {ssh_key} {ssh_user}@{server_ip} \"{command}\""
