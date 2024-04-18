@@ -5,6 +5,7 @@
 import pytest
 import re
 
+from ..helpers.agent import WazuhAgent, WazuhAPI
 from ..helpers.generic import GeneralComponentActions, HostInformation
 from modules.generic.logger import logger
 from ..helpers.manager import WazuhManager
@@ -84,3 +85,13 @@ def test_isActive(wazuh_params):
 def test_clientKeys(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
         assert GeneralComponentActions.hasAgentClientKeys(agent_params), logger.error(f'{agent_names} has not ClientKeys file')
+
+
+def test_port(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert WazuhAgent.isAgent_port_open(agent_params), logger.error('Port is closed')
+
+
+def test_processes(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert WazuhAgent.areAgent_processes_active(agent_params), logger.error('Agent processes are not active')

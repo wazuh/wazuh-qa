@@ -103,7 +103,18 @@ class WazuhAgent:
         ]
 
         Executor.execute_commands(inventory_path, commands)
-        assert internal_ip in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the Manager IP ({internal_ip})in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+        assert internal_ip in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the Manager IP ({internal_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+
+
+    @staticmethod
+    def set_protocol_agent_connection(inventory_path, protocol):
+        commands = [
+            f"sed -i 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' {WAZUH_CONF}",
+            "systemctl restart wazuh-agent"
+        ]
+
+        Executor.execute_commands(inventory_path, commands)
+        assert protocol in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
 
     @staticmethod
@@ -283,6 +294,25 @@ class WazuhAgent:
             for action in actions:
                 assert result[category][action] == [], logger.error(f'{result[category][action]} was found in: {category}{action}')
 
+    def areAgent_processes_active(agent_params):
+        """
+        Check if agent processes are active
+        Args:
+            agent_name (str): Agent name.
+        Returns:
+            str: Os name.
+        """
+        return bool([int(numero) for numero in Executor.execute_command(agent_params, 'pgrep wazuh').splitlines()])
+
+    def isAgent_port_open(agent_params):
+        """
+        Check if agent port is open
+        Args:
+            agent_name (str): Agent name.
+        Returns:
+            str: Os name.
+        """
+        return 'ESTAB' in Executor.execute_command(agent_params, 'ss -t -a -n | grep ":1514" | grep ESTAB')
 
     def get_agents_information(wazuh_api: WazuhAPI) -> list:
         """

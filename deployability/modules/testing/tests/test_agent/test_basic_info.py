@@ -5,12 +5,13 @@
 import pytest
 import re
 
-from ..helpers.agent import WazuhAgent
+from ..helpers.agent import WazuhAgent, WazuhAPI
 from ..helpers.constants import WAZUH_ROOT
-from ..helpers.generic import HostInformation, GeneralComponentActions, Waits
-from ..helpers.manager import WazuhManager, WazuhAPI
+from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions, Waits
 from modules.generic.logger import logger
+from ..helpers.manager import WazuhManager
 from ..helpers.utils import Utils
+
 
 @pytest.fixture(scope="module", autouse=True)
 def wazuh_params(request):
@@ -47,7 +48,6 @@ def setup_test_environment(wazuh_params):
     # If there are no indexers, we choose wazuh-1 by default
     if not wazuh_params['indexers']:
         wazuh_params['indexers'].append(wazuh_params['master'])
-
     wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
     wazuh_params['agents'] = {key + '-' + re.findall(r'agent-(.*?)/', value)[0].replace('.',''): value for key, value in targets_dict.items() if key.startswith('agent')}
 
@@ -63,39 +63,22 @@ def setup_test_environment(wazuh_params):
         if updated_agents != {}:
             wazuh_params['agents'] = updated_agents
 
-def test_uninstall(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
-        assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not Active before the installation')
-        assert HostInformation.dir_exists(agent_params, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in the host {agent_names}')
 
-    # Agent installation
-    for agent_names, agent_params in wazuh_params['agents'].items():
-        WazuhAgent.perform_uninstall_and_scan_for_agent(agent_params,wazuh_params)
-
-    # Manager uninstallation status check
-    for agent_names, agent_params in wazuh_params['agents'].items():
-        assert 'Disconnected' in WazuhManager.get_agent_control_info(wazuh_params['master']), logger.error(f'{agent_names} is still connected in the Manager')
-
-
-def test_agent_uninstalled_directory(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
-        assert not HostInformation.dir_exists(agent_params, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is still present in the agent {agent_names}')
-
-
-def test_service(wazuh_params):
+def test_wazuh_os_version(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['master'])
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert not GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not inactive by command')
-
-        expected_condition_func = lambda: 'disconnected' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
+        assert HostInformation.dir_exists(agent_params, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
+        expected_condition_func = lambda: 'active' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
+        assert HostInformation.get_os_version_from_inventory(agent_params) in WazuhAgent.get_agent_os_version_by_name(wazuh_api, agent_names), logger.error('There is a mismatch between the OS version and the OS  version of the installed agent')
+        assert HostInformation.get_os_name_from_inventory(agent_params) in WazuhAgent.get_agent_os_name_by_name(wazuh_api, agent_names).replace(' ', ''),  logger.error('There is a mismatch between the OS name and the OS name of the installed agent')
 
 
-def test_port(wazuh_params):
+def test_wazuh_version(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert not WazuhAgent.isAgent_port_open(agent_params), logger.error('Port is still opened')
+        assert wazuh_params['wazuh_version'] in GeneralComponentActions.get_component_version(agent_params), logger.error(f"The version {HostInformation.get_os_name_and_version_from_inventory(agent_params)} is not {wazuh_params['wazuh_version']} by command")
 
 
-def test_processes(wazuh_params):
+def test_wazuh_revision(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert not WazuhAgent.areAgent_processes_active(agent_params), logger.error('Agent processes are still active')
+        assert wazuh_params['wazuh_revision'] in GeneralComponentActions.get_component_revision(agent_params), logger.error(f"The revision {HostInformation.get_os_name_and_version_from_inventory(agent_params)} is not {wazuh_params['wazuh_revision']} by command")
