@@ -297,8 +297,10 @@ class WazuhAgent:
     def areAgent_processes_active(agent_params):
         """
         Check if agent processes are active
+
         Args:
             agent_name (str): Agent name.
+
         Returns:
             str: Os name.
         """
