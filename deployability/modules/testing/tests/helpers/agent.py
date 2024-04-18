@@ -309,8 +309,10 @@ class WazuhAgent:
     def isAgent_port_open(agent_params):
         """
         Check if agent port is open
+
         Args:
             agent_name (str): Agent name.
+
         Returns:
             str: Os name.
         """
