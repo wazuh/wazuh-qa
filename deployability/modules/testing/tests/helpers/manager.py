@@ -8,7 +8,7 @@ import socket
 from .constants import CLUSTER_CONTROL, AGENT_CONTROL, WAZUH_CONF, WAZUH_ROOT
 from .executor import Executor, WazuhAPI
 from .generic import HostInformation, CheckFiles
-from .logger.logger import logger
+from modules.generic.logger import logger
 from .utils import Utils
 
 

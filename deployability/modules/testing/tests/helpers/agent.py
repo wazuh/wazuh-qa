@@ -8,7 +8,7 @@ from typing import List, Optional
 from .constants import WAZUH_CONF, WAZUH_ROOT
 from .executor import Executor, WazuhAPI
 from .generic import HostInformation, CheckFiles
-from .logger.logger import logger
+from modules.generic.logger import logger
 
 class WazuhAgent:
 
@@ -199,9 +199,10 @@ class WazuhAgent:
         """
         result = CheckFiles.perform_action_and_scan(agent_params, action_callback)
         os_name = HostInformation.get_os_name_from_inventory(agent_params)
+        os_type = HostInformation.get_os_type(agent_params)
         logger.info(f'Applying filters in checkfiles in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
 
-        if 'linux' == HostInformation.get_os_type(agent_params):
+        if os_type == 'linux':
             if 'debian' in os_name:
                 filter_data = {
                     '/boot': {'added': [], 'removed': [], 'modified': ['grubenv']},
@@ -237,7 +238,7 @@ class WazuhAgent:
                     '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
                     '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
                 }
-        elif 'macos' == HostInformation.get_os_type(agent_params):
+        elif os_type == 'macos':
                 filter_data = {
                     '/usr/bin': {'added': [], 'removed': [], 'modified': []},
                     '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
