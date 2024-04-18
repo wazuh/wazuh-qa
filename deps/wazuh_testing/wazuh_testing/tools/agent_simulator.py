@@ -974,6 +974,213 @@ class GeneratorSyscollector:
         return event_final
 
 
+class GeneratorVulnerabilityEvents:
+    """This class allows the generation of vulnerability events.
+    Create OS and Packages type events (syscollector events) to generate vulnerability events.
+    In order to change messages events it randomized different fields of templates specified by <random_string>.
+    In order to simulate syscollector module, it send a set of the same syscollector type messages, which size is specified by `batch_size` attribute.
+    Args:
+        agent_name (str): Name of the agent.
+        old_format (bool): Enable prior 4.2 agents syscollector format.
+        batch_size (int): Number of messages of the same type.
+        custom_packages_vuln_content (list): File containing a list of packages to be sent by syscollector.
+    """
+
+    def __init__(self, agent_name, old_format, batch_size, custom_packages_vuln_content):
+        self.current_batch_events_size = 0
+        self.current_id = 1
+        self.package_index = 0
+        self.syscollector_event_type_mapping = {
+            'packages': 'dbsync_packages',
+            'osinfo': 'dbsync_osinfo'
+        }
+
+        self.syscollector_tag = 'syscollector'
+        self.syscollector_mq = 'd'
+
+
+        self.agent_name = agent_name
+        self.old_format = old_format
+        self.batch_size = batch_size
+
+        self.packages = []
+        self.custom_packages_vuln_content = custom_packages_vuln_content
+        self.default_packages_vuln_content = os.path.join(_data_path, 'vulnerability_parsed_packages.json')
+        if self.custom_packages_vuln_content:
+            self.packages = self.init_package_list(self.custom_packages_vuln_content)
+        else:
+            self.packages = self.init_package_list(self.default_packages_vuln_content)
+
+
+    def parse_package_template(self, message, package_data):
+        """Parse package template with package data.
+        Args:
+            message (str): Syscollector event message.
+            package_data (dict): Package data.
+        Returns:
+            str: Parsed syscollector event message.
+        """
+
+        template_package_fields = {
+            '<package_description>': package_data['description'],
+            '<package_architecture>': package_data['architecture'],
+            '<package_format>': package_data['format'],
+            '<package_name>':  package_data['product'],
+            '<package_source>': package_data['source'],
+            '<package_vendor>': package_data['vendor'],
+            '<package_version>': package_data['version'],
+            '<package_item_id>': package_data['item_id']
+        }
+
+        for package_key, package_value in template_package_fields.items():
+            message = message.replace(package_key, package_value)
+
+        return message
+
+    def get_package_data(self):
+        """Get package data.
+        Returns:
+            dict: Package data.
+            str: Operation (INSERTED or DELETED).
+        """
+
+        operation = 'DELETED' if self.packages[self.package_index]['installed'] else 'INSERTED'
+
+        package_data = self.packages[self.package_index]
+
+        self.packages[self.package_index]['installed'] = not self.packages[self.package_index]['installed']
+        self.package_index = (self.package_index + 1) % len(self.packages)
+
+        return package_data, operation
+
+    def init_package_list(self, packages_file):
+        """Get package data from a json file.
+        Returns:
+            dict: Package data.
+        """
+
+        with open(os.path.join(_data_path, packages_file), 'r') as fp:
+            package_data = json.load(fp)
+
+        for package in package_data:
+            package['installed'] = False
+            if 'description' not in package:
+                package['description'] = ''
+            if 'architecture' not in package:
+                package['architecture'] = ''
+            if 'format' not in package:
+                package['format'] = ''
+            if 'source' not in package:
+                package['source'] = ''
+            if 'item_id' not in package:
+                package['item_id'] = get_random_string(10)
+
+    def get_event_template_legacy(self, message_type):
+        """Get syscollector legacy message of the specified type.
+        Args:
+            message_type (str): Syscollector event type.
+        Return:
+            str: Syscollector legacy event message.
+        """
+
+        message = syscollector.LEGACY_SYSCOLLECTOR_HEADER
+
+        if message_type == 'packages':
+            message += syscollector.LEGACY_SYSCOLLECTOR_PACKAGES_EVENT_TEMPLATE
+        elif message_type == 'osinfo':
+            message += syscollector.LEGACY_SYSCOLLECTOR_OS_EVENT_TEMPLATE
+
+        return message
+
+    def get_event_template(self, message_type):
+        """Get syscollector message of the specified type.
+        Args:
+            message_type (str): Syscollector event type.
+        Returns:
+            str: Syscollector event message.
+        """
+
+        message_event_type = self.syscollector_event_type_mapping[message_type]
+        message_operation = 'INSERTED'
+
+        message_data = {}
+        package_data = {}
+
+        if message_type == 'packages':
+            message_data = syscollector.SYSCOLLECTOR_PACKAGE_DELTA_DATA_TEMPLATE
+            package_data, message_operation = self.get_package_data()
+        elif message_type == 'osinfo':
+            message_data = syscollector.SYSCOLLECTOR_OSINFO_DELTA_EVENT_TEMPLATE
+
+        message = '{"type": "%s", "data": %s, "operation": "%s"}' % (
+            message_event_type,
+            re.sub(r'\s', '', json.dumps(message_data)),
+            message_operation
+        )
+
+        if message_type == 'packages':
+            message = self.parse_package_template(message, package_data)
+
+        return message
+
+    def format_event_template(self, template, message_type=None):
+        """Format syscollector message of the specified type.
+        Args:
+            template (str): Syscollector event message.
+            message_type (str): Syscollector event type.
+        Returns:
+            str: Syscollector event message.
+        """
+
+        today = date.today()
+        timestamp = today.strftime("%Y/%m/%d %H:%M:%S")
+        message = template
+
+        generics_fields_to_replace = [
+            ('<agent_name>', self.agent_name), ('<random_int>', f"{self.current_id}"),
+            ('<random_string>', get_random_string(10)),
+            ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
+        ]
+
+        for variable, value in generics_fields_to_replace:
+            message = message.replace(variable, value)
+
+        final_mesage = f"{self.syscollector_mq}:{self.syscollector_tag}:{message}"
+
+        return final_mesage
+
+    def generate_event(self):
+        """Generate vulnerability event.
+        The event types are selected sequentially, creating a number of events of the same type specified in `batch_size`.
+        Returns:
+            str: generated event with the desired format for syscollector
+        """
+
+        event = None
+
+        if self.current_batch_events_size == 0:
+            if self.current_id != 1:
+                event = 'packages'
+                self.current_batch_events_size = self.batch_size
+            else:
+                event = 'osinfo'
+                self.current_batch_events_size = 1
+
+        self.current_batch_events_size = self.current_batch_events_size - 1
+
+        if self.old_format:
+            event_template = self.get_event_template_legacy(event)
+        else:
+            event_template = self.get_event_template(event)
+
+        event_final = self.format_event_template(event_template, event)
+        logging.debug(f"Vulnerability Event - {event_final}")
+
+        self.current_id += 1
+
+        return event_final
+
+
 class SCA:
     """This class allows the generation of sca_label events.
     Create sca events, both summary and check.
