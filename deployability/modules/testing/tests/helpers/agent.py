@@ -8,7 +8,7 @@ from typing import List, Optional
 from .constants import WAZUH_CONF, WAZUH_ROOT
 from .executor import Executor, WazuhAPI
 from .generic import HostInformation, CheckFiles
-from .logger.logger import logger
+from modules.testing.utils import logger
 
 class WazuhAgent:
 

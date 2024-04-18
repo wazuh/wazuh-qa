@@ -9,7 +9,7 @@ from modules.generic import Ansible, Inventory
 from modules.generic.utils import Utils
 from pathlib import Path
 from .models import InputPayload, ExtraVars
-from .utils import logger
+from modules.testing.utils import logger
 
 
 class Tester:

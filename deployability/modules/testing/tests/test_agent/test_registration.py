@@ -8,7 +8,7 @@ import re
 from ..helpers.agent import WazuhAgent, WazuhAPI
 from ..helpers.generic import HostInformation, GeneralComponentActions, Waits
 from ..helpers.manager import WazuhManager, WazuhAPI
-from modules.generic.logger import logger
+from modules.testing.utils import logger
 from ..helpers.utils import Utils
 
 @pytest.fixture(scope="module", autouse=True)
