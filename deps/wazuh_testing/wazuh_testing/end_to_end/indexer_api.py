@@ -18,7 +18,7 @@ from typing import Dict
 from wazuh_testing.tools.system import HostManager
 
 
-STATE_INDEX_NAME = 'wazuh-vulnerabilities-states'
+STATE_INDEX_NAME = 'wazuh-states-vulnerabilities'
 
 
 def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'},
@@ -45,7 +45,8 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
     }
 
     data = {}
-    data['query'] = filter
+    if filter:
+        data['query'] = filter
 
     param = {
         'size': size,
