@@ -22,14 +22,42 @@ STATE_INDEX_NAME = 'wazuh-states-vulnerabilities'
 
 
 def create_vulnerability_states_indexer_filter(target_agent: str, greater_than_timestamp: str) -> dict:
+    """Create a filter for the Indexer API for the vulnerability state index.
+
+    Args:
+        target_agent: The target agent to filter on.
+        greater_than_timestamp: The timestamp to filter on.
+
+    Returns:
+        dict: A dictionary containing the filter.
+    """
     return _create_filter(target_agent, greater_than_timestamp, 'vulnerability.detected_at')
 
 
 def create_alerts_filter(target_agent: str, greater_than_timestamp: str) -> dict:
+    """Create a filter for the Indexer API for the alerts index.
+
+    Args:
+        target_agent: The target agent to filter on.
+        greater_than_timestamp: The timestamp to filter on.
+
+    Returns:
+        dict: A dictionary containing the filter.
+    """
     return _create_filter(target_agent, greater_than_timestamp, '@timestamp')
 
 
 def _create_filter(target_agent: str, greater_than_timestamp: str, timestamp_field: str) -> dict:
+    """Create a filter for the Indexer API.
+
+    Args:
+        target_agent: The target agent to filter on.
+        greater_than_timestamp: The timestamp to filter on.
+        timestamp_field: The timestamp field to filter on.
+
+    Returns:
+        dict: A dictionary containing the filter.
+    """
     filter = {
         'bool': {
             'must': []
