@@ -21,7 +21,8 @@ from wazuh_testing.tools.system import HostManager
 STATE_INDEX_NAME = 'wazuh-states-vulnerabilities'
 
 
-def create_vulnerability_states_indexer_filter(target_agent: str, greater_than_timestamp: str) -> dict:
+def create_vulnerability_states_indexer_filter(target_agent: str | None = None,
+                                               greater_than_timestamp: str | None = None) -> dict:
     """Create a filter for the Indexer API for the vulnerability state index.
 
     Args:
@@ -31,10 +32,17 @@ def create_vulnerability_states_indexer_filter(target_agent: str, greater_than_t
     Returns:
         dict: A dictionary containing the filter.
     """
-    return _create_filter(target_agent, greater_than_timestamp, 'vulnerability.detected_at')
+    timestamp_filter = None
+    if greater_than_timestamp:
+        timestamp_filter = {
+                'greater_than_timestamp': greater_than_timestamp,
+                'timestamp_name': 'vulnerability.detected_at'
+        }
+
+    return _create_filter(target_agent, timestamp_filter)
 
 
-def create_alerts_filter(target_agent: str, greater_than_timestamp: str) -> dict:
+def create_alerts_filter(target_agent: str | None = None, greater_than_timestamp: str | None = None) -> dict:
     """Create a filter for the Indexer API for the alerts index.
 
     Args:
@@ -44,10 +52,17 @@ def create_alerts_filter(target_agent: str, greater_than_timestamp: str) -> dict
     Returns:
         dict: A dictionary containing the filter.
     """
-    return _create_filter(target_agent, greater_than_timestamp, '@timestamp')
+    timestamp_filter = None
+    if greater_than_timestamp:
+        timestamp_filter = {
+                'greater_than_timestamp': greater_than_timestamp,
+                'timestamp_name': '@timestamp'
+        }
+
+    return _create_filter(target_agent, timestamp_filter)
 
 
-def _create_filter(target_agent: str, greater_than_timestamp: str, timestamp_field: str) -> dict:
+def _create_filter(target_agent: str | None = None, timestamp_filter: dict | None = None) -> dict:
     """Create a filter for the Indexer API.
 
     Args:
@@ -63,7 +78,9 @@ def _create_filter(target_agent: str, greater_than_timestamp: str, timestamp_fie
             'must': []
         }
     }
-    if greater_than_timestamp:
+    if timestamp_filter:
+        timestamp_field = timestamp_filter['timestamp_name']
+        greater_than_timestamp = timestamp_filter['greater_than_timestamp']
         filter['bool']['must'].append({'range': {timestamp_field: {'gte': greater_than_timestamp}}})
     if target_agent:
         filter['bool']['must'].append({'match': {'agent.name': target_agent}})
