@@ -119,10 +119,11 @@ class AWSProvider(Provider):
         instance_dir = Path(base_dir, instance_id)
         logger.debug(f"Renaming temp {temp_dir} directory to {instance_dir}")
         os.rename(temp_dir, instance_dir)
-        if not ssh_key:
-            credentials.key_path = (instance_dir / credentials.name)
-        else:
-            credentials.key_path = (os.path.splitext(ssh_key)[0])
+        if platform != "windows":
+            if not ssh_key:
+                credentials.key_path = (instance_dir / credentials.name)
+            else:
+                credentials.key_path = (os.path.splitext(ssh_key)[0])
 
         instance_params = {}
         instance_params['instance_dir'] = instance_dir
@@ -159,8 +160,9 @@ class AWSProvider(Provider):
             destroy_parameters (InstancePayload): The parameters for destroying the instance.
         """
         credentials = AWSCredentials()
-        key_id = os.path.basename(destroy_parameters.key_path)
-        credentials.load(key_id)
+        if destroy_parameters.platform != 'windows':
+            key_id = os.path.basename(destroy_parameters.key_path)
+            credentials.load(key_id)
         instance_params = {}
         instance_params['instance_dir'] = destroy_parameters.instance_dir
         instance_params['identifier'] = destroy_parameters.identifier
@@ -168,7 +170,7 @@ class AWSProvider(Provider):
         instance_params['host_identifier'] = destroy_parameters.host_identifier
 
         instance = AWSInstance(InstancePayload(**instance_params), credentials)
-        if os.path.dirname(destroy_parameters.key_path) == str(destroy_parameters.instance_dir):
+        if os.path.dirname(destroy_parameters.key_path) == str(destroy_parameters.instance_dir) and destroy_parameters.platform != 'windows':
             logger.debug(f"Deleting credentials: {instance.credentials.name}")
             instance.credentials.delete()
         instance.delete()
@@ -297,19 +299,23 @@ class AWSProvider(Provider):
         client = boto3.client('ec2')
         dedicated_host_name = str(config.name) + '-Host-' + arch
         logger.info(f"Creating dedicated host: {dedicated_host_name}")
-        host = client.allocate_hosts(InstanceType=config.type,
-                                        AutoPlacement='on',
-                                        AvailabilityZone=config.zone,
-                                        Quantity=1,
-                                        TagSpecifications=[{
-                                            'ResourceType': 'dedicated-host',
-                                            'Tags': [
-                                                {'Key': 'Name', 'Value': dedicated_host_name},
-                                                {'Key': 'termination_date', 'Value': config.termination_date},
-                                                {'Key': 'issue', 'Value': config.issue},
-                                                {'Key': 'team', 'Value': config.team}
-                                            ]
-                                        }])
+        params = {
+            'InstanceType': config.type,
+            'AutoPlacement': 'on',
+            'AvailabilityZone': config.zone,
+            'Quantity': 1,
+            'TagSpecifications': [{
+                'ResourceType': 'dedicated-host',
+                'Tags': [
+                    {'Key': 'Name', 'Value': config.name},
+                    {'Key': 'termination_date', 'Value': config.termination_date},
+                    {'Key': 'team', 'Value': config.team}
+                ]
+            }]
+        }
+        if config.issue:
+            params['TagSpecifications'][0]['Tags'].append({'Key': 'issue', 'Value': config.issue})
+        host = client.allocate_hosts(**params)
         logger.info(f"Dedicated host created: {host['HostIds'][0]}")
         return host['HostIds'][0]
 
@@ -330,7 +336,7 @@ class AWSProvider(Provider):
         if host['Unsuccessful']:
             unsuccessful_messages = [item['Error']['Message'] for item in host['Unsuccessful']]
             for message in unsuccessful_messages:
-                logger.info(f"{message}")
+                logger.warning(f"{message}")
         else:
             logger.info(f"Dedicated host released: {host_identifier}")
 

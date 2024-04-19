@@ -294,9 +294,12 @@ class VagrantProvider(Provider):
 
             if conn_ok:
                 if action == 'create':
-                    cmd = "sudo /usr/local/bin/prlctl list -j"
-                    prlctl_output = subprocess.Popen(f"sshpass -p {ssh_password} ssh {ssh_user}@{server_ip} {cmd}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
-                    data_list = json.loads(prlctl_output)
+                    try:
+                        cmd = "sudo /usr/local/bin/prlctl list -j"
+                        prlctl_output = subprocess.Popen(f"sshpass -p {ssh_password} ssh -o 'StrictHostKeyChecking no' {ssh_user}@{server_ip} {cmd}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
+                        data_list = json.loads(prlctl_output)
+                    except Exception as e:
+                        raise ValueError('Could not get VMs running on macStadium server: ' + str(e) + '.')
                     uuid_count = 0
                     for item in data_list:
                         if 'uuid' in item:
@@ -330,12 +333,15 @@ class VagrantProvider(Provider):
 
             if conn_ok:
                 if action == 'create':
-                    loadav_command = "\'python3 -c \"import psutil; print(psutil.getloadavg()[0])\"\'"
-                    cpu_command = "\'python3 -c \"import psutil; print(psutil.getloadavg()[0]/ psutil.cpu_count() * 100)\"\'"
-                    memory_command = "\'python3 -c \"import psutil; print(psutil.virtual_memory().percent)\"\'"
-                    load_average = subprocess.Popen(f"sshpass -p {ssh_password} ssh {ssh_user}@{server_ip} {loadav_command}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
-                    cpu_usage = subprocess.Popen(f"sshpass -p {ssh_password} ssh {ssh_user}@{server_ip} {cpu_command}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
-                    memory_usage = subprocess.Popen(f"sshpass -p {ssh_password} ssh {ssh_user}@{server_ip} {memory_command}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
+                    try:
+                        loadav_command = "\'python3 -c \"import psutil; print(psutil.getloadavg()[0])\"\'"
+                        cpu_command = "\'python3 -c \"import psutil; print(psutil.getloadavg()[0]/ psutil.cpu_count() * 100)\"\'"
+                        memory_command = "\'python3 -c \"import psutil; print(psutil.virtual_memory().percent)\"\'"
+                        load_average = subprocess.Popen(f"sshpass -p {ssh_password} ssh -o 'StrictHostKeyChecking no' {ssh_user}@{server_ip} {loadav_command}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
+                        cpu_usage = subprocess.Popen(f"sshpass -p {ssh_password} ssh -o 'StrictHostKeyChecking no' {ssh_user}@{server_ip} {cpu_command}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
+                        memory_usage = subprocess.Popen(f"sshpass -p {ssh_password} ssh -o 'StrictHostKeyChecking no' {ssh_user}@{server_ip} {memory_command}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
+                    except Exception as e:
+                        raise ValueError('Could not get server load average: ' + str(e) + '.')
 
                     if float(load_average) <= 10.0 and float(cpu_usage) <= 70.0 and float(memory_usage) <= 75.0:
                         logger.info(f"Using the black mini server to deploy.")
@@ -382,8 +388,11 @@ class VagrantProvider(Provider):
 
             if conn_ok:
                 if action == 'create':
-                    cmd = "sudo docker ps -a"
-                    output = subprocess.Popen(f"ssh -i {ssh_key} {ssh_user}@{server_ip} {cmd}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
+                    try:
+                        cmd = "sudo docker ps -a"
+                        output = subprocess.Popen(f"ssh -i {ssh_key} {ssh_user}@{server_ip} {cmd}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
+                    except Exception as e:
+                        raise ValueError('Could not get docker containers running on ppc64 server: ' + str(e) + '.')
                     if '2222' in output and '8080' in output:
                         raise ValueError(f"ppc64 server has full capacity, cannot host a new container")
                     else:
