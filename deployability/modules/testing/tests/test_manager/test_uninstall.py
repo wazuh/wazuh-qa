@@ -7,7 +7,7 @@ import pytest
 from ..helpers.constants import WAZUH_ROOT
 from ..helpers.generic import HostInformation, GeneralComponentActions
 from ..helpers.manager import WazuhManager
-from modules.generic.logger import logger
+from modules.testing.utils import logger
 
 
 @pytest.fixture(scope="module", autouse=True)

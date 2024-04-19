@@ -16,6 +16,7 @@ from .constants import WAZUH_CONTROL, CLIENT_KEYS
 from .executor import Executor
 from modules.testing.utils import logger
 from .utils import Utils
+from modules.testing.utils import logger
 
 
 class HostInformation:
