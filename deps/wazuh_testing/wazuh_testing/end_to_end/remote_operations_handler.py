@@ -28,11 +28,12 @@ from concurrent.futures import ThreadPoolExecutor
 
 from wazuh_testing.end_to_end.waiters import wait_syscollector_and_vuln_scan
 from wazuh_testing.tools.system import HostManager
+from wazuh_testing.end_to_end.indexer_api import get_indexer_values
+from wazuh_testing.modules.syscollector import TIMEOUT_SYSCOLLECTOR_SCAN
 from wazuh_testing.end_to_end.vulnerability_detector import check_vuln_alert_indexer, check_vuln_state_index, \
         load_packages_metadata, get_vulnerabilities_from_states_by_agent, get_vulnerabilities_from_alerts_by_agent, \
         Vulnerability
-from wazuh_testing.end_to_end.indexer_api import get_indexer_values
-from wazuh_testing.modules.syscollector import TIMEOUT_SYSCOLLECTOR_SCAN
+
 
 def get_vulnerabilities_not_found(vulnerabilities_found: List, expected_vulnerabilities: List) -> List:
     """
