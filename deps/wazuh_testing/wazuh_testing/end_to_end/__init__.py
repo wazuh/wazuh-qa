@@ -137,6 +137,7 @@ class Evidence:
     def dict(self):
         return {self.name: self.value}
 
+
 class Check:
     def __init__(self, name: str, assert_function: callable, expected_evidences: list = None):
         self.name = name
