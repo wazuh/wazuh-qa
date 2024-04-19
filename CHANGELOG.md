@@ -52,6 +52,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix vulnerabilities and add new packages to Vulnerability Detector E2E tests ([#5234](https://github.com/wazuh/wazuh-qa/pull/5234)) \- (Tests)
 - Fix provision macOS endpoints with npm ([#5128](https://github.com/wazuh/wazuh-qa/pull/5158)) \- (Tests)
 - Fix timestamps alerts and logs filter ([#5157](https://github.com/wazuh/wazuh-qa/pull/5157)) \- (Framework + Tests)
 - Fix macOS and Windows agents timezone ([#5178](https://github.com/wazuh/wazuh-qa/pull/5178)) \- (Framework)
