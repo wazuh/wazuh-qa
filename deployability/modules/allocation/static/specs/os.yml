@@ -367,24 +367,20 @@ aws:
   windows-desktop-10-amd64:
     ami: ami-0a747df120215911a
     zone: us-east-1
-    user: Administrator
-  windows-desktop-11-amd64:
-    ami: ami-09d8cef159442d5b0
-    zone: us-east-1
-    user: Jenkins
+    user: wazuh-user
   windows-server-2012r2-amd64:
-    ami: ami-09a3ef2bc0c6a252f
+    ami: ami-05710c71113d5a40e
     zone: us-east-1
-    user: Administrator
+    user: wazuh-user
   windows-server-2016-amd64:
-    ami: ami-04d7825822fe66af3
+    ami: ami-0f279f6c0764bef8f
     zone: us-east-1
-    user: Administrator
+    user: wazuh-user
   windows-server-2019-amd64:
     ami: ami-06cc514f1012a7431
     zone: us-east-1
-    user: Administrator
+    user: wazuh-user
   windows-server-2022-amd64:
     ami: ami-0f9c44e98edf38a2b
     zone: us-east-1
-    user: Administrator
+    user: wazuh-user

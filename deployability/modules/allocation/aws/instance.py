@@ -77,7 +77,7 @@ class AWSInstance(Instance):
         if self.platform == 'windows':
             return ConnectionInfo(hostname=self._instance.public_dns_name,
                                 user=self._user,
-                                port=3389,
+                                port=5986,
                                 password=str(self.credentials.name))
         else:
             return ConnectionInfo(hostname=self._instance.public_dns_name,

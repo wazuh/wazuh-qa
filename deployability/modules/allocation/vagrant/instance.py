@@ -182,7 +182,7 @@ class VagrantInstance(Instance):
                     if match and key == 'hostname':
                         ip = match.group(1).strip()
                 ssh_config['hostname'] = ip
-                ssh_config['port'] = 3389
+                ssh_config['port'] = 5985
                 ssh_config['user'] = 'vagrant'
                 ssh_config['password'] = 'vagrant'
             else:
