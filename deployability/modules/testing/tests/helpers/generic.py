@@ -16,7 +16,6 @@ from .constants import WAZUH_CONTROL, CLIENT_KEYS
 from .executor import Executor
 from modules.testing.utils import logger
 from .utils import Utils
-from modules.testing.utils import logger
 
 
 class HostInformation:
@@ -708,7 +707,7 @@ class GeneralComponentActions:
         """
         os_type = HostInformation.get_os_type(inventory_path)
         if os_type == 'linux':
-            return HostInformation.file_exists(inventory_path, {CLIENT_KEYS})
+            return HostInformation.file_exists(inventory_path, CLIENT_KEYS)
         elif os_type == 'macos':
             return HostInformation.file_exists(inventory_path, '/Library/Ossec/etc/client.keys')
 
