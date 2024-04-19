@@ -5,10 +5,9 @@ import requests
 import yaml
 
 from typing import List, Optional
-from .constants import WAZUH_CONF, WAZUH_ROOT
+from .constants import WAZUH_CONF, WAZUH_ROOT, WAZUH_WINDOWS_CONF
 from .executor import Executor, WazuhAPI
-from .generic import HostInformation, CheckFiles
-from .logger.logger import logger
+from .generic import HostInformation, CheckFiles, logger
 
 class WazuhAgent:
 
@@ -17,7 +16,7 @@ class WazuhAgent:
 
         if live == True:
             s3_url = 'packages'
-            release = wazuh_version[0:3]
+            release = wazuh_version[:1] + ".x"
         else:
             s3_url = 'packages-dev'
             release = 'pre-release'
@@ -55,14 +54,13 @@ class WazuhAgent:
         elif 'windows' in os_type :
             commands.extend([
                 f"Invoke-WebRequest -Uri https://packages.wazuh.com/{release}/windows/wazuh-agent-{wazuh_version}-1.msi"
-                "-OutFile ${env.tmp}\wazuh-agent;"
-                "msiexec.exe /i ${env.tmp}\wazuh-agent /q"
+                "-OutFile $env:TEMP\wazuh-agent.msi;"
+                "msiexec.exe /i $env:TEMP\wazuh-agent.msi /q"
                 f"WAZUH_MANAGER='MANAGER_IP'"
                 f"WAZUH_AGENT_NAME='{agent_name}'"
-                f"WAZUH_REGISTRATION_SERVER='MANAGER_IP'",
-                "NET START WazuhSvc",
-                "NET STATUS WazuhSvc"
-                ])
+                f"WAZUH_REGISTRATION_SERVER='MANAGER_IP'"
+            ])
+            commands.extend(["NET START WazuhSvc"])
         elif 'macos' in os_type:
             if 'intel' in architecture:
                 commands.extend([
@@ -97,13 +95,29 @@ class WazuhAgent:
 
         internal_ip = HostInformation.get_internal_ip_from_aws_dns(host) if 'amazonaws' in host else host
 
-        commands = [
-            f"sed -i 's/<address>MANAGER_IP<\/address>/<address>{internal_ip}<\/address>/g' {WAZUH_CONF}",
-            "systemctl restart wazuh-agent"
-        ]
+        os_type = HostInformation.get_os_type(inventory_path)
 
-        Executor.execute_commands(inventory_path, commands)
-        assert internal_ip in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the Manager IP ({internal_ip})in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+        if 'linux' in os_type:
+            commands = [
+                f"sed -i 's/<address>MANAGER_IP<\/address>/<address>{internal_ip}<\/address>/g' {WAZUH_CONF}",
+                "systemctl restart wazuh-agent"
+            ]
+
+            Executor.execute_commands(inventory_path, commands)
+
+            assert internal_ip in Executor.execute_commands(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the Manager
+            IP ({internal_ip})in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+        elif 'windows' in os_type :
+            commands = [
+                f'(Get-Content -Path "{WAZUH_WINDOWS_CONF}" -Raw) -replace "<address>MANAGER_IP</address>", "<address>{internal_ip}</address>" | Set-Content -Path "{WAZUH_WINDOWS_CONF}"'
+            ]
+            commands.extend(["NET STOP WazuhSvc"])
+            commands.extend(["NET START WazuhSvc"])
+
+            Executor.execute_commands(inventory_path, commands)
+
+            assert internal_ip in Executor.execute_windows_command(inventory_path, f'Get-Content "{WAZUH_WINDOWS_CONF}"'), logger.error(f'Error configuring the Manager
+            IP ({internal_ip})in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
 
     @staticmethod
@@ -139,7 +153,7 @@ class WazuhAgent:
             commands.extend(system_commands)
         elif 'windows' in os_type:
             commands.extend([
-                f"msiexec.exe /x wazuh-agent-{wazuh_version}-1.msi /qn"
+                f"msiexec.exe /x $env:TEMP\wazuh-agent.msi /qn"
             ])
         elif 'macos' in os_type:
             commands.extend([
@@ -177,7 +191,7 @@ class WazuhAgent:
     def perform_action_and_scan(agent_params, action_callback) -> dict:
         """
         Takes scans using filters, the callback action and compares the result
-        
+
         Args:
             agent_params (str): agent parameters
             callbak (cb): callback (action)
@@ -239,7 +253,7 @@ class WazuhAgent:
     def perform_install_and_scan_for_agent(agent_params, agent_name, wazuh_params) -> None:
         """
         Coordinates the action of install the agent and compares the checkfiles
-        
+
         Args:
             agent_params (str): agent parameters
             wazuh_params (str): wazuh parameters
@@ -255,7 +269,7 @@ class WazuhAgent:
     def perform_uninstall_and_scan_for_agent(agent_params, wazuh_params) -> None:
         """
         Coordinates the action of uninstall the agent and compares the checkfiles
-        
+
         Args:
             agent_params (str): agent parameters
             wazuh_params (str): wazuh parameters
@@ -271,7 +285,7 @@ class WazuhAgent:
     def assert_results(result) -> None:
         """
         Gets the status of an agent given its name.
-        
+
         Args:
             result (dict): result of comparison between pre and post action scan
 
@@ -303,11 +317,11 @@ class WazuhAgent:
     def get_agent_status(wazuh_api: WazuhAPI, agent_name) -> str:
         """
         Function to get the status of an agent given its name.
-        
+
         Args:
         - agents_data (list): List of dictionaries containing agents' data.
         - agent_name (str): Name of the agent whose status is to be obtained.
-        
+
         Returns:
         - str: Status of the agent if found in the data, otherwise returns None.
         """

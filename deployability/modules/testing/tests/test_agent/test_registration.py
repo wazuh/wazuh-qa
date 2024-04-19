@@ -69,7 +69,8 @@ def test_registration(wazuh_params):
 
 def test_status(wazuh_params):
     for agent in wazuh_params['agents'].values():
-        assert 'active' in GeneralComponentActions.get_component_status(agent, 'wazuh-agent'), logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} is not active')
+        status = GeneralComponentActions.get_component_status(agent, 'wazuh-agent')
+        assert 'active' in status or 'connected' in status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} is not active')
 
 
 def test_connection(wazuh_params):

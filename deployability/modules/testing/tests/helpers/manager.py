@@ -236,7 +236,7 @@ class WazuhManager:
             str: Cluster status
         """
 
-        return Executor.execute_command(inventory_path, f'{CLUSTER_CONTROL} -l')
+        return Executor.execute_commands(inventory_path, f'{CLUSTER_CONTROL} -l')
 
 
     @staticmethod
@@ -251,7 +251,7 @@ class WazuhManager:
             str: Agents status
         """
 
-        return Executor.execute_command(inventory_path, f'{AGENT_CONTROL} -l')
+        return Executor.execute_commands(inventory_path, f'{AGENT_CONTROL} -l')
 
 
     @staticmethod
@@ -279,7 +279,7 @@ class WazuhManager:
         ]
 
         Executor.execute_commands(inventory_path, commands)
-        if node_name in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'):
+        if node_name in Executor.execute_commands(inventory_path, f'cat {WAZUH_CONF}'):
             logger.info(f'Cluster configured in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         else:
             logger.error(f'Error configuring cluster information in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')

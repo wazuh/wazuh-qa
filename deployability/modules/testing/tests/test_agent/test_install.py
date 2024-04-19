@@ -6,7 +6,7 @@ import pytest
 import re
 
 from ..helpers.agent import WazuhAgent
-from ..helpers.constants import WAZUH_ROOT
+from ..helpers.constants import WAZUH_ROOT, WINDOWS_CONFIGURATIONS_DIR
 from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
 from modules.generic.logger import logger
 from ..helpers.manager import WazuhManager
@@ -86,13 +86,19 @@ def test_installation(wazuh_params):
 
     # Testing installation directory
     for agent in wazuh_params['agents'].values():
-        assert HostInformation.dir_exists(agent, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(agent)}')
+        os_type = HostInformation.get_os_type(agent)
+        if os_type == 'linux':
+            path_to_check = WAZUH_ROOT
+        elif os_type == 'windows':
+            path_to_check = WINDOWS_CONFIGURATIONS_DIR
+
+        assert HostInformation.dir_exists(agent, path_to_check), logger.error(f'The {path_to_check} is not present in {HostInformation.get_os_name_and_version_from_inventory(agent)}')
 
 
 def test_status(wazuh_params):
     for agent in wazuh_params['agents'].values():
         agent_status = GeneralComponentActions.get_component_status(agent, 'wazuh-agent')
-        assert 'loaded' in agent_status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} status is not loaded')
+        assert 'loaded' in agent_status or 'Stopped' in agent_status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} status is not loaded')
 
 
 def test_version(wazuh_params):
