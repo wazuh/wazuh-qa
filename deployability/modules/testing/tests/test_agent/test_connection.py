@@ -5,11 +5,10 @@
 import pytest
 import re
 
-from ..helpers.agent import WazuhAgent
-from ..helpers.constants import WAZUH_ROOT
-from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
+from ..helpers.agent import WazuhAgent, WazuhAPI
+from ..helpers.generic import HostInformation, GeneralComponentActions, Waits
+from ..helpers.manager import WazuhManager, WazuhAPI
 from modules.testing.utils import logger
-from ..helpers.manager import WazuhManager
 from ..helpers.utils import Utils
 
 
@@ -63,33 +62,39 @@ def setup_test_environment(wazuh_params):
         if updated_agents != {}:
             wazuh_params['agents'] = updated_agents
 
-def test_installation(wazuh_params):
-    # Checking connection
-    for manager_name, manager_params in wazuh_params['managers'].items():
-        Utils.check_inventory_connection(manager_params)
 
-    # Certs creation, firewall management and Manager installation
-    for agent_name, agent_params in wazuh_params['agents'].items():
-        HostConfiguration.disable_firewall(agent_params)
-
-    if HostInformation.dir_exists(wazuh_params['master'], WAZUH_ROOT):
-        logger.info(f'Manager is already installed in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])}')
-    else:
-        HostConfiguration.disable_firewall(manager_params)
-        HostConfiguration.certs_create(wazuh_params['wazuh_version'], wazuh_params['master'], wazuh_params['dashboard'], wazuh_params['indexers'], wazuh_params['workers'])
-        WazuhManager.install_manager(wazuh_params['master'], 'wazuh-1', wazuh_params['wazuh_version'])
-    assert HostInformation.dir_exists(wazuh_params['master'], WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])}')
-
-    # Agent installation
+def test_connection(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
-        WazuhAgent.perform_install_and_scan_for_agent(agent_params, agent_names, wazuh_params)
-
-    # Testing installation directory
-    for agent in wazuh_params['agents'].values():
-        assert HostInformation.dir_exists(agent, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(agent)}')
+        WazuhAgent.set_protocol_agent_connection(agent_params, 'tcp')
+        assert agent_names in WazuhManager.get_agent_control_info(wazuh_params['master']), f'The {agent_names} is not present in the master by command'
+    wazuh_api = WazuhAPI(wazuh_params['master'])
+    assert any(d.get('name') == agent_names for d in WazuhAgent.get_agents_information(wazuh_api)), logger.error(f'The {agent_names} is not present in the master by API')
 
 
 def test_status(wazuh_params):
     for agent in wazuh_params['agents'].values():
-        agent_status = GeneralComponentActions.get_component_status(agent, 'wazuh-agent')
-        assert 'loaded' in agent_status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} status is not loaded')
+        assert 'active' in GeneralComponentActions.get_component_status(agent, 'wazuh-agent'), logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} is not active')
+
+
+def test_service(wazuh_params):
+    wazuh_api = WazuhAPI(wazuh_params['master'])
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by API')
+
+        expected_condition_func = lambda: 'active' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
+        Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
+
+
+def test_clientKeys(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert GeneralComponentActions.hasAgentClientKeys(agent_params), logger.error(f'{agent_names} has not ClientKeys file')
+
+
+def test_port(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert WazuhAgent.isAgent_port_open(agent_params), logger.error('Port is closed')
+
+
+def test_processes(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert WazuhAgent.areAgent_processes_active(agent_params), logger.error('Agent processes are not active')

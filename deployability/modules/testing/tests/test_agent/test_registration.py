@@ -62,12 +62,11 @@ def setup_test_environment(wazuh_params):
         if updated_agents != {}:
             wazuh_params['agents'] = updated_agents
 
-def test_registration(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
-        WazuhAgent.register_agent(agent_params, wazuh_params['master'])
 
 
 def test_status(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        WazuhAgent.register_agent(agent_params, wazuh_params['master'])
     for agent in wazuh_params['agents'].values():
         assert 'active' in GeneralComponentActions.get_component_status(agent, 'wazuh-agent'), logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} is not active')
 
@@ -79,7 +78,7 @@ def test_connection(wazuh_params):
     assert any(d.get('name') == agent_names for d in WazuhAgent.get_agents_information(wazuh_api)), logger.error(f'The {agent_names} is not present in the master by API')
 
 
-def test_isActive(wazuh_params):
+def test_service(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['master'])
     for agent_names, agent_params in wazuh_params['agents'].items():
         assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by API')

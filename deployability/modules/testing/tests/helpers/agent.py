@@ -103,7 +103,18 @@ class WazuhAgent:
         ]
 
         Executor.execute_commands(inventory_path, commands)
-        assert internal_ip in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the Manager IP ({internal_ip})in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+        assert internal_ip in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the Manager IP ({internal_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+
+
+    @staticmethod
+    def set_protocol_agent_connection(inventory_path, protocol):
+        commands = [
+            f"sed -i 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' {WAZUH_CONF}",
+            "systemctl restart wazuh-agent"
+        ]
+
+        Executor.execute_commands(inventory_path, commands)
+        assert protocol in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
 
     @staticmethod
@@ -283,6 +294,29 @@ class WazuhAgent:
             for action in actions:
                 assert result[category][action] == [], logger.error(f'{result[category][action]} was found in: {category}{action}')
 
+    def areAgent_processes_active(agent_params):
+        """
+        Check if agent processes are active
+
+        Args:
+            agent_name (str): Agent name.
+
+        Returns:
+            str: Os name.
+        """
+        return bool([int(numero) for numero in Executor.execute_command(agent_params, 'pgrep wazuh').splitlines()])
+
+    def isAgent_port_open(agent_params):
+        """
+        Check if agent port is open
+
+        Args:
+            agent_name (str): Agent name.
+
+        Returns:
+            str: Os name.
+        """
+        return 'ESTAB' in Executor.execute_command(agent_params, 'ss -t -a -n | grep ":1514" | grep ESTAB')
 
     def get_agents_information(wazuh_api: WazuhAPI) -> list:
         """
@@ -357,6 +391,47 @@ class WazuhAgent:
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             return [None, None, None]
+
+
+    def get_agent_os_version_by_name(wazuh_api: WazuhAPI, agent_name):
+        """
+        Get Agent os version by Agent name
+
+        Args:
+            agent_name (str): Agent name.
+
+        Returns:
+            str: Os version.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/agents", headers=wazuh_api.headers, verify=False)
+        try:
+            for agent_data in eval(response.text)['data']['affected_items']:
+                if agent_data.get('name') == agent_name:
+                    return agent_data.get('os', {}).get('version')
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return f"Unexpected error: {e}"
+
+
+    def get_agent_os_name_by_name(wazuh_api: WazuhAPI, agent_name):
+        """
+        Get Agent os name by Agent name
+
+        Args:
+            agent_name (str): Agent name.
+
+        Returns:
+            str: Os name.
+        """
+        response = requests.get(f"{wazuh_api.api_url}/agents", headers=wazuh_api.headers, verify=False)
+        try:
+            for agent_data in eval(response.text)['data']['affected_items']:
+                if agent_data.get('name') == agent_name:
+                    return 'suse' if agent_data.get('os', {}).get('name', '').lower() == 'sles' else agent_data.get('os', {}).get('name', '').lower()
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+            return f"Unexpected error: {e}"
+        return None
 
 
 def add_agent_to_manager(wazuh_api: WazuhAPI, name, ip) -> str:

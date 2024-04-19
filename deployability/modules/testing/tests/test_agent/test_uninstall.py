@@ -82,10 +82,20 @@ def test_agent_uninstalled_directory(wazuh_params):
         assert not HostInformation.dir_exists(agent_params, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is still present in the agent {agent_names}')
 
 
-def test_isActive(wazuh_params):
+def test_service(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['master'])
     for agent_names, agent_params in wazuh_params['agents'].items():
         assert not GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not inactive by command')
 
         expected_condition_func = lambda: 'disconnected' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
+
+
+def test_port(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert not WazuhAgent.isAgent_port_open(agent_params), logger.error('Port is still opened')
+
+
+def test_processes(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert not WazuhAgent.areAgent_processes_active(agent_params), logger.error('Agent processes are still active')
