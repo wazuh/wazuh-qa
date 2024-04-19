@@ -6,10 +6,11 @@ import pytest
 import re
 
 from ..helpers.agent import WazuhAgent, WazuhAPI
-from ..helpers.generic import GeneralComponentActions, HostInformation
+from ..helpers.generic import HostInformation, GeneralComponentActions, Waits
+from ..helpers.manager import WazuhManager, WazuhAPI
 from modules.testing.utils import logger
-from ..helpers.manager import WazuhManager
 from ..helpers.utils import Utils
+
 
 @pytest.fixture(scope="module", autouse=True)
 def wazuh_params(request):
@@ -46,7 +47,6 @@ def setup_test_environment(wazuh_params):
     # If there are no indexers, we choose wazuh-1 by default
     if not wazuh_params['indexers']:
         wazuh_params['indexers'].append(wazuh_params['master'])
-
     wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
     wazuh_params['agents'] = {key + '-' + re.findall(r'agent-(.*?)/', value)[0].replace('.',''): value for key, value in targets_dict.items() if key.startswith('agent')}
 
@@ -62,24 +62,27 @@ def setup_test_environment(wazuh_params):
         if updated_agents != {}:
             wazuh_params['agents'] = updated_agents
 
-def test_restart(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
-        GeneralComponentActions.component_restart(agent_params, 'wazuh-agent')
-
-
-def test_status(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
-        assert 'active' in GeneralComponentActions.get_component_status(agent_params, 'wazuh-agent') or 'is running' in GeneralComponentActions.get_component_status(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by command')
-
 
 def test_connection(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert agent_names in WazuhManager.get_agent_control_info(wazuh_params['master']), logger.error(f'{agent_names} is not present in agent_control information')
+        WazuhAgent.set_protocol_agent_connection(agent_params, 'tcp')
+        assert agent_names in WazuhManager.get_agent_control_info(wazuh_params['master']), f'The {agent_names} is not present in the master by command'
+    wazuh_api = WazuhAPI(wazuh_params['master'])
+    assert any(d.get('name') == agent_names for d in WazuhAgent.get_agents_information(wazuh_api)), logger.error(f'The {agent_names} is not present in the master by API')
 
 
-def test_isActive(wazuh_params):
+def test_status(wazuh_params):
+    for agent in wazuh_params['agents'].values():
+        assert 'active' in GeneralComponentActions.get_component_status(agent, 'wazuh-agent'), logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} is not active')
+
+
+def test_service(wazuh_params):
+    wazuh_api = WazuhAPI(wazuh_params['master'])
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by command')
+        assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by API')
+
+        expected_condition_func = lambda: 'active' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
+        Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
 
 
 def test_clientKeys(wazuh_params):

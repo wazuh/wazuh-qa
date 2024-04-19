@@ -175,6 +175,16 @@ class HostInformation:
             return None
 
     @staticmethod
+    def get_os_version_from_inventory(inventory_path) -> str:
+        if 'manager' in inventory_path:
+            os_version = re.search(r".*?/manager-linux-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
+        elif 'agent' in inventory_path:
+            os_version = re.search(r".*?/agent-linux-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
+            return os_version
+        else:
+            return None
+
+    @staticmethod
     def get_current_dir(inventory_path) -> str:
         """
         It returns the current directory
