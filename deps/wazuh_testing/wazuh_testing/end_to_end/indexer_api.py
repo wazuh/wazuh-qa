@@ -40,17 +40,13 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
     logging.info(f"Getting values from the Indexer API for index {index}")
 
     url = f"https://{host_manager.get_master_ip()}:9200/{index}/_search"
-    headers = {
-        'Content-Type': 'application/json',
-    }
 
     data = {}
+    param = {'size': size}
+    headers = {'Content-Type': 'application/json'}
+
     if filter:
         data['query'] = filter
-
-    param = {
-        'size': size,
-    }
 
     response = requests.get(url=url, params=param, verify=False,
                             auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']),
