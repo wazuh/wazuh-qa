@@ -6,7 +6,7 @@ import pytest
 import re
 
 from ..helpers.generic import GeneralComponentActions, HostInformation
-from modules.generic.logger import logger
+from modules.testing.utils import logger
 from ..helpers.manager import WazuhManager
 from ..helpers.utils import Utils
 

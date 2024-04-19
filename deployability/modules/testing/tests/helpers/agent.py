@@ -8,7 +8,7 @@ from typing import List, Optional
 from .constants import WAZUH_CONF, WAZUH_ROOT
 from .executor import Executor, WazuhAPI
 from .generic import HostInformation, CheckFiles
-from modules.generic.logger import logger
+from modules.testing.utils import logger
 
 class WazuhAgent:
 
@@ -29,19 +29,19 @@ class WazuhAgent:
             distribution = HostInformation.get_linux_distribution(inventory_path)
             architecture = HostInformation.get_architecture(inventory_path)
 
-            if distribution == 'rpm' and 'x86_64' in architecture:
+            if distribution == 'rpm' and 'amd64' in architecture:
                 commands.extend([
                     f"curl -o wazuh-agent-{wazuh_version}-1.x86_64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.x86_64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.x86_64.rpm"
                 ])
-            elif distribution == 'rpm' and 'aarch64' in architecture:
+            elif distribution == 'rpm' and 'arm64' in architecture:
                 commands.extend([
                     f"curl -o wazuh-agent-{wazuh_version}-1aarch64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.aarch64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.aarch64.rpm"
                 ])
-            elif distribution == 'deb' and 'x86_64' in architecture:
+            elif distribution == 'deb' and 'amd64' in architecture:
                 commands.extend([
                     f"wget https://{s3_url}.wazuh.com/{release}/apt/pool/main/w/wazuh-agent/wazuh-agent_{wazuh_version}-1_amd64.deb && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' dpkg -i ./wazuh-agent_{wazuh_version}-1_amd64.deb"
                 ])
-            elif distribution == 'deb' and 'aarch64' in architecture:
+            elif distribution == 'deb' and 'arm64' in architecture:
                 commands.extend([
                     f"wget https://{s3_url}.wazuh.com/{release}/apt/pool/main/w/wazuh-agent/wazuh-agent_{wazuh_version}-1_arm64.deb && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' dpkg -i ./wazuh-agent_{wazuh_version}-1arm64.deb"
                 ])

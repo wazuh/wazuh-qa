@@ -14,7 +14,7 @@ import yaml
 from pathlib import Path
 from .constants import WAZUH_CONTROL, CLIENT_KEYS
 from .executor import Executor
-from modules.generic.logger import logger
+from modules.testing.utils import logger
 from .utils import Utils
 
 
@@ -69,16 +69,19 @@ class HostInformation:
         Returns:
             str: type of host (windows, linux, macos)
         """
-        if 'manager' in inventory_path:
-            pattern = r'manager-(\w+)-'
-        elif 'agent' in inventory_path:
-            pattern = r'agent-(\w+)-'
-        result = re.search(pattern, inventory_path)
-        if result:
-            return result.group(1)
-        else:
-            return None
-
+        try:
+            with open(inventory_path.replace('inventory', 'track'), 'r') as file:
+                data = yaml.safe_load(file)
+            if 'platform' in data:
+                return data['platform']
+            else:
+                raise KeyError("The 'platform' key was not found in the YAML file.")
+        except FileNotFoundError:
+            logger.error(f"The YAML file '{inventory_path}' was not found.")
+        except yaml.YAMLError as e:
+            logger.error(f"Error while loading the YAML file: {e}")
+        except Exception as e:
+            logger.error(f"An unexpected error occurred: {e}")
 
 
     @staticmethod
@@ -90,9 +93,21 @@ class HostInformation:
             inventory_path: host's inventory path
 
         Returns:
-            str: architecture (aarch64, x86_64, intel, apple)
+            str: architecture (amd64, arm64, intel, apple)
         """
-        return Executor.execute_command(inventory_path, 'uname -m')
+        try:
+            with open(inventory_path.replace('inventory', 'track'), 'r') as file:
+                data = yaml.safe_load(file)
+            if 'platform' in data:
+                return data['arch']
+            else:
+                raise KeyError("The 'platform' key was not found in the YAML file.")
+        except FileNotFoundError:
+            logger.error(f"The YAML file '{inventory_path}' was not found.")
+        except yaml.YAMLError as e:
+            logger.error(f"Error while loading the YAML file: {e}")
+        except Exception as e:
+            logger.error(f"An unexpected error occurred: {e}")
 
 
     @staticmethod
@@ -692,7 +707,7 @@ class GeneralComponentActions:
         """
         os_type = HostInformation.get_os_type(inventory_path)
         if os_type == 'linux':
-            return HostInformation.file_exists(inventory_path,{CLIENT_KEYS})
+            return HostInformation.file_exists(inventory_path, {CLIENT_KEYS})
         elif os_type == 'macos':
             return HostInformation.file_exists(inventory_path, '/Library/Ossec/etc/client.keys')
 

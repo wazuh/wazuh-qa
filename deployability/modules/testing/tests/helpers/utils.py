@@ -8,7 +8,7 @@ import yaml
 import logging
 import time
 
-from modules.generic.logger import logger
+from modules.testing.utils import logger
 
 
 paramiko_logger = logging.getLogger("paramiko")
