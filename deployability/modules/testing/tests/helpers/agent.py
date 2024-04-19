@@ -65,7 +65,7 @@ class WazuhAgent:
                 "NET STATUS WazuhSvc"
                 ])
         elif 'macos' in os_type:
-            if 'x86_64' in architecture:
+            if 'amd64' in architecture:
                 commands.extend([
                     f'curl -so wazuh-agent.pkg https://{s3_url}.wazuh.com/{release}/macos/wazuh-agent-{wazuh_version}-1.intel64.pkg && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
                 ])
@@ -116,6 +116,25 @@ class WazuhAgent:
             Executor.execute_commands(inventory_path, commands)
             assert host_ip in Executor.execute_command(inventory_path, f'cat /Library/Ossec/etc/ossec.conf'), logger.error(f'Error configuring the Manager IP ({host_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
+
+    @staticmethod
+    def set_protocol_agent_connection(inventory_path, protocol):
+        os_type = HostInformation.get_os_type(inventory_path)
+        if 'linux' in os_type:
+            commands = [
+                f"sed -i 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' {WAZUH_CONF}",
+                "systemctl restart wazuh-agent"
+            ]
+            Executor.execute_commands(inventory_path, commands)
+            assert protocol in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+        elif 'macos' in os_type:
+            commands = [
+                f"sed -i '' 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' /Library/Ossec/etc/ossec.conf",
+                "/Library/Ossec/bin/wazuh-control restart"
+            ]
+            Executor.execute_commands(inventory_path, commands)
+            assert protocol in Executor.execute_command(inventory_path, f'cat /Library/Ossec/etc/ossec.conf'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+       
 
     @staticmethod
     def uninstall_agent(inventory_path, wazuh_version=None, wazuh_revision=None) -> None:
@@ -328,7 +347,11 @@ class WazuhAgent:
         Returns:
             str: Os name.
         """
-        return 'ESTAB' in Executor.execute_command(agent_params, 'ss -t -a -n | grep ":1514" | grep ESTAB')
+        os_name = HostInformation.get_os_name_from_inventory(agent_params)
+        if os_name == 'linux':
+            return 'ESTAB' in Executor.execute_command(agent_params, 'ss -t -a -n | grep ":1514" | grep ESTAB')
+        elif os_name == 'macos':
+            return 'ESTABLISHED' in Executor.execute_command(agent_params, 'netstat -an | grep ".1514 " | grep ESTABLISHED')
 
     def get_agents_information(wazuh_api: WazuhAPI) -> list:
         """
