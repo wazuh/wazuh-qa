@@ -82,6 +82,12 @@ class StatisticMonitor:
             self.daemon = 'wazuh-db'
             self.use_state_file = False
             logger.warning("Wazuhdb stat monitoring from State File is not supported. Will get data from API.")
+        elif self.target == "vulnerabilities":
+            self.use_state_file = False
+            logger.warning("Vulnerabilities index monitoring from State File is not supported. Will get data from API.")
+        elif self.target == "alerts":
+            self.use_state_file = False
+            logger.warning("Alerts monitoring from State File is not supported. Will get data from API.")
         else:
             raise ValueError(f'The target {self.target} is not a valid one.')
 
@@ -149,6 +155,8 @@ class StatisticMonitor:
 
         API_URL = f"https://{self.ip}:{self.port}"
         DAEMONS_ENDPOINT= f"/manager/daemons/stats?daemons_list={self.daemon}&wait_for_complete=true"
+        VULNS_ENDOPOINT= f"/wazuh-states-vulnerabilities/_count"
+        ALERTS_ENDPOINT= f"/wazuh-alerts-4.x-*/_count"
         TOKEN_ENDPOINT="/security/user/authenticate"
 
         logging.info("Getting statistics data from API for {}".format(self.target))
@@ -156,30 +164,59 @@ class StatisticMonitor:
         max_retries = 3
         token_response = None
         daemon_response = None
-        # Try to get the response token three times
-        for _ in range(max_retries):
-            try:
-                token_response = requests.get(API_URL + TOKEN_ENDPOINT, verify=False,
-                                              auth=requests.auth.HTTPBasicAuth("wazuh", "wazuh"))
-                if token_response.status_code == 200:
-                    break
-            except requests.exceptions.RequestException as e:
-                logging.error(f"Error getting token from API: {str(e)}")
-        else:
-            logging.error("Retrying get API data, status code {}".format(token_response.status_code))
+        data = None        
 
-        for _ in range(max_retries):
-            try:
-                daemons_response = requests.get(API_URL + DAEMONS_ENDPOINT, verify=False,
-                                                headers={'Authorization': 'Bearer ' + token_response.json()['data']['token']})
-                if daemons_response.status_code == 200:
-                    break
-            except requests.exceptions.RequestException as e:
-                logging.error(f"Error fetching {self.daemon} datafrom API: {str(e)}")
-        else:
-             logging.error("Failed to fetch daemons data after 3 attempts")
+        if(self.target == "vulnerabilities"):
+            for _ in range(max_retries):
+                try:
+                    response = requests.get(API_URL + VULNS_ENDOPOINT, verify=False,
+                                                    auth=requests.auth.HTTPBasicAuth("admin", "admin"))
+                    if response.status_code == 200:
+                        data = response.json()['count']
+                        break
+                except requests.exceptions.RequestException as e:
+                    logging.error(f"Error fetching {self.target} datafrom API: {str(e)}")
+            else:
+                logging.error("Failed to fetch vulnerabilities data after 3 attempts")
 
-        data = daemons_response.json()['data']['affected_items'][0]
+        elif(self.target == "alerts"):
+            for _ in range(max_retries):
+                try:
+                    response = requests.get(API_URL + ALERTS_ENDPOINT, verify=False,
+                                                    auth=requests.auth.HTTPBasicAuth("admin", "admin"))
+                    if response.status_code == 200:
+                        data = response.json()['count']
+                        break
+                except requests.exceptions.RequestException as e:
+                    logging.error(f"Error fetching {self.target} datafrom API: {str(e)}")
+            else:
+                logging.error("Failed to fetch alerts data after 3 attempts")
+
+        else:
+            # Try to get the response token three times
+            for _ in range(max_retries):
+                try:
+                    token_response = requests.get(API_URL + TOKEN_ENDPOINT, verify=False,
+                                                auth=requests.auth.HTTPBasicAuth("wazuh", "wazuh"))
+                    if token_response.status_code == 200:
+                        break
+                except requests.exceptions.RequestException as e:
+                    logging.error(f"Error getting token from API: {str(e)}")
+            else:
+                logging.error("Retrying get API data, status code {}".format(token_response.status_code))
+
+            for _ in range(max_retries):
+                try:
+                    response = requests.get(API_URL + DAEMONS_ENDPOINT, verify=False,
+                                                    headers={'Authorization': 'Bearer ' + token_response.json()['data']['token']})
+                    if response.status_code == 200:
+                        data = response.json()['data']['affected_items'][0]
+                        break
+                except requests.exceptions.RequestException as e:
+                    logging.error(f"Error fetching {self.daemon} datafrom API: {str(e)}")
+            else:
+                logging.error("Failed to fetch daemons data after 3 attempts")
+
         self._write_csv(data, self.target, self.csv_file)
 
 
@@ -199,6 +236,10 @@ class StatisticMonitor:
             csv_header = headers.remoted_header if self.use_state_file else headers.remoted_api_header
         elif target == "wazuhdb":
             csv_header = headers.wazuhdb_header
+        elif target == "vulnerabilities":
+            csv_header = headers.vulns_header
+        elif target == "alerts":
+            csv_header = headers.alerts_header
         else:
             csv_header = headers.agentd_header
 
@@ -212,10 +253,11 @@ class StatisticMonitor:
             timestamp = datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S')
             
             if self.use_state_file == False:
-                format = r"%Y-%m-%dT%H:%M:%S+%f:00"
-                datetime_timestamp = datetime.strptime(data['timestamp'], format)
-                datetime_uptime = datetime.strptime(data['uptime'], format)
-                interval =  (datetime_timestamp - datetime_uptime).total_seconds()
+                if target not in ["vulnerabilities", "alerts"]:
+                    format = r"%Y-%m-%dT%H:%M:%S+%f:00"
+                    datetime_timestamp = datetime.strptime(data['timestamp'], format)
+                    datetime_uptime = datetime.strptime(data['uptime'], format)
+                    interval =  (datetime_timestamp - datetime_uptime).total_seconds()
 
                 if target == "analysis":                   
                     metrics = data['metrics']
@@ -297,6 +339,16 @@ class StatisticMonitor:
                         decoded['dbsync'] / interval,                                           # 61
                         decoded['monitor'] / interval,                                          # 62
                         decoded['remote'] / interval,                                           # 63
+                    ))
+                elif target == "vulnerabilities":
+                    logger.info("Writing vulnerabilities data from API info to {}.".format(csv_file))
+                    log.write(("{0}\n").format(
+                        data
+                    ))
+                elif target == "alerts":
+                    logger.info("Writing alerts data from API info to {}.".format(csv_file))
+                    log.write(("{0}\n").format(
+                        data
                     ))
                 elif target == "remote":
                     metrics = data['metrics']
