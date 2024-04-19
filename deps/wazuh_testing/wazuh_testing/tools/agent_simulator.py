@@ -115,10 +115,10 @@ class Agent:
         registration_address (str): Manager registration IP address.
     """
     def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None, id=None, name=None, key=None,
-                 version="v4.3.0", fim_eps=100, fim_integrity_eps=100, sca_eps=100, syscollector_eps=100, labels=None,
+                 version="v4.3.0", fim_eps=100, fim_integrity_eps=100, sca_eps=100, syscollector_eps=100, vulnerability_eps=100, labels=None,
                  rootcheck_eps=100, logcollector_eps=100, authd_password=None, disable_all_modules=False,
                  rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
-                 syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100,
+                 syscollector_frequency=60.0, vulnerability_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100,
                  fixed_message_size=None, registration_address=None, retry_enrollment=False,
                  logcollector_msg_number=None, custom_logcollector_message='',
                  syscollector_event_types=['network', 'port', 'hotfix', 'process', 'packages', 'osinfo', 'hwinfo'],
@@ -144,9 +144,11 @@ class Agent:
         self.syscollector_legacy_messages = syscollector_legacy_messages
         self.syscollector_packages_vuln_content = syscollector_packages_vuln_content
 
+        self.vulnerability_eps = vulnerability_eps
         self.vulnerability_legacy_messages = vulnerability_legacy_messages
         self.vulnerability_batch_size = vulnerability_batch_size
         self.vulnerability_packages_vuln_content = vulnerability_packages_vuln_content
+        self.vulnerability_frequency = vulnerability_frequency
 
         self.rootcheck_eps = rootcheck_eps
         self.logcollector_eps = logcollector_eps
@@ -180,8 +182,8 @@ class Agent:
             'keepalive': {'status': 'enabled', 'frequency': self.keepalive_frequency},
             'fim': {'status': 'enabled', 'eps': self.fim_eps},
             'fim_integrity': {'status': 'disabled', 'eps': self.fim_integrity_eps},
-            'syscollector': {'status': 'disabled', 'frequency': self.syscollector_frequency,
-                             'eps': self.syscollector_eps},
+            'syscollector': {'status': 'disabled', 'frequency': self.syscollector_frequency, 'eps': self.syscollector_eps},
+            'vulnerability': {'status': 'disabled', 'frequency': self.vulnerability_frequency, 'eps': self.vulnerability_eps},
             'rootcheck': {'status': 'disabled', 'frequency': self.rootcheck_frequency, 'eps': self.rootcheck_eps},
             'sca': {'status': 'disabled', 'frequency': self.sca_frequency, 'eps': self.sca_eps},
             'hostinfo': {'status': 'disabled', 'eps': self.hostinfo_eps},
@@ -654,6 +656,8 @@ class Agent:
             self.init_sca()
         if self.modules['logcollector']['status'] == 'enabled':
             self.init_logcollector()
+        if self.modules['vulnerability']['status'] == 'enabled':
+            self.init_vulnerability()
 
     def init_logcollector(self):
         """Initialize logcollector module."""
@@ -1014,6 +1018,7 @@ class GeneratorVulnerabilityEvents:
         self.syscollector_tag = 'syscollector'
         self.syscollector_mq = 'd'
 
+        self.current_event = None
 
         self.agent_name = agent_name
         self.old_format = old_format
@@ -1026,7 +1031,6 @@ class GeneratorVulnerabilityEvents:
             self.packages = self.init_package_list(self.custom_packages_vuln_content)
         else:
             self.packages = self.init_package_list(self.default_packages_vuln_content)
-
 
     def parse_package_template(self, message, package_data):
         """Parse package template with package data.
@@ -1090,6 +1094,8 @@ class GeneratorVulnerabilityEvents:
                 package['source'] = ''
             if 'item_id' not in package:
                 package['item_id'] = get_random_string(10)
+        
+        return package_data
 
     def get_event_template_legacy(self, message_type):
         """Get syscollector legacy message of the specified type.
@@ -1172,24 +1178,22 @@ class GeneratorVulnerabilityEvents:
             str: generated event with the desired format for syscollector
         """
 
-        event = None
-
         if self.current_batch_events_size == 0:
             if self.current_id != 1:
-                event = 'packages'
+                self.current_event = 'packages'
                 self.current_batch_events_size = self.batch_size
             else:
-                event = 'osinfo'
+                self.current_event = 'osinfo'
                 self.current_batch_events_size = 1
 
         self.current_batch_events_size = self.current_batch_events_size - 1
 
         if self.old_format:
-            event_template = self.get_event_template_legacy(event)
+            event_template = self.get_event_template_legacy(self.current_event)
         else:
-            event_template = self.get_event_template(event)
+            event_template = self.get_event_template(self.current_event)
 
-        event_final = self.format_event_template(event_template, event)
+        event_final = self.format_event_template(event_template, self.current_event)
         logging.debug(f"Vulnerability Event - {event_final}")
 
         self.current_id += 1
