@@ -21,6 +21,28 @@ from wazuh_testing.tools.system import HostManager
 STATE_INDEX_NAME = 'wazuh-states-vulnerabilities'
 
 
+def create_vulnerability_states_indexer_filter(target_agent: str, greater_than_timestamp: str) -> dict:
+    return _create_filter(target_agent, greater_than_timestamp, 'vulnerability.detected_at')
+
+
+def create_alerts_filter(target_agent: str, greater_than_timestamp: str) -> dict:
+    return _create_filter(target_agent, greater_than_timestamp, '@timestamp')
+
+
+def _create_filter(target_agent: str, greater_than_timestamp: str, timestamp_field: str) -> dict:
+    filter = {
+        'bool': {
+            'must': []
+        }
+    }
+    if greater_than_timestamp:
+        filter['bool']['must'].append({'range': {timestamp_field: {'gte': greater_than_timestamp}}})
+    if target_agent:
+        filter['bool']['must'].append({'match': {'agent.name': target_agent}})
+
+    return filter
+
+
 def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'},
                        index: str = 'wazuh-alerts*', filter: dict | None = None, size: int = 10000) -> Dict:
     """
