@@ -7,7 +7,7 @@ import re
 
 from ..helpers.agent import WazuhAgent, WazuhAPI
 from ..helpers.generic import GeneralComponentActions, Waits, HostInformation
-from modules.generic.logger import logger
+from modules.testing.utils import logger
 from ..helpers.utils import Utils
 
 @pytest.fixture(scope="module", autouse=True)
@@ -65,7 +65,7 @@ def setup_test_environment(wazuh_params):
         if updated_agents != {}:
             wazuh_params['agents'] = updated_agents
 
-def test_stop(wazuh_params):
+def test_service(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['master'])
     for agent_names, agent_params in wazuh_params['agents'].items():
         GeneralComponentActions.component_stop(agent_params, 'wazuh-agent')
@@ -76,3 +76,13 @@ def test_stop(wazuh_params):
 
         expected_condition_func = lambda: 'disconnected' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
+
+
+def test_port(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert not WazuhAgent.isAgent_port_open(agent_params), logger.error('Port is still opened')
+
+
+def test_processes(wazuh_params):
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        assert not WazuhAgent.areAgent_processes_active(agent_params), logger.error('Agent processes are still active')

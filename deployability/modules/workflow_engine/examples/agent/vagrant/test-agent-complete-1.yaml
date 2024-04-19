@@ -104,7 +104,7 @@ tasks:
           - targets:
             - wazuh-1: "{working-dir}/manager-{manager-os}/inventory.yaml"
             - agent: "{working-dir}/agent-{agent}/inventory.yaml"
-          - tests: "install,registration,restart,stop,uninstall"
+          - tests: "install,registration,connection,basic_info,restart,stop,uninstall"
           - component: "agent"
           - wazuh-version: "4.7.3"
           - wazuh-revision: "40714"

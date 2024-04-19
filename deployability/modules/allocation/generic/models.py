@@ -31,6 +31,7 @@ class InventoryOutput(BaseModel):
     ansible_password: str | None = None
     ansible_connection: Literal['ssh', 'winrm'] | None = None
     ansible_winrm_server_cert_validation: Literal['ignore'] | None = None
+    ansible_ssh_common_args: Literal['-o StrictHostKeyChecking=no'] | None = None
 
 
 class TrackOutput(BaseModel):

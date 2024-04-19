@@ -14,8 +14,8 @@ import yaml
 from pathlib import Path
 from .constants import WAZUH_CONTROL, CLIENT_KEYS, WINDOWS_CLIENT_KEYS, WINDOWS_VERSION, WINDOWS_REVISION
 from .executor import Executor
-from modules.generic.logger import logger
 from .utils import Utils
+from modules.testing.utils import logger
 
 
 class HostInformation:
@@ -167,6 +167,16 @@ class HostInformation:
             os_name = match.group(1)
             version = match.group(2)
             return os_name+'-'+version
+        else:
+            return None
+
+    @staticmethod
+    def get_os_version_from_inventory(inventory_path) -> str:
+        if 'manager' in inventory_path:
+            os_version = re.search(r".*?/manager-linux-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
+        elif 'agent' in inventory_path:
+            os_version = re.search(r".*?/agent-linux-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
+            return os_version
         else:
             return None
 
