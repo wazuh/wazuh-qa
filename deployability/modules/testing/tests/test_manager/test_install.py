@@ -8,7 +8,7 @@ from ..helpers.constants import WAZUH_ROOT
 from ..helpers.executor import WazuhAPI
 from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
 from ..helpers.manager import WazuhManager
-from modules.generic.logger import logger
+from modules.testing.utils import logger
 from ..helpers.utils import Utils
 
 
