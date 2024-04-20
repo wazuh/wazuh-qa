@@ -6,7 +6,7 @@ import pytest
 import re
 
 from ..helpers.agent import WazuhAgent
-from ..helpers.constants import WAZUH_ROOT
+from ..helpers.constants import WAZUH_ROOT, WINDOWS_CONFIGURATIONS_DIR
 from ..helpers.generic import HostInformation, GeneralComponentActions, Waits
 from ..helpers.manager import WazuhManager, WazuhAPI
 from modules.testing.utils import logger
@@ -66,7 +66,14 @@ def setup_test_environment(wazuh_params):
 def test_uninstall(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
         assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not Active before the installation')
-        assert HostInformation.dir_exists(agent_params, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in the host {agent_names}')
+
+        os_type = HostInformation.get_os_type(agent_params)
+        if os_type == 'linux':
+            path_to_check = WAZUH_ROOT
+        elif os_type == 'windows':
+            path_to_check = WINDOWS_CONFIGURATIONS_DIR
+
+        assert HostInformation.dir_exists(agent_params, path_to_check), logger.error(f'The {path_to_check} is not present in the host {agent_names}')
 
     # Agent installation
     for agent_names, agent_params in wazuh_params['agents'].items():

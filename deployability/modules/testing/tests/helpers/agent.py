@@ -123,13 +123,23 @@ class WazuhAgent:
 
     @staticmethod
     def set_protocol_agent_connection(inventory_path, protocol):
-        commands = [
-            f"sed -i 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' {WAZUH_CONF}",
-            "systemctl restart wazuh-agent"
-        ]
+        os_type = HostInformation.get_os_type(inventory_path)
 
-        Executor.execute_commands(inventory_path, commands)
-        assert protocol in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+        if 'linux' in os_type:
+            commands = [
+                f"sed -i 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' {WAZUH_CONF}",
+                "systemctl restart wazuh-agent"
+            ]
+
+            Executor.execute_commands(inventory_path, commands)
+            assert protocol in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+        elif 'windows' in os_type :
+            commands = [
+                f"(Get-Content -Path '{WAZUH_WINDOWS_CONF}') -replace '<protocol>[^<]*<\/protocol>', '<protocol>{protocol}</protocol>' | Set-Content -Path '{WAZUH_WINDOWS_CONF}'"
+            ]
+
+            Executor.execute_commands(inventory_path, commands)
+            assert protocol in Executor.execute_command(inventory_path, f'Get-Content -Path "{WAZUH_WINDOWS_CONF}"'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
 
     @staticmethod
