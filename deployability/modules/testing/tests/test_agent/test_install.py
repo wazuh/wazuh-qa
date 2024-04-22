@@ -54,7 +54,6 @@ def setup_test_environment(wazuh_params):
     updated_agents = {}
     for agent_name, agent_params in wazuh_params['agents'].items():
         Utils.check_inventory_connection(agent_params)
-
         if GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent') and GeneralComponentActions.hasAgentClientKeys(agent_params):
             if HostInformation.get_client_keys(agent_params) != []:
                 client_name = HostInformation.get_client_keys(agent_params)[0]['name']
@@ -84,7 +83,6 @@ def test_installation(wazuh_params):
     # Agent installation
     for agent_names, agent_params in wazuh_params['agents'].items():
         WazuhAgent.perform_install_and_scan_for_agent(agent_params, agent_names, wazuh_params)
-
 
     # Testing installation directory
     for agent_names, agent_params in wazuh_params['agents'].items():

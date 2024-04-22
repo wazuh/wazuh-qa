@@ -93,13 +93,16 @@ class WazuhAgent:
     def register_agent(inventory_path, manager_path):
 
         with open(manager_path, 'r') as yaml_file:
-            manager_path = yaml.safe_load(yaml_file)
+            manager_path_yaml = yaml.safe_load(yaml_file)
+        manager_host = manager_path_yaml.get('ansible_host')
 
-        host = manager_path.get('ansible_host')
+        with open(inventory_path, 'r') as yaml_file:
+            inventory_path_yaml = yaml.safe_load(yaml_file)
+        agent_host = inventory_path_yaml.get('ansible_host')
 
         os_type = HostInformation.get_os_type(inventory_path)
         if os_type == 'linux':
-            host_ip = HostInformation.get_internal_ip_from_aws_dns(host) if 'amazonaws' in host else host
+            host_ip = HostInformation.get_internal_ip_from_aws_dns(manager_host) if 'amazonaws' in manager_host else manager_host
             commands = [
                 f"sed -i 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' {WAZUH_CONF}",
                 "systemctl restart wazuh-agent"
@@ -108,7 +111,10 @@ class WazuhAgent:
             assert host_ip in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the Manager IP ({host_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
         elif os_type == 'macos':
-            host_ip = HostInformation.get_internal_ip_from_aws_dns(host) if 'amazonaws' in host else HostInformation.get_public_ip_from_aws_dns(host)
+            if 'amazonaws' in manager_host and 'amazonaws' in agent_host:
+                host_ip = HostInformation.get_internal_ip_from_aws_dns(manager_host) 
+            else:
+                host_ip = HostInformation.get_public_ip_from_aws_dns(manager_host)
             commands = [
                 f"sed -i '.bak' 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' /Library/Ossec/etc/ossec.conf",
                 "/Library/Ossec/bin/wazuh-control restart"
