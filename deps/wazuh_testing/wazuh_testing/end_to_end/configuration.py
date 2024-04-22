@@ -281,11 +281,11 @@ def load_vulnerability_detector_configurations(host_manager, configurations_path
             indexer_server = host_manager.get_group_hosts('indexer')[0]
             indexer_server_variables = host_manager.get_host_variables(indexer_server)
 
-            default_filebeat_key_path = '/etc/pki/filebeat/node-{manager_index}-key.pem'
+            default_filebeat_key_path = f"/etc/pki/filebeat/node-{manager_index}-key.pem"
             filebeat_key = indexer_server_variables['filebeat_key_path'] if 'filebeat_key_path' in indexer_server_variables \
                     else default_filebeat_key_path
 
-            default_filebeat_certificate_path = '/etc/pki/filebeat/node-{manager_index}.pem'
+            default_filebeat_certificate_path = f"/etc/pki/filebeat/node-{manager_index}.pem"
             filebeat_certificate = indexer_server_variables['filebeat_certificate_path'] if 'filebeat_certificate_path' in indexer_server_variables \
                     else default_filebeat_certificate_path
 

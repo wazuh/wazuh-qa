@@ -279,7 +279,6 @@ def install_package(host: str, operation_data: Dict[str, Any], host_manager: Hos
     package_system = get_package_system(host, host_manager)
 
     utc_now_timestamp = datetime.utcnow()
-    current_datetime = utc_now_timestamp.strftime("%Y-%m-%dT%H:%M:%S")
 
     try:
         host_manager.install_package(host, package_url, package_system)
