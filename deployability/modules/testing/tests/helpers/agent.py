@@ -108,7 +108,7 @@ class WazuhAgent:
             assert host_ip in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the Manager IP ({host_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
         elif os_type == 'macos':
-            host_ip = HostInformation.get_public_ip_from_aws_dns(host) if 'amazonaws' in host else host
+            host_ip = HostInformation.get_internal_ip_from_aws_dns(host) if 'amazonaws' in host else HostInformation.get_public_ip_from_aws_dns(host)
             commands = [
                 f"sed -i '.bak' 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' /Library/Ossec/etc/ossec.conf",
                 "/Library/Ossec/bin/wazuh-control restart"
