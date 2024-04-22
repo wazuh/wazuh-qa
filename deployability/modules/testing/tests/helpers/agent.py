@@ -313,10 +313,10 @@ class WazuhAgent:
             result (dict): result of comparison between pre and post action scan
 
         """
-        os_name = HostInformation.get_os_name_from_inventory(agent_params)
-        if os_name == 'linux':
+        os_type = HostInformation.get_os_type(agent_params)
+        if os_type == 'linux':
             categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
-        elif os_name == 'macos':
+        elif os_type == 'macos':
             categories = ['/usr/bin', '/usr/sbin']
         actions = ['added', 'modified', 'removed']
 
@@ -337,21 +337,21 @@ class WazuhAgent:
         """
         return bool([int(numero) for numero in Executor.execute_command(agent_params, 'pgrep wazuh').splitlines()])
 
-    def isAgent_port_open(agent_params):
+    def isAgent_port_open(inventory_path):
         """
         Check if agent port is open
 
         Args:
-            agent_name (str): Agent name.
+            inventory_path (str): Agent inventory path.
 
         Returns:
             str: Os name.
         """
-        os_name = HostInformation.get_os_name_from_inventory(agent_params)
-        if os_name == 'linux':
-            return 'ESTAB' in Executor.execute_command(agent_params, 'ss -t -a -n | grep ":1514" | grep ESTAB')
-        elif os_name == 'macos':
-            return 'ESTABLISHED' in Executor.execute_command(agent_params, 'netstat -an | grep ".1514 " | grep ESTABLISHED')
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            return 'ESTAB' in Executor.execute_command(inventory_path, 'ss -t -a -n | grep ":1514" | grep ESTAB')
+        elif os_type == 'macos':
+            return 'ESTABLISHED' in Executor.execute_command(inventory_path, 'netstat -an | grep ".1514 " | grep ESTABLISHED')
 
     def get_agents_information(wazuh_api: WazuhAPI) -> list:
         """
