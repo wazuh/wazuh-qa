@@ -153,4 +153,6 @@ def test_register_agent(execute_command_mock: MagicMock):
     execute_command_mock: MagicMock
         Executor.execute_commands mock.
         """
+    yaml_file = ""
+    with patch('builtins.open', mock_open(read_data=)):
 
