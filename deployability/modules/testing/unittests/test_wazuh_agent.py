@@ -1,8 +1,8 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+from unittest.mock import patch, MagicMock, call, mock_open
 import pytest
-from mock import patch, MagicMock, call
 
 from modules.testing.tests.helpers.agent import WazuhAgent
 
@@ -21,6 +21,25 @@ from modules.testing.tests.helpers.agent import WazuhAgent
 @patch('modules.testing.tests.helpers.agent.HostInformation')
 def test_install_agent(hostInfo: MagicMock,  execute_command_mock: MagicMock, logger_mock: MagicMock,
                                      os_type: str, architecture: str, distribution: str, live: bool):
+    """Test WazuhAgent.install_agent method.
+    
+    Parameters
+    ----------
+    hostInfo: MagicMock
+        HostInformation mock.
+    execute_command_mock: MagicMock
+        Executor.execute_commands mock.
+    logger_mock: MagicMock
+        Logger fixture.
+    os_type: str
+        OS type parameterized value: linux, macos, windows
+    architecture: str
+        Architecture parameterized value (for linux and macos only).
+    distribution: str
+        Distribution parameterized value (for linux only).
+    live: bool
+        Parameterized value.
+    """
     wazuh_version = 'x.x.x'
     inventory_path = '/inventory_path'
     agent_name = 'agent_name'
@@ -99,7 +118,7 @@ def test_install_agent(hostInfo: MagicMock,  execute_command_mock: MagicMock, lo
          patch.object(hostInfo, 'get_os_name_and_version_from_inventory',
                       return_value=f"{os_type}-x.x.x") as get_name_and_version_mock:
         WazuhAgent.install_agent(inventory_path, agent_name, wazuh_version, None, live)
-    
+
     get_os_type_mock.assert_called_once_with(inventory_path)
     get_name_and_version_mock.assert_called_once_with(inventory_path)
     if os_type == 'linux':
@@ -110,6 +129,7 @@ def test_install_agent(hostInfo: MagicMock,  execute_command_mock: MagicMock, lo
 
 
 def test_install_agents():
+    """Test for WazuhAgent.install_agents method."""
     inventory_paths = ['/inventory_path_1', '/inventory_path_2']
     wazuh_versions = ['x.y.z', 'j.q.k']
     agent_names = ['agent_1', 'agent_2']
@@ -122,4 +142,15 @@ def test_install_agents():
         call(inventory_paths[0], wazuh_versions[0], wazuh_revisions[0], agent_names[0], live[0]),
         call(inventory_paths[1], wazuh_versions[1], wazuh_revisions[1], agent_names[1], live[1]),
     ])
+
+
+@patch('modules.testing.tests.helpers.agent.Executor.execute_commands')
+def test_register_agent(execute_command_mock: MagicMock):
+    """Test for WazuhAgent.register_agent method.
     
+    Parameters
+    ----------
+    execute_command_mock: MagicMock
+        Executor.execute_commands mock.
+        """
+
