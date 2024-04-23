@@ -149,14 +149,20 @@ class Check:
     def __str__(self) -> str:
         return self.report_check()
 
-    def validate(self, evidences: List[Evidence] = None) -> bool:
-        provided_evidences = [evidence for evidence in evidences if evidence.name in self.expected_evidences]
-        provided_evidences_names = [evidence.name for evidence in provided_evidences]
+    def validate(self, evidences: List[Evidence] | None = None) -> bool:
+        evidences = [] if not evidences else evidences
 
-        if provided_evidences_names != self.expected_evidences:
-            raise ValueError('Evidences should match the expected ones.\n' f"Expected evidences: {self.expected_evidences}. Evidences found: {provided_evidences}")
+        provided_evidences_names = [evidence.name for evidence in evidences]
+        provided_evidences_expected = [evidence for evidence in evidences
+                                       if evidence.name in self.expected_evidences]
 
-        self.result = self.assert_function(*[evidence.value for evidence in provided_evidences])
+        if len(self.expected_evidences) != len(provided_evidences_expected):
+            raise ValueError('Evidences should match the expected ones.\n' +
+                             f"Expected evidences: {self.expected_evidences}."
+                             f"Evidences found: {provided_evidences_names}")
+
+
+        self.result = self.assert_function(*[evidence.value for evidence in provided_evidences_expected])
         self.evidences = evidences
 
         logging.error(f"Marked check {self.name} result to {self.result} with evidences {provided_evidences_names}")
@@ -166,7 +172,7 @@ class Check:
     def get_result(self):
         if self.result is None:
             raise ValueError(f"Check {self.name} has not been executed yet")
-        
+
         return self.result
 
     def report_check(self):
@@ -191,7 +197,7 @@ class TestResult:
 
     def __str__(self) -> str:
         return self.report()
-    
+
     def add_check(self, check: Check):
         self.checks.append(check)
 
@@ -203,7 +209,6 @@ class TestResult:
         for check in self.checks:
             if check.get_result() and not collect_evidences_for_passed_checks:
                 continue
-            
             check.collect_evidences(evidences_directory, collect_verbose_evidences)
 
     def report(self):

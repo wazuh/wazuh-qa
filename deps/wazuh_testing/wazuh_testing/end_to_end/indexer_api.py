@@ -13,12 +13,12 @@ This program is a free software; you can redistribute it and/or modify it under 
 """
 import requests
 import logging
-from typing import Dict, List
+from typing import Dict
 
 from wazuh_testing.tools.system import HostManager
 
 
-STATE_INDEX_NAME = 'wazuh-states-vulnerabilities'
+WAZUH_STATES_VULNERABILITIES_INDEXNAME = 'wazuh-states-vulnerabilities'
 
 
 def create_vulnerability_states_indexer_filter(target_agent: str | None = None,

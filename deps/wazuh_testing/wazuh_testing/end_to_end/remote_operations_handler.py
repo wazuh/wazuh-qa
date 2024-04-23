@@ -54,89 +54,55 @@ def get_vulnerabilities_not_found(vulnerabilities_found: List, expected_vulnerab
     return vulnerabilities_not_found
 
 
-def get_missing_vulnerabilities(vulnerabilities_by_agent: Dict, expected_vulnerabilities_by_agent: Dict) -> Dict:
-    """
-    Get the missing vulnerabilities in the list of expected vulnerabilities.
-
-    Args:
-        vulnerabilities_by_agent (dict): Dictionary containing the vulnerabilities found by agent.
-        expected_vulnerabilities_by_agent (dict): Dictionary containing the expected vulnerabilities by agent.
-
-    Returns:
-        dict: Dictionary containing the missing vulnerabilities.
-    """
-    missing_vulnerabilities = {}
-    for agent, vulnerabilities in expected_vulnerabilities_by_agent.items():
-        missing_vulnerabilities[agent] = get_vulnerabilities_not_found(vulnerabilities_by_agent[agent], vulnerabilities)
-
-    return missing_vulnerabilities
-
-
-def calculate_expected_vulnerabilities_by_agent(host_manager: HostManager, packages_data: Dict) -> Dict:
-    """
-    Calculate the expected vulnerabilities by agent.
-
-    Args:
-        host_manager (HostManager): An instance of the HostManager class containing information about hosts.
-        packages_data (dict): Dictionary containing package data.
-
-    Returns:
-        dict: Dictionary containing the expected vulnerabilities by agent.
-    """
-    expected_vulnerabilities_by_agent = {}
-    for agent in host_manager.get_group_hosts('agent'):
-        expected_vulnerabilities_by_agent[agent] = []
-        for package_id in packages_data:
-            expected_vulnerabilities_by_agent[agent].extend(packages_data[package_id]['CVE'])
-
-    return expected_vulnerabilities_by_agent
-
-
 def get_expected_vulnerabilities_for_package(host_manager: HostManager, host: str,
-                                             package_id: str, check: Dict) -> Dict:
+                                             package_id: str) -> list:
 
     package_data = load_packages_metadata()[package_id]
     vulnerabilities_list = []
 
-    host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
     host_os_arch = host_manager.get_host_variables(host)['architecture']
     system = host_manager.get_host_variables(host)['os_name']
+
+    architecture = None
+    if package_data.get('use_npm', False):
+        architecture = None
+    else:
+        if host_os_arch == 'amd64':
+            architecture = 'x86_64'
+        elif host_os_arch == 'arm64v8':
+            architecture = 'arm64'
+        else:
+            architecture = host_os_arch
 
     if system == 'linux':
         system = host_manager.get_host_variables(host)['os'].split('_')[0]
 
-    package_system = get_package_system(host, host_manager)
-
     for cve in package_data['CVE']:
-        vulnerability = Vulnerability(cve, package_data['package_name'], package_data['package_version'], host_os_arch)
+        vulnerability = Vulnerability(cve, package_data['package_name'], package_data['package_version'], architecture)
         vulnerabilities_list.append(vulnerability)
 
     vulnerabilities = sorted(vulnerabilities_list,
                              key=lambda x: (x.cve, x.package_name, x.package_version, x.architecture))
 
-    expected_vuln = {
-        'alerts': vulnerabilities if check.get('alerts', True) else [],
-        'index': vulnerabilities if check.get('states', True) else []
-    }
-
-    return expected_vuln
+    return vulnerabilities
 
 
 def filter_vulnerabilities_by_packages(host_manager: HostManager, vulnerabilities: Dict,
-                                       packages_data: Dict) -> Dict:
+                                       packages_data: List) -> Dict:
     filtered_vulnerabilities = {}
     for host in vulnerabilities.keys():
         filtered_vulnerabilities[host] = []
         host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
         host_os_arch = host_manager.get_host_variables(host)['architecture']
 
-        package_id = packages_data[host_os_name][host_os_arch]
-        package_data = load_packages_metadata()[package_id]
-        package_name = package_data['package_name']
+        for package_data in packages_data:
+            package_id = package_data[host_os_name][host_os_arch]
+            data = load_packages_metadata()[package_id]
+            package_name = data['package_name']
 
-        for vulnerability in vulnerabilities[host]:
-            if vulnerability.package_name == package_name:
-                filtered_vulnerabilities[host].append(vulnerability)
+            for vulnerability in vulnerabilities[host]:
+                if vulnerability.package_name == package_name:
+                    filtered_vulnerabilities[host].append(vulnerability)
 
     return filtered_vulnerabilities
 
@@ -161,15 +127,32 @@ def get_expected_vulnerabilities_by_agent(host_manager: HostManager, agents_list
         expected_vulnerabilities_by_agent[agent] = []
         package_id = packages_data[host_os_name][host_os_arch]
 
-        expected_vulnerabilities = get_expected_vulnerabilities_for_package(host_manager, agent, package_id,)
+        expected_vulnerabilities = get_expected_vulnerabilities_for_package(host_manager, agent, package_id)
         expected_vulnerabilities_by_agent[agent] = expected_vulnerabilities
 
     return expected_vulnerabilities_by_agent
 
 
-def get_package_url_for_host(host: str, package_id: str, host_manager: HostManager,
-                             operation_data: Dict[str, Any]) -> str:
+def get_package_url_for_host(host: str, package_data: Dict[str, Any], host_manager: HostManager) -> str:
 
+    host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
+    host_os_arch = host_manager.get_host_variables(host)['architecture']
+    system = host_manager.get_host_variables(host)['os_name']
+
+    if system == 'linux':
+        system = host_manager.get_host_variables(host)['os'].split('_')[0]
+
+    try:
+        package_id = package_data[host_os_name][host_os_arch]
+        package_data = load_packages_metadata()[package_id]
+        package_url = package_data['urls'][host_os_name][host_os_arch]
+
+        return package_url
+    except KeyError:
+        raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found. Maybe {host} OS is not supported.")
+
+
+def get_package_npm(host: str, operation_data: Dict[str, Any], host_manager: HostManager) -> bool:
     host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
     host_os_arch = host_manager.get_host_variables(host)['architecture']
     system = host_manager.get_host_variables(host)['os_name']
@@ -179,18 +162,15 @@ def get_package_url_for_host(host: str, package_id: str, host_manager: HostManag
 
     install_package_data = operation_data['package']
 
-    try:
-        package_id = install_package_data[host_os_name][host_os_arch]
-        package_data = load_packages_metadata()[package_id]
-        package_url = package_data['urls'][host_os_name][host_os_arch]
+    package_id = install_package_data[host_os_name][host_os_arch]
+    package_data = load_packages_metadata()[package_id]
+    package_npm = package_data.get('use_npm', False)
 
-        return package_url
-    except KeyError:
-        raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found. Maybe {host} OS is not supported.")
+    return package_npm
 
 
 def get_package_uninstallation_name(host: str, package_id: str, host_manager: HostManager,
-                             operation_data: Dict[str, Any]) -> str:
+                                    operation_data: Dict[str, Any]) -> str:
     host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
     host_os_arch = host_manager.get_host_variables(host)['architecture']
     system = host_manager.get_host_variables(host)['os_name']
@@ -209,26 +189,6 @@ def get_package_uninstallation_name(host: str, package_id: str, host_manager: Ho
         raise ValueError(f"Package for {host_os_name} and {host_os_arch} not found uninstall name.")
 
 
-def get_package_uninstallation_playbook(host: str, package_id: str, host_manager: HostManager,
-                             operation_data: Dict[str, Any]) -> str:
-    host_os_name = host_manager.get_host_variables(host)['os'].split('_')[0]
-    host_os_arch = host_manager.get_host_variables(host)['architecture']
-    system = host_manager.get_host_variables(host)['os_name']
-
-    if system == 'linux':
-        system = host_manager.get_host_variables(host)['os'].split('_')[0]
-
-    install_package_data = operation_data['package']
-    try:
-        package_id = install_package_data[host_os_name][host_os_arch]
-        package_data = load_packages_metadata()[package_id]
-        package_uninstall_name = package_data['uninstall_custom_playbook']
-
-        return package_uninstall_name
-    except KeyError:
-        raise ValueError(f"Custom installation playbook for {host_os_name} and {host_os_arch} not found uninstall name.")
-
-
 def get_package_system(host: str, host_manager: HostManager) -> str:
     system = host_manager.get_host_variables(host)['os_name']
     if system == 'linux':
@@ -237,27 +197,73 @@ def get_package_system(host: str, host_manager: HostManager) -> str:
     return system
 
 
-def get_vulnerabilities(host_manager: HostManager, agent_list, packages_data: Dict,
-                          greater_than_timestamp: str = '') -> Dict:
-
-    result = {}
-    wait_syscollector_and_vuln_scan(host_manager, TIMEOUT_SYSCOLLECTOR_SCAN, greater_than_timestamp=greater_than_timestamp,
-                                    agent_list=agent_list)
-    vulnerabilities = get_vulnerabilities_from_states_by_agent(host_manager, agent_list,
-                                            greater_than_timestamp=greater_than_timestamp)
+def get_vulnerability_alerts(host_manager: HostManager, agent_list, packages_data: List,
+                             greater_than_timestamp: str = '') -> Dict:
     alerts = get_vulnerabilities_from_alerts_by_agent(host_manager, agent_list,
-                                                    greater_than_timestamp=greater_than_timestamp)
+                                                      greater_than_timestamp=greater_than_timestamp)
+    alerts_vulnerabilities = filter_vulnerabilities_by_packages(host_manager, alerts['affected'], packages_data)
+    alerts_vulnerabilities_mitigated = filter_vulnerabilities_by_packages(host_manager, alerts['mitigated'],
+                                                                          packages_data)
+
+    return {
+        'affected': alerts_vulnerabilities,
+        'mitigated': alerts_vulnerabilities_mitigated
+    }
+
+
+def get_vulnerabilities_index(host_manager: HostManager, agent_list, packages_data: List[Dict],
+                              greater_than_timestamp: str = '') -> Dict:
+    vulnerabilities = get_vulnerabilities_from_states_by_agent(host_manager, agent_list,
+                                                               greater_than_timestamp=greater_than_timestamp)
     package_vulnerabilities = filter_vulnerabilities_by_packages(host_manager, vulnerabilities, packages_data)
-    alerts_vulnerabilities = filter_vulnerabilities_by_packages(host_manager, alerts['affected'] , packages_data)
-    alerts_vulnerabilities_mitigated = filter_vulnerabilities_by_packages(host_manager, alerts['mitigated'] , packages_data)
 
-    result['index_vulnerabilities'] = package_vulnerabilities
-    result['alerts_vulnerabilities'] = alerts_vulnerabilities
-    result['mitigated_vulnerabilities'] = alerts_vulnerabilities_mitigated
+    return package_vulnerabilities
 
-    return result
 
-def install_package(host: str, operation_data: Dict[str, Any], host_manager: HostManager) -> Dict:
+def get_expected_alerts(host_manager: HostManager, agent_list, operation: str, packages_data: Dict) -> Dict:
+    expected_alerts_vulnerabilities = {
+        'affected': {},
+        'mitigated': {}
+    }
+
+    if operation == "update_package":
+        expected_alerts_vulnerabilities['mitigated'] = get_expected_vulnerabilities_by_agent(host_manager, agent_list,
+                                                                                             packages_data['from'])
+        expected_alerts_vulnerabilities['affected'] = get_expected_vulnerabilities_by_agent(host_manager, agent_list,
+                                                                                            packages_data['to'])
+    elif operation == "remove_package":
+        expected_alerts_vulnerabilities['mitigated'] = get_expected_vulnerabilities_by_agent(host_manager, agent_list,
+                                                                                             packages_data)
+    elif operation == "install_package":
+        expected_alerts_vulnerabilities['affected'] = get_expected_vulnerabilities_by_agent(host_manager, agent_list,
+                                                                                            packages_data)
+
+    return expected_alerts_vulnerabilities
+
+
+def get_expected_index(host_manager: HostManager, agent_list, operation: str, packages_data: Dict) -> Dict:
+
+    expected_index = {
+            'present': {},
+            'absent': {}
+    }
+
+    if operation == "update_package":
+        expected_index['absent'] = get_expected_vulnerabilities_by_agent(host_manager, agent_list,
+                                                                         packages_data['from'])
+        expected_index['present'] = get_expected_vulnerabilities_by_agent(host_manager, agent_list,
+                                                                          packages_data['to'])
+    elif operation == "remove_package":
+        expected_index['absent'] = get_expected_vulnerabilities_by_agent(host_manager, agent_list,
+                                                                         packages_data)
+    elif operation == "install_package":
+        expected_index['present'] = get_expected_vulnerabilities_by_agent(host_manager, agent_list,
+                                                                          packages_data)
+
+    return expected_index
+
+
+def install_package(host: str, operation_data: Dict[str, Any], host_manager: HostManager) -> bool:
     """
     Install a package on the specified host.
 
@@ -269,36 +275,26 @@ def install_package(host: str, operation_data: Dict[str, Any], host_manager: Hos
     Raises:
         ValueError: If the specified operation is not recognized.
     """
-    result = {
-        'success': True,
-    }
-
+    result = True
     logging.info(f"Installing package on {host}")
     package_url = get_package_url_for_host(host, operation_data['package'],
-                                           host_manager, operation_data)
+                                           host_manager)
     package_system = get_package_system(host, host_manager)
-
-    utc_now_timestamp = datetime.utcnow()
+    npm_package = get_package_npm(host, operation_data, host_manager)
 
     try:
-        host_manager.install_package(host, package_url, package_system)
+        if npm_package:
+            host_manager.install_npm_package(host, package_url, package_system)
+        else:
+            host_manager.install_package(host, package_url, package_system)
     except Exception as e:
         logging.error(f"Error installing package on {host}: {e}")
-        result['success'] = False
-
-    # check_options = operation_data.get('check', {})
-    # check_vuln = check_options.get('alerts') or check_options.get('states') if check_options else False
-    # if result['success'] and check_vuln:
-    #     result['vulnerabilities'] = get_vulnerabilities(host_manager, host,
-    #                                                     operation_data['package'],
-    #                                                     current_datetime)
-    #     result['expected_vulnerabilities'] = get_expected_vulnerabilities_by_agent(host_manager, [host],
-    #                                                                             operation_data['package'],
-    #                                                                             operation_data['check'])[host]
+        result = False
 
     return result
 
-def remove_package(host: str, operation_data: Dict[str, Any], host_manager: HostManager) -> Dict:
+
+def remove_package(host: str, operation_data: Dict[str, Any], host_manager: HostManager) -> bool:
     """
     Install a package on the specified host.
 
@@ -310,93 +306,50 @@ def remove_package(host: str, operation_data: Dict[str, Any], host_manager: Host
     Raises:
         ValueError: If the specified operation is not recognized.
     """
-    result = {
-        'success': True,
-    }
-
+    result = True
     logging.info(f"Removing package on {host}")
     package_system = get_package_system(host, host_manager)
-
-    utc_now_timestamp = datetime.utcnow()
-    current_datetime = utc_now_timestamp.strftime("%Y-%m-%dT%H:%M:%S")
 
     try:
         package_uninstall_name = None
         custom_uninstall_playbook = None
+        npm_package = get_package_npm(host, operation_data, host_manager)
         try:
             package_uninstall_name = get_package_uninstallation_name(host, operation_data['package'],
-                                           host_manager, operation_data)
+                                                                     host_manager, operation_data)
         except ValueError:
             logging.info(f"No uninstall name found for {operation_data['package']}. Searching for custom playbook")
-            custom_uninstall_playbook = operation_data['package']['uninstall_playbook'] if 'uninstall_playbook' in operation_data['package'] else None
+            custom_uninstall_playbook = operation_data['package']['uninstall_playbook'] if \
+                'uninstall_playbook' in operation_data['package'] else None
 
-        host_manager.remove_package(host, package_system, package_uninstall_name, custom_uninstall_playbook)
+        if npm_package:
+            host_manager.remove_npm_package(host, package_system, package_uninstall_name, custom_uninstall_playbook)
+        else:
+            host_manager.remove_package(host, package_system, package_uninstall_name, custom_uninstall_playbook)
 
     except Exception as e:
         logging.error(f"Error removing package on {host}: {e}")
-        result['success'] = False
-
-    # check_options = operation_data.get('check', {})
-    # check_vuln = check_options.get('alerts') or check_options.get('states') if check_options else False
-
-    # if result['success'] and check_vuln:
-    #     result['vulnerabilities'] = get_vulnerabilities(host_manager, host,
-    #                                                     operation_data['package'],
-    #                                                     greater_than_timestamp=current_datetime)
-    #     result['expected_vulnerabilities'] = get_expected_vulnerabilities_by_agent(host_manager, [host],
-    #                                                                             operation_data['package'],
-    #                                                                             operation_data['check'])[host]
+        result = False
 
     return result
 
 
-def update_package(host: str, operation_data: Dict[str, Any], host_manager: HostManager) -> Dict:
-    result = {
-        'success': True,
-        'vulnerabilities': {
-            'to': {},
-            'from': {}
-        },
-        'expected_vulnerabilities': {
-            'to': {},
-            'from': {}
-        }
-    }
-
+def update_package(host: str, operation_data: Dict[str, Any], host_manager: HostManager) -> bool:
+    result = True
     logging.info(f"Installing package on {host}")
     package_url = get_package_url_for_host(host, operation_data['package']['to'],
-                                           host_manager, operation_data)
+                                           host_manager)
     package_system = get_package_system(host, host_manager)
+    npm_package = get_package_npm(host, operation_data, host_manager)
 
-    utc_now_timestamp = datetime.utcnow()
-    current_datetime = utc_now_timestamp.strftime("%Y-%m-%dT%H:%M:%S")
     try:
-        host_manager.install_package(host, package_url, package_system)
+        if npm_package:
+            host_manager.install_npm_package(host, package_url, package_system)
+        else:
+            host_manager.install_package(host, package_url, package_system)
     except Exception as e:
         logging.error(f"Error installing package on {host}: {e}")
-        result['success'] = False
-
-    check_options = operation_data.get('check', {})
-    check_vuln = check_options.get('alerts') or check_options.get('states') if check_options else False
-    # if result['success'] and check_vuln:
-    #     result['vulnerabilities']['to'] = get_vulnerabilities(host_manager, host,
-    #                                                       operation_data['package']['to'],
-    #                                                       greater_than_timestamp=current_datetime)
-
-    #     result['vulnerabilities']['from'] = get_vulnerabilities(host_manager, host,
-    #                                                       operation_data['package']['from'],
-    #                                                       greater_than_timestamp=current_datetime)
-
-    #     expected_vulnerabilities_to = get_expected_vulnerabilities_by_agent(host_manager, [host],
-    #                                                                         operation_data['package']['to'],
-    #                                                                         operation_data['check'])[host]
-
-    #     expected_vulnerabilities_from = get_expected_vulnerabilities_by_agent(host_manager, [host],
-    #                                                                         operation_data['package']['from'],
-    #                                                                         operation_data['check'])[host]
-
-    #     result['expected_vulnerabilities']['to'] = expected_vulnerabilities_to
-    #     result['expected_vulnerabilities']['from'] = expected_vulnerabilities_from
+        result = False
 
     return result
 
@@ -411,8 +364,22 @@ def launch_remote_operation(host: str, operation_data: Dict[str, Dict], host_man
         raise ValueError(f"Operation {operation} not recognized")
 
 
+def filter_hosts_by_os(host_manager: HostManager, os_list: List[str]) -> List[str]:
+    agents = host_manager.get_group_hosts()
+    for agent in agents:
+        system = host_manager.get_host_variables(agent)['os_name']
+
+        if system == 'linux':
+            system = host_manager.get_host_variables(agent)['os'].split('_')[0]
+
+        if system not in os_list:
+            agents.remove(agent)
+
+    return agents
+
+
 def launch_parallel_operations(task: Dict[str, List], host_manager: HostManager,
-                               target_to_ignore: List[str] = None):
+                               target_to_ignore: List[str] | None = None):
     """
     Launch parallel remote operations on multiple hosts.
 
@@ -429,20 +396,18 @@ def launch_parallel_operations(task: Dict[str, List], host_manager: HostManager,
     def launch_and_store_result(args):
         host, task, manager = args
         result = launch_remote_operation(host, task, manager)
-        results[task['operation']] = {}
         with lock:
-            results[task['operation']][host] = result
+            results[host] = result
 
     with ThreadPoolExecutor() as executor:
         # Submit tasks asynchronously
         hosts_target = host_manager.get_group_hosts(target)
-        hosts_to_ignore = target_to_ignore
 
         futures = []
 
         # Calculate the hosts to ignore based on previous operations results
-        if target_to_ignore:
-            hosts_target = [host for host in hosts_target if host not in target_to_ignore]
+        if hosts_to_ignore:
+            hosts_target = [host for host in hosts_target if host not in hosts_to_ignore]
 
         logging.info(f"Launching operation {task['operation']} on {hosts_target}")
 

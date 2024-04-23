@@ -1,88 +1,125 @@
-import logging 
+import logging
+
+
+def get_failed_operation_hosts(global_operation_results: dict) -> list:
+    failed_hosts = []
+    for host, operation_result in global_operation_results.items():
+        if not operation_result:
+            logging.critical(f"Operation on {host} failed")
+            failed_hosts.append(host)
+
+    return failed_hosts
 
 
 def validate_operation_results(global_operation_results: dict) -> bool:
-    logging.critical(global_operation_results)
-    for _, task_results in global_operation_results.items():
-        for operation_result in task_results:
-            operation = list(operation_result.keys())[0]
-            operation_success = operation_result[operation]["success"]
-            if not operation_success:
-                logging.critical(f"Operation {operation} failed")
-                return False
-    return True
+    return len(get_failed_operation_hosts(global_operation_results)) == 0
 
 
-def validate_vulnerabilities_results(global_operation_results: dict):
-    check_vulnerabilities_operations = [
-        "install_package",
-        "remove_package",
-        "update_package",
-    ]
-    expected_vulnerabilities_found = True
+def compare_expected_found_vulnerabilities(vulnerabilities, expected_vulnerabilities):
+    logging.critical(f"Vulnerabilities: {vulnerabilities}")
+    logging.critical(f"Expected vulnerabilities: {expected_vulnerabilities}")
 
-    for agent, agent_operation_results in global_operation_results.items():
-        for task_lists_results in agent_operation_results:
-            for task, result in task_lists_results.items():
-                task_result = True
+    result = True
 
-                vulnerabilities = result.get("vulnerabilities", {})
-                index_vulnerabilities = vulnerabilities.get("index_vulnerabilities", [])
-                alerts_vulnerabilities = vulnerabilities.get(
-                    "alerts_vulnerabilities", []
-                )
-                mitigated_vulnerabilities = vulnerabilities.get(
-                    "mitigated_vulnerabilities", []
-                )
+    vulnerabilities_not_found = {}
+    vulnerabilities_unexpected = {}
 
-                expected_vulnerabilities = result.get("expected_vulnerabilities", {})
-                expected_index = expected_vulnerabilities.get("states", [])
-                expected_alerts = expected_vulnerabilities.get("alerts", [])
-                if task in check_vulnerabilities_operations:
-                    # Check vulnerabilities
-                    if task == "update_package":
-                        continue
-                    elif task == "remove_package":
-                        if len(index_vulnerabilities) != 0:
-                            logging.critical(
-                                "Vulnerabilities differs in states index"
-                                "from expected in {agent} for task {task}"
-                            )
-                            logging.critical(f"Expected: {expected_index}")
-                            logging.critical(f"Found: {index_vulnerabilities}")
-                            task_result = False
-                        if mitigated_vulnerabilities != expected_alerts:
-                            logging.critical(
-                                "Vulnerabilities differs in states index from"
-                                f"expected in {agent} for task {task}"
-                            )
-                            logging.critical(f"Expected: {expected_index}")
-                            logging.critical(f"Found: {index_vulnerabilities}")
-                            task_result = False
-                    else:
-                        if task == "install_package":
-                            if index_vulnerabilities != expected_index:
-                                logging.critical(
-                                    "Vulnerabilities differs in states index from"
-                                    f"expected in {agent} for task {task}"
-                                )
-                                logging.critical(f"Expected: {expected_index}")
-                                logging.critical(f"Found: {index_vulnerabilities}")
-                                task_result = False
+    failed_agents = []
 
-                            if alerts_vulnerabilities != expected_alerts:
-                                logging.critical(
-                                    "Vulnerabilities Alerts differs from expected"
-                                    f"in {agent} for task {task}"
-                                )
-                                logging.critical(f"Expected: {expected_alerts}")
-                                logging.critical(f"Found: {alerts_vulnerabilities}")
-                                task_result = False
+    expected_vulnerabilities_present = expected_vulnerabilities.get('present', {})
+    expected_vulnerabilities_absent = expected_vulnerabilities.get('absent', {})
 
-                    if not task_result:
-                        expected_vulnerabilities_found = False
+    for agent, expected_vulns in expected_vulnerabilities_present.items():
+        for vulnerability in expected_vulns:
+            if vulnerability not in vulnerabilities.get(agent, []):
+                logging.critical(f"Vulnerability not found for {agent}: {vulnerability}")
+                if agent not in vulnerabilities_not_found:
+                    vulnerabilities_not_found[agent] = []
+                    failed_agents.append(agent)
 
-    return expected_vulnerabilities_found
+                result = False
+                vulnerabilities_not_found[agent].append(vulnerability)
+
+    for agent, expected_vuln in expected_vulnerabilities_absent.items():
+        for vulnerability in expected_vuln:
+            if vulnerability in vulnerabilities.get(agent, []):
+                logging.critical(f"Vulnerability unexpected: {vulnerability}")
+                if agent not in vulnerabilities_unexpected:
+                    vulnerabilities_unexpected[agent] = []
+                    failed_agents.append(agent)
+
+                result = False
+                vulnerabilities_unexpected[agent].append(vulnerability)
+
+    if not result:
+        logging.critical(f"Vulnerabilities not found: {vulnerabilities_not_found}")
+        logging.critical(f"Vulnerabilities unexpected: {vulnerabilities_unexpected}")
+
+    return {
+                'vulnerabilities_not_found': vulnerabilities_not_found,
+                'vulnerabilities_unexpected': vulnerabilities_unexpected,
+                'failed_agents': failed_agents,
+                'result': result
+            }
+
+
+def expected_vulnerabilities_index(vulnerabilities, expected_vulnerabilities):
+    expected_found_comparision = compare_expected_found_vulnerabilities(vulnerabilities,
+                                                                        expected_vulnerabilities)
+
+    return expected_found_comparision['result']
+
+
+def compare_expected_found_vulnerabilities_alerts(vulnerabilities, expected_vulnerabilities):
+    result = True
+    vulnerabilities_affected_not_found = {}
+    vulnerabilities_mitigated_not_found = {}
+
+    failed_agents = []
+
+    vulnerabilities_present = vulnerabilities.get('affected', {})
+    vulnerabilities_absent = vulnerabilities.get('mitigated', {})
+    expected_vulnerabilities_affected = expected_vulnerabilities.get('affected', {})
+    expected_vulnerabilities_mitigated = expected_vulnerabilities.get('mitigated', {})
+
+    for agent, vulnerabilities in expected_vulnerabilities_affected.items():
+        for vulnerability in vulnerabilities:
+            if vulnerability not in vulnerabilities_present.get(agent):
+                if agent not in vulnerabilities_affected_not_found:
+                    vulnerabilities_affected_not_found[agent] = []
+                    failed_agents.append(agent)
+
+                vulnerabilities_affected_not_found[agent].append(vulnerability)
+                result = False
+
+    for agent, vulnerabilities in expected_vulnerabilities_mitigated.items():
+        for vulnerability in vulnerabilities:
+            if vulnerability not in vulnerabilities_absent.get(agent):
+                if agent not in vulnerabilities_mitigated_not_found:
+                    vulnerabilities_mitigated_not_found[agent] = []
+                    failed_agents.append(agent)
+
+                vulnerabilities_mitigated_not_found[agent].append(vulnerability)
+                result = False
+
+    if not result:
+        logging.critical(f"Vulnerabilities affected not found: {vulnerabilities_affected_not_found}")
+        logging.critical(f"Vulnerabilities mitigated not found: {vulnerabilities_mitigated_not_found}")
+
+    return {
+                'vulnerabilities_affected_not_found': vulnerabilities_affected_not_found,
+                'vulnerabilities_mitigated_not_found': vulnerabilities_mitigated_not_found,
+                'failed_agents': failed_agents,
+                'result': result
+            }
+
+
+def expected_vulnerability_alerts(vulnerabilities, expected_vulnerabilities):
+
+    expected_found_comparision = compare_expected_found_vulnerabilities_alerts(vulnerabilities,
+                                                                               expected_vulnerabilities)
+    return expected_found_comparision['result']
+
 
 equals = lambda x, y: x == y
 
@@ -92,8 +129,8 @@ def equals_but_not_empty(x, y):
 
 
 empty = lambda x: len(x) == 0
+
 no_errors = lambda x: all(
     not any(x[host][level] for level in ["ERROR", "CRITICAL", "WARNING"])
     for host in x
 )
-
