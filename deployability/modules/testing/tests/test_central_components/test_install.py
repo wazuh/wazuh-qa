@@ -8,6 +8,8 @@ from ..helpers.constants import WAZUH_ROOT
 from ..helpers.executor import WazuhAPI
 from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
 from ..helpers.manager import WazuhManager
+from ..helpers.indexer import WazuhIndexer
+from ..helpers.dashboard import WazuhDashboard
 from ..helpers.central import WazuhCentralComponents
 from modules.testing.utils import logger
 from ..helpers.utils import Utils
@@ -48,7 +50,23 @@ def setup_test_environment(wazuh_params):
 
     wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
 
-def test_installation(wazuh_params):
+
+def test_parametros(wazuh_params):
+    #logger.error(WazuhDashboard.get_dashboard_version(wazuh_params['dashboard']))
+    #for indexer_params in wazuh_params['indexers']:
+    #    logger.error(WazuhIndexer.get_indexer_version(indexer_params))
+
+    #logger.error(WazuhDashboard.isDashboard_active(wazuh_params['dashboard']))
+
+
+    #logger.error(WazuhDashboard.isDashboardKeystore_working(wazuh_params['dashboard']))
+    #for indexer_params in wazuh_params['indexers']:
+    #    logger.error(WazuhIndexer.areIndexer_internalUsers_complete(indexer_params))
+
+    wazuh_api = WazuhAPI(wazuh_params['dashboard'], component='dashboard')
+    logger.error(WazuhDashboard.areIndexes_working(wazuh_api))
+    
+""" def test_installation(wazuh_params):
     # Disabling firewall for all managers
     for manager_name, manager_params in wazuh_params['managers'].items():
         Utils.check_inventory_connection(manager_params)
@@ -93,3 +111,4 @@ def test_manager_revision(wazuh_params):
 def test_manager_installed_directory(wazuh_params):
     for manager in wazuh_params['managers'].values():
         assert HostInformation.dir_exists(manager, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(manager)}')
+ """

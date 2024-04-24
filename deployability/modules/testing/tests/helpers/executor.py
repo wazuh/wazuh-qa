@@ -50,10 +50,13 @@ class Executor:
 
 
 class WazuhAPI:
-    def __init__(self, inventory_path):
+    def __init__(self, inventory_path, component=None):
         self.inventory_path = inventory_path
         self.api_url = None
         self.headers = None
+        self.component = component
+        self.username = None
+        self.password = None
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self._authenticate()
 
@@ -80,8 +83,25 @@ class WazuhAPI:
 
         token = json.loads(requests.post(login_url, headers=login_headers, verify=False).content.decode())['data']['token']
 
-        self.api_url = f'https://{host}:{port}'
         self.headers = {
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {token}'
         }
+
+        self.api_url = f'https://{host}:{port}'
+
+        if self.component == 'dashboard':
+            self.username = 'admin'
+            file_path = Executor.execute_command(self.inventory_path, 'pwd').replace("\n","") + '/wazuh-install-files/wazuh-passwords.txt'
+            if not 'true' in Executor.execute_command(self.inventory_path, f'test -f {file_path} && echo "true" || echo "false"'):
+                Executor.execute_command(self.inventory_path, 'tar -xvf wazuh-install-files.tar')
+            self.password = Executor.execute_command(self.inventory_path, "grep indexer_password  wazuh-install-files/wazuh-passwords.txt | head -n 1 | awk '{print $NF}'").replace("'","").replace("\n","")
+            self.api_url = f'https://localhost'
+
+        if self.component == 'indexer':
+            self.username = 'admin'
+            file_path = Executor.execute_command(self.inventory_path, 'pwd').replace("\n","") + '/wazuh-install-files/wazuh-passwords.txt'
+            if not 'true' in Executor.execute_command(self.inventory_path, f'test -f {file_path} && echo "true" || echo "false"'):
+                Executor.execute_command(self.inventory_path, 'tar -xvf wazuh-install-files.tar')
+            self.password = Executor.execute_command(self.inventory_path, "").replace("'","").replace("\n","")
+            self.api_url = f'https://localhost:9200'

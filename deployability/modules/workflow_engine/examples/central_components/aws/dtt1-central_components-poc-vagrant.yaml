@@ -3,17 +3,16 @@ description: This workflow is used to test manager deployment for DDT1 PoC
 variables:
   central_components-os:
     - linux-ubuntu-20.04-amd64
-    #- linux-ubuntu-22.04-amd64
-    #- linux-oracle-9-amd64
-    #- linux-amazon-2-amd64
-    #- linux-redhat-7-amd64
-    #- linux-redhat-8-amd64
-    #- linux-redhat-9-amd64
-    #- linux-centos-7-amd64
-    #- linux-centos-8-amd64
-    #- linux-debian-10-amd64
-    #- linux-debian-11-amd64
-    #- linux-debian-12-amd64
+    - linux-ubuntu-22.04-amd64
+    - linux-amazon-2-amd64
+    - linux-redhat-7-amd64
+    - linux-redhat-8-amd64
+    - linux-redhat-9-amd64
+    - linux-centos-7-amd64
+    - linux-centos-8-amd64
+    - linux-debian-10-amd64
+    - linux-debian-11-amd64
+    - linux-debian-12-amd64
   infra-provider: aws
   working-dir: /tmp/dtt1-poc
 
@@ -39,6 +38,14 @@ tasks:
     foreach:
       - variable: central_components-os
         as: central_components
+    cleanup:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: delete
+          - track-output: "{working-dir}/central_components-{central_components-os}/track.yaml"
 
   # Generic manager test task
   - task: "run-central_components-{central_components}-tests"
