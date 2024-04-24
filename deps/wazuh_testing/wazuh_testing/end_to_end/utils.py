@@ -16,4 +16,3 @@ def extract_case_info(cases):
 
 def get_case_ids(cases):
     return [case["id"] for case in cases]
-
