@@ -257,8 +257,9 @@ class Check:
             str: A report message indicating whether the check succeeded or failed.
         """
         message = f"Check {self.name} "
-        message += f"failed\n. Evidences ({self.expected_evidences}) "
-        "can be found in the report.\n\n" if not self.get_result() else "succeeded\n"
+        message += f"failed. Evidences ({self.expected_evidences}) " + \
+            "can be found in the report." if not self.get_result() else "succeeded"
+        message += '\n'
 
         return message
 
