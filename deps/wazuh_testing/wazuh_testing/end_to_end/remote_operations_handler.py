@@ -245,8 +245,6 @@ def get_vulnerability_alerts(
         host_manager, alerts["mitigated"], packages_data
     )
 
-    import pdb; pdb.set_trace()
-
     return {
         "affected": alerts_vulnerabilities,
         "mitigated": alerts_vulnerabilities_mitigated,
