@@ -619,8 +619,8 @@ class HostManager:
             remove_operation_result = self.run_playbook(host, custom_uninstall_playbook)
         elif package_uninstall_name:
             if os_name == 'windows':
-                remove_operation_result = self.get_host(host).ansible("win_command",
-                                                                      f"{package_uninstall_name} /uninstall /quiet /S",
+                remove_operation_result = self.get_host(host).ansible("win_package",
+                                                                      f"product_id={package_uninstall_name} state=absent",
                                                                       check=False)
             elif os_name == 'linux':
                 os = self.get_host_variables(host)['os'].split('_')[0]
