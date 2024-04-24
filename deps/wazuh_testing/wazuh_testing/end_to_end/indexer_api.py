@@ -21,8 +21,8 @@ from wazuh_testing.tools.system import HostManager
 WAZUH_STATES_VULNERABILITIES_INDEXNAME = 'wazuh-states-vulnerabilities'
 
 
-def create_vulnerability_states_indexer_filter(target_agent: str | None = None,
-                                               greater_than_timestamp: str | None = None) -> dict:
+def create_vulnerability_states_indexer_filter(target_agent: str = None,
+                                               greater_than_timestamp: str = None) -> dict:
     """Create a filter for the Indexer API for the vulnerability state index.
 
     Args:
@@ -42,7 +42,7 @@ def create_vulnerability_states_indexer_filter(target_agent: str | None = None,
     return _create_filter(target_agent, timestamp_filter)
 
 
-def create_alerts_filter(target_agent: str | None = None, greater_than_timestamp: str | None = None) -> dict:
+def create_alerts_filter(target_agent: str = None, greater_than_timestamp: str = None) -> dict:
     """Create a filter for the Indexer API for the alerts index.
 
     Args:
@@ -62,7 +62,7 @@ def create_alerts_filter(target_agent: str | None = None, greater_than_timestamp
     return _create_filter(target_agent, timestamp_filter)
 
 
-def _create_filter(target_agent: str | None = None, timestamp_filter: dict | None = None) -> dict:
+def _create_filter(target_agent: str = None, timestamp_filter: dict = None) -> dict:
     """Create a filter for the Indexer API.
 
     Args:
@@ -89,7 +89,7 @@ def _create_filter(target_agent: str | None = None, timestamp_filter: dict | Non
 
 
 def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'},
-                       index: str = 'wazuh-alerts*', filter: dict | None = None, size: int = 10000) -> Dict:
+                       index: str = 'wazuh-alerts*', filter: dict = None, size: int = 10000) -> Dict:
     """
     Get values from the Wazuh Indexer API.
 

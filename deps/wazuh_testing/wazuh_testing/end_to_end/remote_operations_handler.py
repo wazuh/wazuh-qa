@@ -466,7 +466,7 @@ def filter_hosts_by_os(host_manager: HostManager, os_list: List[str]) -> List[st
 def launch_parallel_operations(
     task: Dict[str, List],
     host_manager: HostManager,
-    target_to_ignore: List[str] | None = None,
+    target_to_ignore: List[str] = None,
 ):
     """
     Launch parallel remote operations on multiple hosts.

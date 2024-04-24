@@ -183,7 +183,7 @@ class Check:
         evidences: List of collected evidence objects.
     """
     def __init__(self, name: str, assert_function: Callable,
-                 expected_evidences: List[str] | None = None):
+                 expected_evidences: List[str] = None):
         """Initializes a check with the given name, assertion function, and expected evidences.
 
         Args:
@@ -205,7 +205,7 @@ class Check:
         """
         return self.report_check()
 
-    def validate(self, evidences: List[Evidence] | None = None) -> bool:
+    def validate(self, evidences: List[Evidence] = None) -> bool:
         """Validates the check using the provided evidences.
 
         Args:
@@ -284,7 +284,7 @@ class TestResult:
         test_name (str): The name of the test.
         checks (List[Check]): List of checks of the test, default is an empty list.
     """
-    def __init__(self, test_name: str, checks: List[Check] | None = None):
+    def __init__(self, test_name: str, checks: List[Check] = None):
         """Initializes a test suite with the given name and checks.
 
         Args:

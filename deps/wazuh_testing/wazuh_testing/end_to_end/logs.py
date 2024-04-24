@@ -67,7 +67,7 @@ def get_hosts_logs(host_manager: HostManager, host_group: str = 'all') -> Dict[s
 
 
 def check_errors_in_environment(host_manager: HostManager, greater_than_timestamp: str = '',
-                                expected_errors: List[str] | None = None) -> dict:
+                                expected_errors: List[str] = None) -> dict:
     """Check if there are errors in the environment
 
     Args:
