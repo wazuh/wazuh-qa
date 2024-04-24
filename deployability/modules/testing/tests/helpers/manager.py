@@ -119,8 +119,8 @@ class WazuhManager:
         Takes scans using filters, the callback action and compares the result
 
         Args:
-            agent_params (str): agent parameters
-            callbak (cb): callback (action)
+            manager_params (str): manager parameters
+            callback (cb): callback (action)
 
         Returns:
             result (dict): comparison brief
@@ -182,6 +182,7 @@ class WazuhManager:
 
         Args:
             manager_params (str): manager parameters
+            manager_name (str): manager name
             wazuh_params (str): wazuh parameters
 
         """
@@ -198,7 +199,6 @@ class WazuhManager:
 
         Args:
             manager_params (str): manager parameters
-            wazuh_params (str): wazuh parameters
 
         """
         action_callback = lambda: WazuhManager._uninstall_manager_callback(manager_params)
@@ -210,7 +210,7 @@ class WazuhManager:
     @staticmethod
     def assert_results(result) -> None:
         """
-        Gets the status of an agent given its name.
+        Assert status of checkfiles
 
         Args:
             result (dict): result of comparison between pre and post action scan

@@ -1,0 +1,60 @@
+version: 0.1
+description: This workflow is used to test manager deployment for DDT1 PoC
+variables:
+  central_components-os:
+    - linux-ubuntu-20.04-amd64
+    #- linux-ubuntu-22.04-amd64
+    #- linux-oracle-9-amd64
+    #- linux-amazon-2-amd64
+    #- linux-redhat-7-amd64
+    #- linux-redhat-8-amd64
+    #- linux-redhat-9-amd64
+    #- linux-centos-7-amd64
+    #- linux-centos-8-amd64
+    #- linux-debian-10-amd64
+    #- linux-debian-11-amd64
+    #- linux-debian-12-amd64
+  infra-provider: vagrant
+  working-dir: /tmp/dtt1-poc
+
+tasks:
+  # Unique central components allocate task
+  - task: "allocate-central_components-{central_components}"
+    description: "Allocate resources for the central_components."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: create
+          - provider: "{infra-provider}"
+          - size: large
+          - composite-name: "{central_components}"
+          - inventory-output: "{working-dir}/central_components-{central_components}/inventory.yaml"
+          - track-output: "{working-dir}/central_components-{central_components}/track.yaml"
+    on-error: "abort-all"
+    foreach:
+      - variable: central_components-os
+        as: central_components
+
+  # Generic manager test task
+  - task: "run-central_components-{central_components}-tests"
+    description: "Run tests install for the central_components."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/testing/main.py
+          - targets:
+            - wazuh-1: "{working-dir}/central_components-{central_components}/inventory.yaml"
+          - tests: "install,stop,restart,uninstall"
+          - component: "central_components"
+          - wazuh-version: "4.7.3"
+          - wazuh-revision: "40714"
+          - live: "True"
+    on-error: "abort-all"
+    foreach:
+      - variable: central_components-os
+        as: central_components

@@ -29,6 +29,8 @@ class Utils:
             match = re.search(r'/manager-linux-([^-]+)-([^-]+)-', inventory_path)
         elif 'agent' in inventory_path:
             match = re.search(r'/agent-linux-([^-]+)-([^-]+)-', inventory_path)
+        elif 'central_components' in inventory_path:
+            match = re.search(r'/central_components-([^-]+)-([^-]+)-', inventory_path)
         if match:
             os_name = match.group(1)+ '-' + match.group(2)
         logger.info(f'Checking connection to {os_name}')

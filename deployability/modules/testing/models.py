@@ -7,7 +7,7 @@ from pydantic import BaseModel, field_validator
 
 class ExtraVars(BaseModel):
     """Extra vars for testing module."""
-    component: Literal['manager', 'agent']
+    component: Literal['manager', 'agent', 'central_components']
     wazuh_version: str
     wazuh_revision: str
     wazuh_branch: str | None = None

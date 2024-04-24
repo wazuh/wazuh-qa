@@ -94,6 +94,8 @@ class HostInformation:
             os_name = re.search(r'/manager-linux-([^-]+)-', inventory_path).group(1)
         elif 'agent' in inventory_path:
             os_name = re.search(r'/agent-linux-([^-]+)-', inventory_path).group(1)
+        elif 'central_components' in inventory_path:
+            os_name = re.search(r'/central_components-linux-([^-]+)-', inventory_path).group(1)
 
         if os_name == 'ubuntu' or os_name == 'debian':
             linux_distribution = 'deb'
@@ -118,6 +120,8 @@ class HostInformation:
             os_name = re.search(r'/manager-linux-([^-]+)-', inventory_path).group(1)
         elif 'agent' in inventory_path:
             os_name = re.search(r'/agent-linux-([^-]+)-', inventory_path).group(1)
+        elif 'central_components' in inventory_path:
+            os_name = re.search(r'/central_components-linux-([^-]+)-', inventory_path).group(1)
 
         return os_name
 
@@ -136,6 +140,8 @@ class HostInformation:
             match = re.search(r'/manager-linux-([^-]+)-([^-]+)-', inventory_path)
         elif 'agent' in inventory_path:
             match = re.search(r'/agent-linux-([^-]+)-([^-]+)-', inventory_path)
+        elif 'central_components' in inventory_path:
+            match = re.search(r'/central_components-linux-([^-]+)-([^-]+)-', inventory_path)
         if match:
             os_name = match.group(1)
             version = match.group(2)
@@ -149,6 +155,8 @@ class HostInformation:
             os_version = re.search(r".*?/manager-linux-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
         elif 'agent' in inventory_path:
             os_version = re.search(r".*?/agent-linux-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
+        elif 'central_components' in inventory_path:
+            os_version = re.search(r".*?/central_components-linux-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
             return os_version
         else:
             return None
@@ -542,7 +550,7 @@ class GeneralComponentActions:
         Returns:
             str: Role status
         """
-        logger.info(f'Getting status of {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        logger.info(f'Getting status of {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
 
         return Executor.execute_command(inventory_path, f'systemctl status {host_role}')
 

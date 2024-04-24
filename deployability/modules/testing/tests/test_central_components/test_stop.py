@@ -22,9 +22,14 @@ def wazuh_params(request):
         'targets': targets
     }
     yield params
-    logger.info('Restoring Manager status')
-    for worker in params['workers']:
-        GeneralComponentActions.component_restart(worker, 'wazuh-manager')
+    logger.info('Restoring Central Component status')
+    GeneralComponentActions.component_restart(params['master'], 'wazuh-manager')
+
+    for indexer_params in params['indexers']:
+        GeneralComponentActions.component_restart(indexer_params, 'wazuh-indexer')
+
+    GeneralComponentActions.component_restart(params['dashboard'], 'wazuh-dashboard')
+    GeneralComponentActions.component_restart(params['master'], 'filebeat')
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -48,9 +53,16 @@ def setup_test_environment(wazuh_params):
     wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
 
 def test_stop(wazuh_params):
-    for workers in wazuh_params['workers']:
-        GeneralComponentActions.component_stop(workers, 'wazuh-manager')
+    GeneralComponentActions.component_stop(wazuh_params['master'], 'wazuh-manager')
 
-    assert 'active ' in GeneralComponentActions.get_component_status(wazuh_params['master'], 'wazuh-manager'), logger.error(f"The {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is not active")
-    for worker in wazuh_params['workers']:
-        assert 'inactive ' in GeneralComponentActions.get_component_status(workers, 'wazuh-manager'), logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(worker)} is not active')
+    for indexer_params in wazuh_params['indexers']:
+        GeneralComponentActions.component_stop(indexer_params, 'wazuh-indexer')
+
+    GeneralComponentActions.component_stop(wazuh_params['dashboard'], 'wazuh-dashboard')
+    GeneralComponentActions.component_stop(wazuh_params['master'], 'filebeat')
+
+    assert 'inactive' in GeneralComponentActions.get_component_status(wazuh_params['master'], 'wazuh-manager'), logger.error(f'The manager in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])} is not active')
+    assert 'inactive' in GeneralComponentActions.get_component_status(wazuh_params['dashboard'], 'wazuh-dashboard'), logger.error(f'The dashboard in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["dashboard"])} is not active')
+    for indexer_params in wazuh_params['indexers']:
+        assert 'inactive' in GeneralComponentActions.get_component_status(indexer_params, 'wazuh-indexer'), logger.error(f'The indexer in {HostInformation.get_os_name_and_version_from_inventory(indexer_params)} is not active')
+    assert 'inactive' in GeneralComponentActions.get_component_status(wazuh_params['master'], 'filebeat'), logger.error(f'The filebeat in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])} is not active')
