@@ -22,7 +22,7 @@ import zlib
 import re
 from datetime import date
 from itertools import cycle
-from random import randint, sample, choice, getrandbits
+from random import randint, sample, choice, getrandbits, choice, getrandbits
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
@@ -675,8 +675,7 @@ class Agent:
         if self.syscollector is None:
             self.syscollector = GeneratorSyscollector(self.name, self.syscollector_event_types,
                                                       self.syscollector_legacy_messages,
-                                                      self.syscollector_batch_size,
-                                                      self.syscollector_packages_vuln_content)
+                                                      self.syscollector_batch_size)
 
     def init_rootcheck(self):
         """Initialize rootcheck module."""
@@ -780,7 +779,7 @@ class GeneratorSyscollector:
         batch_size (int): Number of messages of the same type
     """
 
-    def __init__(self, agent_name, event_types_list, old_format, batch_size, syscollector_packages_vuln_content):
+    def __init__(self, agent_name, event_types_list, old_format, batch_size):
         self.current_batch_events = -1
         self.current_batch_events_size = 0
         self.list_events = event_types_list
@@ -793,9 +792,6 @@ class GeneratorSyscollector:
             'network': 'dbsync_network_iface',
             'process': 'dbsync_processes'
         }
-        self.syscollector_packages_vuln_content = syscollector_packages_vuln_content
-
-        self.packages = []
 
         self.old_format = old_format
         self.agent_name = agent_name
@@ -803,14 +799,6 @@ class GeneratorSyscollector:
         self.syscollector_tag = 'syscollector'
         self.syscollector_mq = 'd'
         self.current_id = 1
-
-        self.default_packages_vuln_content = os.path.join(_data_path, 'syscollector_parsed_packages.json')
-        self.package_index = 0
-
-        if self.syscollector_packages_vuln_content:
-            self.packages = self.init_package_list(self.syscollector_packages_vuln_content)
-        else:
-            self.packages = self.init_package_list(self.default_packages_vuln_content)
 
     def parse_package_template(self, message, package_data):
         """Parse package template with package data.
@@ -842,37 +830,26 @@ class GeneratorSyscollector:
             dict: Package data.
             str: Operation (INSERTED or DELETED).
         """
-        operation = 'DELETED' if self.packages[self.package_index]['installed'] else 'INSERTED'
+        operation = str(choice(['INSERTED', 'DELETED']))
 
-        package_data = self.packages[self.package_index]
+        installed = bool(getrandbits(1))
+        item_id = get_random_string(10)
+        vendor_product = ''.join(sample(ascii_letters * 5, 10))
+        version = sample(digits, 1)[0]
 
-        self.packages[self.package_index]['installed'] = not self.packages[self.package_index]['installed']
-        self.package_index = (self.package_index + 1) % len(self.packages)
+        package_data = {
+            "architecture": '',
+            "description": '',
+            "format": '',
+            "installed": installed,
+            "item_id": item_id,
+            "product": vendor_product,
+            "source": '',
+            "vendor": vendor_product,
+            "version": version
+        }
 
         return package_data, operation
-
-    def init_package_list(self, packages_file):
-        """Get package data from a json file.
-        Returns:
-            dict: Package data.
-        """
-        with open(os.path.join(_data_path, packages_file), 'r') as fp:
-            package_data = json.load(fp)
-
-        for package in package_data:
-            package['installed'] = False
-            if 'description' not in package:
-                package['description'] = ''
-            if 'architecture' not in package:
-                package['architecture'] = ''
-            if 'format' not in package:
-                package['format'] = ''
-            if 'source' not in package:
-                package['source'] = ''
-            if 'item_id' not in package:
-                package['item_id'] = get_random_string(10)
-
-        return package_data
 
     def get_event_template_legacy(self, message_type):
         """Get syscollector legacy message of the specified type.
@@ -909,8 +886,7 @@ class GeneratorSyscollector:
             str: Syscollector event message.
         """
         message_event_type = self.syscollector_event_type_mapping[message_type]
-        operation = 'INSERTED' if (message_type == 'osinfo' or message_type == 'packages') else 'MODIFIED'
-        message_operation = operation
+        message_operation = 'INSERTED' if (message_type == 'osinfo' or message_type == 'packages') else 'MODIFIED'
 
         message_data = {}
         package_data = {}
@@ -950,10 +926,10 @@ class GeneratorSyscollector:
         message = template
 
         generics_fields_to_replace = [
-                        ('<agent_name>', self.agent_name), ('<random_int>', f"{self.current_id}"),
-                        ('<random_string>', get_random_string(10)),
-                        ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
-                    ]
+            ('<agent_name>', self.agent_name), ('<random_int>', f"{self.current_id}"),
+            ('<random_string>', get_random_string(10)),
+            ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
+        ]
 
         for variable, value in generics_fields_to_replace:
             message = message.replace(variable, value)
