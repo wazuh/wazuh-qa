@@ -16,16 +16,15 @@ Copyright (C) 2015, Wazuh Inc.
 Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
-import xml.dom.minidom
-import logging
 import ast
-
+import logging
+import xml.dom.minidom
 from multiprocessing.pool import ThreadPool
 from typing import Dict, List
 
 from wazuh_testing.end_to_end import configuration_filepath_os
-from wazuh_testing.tools.configuration import set_section_wazuh_conf
-from wazuh_testing.tools.configuration import load_configuration_template
+from wazuh_testing.tools.configuration import (load_configuration_template,
+                                               set_section_wazuh_conf)
 from wazuh_testing.tools.system import HostManager
 
 
@@ -244,8 +243,9 @@ def change_agent_manager_ip(host_manager: HostManager, agent: str, new_manager_i
     configure_host(agent, new_configuration, host_manager)
 
 
-def load_vulnerability_detector_configurations(host_manager, configurations_paths, enable=True, syscollector_interval='1m'):
-    """Return the configurations for Vulnerability testing for the agent and manager roles
+def load_vulnerability_detector_configurations(host_manager, configurations_paths, enable=True,
+                                               syscollector_interval='1m'):
+    """Returns the configurations for Vulnerability testing for the agent and manager roles
 
     Args:
         host_manager (HostManager): An instance of the HostManager class containing information about hosts.
@@ -259,10 +259,10 @@ def load_vulnerability_detector_configurations(host_manager, configurations_path
     configurations = {}
     vd_enable_value = 'yes' if enable else 'no'
 
-
     for host in host_manager.get_group_hosts('all'):
         if host in host_manager.get_group_hosts('agent'):
-            configurations[host] = load_configuration_template(configurations_paths['agent'], [{}], [{}])
+            configurations[host] = load_configuration_template(configurations_paths['agent'],
+                                                               [{}], [{}])
 
             configuration_template_str = str(configurations[host])
             configuration_variables = {
@@ -282,19 +282,19 @@ def load_vulnerability_detector_configurations(host_manager, configurations_path
             indexer_server_variables = host_manager.get_host_variables(indexer_server)
 
             default_filebeat_key_path = f"/etc/pki/filebeat/node-{manager_index}-key.pem"
-            filebeat_key = indexer_server_variables['filebeat_key_path'] if 'filebeat_key_path' in indexer_server_variables \
-                    else default_filebeat_key_path
+
+            filebeat_key = indexer_server_variables.get('filebeat_key_path',
+                                                        default_filebeat_key_path)
 
             default_filebeat_certificate_path = f"/etc/pki/filebeat/node-{manager_index}.pem"
-            filebeat_certificate = indexer_server_variables['filebeat_certificate_path'] if 'filebeat_certificate_path' in indexer_server_variables \
-                    else default_filebeat_certificate_path
+            filebeat_certificate = indexer_server_variables.get('filebeat_certificate_path',
+                                                                default_filebeat_certificate_path)
 
             default_filebeat_root_ca_path = '/etc/pki/filebeat/root-ca.pem'
-            filebeat_root_ca = indexer_server_variables['filebeat_root_ca_path'] if 'filebeat_root_ca_path' in indexer_server_variables \
-                    else default_filebeat_root_ca_path
-
-            indexer_server = indexer_server_variables['indexer_server'] if 'indexer_server' in indexer_server_variables \
-                    else indexer_server_variables['ip']
+            filebeat_root_ca = indexer_server_variables.get('filebeat_root_ca_path',
+                                                            default_filebeat_root_ca_path)
+            indexer_server = indexer_server_variables.get('indexer_server',
+                                                          indexer_server_variables['ip'])
 
             configuration_variables = {
                 'VULNERABILITY_DETECTOR_ENABLE': vd_enable_value,
