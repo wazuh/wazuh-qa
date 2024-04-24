@@ -50,9 +50,9 @@ def get_alert_indexer_api(query, credentials, ip_address, index='wazuh-alerts-4.
      """
     url = f"https://{ip_address}:9200/{index}/_search?"
 
-    response = requests.get(url=url, params={'pretty': 'true'}, json=query, 
+    response = requests.get(url=url, params={'pretty': 'true'}, json=query,
                             verify=False,
-                            auth=requests.auth.HTTPBasicAuth(credentials['user'], 
+                            auth=requests.auth.HTTPBasicAuth(credentials['user'],
                                                              credentials['password']))
 
     if '"hits" : [ ]' in response.text:
@@ -78,7 +78,7 @@ def delete_index_api(credentials, ip_address, index='wazuh-alerts-4.x-*'):
         obj(class): `NoneType` object
     """
     url = f"https://{ip_address}:9200/"
-    authorization = requests.auth.HTTPBasicAuth(credentials['user'], 
+    authorization = requests.auth.HTTPBasicAuth(credentials['user'],
                                                 credentials['password'])
 
     response = requests.delete(url=url+index, params={'pretty': 'true'}, verify=False, auth=authorization)
@@ -124,7 +124,7 @@ class Evidence:
     Attributes:
         name (str): The name of the evidence.
         value (Any): The value of the evidence.
-        debug (bool, optional): Indicates whether the evidence is for debugging, for verbose evidences. 
+        debug (bool, optional): Indicates whether the evidence is for debugging, for verbose evidences.
                                 Defaults to False.
     """
     name: str
@@ -177,12 +177,12 @@ class Check:
     Attributes:
         name (str): The name of the check.
         assert_function (Callable): The function used for assertion.
-        expected_evidences (List[str] | None): List of expected evidence names to perform the validation. 
+        expected_evidences (List[str] | None): List of expected evidence names to perform the validation.
             Default is None.
         result: The result of the check.
         evidences: List of collected evidence objects.
     """
-    def __init__(self, name: str, assert_function: Callable, 
+    def __init__(self, name: str, assert_function: Callable,
                  expected_evidences: List[str] | None = None):
         """Initializes a check with the given name, assertion function, and expected evidences.
 
@@ -213,7 +213,7 @@ class Check:
 
         Returns:
             bool: True if validation succeeds, False otherwise.
-        
+
         Raises:
             ValueError: If provided evidences do not contains the expected ones.
         """
@@ -229,7 +229,6 @@ class Check:
                              f"Expected evidences: {self.expected_evidences}."
                              f"Evidences found: {provided_evidences_names}")
 
-
         self.result = self.assert_function(*[evidence.value for evidence in provided_evidences_expected])
         self.evidences = evidences
 
@@ -242,7 +241,7 @@ class Check:
 
         Returns:
             Any: The result of the check.
-        
+
         Raises:
             ValueError: If the check has not been executed yet.
         """
@@ -258,8 +257,8 @@ class Check:
             str: A report message indicating whether the check succeeded or failed.
         """
         message = f"Check {self.name} "
-        message += f"failed\n. Evidences ({self.expected_evidences}) " \
-                    "can be found in the report.\n\n" if not self.get_result() else "succeeded\n"
+        message += f"failed\n. Evidences ({self.expected_evidences}) "
+        "can be found in the report.\n\n" if not self.get_result() else "succeeded\n"
 
         return message
 
@@ -318,7 +317,7 @@ class TestResult:
         """
         return all([check.result for check in self.checks])
 
-    def collect_evidences(self, evidences_directory: str, 
+    def collect_evidences(self, evidences_directory: str,
                           collect_verbose_evidences: bool = False,
                           collect_evidences_for_passed_checks: bool = False) -> None:
         """Collects evidences for the checks in the test suite.
@@ -326,7 +325,8 @@ class TestResult:
         Args:
             evidences_directory (str): The directory where evidence files will be stored.
             collect_verbose_evidences (bool, optional): If True, collects verbose evidences. Defaults to False.
-            collect_evidences_for_passed_checks (bool, optional): If True, collects evidences for passed checks as well. Defaults to False.
+            collect_evidences_for_passed_checks (bool, optional): If True, collects evidences for passed checks as well.
+                                                                  Defaults to False.
         """
         for check in self.checks:
             if check.get_result() and not collect_evidences_for_passed_checks:
@@ -337,7 +337,8 @@ class TestResult:
         """Generates a report message for the test suite.
 
         Returns:
-            str: A report message indicating whether the test suite succeeded or failed, along with individual check reports.
+            str: A report message indicating whether the test suite succeeded or failed,
+                 along with individual check reports.
         """
         message = f"\nTest {self.test_name} "
         message += "failed\n\n" if not self.get_test_result() else "succeeded:\n\n-----\n"
