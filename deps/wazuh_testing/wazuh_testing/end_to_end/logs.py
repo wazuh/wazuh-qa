@@ -16,7 +16,7 @@ This program is a free software; you can redistribute it and/or modify it under 
 """
 import re
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List
 
 from wazuh_testing import ALERTS_JSON_PATH
 from wazuh_testing.end_to_end import logs_filepath_os
@@ -66,13 +66,14 @@ def get_hosts_logs(host_manager: HostManager, host_group: str = 'all') -> Dict[s
     return host_logs
 
 
-def check_errors_in_environment(host_manager: HostManager, greater_than_timestamp: str='',
-                                expected_errors=None) -> dict:
+def check_errors_in_environment(host_manager: HostManager, greater_than_timestamp: str = '',
+                                expected_errors: List[str] | None = None) -> dict:
     """Check if there are errors in the environment
 
     Args:
         host_manager (HostManager): An instance of the HostManager class.
         greater_than_timestamp (str): Timestamp to filter the logs
+        expected_errors (List): List of expected errors. Default None
 
     Returns:
         dict: Errors found in the environment
