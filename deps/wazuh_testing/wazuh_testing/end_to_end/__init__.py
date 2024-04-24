@@ -139,16 +139,28 @@ class Evidence:
         """
         try:
             with open(os.path.join(evidences_directory, self.name), 'w') as evidence_file:
-                if isinstance(self.value, dict) or isinstance(self.value, list):
-                    evidence_file.write(json.dumps(self.value, indent=4))
-                else:
-                    evidence_file.write(self.value)
-        except PermissionError as e:
-            logging.error(f"Error while writing evidence {self.name}: {e}")
-        except FileNotFoundError as e:
-            logging.error(f"Error while writing evidence {self.name}: {e}")
+                self._write_to_file(evidence_file)
         except Exception as e:
-            logging.error(f"Error while writing evidence {self.name}: {e}")
+            self._log_error(e)
+
+    def _write_to_file(self, evidence_file):
+        """Writes evidence to a file.
+
+        Args:
+            evidence_file: File object to write evidence to.
+        """
+        if isinstance(self.value, (dict, list)):
+            json.dump(self.value, evidence_file, indent=4)
+        else:
+            evidence_file.write(str(self.value))
+
+    def _log_error(self, e):
+        """Logs error occurred while writing evidence.
+
+        Args:
+            e: The exception that occurred.
+        """
+        logging.error(f"Error while writing evidence {self.name}: {e}")
 
     def dict(self):
         """Returns the evidence as a dictionary.
