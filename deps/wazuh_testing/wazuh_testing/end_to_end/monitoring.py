@@ -15,17 +15,16 @@ Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
 
-import re
 import logging
-from time import sleep
-from datetime import datetime
-from typing import Dict, List
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
+from time import sleep
+from typing import Dict, List
 
 from wazuh_testing.end_to_end import logs_filepath_os
 from wazuh_testing.end_to_end.regex import get_event_regex
 from wazuh_testing.tools.system import HostManager
-
 
 DEFAULT_SCAN_INTERVAL = 5
 
@@ -222,13 +221,14 @@ def generate_monitoring_logs(host_manager: HostManager, regex_list: List[str], t
     return monitoring_data
 
 
-def monitoring_syscollector_scan_agents(host_manager: HostManager, timeout: int, greater_than_timestamp: str = '') -> list:
-    """
-    Monitor syscollector scan on agents.
+def monitoring_syscollector_scan_agents(host_manager: HostManager, timeout: int,
+                                        greater_than_timestamp: str = '') -> list:
+    """Monitor syscollector scan on agents.
 
     Args:
         host_manager (HostManager): An instance of the HostManager class.
         timeout (int): The timeout value for monitoring.
+        greater_than_timestamp_formatted (str): Timestamp to filter agents logs. Default ''
 
     Returns:
         list: A list of agents that were not scanned.
