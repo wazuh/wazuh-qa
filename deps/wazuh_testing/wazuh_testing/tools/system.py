@@ -3,22 +3,23 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import json
-import tempfile
-import sys
-import os
 import logging
+import os
+import sys
+import tempfile
 import xml.dom.minidom as minidom
-from typing import Union, List
+from threading import Thread
+from typing import List, Union
+
 import testinfra
 import yaml
-
-from wazuh_testing.tools import WAZUH_CONF, WAZUH_API_CONF, API_LOG_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
-from wazuh_testing.tools.configuration import set_section_wazuh_conf
 from ansible.inventory.manager import InventoryManager
 from ansible.parsing.dataloader import DataLoader
 from ansible.vars.manager import VariableManager
-from threading import Thread
 
+from wazuh_testing.tools import (API_LOG_FILE_PATH, WAZUH_API_CONF, WAZUH_CONF,
+                                 WAZUH_LOCAL_INTERNAL_OPTIONS)
+from wazuh_testing.tools.configuration import set_section_wazuh_conf
 
 logger = logging.getLogger('testinfra')
 logger.setLevel(logging.CRITICAL)
@@ -889,6 +890,24 @@ class HostManager:
                 hosts_not_reachable.append(host)
 
         return hosts_not_reachable
+
+    def clean_agents(self, restart_managers: bool = False) -> None:
+        """Clean and register agents
+
+        Args:
+            host_manager (HostManager): An instance of the HostManager class.
+            restart_managers (bool, optional): Whether to restart the managers. Defaults to False.
+        """
+        # Restart managers and stop agents
+        logging.info("Stopping agents")
+        self.control_environment("stop", ["agent"], parallel=True)
+
+        logging.info("Removing agents")
+        self.remove_agents()
+
+        if restart_managers:
+            logging.info("Restarting managers")
+            self.control_environment("restart", ["manager"], parallel=True)
 
 
 def clean_environment(host_manager, target_files):
