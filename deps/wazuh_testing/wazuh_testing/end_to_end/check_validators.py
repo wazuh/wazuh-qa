@@ -121,6 +121,15 @@ def expected_vulnerability_alerts(vulnerabilities, expected_vulnerabilities):
     return expected_found_comparision['result']
 
 
+def empty_dict(dictionary: dict):
+    result = True
+    for key, value in dictionary.items():
+        if value:
+            logging.critical(f"{key} is not empty: {value}")
+            result = False
+
+    return result
+
 equals = lambda x, y: x == y
 
 
