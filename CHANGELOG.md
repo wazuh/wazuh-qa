@@ -23,7 +23,9 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Crearte additional Vulnerability Detector E2E tests ([#5287](https://github.com/wazuh/wazuh-qa/pull/5287)) \- (Framework + Tests)
 - Change Vulnerability Detection feed updated waiter ([#5227](https://github.com/wazuh/wazuh-qa/pull/5227)) \- (Tests)
+- Replace timestamp filter with vulnerabilities detected_at field.([#5266](https://github.com/wazuh/wazuh-qa/pull/5266)) \- (Framework + Tests)
 - Changes macOS packages with new ones that generate vulnerabilities ([#5174](https://github.com/wazuh/wazuh-qa/pull/5174)) \- (Tests)
 - Refactor initial scan Vulnerability E2E tests ([#5081](https://github.com/wazuh/wazuh-qa/pull/5081)) \- (Framework + Tests)
 - Update Packages in TestScanSyscollectorCases ([#4997](https://github.com/wazuh/wazuh-qa/pull/4997)) \- (Framework + Tests)
@@ -53,6 +55,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix packages in Windows and macOS upgrade cases ([#5223](https://github.com/wazuh/wazuh-qa/pull/5223)) \- (Framework + Tests)
+- Fix vulnerabilities and add new packages to Vulnerability Detector E2E tests ([#5234](https://github.com/wazuh/wazuh-qa/pull/5234)) \- (Tests)
 - Fix provision macOS endpoints with npm ([#5128](https://github.com/wazuh/wazuh-qa/pull/5158)) \- (Tests)
 - Fix timestamps alerts and logs filter ([#5157](https://github.com/wazuh/wazuh-qa/pull/5157)) \- (Framework + Tests)
 - Fix macOS and Windows agents timezone ([#5178](https://github.com/wazuh/wazuh-qa/pull/5178)) \- (Framework)
