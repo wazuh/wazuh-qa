@@ -410,8 +410,8 @@ def main():
     arg_parser.add_argument('--vulnerability-packages-list-file', 
                             metavar='<vulnerability_packages_list_file>',
                             type=str, 
-                            help='''File containing a list of packages to be sent by syscollector. One package per line. Default is None.''', 
-                            required=False, 
+                            help='File containing a list of packages to be sent by syscollector. One package per line. Default is None.', 
+                            required=False,
                             default=None,
                             dest='vulnerability_packages_list_file')
 
