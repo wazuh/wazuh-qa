@@ -115,12 +115,13 @@ class Agent:
         registration_address (str): Manager registration IP address.
     """
     def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None, id=None, name=None, key=None,
-                 version="v4.3.0", fim_eps=100, fim_integrity_eps=100, sca_eps=100, syscollector_eps=100, vulnerability_eps=100, labels=None,
-                 rootcheck_eps=100, logcollector_eps=100, authd_password=None, disable_all_modules=False,
-                 rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
-                 syscollector_frequency=60.0, vulnerability_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100,
-                 fixed_message_size=None, registration_address=None, retry_enrollment=False,
-                 logcollector_msg_number=None, custom_logcollector_message='',
+                 version="v4.3.0", fim_eps=100, fim_integrity_eps=100, sca_eps=100, syscollector_eps=100,
+                 vulnerability_eps=100, labels=None, rootcheck_eps=100, logcollector_eps=100, authd_password=None,
+                 disable_all_modules=False, rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0,
+                 sca_frequency=60, syscollector_frequency=60.0, vulnerability_frequency=60.0,
+                 syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100, fixed_message_size=None,
+                 registration_address=None, retry_enrollment=False, logcollector_msg_number=None,
+                 custom_logcollector_message='',
                  syscollector_event_types=['network', 'port', 'hotfix', 'process', 'packages', 'osinfo', 'hwinfo'],
                  syscollector_legacy_messages=False, vulnerability_packages_vuln_content=None,
                  vulnerability_events=10):
@@ -179,9 +180,15 @@ class Agent:
             'keepalive': {'status': 'enabled', 'frequency': self.keepalive_frequency},
             'fim': {'status': 'enabled', 'eps': self.fim_eps},
             'fim_integrity': {'status': 'disabled', 'eps': self.fim_integrity_eps},
-            'syscollector': {'status': 'disabled', 'frequency': self.syscollector_frequency, 'eps': self.syscollector_eps},
-            'vulnerability': {'status': 'disabled', 'frequency': self.vulnerability_frequency, 'eps': self.vulnerability_eps},
-            'rootcheck': {'status': 'disabled', 'frequency': self.rootcheck_frequency, 'eps': self.rootcheck_eps},
+            'syscollector': {
+                'status': 'disabled', 'frequency': self.syscollector_frequency, 'eps': self.syscollector_eps
+            },
+            'vulnerability': {
+                'status': 'disabled', 'frequency': self.vulnerability_frequency, 'eps': self.vulnerability_eps
+            },
+            'rootcheck': {
+                'status': 'disabled', 'frequency': self.rootcheck_frequency, 'eps': self.rootcheck_eps
+            },
             'sca': {'status': 'disabled', 'frequency': self.sca_frequency, 'eps': self.sca_eps},
             'hostinfo': {'status': 'disabled', 'eps': self.hostinfo_eps},
             'winevt': {'status': 'disabled', 'eps': self.winevt_eps},
@@ -783,7 +790,7 @@ class Generator:
         }
 
         self.current_id = 1
-    
+
     def parse_package_template(self, message, package_data):
         """Parse package template with package data.
         Args:
@@ -808,7 +815,7 @@ class Generator:
             message = message.replace(package_key, package_value)
 
         return message
-    
+
     def get_event_template(self, message_type):
         """Get syscollector message of the specified type.
         Args:
@@ -850,7 +857,7 @@ class Generator:
             message = self.parse_package_template(message, package_data)
 
         return message
-    
+
     def format_event_template(self, template, message_type=None):
         """Format syscollector message of the specified type.
         Args:
@@ -994,7 +1001,8 @@ class GeneratorVulnerabilityEvents(Generator):
     """This class allows the generation of vulnerability events.
     Create OS and Packages type events (syscollector events) to generate vulnerability events.
     In order to change messages events it randomized different fields of templates specified by <random_string>.
-    In order to simulate syscollector module, it send a set of the same syscollector type messages, which size is specified by `batch_size` attribute.
+    In order to simulate syscollector module, it send a set of the same syscollector type messages, which size 
+    is specified by `batch_size` attribute.
     Args:
         agent_name (str): Name of the agent.
         old_format (bool): Enable prior 4.2 agents syscollector format.
@@ -1057,12 +1065,13 @@ class GeneratorVulnerabilityEvents(Generator):
                 package['source'] = ''
             if 'item_id' not in package:
                 package['item_id'] = get_random_string(10)
-        
+
         return package_data
 
     def generate_event(self):
         """Generate vulnerability event.
-        The event types are selected sequentially, creating a number of events of the same type specified in `events_size`.
+        The event types are selected sequentially, creating a number of events of the same 
+        type specified in `events_size`.
         Returns:
             str: generated event with the desired format for syscollector
         """
@@ -1076,7 +1085,7 @@ class GeneratorVulnerabilityEvents(Generator):
         event_template = self.get_event_template(self.current_event)
 
         event_final = self.format_event_template(event_template, self.current_event)
-        
+
         logging.debug(f"Vulnerability Event - {event_final}")
 
         self.current_id += 1

@@ -399,18 +399,18 @@ def main():
                             action='store_true',
                             default=False,
                             dest='syscollector_legacy_messages')
-    
+
     arg_parser.add_argument('--vulnerability-events',
                             type=int,
                             help='Number of vulnerabilities per agent',
                             required=False,
                             default=10,
                             dest='vulnerability_events')
-    
-    arg_parser.add_argument('--vulnerability-packages-list-file', 
+
+    arg_parser.add_argument('--vulnerability-packages-list-file',
                             metavar='<vulnerability_packages_list_file>',
-                            type=str, 
-                            help='File containing a list of packages to be sent by syscollector. One package per line. Default is None.', 
+                            type=str,
+                            help='File containing a list of packages to be sent by syscollector. One package per line.',
                             required=False,
                             default=None,
                             dest='vulnerability_packages_list_file')
