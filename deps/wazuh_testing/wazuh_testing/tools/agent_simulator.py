@@ -123,7 +123,7 @@ class Agent:
                  logcollector_msg_number=None, custom_logcollector_message='',
                  syscollector_event_types=['network', 'port', 'hotfix', 'process', 'packages', 'osinfo', 'hwinfo'],
                  syscollector_legacy_messages=False, vulnerability_packages_vuln_content=None,
-                 vulnerability_batch_size=10):
+                 vulnerability_events=10):
         self.id = id
         self.name = name
         self.key = key
@@ -143,7 +143,7 @@ class Agent:
         self.syscollector_legacy_messages = syscollector_legacy_messages
 
         self.vulnerability_eps = vulnerability_eps
-        self.vulnerability_batch_size = vulnerability_batch_size
+        self.vulnerability_events = vulnerability_events
         self.vulnerability_packages_vuln_content = vulnerability_packages_vuln_content
         self.vulnerability_frequency = vulnerability_frequency
 
@@ -705,7 +705,7 @@ class Agent:
         if self.vulnerability is None:
             self.vulnerability = GeneratorVulnerabilityEvents(
                 self.name,
-                self.vulnerability_batch_size,
+                self.vulnerability_events,
                 self.vulnerability_packages_vuln_content
             )
 
@@ -998,17 +998,17 @@ class GeneratorVulnerabilityEvents(Generator):
     Args:
         agent_name (str): Name of the agent.
         old_format (bool): Enable prior 4.2 agents syscollector format.
-        batch_size (int): Number of messages of the same type.
+        events_size (int): Number of messages of the same type.
         custom_packages_vuln_content (list): File containing a list of packages to be sent by syscollector.
     """
 
-    def __init__(self, agent_name, batch_size, custom_packages_vuln_content):
+    def __init__(self, agent_name, events_size, custom_packages_vuln_content):
         super().__init__(agent_name, 'd', 'syscollector')
 
-        self.current_batch_events_size = 0
+        self.current_events_size = 1
         self.package_index = 0
-        self.current_event = None
-        self.batch_size = batch_size
+        self.current_event = 'osinfo'
+        self.events_size = events_size
 
         self.packages = []
         self.custom_packages_vuln_content = custom_packages_vuln_content
@@ -1026,11 +1026,12 @@ class GeneratorVulnerabilityEvents(Generator):
             str: Operation (INSERTED or DELETED).
         """
 
-        operation = 'DELETED' if self.packages[self.package_index]['installed'] else 'INSERTED'
+        is_installed = self.packages[self.package_index]['installed']
+        operation = 'DELETED' if is_installed else 'INSERTED'
 
         package_data = self.packages[self.package_index]
 
-        self.packages[self.package_index]['installed'] = not self.packages[self.package_index]['installed']
+        self.packages[self.package_index]['installed'] = not is_installed
         self.package_index = (self.package_index + 1) % len(self.packages)
 
         return package_data, operation
@@ -1061,24 +1062,21 @@ class GeneratorVulnerabilityEvents(Generator):
 
     def generate_event(self):
         """Generate vulnerability event.
-        The event types are selected sequentially, creating a number of events of the same type specified in `batch_size`.
+        The event types are selected sequentially, creating a number of events of the same type specified in `events_size`.
         Returns:
             str: generated event with the desired format for syscollector
         """
 
-        if self.current_batch_events_size == 0:
-            if self.current_id != 1:
-                self.current_event = 'packages'
-                self.current_batch_events_size = self.batch_size
-            else:
-                self.current_event = 'osinfo'
-                self.current_batch_events_size = 1
+        if self.current_events_size == 0:
+            self.current_event = 'packages'
+            self.current_events_size = self.events_size
 
-        self.current_batch_events_size = self.current_batch_events_size - 1
+        self.current_events_size = self.current_events_size - 1
 
         event_template = self.get_event_template(self.current_event)
 
         event_final = self.format_event_template(event_template, self.current_event)
+        
         logging.debug(f"Vulnerability Event - {event_final}")
 
         self.current_id += 1

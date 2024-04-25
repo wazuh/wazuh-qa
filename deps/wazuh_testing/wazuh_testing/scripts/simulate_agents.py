@@ -108,7 +108,7 @@ def create_agent(args, custom_labels):
         'syscollector_frequency': args.syscollector_frequency,
         'syscollector_event_types': args.syscollector_event_types,
         'syscollector_legacy_messages': args.syscollector_legacy_messages,
-        'vulnerability_batch_size': args.vulnerability_batch_size,
+        'vulnerability_events': args.vulnerability_events,
         'vulnerability_packages_vuln_content': args.vulnerability_packages_list_file
     }
 
@@ -400,12 +400,12 @@ def main():
                             default=False,
                             dest='syscollector_legacy_messages')
     
-    arg_parser.add_argument('--vulnerability-batch-size',
+    arg_parser.add_argument('--vulnerability-events',
                             type=int,
                             help='Number of vulnerabilities per agent',
                             required=False,
                             default=10,
-                            dest='vulnerability_batch_size')
+                            dest='vulnerability_events')
     
     arg_parser.add_argument('--vulnerability-packages-list-file', 
                             metavar='<vulnerability_packages_list_file>',
