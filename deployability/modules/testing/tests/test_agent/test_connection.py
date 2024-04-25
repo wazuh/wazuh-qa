@@ -74,7 +74,7 @@ def test_connection(wazuh_params):
 def test_status(wazuh_params):
     for agent in wazuh_params['agents'].values():
         status = GeneralComponentActions.get_component_status(agent, 'wazuh-agent')
-        assert 'active' in status or 'connected' in status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} is not active')
+        assert 'active' in status or 'connected' in status or "Running" in status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} is not active')
 
 
 def test_service(wazuh_params):

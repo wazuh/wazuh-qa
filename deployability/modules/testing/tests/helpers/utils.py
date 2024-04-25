@@ -77,18 +77,19 @@ class Utils:
                 protocol = 'http'
             endpoint_url = f'{protocol}://{host}:{port}'
 
-            try:
-                session = winrm.Session(endpoint_url, auth=(username, password),transport='ntlm', server_cert_validation='ignore')
-                cmd = session.run_cmd('ipconfig')
-                if cmd.status_code == 0:
-                    logger.info("WinRM connection successful.")
-                    return True
-                else:
-                    logger.error(f'WinRM connection failed. Check the credentials in the inventory file.')
-                    return False
-            except Exception as e:
-                logger.warning(f'Error on attempt {attempt} of {attempts}: {e}')
-            time.sleep(sleep)
+            for attempt in range(1, attempts + 1):
+                try:
+                    session = winrm.Session(endpoint_url, auth=(username, password),transport='ntlm', server_cert_validation='ignore')
+                    cmd = session.run_cmd('ipconfig')
+                    if cmd.status_code == 0:
+                        logger.info("WinRM connection successful.")
+                        return True
+                    else:
+                        logger.error(f'WinRM connection failed. Check the credentials in the inventory file.')
+                        return False
+                except Exception as e:
+                    logger.warning(f'Error on attempt {attempt} of {attempts}: {e}')
+                time.sleep(sleep)
 
         logger.error(f'Connection attempts failed after {attempts} tries. Connection timeout in {os_name}')
         return False

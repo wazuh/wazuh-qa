@@ -6,7 +6,7 @@ import pytest
 import re
 
 from ..helpers.agent import WazuhAgent
-from ..helpers.constants import WAZUH_ROOT, WINDOWS_CONFIGURATIONS_DIR
+from ..helpers.constants import WAZUH_ROOT, WINDOWS_ROOT_DIR
 from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
 from modules.testing.utils import logger
 from ..helpers.manager import WazuhManager
@@ -81,8 +81,9 @@ def test_installation(wazuh_params):
     assert HostInformation.dir_exists(wazuh_params['master'], WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])}')
 
     # Agent installation
-    for agent_names, agent_params in wazuh_params['agents'].items():
-        WazuhAgent.perform_install_and_scan_for_agent(agent_params, agent_names, wazuh_params)
+    for agent_name, agent_params in wazuh_params['agents'].items():
+        WazuhAgent.perform_install_and_scan_for_agent(agent_params, agent_name, wazuh_params)
+        #WazuhAgent.install_agent(agent_params, agent_name, wazuh_params['wazuh_version'], wazuh_params['wazuh_revision'], wazuh_params['live'])
 
     # Testing installation directory
     for agent in wazuh_params['agents'].values():
@@ -90,7 +91,7 @@ def test_installation(wazuh_params):
         if os_type == 'linux':
             path_to_check = WAZUH_ROOT
         elif os_type == 'windows':
-            path_to_check = WINDOWS_CONFIGURATIONS_DIR
+            path_to_check = WINDOWS_ROOT_DIR
 
         assert HostInformation.dir_exists(agent, path_to_check), logger.error(f'The {path_to_check} is not present in {HostInformation.get_os_name_and_version_from_inventory(agent)}')
 

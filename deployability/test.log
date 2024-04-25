@@ -1,0 +1,43 @@
+[37m[2024-04-22 23:10:52] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m
+[37m[2024-04-22 23:10:52] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m
+============================= test session starts ==============================
+platform linux -- Python 3.10.14, pytest-7.4.4, pluggy-1.4.0 -- /home/fcaffieri/wazuh-env/wazuh-qa/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/fcaffieri/wazuh-env/wazuh-qa/deployability/modules
+collecting ... collected 2 items
+
+modules/testing/tests/test_agent/test_install.py::test_installation [32m[2024-04-22 23:10:52] [INFO] TESTER: Checking connection to server-2016[0m
+[32m[2024-04-22 23:10:52] [INFO] TESTER: WinRM connection successful.[0m
+validando
+Get-Service -Name 'Wazuh'
+False
+Test-Path -Path "C:/Program Files (x86)/ossec-agent/client.keys"
+False
+Get-Service -Name 'Wazuh'
+[32m[2024-04-22 23:10:53] [INFO] TESTER: Checking connection to ubuntu-22.04[0m
+[32m[2024-04-22 23:10:53] [INFO] TESTER: Connection established successfully in ubuntu-22.04[0m
+Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+
+
+=============================== warnings summary ===============================
+modules/provision/models.py:36
+  /home/fcaffieri/wazuh-env/wazuh-qa/deployability/modules/provision/models.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+    @validator('dependencies', pre=True)
+
+modules/provision/models.py:64
+  /home/fcaffieri/wazuh-env/wazuh-qa/deployability/modules/provision/models.py:64: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/
+    @validator('install', 'uninstall', pre=True)
+
+testing/tests/test_agent/test_install.py::test_installation
+testing/tests/test_agent/test_install.py::test_installation
+testing/tests/test_agent/test_install.py::test_installation
+testing/tests/test_agent/test_install.py::test_installation
+testing/tests/test_agent/test_install.py::test_installation
+  /home/fcaffieri/wazuh-env/wazuh-qa/.venv/lib/python3.10/site-packages/winrm/transport.py:349: DeprecationWarning: inspect.getargspec() is deprecated since Python 3.0, use inspect.signature() or inspect.getfullargspec()
+    argspec = set(inspect.getargspec(function).args)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+/usr/lib/python3.10/subprocess.py:1141: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+============================= 7 warnings in 2.58s ==============================
