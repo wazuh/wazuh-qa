@@ -982,7 +982,7 @@ class GeneratorVulnerabilityEvents:
         custom_packages_vuln_content (list): File containing a list of packages to be sent by syscollector.
     """
 
-    def __init__(self, agent_name, old_format, batch_size, custom_packages_vuln_content):
+    def __init__(self, agent_name, batch_size, custom_packages_vuln_content):
         self.current_batch_events_size = 0
         self.current_id = 1
         self.package_index = 0
@@ -997,7 +997,6 @@ class GeneratorVulnerabilityEvents:
         self.current_event = None
 
         self.agent_name = agent_name
-        self.old_format = old_format
         self.batch_size = batch_size
 
         self.packages = []
@@ -1073,23 +1072,6 @@ class GeneratorVulnerabilityEvents:
         
         return package_data
 
-    def get_event_template_legacy(self, message_type):
-        """Get syscollector legacy message of the specified type.
-        Args:
-            message_type (str): Syscollector event type.
-        Return:
-            str: Syscollector legacy event message.
-        """
-
-        message = syscollector.LEGACY_SYSCOLLECTOR_HEADER
-
-        if message_type == 'packages':
-            message += syscollector.LEGACY_SYSCOLLECTOR_PACKAGES_EVENT_TEMPLATE
-        elif message_type == 'osinfo':
-            message += syscollector.LEGACY_SYSCOLLECTOR_OS_EVENT_TEMPLATE
-
-        return message
-
     def get_event_template(self, message_type):
         """Get syscollector message of the specified type.
         Args:
@@ -1164,10 +1146,7 @@ class GeneratorVulnerabilityEvents:
 
         self.current_batch_events_size = self.current_batch_events_size - 1
 
-        if self.old_format:
-            event_template = self.get_event_template_legacy(self.current_event)
-        else:
-            event_template = self.get_event_template(self.current_event)
+        event_template = self.get_event_template(self.current_event)
 
         event_final = self.format_event_template(event_template, self.current_event)
         logging.debug(f"Vulnerability Event - {event_final}")

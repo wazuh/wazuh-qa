@@ -108,7 +108,6 @@ def create_agent(args, custom_labels):
         'syscollector_frequency': args.syscollector_frequency,
         'syscollector_event_types': args.syscollector_event_types,
         'syscollector_legacy_messages': args.syscollector_legacy_messages,
-        'vulnerability_legacy_messages': args.vulnerability_legacy_messages,
         'vulnerability_batch_size': args.vulnerability_batch_size,
         'vulnerability_packages_vuln_content': args.vulnerability_packages_list_file
     }
@@ -400,13 +399,6 @@ def main():
                             action='store_true',
                             default=False,
                             dest='syscollector_legacy_messages')
-    
-    arg_parser.add_argument('--vulnerability-legacy-messages',
-                            help='Enable prior 4.2 agents syscollector format. Default is False.',
-                            required=False,
-                            action='store_true',
-                            default=False,
-                            dest='vulnerability_legacy_messages')
     
     arg_parser.add_argument('--vulnerability-batch-size',
                             type=int,
