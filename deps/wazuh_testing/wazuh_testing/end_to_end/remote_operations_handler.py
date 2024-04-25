@@ -251,15 +251,10 @@ def get_vulnerability_alerts(
     }
 
 
-def get_vulnerabilities_index(
-    host_manager: HostManager,
-    agent_list,
-    packages_data: List[Dict],
-    greater_than_timestamp: str = "",
-) -> Dict:
-    vulnerabilities = get_vulnerabilities_from_states_by_agent(
-        host_manager, agent_list, greater_than_timestamp=greater_than_timestamp
-    )
+def get_vulnerabilities_index(host_manager: HostManager, agent_list, packages_data: List[Dict],
+                              greater_than_timestamp: str = "") -> Dict:
+    vulnerabilities = get_vulnerabilities_from_states_by_agent(host_manager, agent_list,
+                                                               greater_than_timestamp=greater_than_timestamp)
     package_vulnerabilities = filter_vulnerabilities_by_packages(
         host_manager, vulnerabilities, packages_data
     )
@@ -450,17 +445,18 @@ def launch_remote_operation(
 
 
 def filter_hosts_by_os(host_manager: HostManager, os_list: List[str]) -> List[str]:
-    agents = host_manager.get_group_hosts()
+    agents = host_manager.get_group_hosts('agent')
+    agents_target_os = []
     for agent in agents:
         system = host_manager.get_host_variables(agent)["os_name"]
 
         if system == "linux":
             system = host_manager.get_host_variables(agent)["os"].split("_")[0]
 
-        if system not in os_list:
-            agents.remove(agent)
+        if system in os_list:
+            agents_target_os.append(agent)
 
-    return agents
+    return agents_target_os
 
 
 def launch_parallel_operations(
