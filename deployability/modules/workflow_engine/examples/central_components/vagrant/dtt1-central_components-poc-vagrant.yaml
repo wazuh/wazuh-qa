@@ -49,7 +49,7 @@ tasks:
           - modules/testing/main.py
           - targets:
             - wazuh-1: "{working-dir}/central_components-{central_components}/inventory.yaml"
-          - tests: "install"
+          - tests: "install,restart,stop,uninstall"
           - component: "central_components"
           - wazuh-version: "4.7.3"
           - wazuh-revision: "40714"
