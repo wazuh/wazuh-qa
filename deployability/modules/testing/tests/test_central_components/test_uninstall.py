@@ -7,6 +7,8 @@ import pytest
 from ..helpers.constants import WAZUH_ROOT
 from ..helpers.generic import HostInformation, GeneralComponentActions
 from ..helpers.manager import WazuhManager
+from ..helpers.dashboard import WazuhDashboard
+from ..helpers.indexer import WazuhIndexer
 from ..helpers.central import WazuhCentralComponents
 from modules.testing.utils import logger
 
@@ -58,4 +60,25 @@ def test_uninstall(wazuh_params):
 
 
 def test_component_uninstalled_directory(wazuh_params):
-    assert not HostInformation.dir_exists(wazuh_params['master'], WAZUH_ROOT), logger.error(f'In {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])} {WAZUH_ROOT} is still present')
+    assert not HostInformation.dir_exists(wazuh_params['master'], WAZUH_ROOT), logger.error(f"In {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} {WAZUH_ROOT} is still present")
+
+
+def test_manager_API_port(wazuh_params):
+    assert not WazuhManager.isWazuhAPI_port_opened(wazuh_params['master'], cycles=1, wait=1), logger.error(f"The manager API port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is still active")
+
+
+def test_manager_agent_port(wazuh_params):
+    assert not WazuhManager.isWazuhAgent_port_opened(wazuh_params['master'], cycles=1, wait=1), logger.error(f"The manager API port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is still active")
+
+
+def test_manager_agent_enrollment_port(wazuh_params):
+    assert not WazuhManager.isWazuhAgent_enrollment_port_opened(wazuh_params['master'], cycles=1, wait=1), logger.error(f"The manager API port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is still active")
+
+
+def test_dashboard_port(wazuh_params):
+    assert not WazuhDashboard.isDashboard_port_opened(wazuh_params['dashboard'], cycles=1, wait=1), logger.error(f"The dashboard port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['dashboard'])} is still active")
+
+
+def test_indexer_port(wazuh_params):
+    for indexer_params in wazuh_params['indexers']:
+        assert not WazuhIndexer.isIndexer_port_opened(indexer_params, cycles=1, wait=1), logger.error(f"Some indexer port in {HostInformation.get_os_name_and_version_from_inventory(indexer_params)} is still active")

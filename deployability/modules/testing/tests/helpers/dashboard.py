@@ -4,6 +4,8 @@
 
 import requests
 import socket
+import json
+import time
 
 from .constants import CLUSTER_CONTROL, AGENT_CONTROL, WAZUH_CONF, WAZUH_ROOT
 from .executor import Executor, WazuhAPI
@@ -21,9 +23,12 @@ class WazuhDashboard:
 
         Args:
             inventory_path (str): host's inventory path
+
+        Returns:
+        - str: Version of the dashboard.
         """
 
-        return Executor.execute_command(inventory_path,'cat /usr/share/wazuh-dashboard/VERSION')
+        return Executor.execute_command(inventory_path,'cat /usr/share/wazuh-dashboard/VERSION').strip()
 
 
     @staticmethod
@@ -33,6 +38,9 @@ class WazuhDashboard:
 
         Args:
             inventory_path (str): host's inventory path
+
+        Returns:
+        - bool: Status of the dashboard.
         """
 
         return '200' in Executor.execute_command(inventory_path, 'curl -Is -k https://localhost/app/login?nextUrl=%2F | head -n 1')
@@ -45,27 +53,57 @@ class WazuhDashboard:
 
         Args:
             inventory_path (str): host's inventory path
+
+        Returns:
+        - bool: Status of the dashboard keystore.
         """
 
         return 'No such file or directory' not in Executor.execute_command(inventory_path, '/usr/share/wazuh-dashboard/bin/opensearch-dashboards-keystore list --allow-root')
 
 
     @staticmethod
-    def areIndexes_working(wazuh_api: WazuhAPI) -> str:
+    def areDashboardNodes_working(wazuh_api: WazuhAPI) -> str:
         """
-        Function to get the status of an agent given its name.
-        
-        Args:
-        - agents_data (list): List of dictioconaaaaaconaaaaaconaaaaaconaaaaaconaaaaaconaaaaaconaaaaaconaaaaaconaaaaaconaaaaaconaaaaaconaaaaanaries conaaaaa.
-        - agent_name (str): Name of the agent whoseconaaaaaconaaaaaconaaaaaconaaaaaconaaaaaconaaaaa status is to be obtained.
-        
+        Returns True/False depending the status of Dashboard nodes
+
         Returns:
-        - str: Status of the agent if found in the daconaaaaaconaaaaaconaaaaaconaaaaaconaaaaaconaaaaaa, otherwise returns None.
+        - bool: True/False depending on the status.
         """
-        logger.error(wazuh_api.api_url)
-        logger.error(wazuh_api.password)
-        logger.error(wazuh_api.username)
-        response = requests.get(f"{wazuh_api.api_url}/_cat/indices/?pretty", auth=(wazuh_api.username, wazuh_api.password), verify=False)
+        response = requests.get(f"{wazuh_api.api_url}/api/status", auth=(wazuh_api.username, wazuh_api.password), verify=False)
 
+        result = True
+        if response.status_code == 200:
+            for status in json.loads((response.text))['status']['statuses']:
+                if status['state'] ==  'green' or status['state'] ==  'yellow':
+                    result = True
+                else: 
+                    result = False
+            return result
 
-        return response
+        else:
+            logger.error(f'The dashboard API returned: {response.status_code}')
+
+    @staticmethod
+    def isDashboard_port_opened(inventory_path, wait=10, cycles=10):
+        """
+        Check if dashboard port is open
+
+        Args:
+            inventory_path (str): Dashboard inventory.
+
+        Returns:
+            str: Os name.
+        """
+        wait_cycles = 0
+        while wait_cycles < cycles:
+            ports = Executor.execute_command(inventory_path, 'ss -t -a -n | grep ":443"').strip().split('\n')
+            for port in ports:
+                if 'ESTAB' in port or 'LISTEN' in port:
+                    continue
+                else:
+                    time.sleep(wait)
+                    wait_cycles += 1
+                    break
+            else:
+                return True
+        return False

@@ -4,6 +4,7 @@
 
 import requests
 import socket
+import time
 
 from .constants import CLUSTER_CONTROL, AGENT_CONTROL, WAZUH_CONF, WAZUH_ROOT
 from .executor import Executor, WazuhAPI
@@ -222,6 +223,82 @@ class WazuhManager:
         for category in categories:
             for action in actions:
                 assert result[category][action] == [], logger.error(f'{result[category][action]} was found in: {category}{action}')
+
+
+    @staticmethod
+    def isWazuhAPI_port_opened(inventory_path, wait=10, cycles=10) -> bool:
+        """
+        Check if Manager API port is open
+
+        Args:
+            inventory_path (str): Manager inventory.
+
+        Returns:
+            bool: True if port is opened.
+        """
+        wait_cycles = 0
+        while wait_cycles < cycles:
+            ports = Executor.execute_command(inventory_path, 'ss -t -a -n | grep ":55000"').strip().split('\n')
+            for port in ports:
+                if 'ESTAB' in port or 'LISTEN' in port:
+                    continue
+                else:
+                    time.sleep(wait)
+                    wait_cycles += 1
+                    break
+            else:
+                return True
+        return False
+
+    @staticmethod
+    def isWazuhAgent_port_opened(inventory_path, wait=10, cycles=10) -> bool:
+        """
+        Check if Wazuh Manager Agent port is open
+
+        Args:
+            inventory_path (str): Manager inventory.
+
+        Returns:
+            bool: True if port is opened.
+        """
+        wait_cycles = 0
+        while wait_cycles < cycles:
+            ports = Executor.execute_command(inventory_path, 'ss -t -a -n | grep ":1514"').strip().split('\n')
+            for port in ports:
+                if 'ESTAB' in port or 'LISTEN' in port:
+                    continue
+                else:
+                    time.sleep(wait)
+                    wait_cycles += 1
+                    break
+            else:
+                return True
+        return False
+
+    @staticmethod
+    def isWazuhAgent_enrollment_port_opened(inventory_path, wait=10, cycles=10) -> bool:
+        """
+        Check if Wazuh Manager Agent enrollment port is open
+
+        Args:
+            inventory_path (str): Manager inventory.
+
+        Returns:
+            bool: True if port is opened.
+        """
+        wait_cycles = 0
+        while wait_cycles < cycles:
+            ports = Executor.execute_command(inventory_path, 'ss -t -a -n | grep ":443"').strip().split('\n')
+            for port in ports:
+                if 'ESTAB' in port or 'LISTEN' in port:
+                    continue
+                else:
+                    time.sleep(wait)
+                    wait_cycles += 1
+                    break
+            else:
+                return True
+        return False
 
 
     @staticmethod

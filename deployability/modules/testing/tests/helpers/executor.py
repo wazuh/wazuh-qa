@@ -60,19 +60,19 @@ class WazuhAPI:
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self._authenticate()
 
+    def _extract_password(self, file_path, keyword):
+        if not 'true' in Executor.execute_command(self.inventory_path, f'test -f {file_path} && echo "true" || echo "false"'):
+            Executor.execute_command(self.inventory_path, 'tar -xvf wazuh-install-files.tar')
+        return Executor.execute_command(self.inventory_path, f"grep {keyword} {file_path} | head -n 1 | awk '{{print $NF}}'").replace("'", "").replace("\n", "")
+
     def _authenticate(self):
         with open(self.inventory_path, 'r') as yaml_file:
             inventory_data = yaml.safe_load(yaml_file)
 
         user = 'wazuh'
-        
-        #----Patch issue https://github.com/wazuh/wazuh-packages/issues/2883-------------
-        file_path = Executor.execute_command(self.inventory_path, 'pwd').replace("\n","") + '/wazuh-install-files/wazuh-passwords.txt'
-        if not 'true' in Executor.execute_command(self.inventory_path, f'test -f {file_path} && echo "true" || echo "false"'):
-            Executor.execute_command(self.inventory_path, 'tar -xvf wazuh-install-files.tar')
-        password = Executor.execute_command(self.inventory_path, "grep api_password wazuh-install-files/wazuh-passwords.txt | head -n 1 | awk '{print $NF}'").replace("'","").replace("\n","")
-        #--------------------------------------------------------------------------------
-        
+        file_path = Executor.execute_command(self.inventory_path, 'pwd').replace("\n", "") + '/wazuh-install-files/wazuh-passwords.txt'
+        password = self._extract_password(file_path, 'api_password')
+
         login_endpoint = 'security/user/authenticate'
         host = inventory_data.get('ansible_host')
         port = '55000'
@@ -90,18 +90,8 @@ class WazuhAPI:
 
         self.api_url = f'https://{host}:{port}'
 
-        if self.component == 'dashboard':
+        if self.component == 'dashboard' or self.component == 'indexer':
             self.username = 'admin'
-            file_path = Executor.execute_command(self.inventory_path, 'pwd').replace("\n","") + '/wazuh-install-files/wazuh-passwords.txt'
-            if not 'true' in Executor.execute_command(self.inventory_path, f'test -f {file_path} && echo "true" || echo "false"'):
-                Executor.execute_command(self.inventory_path, 'tar -xvf wazuh-install-files.tar')
-            self.password = Executor.execute_command(self.inventory_path, "grep indexer_password  wazuh-install-files/wazuh-passwords.txt | head -n 1 | awk '{print $NF}'").replace("'","").replace("\n","")
-            self.api_url = f'https://localhost'
-
-        if self.component == 'indexer':
-            self.username = 'admin'
-            file_path = Executor.execute_command(self.inventory_path, 'pwd').replace("\n","") + '/wazuh-install-files/wazuh-passwords.txt'
-            if not 'true' in Executor.execute_command(self.inventory_path, f'test -f {file_path} && echo "true" || echo "false"'):
-                Executor.execute_command(self.inventory_path, 'tar -xvf wazuh-install-files.tar')
-            self.password = Executor.execute_command(self.inventory_path, "").replace("'","").replace("\n","")
-            self.api_url = f'https://localhost:9200'
+            password = self._extract_password(file_path, 'indexer_password')
+            self.password = password
+            self.api_url = f'https://{host}' if self.component == 'dashboard' else f'https://127.0.0.1:9200'
