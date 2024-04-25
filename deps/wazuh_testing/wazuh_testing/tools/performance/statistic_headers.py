@@ -165,9 +165,9 @@ agentd_header = ["Timestamp",
                  "Number of messages",
                  "Number of events buffered"]
 
-vulns_header = ["Total"]
+vulns_header = ["Total vulnerabilities"]
 
-alerts_header = ["Total"]
+alerts_header = ["Total alerts"]
 
 
 wazuhdb_header = ["Timestamp",
