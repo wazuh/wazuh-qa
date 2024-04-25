@@ -88,7 +88,7 @@ class WazuhIndexer:
 
 
     @staticmethod
-    def isIndexer_port_opened(inventory_path, wait=0, cycles=10):
+    def isIndexer_port_opened(inventory_path, wait=10, cycles=10):
         """
         Check if indexer port is open
 
