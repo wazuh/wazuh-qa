@@ -1001,7 +1001,7 @@ class GeneratorVulnerabilityEvents(Generator):
     """This class allows the generation of vulnerability events.
     Create OS and Packages type events (syscollector events) to generate vulnerability events.
     In order to change messages events it randomized different fields of templates specified by <random_string>.
-    In order to simulate syscollector module, it send a set of the same syscollector type messages, which size 
+    In order to simulate syscollector module, it send a set of the same syscollector type messages, which size
     is specified by `batch_size` attribute.
     Args:
         agent_name (str): Name of the agent.
@@ -1070,7 +1070,7 @@ class GeneratorVulnerabilityEvents(Generator):
 
     def generate_event(self):
         """Generate vulnerability event.
-        The event types are selected sequentially, creating a number of events of the same 
+        The event types are selected sequentially, creating a number of events of the same
         type specified in `events_size`.
         Returns:
             str: generated event with the desired format for syscollector
