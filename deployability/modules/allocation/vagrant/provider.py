@@ -6,7 +6,6 @@ import os
 import platform, json
 import subprocess
 import boto3
-import random
 
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
@@ -245,8 +244,8 @@ class VagrantProvider(Provider):
             if response != 0:
                 return ip
 
-        for i in range(254):
-            ip = f"192.168.57.{random.randint(2, 253)}"
+        for i in range(2, 254):
+            ip = f"192.168.57.{i}"
             if check_ip(ip):
                 return ip
 

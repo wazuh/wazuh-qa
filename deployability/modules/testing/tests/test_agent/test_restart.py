@@ -69,8 +69,8 @@ def test_restart(wazuh_params):
 
 def test_status(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert 'active' in GeneralComponentActions.get_component_status(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by command')
-
+        status = GeneralComponentActions.get_component_status(agent_params, 'wazuh-agent')
+        assert 'active' in status or 'Running' in status or 'is running' in status, logger.error(f'{agent_names} is not active by command')
 
 def test_connection(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
