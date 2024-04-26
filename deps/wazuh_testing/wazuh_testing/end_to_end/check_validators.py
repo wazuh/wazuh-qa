@@ -16,9 +16,6 @@ def validate_operation_results(global_operation_results: dict) -> bool:
 
 
 def compare_expected_found_vulnerabilities(vulnerabilities, expected_vulnerabilities):
-    logging.critical(f"Vulnerabilities: {vulnerabilities}")
-    logging.critical(f"Expected vulnerabilities: {expected_vulnerabilities}")
-
     result = True
 
     vulnerabilities_not_found = {}
@@ -40,6 +37,7 @@ def compare_expected_found_vulnerabilities(vulnerabilities, expected_vulnerabili
     for agent, agent_vulnerabilities in vulnerabilities.items():
         for vulnerability in agent_vulnerabilities:
             if vulnerability not in expected_vulnerabilities.get(agent, []):
+                logging.critical(f"Vulnerability unexpected found for {agent}: {vulnerability}")
                 if agent not in vulnerabilities_unexpected:
                     vulnerabilities_unexpected[agent] = []
                     failed_agents.append(agent)
@@ -140,6 +138,7 @@ def empty_dict(dictionary: dict):
             result = False
 
     return result
+
 
 equals = lambda x, y: x == y
 
