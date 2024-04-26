@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Add an IT to check that the agent erases its wazuh-agent.state file ([#4716](https://github.com/wazuh/wazuh-qa/pull/4716)) \- (Core)
+- Fixed agent_simulator response for active-response configuration commands. ([#4895](https://github.com/wazuh/wazuh-qa/pull/4895)) \- (Framework)
 
 ## [4.8.2] - TBD
 
