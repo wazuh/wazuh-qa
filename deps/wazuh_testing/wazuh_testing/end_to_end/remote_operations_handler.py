@@ -66,10 +66,11 @@ def get_expected_vulnerabilities_for_package(
 
     host_os_arch = host_manager.get_host_variables(host)["architecture"]
     system = host_manager.get_host_variables(host)["os_name"]
+    use_npm = package_data.get('use_npm', False)
 
-    architecture = None
-    if package_data.get("use_npm", False):
-        architecture = None
+    architecture = ''
+    if use_npm:
+        architecture = ''
     else:
         if host_os_arch == "amd64":
             architecture = "x86_64"
@@ -140,7 +141,6 @@ def get_expected_vulnerabilities_by_agent(
 
         expected_vulnerabilities_by_agent[agent] = []
         package_id = packages_data[host_os_name][host_os_arch]
-
         expected_vulnerabilities = get_expected_vulnerabilities_for_package(
             host_manager, agent, package_id
         )
