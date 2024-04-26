@@ -7,6 +7,7 @@ import yaml
 
 from pathlib import Path
 from pydantic import BaseModel, IPvAnyAddress
+from typing import Optional
 
 from modules.generic.utils import Utils
 from modules.generic.logger import Logger
@@ -16,7 +17,8 @@ class Inventory(BaseModel):
     ansible_host: str | IPvAnyAddress
     ansible_user: str
     ansible_port: int
-    ansible_ssh_private_key_file: str
+    ansible_ssh_private_key_file: Optional[str] = None
+    ansible_password: Optional[str] = None
 
 
 class Ansible:
@@ -118,7 +120,9 @@ class Ansible:
                     self.ansible_data.ansible_host: {
                         'ansible_port': self.ansible_data.ansible_port,
                         'ansible_user': self.ansible_data.ansible_user,
-                        'ansible_ssh_private_key_file': self.ansible_data.ansible_ssh_private_key_file
+                        **({'ansible_ssh_private_key_file': self.ansible_data.ansible_ssh_private_key_file}
+                        if hasattr(self.ansible_data, 'ansible_ssh_private_key_file')
+                        else {'ansible_password': self.ansible_data.ansible_password})
                     }
                 }
             }

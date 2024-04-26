@@ -3,8 +3,9 @@ __pycache__
 .pytest_cache
 
 venv
-wazuh_testing.egg-info
+*.egg-info
 dist
+build
 
 # Python bytecode files
 *.pyc

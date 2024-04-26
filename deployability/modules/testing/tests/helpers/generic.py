@@ -12,9 +12,8 @@ import time
 import yaml
 
 from pathlib import Path
-from .constants import WAZUH_CONTROL, CLIENT_KEYS
-from .executor import Executor
-from .utils import Utils
+from .constants import WAZUH_CONTROL, CLIENT_KEYS, WINDOWS_CLIENT_KEYS, WINDOWS_VERSION, WINDOWS_REVISION
+from .executor import Executor, ConnectionManager
 from modules.testing.utils import logger
 
 
@@ -32,7 +31,14 @@ class HostInformation:
         Returns:
             bool: True or False
         """
-        return 'true' in Executor.execute_command(inventory_path, f'test -d {dir_path} && echo "true" || echo "false"')
+        os_type = HostInformation.get_os_type(inventory_path)
+
+        if os_type == 'linux':
+            result = ConnectionManager.execute_commands(inventory_path, f'test -d {dir_path} && echo "True" || echo "False"')
+
+            return result.get('output')
+        elif os_type == 'windows':
+            return ConnectionManager.execute_commands(inventory_path, f'Test-Path -Path "{dir_path}"').get('success')
 
 
     @staticmethod
@@ -47,7 +53,12 @@ class HostInformation:
         Returns:
             bool: True or False
         """
-        return 'true' in Executor.execute_command(inventory_path, f'test -f {file_path} && echo "true" || echo "false"')
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            result = ConnectionManager.execute_commands(inventory_path, f'test -f {file_path} && echo "True" || echo "False"')
+            return result.get('output')
+        elif os_type == 'windows':
+            return ConnectionManager.execute_commands(inventory_path, f'Test-Path -Path "{file_path}"').get('output')
 
 
     @staticmethod
@@ -61,8 +72,19 @@ class HostInformation:
         Returns:
             str: type of host (windows, linux, macos)
         """
-        system = Executor.execute_command(inventory_path, 'uname')
-        return system.lower()
+        try:
+            with open(inventory_path.replace('inventory', 'track'), 'r') as file:
+                data = yaml.safe_load(file)
+            if 'platform' in data:
+                return data['platform']
+            else:
+                raise KeyError("The 'platform' key was not found in the YAML file.")
+        except FileNotFoundError:
+            logger.error(f"The YAML file '{inventory_path}' was not found.")
+        except yaml.YAMLError as e:
+            logger.error(f"Error while loading the YAML file: {e}")
+        except Exception as e:
+            logger.error(f"An unexpected error occurred: {e}")
 
 
     @staticmethod
@@ -74,9 +96,21 @@ class HostInformation:
             inventory_path: host's inventory path
 
         Returns:
-            str: architecture (aarch64, x86_64, intel, apple)
+            str: architecture (amd64, arm64, intel, apple)
         """
-        return Executor.execute_command(inventory_path, 'uname -m')
+        try:
+            with open(inventory_path.replace('inventory', 'track'), 'r') as file:
+                data = yaml.safe_load(file)
+            if 'platform' in data:
+                return data['arch']
+            else:
+                raise KeyError("The 'platform' key was not found in the YAML file.")
+        except FileNotFoundError:
+            logger.error(f"The YAML file '{inventory_path}' was not found.")
+        except yaml.YAMLError as e:
+            logger.error(f"Error while loading the YAML file: {e}")
+        except Exception as e:
+            logger.error(f"An unexpected error occurred: {e}")
 
 
     @staticmethod
@@ -115,9 +149,9 @@ class HostInformation:
             str: linux os name (debian, ubuntu, opensuse, amazon, centos, redhat)
         """
         if 'manager' in inventory_path:
-            os_name = re.search(r'/manager-linux-([^-]+)-', inventory_path).group(1)
+            os_name = re.search(r'/manager-[^-]+-([^-]+)-', inventory_path).group(1)
         elif 'agent' in inventory_path:
-            os_name = re.search(r'/agent-linux-([^-]+)-', inventory_path).group(1)
+            os_name = re.search(r'/agent-[^-]+-([^-]+)-', inventory_path).group(1)
 
         return os_name
 
@@ -133,9 +167,9 @@ class HostInformation:
             tuple: linux os name and version (e.g., ('ubuntu', '22.04'))
         """
         if 'manager' in inventory_path:
-            match = re.search(r'/manager-linux-([^-]+)-([^-]+)-', inventory_path)
+            match = re.search(r'/manager-[^-]+-([^-]+)-([^-]+)-', inventory_path)
         elif 'agent' in inventory_path:
-            match = re.search(r'/agent-linux-([^-]+)-([^-]+)-', inventory_path)
+            match = re.search(r'/agent-[^-]+-([^-]+)-([^-]+)-', inventory_path)
         if match:
             os_name = match.group(1)
             version = match.group(2)
@@ -145,13 +179,22 @@ class HostInformation:
 
     @staticmethod
     def get_os_version_from_inventory(inventory_path) -> str:
-        if 'manager' in inventory_path:
-            os_version = re.search(r".*?/manager-linux-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
-        elif 'agent' in inventory_path:
-            os_version = re.search(r".*?/agent-linux-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
-            return os_version
-        else:
-            return None
+        os_type = HostInformation.get_os_type(inventory_path)
+
+        if os_type == 'linux':
+            if 'manager' in inventory_path:
+                os_version = re.search(r".*?/manager-.*?-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
+            elif 'agent' in inventory_path:
+                os_version = re.search(r".*?/agent-.*?-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
+                return os_version
+            else:
+                return None
+        elif os_type == 'windows':
+            if 'agent' in inventory_path:
+                os_version = re.search(r".*?/agent-.*?-.*?-(.*?)-.*?/inventory.yaml", inventory_path)[1:3]
+                return os_version
+            else:
+                return None
 
     @staticmethod
     def get_current_dir(inventory_path) -> str:
@@ -164,8 +207,13 @@ class HostInformation:
         Returns:
             str: current directory
         """
+        os_type = HostInformation.get_os_type(inventory_path)
 
-        return Executor.execute_command(inventory_path, 'pwd').replace("\n","")
+        if os_type == 'linux':
+            result = ConnectionManager.execute_commands(inventory_path, 'pwd')
+            return result.get('output').replace("\n","")
+        elif os_type == 'windows':
+            return ConnectionManager.execute_commands(inventory_path, '(Get-Location).Path').get('output')
 
     @staticmethod
     def get_internal_ip_from_aws_dns(dns_name):
@@ -198,7 +246,14 @@ class HostInformation:
             list: List of dictionaries with the client keys.
         """
         clients = []
-        client_key = Executor.execute_command(inventory_path, f'cat {CLIENT_KEYS}')
+
+        os_type = HostInformation.get_os_type(inventory_path)
+
+        if os_type == 'linux':
+            client_key = ConnectionManager.execute_commands(inventory_path, f'cat {CLIENT_KEYS}').get('output')
+        elif os_type == 'windows':
+            client_key = ConnectionManager.execute_commands(inventory_path, f'Get-Content "{WINDOWS_CLIENT_KEYS}"').get('output')
+
         lines = client_key.split('\n')[:-1]
         for line in lines:
             _id, name, address, password = line.strip().split()
@@ -225,7 +280,7 @@ class HostConfiguration:
         """
 
         commands = ["sudo sed -i '/^PasswordAuthentication/s/^/#/' /etc/ssh/sshd_config", "sudo sed -i '/^PermitRootLogin no/s/^/#/' /etc/ssh/sshd_config", 'echo -e "PasswordAuthentication yes\nPermitRootLogin yes" | sudo tee -a /etc/ssh/sshd_config', 'sudo systemctl restart sshd', 'cat /etc/ssh/sshd_config']
-        Executor.execute_commands(inventory_path, commands)
+        ConnectionManager.execute_commands(inventory_path, commands)
 
 
     @staticmethod
@@ -237,17 +292,25 @@ class HostConfiguration:
             inventory_path: host's inventory path
 
         """
-        commands = ["sudo systemctl stop firewalld", "sudo systemctl disable firewalld"]
-        if GeneralComponentActions.isComponentActive(inventory_path, 'firewalld'):
-            Executor.execute_commands(inventory_path, commands)
+        commands = []
 
-            logger.info(f'Firewall disabled on {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
-        else:
-            logger.info(f'No Firewall to disable on {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        os_type = HostInformation.get_os_type(inventory_path)
 
+        if os_type == 'linux':
+            commands = ["sudo systemctl stop firewalld", "sudo systemctl disable firewalld"]
+            if GeneralComponentActions.isComponentActive(inventory_path, 'firewalld'):
+                ConnectionManager.execute_commands(inventory_path, commands)
+
+                logger.info(f'Firewall disabled on {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+            else:
+                logger.info(f'No Firewall to disable on {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        elif os_type == 'windows':
+            commands = ["Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False"]
+            ConnectionManager.execute_commands(inventory_path, commands)
 
 
     def _extract_hosts(paths, is_aws):
+        from .utils import Utils
         if is_aws:
             return [HostInformation.get_internal_ip_from_aws_dns(Utils.extract_ansible_host(path)) for path in paths]
         else:
@@ -266,6 +329,8 @@ class HostConfiguration:
             workers_paths (list): wazuh worker paths list
 
         """
+        from .utils import Utils
+
         current_directory = HostInformation.get_current_dir(master_path)
 
         wazuh_version = '.'.join(wazuh_version.split('.')[:2])
@@ -326,7 +391,7 @@ class HostConfiguration:
 
         commands.extend(certs_creation)
 
-        Executor.execute_commands(master_path, commands)
+        ConnectionManager.execute_commands(master_path, commands)
 
         current_from_directory = HostInformation.get_current_dir(master_path)
 
@@ -364,7 +429,7 @@ class HostConfiguration:
 
         # Allowing handling permissions
         if file_name == 'wazuh-install-files.tar':
-            Executor.execute_command(from_inventory_path, f'chmod +rw {file_name}')
+            ConnectionManager.execute_commands(from_inventory_path, f'chmod +rw {file_name}')
             logger.info('File permissions modified to be handled')
 
         # SCP
@@ -381,8 +446,8 @@ class HostConfiguration:
 
         # Restoring permissions
         if file_name == 'wazuh-install-files.tar':
-            Executor.execute_command(from_inventory_path, f'chmod 600 {file_name}')
-            Executor.execute_command(to_inventory_path, f'chmod 600 {file_name}')
+            ConnectionManager.execute_commands(from_inventory_path, f'chmod 600 {file_name}')
+            ConnectionManager.execute_commands(to_inventory_path, f'chmod 600 {file_name}')
             logger.info('File permissions were restablished')
 
         # Deleting file from localhost
@@ -461,18 +526,52 @@ class HostMonitor:
 class CheckFiles:
 
     @staticmethod
-    def _checkfiles(inventory_path, os_type, directory, filter= None, hash_algorithm='sha256') -> dict:
+    def _checkfiles(inventory_path, os_type, directory, filters_keywords= None, hash_algorithm='sha256') -> dict:
         """
         It captures a structure of a directory
         Returns:
             Dict: dict of directories:hash
         """
         if 'linux' in os_type or 'macos' in os_type:
-            command = f'sudo find {directory} -type f -exec sha256sum {{}} + {filter}'
-            result = Executor.execute_command(inventory_path, command)
+            filters = f"| grep -v {filters_keywords[0]}"
+            for filter_ in filters_keywords[1:]:
+                filters += f" | grep -v {filter_}"
+            command = f'sudo find {directory} -type f -exec sha256sum {{}} + {filters}'
+            result = ConnectionManager.execute_commands(inventory_path, command).get('output')
 
         elif 'windows' in os_type:
-            command = 'dir /a-d /b /s | findstr /v /c:"\\.$" /c:"\\..$"| find /c ":"'
+
+            quoted_filters = ['"{}"'.format(keyword) for keyword in filters_keywords]
+            filter_files = ",".join(quoted_filters)
+            command = f"$includedDirectories = @('{directory}') "
+            command += f"\n$excludedPatterns = @({filter_files})"
+            command += """
+                try {
+                    foreach ($dir in $includedDirectories) {
+                        Get-ChildItem -Path "$dir" -Recurse -File -ErrorAction SilentlyContinue | ForEach-Object {
+                            $fileName = $_.FullName
+                            $hash = Get-FileHash -Path $fileName -Algorithm SHA256 -ErrorAction SilentlyContinue
+                            if ($hash) {
+                                $exclude = $false
+                                foreach ($pattern in $excludedPatterns) {
+                                    if ($fileName -like "*$pattern*") {
+                                        $exclude = $true
+                                        break
+                                    }
+                                }
+                                if (-not $exclude) {
+                                    Write-Output "$($hash.Hash) $fileName"
+                                }
+                            }
+                        }
+                    }
+                } catch {
+                    Write-Host "Error: $_"
+                }
+
+            """
+
+            result = ConnectionManager.execute_commands(inventory_path, command).get('output')
         else:
             logger.info(f'Unsupported operating system')
             return None
@@ -485,9 +584,9 @@ class CheckFiles:
 
 
     @staticmethod
-    def _perform_scan(inventory_path, os_type, directories, filters):
+    def _perform_scan(inventory_path, os_type, directories, filters_keywords):
         logger.info(f'Generating Snapshot for Checkfile in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
-        return {directory: CheckFiles._checkfiles(inventory_path, os_type, directory, filters) for directory in directories}
+        return {directory: CheckFiles._checkfiles(inventory_path, os_type, directory, filters_keywords) for directory in directories}
 
 
     @staticmethod
@@ -514,16 +613,16 @@ class CheckFiles:
         """
         os_type = HostInformation.get_os_type(inventory_path)
 
-        directories = ['/boot', '/usr/bin', '/root', '/usr/sbin']
-        filters_keywords = ['grep', 'tar', 'coreutils', 'sed', 'procps', 'gawk', 'lsof', 'curl', 'openssl', 'libcap', 'apt-transport-https', 'libcap2-bin', 'software-properties-common', 'gnupg', 'gpg']
-        filters = f"| grep -v {filters_keywords[0]}"
+        if os_type == 'linux':
+            directories = ['/boot', '/usr/bin', '/root', '/usr/sbin']
+            filters_keywords = ['grep', 'tar', 'coreutils', 'sed', 'procps', 'gawk', 'lsof', 'curl', 'openssl', 'libcap', 'apt-transport-https', 'libcap2-bin', 'software-properties-common', 'gnupg', 'gpg']
+        elif os_type == 'windows':
+            directories = ['C:\\Program Files', 'C:\\Program Files (x86)','C:\\Users\\vagrant']
+            filters_keywords = ['log','tmp','ossec-agent', 'EdgeUpdate']
 
-        for filter_ in filters_keywords[1:]:
-            filters+= f" | grep -v {filter_}"
-
-        initial_scans = CheckFiles._perform_scan(inventory_path, os_type, directories, filters)
+        initial_scans = CheckFiles._perform_scan(inventory_path, os_type, directories, filters_keywords)
         callback()
-        second_scans = CheckFiles._perform_scan(inventory_path, os_type, directories, filters)
+        second_scans = CheckFiles._perform_scan(inventory_path, os_type, directories, filters_keywords)
         changes = {directory: CheckFiles._calculate_changes(initial_scans[directory], second_scans[directory]) for directory in directories}
 
         return changes
@@ -543,8 +642,14 @@ class GeneralComponentActions:
             str: Role status
         """
         logger.info(f'Getting status of {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        os_type = HostInformation.get_os_type(inventory_path)
 
-        return Executor.execute_command(inventory_path, f'systemctl status {host_role}')
+        if os_type == 'linux':
+            return ConnectionManager.execute_commands(inventory_path, f'systemctl status {host_role}').get('output')
+        elif os_type == 'windows':
+            result = ConnectionManager.execute_commands(inventory_path, "Get-Service -Name 'Wazuh' | Format-Table -HideTableHeaders Status")
+            if result.get('success'):
+                return result.get('output')
 
 
     @staticmethod
@@ -558,7 +663,12 @@ class GeneralComponentActions:
         """
 
         logger.info(f'Stopping {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
-        Executor.execute_command(inventory_path, f'systemctl stop {host_role}')
+        os_type = HostInformation.get_os_type(inventory_path)
+
+        if os_type == 'linux':
+            ConnectionManager.execute_commands(inventory_path, f'systemctl stop {host_role}')
+        elif os_type == 'windows':
+            ConnectionManager.execute_commands(inventory_path, f'NET STOP Wazuh')
 
 
     @staticmethod
@@ -572,7 +682,13 @@ class GeneralComponentActions:
         """
 
         logger.info(f'Restarting {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
-        Executor.execute_command(inventory_path, f'systemctl restart {host_role}')
+        os_type = HostInformation.get_os_type(inventory_path)
+
+        if os_type == 'linux':
+            ConnectionManager.execute_commands(inventory_path, f'systemctl restart {host_role}')
+        elif os_type == 'windows':
+            ConnectionManager.execute_commands(inventory_path, 'NET STOP Wazuh')
+            ConnectionManager.execute_commands(inventory_path, 'NET START Wazuh')
 
 
     @staticmethod
@@ -586,7 +702,13 @@ class GeneralComponentActions:
         """
 
         logger.info(f'Starting {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
-        Executor.execute_command(inventory_path, f'systemctl restart {host_role}')
+
+        os_type = HostInformation.get_os_type(inventory_path)
+
+        if os_type == 'linux':
+            ConnectionManager.execute_commands(inventory_path, f'systemctl start {host_role}')
+        elif os_type == 'windows':
+            ConnectionManager.execute_commands(inventory_path, 'NET START Wazuh')
 
 
     @staticmethod
@@ -600,7 +722,12 @@ class GeneralComponentActions:
         Returns:
             str: version
         """
-        return Executor.execute_command(inventory_path, f'{WAZUH_CONTROL} info -v')
+        os_type = HostInformation.get_os_type(inventory_path)
+
+        if os_type == 'linux':
+            return ConnectionManager.execute_commands(inventory_path, f'{WAZUH_CONTROL} info -v').get('output')
+        elif os_type == 'windows':
+            return ConnectionManager.execute_commands(inventory_path, f'Get-Content "{WINDOWS_VERSION}"').get('output')#.replace("\n", ""))
 
 
     @staticmethod
@@ -614,7 +741,13 @@ class GeneralComponentActions:
         Returns:
             str: revision number
         """
-        return Executor.execute_command(inventory_path, f'{WAZUH_CONTROL} info -r')
+
+        os_type = HostInformation.get_os_type(inventory_path)
+
+        if os_type == 'linux':
+            return ConnectionManager.execute_commands(inventory_path, f'{WAZUH_CONTROL} info -r').get('output')
+        elif os_type == 'windows':
+            return ConnectionManager.execute_commands(inventory_path, f'Get-Content "{WINDOWS_REVISION}"').get('output')
 
 
     @staticmethod
@@ -628,8 +761,17 @@ class GeneralComponentActions:
         Returns:
             bool: True/False
         """
-        return 'true' in Executor.execute_command(inventory_path, f'[ -f {CLIENT_KEYS} ] && echo true || echo false')
 
+        os_type = HostInformation.get_os_type(inventory_path)
+
+        if os_type == 'linux':
+            result = ConnectionManager.execute_commands(inventory_path, f'[ -f {CLIENT_KEYS} ] && echo true || echo false')
+            return 'true' in result.get('output')
+        elif os_type == 'windows':
+            result = ConnectionManager.execute_commands(inventory_path, f'Test-Path -Path "{WINDOWS_CLIENT_KEYS}"')
+            if result.get('success'):
+                return result.get('output', '')
+            return False
 
     @staticmethod
     def isComponentActive(inventory_path, host_role) -> bool:
@@ -643,7 +785,15 @@ class GeneralComponentActions:
         Returns:
             bool: True/False
         """
-        return 'active' == Executor.execute_command(inventory_path, f'systemctl is-active {host_role}').replace("\n", "")
+
+        os_type = HostInformation.get_os_type(inventory_path)
+
+        if os_type == 'linux':
+
+            return 'active' == ConnectionManager.execute_commands(inventory_path, f'systemctl is-active {host_role}').get('output').replace("\n", "")
+        elif os_type == 'windows':
+            result = ConnectionManager.execute_commands(inventory_path, "Get-Service -Name 'Wazuh'")
+            return result.get('success')
 
 class Waits:
 
