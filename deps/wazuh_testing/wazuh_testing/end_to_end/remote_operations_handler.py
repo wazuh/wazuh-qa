@@ -294,27 +294,12 @@ def get_expected_alerts(
     return expected_alerts_vulnerabilities
 
 
-def get_expected_index(
-    host_manager: HostManager, agent_list, operation: str, packages_data: Dict
-) -> Dict:
-
-    expected_index = {"present": {}, "absent": {}}
-
+def get_expected_index(host_manager: HostManager, agent_list, operation: str, packages_data: Dict) -> Dict:
+    expected_index = {}
     if operation == "update_package":
-        expected_index["absent"] = get_expected_vulnerabilities_by_agent(
-            host_manager, agent_list, packages_data["from"]
-        )
-        expected_index["present"] = get_expected_vulnerabilities_by_agent(
-            host_manager, agent_list, packages_data["to"]
-        )
-    elif operation == "remove_package":
-        expected_index["absent"] = get_expected_vulnerabilities_by_agent(
-            host_manager, agent_list, packages_data
-        )
+        expected_index = get_expected_vulnerabilities_by_agent(host_manager, agent_list, packages_data["to"])
     elif operation == "install_package":
-        expected_index["present"] = get_expected_vulnerabilities_by_agent(
-            host_manager, agent_list, packages_data
-        )
+        expected_index = get_expected_vulnerabilities_by_agent(host_manager, agent_list, packages_data)
 
     return expected_index
 

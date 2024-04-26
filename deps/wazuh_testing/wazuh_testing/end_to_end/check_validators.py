@@ -26,10 +26,7 @@ def compare_expected_found_vulnerabilities(vulnerabilities, expected_vulnerabili
 
     failed_agents = []
 
-    expected_vulnerabilities_present = expected_vulnerabilities.get('present', {})
-    expected_vulnerabilities_absent = expected_vulnerabilities.get('absent', {})
-
-    for agent, expected_vulns in expected_vulnerabilities_present.items():
+    for agent, expected_vulns in expected_vulnerabilities.items():
         for vulnerability in expected_vulns:
             if vulnerability not in vulnerabilities.get(agent, []):
                 logging.critical(f"Vulnerability not found for {agent}: {vulnerability}")
@@ -40,10 +37,9 @@ def compare_expected_found_vulnerabilities(vulnerabilities, expected_vulnerabili
                 result = False
                 vulnerabilities_not_found[agent].append(vulnerability)
 
-    for agent, expected_vuln in expected_vulnerabilities_absent.items():
-        for vulnerability in expected_vuln:
-            if vulnerability in vulnerabilities.get(agent, []):
-                logging.critical(f"Vulnerability unexpected: {vulnerability}")
+    for agent, agent_vulnerabilities in vulnerabilities.items():
+        for vulnerability in agent_vulnerabilities:
+            if vulnerability not in expected_vulnerabilities.get(agent, []):
                 if agent not in vulnerabilities_unexpected:
                     vulnerabilities_unexpected[agent] = []
                     failed_agents.append(agent)
@@ -68,6 +64,21 @@ def expected_vulnerabilities_index(vulnerabilities, expected_vulnerabilities):
                                                                         expected_vulnerabilities)
 
     return expected_found_comparision['result']
+
+
+def get_duplicated_elements(list_of_elements) -> list:
+    seen = set()
+    duplicated = set()
+    for item in list_of_elements:
+        if item in seen:
+            duplicated.add(item)
+        seen.add(item)
+
+    return list(duplicated)
+
+
+def no_duplicated_elements(list_of_elements) -> bool:
+    return len(get_duplicated_elements(list_of_elements)) > 0
 
 
 def compare_expected_found_vulnerabilities_alerts(vulnerabilities, expected_vulnerabilities):
@@ -143,3 +154,4 @@ no_errors = lambda x: all(
     not any(x[host][level] for level in ["ERROR", "CRITICAL", "WARNING"])
     for host in x
 )
+
