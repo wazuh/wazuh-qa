@@ -14,8 +14,8 @@ import yaml
 from pathlib import Path
 from .constants import WAZUH_CONTROL, CLIENT_KEYS
 from .executor import Executor
-from .utils import Utils
 from modules.testing.utils import logger
+from .utils import Utils
 
 
 class HostInformation:
@@ -32,7 +32,11 @@ class HostInformation:
         Returns:
             bool: True or False
         """
-        return 'true' in Executor.execute_command(inventory_path, f'test -d {dir_path} && echo "true" || echo "false"')
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            return 'true' in Executor.execute_command(inventory_path, f'test -d {dir_path} && echo "true" || echo "false"')
+        elif os_type == 'macos':
+            return 'true' in Executor.execute_command(inventory_path, f'stat {dir_path} >/dev/null 2>&1 && echo "true" || echo "false"')
 
 
     @staticmethod
@@ -47,7 +51,11 @@ class HostInformation:
         Returns:
             bool: True or False
         """
-        return 'true' in Executor.execute_command(inventory_path, f'test -f {file_path} && echo "true" || echo "false"')
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            return 'true' in Executor.execute_command(inventory_path, f'test -f {file_path} && echo "true" || echo "false"')
+        elif os_type == 'macos':
+            return 'true' in Executor.execute_command(inventory_path, f'stat {file_path} >/dev/null 2>&1 && echo "true" || echo "false"')
 
 
     @staticmethod
@@ -61,8 +69,19 @@ class HostInformation:
         Returns:
             str: type of host (windows, linux, macos)
         """
-        system = Executor.execute_command(inventory_path, 'uname')
-        return system.lower()
+        try:
+            with open(inventory_path.replace('inventory', 'track'), 'r') as file:
+                data = yaml.safe_load(file)
+            if 'platform' in data:
+                return data['platform']
+            else:
+                raise KeyError("The 'platform' key was not found in the YAML file.")
+        except FileNotFoundError:
+            logger.error(f"The YAML file '{inventory_path}' was not found.")
+        except yaml.YAMLError as e:
+            logger.error(f"Error while loading the YAML file: {e}")
+        except Exception as e:
+            logger.error(f"An unexpected error occurred: {e}")
 
 
     @staticmethod
@@ -74,9 +93,21 @@ class HostInformation:
             inventory_path: host's inventory path
 
         Returns:
-            str: architecture (aarch64, x86_64, intel, apple)
+            str: architecture (amd64, arm64, intel, apple)
         """
-        return Executor.execute_command(inventory_path, 'uname -m')
+        try:
+            with open(inventory_path.replace('inventory', 'track'), 'r') as file:
+                data = yaml.safe_load(file)
+            if 'platform' in data:
+                return data['arch']
+            else:
+                raise KeyError("The 'platform' key was not found in the YAML file.")
+        except FileNotFoundError:
+            logger.error(f"The YAML file '{inventory_path}' was not found.")
+        except yaml.YAMLError as e:
+            logger.error(f"Error while loading the YAML file: {e}")
+        except Exception as e:
+            logger.error(f"An unexpected error occurred: {e}")
 
 
     @staticmethod
@@ -115,9 +146,9 @@ class HostInformation:
             str: linux os name (debian, ubuntu, opensuse, amazon, centos, redhat)
         """
         if 'manager' in inventory_path:
-            os_name = re.search(r'/manager-linux-([^-]+)-', inventory_path).group(1)
+            os_name = re.search(r'/manager-[^-]+-([^-]+)-', inventory_path).group(1)
         elif 'agent' in inventory_path:
-            os_name = re.search(r'/agent-linux-([^-]+)-', inventory_path).group(1)
+            os_name = re.search(r'/agent-[^-]+-([^-]+)-', inventory_path).group(1)
 
         return os_name
 
@@ -133,9 +164,9 @@ class HostInformation:
             tuple: linux os name and version (e.g., ('ubuntu', '22.04'))
         """
         if 'manager' in inventory_path:
-            match = re.search(r'/manager-linux-([^-]+)-([^-]+)-', inventory_path)
+            match = re.search(r'/manager-[^-]+-([^-]+)-([^-]+)-', inventory_path)
         elif 'agent' in inventory_path:
-            match = re.search(r'/agent-linux-([^-]+)-([^-]+)-', inventory_path)
+            match = re.search(r'/agent-[^-]+-([^-]+)-([^-]+)-', inventory_path)
         if match:
             os_name = match.group(1)
             version = match.group(2)
@@ -146,9 +177,9 @@ class HostInformation:
     @staticmethod
     def get_os_version_from_inventory(inventory_path) -> str:
         if 'manager' in inventory_path:
-            os_version = re.search(r".*?/manager-linux-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
+            os_version = re.search(r".*?/manager-.*?-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
         elif 'agent' in inventory_path:
-            os_version = re.search(r".*?/agent-linux-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
+            os_version = re.search(r".*?/agent-.*?-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
             return os_version
         else:
             return None
@@ -168,7 +199,7 @@ class HostInformation:
         return Executor.execute_command(inventory_path, 'pwd').replace("\n","")
 
     @staticmethod
-    def get_internal_ip_from_aws_dns(dns_name):
+    def get_internal_ip_from_aws_dns(dns_name) -> str:
         """
         It returns the private AWS IP from dns_name
 
@@ -187,6 +218,24 @@ class HostInformation:
             return None
 
     @staticmethod
+    def get_public_ip_from_aws_dns(dns_name) -> str:
+        """
+        It returns the public AWS IP from dns_name
+
+        Args:
+            dns_name (str): host's dns public dns name
+
+        Returns:
+            str: public ip
+        """
+        try:
+            ip_address = socket.gethostbyname(dns_name)
+            return ip_address
+        except socket.gaierror as e:
+            logger.error("Error obtaining IP address:", e)
+            return None
+
+    @staticmethod
     def get_client_keys(inventory_path) -> list[dict]:
         """
         Get the client keys from the client.keys file in the host.
@@ -198,7 +247,11 @@ class HostInformation:
             list: List of dictionaries with the client keys.
         """
         clients = []
-        client_key = Executor.execute_command(inventory_path, f'cat {CLIENT_KEYS}')
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            client_key = Executor.execute_command(inventory_path, f'cat {CLIENT_KEYS}')
+        elif os_type == 'macos':
+            client_key = Executor.execute_command(inventory_path, f'cat /Library/Ossec/etc/client.keys')
         lines = client_key.split('\n')[:-1]
         for line in lines:
             _id, name, address, password = line.strip().split()
@@ -237,14 +290,18 @@ class HostConfiguration:
             inventory_path: host's inventory path
 
         """
-        commands = ["sudo systemctl stop firewalld", "sudo systemctl disable firewalld"]
-        if GeneralComponentActions.isComponentActive(inventory_path, 'firewalld'):
-            Executor.execute_commands(inventory_path, commands)
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            commands = ["sudo systemctl stop firewalld", "sudo systemctl disable firewalld"]
+            if GeneralComponentActions.isComponentActive(inventory_path, 'firewalld'):
+                Executor.execute_commands(inventory_path, commands)
 
+                logger.info(f'Firewall disabled on {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+            else:
+                logger.info(f'No Firewall to disable on {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        elif os_type == 'macos':
             logger.info(f'Firewall disabled on {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
-        else:
-            logger.info(f'No Firewall to disable on {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
-
+            Executor.execute_command(inventory_path, 'sudo pfctl -d')
 
 
     def _extract_hosts(paths, is_aws):
@@ -467,11 +524,13 @@ class CheckFiles:
         Returns:
             Dict: dict of directories:hash
         """
-        if 'linux' in os_type or 'macos' in os_type:
+        if 'linux' == os_type:
             command = f'sudo find {directory} -type f -exec sha256sum {{}} + {filter}'
             result = Executor.execute_command(inventory_path, command)
-
-        elif 'windows' in os_type:
+        elif 'macos' == os_type:
+            command = f'sudo find {directory} -type f -exec shasum -a 256 {{}} \; {filter}'
+            result = Executor.execute_command(inventory_path, command)
+        elif 'windows' == os_type:
             command = 'dir /a-d /b /s | findstr /v /c:"\\.$" /c:"\\..$"| find /c ":"'
         else:
             logger.info(f'Unsupported operating system')
@@ -514,9 +573,15 @@ class CheckFiles:
         """
         os_type = HostInformation.get_os_type(inventory_path)
 
-        directories = ['/boot', '/usr/bin', '/root', '/usr/sbin']
-        filters_keywords = ['grep', 'tar', 'coreutils', 'sed', 'procps', 'gawk', 'lsof', 'curl', 'openssl', 'libcap', 'apt-transport-https', 'libcap2-bin', 'software-properties-common', 'gnupg', 'gpg']
-        filters = f"| grep -v {filters_keywords[0]}"
+        if 'linux' in inventory_path:
+            directories = ['/boot', '/usr/bin', '/root', '/usr/sbin']
+            filters_keywords = ['grep', 'tar', 'coreutils', 'sed', 'procps', 'gawk', 'lsof', 'curl', 'openssl', 'libcap', 'apt-transport-https', 'libcap2-bin', 'software-properties-common', 'gnupg', 'gpg']
+            filters = f"| grep -v {filters_keywords[0]}"
+
+        elif 'macos' in inventory_path:
+            directories = ['/usr/bin', '/usr/sbin']
+            filters_keywords = ['grep']
+            filters = f"| grep -v {filters_keywords[0]}"
 
         for filter_ in filters_keywords[1:]:
             filters+= f" | grep -v {filter_}"
@@ -543,8 +608,11 @@ class GeneralComponentActions:
             str: Role status
         """
         logger.info(f'Getting status of {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
-
-        return Executor.execute_command(inventory_path, f'systemctl status {host_role}')
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            return Executor.execute_command(inventory_path, f'systemctl status {host_role}')
+        elif os_type == 'macos':
+            return Executor.execute_command(inventory_path, f'/Library/Ossec/bin/wazuh-control status | grep {host_role}')
 
 
     @staticmethod
@@ -556,9 +624,12 @@ class GeneralComponentActions:
             inventory_path: host's inventory path
             host_role: role of the component
         """
-
         logger.info(f'Stopping {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
-        Executor.execute_command(inventory_path, f'systemctl stop {host_role}')
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            return Executor.execute_command(inventory_path, f'systemctl stop {host_role}')
+        elif os_type == 'macos':
+            return Executor.execute_command(inventory_path, f'/Library/Ossec/bin/wazuh-control stop | grep {host_role}')
 
 
     @staticmethod
@@ -572,7 +643,11 @@ class GeneralComponentActions:
         """
 
         logger.info(f'Restarting {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
-        Executor.execute_command(inventory_path, f'systemctl restart {host_role}')
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            return Executor.execute_command(inventory_path, f'systemctl restart {host_role}')
+        elif os_type == 'macos':
+            return Executor.execute_command(inventory_path, f'/Library/Ossec/bin/wazuh-control restart | grep {host_role}')
 
 
     @staticmethod
@@ -586,7 +661,11 @@ class GeneralComponentActions:
         """
 
         logger.info(f'Starting {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
-        Executor.execute_command(inventory_path, f'systemctl restart {host_role}')
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            return Executor.execute_command(inventory_path, f'systemctl start {host_role}')
+        elif os_type == 'macos':
+            return Executor.execute_command(inventory_path, f'/Library/Ossec/bin/wazuh-control start | grep {host_role}')
 
 
     @staticmethod
@@ -600,7 +679,11 @@ class GeneralComponentActions:
         Returns:
             str: version
         """
-        return Executor.execute_command(inventory_path, f'{WAZUH_CONTROL} info -v')
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            return Executor.execute_command(inventory_path, f'{WAZUH_CONTROL} info -v')
+        elif os_type == 'macos':
+            return Executor.execute_command(inventory_path, f'/Library/Ossec/bin/wazuh-control info -v')
 
 
     @staticmethod
@@ -614,7 +697,11 @@ class GeneralComponentActions:
         Returns:
             str: revision number
         """
-        return Executor.execute_command(inventory_path, f'{WAZUH_CONTROL} info -r')
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            return Executor.execute_command(inventory_path, f'{WAZUH_CONTROL} info -r')
+        elif os_type == 'macos':
+            return Executor.execute_command(inventory_path, f'/Library/Ossec/bin/wazuh-control info -r')
 
 
     @staticmethod
@@ -628,7 +715,11 @@ class GeneralComponentActions:
         Returns:
             bool: True/False
         """
-        return 'true' in Executor.execute_command(inventory_path, f'[ -f {CLIENT_KEYS} ] && echo true || echo false')
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            return HostInformation.file_exists(inventory_path, CLIENT_KEYS)
+        elif os_type == 'macos':
+            return HostInformation.file_exists(inventory_path, '/Library/Ossec/etc/client.keys')
 
 
     @staticmethod
@@ -643,7 +734,12 @@ class GeneralComponentActions:
         Returns:
             bool: True/False
         """
-        return 'active' == Executor.execute_command(inventory_path, f'systemctl is-active {host_role}').replace("\n", "")
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            return 'active' == Executor.execute_command(inventory_path, f'systemctl is-active {host_role}').replace("\n", "")
+        elif os_type == 'macos':
+            return f'com.{host_role.replace("-", ".")}' in Executor.execute_command(inventory_path, f'launchctl list | grep com.{host_role.replace("-", ".")}')
+
 
 class Waits:
 

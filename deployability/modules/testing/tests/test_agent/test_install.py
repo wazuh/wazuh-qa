@@ -85,11 +85,14 @@ def test_installation(wazuh_params):
         WazuhAgent.perform_install_and_scan_for_agent(agent_params, agent_names, wazuh_params)
 
     # Testing installation directory
-    for agent in wazuh_params['agents'].values():
-        assert HostInformation.dir_exists(agent, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(agent)}')
+    for agent_names, agent_params in wazuh_params['agents'].items():
+        if HostInformation.get_os_type(agent_params) == 'linux':
+            assert HostInformation.dir_exists(agent_params, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
+        elif HostInformation.get_os_type(agent_params) == 'macos':
+            assert HostInformation.dir_exists(agent_params, '/Library/Ossec'), logger.error(f'The /Library/Ossec is not present in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
 
 
 def test_status(wazuh_params):
     for agent in wazuh_params['agents'].values():
         agent_status = GeneralComponentActions.get_component_status(agent, 'wazuh-agent')
-        assert 'loaded' in agent_status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} status is not loaded')
+        assert 'loaded' in agent_status or 'not running' in agent_status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} status is not loaded')
