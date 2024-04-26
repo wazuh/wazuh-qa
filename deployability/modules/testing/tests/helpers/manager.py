@@ -226,7 +226,7 @@ class WazuhManager:
 
 
     @staticmethod
-    def isWazuhAPI_port_opened(inventory_path, wait=10, cycles=10) -> bool:
+    def isWazuhAPI_port_opened(inventory_path, wait=10, cycles=50) -> bool:
         """
         Check if Manager API port is open
 
@@ -251,7 +251,7 @@ class WazuhManager:
         return False
 
     @staticmethod
-    def isWazuhAgent_port_opened(inventory_path, wait=10, cycles=10) -> bool:
+    def isWazuhAgent_port_opened(inventory_path, wait=10, cycles=50) -> bool:
         """
         Check if Wazuh Manager Agent port is open
 
@@ -276,7 +276,7 @@ class WazuhManager:
         return False
 
     @staticmethod
-    def isWazuhAgent_enrollment_port_opened(inventory_path, wait=10, cycles=10) -> bool:
+    def isWazuhAgent_enrollment_port_opened(inventory_path, wait=10, cycles=50) -> bool:
         """
         Check if Wazuh Manager Agent enrollment port is open
 

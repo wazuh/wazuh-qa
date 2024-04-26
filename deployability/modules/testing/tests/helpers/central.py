@@ -98,7 +98,7 @@ class WazuhCentralComponents:
                     'removed': ['filebeat'],
                     'modified': []
                 },
-                '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': ['filebeat'], 'modified': []},
+                '/root': {'added': ['trustdb.gpg', 'lesshst', 'ssh'], 'removed': ['filebeat'], 'modified': []},
                 '/usr/sbin': {
                     'added': [
                         'update-catalog', 'applygnupgdefaults', 'addgnupghome', 'install-sgmlcatalog', 'update-xmlcatalog'

@@ -84,7 +84,7 @@ class WazuhDashboard:
             logger.error(f'The dashboard API returned: {response.status_code}')
 
     @staticmethod
-    def isDashboard_port_opened(inventory_path, wait=10, cycles=10):
+    def isDashboard_port_opened(inventory_path, wait=10, cycles=50):
         """
         Check if dashboard port is open
 
