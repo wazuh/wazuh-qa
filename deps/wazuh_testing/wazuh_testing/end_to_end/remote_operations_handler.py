@@ -29,7 +29,8 @@ from wazuh_testing.end_to_end.waiters import wait_syscollector_and_vuln_scan
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.end_to_end.vulnerability_detector import check_vuln_alert_indexer, check_vuln_state_index, \
         load_packages_metadata, parse_vulnerability_detector_alerts
-from wazuh_testing.end_to_end.indexer_api import get_indexer_values
+from wazuh_testing.end_to_end.indexer_api import get_indexer_values, \
+        create_vulnerability_states_indexer_filter, create_alerts_filter
 
 
 def check_vulnerability_alerts(results: Dict, check_data: Dict, current_datetime: str, host_manager: HostManager,
@@ -43,12 +44,12 @@ def check_vulnerability_alerts(results: Dict, check_data: Dict, current_datetime
     vulnerability_index = {}
 
     for agent in host_manager.get_group_hosts('agent'):
-        agent_all_alerts = parse_vulnerability_detector_alerts(get_indexer_values(host_manager,
-                                              greater_than_timestamp=current_datetime,
-                                              agent=agent)['hits']['hits'])
+        alerts_filter = create_alerts_filter(agent, current_datetime)
+        index_vuln_filter = create_vulnerability_states_indexer_filter(agent, current_datetime)
 
-        agent_all_vulnerabilities = get_indexer_values(host_manager, greater_than_timestamp=current_datetime,
-                                                       agent=agent,
+        agent_all_alerts = parse_vulnerability_detector_alerts(get_indexer_values(host_manager,
+                                                                                  filter=alerts_filter)['hits']['hits'])
+        agent_all_vulnerabilities = get_indexer_values(host_manager, filter=index_vuln_filter,
                                                        index='wazuh-states-vulnerabilities')['hits']['hits']
 
         vulnerability_alerts[agent] = agent_all_alerts['affected']
