@@ -57,7 +57,7 @@ def wait_until_vd_is_updated(host_manager: HostManager) -> None:
 
     # Check initial scanner log
     if any(scanner_started_message in result['found'] for result in initial_results.values()):
-        print("Vulnerability scanner has started. Waiting for feed update completion...")
+        logging.info("Vulnerability scanner has started. Waiting for feed update completion...")
         # Proceed to check feed initiated log
         initiated_monitoring_data = generate_monitoring_logs(
             host_manager, [feed_update_initiated_message],
@@ -66,7 +66,7 @@ def wait_until_vd_is_updated(host_manager: HostManager) -> None:
         initiated_results = monitoring_events_multihost(host_manager, initiated_monitoring_data)
 
         if any(feed_update_initiated_message in result['found'] for result in initiated_results.values()):
-            print("Feed update process initiated successfully. Waiting for feed update completion...")
+            logging.info("Feed update process initiated successfully. Waiting for feed update completion...")
             # Finally check completion log
             completion_monitoring_data = generate_monitoring_logs(
                 host_manager, [feed_update_complete_message],
@@ -74,13 +74,13 @@ def wait_until_vd_is_updated(host_manager: HostManager) -> None:
             )
             completion_results = monitoring_events_multihost(host_manager, completion_monitoring_data)
             if any(feed_update_complete_message in result['found'] for result in completion_results.values()):
-                print("Feed update process completed successfully")
+                logging.info("Feed update process completed successfully")
             else:
                 raise TimeoutError("Timeout waiting for the feed update process to complete")
         else:
-            print("Feed update initiated log not found, the feed has already been updated previously")
+            logging.info("Feed update initiated log not found, the feed has already been updated previously")
     else:
-        print("Scanner start log not found")
+        logging.info("Scanner start log not found")
 
 def wait_until_vuln_scan_agents_finished(host_manager: HostManager) -> None:
     """
