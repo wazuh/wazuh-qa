@@ -1,4 +1,5 @@
 import logging
+from typing import Dict
 
 
 def get_failed_operation_hosts(global_operation_results: dict) -> list:
@@ -75,11 +76,11 @@ def get_duplicated_elements(list_of_elements) -> list:
     return list(duplicated)
 
 
-def get_duplicated_vulnerabilities(vulnerabilities) -> list:
+def get_duplicated_vulnerabilities(vulnerabilities: Dict) -> list:
     global_duplicated_vulnerabilities = []
 
     for agent, agent_vulnerabilities in vulnerabilities.items():
-        duplicated_vulnerabilities = get_duplicated_vulnerabilities(agent_vulnerabilities)
+        duplicated_vulnerabilities = get_duplicated_elements(agent_vulnerabilities)
         if duplicated_vulnerabilities:
             global_duplicated_vulnerabilities.append({agent: duplicated_vulnerabilities})
 
