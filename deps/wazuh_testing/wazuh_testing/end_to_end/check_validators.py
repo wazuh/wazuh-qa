@@ -75,6 +75,17 @@ def get_duplicated_elements(list_of_elements) -> list:
     return list(duplicated)
 
 
+def get_duplicated_vulnerabilities(vulnerabilities) -> list:
+    global_duplicated_vulnerabilities = []
+
+    for agent, agent_vulnerabilities in vulnerabilities.items():
+        duplicated_vulnerabilities = get_duplicated_vulnerabilities(agent_vulnerabilities)
+        if duplicated_vulnerabilities:
+            global_duplicated_vulnerabilities.append({agent: duplicated_vulnerabilities})
+
+    return global_duplicated_vulnerabilities
+
+
 def no_duplicated_elements(list_of_elements) -> bool:
     return len(get_duplicated_elements(list_of_elements)) > 0
 
