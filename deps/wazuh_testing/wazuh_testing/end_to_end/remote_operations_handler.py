@@ -99,9 +99,8 @@ def get_expected_vulnerabilities_for_package(
     return vulnerabilities
 
 
-def filter_vulnerabilities_by_packages(
-    host_manager: HostManager, vulnerabilities: Dict, packages_data: List
-) -> Dict:
+def filter_vulnerabilities_by_packages(host_manager: HostManager,
+                                       vulnerabilities: Dict, packages_data: List) -> Dict:
     filtered_vulnerabilities = {}
     for host in vulnerabilities.keys():
         filtered_vulnerabilities[host] = []
@@ -255,9 +254,7 @@ def get_vulnerabilities_index(host_manager: HostManager, agent_list, packages_da
                               greater_than_timestamp: str = "") -> Dict:
     vulnerabilities = get_vulnerabilities_from_states_by_agent(host_manager, agent_list,
                                                                greater_than_timestamp=greater_than_timestamp)
-    package_vulnerabilities = filter_vulnerabilities_by_packages(
-        host_manager, vulnerabilities, packages_data
-    )
+    package_vulnerabilities = filter_vulnerabilities_by_packages(host_manager, vulnerabilities, packages_data)
 
     return package_vulnerabilities
 
