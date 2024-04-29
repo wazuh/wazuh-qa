@@ -68,7 +68,7 @@ def test_status(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
         WazuhAgent.register_agent(agent_params, wazuh_params['master'])
     for agent in wazuh_params['agents'].values():
-        assert 'active' in GeneralComponentActions.get_component_status(agent, 'wazuh-agent'), logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} is not active')
+        assert 'active' in GeneralComponentActions.get_component_status(agent, 'wazuh-agent') or 'is running' in GeneralComponentActions.get_component_status(agent, 'wazuh-agent'), logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} is not active')
 
 
 def test_connection(wazuh_params):
@@ -81,7 +81,7 @@ def test_connection(wazuh_params):
 def test_service(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['master'])
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by API')
+        assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by command')
 
         expected_condition_func = lambda: 'active' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)

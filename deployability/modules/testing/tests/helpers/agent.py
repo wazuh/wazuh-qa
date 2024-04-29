@@ -23,24 +23,25 @@ class WazuhAgent:
             release = 'pre-release'
 
         os_type = HostInformation.get_os_type(inventory_path)
+        architecture = HostInformation.get_architecture(inventory_path)
         commands = []
         if 'linux' in os_type:
             distribution = HostInformation.get_linux_distribution(inventory_path)
             architecture = HostInformation.get_architecture(inventory_path)
 
-            if distribution == 'rpm' and 'x86_64' in architecture:
+            if distribution == 'rpm' and 'amd64' in architecture:
                 commands.extend([
                     f"curl -o wazuh-agent-{wazuh_version}-1.x86_64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.x86_64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.x86_64.rpm"
                 ])
-            elif distribution == 'rpm' and 'aarch64' in architecture:
+            elif distribution == 'rpm' and 'arm64' in architecture:
                 commands.extend([
                     f"curl -o wazuh-agent-{wazuh_version}-1aarch64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.aarch64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.aarch64.rpm"
                 ])
-            elif distribution == 'deb' and 'x86_64' in architecture:
+            elif distribution == 'deb' and 'amd64' in architecture:
                 commands.extend([
                     f"wget https://{s3_url}.wazuh.com/{release}/apt/pool/main/w/wazuh-agent/wazuh-agent_{wazuh_version}-1_amd64.deb && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' dpkg -i ./wazuh-agent_{wazuh_version}-1_amd64.deb"
                 ])
-            elif distribution == 'deb' and 'aarch64' in architecture:
+            elif distribution == 'deb' and 'arm64' in architecture:
                 commands.extend([
                     f"wget https://{s3_url}.wazuh.com/{release}/apt/pool/main/w/wazuh-agent/wazuh-agent_{wazuh_version}-1_arm64.deb && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' dpkg -i ./wazuh-agent_{wazuh_version}-1arm64.deb"
                 ])
@@ -64,11 +65,11 @@ class WazuhAgent:
                 "NET STATUS WazuhSvc"
                 ])
         elif 'macos' in os_type:
-            if 'intel' in architecture:
+            if 'amd64' in architecture:
                 commands.extend([
                     f'curl -so wazuh-agent.pkg https://{s3_url}.wazuh.com/{release}/macos/wazuh-agent-{wazuh_version}-1.intel64.pkg && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
                 ])
-            elif 'apple' in architecture:
+            elif 'arm64' in architecture:
                 commands.extend([
                     f'curl -so wazuh-agent.pkg https://{s3_url}.wazuh.com/{release}/macos/wazuh-agent-{wazuh_version}-1.arm64.pkg && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
                 ])
@@ -92,30 +93,54 @@ class WazuhAgent:
     def register_agent(inventory_path, manager_path):
 
         with open(manager_path, 'r') as yaml_file:
-            manager_path = yaml.safe_load(yaml_file)
-        host = manager_path.get('ansible_host')
+            manager_path_yaml = yaml.safe_load(yaml_file)
+        manager_host = manager_path_yaml.get('ansible_host')
 
-        internal_ip = HostInformation.get_internal_ip_from_aws_dns(host) if 'amazonaws' in host else host
+        with open(inventory_path, 'r') as yaml_file:
+            inventory_path_yaml = yaml.safe_load(yaml_file)
+        agent_host = inventory_path_yaml.get('ansible_host')
 
-        commands = [
-            f"sed -i 's/<address>MANAGER_IP<\/address>/<address>{internal_ip}<\/address>/g' {WAZUH_CONF}",
-            "systemctl restart wazuh-agent"
-        ]
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            host_ip = HostInformation.get_internal_ip_from_aws_dns(manager_host) if 'amazonaws' in manager_host else manager_host
+            commands = [
+                f"sed -i 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' {WAZUH_CONF}",
+                "systemctl restart wazuh-agent"
+            ]
+            Executor.execute_commands(inventory_path, commands)
+            assert host_ip in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the Manager IP ({host_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
-        Executor.execute_commands(inventory_path, commands)
-        assert internal_ip in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the Manager IP ({internal_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+        elif os_type == 'macos':
+            if 'amazonaws' in manager_host and 'amazonaws' in agent_host:
+                host_ip = HostInformation.get_internal_ip_from_aws_dns(manager_host) 
+            else:
+                host_ip = HostInformation.get_public_ip_from_aws_dns(manager_host)
+            commands = [
+                f"sed -i '.bak' 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' /Library/Ossec/etc/ossec.conf",
+                "/Library/Ossec/bin/wazuh-control restart"
+            ]
+            Executor.execute_commands(inventory_path, commands)
+            assert host_ip in Executor.execute_command(inventory_path, f'cat /Library/Ossec/etc/ossec.conf'), logger.error(f'Error configuring the Manager IP ({host_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
 
     @staticmethod
     def set_protocol_agent_connection(inventory_path, protocol):
-        commands = [
-            f"sed -i 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' {WAZUH_CONF}",
-            "systemctl restart wazuh-agent"
-        ]
-
-        Executor.execute_commands(inventory_path, commands)
-        assert protocol in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
-
+        os_type = HostInformation.get_os_type(inventory_path)
+        if 'linux' in os_type:
+            commands = [
+                f"sed -i 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' {WAZUH_CONF}",
+                "systemctl restart wazuh-agent"
+            ]
+            Executor.execute_commands(inventory_path, commands)
+            assert protocol in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+        elif 'macos' in os_type:
+            commands = [
+                f"sed -i '' 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' /Library/Ossec/etc/ossec.conf",
+                "/Library/Ossec/bin/wazuh-control restart"
+            ]
+            Executor.execute_commands(inventory_path, commands)
+            assert protocol in Executor.execute_command(inventory_path, f'cat /Library/Ossec/etc/ossec.conf'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+       
 
     @staticmethod
     def uninstall_agent(inventory_path, wazuh_version=None, wazuh_revision=None) -> None:
@@ -199,43 +224,50 @@ class WazuhAgent:
         """
         result = CheckFiles.perform_action_and_scan(agent_params, action_callback)
         os_name = HostInformation.get_os_name_from_inventory(agent_params)
+        os_type = HostInformation.get_os_type(agent_params)
         logger.info(f'Applying filters in checkfiles in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
 
-        if 'debian' in os_name:
-            filter_data = {
-                '/boot': {'added': [], 'removed': [], 'modified': ['grubenv']},
-                '/usr/bin': {
-                    'added': [
-                        'unattended-upgrade', 'gapplication', 'add-apt-repository', 'gpg-wks-server', 'pkexec', 'gpgsplit',
-                        'watchgnupg', 'pinentry-curses', 'gpg-zip', 'gsettings', 'gpg-agent', 'gresource', 'gdbus',
-                        'gpg-connect-agent', 'gpgconf', 'gpgparsemail', 'lspgpot', 'pkaction', 'pkttyagent', 'pkmon',
-                        'dirmngr', 'kbxutil', 'migrate-pubring-from-classic-gpg', 'gpgcompose', 'pkcheck', 'gpgsm', 'gio',
-                        'pkcon', 'gpgtar', 'dirmngr-client', 'gpg', 'filebeat', 'gawk', 'curl', 'update-mime-database',
-                        'dh_installxmlcatalogs', 'appstreamcli', 'lspgpot', 'symcryptrun'
-                    ],
-                    'removed': [],
-                    'modified': []
-                },
-                '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
-                '/usr/sbin': {
-                    'added': [
-                        'update-catalog', 'applygnupgdefaults', 'addgnupghome', 'install-sgmlcatalog', 'update-xmlcatalog'
-                    ],
-                    'removed': [],
-                    'modified': []
+        if os_type == 'linux':
+            if 'debian' in os_name:
+                filter_data = {
+                    '/boot': {'added': [], 'removed': [], 'modified': ['grubenv']},
+                    '/usr/bin': {
+                        'added': [
+                            'unattended-upgrade', 'gapplication', 'add-apt-repository', 'gpg-wks-server', 'pkexec', 'gpgsplit',
+                            'watchgnupg', 'pinentry-curses', 'gpg-zip', 'gsettings', 'gpg-agent', 'gresource', 'gdbus',
+                            'gpg-connect-agent', 'gpgconf', 'gpgparsemail', 'lspgpot', 'pkaction', 'pkttyagent', 'pkmon',
+                            'dirmngr', 'kbxutil', 'migrate-pubring-from-classic-gpg', 'gpgcompose', 'pkcheck', 'gpgsm', 'gio',
+                            'pkcon', 'gpgtar', 'dirmngr-client', 'gpg', 'filebeat', 'gawk', 'curl', 'update-mime-database',
+                            'dh_installxmlcatalogs', 'appstreamcli', 'lspgpot', 'symcryptrun'
+                        ],
+                        'removed': [],
+                        'modified': []
+                    },
+                    '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
+                    '/usr/sbin': {
+                        'added': [
+                            'update-catalog', 'applygnupgdefaults', 'addgnupghome', 'install-sgmlcatalog', 'update-xmlcatalog'
+                        ],
+                        'removed': [],
+                        'modified': []
+                    }
                 }
-            }
-        else:
-            filter_data = {
-                '/boot': {
-                    'added': ['grub2', 'loader', 'vmlinuz', 'System.map', 'config-', 'initramfs'],
-                    'removed': [],
-                    'modified': ['grubenv']
-                },
-                '/usr/bin': {'added': ['filebeat'], 'removed': [], 'modified': []},
-                '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
-                '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
-            }
+            else:
+                filter_data = {
+                    '/boot': {
+                        'added': ['grub2', 'loader', 'vmlinuz', 'System.map', 'config-', 'initramfs'],
+                        'removed': [],
+                        'modified': ['grubenv']
+                    },
+                    '/usr/bin': {'added': ['filebeat'], 'removed': [], 'modified': []},
+                    '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
+                    '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
+                }
+        elif os_type == 'macos':
+                filter_data = {
+                    '/usr/bin': {'added': [], 'removed': [], 'modified': []},
+                    '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
+                }
 
         # Use of filters
         for directory, changes in result.items():
@@ -259,7 +291,7 @@ class WazuhAgent:
         action_callback = lambda: WazuhAgent._install_agent_callback(wazuh_params, agent_name, agent_params)
         result = WazuhAgent.perform_action_and_scan(agent_params, action_callback)
         logger.info(f'Pre and post install checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}: {result}')
-        WazuhAgent.assert_results(result)
+        WazuhAgent.assert_results(result, agent_params)
 
 
     @staticmethod
@@ -275,11 +307,11 @@ class WazuhAgent:
         action_callback = lambda: WazuhAgent._uninstall_agent_callback(wazuh_params, agent_params)
         result = WazuhAgent.perform_action_and_scan(agent_params, action_callback)
         logger.info(f'Pre and post uninstall checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}: {result}')
-        WazuhAgent.assert_results(result)
+        WazuhAgent.assert_results(result, agent_params)
 
 
     @staticmethod
-    def assert_results(result) -> None:
+    def assert_results(result, agent_params) -> None:
         """
         Gets the status of an agent given its name.
         
@@ -287,8 +319,13 @@ class WazuhAgent:
             result (dict): result of comparison between pre and post action scan
 
         """
-        categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
+        os_type = HostInformation.get_os_type(agent_params)
+        if os_type == 'linux':
+            categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
+        elif os_type == 'macos':
+            categories = ['/usr/bin', '/usr/sbin']
         actions = ['added', 'modified', 'removed']
+
         # Testing the results
         for category in categories:
             for action in actions:
@@ -306,17 +343,21 @@ class WazuhAgent:
         """
         return bool([int(numero) for numero in Executor.execute_command(agent_params, 'pgrep wazuh').splitlines()])
 
-    def isAgent_port_open(agent_params):
+    def isAgent_port_open(inventory_path):
         """
         Check if agent port is open
 
         Args:
-            agent_name (str): Agent name.
+            inventory_path (str): Agent inventory path.
 
         Returns:
             str: Os name.
         """
-        return 'ESTAB' in Executor.execute_command(agent_params, 'ss -t -a -n | grep ":1514" | grep ESTAB')
+        os_type = HostInformation.get_os_type(inventory_path)
+        if os_type == 'linux':
+            return 'ESTAB' in Executor.execute_command(inventory_path, 'ss -t -a -n | grep ":1514" | grep ESTAB')
+        elif os_type == 'macos':
+            return 'ESTABLISHED' in Executor.execute_command(inventory_path, 'netstat -an | grep ".1514 " | grep ESTABLISHED')
 
     def get_agents_information(wazuh_api: WazuhAPI) -> list:
         """
