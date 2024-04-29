@@ -87,10 +87,6 @@ def get_duplicated_vulnerabilities(vulnerabilities: Dict) -> list:
     return global_duplicated_vulnerabilities
 
 
-def no_duplicated_elements(list_of_elements) -> bool:
-    return len(get_duplicated_elements(list_of_elements)) > 0
-
-
 def compare_expected_found_vulnerabilities_alerts(vulnerabilities, expected_vulnerabilities):
     result = True
     vulnerabilities_affected_not_found = {}
