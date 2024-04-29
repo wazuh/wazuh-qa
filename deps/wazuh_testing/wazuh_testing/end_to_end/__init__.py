@@ -37,7 +37,7 @@ def get_alert_indexer_api(query, credentials, ip_address, index='wazuh-alerts-4.
     """Get an alert from the wazuh-indexer API
 
     Make a request to the wazuh-indexer API to get the last indexed alert that matches the values passed in
-    must_match.
+    query.
 
     Args:
         ip_address (str): wazuh-indexer IP address.
@@ -263,15 +263,15 @@ class Check:
 
         return message
 
-    def collect_evidences(self, evidences_directory: str, debug: bool = False):
+    def collect_evidences(self, evidences_directory: str, collect_debug_evidences: bool = False):
         """Collects evidences for the check.
 
         Args:
             evidences_directory (str): The directory where evidence files will be stored.
-            debug (bool, optional): If True, collects debug evidence. Defaults to False.
+            collect_debug_evidences (bool, optional): If True, collects debug evidence. Defaults to False.
         """
         for evidence in self.evidences:
-            if evidence.debug and not debug:
+            if evidence.debug and not collect_debug_evidences:
                 continue
 
             evidence.collect_evidence(evidences_directory)
