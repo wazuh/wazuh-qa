@@ -23,16 +23,12 @@ This program is a free software; you can redistribute it and/or modify it under 
 import logging
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
-from typing import Any, Dict, List
 
-from wazuh_testing.end_to_end.indexer_api import get_indexer_values
-from wazuh_testing.end_to_end.vulnerability_detector import (
-    Vulnerability, check_vuln_alert_indexer, check_vuln_state_index,
-    get_vulnerabilities_from_alerts_by_agent,
-    get_vulnerabilities_from_states_by_agent, load_packages_metadata)
-from wazuh_testing.end_to_end.waiters import wait_syscollector_and_vuln_scan
-from wazuh_testing.modules.syscollector import TIMEOUT_SYSCOLLECTOR_SCAN
+from typing import Any, Dict, List
+from wazuh_testing.end_to_end.vulnerability_detector import (Vulnerability,
+                                                             get_vulnerabilities_from_alerts_by_agent,
+                                                             get_vulnerabilities_from_states_by_agent,
+                                                             load_packages_metadata)
 from wazuh_testing.tools.system import HostManager
 
 
