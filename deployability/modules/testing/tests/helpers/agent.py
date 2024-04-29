@@ -5,7 +5,7 @@ import requests
 import yaml
 
 from typing import List, Optional
-from .constants import WAZUH_CONF, WAZUH_ROOT, WAZUH_WINDOWS_CONF
+from .constants import WAZUH_CONF, WAZUH_ROOT, WAZUH_WINDOWS_CONF, WAZUH_MACOS_CONF
 from .executor import WazuhAPI, ConnectionManager
 from .generic import HostInformation, CheckFiles
 from modules.testing.utils import logger
@@ -23,11 +23,11 @@ class WazuhAgent:
             release = 'pre-release'
 
         os_type = HostInformation.get_os_type(inventory_path)
+        architecture = HostInformation.get_architecture(inventory_path)
         commands = []
 
         if os_type == 'linux':
             distribution = HostInformation.get_linux_distribution(inventory_path)
-            architecture = HostInformation.get_architecture(inventory_path)
 
             if distribution == 'rpm' and 'amd64' in architecture:
                 commands.extend([
@@ -66,11 +66,11 @@ class WazuhAgent:
             ])
             commands.extend(["NET START WazuhSvc"])
         elif os_type == 'macos':
-            if 'amd64' in architecture:
+            if architecture == 'amd64':
                 commands.extend([
                     f'curl -so wazuh-agent.pkg https://{s3_url}.wazuh.com/{release}/macos/wazuh-agent-{wazuh_version}-1.intel64.pkg && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
                 ])
-            elif 'arm64' in architecture:
+            elif architecture == 'arm64':
                 commands.extend([
                     f'curl -so wazuh-agent.pkg https://{s3_url}.wazuh.com/{release}/macos/wazuh-agent-{wazuh_version}-1.arm64.pkg && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
                 ])
@@ -125,7 +125,7 @@ class WazuhAgent:
                 else:
                     host_ip = HostInformation.get_public_ip_from_aws_dns(manager_host)
                 commands = [
-                    f"sed -i '.bak' 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' /Library/Ossec/etc/ossec.conf",
+                    f"sed -i '.bak' 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' {WAZUH_MACOS_CONF}",
                     "/Library/Ossec/bin/wazuh-control restart"
                 ]
                 ConnectionManager.execute_commands(inventory_path, commands)
@@ -393,13 +393,19 @@ class WazuhAgent:
         """
         os_type = HostInformation.get_os_type(agent_params)
 
-        if 'linux' in os_type:
+        if os_type == 'linux':
             result = ConnectionManager.execute_commands(agent_params, 'pgrep wazuh')
             if result.get('success'):
                 return bool([int(numero) for numero in result.get('output').splitlines()])
             else:
                 return False
-        elif 'windows' in os_type:
+
+        if os_type == 'macos':
+            result = ConnectionManager.execute_commands(agent_params, 'pgrep wazuh')
+            return bool([int(numero) for numero in result.splitlines()])
+
+
+        elif os_type == 'windows':
             result = ConnectionManager.execute_commands(agent_params, 'Get-Process -Name "wazuh-agent" | Format-Table -HideTableHeaders  ProcessName')
             if result.get('success'):
                 return 'wazuh-agent' in result.get('output')

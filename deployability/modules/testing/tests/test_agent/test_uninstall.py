@@ -6,7 +6,7 @@ import pytest
 import re
 
 from ..helpers.agent import WazuhAgent
-from ..helpers.constants import WAZUH_ROOT, WINDOWS_CONFIGURATIONS_DIR, WINDOWS_ROOT_DIR, MACOS_ROOT_DIR
+from ..helpers.constants import WAZUH_ROOT, WINDOWS_CONFIGURATIONS_DIR, WINDOWS_ROOT_DIR, MACOS_ROOT_DIR, MACOS_CONFIGURATIONS_DIR
 from ..helpers.generic import HostInformation, GeneralComponentActions, Waits
 from ..helpers.manager import WazuhManager, WazuhAPI
 from modules.testing.utils import logger
@@ -93,7 +93,10 @@ def test_agent_uninstalled_directory(wazuh_params):
             path_to_check = WAZUH_ROOT
         elif os_type == 'windows':
             path_to_check = WINDOWS_CONFIGURATIONS_DIR
-        assert HostInformation.dir_exists(agent_params, path_to_check), logger.error(f'The {path_to_check} is still present in the agent {agent_names}')
+        elif os_type == 'macos':
+            path_to_check = MACOS_CONFIGURATIONS_DIR
+
+        assert not HostInformation.dir_exists(agent_params, path_to_check), logger.error(f'The {path_to_check} is still present in the agent {agent_names}')
 
 
 def test_service(wazuh_params):
