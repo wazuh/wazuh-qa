@@ -304,10 +304,16 @@ class WazuhAgent:
                     '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
                 }
         elif os_type == 'macos':
-                filter_data = {
-                    '/usr/bin': {'added': [], 'removed': [], 'modified': []},
-                    '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
-                }
+            filter_data = {
+                '/usr/bin': {'added': [], 'removed': [], 'modified': []},
+                '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
+            }
+        elif os_type == 'windows':
+            filter_data = {
+                'C:\\Program Files': {'added': [], 'removed': [], 'modified': []},
+                'C:\\Program Files (x86)': {'added': [], 'removed': [], 'modified': []},
+                'C:\\Users\\vagrant' : {'added': [], 'removed': [], 'modified': []}
+            }
 
         # Use of filters
         for directory, changes in result.items():
@@ -373,7 +379,7 @@ class WazuhAgent:
         for category in categories:
             for action in actions:
 
-                assert result[category][action] == [], logger.error(f'{result[category][action]} was found in: {category}{action}')
+                assert result[category][action] == [], logger.error(f'{result[category][action]} was found in: {category} {action}')
 
     def areAgent_processes_active(agent_params):
         """

@@ -568,6 +568,7 @@ class CheckFiles:
                 filters += f" | grep -v {filter_}"
             command = f'sudo find {directory} -type f -exec shasum -a 256 {{}} \; {filter}'
             result = ConnectionManager.execute_commands(inventory_path, command)
+
         elif 'windows' in os_type:
             quoted_filters = ['"{}"'.format(keyword) for keyword in filters_keywords]
             filter_files = ",".join(quoted_filters)

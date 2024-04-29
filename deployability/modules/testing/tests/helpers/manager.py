@@ -221,7 +221,7 @@ class WazuhManager:
         # Testing the results
         for category in categories:
             for action in actions:
-                assert result[category][action] == [], logger.error(f'{result[category][action]} was found in: {category}{action}')
+                assert result[category][action] == [], logger.error(f'{result[category][action]} was found in: {category} {action}')
 
 
     @staticmethod
