@@ -133,7 +133,7 @@ class WazuhAgent:
                 raise Exception(f'Error registering agent. Error executing: {commands} with error: {e}')
 
             result = ConnectionManager.execute_commands(inventory_path, f'cat {WAZUH_CONF}')
-            assert host_ip in result.get('output'), logger.error(f'Error configuring the Manager IP ({host_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+            assert host_ip in result, logger.error(f'Error configuring the Manager IP ({host_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
         elif os_type == 'windows':
             try:
