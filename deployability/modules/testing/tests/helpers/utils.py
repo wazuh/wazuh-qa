@@ -70,6 +70,7 @@ class Utils:
                 except Exception as e:
                     logger.warning(f'Error on attempt {attempt} of {attempts}: {e}')
                 time.sleep(sleep)
+
         elif os_type == 'windows':
             if port == 5986:
                 protocol = 'https'
@@ -90,6 +91,7 @@ class Utils:
                 except Exception as e:
                     logger.warning(f'Error on attempt {attempt} of {attempts}: {e}')
                 time.sleep(sleep)
+
         elif os_type == 'macos':
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())

@@ -556,9 +556,16 @@ class CheckFiles:
             Dict: dict of directories:hash
         """
         if 'linux' == os_type:
-            command = f'sudo find {directory} -type f -exec sha256sum {{}} + {filter}'
-            result = ConnectionManager.execute_commands(inventory_path, command)
+            filters = f"| grep -v {filters_keywords[0]}"
+            for filter_ in filters_keywords[1:]:
+                filters += f" | grep -v {filter_}"
+            command = f'sudo find {directory} -type f -exec sha256sum {{}} + {filters}'
+            result = ConnectionManager.execute_commands(inventory_path, command).get('output')
+
         elif 'macos' == os_type:
+            filters = f"| grep -v {filters_keywords[0]}"
+            for filter_ in filters_keywords[1:]:
+                filters += f" | grep -v {filter_}"
             command = f'sudo find {directory} -type f -exec shasum -a 256 {{}} \; {filter}'
             result = ConnectionManager.execute_commands(inventory_path, command)
         elif 'windows' in os_type:
@@ -640,13 +647,10 @@ class CheckFiles:
         elif os_type == 'windows':
             directories = ['C:\\Program Files', 'C:\\Program Files (x86)','C:\\Users\\vagrant']
             filters_keywords = ['log','tmp','ossec-agent', 'EdgeUpdate']
-        elif 'macos' in inventory_path:
+        elif os_type == 'macos':
             directories = ['/usr/bin', '/usr/sbin']
             filters_keywords = ['grep']
 
-        filters = f"| grep -v {filters_keywords[0]}"
-        for filter_ in filters_keywords[1:]:
-                    filters+= f" | grep -v {filter_}"
         initial_scans = CheckFiles._perform_scan(inventory_path, os_type, directories, filters_keywords)
         callback()
         second_scans = CheckFiles._perform_scan(inventory_path, os_type, directories, filters_keywords)
@@ -824,11 +828,12 @@ class GeneralComponentActions:
         os_type = HostInformation.get_os_type(inventory_path)
 
         if os_type == 'linux':
-
             return 'active' == ConnectionManager.execute_commands(inventory_path, f'systemctl is-active {host_role}').get('output').replace("\n", "")
+
         elif os_type == 'windows':
             result = ConnectionManager.execute_commands(inventory_path, "Get-Service -Name 'Wazuh'")
             return result.get('success')
+
         elif os_type == 'macos':
             return f'com.{host_role.replace("-", ".")}' in ConnectionManager.execute_commands(inventory_path, f'launchctl list | grep com.{host_role.replace("-", ".")}')
 
