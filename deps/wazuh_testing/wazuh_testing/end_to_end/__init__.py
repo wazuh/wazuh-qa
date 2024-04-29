@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import requests
+
 from dataclasses import dataclass
 from http import HTTPStatus
 from tempfile import gettempdir
@@ -12,7 +13,9 @@ from typing import Any, Callable, List
 
 from wazuh_testing.tools.utils import retry
 
+
 fetched_alerts_json_path = os.path.join(gettempdir(), 'alerts.json')
+VD_E2E_TIMEOUT_SYSCOLLECTOR_SCAN = 130
 
 base_path = {
     'linux': '/var/ossec',
