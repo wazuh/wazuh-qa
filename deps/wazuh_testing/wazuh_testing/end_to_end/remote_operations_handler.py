@@ -32,9 +32,7 @@ from wazuh_testing.end_to_end.vulnerability_detector import (Vulnerability,
 from wazuh_testing.tools.system import HostManager
 
 
-def get_vulnerabilities_not_found(
-    vulnerabilities_found: List, expected_vulnerabilities: List
-) -> List:
+def get_vulnerabilities_not_found(vulnerabilities_found: List, expected_vulnerabilities: List) -> List:
     """
     Get the vulnerabilities not found in the list of expected vulnerabilities.
 
@@ -437,11 +435,8 @@ def filter_hosts_by_os(host_manager: HostManager, os_list: List[str]) -> List[st
     return agents_target_os
 
 
-def launch_parallel_operations(
-    task: Dict[str, List],
-    host_manager: HostManager,
-    target_to_ignore: List[str] = None,
-):
+def launch_parallel_operations(task: Dict[str, List], host_manager: HostManager,
+                               target_to_ignore: List[str] = None):
     """
     Launch parallel remote operations on multiple hosts.
 
