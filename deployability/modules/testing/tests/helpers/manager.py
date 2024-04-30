@@ -250,10 +250,8 @@ class WazuhManager:
         Returns:
             str: Agents status
         """
-        result = ConnectionManager.execute_commands(inventory_path, f'{AGENT_CONTROL} -l')
 
-
-        return result.get('output')
+        return ConnectionManager.execute_commands(inventory_path, f'{AGENT_CONTROL} -l').get('output')
 
 
     @staticmethod

@@ -25,16 +25,27 @@ MACOS_CLIENT_KEYS = Path(MACOS_CONFIGURATIONS_DIR, "client.keys")
 MACOS_VERSION = Path(MACOS_ROOT_DIR, "VERSION")
 MACOS_REVISION = Path(MACOS_ROOT_DIR, "REVISION")
 
+
 # Binaries paths
 BINARIES_DIR = Path(WAZUH_ROOT, "bin")
 WAZUH_CONTROL = Path(BINARIES_DIR, "wazuh-control")
 AGENT_CONTROL = Path(BINARIES_DIR, "agent_control")
 CLUSTER_CONTROL = Path(BINARIES_DIR, "cluster_control")
+
+MACOS_BINARIES_DIR = Path(MACOS_ROOT_DIR, "bin")
+MACOS_WAZUH_CONTROL = Path(MACOS_BINARIES_DIR, "wazuh-control")
+
 # Logs paths
 LOGS_DIR = Path(WAZUH_ROOT, "logs")
 WAZUH_LOG = Path(LOGS_DIR, "ossec.log")
 ALERTS_DIR = Path(LOGS_DIR, "alerts")
 ALERTS_JSON = Path(ALERTS_DIR, "alerts.json")
+
+MACOS_LOGS_DIR = Path(MACOS_ROOT_DIR, "logs")
+WAZUH_MACOS_LOG = Path(MACOS_LOGS_DIR, "ossec.log")
+MACOS_ALERTS_DIR = Path(MACOS_LOGS_DIR, "alerts")
+MACOS_ALERTS_JSON = Path(MACOS_ALERTS_DIR, "alerts.json")
+
 # Daemons running paths
 DAEMONS_DIR = Path(WAZUH_ROOT, "var", "run")
 AGENTD_STATE = Path(DAEMONS_DIR, "wazuh-agentd.state")

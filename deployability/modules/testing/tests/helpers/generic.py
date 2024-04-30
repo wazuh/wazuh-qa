@@ -12,7 +12,7 @@ import time
 import yaml
 
 from pathlib import Path
-from .constants import WAZUH_CONTROL, CLIENT_KEYS, WINDOWS_CLIENT_KEYS, WINDOWS_VERSION, WINDOWS_REVISION
+from .constants import WAZUH_CONTROL, CLIENT_KEYS, WINDOWS_CLIENT_KEYS, WINDOWS_VERSION, WINDOWS_REVISION, MACOS_WAZUH_CONTROL, MACOS_CLIENT_KEYS
 from .executor import ConnectionManager
 from modules.testing.utils import logger
 
@@ -34,14 +34,13 @@ class HostInformation:
         os_type = HostInformation.get_os_type(inventory_path)
 
         if os_type == 'linux':
-            result = ConnectionManager.execute_commands(inventory_path, f'test -d {dir_path} && echo "True" || echo "False"')
+            return 'True' in ConnectionManager.execute_commands(inventory_path, f'test -d {dir_path} && echo "True" || echo "False"').get('output')
 
-            return result.get('output')
         elif os_type == 'windows':
             return ConnectionManager.execute_commands(inventory_path, f'Test-Path -Path "{dir_path}"').get('success')
 
         elif os_type == 'macos':
-            return 'true' in ConnectionManager.execute_commands(inventory_path, f'stat {dir_path} >/dev/null 2>&1 && echo "true" || echo "false"')
+            return 'true' in ConnectionManager.execute_commands(inventory_path, f'stat {dir_path} >/dev/null 2>&1 && echo "true" || echo "false"').get('output')
 
     @staticmethod
     def file_exists(inventory_path, file_path) -> bool:
@@ -57,12 +56,11 @@ class HostInformation:
         """
         os_type = HostInformation.get_os_type(inventory_path)
         if os_type == 'linux':
-            result = ConnectionManager.execute_commands(inventory_path, f'test -f {file_path} && echo "True" || echo "False"')
-            return result.get('output')
+            return ConnectionManager.execute_commands(inventory_path, f'test -f {file_path} && echo "True" || echo "False"').get('output')
         elif os_type == 'windows':
             return ConnectionManager.execute_commands(inventory_path, f'Test-Path -Path "{file_path}"').get('output')
         elif os_type == 'macos':
-            return 'true' in ConnectionManager.execute_commands(inventory_path, f'stat {file_path} >/dev/null 2>&1 && echo "true" || echo "false"')
+            return 'true' in ConnectionManager.execute_commands(inventory_path, f'stat {file_path} >/dev/null 2>&1 && echo "true" || echo "false"').get('output')
 
     @staticmethod
     def get_os_type(inventory_path) -> str:
@@ -211,6 +209,9 @@ class HostInformation:
             return result.get('output').replace("\n","")
         elif os_type == 'windows':
             return ConnectionManager.execute_commands(inventory_path, '(Get-Location).Path').get('output')
+        elif os_type == 'macos':
+            result = ConnectionManager.execute_commands(inventory_path, 'pwd').get('output')
+            return result.replace("\n","")
 
     @staticmethod
     def get_internal_ip_from_aws_dns(dns_name):
@@ -267,20 +268,22 @@ class HostInformation:
         elif os_type == 'windows':
             client_key = ConnectionManager.execute_commands(inventory_path, f'Get-Content "{WINDOWS_CLIENT_KEYS}"').get('output')
         elif os_type == 'macos':
-            client_key = ConnectionManager.execute_commands(inventory_path, f'cat /Library/Ossec/etc/client.keys')
-
-        lines = client_key.split('\n')[:-1]
-        for line in lines:
-            _id, name, address, password = line.strip().split()
-            client_info = {
-                "id": _id,
-                "name": name,
-                "address": address,
-                "password": password
-            }
-            clients.append(client_info)
-        return clients
-
+            client_key = ConnectionManager.execute_commands(inventory_path, f'cat {MACOS_CLIENT_KEYS}').get('output')
+        
+        if client_key != None:
+            lines = client_key.split('\n')[:-1]
+            for line in lines:
+                _id, name, address, password = line.strip().split()
+                client_info = {
+                    "id": _id,
+                    "name": name,
+                    "address": address,
+                    "password": password
+                }
+                clients.append(client_info)
+            return clients
+        else:
+            return []
 
 class HostConfiguration:
 
@@ -562,7 +565,7 @@ class CheckFiles:
             for filter_ in filters_keywords[1:]:
                 filters += f" | grep -v {filter_}"
             command = f'sudo find {directory} -type f -exec shasum -a 256 {{}} \; {filter}'
-            result = ConnectionManager.execute_commands(inventory_path, command)
+            result = ConnectionManager.execute_commands(inventory_path, command).get('output')
 
         elif 'windows' in os_type:
             quoted_filters = ['"{}"'.format(keyword) for keyword in filters_keywords]
@@ -678,7 +681,7 @@ class GeneralComponentActions:
             if result.get('success'):
                 return result.get('output')
         elif os_type == 'macos':
-            return ConnectionManager.execute_commands(inventory_path, f'/Library/Ossec/bin/wazuh-control status | grep {host_role}')
+            return ConnectionManager.execute_commands(inventory_path, f'{MACOS_WAZUH_CONTROL} status | grep {host_role}').get('output')
 
     @staticmethod
     def component_stop(inventory_path, host_role) -> None:
@@ -698,7 +701,7 @@ class GeneralComponentActions:
         elif os_type == 'windows':
             ConnectionManager.execute_commands(inventory_path, f'NET STOP Wazuh')
         elif os_type == 'macos':
-            return ConnectionManager.execute_commands(inventory_path, f'/Library/Ossec/bin/wazuh-control stop | grep {host_role}')
+            ConnectionManager.execute_commands(inventory_path, f'{MACOS_WAZUH_CONTROL} stop | grep {host_role}')
 
     @staticmethod
     def component_restart(inventory_path, host_role) -> None:
@@ -719,7 +722,7 @@ class GeneralComponentActions:
             ConnectionManager.execute_commands(inventory_path, 'NET STOP Wazuh')
             ConnectionManager.execute_commands(inventory_path, 'NET START Wazuh')
         elif os_type == 'macos':
-            ConnectionManager.execute_commands(inventory_path, f'/Library/Ossec/bin/wazuh-control restart | grep {host_role}')
+            ConnectionManager.execute_commands(inventory_path, f'{MACOS_WAZUH_CONTROL} restart | grep {host_role}')
 
     @staticmethod
     def component_start(inventory_path, host_role) -> None:
@@ -740,7 +743,7 @@ class GeneralComponentActions:
         elif os_type == 'windows':
             ConnectionManager.execute_commands(inventory_path, 'NET START Wazuh')
         elif os_type == 'macos':
-            ConnectionManager.execute_commands(inventory_path, f'/Library/Ossec/bin/wazuh-control start | grep {host_role}')
+            ConnectionManager.execute_commands(inventory_path, f'{MACOS_WAZUH_CONTROL} start | grep {host_role}')
 
     @staticmethod
     def get_component_version(inventory_path) -> str:
@@ -757,10 +760,12 @@ class GeneralComponentActions:
 
         if os_type == 'linux':
             return ConnectionManager.execute_commands(inventory_path, f'{WAZUH_CONTROL} info -v').get('output')
+
         elif os_type == 'windows':
             return ConnectionManager.execute_commands(inventory_path, f'Get-Content "{WINDOWS_VERSION}"').get('output')#.replace("\n", ""))
+
         elif os_type == 'macos':
-            ConnectionManager.execute_commands(inventory_path, f'/Library/Ossec/bin/wazuh-control info -v')
+            return ConnectionManager.execute_commands(inventory_path, f'{MACOS_WAZUH_CONTROL} info -v').get('output')
 
     @staticmethod
     def get_component_revision(inventory_path) -> str:
@@ -781,7 +786,7 @@ class GeneralComponentActions:
         elif os_type == 'windows':
             return ConnectionManager.execute_commands(inventory_path, f'Get-Content "{WINDOWS_REVISION}"').get('output')
         elif os_type == 'macos':
-            return ConnectionManager.execute_commands(inventory_path, f'/Library/Ossec/bin/wazuh-control info -r')
+            return ConnectionManager.execute_commands(inventory_path, f'{MACOS_WAZUH_CONTROL} info -r').get('output')
 
     @staticmethod
     def hasAgentClientKeys(inventory_path) -> bool:
@@ -806,7 +811,7 @@ class GeneralComponentActions:
                 return result.get('output', '')
             return False
         elif os_type == 'macos':
-            return HostInformation.file_exists(inventory_path, '/Library/Ossec/etc/client.keys')
+            return HostInformation.file_exists(inventory_path, f'{MACOS_CLIENT_KEYS}')
 
     @staticmethod
     def isComponentActive(inventory_path, host_role) -> bool:
@@ -831,7 +836,11 @@ class GeneralComponentActions:
             return result.get('success')
 
         elif os_type == 'macos':
-            return f'com.{host_role.replace("-", ".")}' in ConnectionManager.execute_commands(inventory_path, f'launchctl list | grep com.{host_role.replace("-", ".")}')
+            result = ConnectionManager.execute_commands(inventory_path, f'launchctl list | grep com.{host_role.replace("-", ".")}').get('output')
+            if result == None:
+                return False
+            else:
+                return f'com.{host_role.replace("-", ".")}' in result
 
 
 

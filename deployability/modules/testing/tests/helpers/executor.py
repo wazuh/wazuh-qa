@@ -113,21 +113,24 @@ class UnixExecutor():
 class MacosExecutor():
     @staticmethod
     def _execute_command(data, command) -> dict:
-
         try:
             ssh_client = paramiko.SSHClient()
             ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh_client.connect(hostname=data.get('host'), port=data.get('port'), username=data.get('username'), password=data.get('username'))
+            ssh_client.connect(hostname=data.get('host'), port=data.get('port'), username=data.get('username'), password=data.get('password'))
             stdin, stdout, stderr = ssh_client.exec_command(f"sudo {command}")
 
-            result = ''.join(stdout.readlines())
+            stdout_str = ''.join(stdout.readlines())
+            stderr_str = ''.join(stderr.readlines())
 
             ssh_client.close()
 
-            return result
+            if stdout_str:
+                return {'success': True, 'output': stdout_str.replace('\n', '')}
+            if stderr_str:
+                return {'success': False, 'output': stderr_str.replace('\n', '')}
+            return {'success': False, 'output': None}
 
         except Exception as e:
-            #return {'success': False, 'output': ret.stderr}
             raise Exception(f'Error executing command: {command} with error: {e}')
 
 # ------------------------------------------------------

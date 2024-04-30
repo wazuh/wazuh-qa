@@ -11,7 +11,7 @@ from ..helpers.generic import HostConfiguration, HostInformation, GeneralCompone
 from modules.testing.utils import logger
 from ..helpers.manager import WazuhManager
 from ..helpers.utils import Utils
-
+from ..helpers.executor import ConnectionManager
 
 @pytest.fixture(scope="module", autouse=True)
 def wazuh_params(request):
@@ -71,6 +71,7 @@ def test_installation(wazuh_params):
     # Certs creation, firewall management and Manager installation
     for agent_name, agent_params in wazuh_params['agents'].items():
         HostConfiguration.disable_firewall(agent_params)
+
 
     if HostInformation.dir_exists(wazuh_params['master'], WAZUH_ROOT):
         logger.info(f'Manager is already installed in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])}')

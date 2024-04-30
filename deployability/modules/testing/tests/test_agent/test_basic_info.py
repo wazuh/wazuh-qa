@@ -88,6 +88,7 @@ def test_wazuh_os_version(wazuh_params):
             os_name = HostInformation.get_os_name_from_inventory(agent_params)
         elif os_type == 'macos':
             os_name = 'macos'
+
         assert os_name in WazuhAgent.get_agent_os_name_by_name(wazuh_api, agent_names).replace(' ', ''),  logger.error('There is a mismatch between the OS name and the OS name of the installed agent')
 
 def test_wazuh_version(wazuh_params):

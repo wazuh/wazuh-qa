@@ -65,6 +65,7 @@ class WazuhAgent:
                 f"WAZUH_REGISTRATION_SERVER='MANAGER_IP' "
             ])
             commands.extend(["NET START WazuhSvc"])
+
         elif os_type == 'macos':
             if architecture == 'amd64':
                 commands.extend([
@@ -78,8 +79,8 @@ class WazuhAgent:
                     '/Library/Ossec/bin/wazuh-control start',
                     '/Library/Ossec/bin/wazuh-control status'
             ]
-
             commands.extend(system_commands)
+
         logger.info(f'Installing Agent in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         ConnectionManager.execute_commands(inventory_path, commands)
 
@@ -132,7 +133,7 @@ class WazuhAgent:
             except Exception as e:
                 raise Exception(f'Error registering agent. Error executing: {commands} with error: {e}')
 
-            result = ConnectionManager.execute_commands(inventory_path, f'cat {WAZUH_CONF}')
+            result = ConnectionManager.execute_commands(inventory_path, f'cat {WAZUH_MACOS_CONF}').get('output')
             assert host_ip in result, logger.error(f'Error configuring the Manager IP ({host_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
         elif os_type == 'windows':
@@ -159,24 +160,22 @@ class WazuhAgent:
                 f"sed -i 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' {WAZUH_CONF}",
                 "systemctl restart wazuh-agent"
             ]
-
             ConnectionManager.execute_commands(inventory_path, commands)
             result = ConnectionManager.execute_commands(inventory_path, f'cat {WAZUH_CONF}')
             assert protocol in result.get('output'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
         elif os_type == 'macos':
-                    commands = [
-                        f"sed -i '' 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' /Library/Ossec/etc/ossec.conf",
-                        "/Library/Ossec/bin/wazuh-control restart"
-                    ]
-                    ConnectionManager.execute_commands(inventory_path, commands)
-                    assert protocol in ConnectionManager.execute_commands(inventory_path, f'cat /Library/Ossec/etc/ossec.conf'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+            commands = [
+                f"sed -i '' 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' {WAZUH_MACOS_CONF}",
+                "/Library/Ossec/bin/wazuh-control restart"
+            ]
+            ConnectionManager.execute_commands(inventory_path, commands)
+            assert protocol in ConnectionManager.execute_commands(inventory_path, f'cat {WAZUH_MACOS_CONF}').get('output'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
         elif os_type == 'windows':
             commands = [
                 f"(Get-Content -Path '{WAZUH_WINDOWS_CONF}') -replace '<protocol>[^<]*<\/protocol>', '<protocol>{protocol}</protocol>' | Set-Content -Path '{WAZUH_WINDOWS_CONF}'"
             ]
-
             ConnectionManager.execute_commands(inventory_path, commands)
             result = ConnectionManager.execute_commands(inventory_path, f'Get-Content -Path "{WAZUH_WINDOWS_CONF}"')
             assert protocol in result.get('output'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
@@ -186,9 +185,11 @@ class WazuhAgent:
     def uninstall_agent(inventory_path, wazuh_version=None, wazuh_revision=None) -> None:
         os_type = HostInformation.get_os_type(inventory_path)
         commands = []
+
         if os_type == 'linux':
             distribution = HostInformation.get_linux_distribution(inventory_path)
             os_name = HostInformation.get_os_name_from_inventory(inventory_path)
+
             if os_name == 'opensuse' or os_name == 'suse':
                     commands.extend([
                         "zypper remove --no-confirm wazuh-agent",
@@ -198,25 +199,23 @@ class WazuhAgent:
                 if distribution == 'deb':
                         commands.extend([
                             "apt-get remove --purge wazuh-agent -y"
-
                         ])
                 elif distribution == 'rpm':
                     commands.extend([
                         "yum remove wazuh-agent -y",
                         f"rm -rf {WAZUH_ROOT}"
                     ])
-
-
             system_commands = [
                     "systemctl disable wazuh-agent",
                     "systemctl daemon-reload"
             ]
-
             commands.extend(system_commands)
+
         elif os_type == 'windows':
             commands.extend([
                 f"msiexec.exe /x $env:TEMP\wazuh-agent.msi /qn"
             ])
+
         elif os_type == 'macos':
             commands.extend([
                 "/Library/Ossec/bin/wazuh-control stop",
@@ -303,11 +302,13 @@ class WazuhAgent:
                     '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
                     '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
                 }
+
         elif os_type == 'macos':
             filter_data = {
                 '/usr/bin': {'added': [], 'removed': [], 'modified': []},
                 '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
             }
+
         elif os_type == 'windows':
             filter_data = {
                 'C:\\Program Files': {'added': [], 'removed': [], 'modified': []},
@@ -369,8 +370,10 @@ class WazuhAgent:
 
         if os_type == 'linux':
             categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
+
         elif os_type == 'windows':
             categories = ['C:\\Program Files', 'C:\\Program Files (x86)','C:\\Users\\vagrant']
+
         elif os_type == 'macos':
             categories = ['/usr/bin', '/usr/sbin']
 
@@ -396,14 +399,16 @@ class WazuhAgent:
         if os_type == 'linux':
             result = ConnectionManager.execute_commands(agent_params, 'pgrep wazuh')
             if result.get('success'):
-                return bool([int(numero) for numero in result.get('output').splitlines()])
+                return bool([int(number) for number in result.get('output').splitlines()])
             else:
                 return False
 
         if os_type == 'macos':
             result = ConnectionManager.execute_commands(agent_params, 'pgrep wazuh')
-            return bool([int(numero) for numero in result.splitlines()])
-
+            if result.get('success'):
+                return bool([int(number) for number in result.get('output').splitlines()])
+            else:
+                return False
 
         elif os_type == 'windows':
             result = ConnectionManager.execute_commands(agent_params, 'Get-Process -Name "wazuh-agent" | Format-Table -HideTableHeaders  ProcessName')
@@ -425,14 +430,26 @@ class WazuhAgent:
         """
 
         os_type = HostInformation.get_os_type(agent_params)
-        if 'linux' in os_type:
+        if os_type == 'linux':
             result = ConnectionManager.execute_commands(agent_params, 'ss -t -a -n | grep ":1514" | grep ESTAB')
-            return result.get('success')
-        elif 'windows' in os_type :
+            if result.get('success'):
+                return 'ESTAB' in result.get('output')
+            else:
+                return False
+
+        elif os_type == 'windows':
             result = ConnectionManager.execute_commands(agent_params, 'netstat -ano | Select-String -Pattern "TCP" | Select-String -Pattern "ESTABLISHED" | Select-String -Pattern ":1514"')
-            return 'ESTABLISHED' in result.get('output')
+            if result.get('success'):
+                return 'ESTABLISHED' in result.get('output')
+            else:
+                return False
+
         elif os_type == 'macos':
-            return 'ESTABLISHED' in ConnectionManager.execute_commands(agent_params, 'netstat -an | grep ".1514 " | grep ESTABLISHED')
+            result = ConnectionManager.execute_commands(agent_params, 'netstat -an | grep ".1514 " | grep ESTABLISHED')
+            if result.get('success'):
+                return 'ESTABLISHED' in result.get('output')
+            else:
+                return False
 
     def get_agents_information(wazuh_api: WazuhAPI) -> list:
         """
