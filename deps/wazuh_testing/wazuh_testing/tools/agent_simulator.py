@@ -1054,17 +1054,17 @@ class GeneratorVulnerabilityEvents(Generator):
     is specified by `batch_size` attribute.
     Args:
         agent_name (str): Name of the agent.
-        events_size (int): Number of messages of the same type.
+        events_number (int): Number of messages of the same type.
         custom_packages_vuln_content (list): File containing a list of packages to be sent by syscollector.
     """
 
-    def __init__(self, agent_name, events_size, custom_packages_vuln_content):
+    def __init__(self, agent_name, events_number, custom_packages_vuln_content):
         super().__init__(agent_name, 'd', 'syscollector')
 
-        self.current_events_size = 1
+        self.current_events_number = 1
         self.package_index = 0
         self.current_event = 'osinfo'
-        self.events_size = events_size
+        self.events_number = events_number
 
         self.packages = []
         self.custom_packages_vuln_content = custom_packages_vuln_content
@@ -1119,16 +1119,16 @@ class GeneratorVulnerabilityEvents(Generator):
     def generate_event(self):
         """Generate vulnerability event.
         The event types are selected sequentially, creating a number of events of the same
-        type specified in `events_size`.
+        type specified in `events_number`.
         Returns:
             str: generated event with the desired format for syscollector
         """
 
-        if self.current_events_size == 0:
+        if self.current_events_number == 0:
             self.current_event = 'packages'
-            self.current_events_size = self.events_size
+            self.current_events_number = self.events_number
 
-        self.current_events_size = self.current_events_size - 1
+        self.current_events_number = self.current_events_number - 1
 
         event_template = self.get_event_template(self.current_event)
 
