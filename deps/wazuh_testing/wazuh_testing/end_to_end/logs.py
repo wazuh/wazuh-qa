@@ -52,6 +52,9 @@ def get_hosts_logs(host_manager: HostManager, host_group: str = 'all') -> Dict[s
     - host_manager (HostManager): An instance of the HostManager class for managing remote hosts.
     - host_group (str, optional): The name of the host group where the files will be truncated.
       Default is 'all'.
+
+    Returns:
+    - host_logs (Dict[str, str]): Dictionary containing the logs from the ossec.log file of each host
     """
     host_logs = {}
     for host in host_manager.get_group_hosts(host_group):
@@ -59,3 +62,19 @@ def get_hosts_logs(host_manager: HostManager, host_group: str = 'all') -> Dict[s
         host_logs[host] = host_manager.get_file_content(host, logs_filepath_os[host_os_name])
 
     return host_logs
+
+def get_hosts_alerts(host_manager: HostManager) -> Dict[str, str]:
+    """
+    Get the alerts in the alert.json file from the specified host group.
+
+    Parameters:
+    - host_manager (HostManager): An instance of the HostManager class for managing remote hosts.
+
+    Returns:
+    - host_alerts (Dict[str, str]): Dictionary containing the alerts from the alert.json file of each manager
+    """
+    host_alerts = {}
+    for host in host_manager.get_group_hosts("manager"):
+        host_alerts[host] = host_manager.get_file_content(host, ALERTS_JSON_PATH)
+
+    return host_alerts

@@ -540,7 +540,11 @@ class Agent:
                     sender.send_event(self.create_event(f'#!-req {req_code} '
                                                         f'{{"error":0, "message":"ok", "data":[]}} '))
         elif command == 'getconfig':
-            response_json = '{"client":{"config-profile":"centos8","notify_time":10,"time-reconnect":60}}'
+            if "active-response" in message_list:
+                response_json = '{"active-response":{"disabled":"no"}}'
+            else:
+                response_json = '{"client":{"config-profile":"centos8","notify_time":10,"time-reconnect":60}}'
+
             sender.send_event(self.create_event(f'#!-req {req_code} ok {response_json}'))
         elif command == 'getstate':
             response_json = '{"error":0,"data":{"global":{"start":"2021-02-26, 06:41:26","end":"2021-02-26 08:49:19"}}}'
