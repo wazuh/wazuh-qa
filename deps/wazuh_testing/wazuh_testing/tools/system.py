@@ -362,7 +362,7 @@ class HostManager:
                                                   f'method={method} headers="{headers}" {request_body} '
                                                   f'validate_certs=no', check=check)
 
-    def run_command(self, host: str, cmd: str, check: bool = False):
+    def run_command(self, host: str, cmd: str, check: bool = False, system: str = 'linux'):
         """Run a command on the specified host and return its stdout.
 
         Args:
@@ -370,13 +370,18 @@ class HostManager:
             cmd (str): Command to execute
             check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
                 applied. Default `False`
+            system (str): The operating system type. Defaults to 'linux'.
+                Supported values: 'windows', 'macos', 'linux'.
 
         Returns:
             stdout (str): The output of the command execution.
         """
-        return self.get_host(host).ansible("command", cmd, check=check)["stdout"]
+        if system == 'windows':
+            return self.get_host(host).ansible("win_command", cmd, check=check)
+        else:
+            return self.get_host(host).ansible("command", cmd, check=check)["stdout"]
 
-    def run_shell(self, host: str, cmd: str, check: bool = False):
+    def run_shell(self, host: str, cmd: str, check: bool = False, system: str = 'linux'):
         """Run a shell command on the specified host and return its stdout.
 
         The difference with run_command is that here, shell symbols like &, |, etc. are interpreted.
@@ -386,11 +391,16 @@ class HostManager:
             cmd (str): Shell command to execute
             check (bool, optional): Ansible check mode("Dry Run"), by default it is enabled so no changes will be
                 applied. Default `False`
+            system (str): The operating system type. Defaults to 'linux'.
+                Supported values: 'windows', 'macos', 'linux'.
 
         Returns:
             stdout (str): The output of the command execution.
         """
-        return self.get_host(host).ansible('shell', cmd, check=check)['stdout']
+        if system == 'windows':
+            return self.get_host(host).ansible("win_shell", cmd, check=check)
+        else:
+            return self.get_host(host).ansible('shell', cmd, check=check)['stdout']
 
     def get_host_ip(self, host: str, interface: str):
         """Get the Ansible object for communicating with the specified host.
@@ -495,7 +505,7 @@ class HostManager:
                 result = True
         elif system == 'centos':
             result = self.get_host(host).ansible("yum", f"name={url} state=present "
-                                                 'sslverify=false disable_gpg_check=True', check=False)
+                                                'sslverify=false disable_gpg_check=True', check=False)
         elif system == 'macos':
             package_name = url.split('/')[-1]
             result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
@@ -503,6 +513,40 @@ class HostManager:
             result = self.get_host(host).ansible("command", cmd, check=False)
 
         logging.info(f"Package installed result {result}")
+
+        return result
+
+    def install_npm_package(self, host, url, system='ubuntu'):
+        """
+        Installs a package on the specified host using npm.
+
+        Args:
+            host (str): The target host on which to install the package.
+            url (str): The URL or name of the package to be installed.
+            system (str, optional): The operating system type. Defaults to 'ubuntu'.
+                Supported values: 'windows', 'ubuntu', 'centos', 'macos'.
+
+        Returns:
+            Dict: Testinfra Ansible Response of the operation
+
+        Example:
+            host_manager.install_package('my_host', 'package_name', 'system_name')
+        """
+
+        # Define the npm install command
+        cmd = f"npm install -g {url}"
+
+        if system == 'macos':
+            cmd = f"PATH=/usr/local/bin:$PATH {cmd}"
+            shell_type = "shell"
+        elif system == 'windows':
+            shell_type = "win_shell"
+        else:
+            shell_type = "shell"
+
+        # Execute the command and log the result
+        result = self.get_host(host).ansible(shell_type, cmd, check=False)
+        logging.info(f"npm package installed result {result}")
 
         return result
 
@@ -594,6 +638,49 @@ class HostManager:
 
         return remove_operation_result
 
+    def remove_npm_package(self, host, system, package_uninstall_name=None, custom_uninstall_playbook=None):
+        """
+        Removes a package from the specified host using npm.
+
+        Args:
+            host (str): The target host from which to remove the package.
+            package_name (str): The name of the package to be removed.
+            system (str): The operating system type.
+                Supported values: 'windows', 'ubuntu', 'centos', 'macos'.
+
+        Returns:
+            Dict: Testinfra Ansible Response of the operation
+
+        Example:
+            host_manager.remove_npm_package('my_host', 'system_name', 'package_name')
+        """
+        logging.info(f"Removing package {package_uninstall_name} from host {host}")
+        logging.info(f"System: {system}")
+
+        remove_operation_result = False
+
+        os_name = self.get_host_variables(host)['os_name']
+
+        if custom_uninstall_playbook:
+            remove_operation_result = self.run_playbook(host, custom_uninstall_playbook)
+        else:
+            # Define the npm uninstall command
+            cmd = f"npm uninstall -g {package_uninstall_name}"
+
+            if system == 'macos':
+                cmd = f"PATH=/usr/local/bin:$PATH {cmd}"
+                shell_type = "shell"
+            elif system == 'windows':
+                shell_type = "win_shell"
+            else:
+                shell_type = "shell"
+
+            # Execute the command and log the result
+            remove_operation_result = self.get_host(host).ansible(shell_type, cmd, check=False)
+            logging.info(f"npm package removed result {remove_operation_result}")
+
+        return remove_operation_result
+
     def run_playbook(self, host, playbook_name, params=None):
         """
         Executes an Ansible playbook on the specified host.
@@ -670,7 +757,7 @@ class HostManager:
             if os == 'linux':
                 result = binary_path = f"/var/ossec/bin/wazuh-control"
             elif os == 'macos':
-                result= binary_path = f"/Library/Ossec/bin/wazuh-control"
+                result = binary_path = f"/Library/Ossec/bin/wazuh-control"
 
             result = self.get_host(host).ansible('shell', f"{binary_path} {operation}", check=False)
 
