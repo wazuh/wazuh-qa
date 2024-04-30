@@ -5,7 +5,7 @@
 import pytest
 import re
 
-from ..helpers.agent import WazuhAgent, WazuhAPI
+from ..helpers.agent import WazuhAgent
 from ..helpers.generic import GeneralComponentActions, HostInformation
 from modules.testing.utils import logger
 from ..helpers.manager import WazuhManager

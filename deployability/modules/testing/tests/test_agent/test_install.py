@@ -11,7 +11,6 @@ from ..helpers.generic import HostConfiguration, HostInformation, GeneralCompone
 from modules.testing.utils import logger
 from ..helpers.manager import WazuhManager
 from ..helpers.utils import Utils
-from ..helpers.executor import ConnectionManager
 
 @pytest.fixture(scope="module", autouse=True)
 def wazuh_params(request):

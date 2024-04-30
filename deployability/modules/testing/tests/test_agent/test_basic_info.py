@@ -7,7 +7,7 @@ import re
 
 from ..helpers.agent import WazuhAgent, WazuhAPI
 from ..helpers.constants import WAZUH_ROOT, WINDOWS_ROOT_DIR, MACOS_ROOT_DIR
-from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions, Waits
+from ..helpers.generic import HostInformation, GeneralComponentActions, Waits
 from modules.testing.utils import logger
 from ..helpers.manager import WazuhManager
 from ..helpers.utils import Utils
