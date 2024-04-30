@@ -78,6 +78,10 @@ class Monitor:
                 if any(filter(lambda x: f'{process_name}.py' in x, proc.cmdline())):
                     pid = proc.pid
                     break
+            elif process_name == 'wazuh-indexer':
+                if any(filter(lambda x: f'{process_name}' in x, proc.cmdline())):
+                    pid = proc.pid
+                    break
             elif process_name in proc.name():
                 pid = proc.pid
                 break
