@@ -415,7 +415,7 @@ def main():
                             required=False,
                             default=None,
                             dest='vulnerability_packages_list_file')
-    
+
     arg_parser.add_argument('--vulnerability-frequency',
                             metavar='<vulnerability_frequency>',
                             type=int,
