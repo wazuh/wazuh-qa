@@ -37,7 +37,9 @@ class HostInformation:
             return 'True' in ConnectionManager.execute_commands(inventory_path, f'test -d {dir_path} && echo "True" || echo "False"').get('output')
 
         elif os_type == 'windows':
-            return ConnectionManager.execute_commands(inventory_path, f'Test-Path -Path "{dir_path}"').get('success')
+            result = ConnectionManager.execute_commands(inventory_path, f'Test-Path -Path "{dir_path}"')
+            if result.get('success'):
+                return 'True' in result.get('output')
 
         elif os_type == 'macos':
             return 'true' in ConnectionManager.execute_commands(inventory_path, f'stat {dir_path} >/dev/null 2>&1 && echo "true" || echo "false"').get('output')
