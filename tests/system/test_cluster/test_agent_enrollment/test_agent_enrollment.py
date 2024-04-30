@@ -26,11 +26,13 @@ tmp_path = os.path.join(local_path, 'tmp')
 # Remove the agent once the test has finished
 @pytest.fixture(scope='module')
 def clean_environment():
+
     yield
+
+    host_manager.control_service(host='wazuh-agent1', service='wazuh', state="stopped")
     agent_id = host_manager.run_command('wazuh-master', f'cut -c 1-3 {WAZUH_PATH}/etc/client.keys')
     host_manager.get_host('wazuh-master').ansible("command", f'{WAZUH_PATH}/bin/manage_agents -r {agent_id}',
                                                   check=False)
-    host_manager.control_service(host='wazuh-agent1', service='wazuh', state="stopped")
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_PATH, 'etc', 'client.keys'))
     host_manager.clear_file(host='wazuh-agent1', file_path=os.path.join(WAZUH_LOGS_PATH, 'ossec.log'))
 
@@ -47,7 +49,7 @@ def test_agent_enrollment(clean_environment):
     # Start the agent enrollment process by restarting the wazuh-agent
     host_manager.control_service(host='wazuh-master', service='wazuh', state="restarted")
     host_manager.control_service(host='wazuh-worker1', service='wazuh', state="restarted")
-    host_manager.get_host('wazuh-agent1').ansible('command', f'service wazuh-agent restart', check=False)
+    host_manager.control_service(host='wazuh-agent1', service='wazuh', state="restarted")
 
     # Run the callback checks for the ossec.log and the cluster.log
     HostMonitor(inventory_path=inventory_path,

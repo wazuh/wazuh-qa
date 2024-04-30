@@ -8,8 +8,10 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Add Workflow module to Wazuh-qa repository ([#4990](https://github.com/wazuh/wazuh-qa/pull/4990)) \- (Tests)
 - Add integration tests for Update field to CPE_Helper. ([#4574](https://github.com/wazuh/wazuh-qa/pull/4574)) \- (Core)
+- Updated integration tests README ([#4742](https://github.com/wazuh/wazuh-qa/pull/4742)) \- (Framework)
+- Removed configobj library from requirements.txt ([#4803](https://github.com/wazuh/wazuh-qa/pull/4803)) \- (Framework)
+- Add Workflow module to Wazuh-qa repository ([#4990](https://github.com/wazuh/wazuh-qa/pull/4990)) \- (Tests)
 
 ### Changed
 
@@ -18,24 +20,16 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Add an IT to check that the agent erases its wazuh-agent.state file ([#4716](https://github.com/wazuh/wazuh-qa/pull/4716)) \- (Core)
-
-## [4.8.2] - TBD
-
-## [4.8.1] - TBD
-
-### Changed
-
-- Removed configobj library from requirements.txt ([#4803](https://github.com/wazuh/wazuh-qa/pull/4803)) \- (Framework)
-- Updated integration tests README ([#4742](https://github.com/wazuh/wazuh-qa/pull/4742)) \- (Framework)
-
-### Fixed
-
 - Fix manager_agent system tests environment ([#4808](https://github.com/wazuh/wazuh-qa/pull/4808)) \- (Framework)
+- Fixed agent_simulator response for active-response configuration commands. ([#4895](https://github.com/wazuh/wazuh-qa/pull/4895)) \- (Framework)
 
 ## [4.8.0] - TBD
 
 ### Added
 
+- Add functionality to obtain statistics and metrics from the indexer. ([#5090](https://github.com/wazuh/wazuh-qa/pull/5090)) \- (Framework)
+- Add support for the installation/uninstallation of npm packages ([#5092](https://github.com/wazuh/wazuh-qa/pull/5092)) \- (Tests)
+- Add alert.json file to Vulnerability Detector E2E test report ([#5147](https://github.com/wazuh/wazuh-qa/pull/5147)) \- (Framework)
 - Add documentation about markers for system tests ([#5080](https://github.com/wazuh/wazuh-qa/pull/5080)) \- (Documentation)
 - Add AWS Custom Buckets Integration tests ([#4675](https://github.com/wazuh/wazuh-qa/pull/4675)) \- (Framework + Tests)
 - Add Vulnerability Detector end to end tests ([#4878](https://github.com/wazuh/wazuh-qa/pull/4878)) \- (Framework + Tests)
@@ -52,6 +46,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Replace timestamp filter with vulnerabilities detected_at field.([#5266](https://github.com/wazuh/wazuh-qa/pull/5266)) \- (Framework + Tests)
+- Changes macOS packages with new ones that generate vulnerabilities ([#5174](https://github.com/wazuh/wazuh-qa/pull/5174)) \- (Tests)
 - Refactor initial scan Vulnerability E2E tests ([#5081](https://github.com/wazuh/wazuh-qa/pull/5081)) \- (Framework + Tests)
 - Update Packages in TestScanSyscollectorCases ([#4997](https://github.com/wazuh/wazuh-qa/pull/4997)) \- (Framework + Tests)
 - Reduced test_shutdown_message runtime ([#4986](https://github.com/wazuh/wazuh-qa/pull/4986)) \- (Tests)
@@ -79,6 +75,15 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix packages in Windows and macOS upgrade cases ([#5223](https://github.com/wazuh/wazuh-qa/pull/5223)) \- (Framework + Tests)
+- Fix vulnerabilities and add new packages to Vulnerability Detector E2E tests ([#5234](https://github.com/wazuh/wazuh-qa/pull/5234)) \- (Tests)
+- Fix provision macOS endpoints with npm ([#5128](https://github.com/wazuh/wazuh-qa/pull/5158)) \- (Tests)
+- Fix timestamps alerts and logs filter ([#5157](https://github.com/wazuh/wazuh-qa/pull/5157)) \- (Framework + Tests)
+- Fix macOS and Windows agents timezone ([#5178](https://github.com/wazuh/wazuh-qa/pull/5178)) \- (Framework)
+- Fix Vulnerability Detector E2E tests by adding description to all tests ([#5151](https://github.com/wazuh/wazuh-qa/pull/5151)) \- (Tests)
+- Fix parser for non package vulnerabilities ([#5146](https://github.com/wazuh/wazuh-qa/pull/5146)) \- (Framework)
+- Fix remote_operations_handler functions to Vulnerability Detector E2E tests ([#5155](https://github.com/wazuh/wazuh-qa/pull/5155)) \- (Framework)
+- Fix enrollment cluster system tests ([#5134](https://github.com/wazuh/wazuh-qa/pull/5134)) \- (Tests)
 - Fix `test_synchronization` system test ([#5089](https://github.com/wazuh/wazuh-qa/pull/5089)) \- (Framework + Tests)
 - Fix number of files and their size for `test_zip_size_limit` ([#5133](https://github.com/wazuh/wazuh-qa/pull/5133)) \- (Tests)
 - Fix test_shutdown_message system test ([#5087](https://github.com/wazuh/wazuh-qa/pull/5087)) \- (Tests)
@@ -105,6 +110,11 @@ All notable changes to this project will be documented in this file.
 - Fix test_file_checker in check_mtime case ([#4873](https://github.com/wazuh/wazuh-qa/pull/4873)) \- (Tests)
 - Fix test cluster performance. ([#4780](https://github.com/wazuh/wazuh-qa/pull/4780)) \- (Framework)
 - Fixed the graphic generation for the logcollectord statistics files. ([#5021](https://github.com/wazuh/wazuh-qa/pull/5021)) \- (Framework)
+
+
+## [4.7.4] - 29/04/2024
+
+- No changes
 
 ## [4.7.3] - 04/03/2024
 
