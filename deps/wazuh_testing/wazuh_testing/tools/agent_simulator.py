@@ -60,59 +60,108 @@ class Agent:
         name (str, optional): Agent name. Specify only if it already exists.
         key (str, optional): Client key. Specify only if it already exists.
         version (str, optional): Wazuh agent version. Default v3.12.0.
-        labels (dict, optional): Wazuh agent labels. Each dict key will be a new label.
-        fim_eps (int, optional): Set the maximum event reporting throughput. Events are messages that will produce an
-                                 alert.
+        fim_eps (int, optional): Set the maximum event reporting throughput. Events are messages that
+            will produce an alert.
         fim_integrity_eps (int, optional): Set the maximum database synchronization message throughput.
-        authd_password (str), optional: Password for registration if needed.
+        sca_eps (int, optional): Set the maximum number of sca events.
+        syscollector_eps (int, optional): Set the maximum number of syscollector messages.
+        vulnerability_eps (int, optional): Set the maximum number of vulnerability events.
+        labels (dict, optional): Wazuh agent labels. Each dict key will be a new label.
+        rootcheck_eps (int, optional): Set the maximum number of rootcheck events.
+        logcollector_eps (int, optional): Set the maximum number of logcollector messages.
+        authd_password (str, optional): Password for registration if needed.
+        disable_all_modules (bool, optional): Disable all simulated modules for this agent.
+        rootcheck_frequency (int, optional): Frequency to run rootcheck scans.
+        rcv_msg_limit (int, optional): Max elements for the received message queue.
+        keep_alive_frequency (int, optional): Frequency to send keepalive messages.
+        sca_frequency (int, optional): Frequency to run sca_label scans.
+        syscollector_frequency (int, optional): Frequency to run syscollector scans.
+        vulnerability_frequency (int, optional): Frequency to run vulnerability scans.
+        syscollector_batch_size (int, optional): Size of the syscollector type batch events.
+        hostinfo_eps (int, optional): Hostinfo's maximum event reporting throughput.
+        winevt_eps (float): Winevt's maximum event reporting throughput.
+        fixed_message_size (int, optional): Fixed size of the agent modules messages in KB.
         registration_address (str, optional): Manager registration IP address.
-        retry_enrollment (bool, optional): retry then enrollment in case of error.
-        logcollector_msg_number (bool, optional): insert in the logcollector message the message number.
+        retry_enrollment (bool, optional): Retry then enrollment in case of error.
+        logcollector_msg_number (bool, optional): Insert in the logcollector message the message number.
         custom_logcollector_message (str): Custom logcollector message to be sent by the agent.
+        syscollector_event_types (list, optional): List of events available for syscollector.
+        syscollector_legacy_messages (bool, optional): Allows sending syscollector messages in the
+            style prior to version 4.2.
+        vulnerability_packages_vuln_content (str, optional): Path to the file with the list of packages
+            for vulnerability.
+        vulnerability_events (int, optional): Number of vulnerability events per agent.
     Attributes:
         id (str): ID of the agent.
         name (str): Agent name.
         key (str): Agent key. Used for creating an encryption_key.
-        long_version (str): Agent version in format x.y.z
-        short_version (str): Agent version in format x.y
+        long_version (str): Agent version in format `x.y.z`.
+        short_version (str): Agent version in format `x.y`.
+        labels (dict): Wazuh agent labels. Each dict key will be a new label. Default `None`.
         cypher (str): Encryption method for message communication.
         os (str): Agent operating system.
         fim_eps (int): Fim's maximum event reporting throughput. Default `1000`.
         fim_integrity_eps (int): Fim integrity's maximum event reporting throughput. Default `100`.
         syscollector_eps (int): Syscollector's maximum event reporting throughput. Default `100`.
+        syscollector_event_types (list): List of events available for syscollector. Default
+            `['network', 'port', 'hotfix', 'process', 'packages', 'osinfo', 'hwinfo']`.
+        syscollector_legacy_messages (bool): Allows sending syscollector messages in the style prior
+            to version 4.2. Default `False`.
+        vulnerability_eps (int): Set the maximum number of vulnerability events. Default `100`.
+        vulnerability_events (int): Number of vulnerability events per agent. Default `10`.
+        vulnerability_packages_vuln_content (str): Path to the file with the list of packages for
+            vulnerability. Default `None`.
+        vulnerability_frequency (int): Frequency to run vulnerability scans. Default `60.0`.
         rootcheck_eps (int): Rootcheck's maximum event reporting throughput. Default `100`.
-        hostinfo_eps (int): Hostinfo's maximum event reporting throughput. Default `100`.
-        winevt_eps (float): Winevt's maximum event reporting throughput. Default `100`.
         logcollector_eps (float): Logcollector's maximum event reporting throughput. Default `100`.
+        winevt_eps (float): Winevt's maximum event reporting throughput. Default `100`.
         sca_eps (float): sca_label's maximum event reporting throughput. Default `100`.
+        hostinfo_eps (int): Hostinfo's maximum event reporting throughput. Default `100`.
+        rootcheck_frequency (int): Frequency to run rootcheck scans. 0 to continuously send rootcheck
+            events.
+        sca_frequency (int): Frequency to run sca_label scans. 0 to continuously send sca_label events.
+        keepalive_frequency (int): Frequency to send keepalive messages. 0 to continuously send
+            keepalive messages.
+        syscollector_frequency (int): Frequency to run syscollector scans. 0 to continuously send
+            syscollector events.
         manager_address (str): Manager IP address.
+        registration_address (str): Manager registration IP address.
         encryption_key (bytes): Encryption key used for encrypt and decrypt the message.
-        keep_alive_event (bytes): Keep alive event (read from template data according to OS and parsed to an event).
+        keep_alive_event (bytes): Keep alive event (read from template data according to OS and parsed
+            to an event).
         keep_alive_raw_msg (string): Keep alive event in plain text.
         merged_checksum (string): Checksum of agent's merge.mg file.
         startup_msg (bytes): Startup event sent before the first keep alive event.
         authd_password (str): Password for manager registration.
+        sca (SCA): Object to simulate SCA events.
+        logcollector (Logcollector): Object to simulate Logcollector events.
+        syscollector_batch_size (int): Size of the syscollector type batch events.
         rootcheck_sample (str): File where are sample rootcheck messages.
         rootcheck (Rootcheck): Object to simulate rootcheck message events.
+        hostinfo (GeneratorHostinfo): Object to simulate host information.
+        winevt (GeneratorWinevt): Object to simulate winevt.
         fim (GeneratorFIM): Object to simulate FIM message events.
         fim_integrity (GeneratorIntegrityFIM): Object to simulate FIM integrity message events.
+        syscollector (GeneratorSyscollector): Object to simulate Syscollector message events.
+        vulnerability (GeneratorVulnerabilityEvents):  Object to simulate Vulnerability events.
         modules (dict): Agent modules with their associated configuration info.
         sha_key (str): Shared key between manager and agent for remote upgrading.
         upgrade_exec_result (int): Upgrade result status code.
-        send_upgrade_notification (boolean): If True, it will be sent the upgrade status message after "upgrading".
-        upgrade_script_result (int): Variable to mock the upgrade script result. Used for simulating a remote upgrade.
+        send_upgrade_notification (boolean): If True, it will be sent the upgrade status message
+            after "upgrading".
+        upgrade_script_result (int): Variable to mock the upgrade script result. Used for simulating a
+            remote upgrade.
         stop_receive (int): Flag to determine when to activate and deactivate the agent event listener.
         stage_disconnect (str): WPK process state variable.
+        retry_enrollment (bool): Retry then enrollment in case of error. Default `False`.
         rcv_msg_limit (int): max elements for the received message queue.
         rcv_msg_queue (monitoring.Queue): Queue to store received messages in the agent.
-        disable_all_modules (boolean): Disable all simulated modules for this agent.
-        rootcheck_frequency (int): frequency to run rootcheck scans. 0 to continuously send rootcheck events.
-        syscollector_frequency (int): frequency to run syscollector scans. 0 to continuously send syscollector events.
-        keepalive_frequency (int): frequency to send keepalive messages. 0 to continuously send keepalive messages.
-        sca_frequency (int): frequency to run sca_label scans. 0 to continuously send sca_label events.
-        syscollector_batch_size (int): Size of the syscollector type batch events.
         fixed_message_size (int): Fixed size of the agent modules messages in KB.
-        registration_address (str): Manager registration IP address.
+        logcollector_msg_number (bool): Insert in the logcollector message the message number.
+            Default `None`.
+        custom_logcollector_message (str): Custom logcollector message to be sent by the agent.
+            Default ``.
+        disable_all_modules (boolean): Disable all simulated modules for this agent.
     """
     def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None, id=None, name=None, key=None,
                  version="v4.3.0", fim_eps=100, fim_integrity_eps=100, sca_eps=100, syscollector_eps=100,
@@ -771,7 +820,7 @@ class Generator:
     Args:
         agent_name (str): Name of the agent.
         mq (str): By default 'd'
-        tag (str): By default ''syscollector
+        tag (str): By default 'syscollector'
     """
 
     def __init__(self, agent_name, mq='d', tag='syscollector'):
@@ -1005,7 +1054,6 @@ class GeneratorVulnerabilityEvents(Generator):
     is specified by `batch_size` attribute.
     Args:
         agent_name (str): Name of the agent.
-        old_format (bool): Enable prior 4.2 agents syscollector format.
         events_size (int): Number of messages of the same type.
         custom_packages_vuln_content (list): File containing a list of packages to be sent by syscollector.
     """

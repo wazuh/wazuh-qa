@@ -390,7 +390,7 @@ def main():
                             Default is "packages". Available types are "packages", "processes", "ports",
                             "network", "hotfix", "hwinfo", "osinfo"''',
                             required=False,
-                            default='packages',
+                            default='packages processes ports network hotfix hwinfo osinfo',
                             dest='syscollector_event_types')
 
     arg_parser.add_argument('--syscollector-legacy-messages',
