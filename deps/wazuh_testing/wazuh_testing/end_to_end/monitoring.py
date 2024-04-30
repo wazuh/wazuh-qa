@@ -15,16 +15,16 @@ Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
 
-import re
 import logging
-from time import sleep
-from datetime import datetime
-from typing import Dict, List
+import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
+from time import sleep
+from typing import Dict, List
 
 from wazuh_testing.end_to_end import logs_filepath_os
+from wazuh_testing.end_to_end.regex import get_event_regex
 from wazuh_testing.tools.system import HostManager
-
 
 DEFAULT_SCAN_INTERVAL = 5
 
@@ -98,7 +98,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
                     timestamp_str = match
 
                 timestamp_format = "%Y/%m/%d %H:%M:%S"
-                timestamp_format_parameter = "%Y-%m-%dT%H:%M:%S.%f"
+                timestamp_format_parameter = "%Y-%m-%dT%H:%M:%S"
 
                 try:
                     timestamp_datetime = datetime.strptime(timestamp_str, timestamp_format)
@@ -161,7 +161,7 @@ def monitoring_events_multihost(host_manager: HostManager, monitoring_data: Dict
     with ThreadPoolExecutor() as executor:
         futures = []
         for host, data in monitoring_data.items():
-            futures.append(executor.submit(monitoring_event, host_manager, host, data, ignore_timeout_error, 
+            futures.append(executor.submit(monitoring_event, host_manager, host, data, ignore_timeout_error,
                                            scan_interval))
 
         results = {}
@@ -219,3 +219,35 @@ def generate_monitoring_logs(host_manager: HostManager, regex_list: List[str], t
             })
 
     return monitoring_data
+
+
+def monitoring_syscollector_scan_agents(host_manager: HostManager, timeout: int,
+                                        greater_than_timestamp: str = '') -> list:
+    """Monitor syscollector scan on agents.
+
+    Args:
+        host_manager (HostManager): An instance of the HostManager class.
+        timeout (int): The timeout value for monitoring.
+        greater_than_timestamp_formatted (str): Timestamp to filter agents logs. Default ''
+
+    Returns:
+        list: A list of agents that were not scanned.
+    """
+    agents_not_scanned = []
+
+    logging.info("Monitoring syscollector first scan")
+    list_hosts = host_manager.get_group_hosts('agent')
+    monitoring_data = generate_monitoring_logs(host_manager,
+                                               [get_event_regex({'event': 'syscollector_scan_start'}),
+                                                get_event_regex({'event': 'syscollector_scan_end'})],
+                                               [timeout, timeout],
+                                               list_hosts, greater_than_timestamp=greater_than_timestamp)
+    monitoring_results = monitoring_events_multihost(host_manager, monitoring_data)
+
+    logging.info(f"Value of monitoring results is: {monitoring_results}")
+
+    for agent in monitoring_results:
+        if monitoring_results[agent]['not_found']:
+            agents_not_scanned.append(agent)
+
+    return agents_not_scanned

@@ -82,19 +82,22 @@ def wait_until_vd_is_updated(host_manager: HostManager) -> None:
     else:
         logging.info("Scanner start log not found")
 
-def wait_until_vuln_scan_agents_finished(host_manager: HostManager) -> None:
+def wait_until_vuln_scan_agents_finished(host_manager: HostManager, agent_list: list = None) -> None:
     """
     Wait until vulnerability scans for all agents are finished.
 
     Args:
         host_manager (HostManager): Host manager instance to handle the environment.
     """
-    final_timeout = VD_INITIAL_SCAN_PER_AGENT_TIMEOUT * len(get_agents_id(host_manager))
+    hosts_to_wait = agent_list if agent_list else host_manager.get_group_hosts('agent')
+    final_timeout = VD_INITIAL_SCAN_PER_AGENT_TIMEOUT * len(hosts_to_wait)
+
     time.sleep(final_timeout)
 
 
-def wait_syscollector_and_vuln_scan(host_manager: HostManager, host: str,  operation_data: Dict,
-                                    current_datetime: str = '') -> None:
+def wait_syscollector_and_vuln_scan(host_manager: HostManager, syscollector_scan: int,
+                                    greater_than_timestamp: str = '',
+                                    agent_list: list = None) -> None:
     """
     Wait until syscollector and vulnerability scans are finished for a specific host.
 
@@ -104,25 +107,18 @@ def wait_syscollector_and_vuln_scan(host_manager: HostManager, host: str,  opera
         operation_data (Dict): Dictionary with the operation data.
         current_datetime (str): Current datetime to use in the operation.
     """
-    logging.info(f"Waiting for syscollector scan to finish on {host}")
-
-    timeout_syscollector_scan = TIMEOUT_SYSCOLLECTOR_SHORT_SCAN if 'timeout_syscollector_scan' not in \
-        operation_data else operation_data['timeout_syscollector_scan']
+    logging.info(f"Waiting for syscollector scan to finish in all hosts")
+    hosts_to_wait = agent_list if agent_list else host_manager.get_group_hosts('agent')
 
     # Wait until syscollector
     monitoring_data = generate_monitoring_logs(host_manager,
                                                [get_event_regex({'event': 'syscollector_scan_start'}),
                                                 get_event_regex({'event': 'syscollector_scan_end'})],
-                                               [timeout_syscollector_scan, timeout_syscollector_scan],
-                                               host_manager.get_group_hosts('agent'),
-                                               greater_than_timestamp=current_datetime)
-
-    truncate_remote_host_group_files(host_manager, host_manager.get_group_hosts('agent'))
+                                               [syscollector_scan, syscollector_scan],
+                                               hosts_to_wait, greater_than_timestamp=greater_than_timestamp)
 
     monitoring_events_multihost(host_manager, monitoring_data, ignore_timeout_error=False)
 
-    logging.info(f"Waiting for vulnerability scan to finish on {host}")
+    logging.info(f"Waiting for vulnerability scan to finish")
 
-    wait_until_vuln_scan_agents_finished(host_manager)
-
-    logging.info(f"Checking agent vulnerability on {host}")
+    wait_until_vuln_scan_agents_finished(host_manager, agent_list=agent_list)
