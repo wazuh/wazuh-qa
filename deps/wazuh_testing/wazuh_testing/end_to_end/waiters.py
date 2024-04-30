@@ -31,9 +31,9 @@ from wazuh_testing.tools.system import HostManager
 from wazuh_testing.modules.syscollector import TIMEOUT_SYSCOLLECTOR_SHORT_SCAN
 
 
-VD_FEED_UPDATE_TIMEOUT = 600
+VD_FEED_UPDATE_COMPLETED_TIMEOUT = 900
+VD_FEED_UPDATE_INITIATED_TIMEOUT = 60
 VD_INITIAL_SCAN_PER_AGENT_TIMEOUT = 15
-
 
 def wait_until_vd_is_updated(host_manager: HostManager) -> None:
     """
@@ -43,10 +43,44 @@ def wait_until_vd_is_updated(host_manager: HostManager) -> None:
         host_manager (HostManager): Host manager instance to handle the environment.
     """
 
-    monitoring_data = generate_monitoring_logs(host_manager, ["INFO: Vulnerability scanner module started"],
-                                               [VD_FEED_UPDATE_TIMEOUT], host_manager.get_group_hosts('manager'))
-    monitoring_events_multihost(host_manager, monitoring_data, ignore_timeout_error=False)
+    # Logs to monitor
+    scanner_started_message = "INFO: Vulnerability scanner module started"
+    feed_update_initiated_message = "INFO: Initiating update feed process"
+    feed_update_complete_message = "INFO: Feed update process completed"
 
+    # Generate and monitor initial scanner log
+    initial_monitoring_data = generate_monitoring_logs(
+        host_manager, [scanner_started_message],
+        [VD_FEED_UPDATE_COMPLETED_TIMEOUT], host_manager.get_group_hosts('manager')
+    )
+    initial_results = monitoring_events_multihost(host_manager, initial_monitoring_data)
+
+    # Check initial scanner log
+    if any(scanner_started_message in result['found'] for result in initial_results.values()):
+        logging.info("Vulnerability scanner has started. Waiting for feed update completion...")
+        # Proceed to check feed initiated log
+        initiated_monitoring_data = generate_monitoring_logs(
+            host_manager, [feed_update_initiated_message],
+            [VD_FEED_UPDATE_INITIATED_TIMEOUT], host_manager.get_group_hosts('manager')
+        )
+        initiated_results = monitoring_events_multihost(host_manager, initiated_monitoring_data)
+
+        if any(feed_update_initiated_message in result['found'] for result in initiated_results.values()):
+            logging.info("Feed update process initiated successfully. Waiting for feed update completion...")
+            # Finally check completion log
+            completion_monitoring_data = generate_monitoring_logs(
+                host_manager, [feed_update_complete_message],
+                [VD_FEED_UPDATE_COMPLETED_TIMEOUT], host_manager.get_group_hosts('manager')
+            )
+            completion_results = monitoring_events_multihost(host_manager, completion_monitoring_data)
+            if any(feed_update_complete_message in result['found'] for result in completion_results.values()):
+                logging.info("Feed update process completed successfully")
+            else:
+                raise TimeoutError("Timeout waiting for the feed update process to complete")
+        else:
+            logging.info("Feed update initiated log not found, the feed has already been updated previously")
+    else:
+        logging.info("Scanner start log not found")
 
 def wait_until_vuln_scan_agents_finished(host_manager: HostManager) -> None:
     """
