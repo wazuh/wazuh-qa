@@ -91,6 +91,11 @@ All notable changes to this project will be documented in this file.
 - Fix test cluster performance. ([#4780](https://github.com/wazuh/wazuh-qa/pull/4780)) \- (Framework)
 - Fixed the graphic generation for the logcollectord statistics files. ([#5021](https://github.com/wazuh/wazuh-qa/pull/5021)) \- (Framework)
 
+
+## [4.7.4] - 29/04/2024
+
+- No changes
+
 ## [4.7.3] - 04/03/2024
 
 ### Changed
