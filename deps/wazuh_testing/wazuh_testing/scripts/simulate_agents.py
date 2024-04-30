@@ -387,10 +387,10 @@ def main():
                             metavar='<syscollector_event_types>',
                             type=str,
                             help='''Space-separated list of event types for syscollector messages.
-                            Default is "packages". Available types are "packages", "processes", "ports",
+                            By default all are chosen. Available types are "packages", "process", "ports",
                             "network", "hotfix", "hwinfo", "osinfo"''',
                             required=False,
-                            default='packages processes ports network hotfix hwinfo osinfo',
+                            default='packages hotfix hwinfo ports osinfo network process',
                             dest='syscollector_event_types')
 
     arg_parser.add_argument('--syscollector-legacy-messages',
