@@ -109,7 +109,8 @@ def create_agent(args, custom_labels):
         'syscollector_event_types': args.syscollector_event_types,
         'syscollector_legacy_messages': args.syscollector_legacy_messages,
         'vulnerability_events': args.vulnerability_events,
-        'vulnerability_packages_vuln_content': args.vulnerability_packages_list_file
+        'vulnerability_packages_vuln_content': args.vulnerability_packages_list_file,
+        'vulnerability_frequency': args.vulnerability_frequency
     }
 
     agent = ag.Agent(**agent_args)
@@ -414,6 +415,14 @@ def main():
                             required=False,
                             default=None,
                             dest='vulnerability_packages_list_file')
+    
+    arg_parser.add_argument('--vulnerability-frequency',
+                            metavar='<vulnerability_frequency>',
+                            type=int,
+                            help='Frequency of Vulnerability scans. Set to 1 for constant message sending.',
+                            required=False,
+                            default=60,
+                            dest='vulnerability_frequency')
 
     args = arg_parser.parse_args()
 
