@@ -10,8 +10,8 @@ export PATH=$PATH:$VAGRANT_DIR
 # Check if an argument is provided
 if [ $# -eq 0 ]
 then
-    echo "Usage: $0 [up | destroy | status | ...]"
-    exit 1
+        echo "Usage: $0 [up | destroy | status | ...]"
+        exit 1
 fi
 
 if [ $1 == "destroy" ]; then
