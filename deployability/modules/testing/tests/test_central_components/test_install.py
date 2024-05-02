@@ -70,7 +70,7 @@ def test_installation(wazuh_params):
 
 
 def test_manager_status(wazuh_params):
-    assert 'active' in GeneralComponentActions.get_component_status(wazuh_params['master'], 'wazuh-manager'), logger.error(f'The manager in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])} is not active')
+    assert 'active' in GeneralComponentActions.get_component_status(wazuh_params['master'], 'wazuh-manager'), logger.error(f'The Wazuh manager in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])} is not active')
 
 def test_manager_version(wazuh_params):
     for manager in wazuh_params['managers'].values():
@@ -93,72 +93,72 @@ def test_manager_installed_directory(wazuh_params):
         assert HostInformation.dir_exists(manager, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(manager)}')
 
 
-def test_manager_API_port(wazuh_params):
-    assert WazuhManager.isWazuhAPI_port_opened(wazuh_params['master']), logger.error(f"The manager API port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is closed")
+def test_manager_api_port(wazuh_params):
+    assert WazuhManager.is_wazuh_api_port_open(wazuh_params['master']), logger.error(f"The Wazuh manager's API port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is closed")
 
 
 def test_manager_agent_port(wazuh_params):
-    assert WazuhManager.isWazuhAgent_port_opened(wazuh_params['master']), logger.error(f"The manage-agent port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is closed")
+    assert WazuhManager.is_wazuh_agent_port_open(wazuh_params['master']), logger.error(f"The Wazuh manager port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is closed")
 
 
 def test_manager_agent_enrollment_port(wazuh_params):
-    assert WazuhManager.isWazuhAgent_enrollment_port_opened(wazuh_params['master']), logger.error(f"The manager-enrollment port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is closed")
+    assert WazuhManager.is_wazuh_agent_enrollment_port_open(wazuh_params['master']), logger.error(f"The Wazuh manager agent enrollment port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is closed")
 
 
 def test_dashboard_status(wazuh_params):
     assert 'active' in GeneralComponentActions.get_component_status(wazuh_params['dashboard'], 'wazuh-dashboard'), logger.error(f"The dashboard in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['dashboard'])} is not active")
     wazuh_api = WazuhAPI(wazuh_params['dashboard'], component='dashboard')
-    assert WazuhDashboard.isDashboard_active(wazuh_params['dashboard']), logger.error(f"The dashboard is not active in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['dashboard'])}")
+    assert WazuhDashboard.is_dashboard_active(wazuh_params['dashboard']), logger.error(f"The Wazuh dashboard is not active in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['dashboard'])}")
 
 
 def test_dashboard_version(wazuh_params):
-    assert wazuh_params['wazuh_version'] == WazuhDashboard.get_dashboard_version(wazuh_params['dashboard']), logger.error(f"There is dismatch in dashboard version in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['dashboard'])}")
+    assert wazuh_params['wazuh_version'] == WazuhDashboard.get_dashboard_version(wazuh_params['dashboard']), logger.error(f"There is dismatch in the Wazuh dashboard version in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['dashboard'])}")
 
 
 def test_dashboard_nodes(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['dashboard'], component='dashboard')
-    assert WazuhDashboard.areDashboardNodes_working(wazuh_api), logger.error(f"There is a problem in a dashboard node in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['dashboard'])}")
+    assert WazuhDashboard.are_dashboard_nodes_working(wazuh_api), logger.error(f"There is a problem in the Wazuh dashboard node in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['dashboard'])}")
 
 
 def test_dashboard_keystore(wazuh_params):
-    assert WazuhDashboard.isDashboardKeystore_working(wazuh_params['dashboard']), logger.error(f"There is a problem in the dashboard keystore in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['dashboard'])}")
+    assert WazuhDashboard.is_dashboard_keystore_working(wazuh_params['dashboard']), logger.error(f"There is a problem in the Wazuh dashboard keystore in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['dashboard'])}")
 
 
 def test_dashboard_port(wazuh_params):
-    assert WazuhDashboard.isDashboard_port_opened(wazuh_params['dashboard']), logger.error(f"The dashboard port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['dashboard'])} is closed")
+    assert WazuhDashboard.is_dashboard_port_open(wazuh_params['dashboard']), logger.error(f"The Wazuh dashboard port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['dashboard'])} is closed")
 
 
 def test_indexer_status(wazuh_params):
     for indexer_params in wazuh_params['indexers']:
-        assert 'active' in GeneralComponentActions.get_component_status(indexer_params, 'wazuh-indexer'), logger.error(f'The indexer in {HostInformation.get_os_name_and_version_from_inventory(indexer_params)} is not active')
+        assert 'active' in GeneralComponentActions.get_component_status(indexer_params, 'wazuh-indexer'), logger.error(f'The Wazuh indexer in {HostInformation.get_os_name_and_version_from_inventory(indexer_params)} is not active')
 
 
 def test_indexer_clusters_status(wazuh_params):
     for indexer_params in wazuh_params['indexers']:
         wazuh_api = WazuhAPI(indexer_params, component='indexer')
-        assert WazuhIndexer.isIndexCluster_working(wazuh_api, indexer_params), logger.error(f'There is a problem in a indexer cluster in {HostInformation.get_os_name_and_version_from_inventory(indexer_params)}')
+        assert WazuhIndexer.is_index_cluster_working(wazuh_api, indexer_params), logger.error(f'There is a problem in a Wazuh indexer cluster in {HostInformation.get_os_name_and_version_from_inventory(indexer_params)}')
 
 
 def test_indexer_indexes(wazuh_params):
     for indexer_params in wazuh_params['indexers']:
         wazuh_api = WazuhAPI(indexer_params, component='indexer')
-        assert WazuhIndexer.areIndexes_working(wazuh_api, indexer_params), logger.error(f'There is a problem in a indexer index in {HostInformation.get_os_name_and_version_from_inventory(indexer_params)}')
+        assert WazuhIndexer.are_indexes_working(wazuh_api, indexer_params), logger.error(f'There is a problem in a Wazuh indexer index in {HostInformation.get_os_name_and_version_from_inventory(indexer_params)}')
 
 
 def test_indexer_internalUsers(wazuh_params):
     for indexer_params in wazuh_params['indexers']:
-        assert WazuhIndexer.areIndexer_internalUsers_complete(indexer_params), logger.error(f'There is a problem in a indexer internal user in {HostInformation.get_os_name_and_version_from_inventory(indexer_params)}')
+        assert WazuhIndexer.are_indexer_internal_users_complete(indexer_params), logger.error(f'There is a problem in a Wazuh indexer internal user in {HostInformation.get_os_name_and_version_from_inventory(indexer_params)}')
 
 
 def test_indexer_version(wazuh_params):
     for indexer_params in wazuh_params['indexers']:
-        assert wazuh_params['wazuh_version'] == WazuhIndexer.get_indexer_version(indexer_params), logger.error(f'There is dismatch in indexer version in {HostInformation.get_os_name_and_version_from_inventory(indexer_params)}')
+        assert wazuh_params['wazuh_version'] == WazuhIndexer.get_indexer_version(indexer_params), logger.error(f'There is dismatch in Wazuh indexer version in {HostInformation.get_os_name_and_version_from_inventory(indexer_params)}')
 
 
 def test_indexer_port(wazuh_params):
     for indexer_params in wazuh_params['indexers']:
-        assert WazuhIndexer.isIndexer_port_opened(indexer_params), logger.error(f"Some indexer port in {HostInformation.get_os_name_and_version_from_inventory(indexer_params)} is closed")
+        assert WazuhIndexer.is_indexer_port_open(indexer_params), logger.error(f"Some Wazuh indexer port in {HostInformation.get_os_name_and_version_from_inventory(indexer_params)} is closed")
 
 
 def test_filebeat_status(wazuh_params):
-    assert 'active' in GeneralComponentActions.get_component_status(wazuh_params['master'], 'filebeat'), logger.error(f"The filebeat in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is not active")
+    assert 'active' in GeneralComponentActions.get_component_status(wazuh_params['master'], 'filebeat'), logger.error(f"The Filebeat in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is not active")

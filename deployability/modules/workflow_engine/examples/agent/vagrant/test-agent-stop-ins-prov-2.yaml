@@ -1,5 +1,5 @@
 version: 0.1
-description: Test agent stop with provisioning agents' with provision module
+description: Test agent stop with provisioning agents with provision module
 variables:
   agent-os:
     - linux-centos-7-amd64

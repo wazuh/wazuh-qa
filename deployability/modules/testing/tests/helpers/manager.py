@@ -226,12 +226,12 @@ class WazuhManager:
 
 
     @staticmethod
-    def isWazuhAPI_port_opened(inventory_path, wait=10, cycles=50) -> bool:
+    def is_wazuh_api_port_open(inventory_path, wait=10, cycles=50) -> bool:
         """
-        Check if Manager API port is open
+        Check if the Wazuh manager API port is open
 
         Args:
-            inventory_path (str): Manager inventory.
+            inventory_path (str): Wazuh manager inventory.
 
         Returns:
             bool: True if port is opened.
@@ -251,9 +251,9 @@ class WazuhManager:
         return False
 
     @staticmethod
-    def isWazuhAgent_port_opened(inventory_path, wait=10, cycles=50) -> bool:
+    def is_wazuh_agent_port_open(inventory_path, wait=10, cycles=50) -> bool:
         """
-        Check if Wazuh Manager Agent port is open
+        Check if the Wazuh manager port is open
 
         Args:
             inventory_path (str): Manager inventory.
@@ -276,9 +276,9 @@ class WazuhManager:
         return False
 
     @staticmethod
-    def isWazuhAgent_enrollment_port_opened(inventory_path, wait=10, cycles=50) -> bool:
+    def is_wazuh_agent_enrollment_port_open(inventory_path, wait=10, cycles=50) -> bool:
         """
-        Check if Wazuh Manager Agent enrollment port is open
+        Check if Wazuh manager's agent enrollment port is open
 
         Args:
             inventory_path (str): Manager inventory.
@@ -319,7 +319,7 @@ class WazuhManager:
     @staticmethod
     def get_agent_control_info(inventory_path) -> None:
         """
-        Returns the Agent information from the manager
+        Returns the Wazuh agent information from the Wazuh manager
 
         Args:
             inventory_path: host's inventory path

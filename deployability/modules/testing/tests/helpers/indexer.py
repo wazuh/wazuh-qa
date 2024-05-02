@@ -12,20 +12,20 @@ class WazuhIndexer:
     @staticmethod
     def get_indexer_version(inventory_path) -> str:
         """
-        Returns indexer version
+        Returns the Wazuh indexer version
 
         Args:
             inventory_path (str): host's inventory path
 
         Returns:
-        - str: Version of the indexer.
+        - str: Version of the Wazuh indexer.
         """
 
         return Executor.execute_command(inventory_path,'cat /usr/share/wazuh-indexer/VERSION').strip()
 
 
     @staticmethod
-    def areIndexer_internalUsers_complete(inventory_path) -> bool:
+    def are_indexer_internal_users_complete(inventory_path) -> bool:
         """
         Returns True/False depending on the existance of all the expected internal users
 
@@ -47,16 +47,14 @@ class WazuhIndexer:
         report_of_users = Executor.execute_command(inventory_path, "cat /etc/wazuh-indexer/opensearch-security/internal_users.yml | grep '^[a-z]'")
         for user in users_to_check:
             if user not in report_of_users:
-
                 return False
-
         return True
 
 
     @staticmethod
-    def areIndexes_working(wazuh_api: WazuhAPI, inventory_path) -> bool:
+    def are_indexes_working(wazuh_api: WazuhAPI, inventory_path) -> bool:
         """
-        Returns True/False depending on the working status of the indexes
+        Returns True/False depending on the working status of the Wazuh indexes
 
         Args:
             inventory_path (str): host's inventory path
@@ -67,15 +65,14 @@ class WazuhIndexer:
         indexes = Executor.execute_command(inventory_path, f"curl -k -u {wazuh_api.username}:{wazuh_api.password} {wazuh_api.api_url}/_cat/indices/?pretty").strip().split('\n')
         for index in indexes:
             if 'red' not in index:
-
                 return True
         return False
 
 
     @staticmethod
-    def isIndexCluster_working(wazuh_api: WazuhAPI, inventory_path) -> bool:
+    def is_index_cluster_working(wazuh_api: WazuhAPI, inventory_path) -> bool:
         """
-        Returns True/False depending on the status of the indexer Cluster
+        Returns True/False depending on the status of the Wazuh indexer cluster
 
         Args:
             inventory_path (str): host's inventory path
@@ -88,15 +85,15 @@ class WazuhIndexer:
 
 
     @staticmethod
-    def isIndexer_port_opened(inventory_path, wait=10, cycles=50) -> bool:
+    def is_indexer_port_open(inventory_path, wait=10, cycles=50) -> bool:
         """
-        Check if indexer port is open
+        Check if the Wazuh indexer port is open
 
         Args:
-            inventory_path (str): Indexer inventory.
+            inventory_path (str): Wazuh indexer inventory.
 
         Returns:
-            str: Os name.
+            str: OS name.
         """
         wait_cycles = 0
         while wait_cycles < cycles:

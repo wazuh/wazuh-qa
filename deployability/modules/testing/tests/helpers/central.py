@@ -27,7 +27,7 @@ class WazuhCentralComponents:
         wazuh_version = '.'.join(wazuh_version.split('.')[:2])
         os_name = HostInformation.get_os_name_from_inventory(inventory_path)
 
-        if 'curl' in Executor.execute_command(inventory_path, 'which curl'):
+        if HostInformation.has_curl(inventory_path):
             commands = [
                 f"curl -sO https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh && sudo bash ./wazuh-install.sh -a --ignore-check"
             ]
@@ -37,14 +37,14 @@ class WazuhCentralComponents:
             ]
 
 
-        logger.info(f'Installing Wazuh AIO in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        logger.info(f'Installing Wazuh central components (AIO) in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_commands(inventory_path, commands)
 
 
     @staticmethod
     def uninstall_aio(inventory_path) -> None:
         """
-        Uninstall Wazuh Central Components AIO in the host
+        Uninstall Wazuh Central Components (AIO) in the host
 
         Args:
             inventory_paths (str): hosts' inventory path
@@ -52,7 +52,7 @@ class WazuhCentralComponents:
 
         commands = ['bash wazuh-install.sh --uninstall --ignore-check']
 
-        logger.info(f'Uninstalling Wazuh AIO in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+        logger.info(f'Uninstalling Wazuh central components (AIO) in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_commands(inventory_path, commands)
 
 
@@ -131,7 +131,7 @@ class WazuhCentralComponents:
     @staticmethod
     def perform_install_and_scan_for_aio(host_params, wazuh_params) -> None:
         """
-        Coordinates the action of install the Wazuh AIO and compares the checkfiles
+        Coordinates the action of install the Wazuh central components (AIO) and compares the checkfiles
 
         Args:
             host_params (str): host parameters
@@ -147,7 +147,7 @@ class WazuhCentralComponents:
     @staticmethod
     def perform_uninstall_and_scan_for_aio(host_params) -> None:
         """
-        Coordinates the action of uninstall the Wazuh AIO and compares the checkfiles
+        Coordinates the action of uninstall the Wazuh central components (AIO) and compares the checkfiles
 
         Args:
             host_params (str): host parameters

@@ -19,52 +19,52 @@ class WazuhDashboard:
     @staticmethod
     def get_dashboard_version(inventory_path) -> str:
         """
-        Returns dashboard version
+        Returns Wazuh dashboard version
 
         Args:
             inventory_path (str): host's inventory path
 
         Returns:
-        - str: Version of the dashboard.
+        - str: Version of the Wazuh dashboard.
         """
 
         return Executor.execute_command(inventory_path,'cat /usr/share/wazuh-dashboard/VERSION').strip()
 
 
     @staticmethod
-    def isDashboard_active(inventory_path) -> bool:
+    def is_dashboard_active(inventory_path) -> bool:
         """
-        Returns True/False depending if the dashboard is active or not
+        Returns True/False depending if the dashboard service is active or not
 
         Args:
             inventory_path (str): host's inventory path
 
         Returns:
-        - bool: Status of the dashboard.
+        - bool: Status of the Wazuh dashboard service.
         """
 
         return '200' in Executor.execute_command(inventory_path, 'curl -Is -k https://localhost/app/login?nextUrl=%2F | head -n 1')
 
 
     @staticmethod
-    def isDashboardKeystore_working(inventory_path) -> bool:
+    def is_dashboard_keystore_working(inventory_path) -> bool:
         """
-        Returns True/False depending if the dashboard keystore is active or not
+        Returns True/False depending if the Wazuh dashboard keystore is active or not
 
         Args:
             inventory_path (str): host's inventory path
 
         Returns:
-        - bool: Status of the dashboard keystore.
+        - bool: Status of the Wazuh dashboard keystore.
         """
 
         return 'No such file or directory' not in Executor.execute_command(inventory_path, '/usr/share/wazuh-dashboard/bin/opensearch-dashboards-keystore list --allow-root')
 
 
     @staticmethod
-    def areDashboardNodes_working(wazuh_api: WazuhAPI) -> str:
+    def are_dashboard_nodes_working(wazuh_api: WazuhAPI) -> str:
         """
-        Returns True/False depending the status of Dashboard nodes
+        Returns True/False depending the status of Wazuh dashboard nodes
 
         Returns:
         - bool: True/False depending on the status.
@@ -81,18 +81,18 @@ class WazuhDashboard:
             return result
 
         else:
-            logger.error(f'The dashboard API returned: {response.status_code}')
+            logger.error(f'The Wazuh dashboard API returned: {response.status_code}')
 
     @staticmethod
-    def isDashboard_port_opened(inventory_path, wait=10, cycles=50):
+    def is_dashboard_port_open(inventory_path, wait=10, cycles=50):
         """
-        Check if dashboard port is open
+        Check if the Wazuh dashboard port is open
 
         Args:
-            inventory_path (str): Dashboard inventory.
+            inventory_path (str): Wazuh dashboard inventory.
 
         Returns:
-            str: Os name.
+            str: OS name.
         """
         wait_cycles = 0
         while wait_cycles < cycles:
