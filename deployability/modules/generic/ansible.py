@@ -4,7 +4,6 @@
 
 import ansible_runner
 import jinja2
-from typing import Optional
 import yaml
 
 from pathlib import Path
