@@ -155,13 +155,15 @@ class HostInformation:
             str: linux os name (debian, ubuntu, opensuse, amazon, centos, redhat)
         """
         if 'manager' in inventory_path:
-            os_name = re.search(r'/manager-[^-]+-([^-]+)-', inventory_path).group(1)
+            match = re.search(r'/manager-[^-]+-([^-]+)-', inventory_path)
         elif 'agent' in inventory_path:
-            os_name = re.search(r'/agent-[^-]+-([^-]+)-', inventory_path).group(1)
+            match = re.search(r'/agent-[^-]+-([^-]+)-', inventory_path)
         elif 'central_components' in inventory_path:
-            os_name = re.search(r'/central_components-[^-]+-([^-]+)-', inventory_path).group(1)
-
-        return os_name
+            match = re.search(r'/central_components-[^-]+-([^-]+)-', inventory_path)
+        if match:
+            return match.group(1)
+        else:
+            return None
 
     @staticmethod
     def get_os_name_and_version_from_inventory(inventory_path) -> tuple:
