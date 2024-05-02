@@ -18,11 +18,78 @@ from typing import Dict
 from wazuh_testing.tools.system import HostManager
 
 
-STATE_INDEX_NAME = 'wazuh-vulnerabilities-states'
+WAZUH_STATES_VULNERABILITIES_INDEXNAME = 'wazuh-states-vulnerabilities'
+
+
+def create_vulnerability_states_indexer_filter(target_agent: str = None,
+                                               greater_than_timestamp: str = None) -> dict:
+    """Create a filter for the Indexer API for the vulnerability state index.
+
+    Args:
+        target_agent: The target agent to filter on.
+        greater_than_timestamp: The timestamp to filter on.
+
+    Returns:
+        dict: A dictionary containing the filter.
+    """
+    timestamp_filter = None
+    if greater_than_timestamp:
+        timestamp_filter = {
+                'greater_than_timestamp': greater_than_timestamp,
+                'timestamp_name': 'vulnerability.detected_at'
+        }
+
+    return _create_filter(target_agent, timestamp_filter)
+
+
+def create_alerts_filter(target_agent: str = None, greater_than_timestamp: str = None) -> dict:
+    """Create a filter for the Indexer API for the alerts index.
+
+    Args:
+        target_agent: The target agent to filter on.
+        greater_than_timestamp: The timestamp to filter on.
+
+    Returns:
+        dict: A dictionary containing the filter.
+    """
+    timestamp_filter = None
+    if greater_than_timestamp:
+        timestamp_filter = {
+                'greater_than_timestamp': greater_than_timestamp,
+                'timestamp_name': '@timestamp'
+        }
+
+    return _create_filter(target_agent, timestamp_filter)
+
+
+def _create_filter(target_agent: str = None, timestamp_filter: dict = None) -> dict:
+    """Create a filter for the Indexer API.
+
+    Args:
+        target_agent: The target agent to filter on.
+        greater_than_timestamp: The timestamp to filter on.
+        timestamp_field: The timestamp field to filter on.
+
+    Returns:
+        dict: A dictionary containing the filter.
+    """
+    filter = {
+        'bool': {
+            'must': []
+        }
+    }
+    if timestamp_filter:
+        timestamp_field = timestamp_filter['timestamp_name']
+        greater_than_timestamp = timestamp_filter['greater_than_timestamp']
+        filter['bool']['must'].append({'range': {timestamp_field: {'gte': greater_than_timestamp}}})
+    if target_agent:
+        filter['bool']['must'].append({'match': {'agent.name': target_agent}})
+
+    return filter
 
 
 def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'},
-                       index: str = 'wazuh-alerts*', greater_than_timestamp=None, agent: str = '') -> Dict:
+                       index: str = 'wazuh-alerts*', filter: dict = None, size: int = 10000) -> Dict:
     """
     Get values from the Wazuh Indexer API.
 
@@ -31,8 +98,8 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
         credentials (Optional): A dictionary containing the Indexer credentials. Defaults to
                                  {'user': 'admin', 'password': 'changeme'}.
         index (Optional): The Indexer index name. Defaults to 'wazuh-alerts*'.
-        greater_than_timestamp (Optional): The timestamp to filter the results. Defaults to None.
-        agent (Optional): The agent name to filter the results. Defaults to ''.
+        filter (Optional): A dictionary containing the query filter. Defaults to None.
+        size (Optional): The number of results to retrieve. Defaults to 10000.
 
     Returns:
        Dict: A dictionary containing the values retrieved from the Indexer API.
@@ -40,52 +107,13 @@ def get_indexer_values(host_manager: HostManager, credentials: dict = {'user': '
     logging.info(f"Getting values from the Indexer API for index {index}")
 
     url = f"https://{host_manager.get_master_ip()}:9200/{index}/_search"
-    headers = {
-        'Content-Type': 'application/json',
-    }
 
-    data = {
-        "query": {
-            "match_all": {}
-        }
-    }
+    data = {}
+    param = {'size': size}
+    headers = {'Content-Type': 'application/json'}
 
-    if greater_than_timestamp and agent:
-        query = {
-                "bool": {
-                    "must": [
-                        {"range": {"@timestamp": {"gte": f"{greater_than_timestamp}"}}},
-                        {"match": {"agent.name": f"{agent}"}}
-                    ]
-                }
-        }
-
-        data['query'] = query
-    elif greater_than_timestamp:
-        query = {
-                "bool": {
-                    "must": [
-                        {"range": {"@timestamp": {"gte": f"{greater_than_timestamp}"}}}
-                    ]
-                }
-        }
-
-        data['query'] = query
-    elif agent:
-        query = {
-                "bool": {
-                    "must": [
-                        {"match": {"agent.name": f"{agent}"}}
-                    ]
-                }
-        }
-
-        data['query'] = query
-
-    param = {
-        'pretty': 'true',
-        'size': 10000,
-    }
+    if filter:
+        data['query'] = filter
 
     response = requests.get(url=url, params=param, verify=False,
                             auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']),
