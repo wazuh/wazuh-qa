@@ -75,7 +75,7 @@ def test_status(wazuh_params):
 
 
 def test_connection(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
+    for agent_names, _ in wazuh_params['agents'].items():
         assert agent_names in WazuhManager.get_agent_control_info(wazuh_params['master']), logger.error(f'{agent_names} is not present in agent_control information')
 
 
@@ -96,4 +96,4 @@ def test_port(wazuh_params):
 
 def test_processes(wazuh_params):
     for _, agent_params in wazuh_params['agents'].items():
-        assert WazuhAgent.areAgent_processes_active(agent_params), logger.error('Agent processes are not active')
+        assert WazuhAgent.are_agent_processes_active(agent_params), logger.error('Agent processes are not active')

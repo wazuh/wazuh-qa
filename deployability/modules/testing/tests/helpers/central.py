@@ -2,14 +2,9 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import requests
-import socket
-
-from .constants import CLUSTER_CONTROL, AGENT_CONTROL, WAZUH_CONF, WAZUH_ROOT
-from .executor import ConnectionManager, WazuhAPI
+from .executor import ConnectionManager
 from .generic import HostInformation, CheckFiles
 from modules.testing.utils import logger
-from .utils import Utils
 
 
 class WazuhCentralComponents:

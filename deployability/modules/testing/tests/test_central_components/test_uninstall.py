@@ -4,13 +4,13 @@
 
 import pytest
 
+from modules.testing.utils import logger
 from ..helpers.constants import WAZUH_ROOT
 from ..helpers.generic import HostInformation, GeneralComponentActions
 from ..helpers.manager import WazuhManager
 from ..helpers.dashboard import WazuhDashboard
 from ..helpers.indexer import WazuhIndexer
 from ..helpers.central import WazuhCentralComponents
-from modules.testing.utils import logger
 
 
 @pytest.fixture(scope="module", autouse=True)

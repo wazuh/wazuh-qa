@@ -4,6 +4,7 @@
 
 import pytest
 
+from modules.testing.utils import logger
 from ..helpers.constants import WAZUH_ROOT
 from ..helpers.executor import WazuhAPI
 from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
@@ -11,7 +12,6 @@ from ..helpers.manager import WazuhManager
 from ..helpers.indexer import WazuhIndexer
 from ..helpers.dashboard import WazuhDashboard
 from ..helpers.central import WazuhCentralComponents
-from modules.testing.utils import logger
 from ..helpers.utils import Utils
 
 

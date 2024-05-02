@@ -10,7 +10,6 @@ import time
 import winrm
 
 from modules.testing.utils import logger
-from .generic import HostInformation
 
 paramiko_logger = logging.getLogger("paramiko")
 paramiko_logger.setLevel(logging.CRITICAL)
@@ -49,8 +48,19 @@ class Utils:
         username = inventory_data.get('ansible_user')
         password = inventory_data.get('ansible_password', None)
 
-
-        os_type = HostInformation.get_os_type(inventory_path)
+        try:
+            with open(inventory_path.replace('inventory', 'track'), 'r') as file:
+                data = yaml.safe_load(file)
+            if 'platform' in data:
+                os_type = data['platform']
+            else:
+                raise KeyError("The 'platform' key was not found in the YAML file.")
+        except FileNotFoundError:
+            logger.error(f"The YAML file '{inventory_path}' was not found.")
+        except yaml.YAMLError as e:
+            logger.error(f"Error while loading the YAML file: {e}")
+        except Exception as e:
+            logger.error(f"An unexpected error occurred: {e}")
 
         if os_type == 'linux':
             ssh = paramiko.SSHClient()

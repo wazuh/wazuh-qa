@@ -359,7 +359,6 @@ class WazuhAgent:
 
     @staticmethod
     def assert_results(result, params = None) -> None:
-
         """
         Gets the status of an agent given its name.
 
@@ -386,7 +385,8 @@ class WazuhAgent:
 
                 assert result[category][action] == [], logger.error(f'{result[category][action]} was found in: {category} {action}')
 
-    def areAgent_processes_active(agent_params):
+    @staticmethod
+    def are_agent_processes_active(agent_params):
         """
         Check if agent processes are active
 
@@ -419,7 +419,7 @@ class WazuhAgent:
             else:
                 return False
 
-
+    @staticmethod
     def is_agent_port_open(inventory_path):
         """
         Check if agent port is open
@@ -488,26 +488,6 @@ class WazuhAgent:
                 return agent.get('status')
 
         return None
-
-
-    def get_agent_ip_status_and_name_by_id(wazuh_api: WazuhAPI, identifier):
-        """
-        Get IP status and name by ID.
-
-        Args:
-            identifier (str): Agent ID.
-
-        Returns:
-            List: IP, name, and status of the agent.
-        """
-        try:
-            agents_information = wazuh_api.get_agents_information()
-            for element in agents_information:
-                if element['id'] == identifier:
-                    return [element['ip'], element['name'], element['status']]
-        except Exception as e:
-            logger.error(f"Unexpected error: {e}")
-            return [None, None, None]
 
 
     def get_agent_ip_status_and_name_by_id(wazuh_api: WazuhAPI, identifier):
