@@ -53,7 +53,7 @@ def setup_test_environment(wazuh_params):
     updated_agents = {}
     for agent_name, agent_params in wazuh_params['agents'].items():
         Utils.check_inventory_connection(agent_params)
-        if GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent') and GeneralComponentActions.hasAgentClientKeys(agent_params):
+        if GeneralComponentActions.is_component_active(agent_params, 'wazuh-agent') and GeneralComponentActions.has_agent_client_keys(agent_params):
             if HostInformation.get_client_keys(agent_params) != []:
                 client_name = HostInformation.get_client_keys(agent_params)[0]['name']
                 updated_agents[client_name] = agent_params
@@ -81,7 +81,7 @@ def test_status(wazuh_params):
 def test_service(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['master'])
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by API')
+        assert GeneralComponentActions.is_component_active(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not active by API')
 
         expected_condition_func = lambda: 'active' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
@@ -89,12 +89,12 @@ def test_service(wazuh_params):
 
 def test_clientKeys(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert GeneralComponentActions.hasAgentClientKeys(agent_params), logger.error(f'{agent_names} has not ClientKeys file')
+        assert GeneralComponentActions.has_agent_client_keys(agent_params), logger.error(f'{agent_names} has not ClientKeys file')
 
 
 def test_port(wazuh_params):
     for _, agent_params in wazuh_params['agents'].items():
-        assert WazuhAgent.isAgent_port_open(agent_params), logger.error('Port is closed')
+        assert WazuhAgent.is_agent_port_open(agent_params), logger.error('Port is closed')
 
 
 def test_processes(wazuh_params):

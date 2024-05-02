@@ -420,7 +420,7 @@ class WazuhAgent:
                 return False
 
 
-    def isAgent_port_open(inventory_path):
+    def is_agent_port_open(inventory_path):
         """
         Check if agent port is open
 
@@ -430,23 +430,23 @@ class WazuhAgent:
         Returns:
             str: Os name.
         """
-        os_type = HostInformation.get_os_type(agent_params)
+        os_type = HostInformation.get_os_type(inventory_path)
         if os_type == 'linux':
-            result = ConnectionManager.execute_commands(agent_params, 'ss -t -a -n | grep ":1514" | grep ESTAB')
+            result = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":1514" | grep ESTAB')
             if result.get('success'):
                 return 'ESTAB' in result.get('output')
             else:
                 return False
 
         elif os_type == 'windows':
-            result = ConnectionManager.execute_commands(agent_params, 'netstat -ano | Select-String -Pattern "TCP" | Select-String -Pattern "ESTABLISHED" | Select-String -Pattern ":1514"')
+            result = ConnectionManager.execute_commands(inventory_path, 'netstat -ano | Select-String -Pattern "TCP" | Select-String -Pattern "ESTABLISHED" | Select-String -Pattern ":1514"')
             if result.get('success'):
                 return 'ESTABLISHED' in result.get('output')
             else:
                 return False
 
         elif os_type == 'macos':
-            result = ConnectionManager.execute_commands(agent_params, 'netstat -an | grep ".1514 " | grep ESTABLISHED')
+            result = ConnectionManager.execute_commands(inventory_path, 'netstat -an | grep ".1514 " | grep ESTABLISHED')
             if result.get('success'):
                 return 'ESTABLISHED' in result.get('output')
             else:

@@ -54,7 +54,7 @@ def setup_test_environment(wazuh_params):
     updated_agents = {}
     for agent_name, agent_params in wazuh_params['agents'].items():
         Utils.check_inventory_connection(agent_params)
-        if GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent') and GeneralComponentActions.hasAgentClientKeys(agent_params):
+        if GeneralComponentActions.is_component_active(agent_params, 'wazuh-agent') and GeneralComponentActions.has_agent_client_keys(agent_params):
             if HostInformation.get_client_keys(agent_params) != []:
                 client_name = HostInformation.get_client_keys(agent_params)[0]['name']
                 updated_agents[client_name] = agent_params
@@ -65,7 +65,7 @@ def setup_test_environment(wazuh_params):
 
 def test_uninstall(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not Active before the installation')
+        assert GeneralComponentActions.is_component_active(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not Active before the installation')
 
         os_type = HostInformation.get_os_type(agent_params)
         if os_type == 'linux':
@@ -103,7 +103,7 @@ def test_agent_uninstalled_directory(wazuh_params):
 def test_service(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['master'])
     for agent_names, agent_params in wazuh_params['agents'].items():
-        assert not GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not inactive by command')
+        assert not GeneralComponentActions.is_component_active(agent_params, 'wazuh-agent'), logger.error(f'{agent_names} is not inactive by command')
 
         expected_condition_func = lambda: 'disconnected' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
@@ -111,7 +111,7 @@ def test_service(wazuh_params):
 
 def test_port(wazuh_params):
     for _, agent_params in wazuh_params['agents'].items():
-        assert not WazuhAgent.isAgent_port_open(agent_params), logger.error('Port is still opened')
+        assert not WazuhAgent.is_agent_port_open(agent_params), logger.error('Port is still opened')
 
 
 def test_processes(wazuh_params):

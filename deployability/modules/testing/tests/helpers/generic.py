@@ -330,7 +330,7 @@ class HostConfiguration:
 
         if os_type == 'linux':
             commands = ["sudo systemctl stop firewalld", "sudo systemctl disable firewalld"]
-            if GeneralComponentActions.isComponentActive(inventory_path, 'firewalld'):
+            if GeneralComponentActions.is_component_active(inventory_path, 'firewalld'):
                 ConnectionManager.execute_commands(inventory_path, commands)
 
                 logger.info(f'Firewall disabled on {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
@@ -801,7 +801,7 @@ class GeneralComponentActions:
             return ConnectionManager.execute_commands(inventory_path, f'{MACOS_WAZUH_CONTROL} info -r').get('output')
 
     @staticmethod
-    def hasAgentClientKeys(inventory_path) -> bool:
+    def has_agent_client_keys(inventory_path) -> bool:
         """
         Returns the True of False depending if in the component Client.keys exists
 
@@ -825,7 +825,7 @@ class GeneralComponentActions:
             return HostInformation.file_exists(inventory_path, f'{MACOS_CLIENT_KEYS}')
 
     @staticmethod
-    def isComponentActive(inventory_path, host_role) -> bool:
+    def is_component_active(inventory_path, host_role) -> bool:
         """
         Returns the True of False depending if the component is Active
 
