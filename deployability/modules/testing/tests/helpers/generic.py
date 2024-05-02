@@ -198,18 +198,17 @@ class HostInformation:
         Returns:
             str: os version
         """
-        os_type = HostInformation.get_os_type(inventory_path)
-
+        logger.error(inventory_path)
         if 'manager' in inventory_path:
-            os_version = re.search(r".*?/manager-.*?-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
+            match = re.search(r".*?/manager-.*?-.*?-(.*?)-.*?/inventory.yaml", inventory_path)
         elif 'agent' in inventory_path:
-            os_version = re.search(r".*?/agent-.*?-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
+            match = re.search(r".*?/agent-.*?-.*?-(.*?)-.*?/inventory.yaml", inventory_path)
         elif 'central_components' in inventory_path:
-            os_version = re.search(r".*?/central_components-.*?-.*?-(.*?)-.*?/inventory.yaml", inventory_path).group(1)
-            return os_version
+            match = re.search(r".*?/central_components-.*?-.*?-(.*?)-.*?/inventory.yaml", inventory_path)
+        if match:
+            return match.group(1)
         else:
             return None
-
 
     @staticmethod
     def get_current_dir(inventory_path) -> str:
