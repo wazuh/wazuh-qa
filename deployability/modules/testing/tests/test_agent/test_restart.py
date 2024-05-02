@@ -96,4 +96,4 @@ def test_port(wazuh_params):
 
 def test_processes(wazuh_params):
     for _, agent_params in wazuh_params['agents'].items():
-        assert WazuhAgent.areAgent_processes_active(agent_params), logger.error('Agent processes are not active')
+        assert WazuhAgent.are_agent_processes_active(agent_params), logger.error('Agent processes are not active')
