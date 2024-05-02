@@ -17,7 +17,7 @@ class WazuhCentralComponents:
     @staticmethod
     def install_aio(inventory_path, wazuh_version) -> None:
         """
-        Installs Wazuh Central Components AIO in the host
+        Installs Wazuh central components (AIO) in the host
 
         Args:
             inventory_path (str): host's inventory path
@@ -27,15 +27,15 @@ class WazuhCentralComponents:
         wazuh_version = '.'.join(wazuh_version.split('.')[:2])
         os_name = HostInformation.get_os_name_from_inventory(inventory_path)
 
-        if 'debian' in os_name:
+        if 'curl' in Executor.execute_command(inventory_path, 'which curl'):
+            commands = [
+                f"curl -sO https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh && sudo bash ./wazuh-install.sh -a --ignore-check"
+            ]
+        else:
             commands = [
                 f"wget https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh && sudo bash ./wazuh-install.sh -a --ignore-check"
             ]
 
-        else:
-            commands = [
-                f"curl -sO https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh && sudo bash ./wazuh-install.sh -a --ignore-check"
-            ]
 
         logger.info(f'Installing Wazuh AIO in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         Executor.execute_commands(inventory_path, commands)

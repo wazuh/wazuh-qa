@@ -274,6 +274,18 @@ class HostInformation:
             clients.append(client_info)
         return clients
 
+    @staticmethod
+    def has_curl(inventory_path) -> bool:
+        """
+        Returns yes in case that curl is installed in Linux/macOS.
+
+        Args:
+            inventory_path (str): host's inventory path
+
+        Returns:
+            bool: True/False.
+        """
+        return 'curl' in Executor.execute_command(inventory_path, 'which curl')
 
 class HostConfiguration:
 
