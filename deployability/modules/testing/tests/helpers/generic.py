@@ -200,7 +200,6 @@ class HostInformation:
         Returns:
             str: os version
         """
-        logger.error(inventory_path)
         if 'manager' in inventory_path:
             match = re.search(r".*?/manager-.*?-.*?-(.*?)-.*?/inventory.yaml", inventory_path)
         elif 'agent' in inventory_path:
