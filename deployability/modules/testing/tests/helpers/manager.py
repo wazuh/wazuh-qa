@@ -235,7 +235,8 @@ class WazuhManager:
         """
         wait_cycles = 0
         while wait_cycles < cycles:
-            ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":55000"').get('output').strip().split('\n')
+            ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":443"').get('output') or ""
+            ports = ports.strip().split('\n')
             for port in ports:
                 if any(state in port for state in ['ESTAB', 'LISTEN']):
                     continue
@@ -259,7 +260,8 @@ class WazuhManager:
         """
         wait_cycles = 0
         while wait_cycles < cycles:
-            ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":1514"').get('output').strip().split('\n')
+            ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":1514"').get('output') or ""
+            ports = ports.strip().split('\n')
             for port in ports:
                 if any(state in port for state in ['ESTAB', 'LISTEN']):
                     continue
@@ -283,7 +285,8 @@ class WazuhManager:
         """
         wait_cycles = 0
         while wait_cycles < cycles:
-            ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":443"').get('output').strip().split('\n')
+            ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":443"').get('output') or ""
+            ports = ports.strip().split('\n')
             for port in ports:
                 if any(state in port for state in ['ESTAB', 'LISTEN']):
                     continue

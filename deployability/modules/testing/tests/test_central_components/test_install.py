@@ -53,7 +53,7 @@ def setup_test_environment(wazuh_params):
 
 def test_installation(wazuh_params):
     # Disabling firewall for all managers
-    for manager_name, manager_params in wazuh_params['managers'].items():
+    for _, manager_params in wazuh_params['managers'].items():
         Utils.check_inventory_connection(manager_params)
         HostConfiguration.disable_firewall(manager_params)
 
@@ -61,8 +61,9 @@ def test_installation(wazuh_params):
     HostConfiguration.certs_create(wazuh_params['wazuh_version'], wazuh_params['master'], wazuh_params['dashboard'], wazuh_params['indexers'], wazuh_params['workers'])
 
     # Install central components and perform checkfile testing
-    for manager_name, manager_params in wazuh_params['managers'].items():
-        WazuhCentralComponents.perform_install_and_scan_for_aio(manager_params, wazuh_params)
+    for _, manager_params in wazuh_params['managers'].items():
+        #WazuhCentralComponents.perform_install_and_scan_for_aio(manager_params, wazuh_params)
+        WazuhCentralComponents.install_aio(manager_params, wazuh_params['wazuh_version'])
 
     # Validation of directory of the components
     for manager in wazuh_params['managers'].values():

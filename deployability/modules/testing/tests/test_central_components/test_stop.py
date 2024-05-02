@@ -86,11 +86,11 @@ def test_manager_api_port(wazuh_params):
 
 
 def test_manager_agent_port(wazuh_params):
-    assert not WazuhManager.is_wazuh_agent_port_open(wazuh_params['master'], cycles=1, wait=1), logger.error(f"The Wazuh manager API port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is still active")
+    assert not WazuhManager.is_wazuh_agent_port_open(wazuh_params['master'], cycles=1, wait=1), logger.error(f"The Wazuh manager port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is still active")
 
 
 def test_manager_agent_enrollment_port(wazuh_params):
-    assert not WazuhManager.is_wazuh_agent_enrollment_port_open(wazuh_params['master'], cycles=1, wait=1), logger.error(f"The Wazuh manager API port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is still active")
+    assert not WazuhManager.is_wazuh_agent_enrollment_port_open(wazuh_params['master'], cycles=1, wait=1), logger.error(f"The Wazuh manager agent enrollment port in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is still active")
 
 
 def test_dashboard_port(wazuh_params):

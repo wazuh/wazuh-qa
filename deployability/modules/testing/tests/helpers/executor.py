@@ -149,7 +149,7 @@ class WazuhAPI:
     def _extract_password(self, file_path, keyword):
         if not 'true' in ConnectionManager.execute_commands(self.inventory_path, f'test -f {file_path} && echo "true" || echo "false"').get('output'):
             ConnectionManager.execute_commands(self.inventory_path, 'tar -xvf wazuh-install-files.tar')
-        return ConnectionManager.execute_command(self.inventory_path, f"grep {keyword} {file_path} | head -n 1 | awk '{{print $NF}}'").get('output').replace("'", "").replace("\n", "")
+        return ConnectionManager.execute_commands(self.inventory_path, f"grep {keyword} {file_path} | head -n 1 | awk '{{print $NF}}'").get('output').replace("'", "").replace("\n", "")
 
     def _authenticate(self):
         with open(self.inventory_path, 'r') as yaml_file:

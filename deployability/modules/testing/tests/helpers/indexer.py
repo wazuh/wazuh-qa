@@ -97,7 +97,8 @@ class WazuhIndexer:
         """
         wait_cycles = 0
         while wait_cycles < cycles:
-            ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":9200"').get('output').strip().split('\n')
+            ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":9200"').get('output') or ""
+            ports = ports.strip().split('\n')
             for port in ports:
                 if any(state in port for state in ['ESTAB', 'LISTEN']):
                     continue

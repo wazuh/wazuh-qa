@@ -3,15 +3,11 @@
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import requests
-import socket
 import json
 import time
 
-from .constants import CLUSTER_CONTROL, AGENT_CONTROL, WAZUH_CONF, WAZUH_ROOT
 from .executor import ConnectionManager, WazuhAPI
-from .generic import HostInformation, CheckFiles
 from modules.testing.utils import logger
-from .utils import Utils
 
 
 class WazuhDashboard:
@@ -96,7 +92,8 @@ class WazuhDashboard:
         """
         wait_cycles = 0
         while wait_cycles < cycles:
-            ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":443"').get('output').strip().split('\n')
+            ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":443"').get('output') or ""
+            ports = ports.strip().split('\n')
             for port in ports:
                 if any(state in port for state in ['ESTAB', 'LISTEN']):
                     continue
