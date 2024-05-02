@@ -126,8 +126,14 @@ vagrant:
   macos-monterey-12.0.1-amd64:
     box: development/macos-monterey
     box_version: 0.0.0
+  macos-ventura-13.4.1-amd64:
+    box: development/macos-ventura
+    box_version: 0.0.0
   macos-ventura-13.4.1-arm64:
     box: macos-13
+    box_version: 0.0.0
+  macos-sonoma-14.4.1-amd64:
+    box: development/macos-sonoma
     box_version: 0.0.0
   macos-sonoma-14.0-arm64:
     box: macos-14

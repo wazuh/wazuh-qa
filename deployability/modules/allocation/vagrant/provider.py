@@ -92,6 +92,9 @@ class VagrantProvider(Provider):
         if platform == 'macos':
             vagrant_file = str(instance_dir) + '/Vagrantfile'
             VagrantUtils.remote_copy(vagrant_file, host_instance_dir, remote_host_parameters)
+            VagrantUtils.remote_copy(Path(__file__).parent.parent / 'vagrant' / 'helpers' / 'vagrant_script.sh', host_instance_dir, remote_host_parameters)
+            cmd = f"chmod 700 {host_instance_dir}/vagrant_script.sh"
+            VagrantUtils.remote_command(cmd, remote_host_parameters)
 
         instance_params = {}
         instance_params['instance_dir'] = instance_dir
@@ -185,10 +188,13 @@ class VagrantProvider(Provider):
         """
         environment = Environment(loader=FileSystemLoader(cls.TEMPLATES_DIR))
         if config.platform == 'macos':
-            if config.arch == 'arm64':
-                template = environment.get_template("vagrant_macStadium.j2")
+            if config.arch == 'amd64':
+                if config.box != 'development/macos-high-sierra' and config.box != 'development/macos-mojave' and config.box != 'development/macos-sierra' and config.box != 'development/macos-sierra_cmake':
+                    template = environment.get_template("vagrant_parallels_intel.j2")
+                else:
+                    template = environment.get_template("vagrant_Virtual_box.j2")
             else:
-                template = environment.get_template("vagrant_black_mini.j2")
+                template = environment.get_template("vagrant_parallels_arm.j2")
         else:
             template = environment.get_template("vagrant.j2")
         return template.render(config=config)
