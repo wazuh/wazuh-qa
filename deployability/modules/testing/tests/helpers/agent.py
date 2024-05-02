@@ -154,7 +154,6 @@ class WazuhAgent:
     @staticmethod
     def set_protocol_agent_connection(inventory_path, protocol):
         os_type = HostInformation.get_os_type(inventory_path)
-
         if os_type == 'linux':
             commands = [
                 f"sed -i 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' {WAZUH_CONF}",
@@ -179,7 +178,6 @@ class WazuhAgent:
             ConnectionManager.execute_commands(inventory_path, commands)
             result = ConnectionManager.execute_commands(inventory_path, f'Get-Content -Path "{WAZUH_WINDOWS_CONF}"')
             assert protocol in result.get('output'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
-
 
     @staticmethod
     def uninstall_agent(inventory_path, wazuh_version=None, wazuh_revision=None) -> None:
@@ -263,6 +261,7 @@ class WazuhAgent:
         """
         result = CheckFiles.perform_action_and_scan(agent_params, action_callback)
         os_name = HostInformation.get_os_name_from_inventory(agent_params)
+        os_type = HostInformation.get_os_type(agent_params)
         logger.info(f'Applying filters in checkfiles in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
         os_type = HostInformation.get_os_type(agent_params)
 
@@ -316,6 +315,7 @@ class WazuhAgent:
                 'C:\\Users\\vagrant' : {'added': [], 'removed': [], 'modified': []}
             }
 
+
         # Use of filters
         for directory, changes in result.items():
             if directory in filter_data:
@@ -359,6 +359,7 @@ class WazuhAgent:
 
     @staticmethod
     def assert_results(result, params = None) -> None:
+
         """
         Gets the status of an agent given its name.
 
@@ -378,6 +379,7 @@ class WazuhAgent:
             categories = ['/usr/bin', '/usr/sbin']
 
         actions = ['added', 'modified', 'removed']
+
         # Testing the results
         for category in categories:
             for action in actions:
@@ -418,17 +420,16 @@ class WazuhAgent:
                 return False
 
 
-    def isAgent_port_open(agent_params):
+    def isAgent_port_open(inventory_path):
         """
         Check if agent port is open
 
         Args:
-            agent_name (str): Agent name.
+            inventory_path (str): Agent inventory path.
 
         Returns:
             str: Os name.
         """
-
         os_type = HostInformation.get_os_type(agent_params)
         if os_type == 'linux':
             result = ConnectionManager.execute_commands(agent_params, 'ss -t -a -n | grep ":1514" | grep ESTAB')

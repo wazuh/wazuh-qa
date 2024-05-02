@@ -81,6 +81,7 @@ def test_uninstall(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
         WazuhAgent.perform_uninstall_and_scan_for_agent(agent_params,wazuh_params)
 
+
     # Manager uninstallation status check
     for agent_names, agent_params in wazuh_params['agents'].items():
         assert 'Disconnected' in WazuhManager.get_agent_control_info(wazuh_params['master']), logger.error(f'{agent_names} is still connected in the Manager')

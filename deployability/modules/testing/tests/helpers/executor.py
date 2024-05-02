@@ -3,6 +3,7 @@
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import json
+import paramiko
 import requests
 import paramiko
 import subprocess
@@ -23,7 +24,6 @@ class ConectionInventory():
     def _get_inventory_data(inventory_path) -> dict:
         with open(inventory_path, 'r') as yaml_file:
             inventory_data = yaml.safe_load(yaml_file)
-
         return {
             'host': inventory_data.get('ansible_host'),
             'port': inventory_data.get('ansible_port'),

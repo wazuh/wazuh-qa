@@ -75,6 +75,7 @@ def test_service(wazuh_params):
         valid_statuses = ['inactive', 'Stopped', 'StopPending', 'not running']
         assert any(valid_status in status for valid_status in valid_statuses), logger.error(f'{agent_names} is still active by command')
 
+
         expected_condition_func = lambda: 'disconnected' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
 

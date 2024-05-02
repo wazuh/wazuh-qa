@@ -15,6 +15,7 @@ from pathlib import Path
 from .constants import WAZUH_CONTROL, CLIENT_KEYS, WINDOWS_CLIENT_KEYS, WINDOWS_VERSION, WINDOWS_REVISION, MACOS_WAZUH_CONTROL, MACOS_CLIENT_KEYS
 from .executor import ConnectionManager
 from modules.testing.utils import logger
+from .utils import Utils
 
 
 class HostInformation:
@@ -225,7 +226,7 @@ class HostInformation:
             return result.replace("\n","")
 
     @staticmethod
-    def get_internal_ip_from_aws_dns(dns_name):
+    def get_internal_ip_from_aws_dns(dns_name) -> str:
         """
         It returns the private AWS IP from dns_name
 
@@ -247,8 +248,10 @@ class HostInformation:
     def get_public_ip_from_aws_dns(dns_name) -> str:
         """
         It returns the public AWS IP from dns_name
+
         Args:
             dns_name (str): host's dns public dns name
+            
         Returns:
             str: public ip
         """
@@ -703,7 +706,6 @@ class GeneralComponentActions:
             inventory_path: host's inventory path
             host_role: role of the component
         """
-
         logger.info(f'Stopping {host_role} in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         os_type = HostInformation.get_os_type(inventory_path)
 
@@ -789,7 +791,6 @@ class GeneralComponentActions:
         Returns:
             str: revision number
         """
-
         os_type = HostInformation.get_os_type(inventory_path)
 
         if os_type == 'linux':
@@ -810,7 +811,6 @@ class GeneralComponentActions:
         Returns:
             bool: True/False
         """
-
         os_type = HostInformation.get_os_type(inventory_path)
 
         if os_type == 'linux':
@@ -836,7 +836,6 @@ class GeneralComponentActions:
         Returns:
             bool: True/False
         """
-
         os_type = HostInformation.get_os_type(inventory_path)
 
         if os_type == 'linux':
@@ -852,7 +851,6 @@ class GeneralComponentActions:
                 return False
             else:
                 return f'com.{host_role.replace("-", ".")}' in result
-
 
 
 class Waits:

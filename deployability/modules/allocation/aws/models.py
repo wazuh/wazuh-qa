@@ -11,6 +11,7 @@ class AWSConfig(ProviderConfig):
     user: str
     key_name: str
     type: str
+    storage: int
     security_groups: list[str]
     termination_date: str
     issue: str | None = None

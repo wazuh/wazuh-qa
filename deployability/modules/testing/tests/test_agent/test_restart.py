@@ -73,6 +73,7 @@ def test_status(wazuh_params):
         valid_statuses = ['active', 'Running', 'is running']
         assert any(valid_status in status for valid_status in valid_statuses), logger.error(f'{agent_names} is not active by command')
 
+
 def test_connection(wazuh_params):
     for agent_names, agent_params in wazuh_params['agents'].items():
         assert agent_names in WazuhManager.get_agent_control_info(wazuh_params['master']), logger.error(f'{agent_names} is not present in agent_control information')
