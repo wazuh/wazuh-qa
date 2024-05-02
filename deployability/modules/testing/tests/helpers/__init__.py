@@ -2,6 +2,6 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-from .agent import WazuhAgent
 from .generic import HostConfiguration, HostInformation, HostMonitor, CheckFiles
+from .agent import WazuhAgent
 from .manager import WazuhManager
