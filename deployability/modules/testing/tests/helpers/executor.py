@@ -154,7 +154,7 @@ class WazuhAPI:
         result = ConnectionManager.execute_commands(self.inventory_path, 'pwd')
         file_path = result.get('output') + '/wazuh-install-files/wazuh-passwords.txt'
         result = ConnectionManager.execute_commands(self.inventory_path, f'test -f {file_path} && echo "true" || echo "false"')
-        if not 'true' in result.get('output'):
+        if 'true' not in result.get('output'):
             ConnectionManager.execute_commands(self.inventory_path, 'tar -xvf wazuh-install-files.tar')
         result = ConnectionManager.execute_commands(self.inventory_path, "grep api_password wazuh-install-files/wazuh-passwords.txt | head -n 1 | awk '{print $NF}'")
         password = result.get('output')[1:-1]

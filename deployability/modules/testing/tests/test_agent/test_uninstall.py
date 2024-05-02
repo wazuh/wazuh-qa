@@ -2,14 +2,14 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import pytest
 import re
+import pytest
 
+from modules.testing.utils import logger
 from ..helpers.agent import WazuhAgent
 from ..helpers.constants import WAZUH_ROOT, WINDOWS_CONFIGURATIONS_DIR, WINDOWS_ROOT_DIR, MACOS_ROOT_DIR, MACOS_CONFIGURATIONS_DIR
 from ..helpers.generic import HostInformation, GeneralComponentActions, Waits
 from ..helpers.manager import WazuhManager, WazuhAPI
-from modules.testing.utils import logger
 from ..helpers.utils import Utils
 
 @pytest.fixture(scope="module", autouse=True)
@@ -109,10 +109,10 @@ def test_service(wazuh_params):
 
 
 def test_port(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
+    for _, agent_params in wazuh_params['agents'].items():
         assert not WazuhAgent.isAgent_port_open(agent_params), logger.error('Port is still opened')
 
 
 def test_processes(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
+    for _, agent_params in wazuh_params['agents'].items():
         assert not WazuhAgent.areAgent_processes_active(agent_params), logger.error('Agent processes are still active')

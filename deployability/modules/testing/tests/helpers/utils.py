@@ -86,7 +86,7 @@ class Utils:
                         logger.info("WinRM connection successful.")
                         return True
                     else:
-                        logger.error(f'WinRM connection failed. Check the credentials in the inventory file.')
+                        logger.error('WinRM connection failed. Check the credentials in the inventory file.')
                         return False
                 except Exception as e:
                     logger.warning(f'Error on attempt {attempt} of {attempts}: {e}')

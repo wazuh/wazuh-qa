@@ -182,6 +182,15 @@ class HostInformation:
 
     @staticmethod
     def get_os_version_from_inventory(inventory_path) -> str:
+        """
+        It returns the os version from the inventory information
+
+        Args:
+            inventory_path: host's inventory path
+
+        Returns:
+            str: os version
+        """
         os_type = HostInformation.get_os_type(inventory_path)
 
         if 'manager' in inventory_path:

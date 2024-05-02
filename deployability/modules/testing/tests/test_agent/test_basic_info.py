@@ -2,14 +2,13 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import pytest
 import re
+import pytest
 
+from modules.testing.utils import logger
 from ..helpers.agent import WazuhAgent, WazuhAPI
 from ..helpers.constants import WAZUH_ROOT, WINDOWS_ROOT_DIR, MACOS_ROOT_DIR
 from ..helpers.generic import HostInformation, GeneralComponentActions, Waits
-from modules.testing.utils import logger
-from ..helpers.manager import WazuhManager
 from ..helpers.utils import Utils
 
 
@@ -95,10 +94,10 @@ def test_wazuh_os_version(wazuh_params):
         assert os_name in WazuhAgent.get_agent_os_name_by_name(wazuh_api, agent_names).replace(' ', ''),  logger.error('There is a mismatch between the OS name and the OS name of the installed agent')
 
 def test_wazuh_version(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
+    for _, agent_params in wazuh_params['agents'].items():
         assert wazuh_params['wazuh_version'] in GeneralComponentActions.get_component_version(agent_params), logger.error(f"The version {HostInformation.get_os_name_and_version_from_inventory(agent_params)} is not {wazuh_params['wazuh_version']} by command")
 
 
 def test_wazuh_revision(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
+    for _, agent_params in wazuh_params['agents'].items():
         assert wazuh_params['wazuh_revision'] in GeneralComponentActions.get_component_revision(agent_params), logger.error(f"The revision {HostInformation.get_os_name_and_version_from_inventory(agent_params)} is not {wazuh_params['wazuh_revision']} by command")

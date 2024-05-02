@@ -2,13 +2,13 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import pytest
 import re
+import pytest
 
+from modules.testing.utils import logger
 from ..helpers.agent import WazuhAgent
 from ..helpers.constants import WAZUH_ROOT, WINDOWS_ROOT_DIR, MACOS_ROOT_DIR
 from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
-from modules.testing.utils import logger
 from ..helpers.manager import WazuhManager
 from ..helpers.utils import Utils
 
@@ -64,7 +64,7 @@ def setup_test_environment(wazuh_params):
 
 def test_installation(wazuh_params):
     # Checking connection
-    for manager_name, manager_params in wazuh_params['managers'].items():
+    for _, manager_params in wazuh_params['managers'].items():
         Utils.check_inventory_connection(manager_params)
 
     # Certs creation, firewall management and Manager installation
@@ -99,4 +99,5 @@ def test_installation(wazuh_params):
 def test_status(wazuh_params):
     for agent in wazuh_params['agents'].values():
         agent_status = GeneralComponentActions.get_component_status(agent, 'wazuh-agent')
-        assert 'loaded' in agent_status or 'Stopped' in agent_status or 'not running' in agent_status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} status is not loaded')
+        valid_statuses = ['loaded', 'Stopped', 'not running']
+        assert any(valid_status in agent_status for valid_status in valid_statuses), logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} status is not loaded')

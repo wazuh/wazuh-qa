@@ -2,12 +2,12 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import pytest
 import re
+import pytest
 
+from modules.testing.utils import logger
 from ..helpers.agent import WazuhAgent, WazuhAPI
 from ..helpers.generic import GeneralComponentActions, Waits, HostInformation
-from modules.testing.utils import logger
 from ..helpers.utils import Utils
 
 @pytest.fixture(scope="module", autouse=True)
@@ -72,17 +72,18 @@ def test_service(wazuh_params):
 
     for agent_names, agent_params in wazuh_params['agents'].items():
         status = GeneralComponentActions.get_component_status(agent_params, 'wazuh-agent')
-        assert 'inactive' in status or 'Stopped' in status or 'StopPending' in status or 'not running' in status, logger.error(f'{agent_names} is still active by command')
+        valid_statuses = ['inactive', 'Stopped', 'StopPending', 'not running']
+        assert any(valid_status in status for valid_status in valid_statuses), logger.error(f'{agent_names} is still active by command')
 
         expected_condition_func = lambda: 'disconnected' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
 
 
 def test_port(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
+    for _, agent_params in wazuh_params['agents'].items():
         assert not WazuhAgent.isAgent_port_open(agent_params), logger.error('Port is still opened')
 
 
 def test_processes(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
+    for _, agent_params in wazuh_params['agents'].items():
         assert not WazuhAgent.areAgent_processes_active(agent_params), logger.error('Agent processes are still active')

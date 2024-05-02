@@ -2,13 +2,13 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import pytest
 import re
+import pytest
 
+from modules.testing.utils import logger
 from ..helpers.agent import WazuhAgent, WazuhAPI
 from ..helpers.generic import HostInformation, GeneralComponentActions, Waits
 from ..helpers.manager import WazuhManager, WazuhAPI
-from modules.testing.utils import logger
 from ..helpers.utils import Utils
 
 @pytest.fixture(scope="module", autouse=True)
@@ -65,7 +65,7 @@ def setup_test_environment(wazuh_params):
 
 
 def test_status(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
+    for _, agent_params in wazuh_params['agents'].items():
         WazuhAgent.register_agent(agent_params, wazuh_params['master'])
     for agent in wazuh_params['agents'].values():
         status = GeneralComponentActions.get_component_status(agent, 'wazuh-agent')
