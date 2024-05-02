@@ -2,16 +2,15 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import pytest
 import re
+import pytest
 
-from ..helpers.agent import WazuhAgent
-from ..helpers.constants import WAZUH_ROOT
-from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
 from modules.testing.utils import logger
+from ..helpers.agent import WazuhAgent
+from ..helpers.constants import WAZUH_ROOT, WINDOWS_ROOT_DIR, MACOS_ROOT_DIR
+from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
 from ..helpers.manager import WazuhManager
 from ..helpers.utils import Utils
-
 
 @pytest.fixture(scope="module", autouse=True)
 def wazuh_params(request):
@@ -54,7 +53,7 @@ def setup_test_environment(wazuh_params):
     updated_agents = {}
     for agent_name, agent_params in wazuh_params['agents'].items():
         Utils.check_inventory_connection(agent_params)
-        if GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent') and GeneralComponentActions.hasAgentClientKeys(agent_params):
+        if GeneralComponentActions.is_component_active(agent_params, 'wazuh-agent') and GeneralComponentActions.has_agent_client_keys(agent_params):
             if HostInformation.get_client_keys(agent_params) != []:
                 client_name = HostInformation.get_client_keys(agent_params)[0]['name']
                 updated_agents[client_name] = agent_params
@@ -65,12 +64,13 @@ def setup_test_environment(wazuh_params):
 
 def test_installation(wazuh_params):
     # Checking connection
-    for manager_name, manager_params in wazuh_params['managers'].items():
+    for _, manager_params in wazuh_params['managers'].items():
         Utils.check_inventory_connection(manager_params)
 
     # Certs creation, firewall management and Manager installation
     for agent_name, agent_params in wazuh_params['agents'].items():
         HostConfiguration.disable_firewall(agent_params)
+
 
     if HostInformation.dir_exists(wazuh_params['master'], WAZUH_ROOT):
         logger.info(f'Manager is already installed in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])}')
@@ -81,18 +81,23 @@ def test_installation(wazuh_params):
     assert HostInformation.dir_exists(wazuh_params['master'], WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])}')
 
     # Agent installation
-    for agent_names, agent_params in wazuh_params['agents'].items():
-        WazuhAgent.perform_install_and_scan_for_agent(agent_params, agent_names, wazuh_params)
+    for agent_name, agent_params in wazuh_params['agents'].items():
+        WazuhAgent.perform_install_and_scan_for_agent(agent_params, agent_name, wazuh_params)
 
     # Testing installation directory
-    for agent_names, agent_params in wazuh_params['agents'].items():
-        if HostInformation.get_os_type(agent_params) == 'linux':
-            assert HostInformation.dir_exists(agent_params, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
-        elif HostInformation.get_os_type(agent_params) == 'macos':
-            assert HostInformation.dir_exists(agent_params, '/Library/Ossec'), logger.error(f'The /Library/Ossec is not present in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
+    for agent in wazuh_params['agents'].values():
+        os_type = HostInformation.get_os_type(agent)
+        if os_type == 'linux':
+            path_to_check = WAZUH_ROOT
+        elif os_type == 'windows':
+            path_to_check = WINDOWS_ROOT_DIR
+        elif os_type == 'macos':
+            path_to_check = MACOS_ROOT_DIR
+        assert HostInformation.dir_exists(agent, path_to_check), logger.error(f'The {path_to_check} is not present in {HostInformation.get_os_name_and_version_from_inventory(agent)}')
 
 
 def test_status(wazuh_params):
     for agent in wazuh_params['agents'].values():
         agent_status = GeneralComponentActions.get_component_status(agent, 'wazuh-agent')
-        assert 'loaded' in agent_status or 'not running' in agent_status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} status is not loaded')
+        valid_statuses = ['loaded', 'Stopped', 'not running']
+        assert any(valid_status in agent_status for valid_status in valid_statuses), logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(agent)} status is not loaded')

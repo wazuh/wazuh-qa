@@ -50,7 +50,7 @@ def test_uninstall(wazuh_params):
     for manager in wazuh_params['managers'].values():
         manager_status = GeneralComponentActions.get_component_status(manager, 'wazuh-manager')
         assert 'active' in manager_status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(manager)} is not active')
-    for manager_name, manager_params in wazuh_params['managers'].items():
+    for _, manager_params in wazuh_params['managers'].items():
         WazuhManager.perform_uninstall_and_scan_for_manager(manager_params)
 
 

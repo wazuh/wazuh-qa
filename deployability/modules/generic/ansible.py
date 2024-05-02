@@ -9,6 +9,7 @@ import yaml
 
 from pathlib import Path
 from pydantic import BaseModel, IPvAnyAddress
+from typing import Optional
 
 from modules.generic.utils import Utils
 from modules.generic.logger import Logger
