@@ -510,26 +510,6 @@ class WazuhAgent:
             return [None, None, None]
 
 
-    def get_agent_ip_status_and_name_by_id(wazuh_api: WazuhAPI, identifier):
-        """
-        Get IP status and name by ID.
-
-        Args:
-            identifier (str): Agent ID.
-
-        Returns:
-            List: IP, name, and status of the agent.
-        """
-        try:
-            agents_information = wazuh_api.get_agents_information()
-            for element in agents_information:
-                if element['id'] == identifier:
-                    return [element['ip'], element['name'], element['status']]
-        except Exception as e:
-            logger.error(f"Unexpected error: {e}")
-            return [None, None, None]
-
-
     def get_agent_os_version_by_name(wazuh_api: WazuhAPI, agent_name):
         """
         Get Agent os version by Agent name
