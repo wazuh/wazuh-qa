@@ -22,7 +22,7 @@ tasks:
             - agent: "{working-dir}/agent-windows-server-2016-amd64/inventory.yaml"
           - tests: "install"
           - component: "agent"
-          - wazuh-version: "4.7.3"
-          - wazuh-revision: "40714"
+          - wazuh-version: "4.7.4"
+          - wazuh-revision: "40717"
           - live: "True"
 

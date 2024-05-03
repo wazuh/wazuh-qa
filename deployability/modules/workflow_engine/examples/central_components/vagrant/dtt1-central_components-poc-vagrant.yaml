@@ -2,9 +2,8 @@ version: 0.1
 description: This workflow is used to test the Wazuh manager deployment for DDT1 PoC
 variables:
   central_components-os:
+    - linux-ubuntu-20.04-amd64
     - linux-ubuntu-22.04-amd64
-    - linux-ubuntu-22.04-amd64
-    - linux-oracle-9-amd64
     - linux-amazon-2-amd64
     - linux-redhat-7-amd64
     - linux-redhat-8-amd64
@@ -33,10 +32,20 @@ tasks:
           - composite-name: "{central_components}"
           - inventory-output: "{working-dir}/central_components-{central_components}/inventory.yaml"
           - track-output: "{working-dir}/central_components-{central_components}/track.yaml"
+          - label-termination-date: "1d"
+          - label-team: "qa"
     on-error: "abort-all"
     foreach:
       - variable: central_components-os
         as: central_components
+    cleanup:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: delete
+          - track-output: "{working-dir}/central_components-{central_components-os}/track.yaml"
 
   # Generic manager test task
   - task: "run-central_components-{central_components}-tests"

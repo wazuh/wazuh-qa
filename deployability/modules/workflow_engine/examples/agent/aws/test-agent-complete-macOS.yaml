@@ -84,7 +84,7 @@ tasks:
           - install:
             - component: wazuh-manager
               type: assistant
-              version: 4.7.3
+              version: 4.7.4
               live: True
     depends-on:
       - "allocate-manager-{manager-os}"
@@ -105,8 +105,8 @@ tasks:
             - agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - tests: "install,registration,basic_info,connection,restart,stop,uninstall"
           - component: "agent"
-          - wazuh-version: "4.7.3"
-          - wazuh-revision: "40714"
+          - wazuh-version: "4.7.4"
+          - wazuh-revision: "40717"
           - live: "True"
     foreach:
       - variable: agent-os

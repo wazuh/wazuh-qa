@@ -62,7 +62,7 @@ class Utils:
         except Exception as e:
             logger.error(f"An unexpected error occurred: {e}")
 
-        if os_type == 'linux':
+        if private_key_path != None:
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             private_key = paramiko.RSAKey.from_private_key_file(private_key_path)
@@ -83,45 +83,46 @@ class Utils:
                     logger.warning(f'Error on attempt {attempt} of {attempts}: {e}')
                 time.sleep(sleep)
 
-        elif os_type == 'windows':
-            if port == 5986:
-                protocol = 'https'
-            else:
-                protocol = 'http'
-            endpoint_url = f'{protocol}://{host}:{port}'
+        else:
+            if os_type == 'windows':
+                if port == 5986:
+                    protocol = 'https'
+                else:
+                    protocol = 'http'
+                endpoint_url = f'{protocol}://{host}:{port}'
 
-            for attempt in range(1, attempts + 1):
-                try:
-                    session = winrm.Session(endpoint_url, auth=(username, password),transport='ntlm', server_cert_validation='ignore')
-                    cmd = session.run_cmd('ipconfig')
-                    if cmd.status_code == 0:
-                        logger.info("WinRM connection successful.")
-                        return True
-                    else:
-                        logger.error('WinRM connection failed. Check the credentials in the inventory file.')
-                        return False
-                except Exception as e:
-                    logger.warning(f'Error on attempt {attempt} of {attempts}: {e}')
-                time.sleep(sleep)
+                for attempt in range(1, attempts + 1):
+                    try:
+                        session = winrm.Session(endpoint_url, auth=(username, password),transport='ntlm', server_cert_validation='ignore')
+                        cmd = session.run_cmd('ipconfig')
+                        if cmd.status_code == 0:
+                            logger.info("WinRM connection successful.")
+                            return True
+                        else:
+                            logger.error('WinRM connection failed. Check the credentials in the inventory file.')
+                            return False
+                    except Exception as e:
+                        logger.warning(f'Error on attempt {attempt} of {attempts}: {e}')
+                    time.sleep(sleep)
 
-        elif os_type == 'macos':
-            ssh = paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-            for attempt in range(1, attempts + 1):
+            elif os_type == 'macos':
                 ssh = paramiko.SSHClient()
                 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                try:
-                    ssh.connect(hostname=host, port=port, username=username, password=password)
-                    logger.info(f'Connection established successfully in {os_name}')
-                    ssh.close()
-                    return True
-                except paramiko.AuthenticationException:
-                    logger.error(f'Authentication error. Check SSH credentials in {os_name}')
-                    return False
-                except Exception as e:
-                    logger.warning(f'Error on attempt {attempt} of {attempts}: {e}')
-                time.sleep(sleep)
+
+                for attempt in range(1, attempts + 1):
+                    ssh = paramiko.SSHClient()
+                    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                    try:
+                        ssh.connect(hostname=host, port=port, username=username, password=password)
+                        logger.info(f'Connection established successfully in {os_name}')
+                        ssh.close()
+                        return True
+                    except paramiko.AuthenticationException:
+                        logger.error(f'Authentication error. Check SSH credentials in {os_name}')
+                        return False
+                    except Exception as e:
+                        logger.warning(f'Error on attempt {attempt} of {attempts}: {e}')
+                    time.sleep(sleep)
 
         logger.error(f'Connection attempts failed after {attempts} tries. Connection timeout in {os_name}')
         return False

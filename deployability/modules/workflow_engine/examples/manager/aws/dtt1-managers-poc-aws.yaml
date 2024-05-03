@@ -62,6 +62,6 @@ tasks:
             - wazuh-11: "{working-dir}/manager-linux-debian-12-amd64/inventory.yaml"
           - tests: "install,restart,stop,uninstall"
           - component: "manager"
-          - wazuh-version: "4.7.3"
-          - wazuh-revision: "40714"
+          - wazuh-version: "4.7.4"
+          - wazuh-revision: "40717"
           - live: "True"
