@@ -385,7 +385,6 @@ class AWSProvider(Provider):
             ValueError: If the dependencies are not met.
         """
         dependencies = ['openssh-client', 'awscli']
-        installed_dependencies = []
         missing_dependencies = []
 
         result = subprocess.run(['which', 'apt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -394,9 +393,7 @@ class AWSProvider(Provider):
 
         for dependency in dependencies:
             result = subprocess.run(['bash', '-c', f"apt list --installed 2>/dev/null | grep -q -E ^{dependency}*"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            if result.returncode == 0:
-                installed_dependencies.append(dependency)
-            else:
+            if result.returncode != 0:
                 if dependency == 'awscli':
                     aws_binary = subprocess.run(['which', '/usr/local/bin/aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     if aws_binary.returncode != 0:

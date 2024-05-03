@@ -415,7 +415,6 @@ class VagrantProvider(Provider):
         """
         remote_deploy_dependencies = ['openssh-client', 'sshpass', 'awscli']
         local_deploy_dependencies = ['vagrant', 'virtualbox']
-        installed_dependencies = []
         missing_dependencies = []
         platform = str(composite_name.split("-")[0])
         arch = str(composite_name.split("-")[3])
@@ -432,9 +431,7 @@ class VagrantProvider(Provider):
 
         for dependency in dependencies:
             result = subprocess.run(['bash', '-c', f"apt list --installed 2>/dev/null | grep -q -E ^{dependency}*"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            if result.returncode == 0:
-                installed_dependencies.append(dependency)
-            else:
+            if result.returncode != 0:
                 if dependency == 'awscli':
                     aws_binary = subprocess.run(['which', '/usr/local/bin/aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     if aws_binary.returncode != 0:
