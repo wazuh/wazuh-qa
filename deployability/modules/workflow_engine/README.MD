@@ -6,6 +6,8 @@ The execution of the Workflow is done through the installation of its library.
 
 Initially, Python libraries must be installed. It is recommended to use virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
 
+The Python version to use is 3.10.13 with pip3 version 22.0.2 or higher.
+
 1. Activate the environment:
 
 	```bash
