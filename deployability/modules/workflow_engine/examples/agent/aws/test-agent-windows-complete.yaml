@@ -117,3 +117,4 @@ tasks:
         as: agent
     depends-on:
       - "allocate-agent-{agent}"
+      - "provision-manager-{manager-os}"
