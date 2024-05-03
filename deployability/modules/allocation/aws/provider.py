@@ -9,6 +9,7 @@ import re
 import random
 from pathlib import Path
 from datetime import datetime, timedelta
+import subprocess
 
 from modules.allocation.generic import Provider
 from modules.allocation.generic.models import CreationPayload, InstancePayload, InstancePayload
@@ -43,6 +44,7 @@ class AWSProvider(Provider):
         Returns:
             AWSInstance: Created AWSInstance object.
         """
+        cls.validate_dependencies()
         temp_id = cls._generate_instance_id(cls.provider_name)
         temp_dir = base_dir / temp_id
         credentials = AWSCredentials()
@@ -373,3 +375,42 @@ class AWSProvider(Provider):
             return matches[1]
         else:
             return repository
+
+    @staticmethod
+    def validate_dependencies():
+        """
+        Validates the dependencies for the Vagrant provider.
+
+        Raises:
+            ValueError: If the dependencies are not met.
+        """
+        packages = ['openssh-client', 'awscli']
+        installed_packages = []
+        missing_packages = []
+
+        # Check if yum or apt is installed
+        package_manager = None
+        for manager in ['yum', 'apt']:
+            result = subprocess.run(['which', manager], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if result.returncode == 0:
+                package_manager = manager
+                break
+
+        if not package_manager:
+            raise ValueError("Neither yum nor apt is available on this system.")
+
+        for package in packages:
+            if package_manager == 'yum':
+                raise ValueError("Yum is not supported for Allocation Module.")
+            if package_manager == 'apt':
+                result = subprocess.run(['bash', '-c', f"apt list --installed 2>/dev/null | grep -q -E ^{package}*"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if result.returncode == 0:
+                installed_packages.append(package)
+            else:
+                missing_packages.append(package)
+
+        for package in missing_packages:
+            if package == 'openssh-client':
+                raise ValueError(f"Missing package: {package}")
+            if package == 'awscli':
+                raise ValueError(f"Missing package: {package}")

@@ -413,7 +413,7 @@ class VagrantProvider(Provider):
         Raises:
             ValueError: If the dependencies are not met.
         """
-        packages = ['vagrant', 'openssh-client', 'sshpass', 'virtualbox']
+        packages = ['vagrant', 'openssh-client', 'sshpass', 'virtualbox', 'awscli']
         installed_packages = []
         missing_packages = []
         platform = str(composite_name.split("-")[0])
@@ -445,6 +445,8 @@ class VagrantProvider(Provider):
                 if package == 'openssh-client':
                     raise ValueError(f"Missing package: {package}")
                 if package == 'sshpass':
+                    raise ValueError(f"Missing package: {package}")
+                if package == 'awscli':
                     raise ValueError(f"Missing package: {package}")
             else:
                 if package == 'virtualbox':
