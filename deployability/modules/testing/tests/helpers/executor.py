@@ -112,25 +112,49 @@ class UnixExecutor():
 class MacosExecutor():
     @staticmethod
     def _execute_command(data, command) -> dict:
-        try:
-            ssh_client = paramiko.SSHClient()
-            ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh_client.connect(hostname=data.get('host'), port=data.get('port'), username=data.get('username'), password=data.get('password'))
-            stdin, stdout, stderr = ssh_client.exec_command(f"sudo {command}")
+        if data.get('private_key_path') == None:
+            try:
+                ssh_client = paramiko.SSHClient()
+                ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                ssh_client.connect(hostname=data.get('host'), port=data.get('port'), username=data.get('username'), password=data.get('password'))
+                stdin, stdout, stderr = ssh_client.exec_command(f"sudo {command}")
 
-            stdout_str = ''.join(stdout.readlines())
-            stderr_str = ''.join(stderr.readlines())
+                stdout_str = ''.join(stdout.readlines())
+                stderr_str = ''.join(stderr.readlines())
 
-            ssh_client.close()
+                ssh_client.close()
 
-            if stdout_str:
-                return {'success': True, 'output': stdout_str.replace('\n', '')}
-            if stderr_str:
-                return {'success': False, 'output': stderr_str.replace('\n', '')}
-            return {'success': False, 'output': None}
+                if stdout_str:
+                    return {'success': True, 'output': stdout_str.replace('\n', '')}
+                if stderr_str:
+                    return {'success': False, 'output': stderr_str.replace('\n', '')}
+                return {'success': False, 'output': None}
 
-        except Exception as e:
-            raise Exception(f'Error executing command: {command} with error: {e}')
+            except Exception as e:
+                raise Exception(f'Error executing command: {command} with error: {e}')
+        else:
+            ssh_command = [
+                "ssh",
+                "-i", data.get('private_key_path'),
+                "-o", "StrictHostKeyChecking=no",
+                "-o", "UserKnownHostsFile=/dev/null",
+                "-p", str(data.get('port')),
+                f"{data.get('username')}@{data.get('host')}",
+                "sudo",
+                command
+            ]
+
+            try:
+                ret = subprocess.run(ssh_command, stdout=subprocess.PIPE, text=True)
+                if ret.stdout:
+                    return {'success': True, 'output': ret.stdout.replace('\n', '')}
+                if ret.stderr:
+                    return {'success': False, 'output': ret.stderr.replace('\n', '')}
+                return {'success': False, 'output': None}
+
+            except Exception as e:
+                #return {'success': False, 'output': ret.stderr}
+                raise Exception(f'Error executing command: {command} with error: {e}')
 
 # ------------------------------------------------------
 
