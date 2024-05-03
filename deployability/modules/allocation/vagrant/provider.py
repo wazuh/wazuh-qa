@@ -442,5 +442,8 @@ class VagrantProvider(Provider):
                 else:
                     missing_dependencies.append(dependency)
 
-        for missing_dependecy in missing_dependencies:
-            raise ValueError(f"Missing package: {missing_dependecy}")
+        if len(missing_dependencies) > 0:
+            if len(missing_dependencies) == 1:
+                raise ValueError(f"Missing dependency: {missing_dependencies[0]}")
+            else:
+                raise ValueError(f"Missing dependencies: {missing_dependencies}")
