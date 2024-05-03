@@ -189,7 +189,7 @@ class VagrantProvider(Provider):
         environment = Environment(loader=FileSystemLoader(cls.TEMPLATES_DIR))
         if config.platform == 'macos':
             if config.arch == 'amd64':
-                if config.box != 'development/macos-high-sierra' and config.box != 'development/macos-mojave' and config.box != 'development/macos-sierra' and config.box != 'development/macos-sierra_cmake':
+                if config.box != 'development/macos-high-sierra' and config.box != 'development/macos-mojave' and config.box != 'development/macos-sierra' and config.box != 'development/macos-sierra_cmake' and config.box != 'development/macos-sierra_gcc9':
                     template = environment.get_template("vagrant_parallels_intel.j2")
                 else:
                     template = environment.get_template("vagrant_Virtual_box.j2")
