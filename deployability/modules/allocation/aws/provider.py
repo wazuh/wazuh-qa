@@ -384,24 +384,24 @@ class AWSProvider(Provider):
         Raises:
             ValueError: If the dependencies are not met.
         """
-        packages = ['openssh-client', 'awscli']
-        installed_packages = []
-        missing_packages = []
+        dependencies = ['openssh-client', 'awscli']
+        installed_dependencies = []
+        missing_dependencies = []
 
         result = subprocess.run(['which', 'apt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.returncode != 0:
             raise ValueError("The Allocation module works on systems with APT as packages systems.")
 
-        for package in packages:
-            result = subprocess.run(['bash', '-c', f"apt list --installed 2>/dev/null | grep -q -E ^{package}*"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        for dependency in dependencies:
+            result = subprocess.run(['bash', '-c', f"apt list --installed 2>/dev/null | grep -q -E ^{dependency}*"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if result.returncode == 0:
-                installed_packages.append(package)
+                installed_dependencies.append(dependency)
             else:
-                missing_packages.append(package)
+                if dependency == 'awscli':
+                    if not subprocess.run(['which', '/usr/local/bin/aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE):
+                        missing_dependencies.append(dependency)
+                else:
+                    missing_dependencies.append(dependency)
 
-        for package in missing_packages:
-            if package == 'openssh-client':
-                raise ValueError(f"Missing package: {package}")
-            if package == 'awscli':
-                if not subprocess.run(['which', '/usr/local/bin/aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE):
-                    raise ValueError(f"Missing package: {package}")
+        for missing_dependency in missing_dependencies:
+            raise ValueError(f"Missing package: {missing_dependency}")

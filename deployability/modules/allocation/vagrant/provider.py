@@ -413,9 +413,10 @@ class VagrantProvider(Provider):
         Raises:
             ValueError: If the dependencies are not met.
         """
-        packages = ['vagrant', 'openssh-client', 'sshpass', 'virtualbox', 'awscli']
-        installed_packages = []
-        missing_packages = []
+        remote_deploy_dependencies = ['openssh-client', 'sshpass', 'awscli']
+        local_deploy_dependencies = ['vagrant', 'virtualbox']
+        installed_dependencies = []
+        missing_dependencies = []
         platform = str(composite_name.split("-")[0])
         arch = str(composite_name.split("-")[3])
 
@@ -423,24 +424,22 @@ class VagrantProvider(Provider):
         if result.returncode != 0:
             raise ValueError("The Allocation module works on systems with APT as packages systems.")
 
-        for package in packages:
-            result = subprocess.run(['bash', '-c', f"apt list --installed 2>/dev/null | grep -q -E ^{package}*"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            if result.returncode == 0:
-                installed_packages.append(package)
-            else:
-                missing_packages.append(package)
 
-        for package in missing_packages:
-            if platform == 'macos' or arch == 'ppc64':
-                if package == 'openssh-client':
-                    raise ValueError(f"Missing package: {package}")
-                if package == 'sshpass':
-                    raise ValueError(f"Missing package: {package}")
-                if package == 'awscli':
-                    if not subprocess.run(['which', '/usr/local/bin/aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE):
-                        raise ValueError(f"Missing package: {package}")
+        if platform == 'macos' or arch == 'ppc64':
+            dependencies = remote_deploy_dependencies
+        else:
+            dependencies = local_deploy_dependencies
+
+        for dependency in dependencies:
+            result = subprocess.run(['bash', '-c', f"apt list --installed 2>/dev/null | grep -q -E ^{dependency}*"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if result.returncode == 0:
+                installed_dependencies.append(dependency)
             else:
-                if package == 'virtualbox':
-                    raise ValueError(f"Missing package: {package}")
-                if package == 'vagrant':
-                    raise ValueError(f"Missing package: {package}")
+                if dependency == 'awscli':
+                    if not subprocess.run(['which', '/usr/local/bin/aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE):
+                        missing_dependencies.append(dependency)
+                else:
+                    missing_dependencies.append(dependency)
+
+        for missing_dependecy in missing_dependencies:
+            raise ValueError(f"Missing package: {missing_dependecy}")
