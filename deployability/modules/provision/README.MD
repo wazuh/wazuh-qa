@@ -14,6 +14,8 @@ The execution of the workflow is done through the installation of its library.
 
 Initially, Python libraries must be installed. we recommended the use of virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
 
+To use this module, you should use a Debian-based system, we recommend using Ubuntu 22.04 for full compatibility, you must have installed at least Python 3.10.12 and pip3 22.0.2
+
 1. Create the python environment:
 
 	```bash

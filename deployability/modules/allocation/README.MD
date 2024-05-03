@@ -11,6 +11,8 @@ Execution can be done from any operating system.
 
 Initially, you have to install the required Python libraries. We recommend using virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
 
+To use this module, you should use a Debian-based system, we recommend using Ubuntu 22.04 for full compatibility, you must have installed at least Python 3.10.12 and pip3 22.0.2
+
 1. Activate the environment:
 
   ```bash
@@ -32,6 +34,17 @@ Initially, you have to install the required Python libraries. We recommend using
   ```bash
   pip3 install -r deployability/deps/requirements.txt
   ```
+
+4. The module may execute any of these commands:
+
+  - ssh
+  - ssh-keygen
+  - sshpass
+  - cat
+  - vagrant
+  - chmod
+  
+  These commands must be available to run on the Host Operating System.
 
 #### Use the Allocation module through the Workflow engine
 
