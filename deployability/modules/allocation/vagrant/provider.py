@@ -436,7 +436,8 @@ class VagrantProvider(Provider):
                 installed_dependencies.append(dependency)
             else:
                 if dependency == 'awscli':
-                    if not subprocess.run(['which', '/usr/local/bin/aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE):
+                    aws_binary = subprocess.run(['which', '/usr/local/bin/aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    if aws_binary.returncode != 0:
                         missing_dependencies.append(dependency)
                 else:
                     missing_dependencies.append(dependency)
