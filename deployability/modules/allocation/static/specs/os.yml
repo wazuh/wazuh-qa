@@ -138,6 +138,9 @@ vagrant:
   macos-sonoma-14.0-arm64:
     box: macos-14
     box_version: 0.0.0
+  macos-ventura-sign-arm64:
+    box: macos-ventura-sign
+    box_version: 0.0.0
   # Windows
   windows-desktop-10-amd64:
     box: gusztavvargadr/windows-10

@@ -197,6 +197,7 @@ class AWSProvider(Provider):
             with open(windosUserData_file, 'r') as file:
                 userData = file.read()
                 userData = userData.replace('ChangeMe', config.key_name)
+            config.storage = 60
         else:
             with open(userData_file, 'r') as file:
                 userData = file.read()
@@ -204,6 +205,17 @@ class AWSProvider(Provider):
             'ImageId': config.ami,
             'InstanceType': config.type,
             'SecurityGroupIds': config.security_groups,
+            'BlockDeviceMappings': [
+                {
+                    'DeviceName': '/dev/sda1',
+                    'Ebs': {
+
+                        'DeleteOnTermination': True,
+                        'VolumeSize': config.storage,
+                        'VolumeType': 'gp2'
+                    },
+                },
+            ],
             'MinCount': 1,
             'MaxCount': 1,
             'UserData': userData,
@@ -262,12 +274,15 @@ class AWSProvider(Provider):
             os_specs['zone'] = os_specs['zone'] + 'c'
             if arch == 'arm64':
                 config['type'] = 'mac2.metal'
+                config['storage'] = 100
             if arch == 'amd64':
                 config['type'] = 'mac1.metal'
+                config['storage'] = 100
         else:
             for spec in size_specs:
                 if fnmatch.fnmatch(arch, spec):
                     config['type'] = size_specs[spec]['type']
+                    config['storage'] = int(size_specs[spec]['storage'])
                     break
 
         config['ami'] = os_specs['ami']
