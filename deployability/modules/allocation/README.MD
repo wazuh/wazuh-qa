@@ -33,6 +33,17 @@ Initially, you have to install the required Python libraries. We recommend using
   pip3 install -r deployability/deps/requirements.txt
   ```
 
+4. The module may execute any of these commands:
+
+  - ssh
+  - ssh-keygen
+  - sshpass
+  - cat
+  - vagrant
+  - chmod
+  
+  These commands must be available to run on the Host Operating System.
+
 #### Use the Allocation module through the Workflow engine
 
 Now, it is possible to use the Worklow engine library to launch the provision module by doing the following steps:

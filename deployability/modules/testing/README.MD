@@ -55,9 +55,16 @@ Initially, Python libraries must be installed, we recommended the use of virtual
 	pip3 uninstall -y workflow_engine && pip3 install .
 	```
 
+6. The module may execute any of these commands:
+
+  - ssh
+  - scp
+  
+  These commands must be available to run on the Host Operating System.
+
   Run the module by doing the following steps:
 
-6. Test fixture to execute:
+7. Test fixture to execute:
 
       It will be necessary to create a fixture (YAML file) where the infrastructure, provisioning, and tests to be executed will be declared.
 
