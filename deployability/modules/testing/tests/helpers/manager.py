@@ -298,7 +298,6 @@ class WazuhManager:
                 return True
         return False
 
-
     @staticmethod
     def get_cluster_info(inventory_path) -> None:
         """

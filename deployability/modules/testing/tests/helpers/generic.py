@@ -211,6 +211,7 @@ class HostInformation:
         else:
             return None
 
+
     @staticmethod
     def get_current_dir(inventory_path) -> str:
         """

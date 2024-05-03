@@ -85,6 +85,7 @@ def test_installation(wazuh_params):
         #WazuhAgent.perform_install_and_scan_for_agent(agent_params, agent_name, wazuh_params)
         WazuhAgent.install_agent(agent_params, agent_name, wazuh_params['wazuh_version'], wazuh_params['wazuh_revision'], wazuh_params['live'])
 
+
     # Testing installation directory
     for agent in wazuh_params['agents'].values():
         os_type = HostInformation.get_os_type(agent)
