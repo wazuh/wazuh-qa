@@ -5,8 +5,8 @@ import requests
 import yaml
 
 from typing import List, Optional
-from .constants import WAZUH_CONF, WAZUH_ROOT
-from .executor import Executor, WazuhAPI
+from .constants import WAZUH_CONF, WAZUH_ROOT, WAZUH_WINDOWS_CONF, WAZUH_MACOS_CONF
+from .executor import WazuhAPI, ConnectionManager
 from .generic import HostInformation, CheckFiles
 from modules.testing.utils import logger
 
@@ -15,9 +15,9 @@ class WazuhAgent:
     @staticmethod
     def install_agent(inventory_path, agent_name, wazuh_version, wazuh_revision, live) -> None:
 
-        if live == True:
+        if live:
             s3_url = 'packages'
-            release = wazuh_version[0:3]
+            release = wazuh_version[:1] + ".x"
         else:
             s3_url = 'packages-dev'
             release = 'pre-release'
@@ -25,9 +25,9 @@ class WazuhAgent:
         os_type = HostInformation.get_os_type(inventory_path)
         architecture = HostInformation.get_architecture(inventory_path)
         commands = []
-        if 'linux' in os_type:
+
+        if os_type == 'linux':
             distribution = HostInformation.get_linux_distribution(inventory_path)
-            architecture = HostInformation.get_architecture(inventory_path)
 
             if distribution == 'rpm' and 'amd64' in architecture:
                 commands.extend([
@@ -53,23 +53,25 @@ class WazuhAgent:
             ]
 
             commands.extend(system_commands)
-        elif 'windows' in os_type :
+        elif os_type == 'windows' :
             commands.extend([
-                f"Invoke-WebRequest -Uri https://packages.wazuh.com/{release}/windows/wazuh-agent-{wazuh_version}-1.msi"
-                "-OutFile ${env.tmp}\wazuh-agent;"
-                "msiexec.exe /i ${env.tmp}\wazuh-agent /q"
-                f"WAZUH_MANAGER='MANAGER_IP'"
-                f"WAZUH_AGENT_NAME='{agent_name}'"
-                f"WAZUH_REGISTRATION_SERVER='MANAGER_IP'",
-                "NET START WazuhSvc",
-                "NET STATUS WazuhSvc"
-                ])
-        elif 'macos' in os_type:
-            if 'amd64' in architecture:
+                f"Invoke-WebRequest -Uri https://packages.wazuh.com/{release}/windows/wazuh-agent-{wazuh_version}-1.msi "
+                "-OutFile $env:TEMP\wazuh-agent.msi"
+            ])
+            commands.extend([
+                "msiexec.exe /i $env:TEMP\wazuh-agent.msi /q "
+                f"WAZUH_MANAGER='MANAGER_IP' "
+                f"WAZUH_AGENT_NAME='{agent_name}' "
+                f"WAZUH_REGISTRATION_SERVER='MANAGER_IP' "
+            ])
+            commands.extend(["NET START WazuhSvc"])
+
+        elif os_type == 'macos':
+            if architecture == 'amd64':
                 commands.extend([
                     f'curl -so wazuh-agent.pkg https://{s3_url}.wazuh.com/{release}/macos/wazuh-agent-{wazuh_version}-1.intel64.pkg && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
                 ])
-            elif 'arm64' in architecture:
+            elif architecture == 'arm64':
                 commands.extend([
                     f'curl -so wazuh-agent.pkg https://{s3_url}.wazuh.com/{release}/macos/wazuh-agent-{wazuh_version}-1.arm64.pkg && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
                 ])
@@ -77,10 +79,10 @@ class WazuhAgent:
                     '/Library/Ossec/bin/wazuh-control start',
                     '/Library/Ossec/bin/wazuh-control status'
             ]
-
             commands.extend(system_commands)
+
         logger.info(f'Installing Agent in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
-        Executor.execute_commands(inventory_path, commands)
+        ConnectionManager.execute_commands(inventory_path, commands)
 
 
     @staticmethod
@@ -101,54 +103,91 @@ class WazuhAgent:
         agent_host = inventory_path_yaml.get('ansible_host')
 
         os_type = HostInformation.get_os_type(inventory_path)
+        logger.info(f'Registering agent in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
+
         if os_type == 'linux':
-            host_ip = HostInformation.get_internal_ip_from_aws_dns(manager_host) if 'amazonaws' in manager_host else manager_host
-            commands = [
-                f"sed -i 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' {WAZUH_CONF}",
-                "systemctl restart wazuh-agent"
-            ]
-            Executor.execute_commands(inventory_path, commands)
-            assert host_ip in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the Manager IP ({host_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+            try:
+                host_ip = HostInformation.get_internal_ip_from_aws_dns(manager_host) if 'amazonaws' in manager_host else manager_host
+                commands = [
+                    f"sed -i 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' {WAZUH_CONF}",
+                    "systemctl restart wazuh-agent"
+                ]
+                ConnectionManager.execute_commands(inventory_path, commands)
+            except Exception as e:
+                raise Exception(f'Error registering agent. Error executing: {commands} with error: {e}')
+
+            result = ConnectionManager.execute_commands(inventory_path, f'cat {WAZUH_CONF}')
+            assert host_ip in result.get('output'), logger.error(f'Error configuring the Manager IP ({host_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
         elif os_type == 'macos':
-            if 'amazonaws' in manager_host and 'amazonaws' in agent_host:
-                host_ip = HostInformation.get_internal_ip_from_aws_dns(manager_host) 
-            else:
-                host_ip = HostInformation.get_public_ip_from_aws_dns(manager_host)
-            commands = [
-                f"sed -i '.bak' 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' /Library/Ossec/etc/ossec.conf",
-                "/Library/Ossec/bin/wazuh-control restart"
-            ]
-            Executor.execute_commands(inventory_path, commands)
-            assert host_ip in Executor.execute_command(inventory_path, f'cat /Library/Ossec/etc/ossec.conf'), logger.error(f'Error configuring the Manager IP ({host_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+            try:
+                if 'amazonaws' in manager_host and 'amazonaws' in agent_host:
+                    host_ip = HostInformation.get_internal_ip_from_aws_dns(manager_host) 
+                else:
+                    host_ip = HostInformation.get_public_ip_from_aws_dns(manager_host)
+                commands = [
+                    f"sed -i '.bak' 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' {WAZUH_MACOS_CONF}",
+                    "/Library/Ossec/bin/wazuh-control restart"
+                ]
+                ConnectionManager.execute_commands(inventory_path, commands)
+            except Exception as e:
+                raise Exception(f'Error registering agent. Error executing: {commands} with error: {e}')
 
+            result = ConnectionManager.execute_commands(inventory_path, f'cat {WAZUH_MACOS_CONF}').get('output')
+            assert host_ip in result, logger.error(f'Error configuring the Manager IP ({host_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+
+        elif os_type == 'windows':
+            try:
+                host_ip = HostInformation.get_internal_ip_from_aws_dns(manager_host) if 'amazonaws' in manager_host else manager_host
+                commands = [
+                    f'(Get-Content -Path "{WAZUH_WINDOWS_CONF}" -Raw) -replace "<address>MANAGER_IP</address>", "<address>{host_ip}</address>" | Set-Content -Path "{WAZUH_WINDOWS_CONF}"',
+                    "NET START WazuhSvc"
+                ]
+
+                ConnectionManager.execute_commands(inventory_path, commands)
+            except Exception as e:
+                raise Exception(f'Error registering agent. Error executing: {commands} with error: {e}')
+
+            result = ConnectionManager.execute_commands(inventory_path, f'Get-Content "{WAZUH_WINDOWS_CONF}"')
+            assert host_ip in result.get('output'), logger.error(f'Error configuring the Manager IP ({host_ip}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
     @staticmethod
     def set_protocol_agent_connection(inventory_path, protocol):
         os_type = HostInformation.get_os_type(inventory_path)
-        if 'linux' in os_type:
+        if os_type == 'linux':
             commands = [
                 f"sed -i 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' {WAZUH_CONF}",
                 "systemctl restart wazuh-agent"
             ]
-            Executor.execute_commands(inventory_path, commands)
-            assert protocol in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
-        elif 'macos' in os_type:
+            ConnectionManager.execute_commands(inventory_path, commands)
+            result = ConnectionManager.execute_commands(inventory_path, f'cat {WAZUH_CONF}')
+            assert protocol in result.get('output'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+
+        elif os_type == 'macos':
             commands = [
-                f"sed -i '' 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' /Library/Ossec/etc/ossec.conf",
+                f"sed -i '' 's/<protocol>[^<]*<\/protocol>/<protocol>{protocol}<\/protocol>/g' {WAZUH_MACOS_CONF}",
                 "/Library/Ossec/bin/wazuh-control restart"
             ]
-            Executor.execute_commands(inventory_path, commands)
-            assert protocol in Executor.execute_command(inventory_path, f'cat /Library/Ossec/etc/ossec.conf'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
-       
+            ConnectionManager.execute_commands(inventory_path, commands)
+            assert protocol in ConnectionManager.execute_commands(inventory_path, f'cat {WAZUH_MACOS_CONF}').get('output'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
+
+        elif os_type == 'windows':
+            commands = [
+                f"(Get-Content -Path '{WAZUH_WINDOWS_CONF}') -replace '<protocol>[^<]*<\/protocol>', '<protocol>{protocol}</protocol>' | Set-Content -Path '{WAZUH_WINDOWS_CONF}'"
+            ]
+            ConnectionManager.execute_commands(inventory_path, commands)
+            result = ConnectionManager.execute_commands(inventory_path, f'Get-Content -Path "{WAZUH_WINDOWS_CONF}"')
+            assert protocol in result.get('output'), logger.error(f'Error configuring the protocol ({protocol}) in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)} agent')
 
     @staticmethod
     def uninstall_agent(inventory_path, wazuh_version=None, wazuh_revision=None) -> None:
         os_type = HostInformation.get_os_type(inventory_path)
         commands = []
-        if 'linux' in os_type:
+
+        if os_type == 'linux':
             distribution = HostInformation.get_linux_distribution(inventory_path)
             os_name = HostInformation.get_os_name_from_inventory(inventory_path)
+
             if os_name == 'opensuse' or os_name == 'suse':
                     commands.extend([
                         "zypper remove --no-confirm wazuh-agent",
@@ -158,26 +197,24 @@ class WazuhAgent:
                 if distribution == 'deb':
                         commands.extend([
                             "apt-get remove --purge wazuh-agent -y"
-
                         ])
                 elif distribution == 'rpm':
                     commands.extend([
                         "yum remove wazuh-agent -y",
                         f"rm -rf {WAZUH_ROOT}"
                     ])
-
-
             system_commands = [
                     "systemctl disable wazuh-agent",
                     "systemctl daemon-reload"
             ]
-
             commands.extend(system_commands)
-        elif 'windows' in os_type:
+
+        elif os_type == 'windows':
             commands.extend([
-                f"msiexec.exe /x wazuh-agent-{wazuh_version}-1.msi /qn"
+                f"msiexec.exe /x $env:TEMP\wazuh-agent.msi /qn"
             ])
-        elif 'macos' in os_type:
+
+        elif os_type == 'macos':
             commands.extend([
                 "/Library/Ossec/bin/wazuh-control stop",
                 "/bin/rm -r /Library/Ossec",
@@ -190,7 +227,7 @@ class WazuhAgent:
             ])
 
         logger.info(f'Uninstalling Agent in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
-        Executor.execute_commands(inventory_path, commands)
+        ConnectionManager.execute_commands(inventory_path, commands)
 
 
     @staticmethod
@@ -213,7 +250,7 @@ class WazuhAgent:
     def perform_action_and_scan(agent_params, action_callback) -> dict:
         """
         Takes scans using filters, the callback action and compares the result
-        
+
         Args:
             agent_params (str): agent parameters
             callbak (cb): callback (action)
@@ -226,6 +263,7 @@ class WazuhAgent:
         os_name = HostInformation.get_os_name_from_inventory(agent_params)
         os_type = HostInformation.get_os_type(agent_params)
         logger.info(f'Applying filters in checkfiles in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
+        os_type = HostInformation.get_os_type(agent_params)
 
         if os_type == 'linux':
             if 'debian' in os_name:
@@ -263,11 +301,20 @@ class WazuhAgent:
                     '/root': {'added': ['trustdb.gpg', 'lesshst'], 'removed': [], 'modified': []},
                     '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
                 }
+
         elif os_type == 'macos':
-                filter_data = {
-                    '/usr/bin': {'added': [], 'removed': [], 'modified': []},
-                    '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
-                }
+            filter_data = {
+                '/usr/bin': {'added': [], 'removed': [], 'modified': []},
+                '/usr/sbin': {'added': [], 'removed': [], 'modified': []}
+            }
+
+        elif os_type == 'windows':
+            filter_data = {
+                'C:\\Program Files': {'added': [], 'removed': [], 'modified': []},
+                'C:\\Program Files (x86)': {'added': [], 'removed': [], 'modified': []},
+                'C:\\Users\\vagrant' : {'added': [], 'removed': [], 'modified': []}
+            }
+
 
         # Use of filters
         for directory, changes in result.items():
@@ -282,7 +329,7 @@ class WazuhAgent:
     def perform_install_and_scan_for_agent(agent_params, agent_name, wazuh_params) -> None:
         """
         Coordinates the action of install the agent and compares the checkfiles
-        
+
         Args:
             agent_params (str): agent parameters
             wazuh_params (str): wazuh parameters
@@ -298,7 +345,7 @@ class WazuhAgent:
     def perform_uninstall_and_scan_for_agent(agent_params, wazuh_params) -> None:
         """
         Coordinates the action of uninstall the agent and compares the checkfiles
-        
+
         Args:
             agent_params (str): agent parameters
             wazuh_params (str): wazuh parameters
@@ -311,27 +358,36 @@ class WazuhAgent:
 
 
     @staticmethod
-    def assert_results(result, agent_params) -> None:
+    def assert_results(result, params = None) -> None:
+
         """
         Gets the status of an agent given its name.
-        
+
         Args:
             result (dict): result of comparison between pre and post action scan
 
         """
-        os_type = HostInformation.get_os_type(agent_params)
+        os_type = HostInformation.get_os_type(params)
+
         if os_type == 'linux':
             categories = ['/root', '/usr/bin', '/usr/sbin', '/boot']
+
+        elif os_type == 'windows':
+            categories = ['C:\\Program Files', 'C:\\Program Files (x86)','C:\\Users\\vagrant']
+
         elif os_type == 'macos':
             categories = ['/usr/bin', '/usr/sbin']
+
         actions = ['added', 'modified', 'removed']
 
         # Testing the results
         for category in categories:
             for action in actions:
-                assert result[category][action] == [], logger.error(f'{result[category][action]} was found in: {category}{action}')
 
-    def areAgent_processes_active(agent_params):
+                assert result[category][action] == [], logger.error(f'{result[category][action]} was found in: {category} {action}')
+
+    @staticmethod
+    def are_agent_processes_active(agent_params):
         """
         Check if agent processes are active
 
@@ -341,9 +397,31 @@ class WazuhAgent:
         Returns:
             str: Os name.
         """
-        return bool([int(numero) for numero in Executor.execute_command(agent_params, 'pgrep wazuh').splitlines()])
+        os_type = HostInformation.get_os_type(agent_params)
 
-    def isAgent_port_open(inventory_path):
+        if os_type == 'linux':
+            result = ConnectionManager.execute_commands(agent_params, 'pgrep wazuh')
+            if result.get('success'):
+                return bool([int(number) for number in result.get('output').splitlines()])
+            else:
+                return False
+
+        if os_type == 'macos':
+            result = ConnectionManager.execute_commands(agent_params, 'pgrep wazuh')
+            if result.get('success'):
+                return bool([int(number) for number in result.get('output').splitlines()])
+            else:
+                return False
+
+        elif os_type == 'windows':
+            result = ConnectionManager.execute_commands(agent_params, 'Get-Process -Name "wazuh-agent" | Format-Table -HideTableHeaders  ProcessName')
+            if result.get('success'):
+                return 'wazuh-agent' in result.get('output')
+            else:
+                return False
+
+    @staticmethod
+    def is_agent_port_open(inventory_path):
         """
         Check if agent port is open
 
@@ -355,9 +433,25 @@ class WazuhAgent:
         """
         os_type = HostInformation.get_os_type(inventory_path)
         if os_type == 'linux':
-            return 'ESTAB' in Executor.execute_command(inventory_path, 'ss -t -a -n | grep ":1514" | grep ESTAB')
+            result = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":1514" | grep ESTAB')
+            if result.get('success'):
+                return 'ESTAB' in result.get('output')
+            else:
+                return False
+
+        elif os_type == 'windows':
+            result = ConnectionManager.execute_commands(inventory_path, 'netstat -ano | Select-String -Pattern "TCP" | Select-String -Pattern "ESTABLISHED" | Select-String -Pattern ":1514"')
+            if result.get('success'):
+                return 'ESTABLISHED' in result.get('output')
+            else:
+                return False
+
         elif os_type == 'macos':
-            return 'ESTABLISHED' in Executor.execute_command(inventory_path, 'netstat -an | grep ".1514 " | grep ESTABLISHED')
+            result = ConnectionManager.execute_commands(inventory_path, 'netstat -an | grep ".1514 " | grep ESTABLISHED')
+            if result.get('success'):
+                return 'ESTABLISHED' in result.get('output')
+            else:
+                return False
 
     def get_agents_information(wazuh_api: WazuhAPI) -> list:
         """
@@ -378,17 +472,20 @@ class WazuhAgent:
     def get_agent_status(wazuh_api: WazuhAPI, agent_name) -> str:
         """
         Function to get the status of an agent given its name.
-        
+
         Args:
         - agents_data (list): List of dictionaries containing agents' data.
         - agent_name (str): Name of the agent whose status is to be obtained.
-        
+
         Returns:
         - str: Status of the agent if found in the data, otherwise returns None.
         """
         response = requests.get(f"{wazuh_api.api_url}/agents", headers=wazuh_api.headers, verify=False)
+
         for agent in eval(response.text)['data']['affected_items']:
             if agent.get('name') == agent_name:
+
+
                 return agent.get('status')
 
         return None
