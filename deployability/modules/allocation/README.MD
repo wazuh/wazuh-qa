@@ -11,7 +11,7 @@ Execution can be done from any operating system.
 
 Initially, you have to install the required Python libraries. We recommend using virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
 
-The Python version to use is 3.10.13 with pip3 version 22.0.2 or higher.
+To use this module, you should use a Debian-based system, we recommend using Ubuntu 22.04 for full compatibility, you must have installed at least Python 3.10.12 and pip3 22.0.2
 
 1. Activate the environment:
 
