@@ -30,7 +30,7 @@ import time
 from system import restart_cluster
 from system.test_cluster.test_agent_groups.common import register_agent
 from wazuh_testing import T_10, T_30
-from wazuh_testing.tools import WAZUH_PATH
+from wazuh_testing.tools import WAZUH_PATH, LOG_FILE_PATH
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.system_monitoring import HostMonitor
 
@@ -56,14 +56,14 @@ pytestmark = [pytest.mark.cluster, pytest.mark.big_cluster_40_agents_env]
 
 
 @pytest.fixture()
-def restart_all_agents():
+def configure_environment():
     for agent in test_infra_agents:
         register_agent(agent, test_infra_managers[0], host_manager)
     restart_cluster(test_infra_agents, host_manager, parallel=True)
     time.sleep(T_30)
     connection_summary = host_manager.get_agents_summary_status(test_infra_managers[0])['data']['connection']
     assert connection_summary['active'] == connection_summary['total'] == number_agents, 'Not all agents are active yet'
-    host_manager.clear_file(host=test_infra_managers[0], file_path=os.path.join('/var/ossec/logs', 'ossec.log'))
+    host_manager.clear_file(host=test_infra_managers[0], file_path=LOG_FILE_PATH)
 
     yield
 
@@ -81,14 +81,14 @@ def stop_gracefully_all_agents():
         thread.join()
 
 
-def test_shut_down_message_gracefully_stopped_agent(restart_all_agents, stop_gracefully_all_agents):
+def test_shut_down_message_gracefully_stopped_agent(configure_environment, stop_gracefully_all_agents):
     '''
         description: Checking shutdown message when socket is closed.
         wazuh_min_version: 4.6.0
         parameters:
-            - restart_all_agents:
+            - configure_environment:
                 type: function
-                brief: Restart all the agents to manipulate them after.
+                brief: Register and restart all the agents to manipulate them after.
             - stop_gracefully_all_agents:
                 type: function
                 brief: Stop agents gracefully
@@ -104,7 +104,7 @@ def test_shut_down_message_gracefully_stopped_agent(restart_all_agents, stop_gra
     shutdown_messages = 0
 
     HostMonitor(inventory_path=inventory_path, messages_path=messages_path, tmp_path=tmp_path).run()
-    ossec_log = host_manager.get_file_content(test_infra_managers[0], '/var/ossec/logs/ossec.log')
+    ossec_log = host_manager.get_file_content(test_infra_managers[0], LOG_FILE_PATH)
     for line in ossec_log.split('\n'):
         if 'HC_SHUTDOWN' in line:
             shutdown_messages += 1
