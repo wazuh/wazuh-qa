@@ -45,6 +45,7 @@ class VagrantProvider(Provider):
         Returns:
             VagrantInstance: The created Vagrant instance.
         """
+        cls.validate_dependencies(params.composite_name)
         if params.instance_name:
             instance_id = params.instance_name
         else:
@@ -400,3 +401,53 @@ class VagrantProvider(Provider):
                         return remote_host_parameters
                 else:
                     return remote_host_parameters
+
+    @staticmethod
+    def validate_dependencies(composite_name: str):
+        """
+        Validates the dependencies for the Vagrant provider.
+
+        Args:
+            composite_name (str): The composite name of the instance.
+
+        Raises:
+            ValueError: If the dependencies are not met.
+        """
+        packages = ['vagrant', 'openssh-client', 'sshpass', 'virtualbox']
+        installed_packages = []
+        missing_packages = []
+        platform = str(composite_name.split("-")[0])
+        arch = str(composite_name.split("-")[3])
+
+        # Check if yum or apt is installed
+        package_manager = None
+        for manager in ['yum', 'apt']:
+            result = subprocess.run(['which', manager], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if result.returncode == 0:
+                package_manager = manager
+                break
+
+        if not package_manager:
+            raise ValueError("Neither yum nor apt is available on this system.")
+
+        for package in packages:
+            if package_manager == 'yum':
+                result = subprocess.run(['rpm', '-q', package], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if package_manager == 'apt':
+                result = subprocess.run(['bash', '-c', f"apt list --installed 2>/dev/null | grep -q -E ^{package}*"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if result.returncode == 0:
+                installed_packages.append(package)
+            else:
+                missing_packages.append(package)
+
+        for package in missing_packages:
+            if platform == 'macos' or arch == 'ppc64':
+                if package == 'openssh-client':
+                    raise ValueError(f"Missing package: {package}")
+                if package == 'sshpass':
+                    raise ValueError(f"Missing package: {package}")
+            else:
+                if package == 'virtualbox':
+                    raise ValueError(f"Missing package: {package}")
+                if package == 'vagrant':
+                    raise ValueError(f"Missing package: {package}")
