@@ -24,14 +24,16 @@ references:
 import os
 import pytest
 import re
-import time
 import threading
+import time
+
+from system import restart_cluster
+from system.test_cluster.test_agent_groups.common import register_agent
 from wazuh_testing import T_10, T_30
 from wazuh_testing.tools import WAZUH_PATH
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.system_monitoring import HostMonitor
-from system import restart_cluster
-from system.test_cluster.test_agent_groups.common import register_agent
+
 
 inventory_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                               'provisioning', 'big_cluster_40_agents', 'inventory.yml')
