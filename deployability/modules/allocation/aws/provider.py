@@ -413,4 +413,5 @@ class AWSProvider(Provider):
             if package == 'openssh-client':
                 raise ValueError(f"Missing package: {package}")
             if package == 'awscli':
-                raise ValueError(f"Missing package: {package}")
+                if not subprocess.run(['which', '/usr/local/bin/aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE):
+                    raise ValueError(f"Missing package: {package}")

@@ -447,7 +447,8 @@ class VagrantProvider(Provider):
                 if package == 'sshpass':
                     raise ValueError(f"Missing package: {package}")
                 if package == 'awscli':
-                    raise ValueError(f"Missing package: {package}")
+                    if not subprocess.run(['which', '/usr/local/bin/aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE):
+                        raise ValueError(f"Missing package: {package}")
             else:
                 if package == 'virtualbox':
                     raise ValueError(f"Missing package: {package}")
