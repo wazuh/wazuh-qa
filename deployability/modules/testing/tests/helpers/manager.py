@@ -3,10 +3,9 @@
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import requests
-import socket
 
 from .constants import CLUSTER_CONTROL, AGENT_CONTROL, WAZUH_CONF, WAZUH_ROOT
-from .executor import Executor, WazuhAPI
+from .executor import WazuhAPI, ConnectionManager
 from .generic import HostInformation, CheckFiles
 from modules.testing.utils import logger
 from .utils import Utils
@@ -39,7 +38,7 @@ class WazuhManager:
                     f"bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
             ]
         logger.info(f'Installing Manager in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
-        Executor.execute_commands(inventory_path, commands)
+        ConnectionManager.execute_commands(inventory_path, commands)
 
 
     @staticmethod
@@ -88,7 +87,7 @@ class WazuhManager:
         commands.extend(system_commands)
 
         logger.info(f'Uninstalling Manager in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
-        Executor.execute_commands(inventory_path, commands)
+        ConnectionManager.execute_commands(inventory_path, commands)
 
 
     @staticmethod
@@ -188,7 +187,7 @@ class WazuhManager:
         action_callback = lambda: WazuhManager._install_manager_callback(wazuh_params, manager_name, manager_params)
         result = WazuhManager.perform_action_and_scan(manager_params, action_callback)
         logger.info(f'Pre and post install checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(manager_params)}: {result}')
-        WazuhManager.assert_results(result)
+        WazuhManager.assert_results(result, manager_params)
 
 
     @staticmethod
@@ -204,7 +203,7 @@ class WazuhManager:
         action_callback = lambda: WazuhManager._uninstall_manager_callback(manager_params)
         result = WazuhManager.perform_action_and_scan(manager_params, action_callback)
         logger.info(f'Pre and post uninstall checkfile comparison in {HostInformation.get_os_name_and_version_from_inventory(manager_params)}: {result}')
-        WazuhManager.assert_results(result)
+        WazuhManager.assert_results(result, manager_params)
 
 
     @staticmethod
@@ -221,7 +220,7 @@ class WazuhManager:
         # Testing the results
         for category in categories:
             for action in actions:
-                assert result[category][action] == [], logger.error(f'{result[category][action]} was found in: {category}{action}')
+                assert result[category][action] == [], logger.error(f'{result[category][action]} was found in: {category} {action}')
 
 
     @staticmethod
@@ -236,7 +235,7 @@ class WazuhManager:
             str: Cluster status
         """
 
-        return Executor.execute_command(inventory_path, f'{CLUSTER_CONTROL} -l')
+        return ConnectionManager.execute_commands(inventory_path, f'{CLUSTER_CONTROL} -l').get('output')
 
 
     @staticmethod
@@ -251,7 +250,7 @@ class WazuhManager:
             str: Agents status
         """
 
-        return Executor.execute_command(inventory_path, f'{AGENT_CONTROL} -l')
+        return ConnectionManager.execute_commands(inventory_path, f'{AGENT_CONTROL} -l').get('output')
 
 
     @staticmethod
@@ -278,8 +277,8 @@ class WazuhManager:
             "systemctl restart wazuh-manager"
         ]
 
-        Executor.execute_commands(inventory_path, commands)
-        if node_name in Executor.execute_command(inventory_path, f'cat {WAZUH_CONF}'):
+        ConnectionManager.execute_commands(inventory_path, commands)
+        if node_name in ConnectionManager.execute_commands(inventory_path, f'cat {WAZUH_CONF}').get('output'):
             logger.info(f'Cluster configured in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         else:
             logger.error(f'Error configuring cluster information in: {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')

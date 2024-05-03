@@ -2,14 +2,13 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import pytest
 import re
+import pytest
 
-from ..helpers.agent import WazuhAgent, WazuhAPI
-from ..helpers.constants import WAZUH_ROOT
-from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions, Waits
 from modules.testing.utils import logger
-from ..helpers.manager import WazuhManager
+from ..helpers.agent import WazuhAgent, WazuhAPI
+from ..helpers.constants import WAZUH_ROOT, WINDOWS_ROOT_DIR, MACOS_ROOT_DIR
+from ..helpers.generic import HostInformation, GeneralComponentActions, Waits
 from ..helpers.utils import Utils
 
 
@@ -54,7 +53,7 @@ def setup_test_environment(wazuh_params):
     updated_agents = {}
     for agent_name, agent_params in wazuh_params['agents'].items():
         Utils.check_inventory_connection(agent_params)
-        if GeneralComponentActions.isComponentActive(agent_params, 'wazuh-agent') and GeneralComponentActions.hasAgentClientKeys(agent_params):
+        if GeneralComponentActions.is_component_active(agent_params, 'wazuh-agent') and GeneralComponentActions.has_agent_client_keys(agent_params):
             if HostInformation.get_client_keys(agent_params) != []:
                 client_name = HostInformation.get_client_keys(agent_params)[0]['name']
                 updated_agents[client_name] = agent_params
@@ -67,25 +66,38 @@ def setup_test_environment(wazuh_params):
 def test_wazuh_os_version(wazuh_params):
     wazuh_api = WazuhAPI(wazuh_params['master'])
     for agent_names, agent_params in wazuh_params['agents'].items():
-        if HostInformation.get_os_type(agent_params) == 'linux':
-            assert HostInformation.dir_exists(agent_params, WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
-        elif HostInformation.get_os_type(agent_params) == 'macos':
-            assert HostInformation.dir_exists(agent_params, '/Library/Ossec'), logger.error(f'The /Library/Ossec is not present in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
+        path_to_check = ''
+        os_type = HostInformation.get_os_type(agent_params)
+
+        if os_type == 'linux':
+            path_to_check = WAZUH_ROOT
+        elif os_type == 'windows':
+            path_to_check = WINDOWS_ROOT_DIR
+        elif os_type == 'macos':
+            path_to_check = MACOS_ROOT_DIR
+
+        assert HostInformation.dir_exists(agent_params, path_to_check), logger.error(f'The {path_to_check} is not present in {HostInformation.get_os_name_and_version_from_inventory(agent_params)}')
 
         expected_condition_func = lambda: 'active' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
-        assert HostInformation.get_os_version_from_inventory(agent_params) in WazuhAgent.get_agent_os_version_by_name(wazuh_api, agent_names), logger.error('There is a mismatch between the OS version and the OS  version of the installed agent')
-        if HostInformation.get_os_type(agent_params) == 'linux':
-            assert HostInformation.get_os_name_from_inventory(agent_params) in WazuhAgent.get_agent_os_name_by_name(wazuh_api, agent_names).replace(' ', ''),  logger.error('There is a mismatch between the OS name and the OS name of the installed agent')
-        elif HostInformation.get_os_type(agent_params) == 'macos':
-            assert 'macos' in WazuhAgent.get_agent_os_name_by_name(wazuh_api, agent_names).replace(' ', ''),  logger.error('There is a mismatch between the OS name and the OS name of the installed agent')
 
+        if not os_type == 'windows':
+            assert HostInformation.get_os_version_from_inventory(agent_params) in WazuhAgent.get_agent_os_version_by_name(wazuh_api, agent_names), logger.error('There is a mismatch between the OS version and the OS  version of the installed agent')
+
+        if os_type == 'macos':
+            os_name = 'macos'
+        elif os_type == 'windows':
+            os_name = 'windows'
+        elif os_type == 'linux':
+            os_name = HostInformation.get_os_name_from_inventory(agent_params)
+
+        assert os_name in WazuhAgent.get_agent_os_name_by_name(wazuh_api, agent_names).replace(' ', ''),  logger.error('There is a mismatch between the OS name and the OS name of the installed agent')
 
 def test_wazuh_version(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
+    for _, agent_params in wazuh_params['agents'].items():
         assert wazuh_params['wazuh_version'] in GeneralComponentActions.get_component_version(agent_params), logger.error(f"The version {HostInformation.get_os_name_and_version_from_inventory(agent_params)} is not {wazuh_params['wazuh_version']} by command")
 
 
 def test_wazuh_revision(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
+    for _, agent_params in wazuh_params['agents'].items():
         assert wazuh_params['wazuh_revision'] in GeneralComponentActions.get_component_revision(agent_params), logger.error(f"The revision {HostInformation.get_os_name_and_version_from_inventory(agent_params)} is not {wazuh_params['wazuh_revision']} by command")
