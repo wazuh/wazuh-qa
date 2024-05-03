@@ -432,7 +432,7 @@ class VagrantProvider(Provider):
 
         for package in packages:
             if package_manager == 'yum':
-                result = subprocess.run(['rpm', '-q', package], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                raise ValueError("Yum is not supported for Allocation Module.")
             if package_manager == 'apt':
                 result = subprocess.run(['bash', '-c', f"apt list --installed 2>/dev/null | grep -q -E ^{package}*"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if result.returncode == 0:
