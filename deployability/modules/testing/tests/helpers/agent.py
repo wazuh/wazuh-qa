@@ -359,10 +359,6 @@ class WazuhAgent:
 
     @staticmethod
     def assert_results(result, params = None) -> None:
-<<<<<<< HEAD
-=======
-
->>>>>>> 4495-dtt1-release
         """
         Gets the status of an agent given its name.
 
