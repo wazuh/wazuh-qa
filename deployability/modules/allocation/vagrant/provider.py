@@ -60,16 +60,15 @@ class VagrantProvider(Provider):
             raise ValueError("Instance name or issue label is required.")
 
         instance_id = name + "-" + str(random.randint(0000, 9999))
-
         # Create the instance directory.
-        instance_dir = base_dir / instance_id
-        try:
-            instance_dir.mkdir(parents=True)
-        except FileExistsError:
-            logger.debug(f"Instance directory {instance_dir} already exists. Assigning new suffix.")
-            instance_id = name + "-" + str(random.randint(0000, 9999))
-            instance_dir = base_dir / instance_id
-            instance_dir.mkdir(parents=True)
+        while True:
+            try:
+                instance_dir = base_dir / instance_id
+                instance_dir.mkdir(parents=True)
+                break
+            except FileExistsError:
+                logger.debug(f"Instance directory {instance_dir} already exists. Assigning new suffix.")
+                instance_id = name + "-" + str(random.randint(0000, 9999))
         platform = str(params.composite_name.split("-")[0])
         host_instance_dir = None
         host_identifier = None
