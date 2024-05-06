@@ -83,7 +83,7 @@ class VagrantProvider(Provider):
             logger.debug(f"Checking if instance directory exists on remote host")
             cmd = f"ls {host_instance_dir} > /dev/null 2>&1"
             if VagrantUtils.remote_command(cmd, remote_host_parameters):
-                raise ValueError(f"Instance directory {host_instance_dir} already exists on remote host, Check if it is possible to delete the directory on the remote host.")
+                raise ValueError(f"Instance directory {host_instance_dir} already exists on remote host. Check if it is possible to delete the directory on the remote host.")
             logger.debug(f"Creating instance directory on remote host")
             cmd = f"mkdir {host_instance_dir}"
             VagrantUtils.remote_command(cmd, remote_host_parameters)
