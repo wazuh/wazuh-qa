@@ -7,6 +7,7 @@ import platform, json
 import subprocess
 import boto3
 import random
+import re
 
 from jinja2 import Environment, FileSystemLoader
 from pathlib import Path
@@ -46,12 +47,28 @@ class VagrantProvider(Provider):
             VagrantInstance: The created Vagrant instance.
         """
         if params.instance_name:
-            instance_id = params.instance_name
+            name = params.instance_name
+        elif params.label_issue:
+            issue = params.label_issue
+            url_regex = "(https:\/\/|http:\/\/)?[github]{2,}(\.[com]{2,})?\/wazuh\/[a-zA-Z0-9_-]+(?:-[a-zA-Z0-9_-]+)?\/issues\/[0-9]{2,}"
+            if not re.match(url_regex, issue):
+                raise ValueError(f"The issue label was not provided or is of incorrect format, example: https://github.com/wazuh/<repository>/issues/<issue-number>")
+            issue_name= re.search(r'github\.com\/wazuh\/([^\/]+)\/issues', issue)
+            repository = cls.generate_repository_name(str(issue_name.group(1)))
+            name = repository + "-" + str(re.search(r'(\d+)$', issue).group(1)) + "-" + str(params.composite_name.split("-")[1]) + "-" + str(params.composite_name.split("-")[2])
         else:
-            instance_id = cls._generate_instance_id(cls.provider_name)
+            raise ValueError("Instance name or issue label is required.")
+
+        instance_id = name + "-" + str(random.randint(1000, 9999))
+
         # Create the instance directory.
         instance_dir = base_dir / instance_id
-        instance_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            instance_dir.mkdir(parents=True)
+        except FileExistsError:
+            instance_id = name + "-" + str(random.randint(1000, 9999))
+            instance_dir = base_dir / instance_id
+            instance_dir.mkdir(parents=True)
         platform = str(params.composite_name.split("-")[0])
         host_instance_dir = None
         host_identifier = None
@@ -60,10 +77,14 @@ class VagrantProvider(Provider):
         # Used for macOS deployments
         if platform == 'macos':
             host_instance_dir = "/Users/jenkins/testing/" + instance_id
-            logger.debug(f"Creating instance directory on remote host")
-            cmd = f"mkdir {host_instance_dir}"
             remote_host_parameters = cls.__remote_host(arch, 'create')
             host_identifier = remote_host_parameters['host_provider']
+            logger.debug(f"Checking if instance directory exists on remote host")
+            cmd = f"ls {host_instance_dir} > /dev/null 2>&1"
+            if VagrantUtils.remote_command(cmd, remote_host_parameters):
+                raise ValueError(f"Instance directory {host_instance_dir} already exists on remote host, please delete it before creating a new instance.")
+            logger.debug(f"Creating instance directory on remote host")
+            cmd = f"mkdir {host_instance_dir}"
             VagrantUtils.remote_command(cmd, remote_host_parameters)
         credentials = VagrantCredentials()
         if arch == 'ppc64':

@@ -5,6 +5,7 @@
 import shutil
 import uuid
 import yaml
+import re
 
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -202,3 +203,22 @@ class Provider(ABC):
         """
         with open(cls.MISC_PATH, "r") as f:
             return yaml.safe_load(f).get(cls.provider_name)
+
+    @staticmethod
+    def generate_repository_name(repository: str) -> str:
+        """
+        Generate a repository name for the instance.
+
+        Args:
+            repository (str): Repository name.
+
+        Returns:
+            str: Repository name for the instance.
+        """
+        matches = re.findall(r'(\w+)', repository)
+        if len(matches) == 3:
+            return ''.join([c[0] for c in matches])
+        elif len(matches) == 2:
+            return matches[1]
+        else:
+            return repository
