@@ -9,6 +9,7 @@ import re
 import random
 from pathlib import Path
 from datetime import datetime, timedelta
+import subprocess
 
 from modules.allocation.generic import Provider
 from modules.allocation.generic.models import CreationPayload, InstancePayload, InstancePayload
@@ -43,6 +44,7 @@ class AWSProvider(Provider):
         Returns:
             AWSInstance: Created AWSInstance object.
         """
+        cls.validate_dependencies()
         temp_id = cls._generate_instance_id(cls.provider_name)
         temp_dir = base_dir / temp_id
         credentials = AWSCredentials()
@@ -354,3 +356,34 @@ class AWSProvider(Provider):
                 logger.warning(f"{message}")
         else:
             logger.info(f"Dedicated host released: {host_identifier}")
+
+    @staticmethod
+    def validate_dependencies():
+        """
+        Validates the dependencies for the Vagrant provider.
+
+        Raises:
+            ValueError: If the dependencies are not met.
+        """
+        dependencies = ['openssh-client', 'awscli']
+        missing_dependencies = []
+
+        result = subprocess.run(['which', 'apt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if result.returncode != 0:
+            raise ValueError("The Allocation module works on systems with APT as packages systems.")
+
+        for dependency in dependencies:
+            result = subprocess.run(['bash', '-c', f"apt list --installed 2>/dev/null | grep -q -E ^{dependency}*"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if result.returncode != 0:
+                if dependency == 'awscli':
+                    aws_binary = subprocess.run(['which', '/usr/local/bin/aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    if aws_binary.returncode != 0:
+                        missing_dependencies.append(dependency)
+                else:
+                    missing_dependencies.append(dependency)
+
+        if len(missing_dependencies) > 0:
+            if len(missing_dependencies) == 1:
+                raise ValueError(f"Missing dependency: {missing_dependencies[0]}")
+            else:
+                raise ValueError(f"Missing dependencies: {missing_dependencies}")
