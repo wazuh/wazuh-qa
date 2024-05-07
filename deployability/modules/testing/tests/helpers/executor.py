@@ -160,28 +160,28 @@ class MacosExecutor():
 
 
 class WazuhAPI:
-    def __init__(self, inventory_path):
+    def __init__(self, inventory_path, component=None):
         self.inventory_path = inventory_path
         self.api_url = None
         self.headers = None
+        self.component = component
+        self.username = None
+        self.password = None
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self._authenticate()
+
+    def _extract_password(self, file_path, keyword):
+        if not 'true' in ConnectionManager.execute_commands(self.inventory_path, f'test -f {file_path} && echo "true" || echo "false"').get('output'):
+            ConnectionManager.execute_commands(self.inventory_path, 'tar -xvf wazuh-install-files.tar')
+        return ConnectionManager.execute_commands(self.inventory_path, f"grep {keyword} {file_path} | head -n 1 | awk '{{print $NF}}'").get('output').replace("'", "").replace("\n", "")
 
     def _authenticate(self):
         with open(self.inventory_path, 'r') as yaml_file:
             inventory_data = yaml.safe_load(yaml_file)
 
         user = 'wazuh'
-
-        #----Patch issue https://github.com/wazuh/wazuh-packages/issues/2883-------------
-        result = ConnectionManager.execute_commands(self.inventory_path, 'pwd')
-        file_path = result.get('output') + '/wazuh-install-files/wazuh-passwords.txt'
-        result = ConnectionManager.execute_commands(self.inventory_path, f'test -f {file_path} && echo "true" || echo "false"')
-        if 'true' not in result.get('output'):
-            ConnectionManager.execute_commands(self.inventory_path, 'tar -xvf wazuh-install-files.tar')
-        result = ConnectionManager.execute_commands(self.inventory_path, "grep api_password wazuh-install-files/wazuh-passwords.txt | head -n 1 | awk '{print $NF}'")
-        password = result.get('output')[1:-1]
-        #--------------------------------------------------------------------------------
+        file_path = ConnectionManager.execute_commands(self.inventory_path, 'pwd').get('output').replace("\n", "") + '/wazuh-install-files/wazuh-passwords.txt'
+        password = self._extract_password(file_path, 'api_password')
 
         login_endpoint = 'security/user/authenticate'
         host = inventory_data.get('ansible_host')
@@ -193,8 +193,15 @@ class WazuhAPI:
 
         token = json.loads(requests.post(login_url, headers=login_headers, verify=False).content.decode())['data']['token']
 
-        self.api_url = f'https://{host}:{port}'
         self.headers = {
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {token}'
         }
+
+        self.api_url = f'https://{host}:{port}'
+
+        if self.component == 'dashboard' or self.component == 'indexer':
+            self.username = 'admin'
+            password = self._extract_password(file_path, 'indexer_password')
+            self.password = password
+            self.api_url = f'https://{host}' if self.component == 'dashboard' else f'https://127.0.0.1:9200'

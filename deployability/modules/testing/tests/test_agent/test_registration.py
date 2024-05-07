@@ -81,7 +81,7 @@ def test_service(wazuh_params):
         Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
 
 def test_connection(wazuh_params):
-    for agent_names, agent_params in wazuh_params['agents'].items():
+    for agent_names, _ in wazuh_params['agents'].items():
         wazuh_api = WazuhAPI(wazuh_params['master'])
         assert agent_names in WazuhManager.get_agent_control_info(wazuh_params['master']), f'The {agent_names} is not present in the master by command'
         assert any(d.get('name') == agent_names for d in WazuhAgent.get_agents_information(wazuh_api)), logger.error(f'The {agent_names} is not present in the master by API')
