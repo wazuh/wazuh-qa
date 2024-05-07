@@ -222,12 +222,8 @@ def get_package_system(host: str, host_manager: HostManager) -> str:
     return system
 
 
-def get_vulnerability_alerts(
-    host_manager: HostManager,
-    agent_list,
-    packages_data: List,
-    greater_than_timestamp: str = "",
-) -> Dict:
+def get_vulnerability_alerts(host_manager: HostManager, agent_list, packages_data: List,
+                             greater_than_timestamp: str = "") -> Dict:
     alerts = get_vulnerabilities_from_alerts_by_agent(
         host_manager, agent_list, greater_than_timestamp=greater_than_timestamp
     )
