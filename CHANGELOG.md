@@ -26,6 +26,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Include CVE-2023-4822 vulnerability to grafana packages ([#5332](https://github.com/wazuh/wazuh-qa/pull/5332)) \- (Framework)
+- Remove sslverify from host manager install package method ([#5339](https://github.com/wazuh/wazuh-qa/pull/5339)) \- (Framework)
 - Include additional Vulnerability Detector E2E tests ([#5287](https://github.com/wazuh/wazuh-qa/pull/5287)) \- (Framework + Tests)
 - Change Vulnerability Detection feed updated waiter ([#5227](https://github.com/wazuh/wazuh-qa/pull/5227)) \- (Tests)
 - Replace timestamp filter with vulnerabilities detected_at field.([#5266](https://github.com/wazuh/wazuh-qa/pull/5266)) \- (Framework + Tests)
@@ -58,6 +59,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix macOS alert collection for E2E Vulnerability Detection tests ([#5337](https://github.com/wazuh/wazuh-qa/pull/5337)) \- (Framework)
 - Fix packages in Windows and macOS upgrade cases ([#5223](https://github.com/wazuh/wazuh-qa/pull/5223)) \- (Framework + Tests)
 - Fix vulnerabilities and add new packages to Vulnerability Detector E2E tests ([#5234](https://github.com/wazuh/wazuh-qa/pull/5234)) \- (Tests)
 - Fix provision macOS endpoints with npm ([#5128](https://github.com/wazuh/wazuh-qa/pull/5158)) \- (Tests)
