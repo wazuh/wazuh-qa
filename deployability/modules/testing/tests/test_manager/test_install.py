@@ -4,11 +4,11 @@
 
 import pytest
 
+from modules.testing.utils import logger
 from ..helpers.constants import WAZUH_ROOT
 from ..helpers.executor import WazuhAPI
 from ..helpers.generic import HostConfiguration, HostInformation, GeneralComponentActions
 from ..helpers.manager import WazuhManager
-from modules.testing.utils import logger
 from ..helpers.utils import Utils
 
 
@@ -61,7 +61,7 @@ def test_installation(wazuh_params):
 
     # Install managers and perform checkfile testing
     for manager_name, manager_params in wazuh_params['managers'].items():
-        WazuhManager.perform_install_and_scan_for_manager(manager_params, manager_name, wazuh_params)
+        WazuhManager.install_manager(manager_params, manager_name, wazuh_params['wazuh_version'])
 
     # Validation of activity and directory of the managers
     for manager in wazuh_params['managers'].values():

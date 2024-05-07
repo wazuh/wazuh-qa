@@ -17,6 +17,8 @@ The execution of the workflow is done through the installation of its library.
 
 Initially, Python libraries must be installed, we recommended the use of virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
 
+To use this module, you should use a Debian-based system, we recommend using Ubuntu 22.04 for full compatibility, you must have installed at least Python 3.10.12 and pip3 22.0.2
+
 1. Create the python environment:
 
 	```bash
@@ -55,9 +57,16 @@ Initially, Python libraries must be installed, we recommended the use of virtual
 	pip3 uninstall -y workflow_engine && pip3 install .
 	```
 
+6. The module may execute any of these commands:
+
+  - ssh
+  - scp
+  
+  These commands must be available to run on the Host Operating System.
+
   Run the module by doing the following steps:
 
-6. Test fixture to execute:
+7. Test fixture to execute:
 
       It will be necessary to create a fixture (YAML file) where the infrastructure, provisioning, and tests to be executed will be declared.
 

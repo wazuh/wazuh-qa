@@ -3,6 +3,7 @@
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import requests
+import time
 
 from .constants import CLUSTER_CONTROL, AGENT_CONTROL, WAZUH_CONF, WAZUH_ROOT
 from .executor import WazuhAPI, ConnectionManager
@@ -118,8 +119,8 @@ class WazuhManager:
         Takes scans using filters, the callback action and compares the result
 
         Args:
-            agent_params (str): agent parameters
-            callbak (cb): callback (action)
+            manager_params (str): manager parameters
+            callback (cb): callback (action)
 
         Returns:
             result (dict): comparison brief
@@ -181,6 +182,7 @@ class WazuhManager:
 
         Args:
             manager_params (str): manager parameters
+            manager_name (str): manager name
             wazuh_params (str): wazuh parameters
 
         """
@@ -197,7 +199,6 @@ class WazuhManager:
 
         Args:
             manager_params (str): manager parameters
-            wazuh_params (str): wazuh parameters
 
         """
         action_callback = lambda: WazuhManager._uninstall_manager_callback(manager_params)
@@ -209,7 +210,7 @@ class WazuhManager:
     @staticmethod
     def assert_results(result) -> None:
         """
-        Gets the status of an agent given its name.
+        Assert status of checkfiles
 
         Args:
             result (dict): result of comparison between pre and post action scan
@@ -224,9 +225,83 @@ class WazuhManager:
 
 
     @staticmethod
+    def is_wazuh_api_port_open(inventory_path, wait=10, cycles=50) -> bool:
+        """
+        Check if the Wazuh manager API port is open
+        Args:
+            inventory_path (str): Wazuh manager inventory.
+        Returns:
+            bool: True if port is opened.
+        """
+        wait_cycles = 0
+        while wait_cycles < cycles:
+            ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":443"').get('output') or ""
+            ports = ports.strip().split('\n')
+            for port in ports:
+                if any(state in port for state in ['ESTAB', 'LISTEN']):
+                    continue
+                else:
+                    time.sleep(wait)
+                    wait_cycles += 1
+                    break
+            else:
+                return True
+        return False
+
+    @staticmethod
+    def is_wazuh_agent_port_open(inventory_path, wait=10, cycles=50) -> bool:
+        """
+        Check if the Wazuh manager port is open
+        Args:
+            inventory_path (str): Manager inventory.
+
+        Returns:
+            bool: True if port is opened.
+        """
+        wait_cycles = 0
+        while wait_cycles < cycles:
+            ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":1514"').get('output') or ""
+            ports = ports.strip().split('\n')
+            for port in ports:
+                if any(state in port for state in ['ESTAB', 'LISTEN']):
+                    continue
+                else:
+                    time.sleep(wait)
+                    wait_cycles += 1
+                    break
+            else:
+                return True
+        return False
+
+    @staticmethod
+    def is_wazuh_agent_enrollment_port_open(inventory_path, wait=10, cycles=50) -> bool:
+        """
+        Check if Wazuh manager's agent enrollment port is open
+        Args:
+            inventory_path (str): Manager inventory.
+
+        Returns:
+            bool: True if port is opened.
+        """
+        wait_cycles = 0
+        while wait_cycles < cycles:
+            ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":443"').get('output') or ""
+            ports = ports.strip().split('\n')
+            for port in ports:
+                if any(state in port for state in ['ESTAB', 'LISTEN']):
+                    continue
+                else:
+                    time.sleep(wait)
+                    wait_cycles += 1
+                    break
+            else:
+                return True
+        return False
+
+    @staticmethod
     def get_cluster_info(inventory_path) -> None:
         """
-        Returns the cluster information
+        Returns the Wazuh cluster information from the Wazuh manager
 
         Args:
             inventory_path: host's inventory path

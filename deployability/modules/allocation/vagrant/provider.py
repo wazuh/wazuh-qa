@@ -45,6 +45,7 @@ class VagrantProvider(Provider):
         Returns:
             VagrantInstance: The created Vagrant instance.
         """
+        cls.validate_dependencies(params.composite_name)
         if params.instance_name:
             instance_id = params.instance_name
         else:
@@ -406,3 +407,46 @@ class VagrantProvider(Provider):
                         return remote_host_parameters
                 else:
                     return remote_host_parameters
+
+    @staticmethod
+    def validate_dependencies(composite_name: str):
+        """
+        Validates the dependencies for the Vagrant provider.
+
+        Args:
+            composite_name (str): The composite name of the instance.
+
+        Raises:
+            ValueError: If the dependencies are not met.
+        """
+        remote_deploy_dependencies = ['openssh-client', 'sshpass', 'awscli']
+        local_deploy_dependencies = ['vagrant', 'virtualbox']
+        missing_dependencies = []
+        platform = str(composite_name.split("-")[0])
+        arch = str(composite_name.split("-")[3])
+
+        result = subprocess.run(['which', 'apt'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if result.returncode != 0:
+            raise ValueError("The Allocation module works on systems with APT as packages systems.")
+
+
+        if platform == 'macos' or arch == 'ppc64':
+            dependencies = remote_deploy_dependencies
+        else:
+            dependencies = local_deploy_dependencies
+
+        for dependency in dependencies:
+            result = subprocess.run(['bash', '-c', f"apt list --installed 2>/dev/null | grep -q -E ^{dependency}*"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if result.returncode != 0:
+                if dependency == 'awscli':
+                    aws_binary = subprocess.run(['which', '/usr/local/bin/aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    if aws_binary.returncode != 0:
+                        missing_dependencies.append(dependency)
+                else:
+                    missing_dependencies.append(dependency)
+
+        if len(missing_dependencies) > 0:
+            if len(missing_dependencies) == 1:
+                raise ValueError(f"Missing dependency: {missing_dependencies[0]}")
+            else:
+                raise ValueError(f"Missing dependencies: {missing_dependencies}")

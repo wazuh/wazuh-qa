@@ -1,5 +1,5 @@
 version: 0.1
-description: Test agent restart with provisioning agents' with provision module
+description: Test agent restart with provisioning agents with provision module
 variables:
   agent-os:
     - linux-ubuntu-18.04-amd64
@@ -90,7 +90,7 @@ tasks:
           - install:
             - component: wazuh-manager
               type: assistant
-              version: 4.7.3
+              version: 4.7.4
               live: True
     depends-on:
       - "allocate-manager-{manager-os}"
@@ -111,7 +111,7 @@ tasks:
           - install:
             - component: wazuh-agent
               type: package
-              version: 4.7.3
+              version: 4.7.4
               live: True
     depends-on:
       - "allocate-agent-{agent}"
@@ -135,8 +135,8 @@ tasks:
             - agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - tests: "uninstall"
           - component: "agent"
-          - wazuh-version: "4.7.3"
-          - wazuh-revision: "40714"
+          - wazuh-version: "4.7.4"
+          - wazuh-revision: "40717"
           - live: "True"
     foreach:
       - variable: agent-os

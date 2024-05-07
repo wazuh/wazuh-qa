@@ -79,8 +79,7 @@ def test_uninstall(wazuh_params):
 
     # Agent uninstallation
     for agent_names, agent_params in wazuh_params['agents'].items():
-        WazuhAgent.perform_uninstall_and_scan_for_agent(agent_params,wazuh_params)
-
+        WazuhAgent.uninstall_agent(agent_params, wazuh_params['wazuh_version'], wazuh_params['wazuh_revision'])
 
     # Manager uninstallation status check
     for agent_names, agent_params in wazuh_params['agents'].items():
