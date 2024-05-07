@@ -6,7 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Add functionality to obtain statistics and metrics from the indexer. ([#5090](https://github.com/wazuh/wazuh-qa/pull/5090)) \- (Framework)
+- Add `GeneratorVulnerabilityEvents` in agent simulator ([#5265](https://github.com/wazuh/wazuh-qa/pull/5265)) \- (Framework)
+- Add functionality to obtain statistics and metrics from the indexer ([#5090](https://github.com/wazuh/wazuh-qa/pull/5090)) \- (Framework)
 - Add support for the installation/uninstallation of npm packages ([#5092](https://github.com/wazuh/wazuh-qa/pull/5092)) \- (Tests)
 - Add alert.json file to Vulnerability Detector E2E test report ([#5147](https://github.com/wazuh/wazuh-qa/pull/5147)) \- (Framework)
 - Add documentation about markers for system tests ([#5080](https://github.com/wazuh/wazuh-qa/pull/5080)) \- (Documentation)
@@ -25,6 +26,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Disable debug evidences for Vulnerability Detector E2E tests by default ([#5331](https://github.com/wazuh/wazuh-qa/pull/5331)) \- ( Tests)
+- Remove sslverify from host manager install package method ([#5339](https://github.com/wazuh/wazuh-qa/pull/5339)) \- (Framework)
 - Include additional Vulnerability Detector E2E tests ([#5287](https://github.com/wazuh/wazuh-qa/pull/5287)) \- (Framework + Tests)
 - Change Vulnerability Detection feed updated waiter ([#5227](https://github.com/wazuh/wazuh-qa/pull/5227)) \- (Tests)
 - Replace timestamp filter with vulnerabilities detected_at field.([#5266](https://github.com/wazuh/wazuh-qa/pull/5266)) \- (Framework + Tests)
@@ -57,6 +59,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix macOS alert collection for E2E Vulnerability Detection tests ([#5337](https://github.com/wazuh/wazuh-qa/pull/5337)) \- (Framework)
 - Fix packages in Windows and macOS upgrade cases ([#5223](https://github.com/wazuh/wazuh-qa/pull/5223)) \- (Framework + Tests)
 - Fix vulnerabilities and add new packages to Vulnerability Detector E2E tests ([#5234](https://github.com/wazuh/wazuh-qa/pull/5234)) \- (Tests)
 - Fix provision macOS endpoints with npm ([#5128](https://github.com/wazuh/wazuh-qa/pull/5158)) \- (Tests)

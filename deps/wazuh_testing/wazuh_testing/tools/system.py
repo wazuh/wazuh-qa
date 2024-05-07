@@ -505,7 +505,7 @@ class HostManager:
             result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
         elif system == 'centos':
             result = self.get_host(host).ansible("yum", f"name={url} state=present "
-                                                'sslverify=false disable_gpg_check=True', check=False)
+                                                'disable_gpg_check=True', check=False)
         elif system == 'macos':
             package_name = url.split('/')[-1]
             result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
