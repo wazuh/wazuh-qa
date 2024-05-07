@@ -120,7 +120,7 @@ class Allocator:
         Args:
             instance (Instance): The instance for which the inventory file is generated.
             inventory_path (Path): The path where the inventory file will be generated.
-            composite_name (str): The name of the composite.
+            composite_name (str): Composite name of the instance to be provisioned.
         """
         if inventory_path is None:
             inventory_path = Path(instance.path, 'inventory.yml')
