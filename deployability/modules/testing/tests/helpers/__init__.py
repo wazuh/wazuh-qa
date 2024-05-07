@@ -5,3 +5,6 @@
 from .generic import HostConfiguration, HostInformation, HostMonitor, CheckFiles
 from .agent import WazuhAgent
 from .manager import WazuhManager
+from .indexer import WazuhIndexer
+from .dashboard import WazuhDashboard
+from .central import WazuhCentralComponents

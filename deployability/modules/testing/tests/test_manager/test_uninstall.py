@@ -4,10 +4,11 @@
 
 import pytest
 
+from modules.testing.utils import logger
 from ..helpers.constants import WAZUH_ROOT
 from ..helpers.generic import HostInformation, GeneralComponentActions
 from ..helpers.manager import WazuhManager
-from modules.testing.utils import logger
+
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -51,8 +52,7 @@ def test_uninstall(wazuh_params):
         manager_status = GeneralComponentActions.get_component_status(manager, 'wazuh-manager')
         assert 'active' in manager_status, logger.error(f'The {HostInformation.get_os_name_and_version_from_inventory(manager)} is not active')
     for _, manager_params in wazuh_params['managers'].items():
-        WazuhManager.perform_uninstall_and_scan_for_manager(manager_params)
-
+        WazuhManager.uninstall_manager(manager_params)
 
 def test_manager_uninstalled_directory(wazuh_params):
     for manager in wazuh_params['managers'].values():

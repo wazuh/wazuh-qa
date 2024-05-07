@@ -4,8 +4,8 @@
 
 import pytest
 
-from ..helpers.generic import HostInformation, GeneralComponentActions
 from modules.testing.utils import logger
+from ..helpers.generic import HostInformation, GeneralComponentActions
 
 
 @pytest.fixture(scope="module", autouse=True)
