@@ -358,25 +358,6 @@ class AWSProvider(Provider):
             logger.info(f"Dedicated host released: {host_identifier}")
 
     @staticmethod
-    def generate_repository_name(repository: str) -> str:
-        """
-        Generate a repository name for the instance.
-
-        Args:
-            repository (str): Repository name.
-
-        Returns:
-            str: Repository name for the instance.
-        """
-        matches = re.findall(r'(\w+)', repository)
-        if len(matches) == 3:
-            return ''.join([c[0] for c in matches])
-        elif len(matches) == 2:
-            return matches[1]
-        else:
-            return repository
-
-    @staticmethod
     def validate_dependencies():
         """
         Validates the dependencies for the Vagrant provider.
