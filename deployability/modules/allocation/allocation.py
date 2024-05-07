@@ -60,7 +60,7 @@ class Allocator:
         instance.start()
         logger.info(f"Instance {instance.identifier} started.")
         # Generate the inventory and track files.
-        inventory = cls.__generate_inventory(instance, payload.inventory_output)
+        inventory = cls.__generate_inventory(instance, payload.inventory_output, instance_params.composite_name)
         # Validate connection
         check_connection = cls.__check_connection(inventory)
         track_file = cls.__generate_track_file(instance, payload.provider, payload.track_output)
@@ -113,13 +113,14 @@ class Allocator:
         return config
 
     @staticmethod
-    def __generate_inventory(instance: Instance, inventory_path: Path) -> None:
+    def __generate_inventory(instance: Instance, inventory_path: Path, composite_name: str) -> None:
         """
         Generates an inventory file.
 
         Args:
             instance (Instance): The instance for which the inventory file is generated.
             inventory_path (Path): The path where the inventory file will be generated.
+            composite_name (str): The name of the composite.
         """
         if inventory_path is None:
             inventory_path = Path(instance.path, 'inventory.yml')
@@ -129,12 +130,20 @@ class Allocator:
             inventory_path.parent.mkdir(parents=True, exist_ok=True)
         ssh_config = instance.ssh_connection_info()
         if instance.platform == 'windows':
-            inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
-                                                ansible_user=ssh_config.user,
-                                                ansible_port=ssh_config.port,
-                                                ansible_password=ssh_config.password,
-                                                ansible_connection='winrm',
-                                                ansible_winrm_server_cert_validation='ignore')
+            if str(composite_name.split("-")[1]) == 'sign':
+                inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
+                                                    ansible_user=ssh_config.user,
+                                                    ansible_port=2200,
+                                                    ansible_connection='ssh',
+                                                    ansible_password=ssh_config.password,
+                                                    ansible_ssh_common_args='-o StrictHostKeyChecking=no')
+            else:
+                inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
+                                                    ansible_user=ssh_config.user,
+                                                    ansible_port=ssh_config.port,
+                                                    ansible_password=ssh_config.password,
+                                                    ansible_connection='winrm',
+                                                    ansible_winrm_server_cert_validation='ignore')
         elif not ssh_config.private_key:
             inventory = models.InventoryOutput(ansible_host=ssh_config.hostname,
                                                 ansible_user=ssh_config.user,
@@ -243,9 +252,6 @@ class Allocator:
                     logger.info("SSH connection successful.")
                     ssh.close()
                     return True
-                except paramiko.AuthenticationException:
-                    logger.error(f'Authentication error. Check the credentials in the inventory file.')
-                    return False
                 except Exception as e:
                     logger.warning(f'Error on attempt {attempt} of {attempts}: {e}')
                 time.sleep(sleep)
