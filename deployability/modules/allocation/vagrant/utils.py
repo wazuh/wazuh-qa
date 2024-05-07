@@ -3,6 +3,7 @@
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import subprocess
+import time
 from pathlib import Path
 from modules.allocation.generic.utils import logger
 
@@ -28,23 +29,33 @@ class VagrantUtils:
             ssh_key = remote_host_parameters['ssh_key']
             ssh_command = f"ssh -i {ssh_key} {ssh_user}@{server_ip} \"{command}\""
 
-        try:
-            output = subprocess.Popen(f"{ssh_command}",
-                                        shell=True,
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE)
-            stdout_data, stderr_data = output.communicate()  # Capture stdout and stderr data
-            stdout_text = stdout_data.decode('utf-8') if stdout_data else ""  # Decode stdout bytes to string
-            stderr_text = stderr_data.decode('utf-8') if stderr_data else ""  # Decode stderr bytes to string
+        max_retry = 3
+        for attempt in range(max_retry):
+            try:
+                output = subprocess.Popen(f"{ssh_command}",
+                                            shell=True,
+                                            stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE)
+                stdout_data, stderr_data = output.communicate()  # Capture stdout and stderr data
+                stdout_text = stdout_data.decode('utf-8') if stdout_data else ""  # Decode stdout bytes to string
+                stderr_text = stderr_data.decode('utf-8') if stderr_data else ""  # Decode stderr bytes to string
 
-            if stderr_text:
-                logger.error(f"Command failed: {stderr_text}")
+                if stderr_text:
+                    if "Connection reset" in stderr_text or "Connection timed out" in stderr_text or "Broken pipe" in stderr_text:
+                        if attempt < max_retry - 1:
+                            logger.warning(f"SSH connection error: {stderr_text}. Retrying...")
+                            time.sleep(30)
+                            continue
+                        else:
+                            raise ValueError(f"SSH connection error: {stderr_text}")
+                    else:
+                        logger.error(f"Command failed: {stderr_text}")
+                    return None
+
+                return stdout_text
+            except subprocess.CalledProcessError as e:
+                logger.error(f"Command failed: {e.stderr.decode('utf-8')}")
                 return None
-
-            return stdout_text
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Command failed: {e.stderr.decode('utf-8')}")
-            return None
 
     @classmethod
     def remote_copy(cls, instance_dir: Path, host_instance_dir: Path, remote_host_parameters: dict) -> str:

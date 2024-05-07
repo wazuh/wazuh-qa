@@ -121,7 +121,18 @@ class VagrantInstance(Instance):
             str: The status of the instance.
         """
         output = self.__run_vagrant_command('status')
-        return self.__parse_vagrant_status(output)
+        vagrant_status = self.__parse_vagrant_status(output)
+        if vagrant_status == None:
+            if VagrantUtils.remote_command(f"ls {self.host_instance_dir} > /dev/null 2>&1", self.remote_host_parameters):
+                if VagrantUtils.remote_command(f"prlctl list -a | grep {self.identifier} > /dev/null 2>&1", self.remote_host_parameters):
+                    return "running"
+                else:
+                    VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.remote_host_parameters)
+                    raise ValueError(f"Instance {self.identifier} is not running, remote instance dir {self.host_instance_dir} was removed.")
+            else:
+                raise ValueError(f"Instance {self.identifier} not found.")
+        else:
+            return self.__parse_vagrant_status(output)
 
     def ssh_connection_info(self) -> ConnectionInfo:
         """
@@ -238,6 +249,10 @@ class VagrantInstance(Instance):
         Returns:
             str: The parsed status.
         """
+        if message is None:
+            logger.error("Received None message when parsing Vagrant status")
+            return None
+
         lines = message.split('\n')
         for line in lines:
             if 'Current machine states:' in line:
