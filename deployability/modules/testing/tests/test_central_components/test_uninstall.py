@@ -56,7 +56,6 @@ def test_uninstall(wazuh_params):
         assert 'active' in GeneralComponentActions.get_component_status(indexer_params, 'wazuh-indexer'), logger.error(f'The indexer in {HostInformation.get_os_name_and_version_from_inventory(indexer_params)} is not active')
     assert 'active' in GeneralComponentActions.get_component_status(wazuh_params['master'], 'filebeat'), logger.error(f'The filebeat in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])} is not active')
 
-    #WazuhCentralComponents.perform_uninstall_and_scan_for_aio(wazuh_params['master'])
     WazuhCentralComponents.uninstall_aio(wazuh_params['master'])
 
 def test_component_uninstalled_directory(wazuh_params):

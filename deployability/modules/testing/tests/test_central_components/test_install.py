@@ -62,7 +62,6 @@ def test_installation(wazuh_params):
 
     # Install central components and perform checkfile testing
     for _, manager_params in wazuh_params['managers'].items():
-        #WazuhCentralComponents.perform_install_and_scan_for_aio(manager_params, wazuh_params)
         WazuhCentralComponents.install_aio(manager_params, wazuh_params['wazuh_version'])
 
     # Validation of directory of the components
