@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Remove sslverify from host manager install package method ([#5339](https://github.com/wazuh/wazuh-qa/pull/5339)) \- (Framework)
 - Include additional Vulnerability Detector E2E tests ([#5287](https://github.com/wazuh/wazuh-qa/pull/5287)) \- (Framework + Tests)
 - Change Vulnerability Detection feed updated waiter ([#5227](https://github.com/wazuh/wazuh-qa/pull/5227)) \- (Tests)
 - Replace timestamp filter with vulnerabilities detected_at field.([#5266](https://github.com/wazuh/wazuh-qa/pull/5266)) \- (Framework + Tests)
