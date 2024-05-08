@@ -88,12 +88,5 @@
       stage: agent sync_info set synced
     -
       input: agent 003 package get
-      output: >-
-        ['due {"name":"test_deb_pkg","version":"1.0.0","architecture":"amd64",
-        "vendor":"Wazuh wazuh@wazuh.com","format":"deb","item_id":"1",
-        "description":"Test package","location":"","size":7490,"install_time":"1715177135"}',
-        'due {"name":"test_rpm_pkg","version":"1.0.0","architecture":"amd64",
-        "vendor":"Wazuh wazuh@wazuh.com","format":"rpm","item_id":"1",
-        "description":"Test package","location":"","size":7490,"install_time":"1715177135"}',
-        'ok {"status":"SUCCESS"}']
+      output: ['due {"name":"test_deb_pkg","version":"1.0.0","architecture":"amd64","vendor":"Wazuh wazuh@wazuh.com","format":"deb","item_id":"1","description":"Test package","location":"","size":7490,"install_time":"1715177135"}', 'due {"name":"test_rpm_pkg","version":"1.0.0","architecture":"amd64","vendor":"Wazuh wazuh@wazuh.com","format":"rpm","item_id":"1","description":"Test package","location":"","size":7490,"install_time":"1715177135"}', 'ok {"status":"SUCCESS"}']
       stage: agent sys_programs getting not all packages
