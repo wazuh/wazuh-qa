@@ -3,10 +3,6 @@ Vagrant.configure("2") do |config|
     config.vm.network :private_network, type: "dhcp"
     config.vm.network "forwarded_port", guest: 22, host: "{{ config.port }}"
 
-    config.vm.provision "file", source: "~/.ssh/vagrant_rsa.pub", destination: "~/.ssh/vagrant_rsa.pub"
-    config.vm.provision "file", source: "~/.ssh/authorized_keys", destination: "~/.ssh/authorized_keys"
-
-
     config.vm.synced_folder ".", "/vagrant", disabled: true
 
     config.vm.provider "virtualbox" do |vb|

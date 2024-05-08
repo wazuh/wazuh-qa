@@ -99,12 +99,6 @@ vagrant:
     box: generic/rocky9
     box_version: 4.3.12
   # Macos
-  macos-bigsur-11.0-amd64:
-    box: development/macos-big-sur
-    box_version: 0.0.0
-  macos-catalina-10.15.1-amd64:
-    box: development/macos-catalina
-    box_version: 0.0.0
   macos-highsierra-10.13.6-amd64:
     box: development/macos-high-sierra
     box_version: 0.0.0
@@ -123,11 +117,14 @@ vagrant:
   macos-monterey-12.6-arm64:
     box: macos-12
     box_version: 0.0.0
-  macos-monterey-12.0.1-amd64:
-    box: development/macos-monterey
+  macos-ventura-13.4.1-amd64:
+    box: development/macos-ventura
     box_version: 0.0.0
   macos-ventura-13.4.1-arm64:
     box: macos-13
+    box_version: 0.0.0
+  macos-sonoma-14.4.1-amd64:
+    box: development/macos-sonoma
     box_version: 0.0.0
   macos-sonoma-14.0-arm64:
     box: macos-14

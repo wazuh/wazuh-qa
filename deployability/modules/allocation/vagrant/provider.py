@@ -114,6 +114,9 @@ class VagrantProvider(Provider):
         if platform == 'macos':
             vagrant_file = str(instance_dir) + '/Vagrantfile'
             VagrantUtils.remote_copy(vagrant_file, host_instance_dir, remote_host_parameters)
+            VagrantUtils.remote_copy(Path(__file__).parent.parent / 'vagrant' / 'helpers' / 'vagrant_script.sh', host_instance_dir, remote_host_parameters)
+            cmd = f"chmod 700 {host_instance_dir}/vagrant_script.sh"
+            VagrantUtils.remote_command(cmd, remote_host_parameters)
 
         instance_params = {}
         instance_params['instance_dir'] = instance_dir
@@ -207,10 +210,14 @@ class VagrantProvider(Provider):
         """
         environment = Environment(loader=FileSystemLoader(cls.TEMPLATES_DIR))
         if config.platform == 'macos':
-            if config.arch == 'arm64':
-                template = environment.get_template("vagrant_macStadium.j2")
+            if config.arch == 'amd64':
+                virtualbox_boxes = ['development/macos-high-sierra', 'development/macos-mojave', 'development/macos-sierra', 'development/macos-sierra_cmake', 'development/macos-sierra_gcc9']
+                if config.box not in virtualbox_boxes:
+                    template = environment.get_template("vagrant_parallels_intel.j2")
+                else:
+                    template = environment.get_template("vagrant_Virtual_box.j2")
             else:
-                template = environment.get_template("vagrant_black_mini.j2")
+                template = environment.get_template("vagrant_parallels_arm.j2")
         else:
             template = environment.get_template("vagrant.j2")
         return template.render(config=config)
@@ -301,14 +308,14 @@ class VagrantProvider(Provider):
                 ssh_password = client.get_secret_value(SecretId='devops_macstadium_m1_jenkins_password')['SecretString']
                 ssh_user = client.get_secret_value(SecretId='devops_macstadium_m1_jenkins_user')['SecretString']
             except Exception as e:
-                raise ValueError('Could not get macOS macStadium server IP: ' + str(e) + '.')
+                raise ValueError('Could not get macOS macStadium ARM server IP: ' + str(e) + '.')
 
             try:
                 tn = Telnet(server_ip, server_port, timeout)
                 conn_ok = True
                 tn.close()
             except Exception as e:
-                raise ValueError('Could not connect to macOS macStadium server: ' + str(e) + '.')
+                raise ValueError('Could not connect to macOS macStadium ARM server: ' + str(e) + '.')
 
             remote_host_parameters['server_ip'] = server_ip
             remote_host_parameters['ssh_password'] = ssh_password
@@ -322,37 +329,37 @@ class VagrantProvider(Provider):
                         prlctl_output = subprocess.Popen(f"sshpass -p {ssh_password} ssh -o 'StrictHostKeyChecking no' {ssh_user}@{server_ip} {cmd}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0].decode('utf-8')
                         data_list = json.loads(prlctl_output)
                     except Exception as e:
-                        raise ValueError('Could not get VMs running on macStadium server: ' + str(e) + '.')
+                        raise ValueError('Could not get VMs running on macStadium ARM server: ' + str(e) + '.')
                     uuid_count = 0
                     for item in data_list:
                         if 'uuid' in item:
                             uuid_count += 1
                     if uuid_count < 2:
-                        logger.info(f"macStadium server has less than 2 VMs running, deploying in this host.")
+                        logger.info(f"macStadium ARM server has less than 2 VMs running, deploying in this host.")
                         return remote_host_parameters
                     else:
-                        raise ValueError(f"macStadium server is full capacity, use AWS provider.")
+                        raise ValueError(f"macStadium ARM server is full capacity, use AWS provider.")
                 else:
                     return remote_host_parameters
         if arch == 'amd64':
             try:
-                server_ip = client.get_secret_value(SecretId='devops_black_mini_jenkins_ip')['SecretString']
-                ssh_password = client.get_secret_value(SecretId='devops_black_mini_jenkins_password')['SecretString']
-                ssh_user = client.get_secret_value(SecretId='devops_black_mini_jenkins_user')['SecretString']
+                server_ip = client.get_secret_value(SecretId='devops_macstadium_intel_ip')['SecretString']
+                ssh_password = client.get_secret_value(SecretId='devops_macstadium_intel_password')['SecretString']
+                ssh_user = client.get_secret_value(SecretId='devops_macstadium_intel_user')['SecretString']
             except Exception as e:
-                raise ValueError('Could not get macOS Black mini server IP: ' + str(e) + '.')
+                raise ValueError('Could not get macOS macStadium Intel server IP: ' + str(e) + '.')
 
             try:
                 tn = Telnet(server_ip, server_port, timeout)
                 conn_ok = True
                 tn.close()
             except Exception as e:
-                raise ValueError('Could not connect to macOS Black mini server: ' + str(e) + '.')
+                raise ValueError('Could not connect to macOS macStadium Intel server: ' + str(e) + '.')
 
             remote_host_parameters['server_ip'] = server_ip
             remote_host_parameters['ssh_password'] = ssh_password
             remote_host_parameters['ssh_user'] = ssh_user
-            remote_host_parameters['host_provider'] = 'black_mini'
+            remote_host_parameters['host_provider'] = 'macstadium'
 
             if conn_ok:
                 if action == 'create':
@@ -367,10 +374,10 @@ class VagrantProvider(Provider):
                         raise ValueError('Could not get server load average: ' + str(e) + '.')
 
                     if float(load_average) <= 10.0 and float(cpu_usage) <= 70.0 and float(memory_usage) <= 75.0:
-                        logger.info(f"Using the black mini server to deploy.")
+                        logger.info(f"Using the macStadium Intel server to deploy.")
                         return remote_host_parameters
                     else:
-                        raise ValueError(f"Black mini server is under heavy load, use AWS provider.")
+                        raise ValueError(f"macStadium Intel server is under heavy load, use AWS provider.")
                 else:
                     return remote_host_parameters
 
