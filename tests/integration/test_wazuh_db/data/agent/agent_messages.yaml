@@ -39,11 +39,11 @@
   description: It checks the commands get packages and get hotfixes
   test_case:
     -
-      input: agent 003 package save 0|2021/04/07 22:00:00|deb|test_deb_pkg|optional|utils|7490|Wazuh wazuh@wazuh.com|NULL|1.0.0|amd64|NULL|NULL|Test package|NULL|1
+      input: agent 003 package save 0|2021/04/07 22:00:00|deb|test_deb_pkg|optional|utils|7490|Wazuh wazuh@wazuh.com|1715177135|1.0.0|amd64|NULL|NULL|Test package|NULL|1
       output: ok
       stage: agent sys_programs adding dummy package
     -
-      input: agent 003 package save 0|2021/04/07 22:00:00|rpm|test_rpm_pkg|optional|utils|7490|Wazuh wazuh@wazuh.com|NULL|1.0.0|amd64|NULL|NULL|Test package|NULL|1
+      input: agent 003 package save 0|2021/04/07 22:00:00|rpm|test_rpm_pkg|optional|utils|7490|Wazuh wazuh@wazuh.com|1715177135|1.0.0|amd64|NULL|NULL|Test package|NULL|1
       output: ok
       stage: agent sys_programs adding dummy package
     -
@@ -88,5 +88,12 @@
       stage: agent sync_info set synced
     -
       input: agent 003 package get
-      output: ['due {"name":"test_deb_pkg","version":"1.0.0","architecture":"amd64","vendor":"Wazuh wazuh@wazuh.com","format":"deb","item_id":"1"}', 'due {"name":"test_rpm_pkg","version":"1.0.0","architecture":"amd64","vendor":"Wazuh wazuh@wazuh.com","format":"rpm","item_id":"1"}', 'ok {"status":"SUCCESS"}']
+      output: >-
+        ['due {"name":"test_deb_pkg","version":"1.0.0","architecture":"amd64",
+        "vendor":"Wazuh wazuh@wazuh.com","format":"deb","item_id":"1",
+        "description":"Test package","location":"","size":7490,"install_time":"1715177135"}',
+        'due {"name":"test_rpm_pkg","version":"1.0.0","architecture":"amd64",
+        "vendor":"Wazuh wazuh@wazuh.com","format":"rpm","item_id":"1",
+        "description":"Test package","location":"","size":7490,"install_time":"1715177135"}',
+        'ok {"status":"SUCCESS"}']
       stage: agent sys_programs getting not all packages
