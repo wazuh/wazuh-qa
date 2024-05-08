@@ -39,6 +39,7 @@ class VagrantUtils:
             ssh_parameters['password'] = remote_host_parameters['ssh_password']
 
         max_retry = 3
+        ssh_exceptions = (subprocess.CalledProcessError, paramiko.AuthenticationException, paramiko.SSHException, socket.timeout, ConnectionResetError)
         for attempt in range(max_retry):
             try:
                 ssh.connect(**ssh_parameters)
@@ -47,7 +48,7 @@ class VagrantUtils:
 
                 ssh.close()
                 return stdout_text
-            except (subprocess.CalledProcessError, paramiko.AuthenticationException, paramiko.SSHException, socket.timeout) as e:
+            except ssh_exceptions as e:
                 if attempt < max_retry - 1:
                     logger.warning(f"SSH connection error: {str(e)}. Retrying in 30 seconds...")
                     time.sleep(30)
