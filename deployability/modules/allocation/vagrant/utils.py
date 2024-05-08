@@ -54,7 +54,7 @@ class VagrantUtils:
                     continue
                 else:
                     ssh.close()
-                    raise ValueError(f"Command failed: {str(e)}")
+                    raise ValueError(f"Remote command execution failed: {str(e)}")
 
     @classmethod
     def remote_copy(cls, instance_dir: Path, host_instance_dir: Path, remote_host_parameters: dict) -> str:
