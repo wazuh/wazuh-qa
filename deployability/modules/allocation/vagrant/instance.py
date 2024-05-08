@@ -127,7 +127,7 @@ class VagrantInstance(Instance):
                     VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.remote_host_parameters)
                     raise ValueError(f"Instance {self.identifier} is not running, remote instance dir {self.host_instance_dir} was removed.")
             else:
-                raise ValueError(f"Instance {self.identifier} not found.")
+                raise ValueError(f"Instance {self.host_instance_dir} not found.")
         else:
             return self.__parse_vagrant_status(output)
 
