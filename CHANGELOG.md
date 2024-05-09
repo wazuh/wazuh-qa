@@ -58,6 +58,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix test cases in Vulnerability Detection E2E test by adding new packages ([#5349](https://github.com/wazuh/wazuh-qa/pull/5349)) \- (Tests)
 - Fix macOS alert collection for E2E Vulnerability Detection tests ([#5337](https://github.com/wazuh/wazuh-qa/pull/5337)) \- (Framework)
 - Fix packages in Windows and macOS upgrade cases ([#5223](https://github.com/wazuh/wazuh-qa/pull/5223)) \- (Framework + Tests)
 - Fix vulnerabilities and add new packages to Vulnerability Detector E2E tests ([#5234](https://github.com/wazuh/wazuh-qa/pull/5234)) \- (Tests)
