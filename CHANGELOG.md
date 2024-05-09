@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Disable debug evidences for Vulnerability Detector E2E tests by default ([#5331](https://github.com/wazuh/wazuh-qa/pull/5331)) \- ( Tests)
 - Include CVE-2023-4822 vulnerability to grafana packages ([#5332](https://github.com/wazuh/wazuh-qa/pull/5332)) \- (Framework)
 - Remove sslverify from host manager install package method ([#5339](https://github.com/wazuh/wazuh-qa/pull/5339)) \- (Framework)
 - Include additional Vulnerability Detector E2E tests ([#5287](https://github.com/wazuh/wazuh-qa/pull/5287)) \- (Framework + Tests)
@@ -59,7 +60,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-- Fix upgrade macOS package cases for vulnerability scanner E2E ([#5334](https://github.com/wazuh/wazuh-qa/pull/5334)) \- (Tests)  
+- Fix upgrade macOS package cases for vulnerability scanner E2E ([#5334](https://github.com/wazuh/wazuh-qa/pull/5334)) \- (Tests)
 - Fix test cases in Vulnerability Detection E2E test by adding new packages ([#5349](https://github.com/wazuh/wazuh-qa/pull/5349)) \- (Tests)
 - Fix macOS alert collection for E2E Vulnerability Detection tests ([#5337](https://github.com/wazuh/wazuh-qa/pull/5337)) \- (Framework)
 - Fix packages in Windows and macOS upgrade cases ([#5223](https://github.com/wazuh/wazuh-qa/pull/5223)) \- (Framework + Tests)
