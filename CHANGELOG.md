@@ -60,6 +60,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix shutdown messages system test ([#5298](https://github.com/wazuh/wazuh-qa/pull/5298)) \- (Framework + Tests)
 - Fix upgrade macOS package cases for vulnerability scanner E2E ([#5334](https://github.com/wazuh/wazuh-qa/pull/5334)) \- (Tests)
 - Fix test cases in Vulnerability Detection E2E test by adding new packages ([#5349](https://github.com/wazuh/wazuh-qa/pull/5349)) \- (Tests)
 - Fix macOS alert collection for E2E Vulnerability Detection tests ([#5337](https://github.com/wazuh/wazuh-qa/pull/5337)) \- (Framework)
