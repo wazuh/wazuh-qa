@@ -10,6 +10,7 @@ import tempfile
 import xml.dom.minidom as minidom
 from threading import Thread
 from typing import List, Union
+from time import sleep
 
 import testinfra
 import yaml
@@ -493,30 +494,79 @@ class HostManager:
         Example:
             host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
         """
-        extension = '.msi'
-        result = None
+        def install_msi_package(host, url):
+            result = self.get_host(host).ansible("win_package",
+                                                 f"path={url} arguments=/passive", check=False)
+            return result
 
-        if system == 'windows':
-            if url.lower().endswith(extension):
-                result = self.get_host(host).ansible("win_package", f"path={url} arguments=/passive", check=False)
-            else:
-                result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
-        elif system == 'ubuntu':
+        def install_exe_package(host, url):
+            result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
+
+            return result
+
+        def install_apt_package(host, url):
             result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
-        elif system == 'centos':
+
+            return result
+
+        def install_yum_package(host, url):
             result = self.get_host(host).ansible("yum", f"name={url} state=present "
-                                                'disable_gpg_check=True', check=False)
-        elif system == 'macos':
+                                                 'disable_gpg_check=True', check=False)
+            return result
+
+        def install_pkg_package(host, url):
             package_name = url.split('/')[-1]
             result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
             cmd = f"installer -pkg {package_name} -target /"
             result = self.get_host(host).ansible("command", cmd, check=False)
-        else:
-            raise ValueError(f"Unsupported system: {system}")
 
-        logging.info(f"Package installed result {result}")
+            return result
 
-        if not (result['changed'] or result.get('rc') == 0) or not (result['changed'] or result.get('stderr', None) == ''):
+        retry_installation_errors = {
+            "corrupted_download": 'The downloaded file could not be read. Verify that the file'
+                                  'exists and that you can access it.'
+        }
+        number_max_retries = 3
+        sleep_time_between_retries = 10
+        result = {}
+
+        extension = url.lower().split('.')[-1]
+
+        for _ in range(number_max_retries):
+            if system == 'windows':
+                if extension == 'msi':
+                    result = install_msi_package(host, url)
+                elif extension == 'exe':
+                    result = install_exe_package(host, url)
+                else:
+                    raise ValueError(f"Unsupported extension: {extension} for Windows systems")
+            elif system == 'ubuntu':
+                if extension == 'deb':
+                    result = install_apt_package(host, url)
+                else:
+                    raise ValueError(f"Unsupported extension: {extension} for Ubuntu systems")
+            elif system == 'centos':
+                if extension == 'rpm':
+                    result = install_yum_package(host, url)
+                else:
+                    raise ValueError(f"Unsupported extension: {extension} for CentOS systems")
+            elif system == 'macos':
+                if extension == '.pkg':
+                    result = install_pkg_package(host, url)
+                else:
+                    raise ValueError(f"Unsupported extension: {extension} for MacOS systems")
+            else:
+                raise ValueError(f"Unsupported system: {system}")
+
+            if result.get('msg') == retry_installation_errors["corrupted_download"]:
+                logging.error(f"Error installing {url} in {host}:"
+                              'Corrupted download detected. Retrying installation...')
+                sleep(sleep_time_between_retries)
+            else:
+                break
+
+        if not (result.get('changed', False) or result.get('rc') == 0) or \
+           not (result.get('changed', False) or result.get('rc') == 0 or result.get('stderr', None) == ''):
             raise RuntimeError(f"Failed to install package in {host}: {result}")
 
     def install_npm_package(self, host, url, system='ubuntu'):
