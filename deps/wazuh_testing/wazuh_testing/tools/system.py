@@ -559,21 +559,19 @@ class HostManager:
             else:
                 raise ValueError(f"Unsupported system: {system}")
 
-            if any(re.search(error, result.get('msg', '')) for error in retry_installation_errors):
-                logging.error(f"Error installing {url} in {host}:"
-                              'Corrupted package detected. Retrying installation...')
-                sleep(retry_delay)
+            failed_installation = not (result.get('changed', False) or result.get('rc') == 0) \
+                or not (result.get('changed', False) or result.get('rc') == 0 or result.get('stderr', None) == '')
+
+            logging.debug(f"Package installation result {result}")
+
+            if failed_installation:
+                if any(re.search(error, result.get('msg', '')) for error in retry_installation_errors):
+                    logging.error(f"Error installing {url} in {host}:"
+                                  'Corrupted package detected. Retrying installation...')
+                    sleep(retry_delay)
             else:
                 logging.error("Installation failed. Installation will not be retried.")
-                break
-
-        failed_installation = not (result.get('changed', False) or result.get('rc') == 0) \
-            or not (result.get('changed', False) or result.get('rc') == 0 or result.get('stderr', None) == '')
-
-        logging.debug(f"Package installation result {result}")
-
-        if failed_installation:
-            raise RuntimeError(f"Failed to install package in {host}: {result}")
+                raise RuntimeError(f"Failed to install package in {host}: {result}")
 
     def install_npm_package(self, host, url, system='ubuntu'):
         """
