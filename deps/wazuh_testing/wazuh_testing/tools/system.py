@@ -945,6 +945,23 @@ class HostManager:
 
         return hosts_not_reachable
 
+    def get_agents_summary_status(self, host):
+        """
+        Gets the agents summary status.
+
+        Returns:
+            result (str): Agents summary status returned by the API
+        """
+        token = self.get_api_token(host)
+        result = self.make_api_call(
+            host=host,
+            method='GET',
+            endpoint='/agents/summary/status',
+            token=token,
+        )
+
+        return result['json']
+
     def clean_agents(self, restart_managers: bool = False) -> None:
         """Clean and register agents
 
