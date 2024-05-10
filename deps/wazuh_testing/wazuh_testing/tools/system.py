@@ -530,50 +530,49 @@ class HostManager:
         ]
 
         result = {}
+        failed_installation = False
 
         extension = url.lower().split('.')[-1]
 
-        for _ in range(retry):
-            if system == 'windows':
-                if extension == 'msi':
-                    result = install_msi_package(host, url)
-                elif extension == 'exe':
-                    result = install_exe_package(host, url)
-                else:
-                    raise ValueError(f"Unsupported extension: {extension} for Windows systems")
-            elif system == 'ubuntu':
-                if extension == 'deb':
-                    result = install_apt_package(host, url)
-                else:
-                    raise ValueError(f"Unsupported extension: {extension} for Ubuntu systems")
-            elif system == 'centos':
-                if extension == 'rpm':
-                    result = install_yum_package(host, url)
-                else:
-                    raise ValueError(f"Unsupported extension: {extension} for CentOS systems")
-            elif system == 'macos':
-                if extension == '.pkg':
-                    result = install_pkg_package(host, url)
-                else:
-                    raise ValueError(f"Unsupported extension: {extension} for MacOS systems")
-            else:
-                raise ValueError(f"Unsupported system: {system}")
+        system_supported = ['windows', 'ubuntu', 'centos', 'macos']
+        installer_map = {
+            'msi': install_msi_package,
+            'exe': install_exe_package,
+            'deb': install_apt_package,
+            'rpm': install_yum_package,
+            'pkg': install_pkg_package
+        }
 
+        if system not in system_supported:
+            raise ValueError(f"Unsupported system: {system}")
+
+        for _ in range(retry):
+            installer_func = installer_map.get(extension, None)
+
+            if not installer_func:
+                raise ValueError(f"Unsupported extension: {extension} for Windows systems")
+
+            result = installer_func(host, url)
+
+            logging.debug(f"Package installation result {result}")
             failed_installation = not (result.get('changed', False) or result.get('rc') == 0) \
                 or not (result.get('changed', False) or result.get('rc') == 0 or result.get('stderr', None) == '')
 
-            logging.debug(f"Package installation result {result}")
-
             if failed_installation:
-                if any(re.search(error, result.get('msg', '')) for error in retry_installation_errors):
-                    logging.error(f"Error installing {url} in {host}:"
-                                  'Corrupted package detected. Retrying installation...')
-                    sleep(retry_delay)
-                else:
+                if not any(re.search(error, result.get('msg', '')) for error in retry_installation_errors):
                     logging.error("Installation failed. Installation will not be retried.")
                     raise RuntimeError(f"Failed to install package in {host}: {result}")
+
+                logging.error(f"Error installing {url} in {host}:"
+                              'Corrupted package detected. Retrying installation...')
+                sleep(retry_delay)
             else:
                 break
+
+        if failed_installation:
+            raise RuntimeError(f"Failed to install package in {host}: {result}")
+
+        return result
 
     def install_npm_package(self, host, url, system='ubuntu'):
         """
@@ -665,7 +664,6 @@ class HostManager:
             host_manager.remove_package('my_host', 'my_package', system='ubuntu')
         """
         logging.info(f"Removing package {package_uninstall_name} from host {host}")
-        logging.info(f"System: {system}")
 
         remove_operation_result = False
 
