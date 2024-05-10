@@ -480,7 +480,7 @@ class HostManager:
 
         return result
 
-    def install_package(self, host, url, system):
+    def install_package(self, host, url, system, retry=3, retry_delay=5):
         """
         Installs a package on the specified host.
 
@@ -529,13 +529,11 @@ class HostManager:
             'This installation package could not be opened',
         ]
 
-        number_max_retries = 3
-        sleep_time_between_retries = 10
         result = {}
 
         extension = url.lower().split('.')[-1]
 
-        for _ in range(number_max_retries):
+        for _ in range(retry):
             if system == 'windows':
                 if extension == 'msi':
                     result = install_msi_package(host, url)
@@ -564,7 +562,7 @@ class HostManager:
             if any(re.search(error, result.get('msg', '')) for error in retry_installation_errors):
                 logging.error(f"Error installing {url} in {host}:"
                               'Corrupted package detected. Retrying installation...')
-                sleep(sleep_time_between_retries)
+                sleep(retry_delay)
             else:
                 logging.error("Installation failed. Installation will not be retried.")
                 break
