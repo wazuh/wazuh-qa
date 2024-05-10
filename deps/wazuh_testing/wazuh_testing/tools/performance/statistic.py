@@ -343,14 +343,14 @@ class StatisticMonitor:
                 elif target == "vulnerabilities":
                     logger.info("Writing vulnerabilities data info to {}.".format(csv_file))
                     log.write(("{0},{1}\n").format(
-                        data,
-                        timestamp
+                        timestamp,
+                        data
                     ))
                 elif target == "alerts":
                     logger.info("Writing alerts data info to {}.".format(csv_file))
                     log.write(("{0},{1}\n").format(
-                        data,
-                        timestamp
+                        timestamp,
+                        data
                     ))
                 elif target == "remote":
                     metrics = data['metrics']
