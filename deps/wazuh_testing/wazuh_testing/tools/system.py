@@ -569,9 +569,11 @@ class HostManager:
                     logging.error(f"Error installing {url} in {host}:"
                                   'Corrupted package detected. Retrying installation...')
                     sleep(retry_delay)
+                else:
+                    logging.error("Installation failed. Installation will not be retried.")
+                    raise RuntimeError(f"Failed to install package in {host}: {result}")
             else:
-                logging.error("Installation failed. Installation will not be retried.")
-                raise RuntimeError(f"Failed to install package in {host}: {result}")
+                break
 
     def install_npm_package(self, host, url, system='ubuntu'):
         """
