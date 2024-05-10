@@ -550,7 +550,7 @@ class HostManager:
             installer_func = installer_map.get(extension, None)
 
             if not installer_func:
-                raise ValueError(f"Unsupported extension: {extension} for Windows systems")
+                raise ValueError(f"Unsupported extension: {extension} for {system}")
 
             result = installer_func(host, url)
 
