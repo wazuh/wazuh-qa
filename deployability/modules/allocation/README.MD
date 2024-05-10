@@ -182,13 +182,13 @@ If one wishes to execute the allocaation module without installing the Workflow 
 - Local deployment (Vagrant)
 
   ```bash
-  python3 modules/allocation/main.py --action create --provider '{{ vagrant }}' --size '{{ large }}' --composite-name '{{ composite-name }}' --inventory-output '{{ inventory }}' --track-output '{{ track }}'
+  python3 modules/allocation/main.py --action create --provider '{{ vagrant }}' --size '{{ large }}' --composite-name '{{ composite-name }}' --instance-name '{{ name }}'  --inventory-output '{{ inventory }}' --track-output '{{ track }}'
 
   ```
 
   Example:
   ```bash
-  python3 modules/allocation/main.py --action create --provider vagrant --size large --composite-name linux-ubuntu-22.04-amd64 --inventory-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml" --track-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml"
+  python3 modules/allocation/main.py --action create --provider vagrant --size large --composite-name linux-ubuntu-22.04-amd64 --instance-name "ubuntu_2204_amd_large" --inventory-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml" --track-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml"
   ```
 
 - AWS deployment
@@ -207,6 +207,16 @@ If one wishes to execute the allocaation module without installing the Workflow 
   Example:
   ```bash
   python3 modules/allocation/main.py --action create --provider aws --size large --composite-name linux-ubuntu-22.04-amd64 --inventory-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml" --track-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml" --label-termination-date "2024-03-20 21:00:00"  --label-team devops
+  ```
+
+  Example 2:
+  ```bash
+  python3 modules/allocation/main.py --action create --provider aws --size small --composite-name linux-ubuntu-22.04-amd64 --inventory-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml" --track-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml" --label-termination-date "3d"  --label-team devops --label-issue "https://github.com/wazuh/internal-devel-requests/issues/1115"
+  ```
+
+  Example 3:
+  ```bash
+  python3 modules/allocation/main.py --action create --provider aws --size small --composite-name linux-ubuntu-22.04-amd64 --inventory-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml" --track-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml" --label-termination-date "1d"  --label-team devops --instance-name "ubuntu_2204_amd_large"
   ```
 
 2. Delete
@@ -282,7 +292,7 @@ If one wishes to execute the allocaation module without installing the Workflow 
     This argument it is mandatory for AWS deploy, allows you to define the date on which the machine can be deleted. The allowed values are **1d** (where the **1** refers to the number of days the machine is needed) or with the following format **"2024-03-20 21:00:00"**
 
   - --instance-name
-    This argument allows us to define a custom name for the instance, if this argument is not used, the instance name is defined by other parameters entered, such as --label-issue or --composite-name.
+    This argument allows us to define a custom name for the instance. It is compulsory for the Vagrant deploy. For the AWS deploy, if this argument is not used, the instance name is defined by other parameters entered, such as --label-issue or --composite-name.
 ---
 
 ### Technical documentation
