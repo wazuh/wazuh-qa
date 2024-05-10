@@ -8,6 +8,8 @@ import os
 import sys
 import tempfile
 import xml.dom.minidom as minidom
+import re
+
 from threading import Thread
 from typing import List, Union
 from time import sleep
@@ -497,6 +499,7 @@ class HostManager:
         def install_msi_package(host, url):
             result = self.get_host(host).ansible("win_package",
                                                  f"path={url} arguments=/passive", check=False)
+
             return result
 
         def install_exe_package(host, url):
@@ -522,10 +525,10 @@ class HostManager:
 
             return result
 
-        retry_installation_errors = {
-            "corrupted_download": 'The downloaded file could not be read. Verify that the file'
-                                  'exists and that you can access it.'
-        }
+        retry_installation_errors = [
+            'This installation package could not be opened',
+        ]
+
         number_max_retries = 3
         sleep_time_between_retries = 10
         result = {}
@@ -558,15 +561,20 @@ class HostManager:
             else:
                 raise ValueError(f"Unsupported system: {system}")
 
-            if result.get('msg') == retry_installation_errors["corrupted_download"]:
+            if any(re.search(error, result.get('msg', '')) for error in retry_installation_errors):
                 logging.error(f"Error installing {url} in {host}:"
                               'Corrupted download detected. Retrying installation...')
                 sleep(sleep_time_between_retries)
             else:
+                logging.error("Installation failed. Installation will not be retried.")
                 break
 
-        if not (result.get('changed', False) or result.get('rc') == 0) or \
-           not (result.get('changed', False) or result.get('rc') == 0 or result.get('stderr', None) == ''):
+        failed_installation = not (result.get('changed', False) or result.get('rc') == 0) \
+            or not (result.get('changed', False) or result.get('rc') == 0 or result.get('stderr', None) == '')
+
+        logging.debug(f"Package installation result {result}")
+
+        if failed_installation:
             raise RuntimeError(f"Failed to install package in {host}: {result}")
 
     def install_npm_package(self, host, url, system='ubuntu'):
@@ -691,7 +699,7 @@ class HostManager:
             or not (remove_operation_result['changed'] or remove_operation_result.get('stderr', None) == ''):
             raise RuntimeError(f"Failed to remove package in {host}: {remove_operation_result}")
 
-        logging.info(f"Package removed result {remove_operation_result}")
+        logging.debug(f"Package removed result {remove_operation_result}")
 
         return remove_operation_result
 
