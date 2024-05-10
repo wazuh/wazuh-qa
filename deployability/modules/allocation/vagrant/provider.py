@@ -58,7 +58,7 @@ class VagrantProvider(Provider):
             repository = cls.generate_repository_name(str(issue_name.group(1)))
             name = repository + "-" + str(re.search(r'(\d+)$', issue).group(1)) + "-" + str(params.composite_name.split("-")[1]) + "-" + str(params.composite_name.split("-")[2])
         else:
-            raise ValueError("Instance name or issue label is required.")
+            raise ValueError("Either --instance-name or --label-issue parameter is required.")
 
         instance_id = name + "-" + str(random.randint(0000, 9999))
         # Create the instance directory.
