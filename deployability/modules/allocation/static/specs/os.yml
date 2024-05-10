@@ -150,7 +150,7 @@ vagrant:
     box_version: 0.3.0
   windows-server-2019-amd64:
     box: gusztavvargadr/windows-server-2019-standard
-    box_version: 1809.0.2310
+    box_version: 1809.0.2402
   windows-server-2022-amd64:
     box: gusztavvargadr/windows-server-2022-standard
     box_version: 2102.0.2312
