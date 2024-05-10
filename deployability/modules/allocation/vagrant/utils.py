@@ -112,18 +112,15 @@ class VagrantUtils:
             raise ValueError(f"ppc64 server has no available SSH ports.")
         else:
             used_ports = []
-            for i in range(20):
-                if used_ports == []:
-                    port = f"432{random.randint(20, 40)}"
-                else:
-                    while used_ports:
-                        port = f"432{random.randint(20, 40)}"
-                        if port not in used_ports:
-                            break
-                cmd = f"sudo lsof -i:{port}"
-                output = cls.remote_command(cmd, remote_host_parameters)
-                if not output:
-                    return port
-                else:
-                    used_ports.append(port)
-            raise ValueError(f"Server has no available SSH ports.")
+            all_ports = [f"432{i}" for i in range(20, 40)]
+            random.shuffle(all_ports)
+            for port in all_ports:
+                if port not in used_ports:
+                    cmd = f"sudo lsof -i:{port}"
+                    output = cls.remote_command(cmd, remote_host_parameters)
+                    if not output:
+                        return port
+                    else:
+                        used_ports.append(port)
+            else:
+                raise ValueError(f"The server has no available ports in the range 43220 to 43240.")
