@@ -563,7 +563,7 @@ class HostManager:
 
             if any(re.search(error, result.get('msg', '')) for error in retry_installation_errors):
                 logging.error(f"Error installing {url} in {host}:"
-                              'Corrupted download detected. Retrying installation...')
+                              'Corrupted package detected. Retrying installation...')
                 sleep(sleep_time_between_retries)
             else:
                 logging.error("Installation failed. Installation will not be retried.")
