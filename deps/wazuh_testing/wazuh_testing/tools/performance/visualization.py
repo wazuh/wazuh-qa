@@ -11,41 +11,57 @@ from matplotlib.ticker import LinearLocator
 BINARY_NON_PRINTABLE_HEADERS = ['PID', 'Daemon', 'Version']
 
 ANALYSISD_CSV_HEADERS = {
-    'decoded_events': {'title': 'Events decoded per queue',
-                       'columns': ['total_events_decoded', 'syscheck_events_decoded',
-                                   'syscollector_events_decoded', 'rootcheck_events_decoded',
-                                   'sca_events_decoded', 'hostinfo_events_decoded', 'winevt_events_decoded',
-                                   'other_events_decoded', 'dbsync_messages_dispatched'],
-                       },
-    'queue_usage': {'title': 'Queue usage during the test',
-                    'columns': ['syscheck_queue_usage', 'syscollector_queue_usage', 'rootcheck_queue_usage',
-                                'sca_queue_usage', 'hostinfo_queue_usage', 'winevt_queue_usage',
-                                'dbsync_queue_usage', 'upgrade_queue_usage', 'event_queue_usage',
-                                'rule_matching_queue_usage', 'alerts_queue_usage', 'firewall_queue_usage',
-                                'statistical_queue_usage', 'archives_queue_usage'],
-                    },
-    'events_decoded_per_second': {'title': 'Events decoded per second',
-                                  'columns': ['syscheck_edps', 'syscollector_edps', 'rootcheck_edps',
-                                              'sca_edps', 'hostinfo_edps', 'winevt_edps',
-                                              'other_events_edps', 'events_edps', 'dbsync_mdps'],
-                                  },
-    'alerts_info': {'title': 'Alerts and events info.',
-                    'columns': ['events_processed', 'events_received', 'events_dropped', 'alerts_written',
-                                'firewall_written', 'fts_written'],
-                    }
+    'decoded_events': {
+        'title': 'Events decoded per queue',
+        'columns': [
+            'Decoded from azure', 'Decoded from ciscat', 'Decoded from command', 'Decoded from docker',
+            'Decoded from logcollector eventchannel', 'Decoded from logcollector eventlog',
+            'Decoded from logcollector macos','Decoded from logcollector others','Decoded from osquery',
+            'Decoded from rootcheck','Decoded from sca','Decoded from syscheck','Decoded from syscollector',
+            'Decoded from vulnerability','Decoded from agentd','Decoded from dbsync','Decoded from monitor',
+            'Decoded from remote'
+        ],
+    },
+    'dropped_events': {
+        'title': 'Events dropped per queue',
+        'columns': [
+            'Dropped from azure', 'Dropped from ciscat', 'Dropped from command', 'Dropped from docker',
+            'Dropped from logcollector eventchannel', 'Dropped from logcollector eventlog',
+            'Dropped from logcollector macos', 'Dropped from logcollector others', 'Dropped from osquery',
+            'Dropped from rootcheck', 'Dropped from sca', 'Dropped from syscheck', 'Dropped from syscollector',
+            'Dropped from vulnerability', 'Dropped from agentd', 'Dropped from dbsync', 'Dropped from monitor',
+            'Dropped from remote'
+        ],
+    },
+    'events_decoded_per_second': {
+        'title': 'Events decoded per second',
+        'columns': [
+            'EDPS from azure', 'EDPS from ciscat', 'EDPS from command', 'EDPS from docker',
+            'EDPS from logcollector eventchannel', 'EDPS from logcollector eventlog', 'EDPS from logcollector macos',
+            'EDPS from logcollector others', 'EDPS from osquery', 'EDPS from rootcheck', 'EDPS from sca',
+            'EDPS from syscheck', 'EDPS from syscollector', 'EDPS from vulnerability', 'EDPS from agentd',
+            'EDPS from dbsync', 'EDPS from monitor', 'EDPS from remote'
+        ],
+    },
+    'alerts_info': {
+        'title': 'Alerts and events info.',
+        'columns': [
+            'Events processed', 'Events received', 'Written alerts', 'Written firewall', 'Written fts'
+        ],
+    }
 }
 REMOTED_CSV_HEADERS = {
     'events_info': {'title': 'Events sent and count',
-                    'columns': ["evt_count", "ctrl_msg_count", "discarded_count", "queued_msgs",
-                                'sent_bytes', 'dequeued_after_close']
+                    'columns': ["Events count", "Control messages", "Discarded messages", "queued_msgs",
+                                'Metrics-Bytes sent', 'Dequeued messages']
                     },
     'queue_size': {'title': 'Queue status',
-                   'columns': ['queue_size', 'total_queue_size']
+                   'columns': ['Queue size', 'total_queue_size']
                    },
     'tcp_sessions': {'title': 'TCP sessions',
-                     'columns': ['tcp_sessions']},
+                     'columns': ['TCP sessions']},
     'recv_bytes': {'title': 'Bytes received',
-                   'columns': ['recv_bytes']}
+                   'columns': ['Metrics-Bytes received']}
 }
 AGENTD_CSV_HEADERS = {
     'messages_info': {'title': 'Messages generated and total',
