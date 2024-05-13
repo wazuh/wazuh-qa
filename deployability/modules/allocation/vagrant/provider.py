@@ -239,7 +239,6 @@ class VagrantProvider(Provider):
         size_specs = cls._get_size_specs(params.size)
         os_specs = cls._get_os_specs(params.composite_name)
         # Parse the configuration.
-        config['ip'] = cls.__get_available_ip()
         config['box'] = str(os_specs['box'])
         config['box_version'] = str(os_specs['box_version'])
         config['private_key'] = str(credentials.key_path)
@@ -255,6 +254,9 @@ class VagrantProvider(Provider):
             config['port'] = VagrantUtils.get_port(remote_host_parameters, config['arch'])
             with open(tmp_port_file, 'w') as f:
                 f.write(config['port'])
+            config['ip'] = remote_host_parameters.get('hostname')
+        else:
+            config['ip'] = cls.__get_available_ip()
 
         return VagrantConfig(**config)
 
