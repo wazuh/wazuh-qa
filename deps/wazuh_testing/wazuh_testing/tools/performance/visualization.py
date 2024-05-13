@@ -84,9 +84,24 @@ AGENTD_CSV_HEADERS = {
 }
 
 LOGCOLLECTOR_CSV_HEADERS = {
-    'events': {'title': 'Events generated', 'columns': ['Events']},
-    'bytes_sent': {'title': 'Bytes sent', 'columns': ['Bytes']},
-    'drops': {'title': 'Events dropped', 'columns': ['Target Drops']},
+    'events': {
+        'title': 'Events generated',
+        'columns': [
+            'Events'
+        ]
+    },
+    'bytes_sent': {
+        'title': 'Bytes sent',
+        'columns': [
+            'Bytes'
+        ]
+    },
+    'drops': {
+        'title': 'Events dropped',
+        'columns': [
+            'Target Drops'
+        ]
+    },
 }
 
 
