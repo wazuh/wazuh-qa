@@ -77,10 +77,18 @@ REMOTED_CSV_HEADERS = {
     }
 }
 AGENTD_CSV_HEADERS = {
-    'messages_info': {'title': 'Messages generated and total',
-                      'columns': ['msg_count', 'msg_sent', 'msg_buffer']},
-    'buffered_messages': {'title': 'Events in the anti-flooding buffer', 'columns': ['msg_buffer']},
-    'ack_and_keepalive_diff': {'title': 'Difference between the last ACK and KeepAlive', 'columns': ['diff_seconds']}
+    'number_of_events_and_messages': {
+        'title': 'Number of events and messages',
+        'columns': [
+            'Number of generated events', 'Number of messages', 'Number of events buffered'
+        ]
+    },
+    'ack_and_keepalive': {
+        'title': 'Last ACK and KeepAlive',
+        'columns': [
+            'Last ACK', 'Last Keepalive'
+        ]
+    }
 }
 
 LOGCOLLECTOR_CSV_HEADERS = {
