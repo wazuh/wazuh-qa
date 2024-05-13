@@ -52,16 +52,29 @@ ANALYSISD_CSV_HEADERS = {
 }
 REMOTED_CSV_HEADERS = {
     'events_info': {'title': 'Events sent and count',
-                    'columns': ["Events count", "Control messages", "Discarded messages", "queued_msgs",
-                                'Metrics-Bytes sent', 'Dequeued messages']
-                    },
-    'queue_size': {'title': 'Queue status',
-                   'columns': ['Queue size', 'total_queue_size']
-                   },
-    'tcp_sessions': {'title': 'TCP sessions',
-                     'columns': ['TCP sessions']},
-    'recv_bytes': {'title': 'Bytes received',
-                   'columns': ['Metrics-Bytes received']}
+        'columns': [
+            "Events count", "Control messages", "Discarded messages", "Queue usage",
+            'Metrics-Bytes sent', 'Dequeued messages'
+        ]
+    },
+    'queue_size': {
+        'title': 'Queue status',
+        'columns': [
+            'Queue size', 'Queue usage'
+        ]
+    },
+    'tcp_sessions': {
+        'title': 'TCP sessions',
+        'columns': [
+            'TCP sessions'
+        ]
+    },
+    'recv_bytes': {
+        'title': 'Bytes received',
+        'columns': [
+            'Metrics-Bytes received'
+        ]
+    }
 }
 AGENTD_CSV_HEADERS = {
     'messages_info': {'title': 'Messages generated and total',
