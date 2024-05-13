@@ -19,14 +19,14 @@ class VagrantUtils:
             str: The output of the command.
         """
         ssh_command = None
-        server_ip = remote_host_parameters['server_ip']
-        ssh_user = remote_host_parameters['ssh_user']
-        if remote_host_parameters.get('ssh_password'):
-            ssh_password = remote_host_parameters['ssh_password']
+        server_ip = remote_host_parameters['hostname']
+        ssh_user = remote_host_parameters['user']
+        if remote_host_parameters.get('password'):
+            ssh_password = remote_host_parameters['password']
             ssh_command = f"sshpass -p {ssh_password} ssh -o 'StrictHostKeyChecking no' {ssh_user}@{server_ip} {command}"
         if remote_host_parameters.get('ssh_key'):
             ssh_key = remote_host_parameters['ssh_key']
-            ssh_command = f"ssh -i {ssh_key} {ssh_user}@{server_ip} \"{command}\""
+            ssh_command = f"ssh -o 'StrictHostKeyChecking no' -i {ssh_key} {ssh_user}@{server_ip} \"{command}\""
 
         try:
             output = subprocess.Popen(f"{ssh_command}",
@@ -59,9 +59,9 @@ class VagrantUtils:
         Returns:
             str: The output of the command.
         """
-        server_ip = remote_host_parameters['server_ip']
-        ssh_password = remote_host_parameters['ssh_password']
-        ssh_user = remote_host_parameters['ssh_user']
+        server_ip = remote_host_parameters['hostname']
+        ssh_password = remote_host_parameters['password']
+        ssh_user = remote_host_parameters['user']
 
         try:
             output = subprocess.Popen(f"sshpass -p {ssh_password} scp -r {instance_dir} {ssh_user}@{server_ip}:{host_instance_dir}",
@@ -106,3 +106,35 @@ class VagrantUtils:
                 output = cls.remote_command(cmd, remote_host_parameters)
                 if not output:
                     return port
+
+    @classmethod
+    def ssh_copy_id(cls, remote_host_parameters: dict, key: Path) -> str:
+        """
+        Copies the SSH key to the remote host.
+
+        Args:
+            remote_host_parameters (dict): The parameters of the remote host.
+            key (Path): The SSH key.
+
+        Returns:
+            str: The output of the command.
+        """
+
+        server_ip = remote_host_parameters['hostname']
+        ssh_user = remote_host_parameters['user']
+        ssh_password = remote_host_parameters['password']
+        port = remote_host_parameters['port']
+        ssh_command = f"sshpass -p {ssh_password} ssh-copy-id -i {key} -p {port} -o 'StrictHostKeyChecking no' -f {ssh_user}@{server_ip}"
+        logger.debug(f"Setting up SSH key on VM")
+
+        try:
+            output = subprocess.Popen(f"{ssh_command}",
+                                        shell=True,
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
+            stdout_data, stderr_data = output.communicate()  # Capture stdout and stderr data
+            stdout_text = stdout_data.decode('utf-8') if stdout_data else ""  # Decode stdout bytes to string
+            return stdout_text
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Command failed: {e.stderr.decode('utf-8')}")
+            return None

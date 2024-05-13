@@ -317,9 +317,9 @@ class VagrantProvider(Provider):
             except Exception as e:
                 raise ValueError('Could not connect to macOS macStadium ARM server: ' + str(e) + '.')
 
-            remote_host_parameters['server_ip'] = server_ip
-            remote_host_parameters['ssh_password'] = ssh_password
-            remote_host_parameters['ssh_user'] = ssh_user
+            remote_host_parameters['hostname'] = server_ip
+            remote_host_parameters['password'] = ssh_password
+            remote_host_parameters['user'] = ssh_user
             remote_host_parameters['host_provider'] = 'macstadium'
 
             if conn_ok:
@@ -356,9 +356,9 @@ class VagrantProvider(Provider):
             except Exception as e:
                 raise ValueError('Could not connect to macOS macStadium Intel server: ' + str(e) + '.')
 
-            remote_host_parameters['server_ip'] = server_ip
-            remote_host_parameters['ssh_password'] = ssh_password
-            remote_host_parameters['ssh_user'] = ssh_user
+            remote_host_parameters['hostname'] = server_ip
+            remote_host_parameters['password'] = ssh_password
+            remote_host_parameters['user'] = ssh_user
             remote_host_parameters['host_provider'] = 'macstadium'
 
             if conn_ok:
@@ -412,9 +412,9 @@ class VagrantProvider(Provider):
             ssh_key = key_path
             subprocess.call(['chmod', '0400', key_path])
 
-            remote_host_parameters['server_ip'] = server_ip
+            remote_host_parameters['hostname'] = server_ip
             remote_host_parameters['ssh_key'] = ssh_key
-            remote_host_parameters['ssh_user'] = ssh_user
+            remote_host_parameters['user'] = ssh_user
 
             if conn_ok:
                 if action == 'create':

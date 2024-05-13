@@ -130,7 +130,7 @@ class VagrantInstance(Instance):
         # Parse the ssh-config.
         ssh_config = {}
         if self.arch == 'ppc64':
-            ssh_config['hostname'] = self.remote_host_parameters['server_ip']
+            ssh_config['hostname'] = self.remote_host_parameters['hostname']
             tmp_port_file = str(self.path) + "/port.txt"
             with open(tmp_port_file, 'r') as f:
                 port = f.read()
@@ -153,7 +153,7 @@ class VagrantInstance(Instance):
                     match = re.search(pattern, output)
                     if match and key == 'hostname':
                         ip = match.group(1).strip()
-                server_ip = self.remote_host_parameters['server_ip']
+                server_ip = self.remote_host_parameters['hostname']
                 tmp_port_file = str(self.path) + "/port.txt"
                 if str(self.host_identifier) == "macstadium":
                     if not Path(tmp_port_file).exists():
@@ -173,6 +173,14 @@ class VagrantInstance(Instance):
                 ssh_config['hostname'] = server_ip
                 ssh_config['user'] = 'vagrant'
                 ssh_config['password'] = 'vagrant'
+                VagrantUtils.ssh_copy_id(ssh_config, self.credentials.key_path)
+                sshd_config_cmd = f"echo 'PasswordAuthentication no\nChallengeResponseAuthentication no\nPubkeyAuthentication yes' | sudo tee -a /etc/ssh/sshd_config"
+                VagrantUtils.remote_command(sshd_config_cmd, ssh_config)
+                sshd_restart_cmd = f"launchctl stop com.openssh.sshd && launchctl start com.openssh.sshd"
+                VagrantUtils.remote_command(sshd_restart_cmd, ssh_config)
+                if self.credentials:
+                    ssh_config['private_key'] = str(self.credentials.key_path)
+                    ssh_config['password'] = None
             elif self.platform == 'windows':
                 for key, pattern in patterns.items():
                     match = re.search(pattern, output)

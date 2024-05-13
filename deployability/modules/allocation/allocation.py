@@ -63,7 +63,7 @@ class Allocator:
         inventory = cls.__generate_inventory(instance, payload.inventory_output, instance_params.composite_name)
         # Validate connection
         check_connection = cls.__check_connection(inventory)
-        track_file = cls.__generate_track_file(instance, payload.provider, payload.track_output)
+        track_file = cls.__generate_track_file(instance, payload.provider, payload.track_output, payload.inventory_output)
         if check_connection is False:
             if payload.rollback:
                 logger.warning(f"Rolling back instance creation.")
@@ -164,7 +164,7 @@ class Allocator:
         return inventory
 
     @staticmethod
-    def __generate_track_file(instance: Instance, provider_name: str,  track_path: Path) -> None:
+    def __generate_track_file(instance: Instance, provider_name: str,  track_path: Path, inventory_path: Path) -> None:
         """
         Generates a track file.
 
@@ -172,6 +172,7 @@ class Allocator:
             instance (Instance): The instance for which the track file is to be generated.
             provider_name (str): The name of the provider.
             track_path (Path): The path where the track file will be generated.
+            inventory_path (Path): The path of the inventory file.
         """
         if track_path is None:
             track_path = Path(instance.path, 'track.yml')
@@ -179,14 +180,16 @@ class Allocator:
             track_path = Path(track_path, 'track.yml')
         if not track_path.parent.exists():
             track_path.parent.mkdir(parents=True, exist_ok=True)
-        ssh_config = instance.ssh_connection_info()
+        with open(inventory_path, 'r') as f:
+            inventory = models.InventoryOutput(**yaml.safe_load(f))
+        port = inventory.ansible_port
         track = models.TrackOutput(identifier=instance.identifier,
                                     provider=provider_name,
                                     instance_dir=str(instance.path),
                                     key_path=str(instance.credentials.key_path),
                                     host_identifier=str(instance.host_identifier),
                                     host_instance_dir=str(instance.host_instance_dir),
-                                    ssh_port=ssh_config.port,
+                                    ssh_port=port,
                                     platform=instance.platform,
                                     arch=instance.arch)
         with open(track_path, 'w') as f:
