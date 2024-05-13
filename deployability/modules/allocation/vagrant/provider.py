@@ -413,7 +413,7 @@ class VagrantProvider(Provider):
             subprocess.call(['chmod', '0400', key_path])
 
             remote_host_parameters['hostname'] = server_ip
-            remote_host_parameters['ssh_key'] = ssh_key
+            remote_host_parameters['private_key'] = ssh_key
             remote_host_parameters['user'] = ssh_user
 
             if conn_ok:
