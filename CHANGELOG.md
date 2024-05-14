@@ -61,6 +61,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Remove false positive from E2E Vulnerability Detection tests ([#5369](https://github.com/wazuh/wazuh-qa/pull/5369)) \- (Framework)
 - Fix E2E Vulnerability Detection Windows package installation error ([#5363](https://github.com/wazuh/wazuh-qa/pull/5363)) \- (Framework)
 - Fix shutdown messages system test ([#5298](https://github.com/wazuh/wazuh-qa/pull/5298)) \- (Framework + Tests)
 - Fix upgrade macOS package cases for vulnerability scanner E2E ([#5334](https://github.com/wazuh/wazuh-qa/pull/5334)) \- (Tests)
