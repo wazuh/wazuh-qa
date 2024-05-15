@@ -128,6 +128,7 @@ class VagrantProvider(Provider):
         instance_params['arch'] = arch
         instance_params['docker_image'] = config.box
         instance_params['ssh_port'] = config.port
+        instance_params['virtualizer'] = config.virtualizer
         return VagrantInstance(InstancePayload(**instance_params), credentials)
 
     @staticmethod
@@ -174,6 +175,7 @@ class VagrantProvider(Provider):
             instance_params['remote_host_parameters'] = remote_host_parameters
             instance_params['arch'] = destroy_parameters.arch
             instance_params['ssh_port'] = destroy_parameters.ssh_port
+            instance_params['virtualizer'] = destroy_parameters.virtualizer
             instance = VagrantInstance(InstancePayload(**instance_params))
         logger.debug(f"Destroying instance {destroy_parameters.identifier}")
         instance.delete()
@@ -211,8 +213,7 @@ class VagrantProvider(Provider):
         environment = Environment(loader=FileSystemLoader(cls.TEMPLATES_DIR))
         if config.platform == 'macos':
             if config.arch == 'amd64':
-                virtualbox_boxes = ['development/macos-high-sierra', 'development/macos-mojave', 'development/macos-sierra', 'development/macos-sierra_cmake', 'development/macos-sierra_gcc9']
-                if config.box not in virtualbox_boxes:
+                if config.virtualizer == 'parallels':
                     template = environment.get_template("vagrant_parallels_intel.j2")
                 else:
                     template = environment.get_template("vagrant_Virtual_box.j2")
@@ -239,9 +240,9 @@ class VagrantProvider(Provider):
         size_specs = cls._get_size_specs(params.size)
         os_specs = cls._get_os_specs(params.composite_name)
         # Parse the configuration.
-        config['ip'] = cls.__get_available_ip()
         config['box'] = str(os_specs['box'])
         config['box_version'] = str(os_specs['box_version'])
+        config['virtualizer'] = str(os_specs['virtualizer'])
         config['private_key'] = str(credentials.key_path)
         config['public_key'] = str(credentials.key_path.with_suffix('.pub'))
         config['cpu'] = size_specs['cpu']
@@ -249,12 +250,14 @@ class VagrantProvider(Provider):
         config['name'] = instance_id
         config['platform'] = params.composite_name.split("-")[0]
         config['arch'] = params.composite_name.split("-")[3]
+        config['ip'] = cls.__get_available_ip()
 
-        if params.composite_name.startswith("macos") and params.composite_name.endswith("amd64") or params.composite_name.split("-")[3] == 'ppc64':
+        if config['platform'] == 'macos' and config['virtualizer'] == 'virtualbox' or config['virtualizer'] == 'docker':
             tmp_port_file = str(instance_dir) + "/port.txt"
             config['port'] = VagrantUtils.get_port(remote_host_parameters, config['arch'])
             with open(tmp_port_file, 'w') as f:
                 f.write(config['port'])
+            config['ip'] = remote_host_parameters['server_ip']
 
         return VagrantConfig(**config)
 

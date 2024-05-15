@@ -47,6 +47,7 @@ class VagrantInstance(Instance):
         self.platform: str = instance_parameters.platform
         self.arch: str = instance_parameters.arch
         self.docker_image: str = instance_parameters.docker_image
+        self.virtualizer: str = instance_parameters.virtualizer
 
     def start(self) -> None:
         """
@@ -105,7 +106,7 @@ class VagrantInstance(Instance):
         if str(self.host_identifier) == "macstadium":
             logger.debug(f"Deleting remote directory {self.host_instance_dir}")
             VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.remote_host_parameters)
-            if self.arch == 'arm64':
+            if self.virtualizer == 'parallels':
                 logger.debug(f"Killing remote process on port {self.ssh_port}")
                 proccess = VagrantUtils.remote_command(f"sudo lsof -Pi :{self.ssh_port} -sTCP:LISTEN -t", self.remote_host_parameters)
                 VagrantUtils.remote_command(f"sudo kill -9 {proccess}", self.remote_host_parameters)
@@ -170,7 +171,7 @@ class VagrantInstance(Instance):
                 if str(self.host_identifier) == "macstadium":
                     if not Path(tmp_port_file).exists():
                         port = VagrantUtils.get_port(self.remote_host_parameters)
-                        cmd = f"sudo /usr/bin/ssh -i /Users/jenkins/.ssh/localhost -L {server_ip}:{port}:{ip}:22 -N 127.0.0.1 -f"
+                        cmd = f"/usr/bin/ssh -i /Users/jenkins/.ssh/localhost -L {server_ip}:{port}:{ip}:22 -N 127.0.0.1 -f"
                         VagrantUtils.remote_command(cmd, self.remote_host_parameters)
                         with open(tmp_port_file, 'w') as f:
                             f.write(port)

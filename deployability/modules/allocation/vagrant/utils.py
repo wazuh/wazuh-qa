@@ -34,7 +34,7 @@ class VagrantUtils:
             'username': remote_host_parameters['ssh_user']
         }
         if remote_host_parameters.get('ssh_key'):
-            ssh_parameters['key_filename'] = remote_host_parameters['ssh_key']
+            ssh_parameters['key_filename'] = str(remote_host_parameters['ssh_key'])
         else:
             ssh_parameters['password'] = remote_host_parameters['ssh_password']
 

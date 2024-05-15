@@ -2,11 +2,14 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-import yaml
-import paramiko, logging, time
-import winrm
-
+import time
+import os
 from pathlib import Path
+
+import yaml
+import paramiko
+import logging
+import winrm
 
 from .aws.provider import AWSProvider, AWSConfig
 from .generic import Instance, Provider, models
@@ -60,10 +63,12 @@ class Allocator:
         instance.start()
         logger.info(f"Instance {instance.identifier} started.")
         # Generate the inventory and track files.
-        inventory = cls.__generate_inventory(instance, payload.inventory_output, instance_params.composite_name)
+        inventory_path = cls.__get_auxiliar_files_path(instance_params.inventory_output, instance, 'inventory')
+        inventory = cls.__generate_inventory(instance, inventory_path, instance_params.composite_name)
         # Validate connection
         check_connection = cls.__check_connection(inventory)
-        track_file = cls.__generate_track_file(instance, payload.provider, payload.track_output)
+        track_path = cls.__get_auxiliar_files_path(instance_params.track_output, instance, 'track')
+        track_file = cls.__generate_track_file(instance, payload.provider, track_path, inventory_path)
         if check_connection is False:
             if payload.rollback:
                 logger.warning(f"Rolling back instance creation.")
@@ -122,10 +127,6 @@ class Allocator:
             inventory_path (Path): The path where the inventory file will be generated.
             composite_name (str): Composite name of the instance to be provisioned.
         """
-        if inventory_path is None:
-            inventory_path = Path(instance.path, 'inventory.yml')
-        if not str(inventory_path).endswith('.yml') and not str(inventory_path).endswith('.yaml'):
-            inventory_path = Path(inventory_path, 'inventory.yml')
         if not inventory_path.parent.exists():
             inventory_path.parent.mkdir(parents=True, exist_ok=True)
         ssh_config = instance.ssh_connection_info()
@@ -164,7 +165,7 @@ class Allocator:
         return inventory
 
     @staticmethod
-    def __generate_track_file(instance: Instance, provider_name: str,  track_path: Path) -> None:
+    def __generate_track_file(instance: Instance, provider_name: str,  track_path: Path, inventory_path: Path) -> None:
         """
         Generates a track file.
 
@@ -172,23 +173,23 @@ class Allocator:
             instance (Instance): The instance for which the track file is to be generated.
             provider_name (str): The name of the provider.
             track_path (Path): The path where the track file will be generated.
+            inventory_path (Path): The path of the inventory file.
         """
-        if track_path is None:
-            track_path = Path(instance.path, 'track.yml')
-        if not str(track_path).endswith('.yml') and not str(track_path).endswith('.yaml'):
-            track_path = Path(track_path, 'track.yml')
         if not track_path.parent.exists():
             track_path.parent.mkdir(parents=True, exist_ok=True)
-        ssh_config = instance.ssh_connection_info()
+        with open(str(inventory_path), 'r') as f:
+            inventory = models.InventoryOutput(**yaml.safe_load(f))
+        port = inventory.ansible_port
         track = models.TrackOutput(identifier=instance.identifier,
                                     provider=provider_name,
                                     instance_dir=str(instance.path),
                                     key_path=str(instance.credentials.key_path),
                                     host_identifier=str(instance.host_identifier),
                                     host_instance_dir=str(instance.host_instance_dir),
-                                    ssh_port=ssh_config.port,
+                                    ssh_port=port,
                                     platform=instance.platform,
-                                    arch=instance.arch)
+                                    arch=instance.arch,
+                                    virtualizer=instance.virtualizer)
         with open(track_path, 'w') as f:
             yaml.dump(track.model_dump(), f)
         if Path(str(instance.path) + "/port.txt").exists():
@@ -258,3 +259,33 @@ class Allocator:
 
         logger.error(f'Connection attempts failed after {attempts} tries. Connection timeout.')
         return False
+
+    @staticmethod
+    def __get_auxiliar_files_path(path: Path, instance: Instance, file: str) -> Path:
+        """
+        Get the path of the auxiliar files.
+
+        Args:
+            path (Path): The path of the instance.
+            instance (Instance): The instance object.
+            file (str): The type of file.
+
+        Returns:
+            Path: The path of the auxiliar files.
+        """
+        if path is None:
+            return Path(os.path.join(instance.path, file + '.yml'))
+        if path.exists() and path.is_dir():
+            return Path(os.path.join(path, file + '.yml'))
+        if str(path).endswith('.yml') or str(path).endswith('.yaml'):
+            if file in str(path):
+                return path
+            elif file == 'inventory' and 'track' in str(path):
+                return Path(str(path).replace('track', 'inventory'))
+            elif file == 'track' and 'inventory' in str(path):
+                return Path(str(path).replace('inventory', 'track'))
+            else:
+                base, ext = os.path.splitext(path)
+                return Path(f"{base}-{file}{ext}")
+        else:
+            raise ValueError(f"Invalid path for auxiliary file, must be a yaml file: {path}")

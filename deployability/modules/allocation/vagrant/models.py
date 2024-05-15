@@ -20,6 +20,7 @@ class VagrantConfig(ProviderConfig):
     port: int = None
     platform: str
     arch: str
+    virtualizer: str
 
     @field_validator('public_key', mode='before')
     @classmethod
