@@ -112,6 +112,21 @@ LOGCOLLECTOR_CSV_HEADERS = {
     },
 }
 
+WAZUHDB_CSV_HEADERS = {
+    'database_queries_counts': {
+        'title': 'Database queries counts',
+        'columns': [
+            'Received queries', 'Agent queries'
+        ]
+    },
+    'agent_queries_breakdown': {
+        'title': 'Agent Queries Breakdown',
+        'columns': [
+            'db-begin', 'db-close', 'db-commit', 'db-remove', 'db-sql', 'db-vacuum', 'db-get_fragmentation'
+        ]
+    }
+}
+
 
 class DataVisualizer:
     """Class that allows to visualize the data collected using the wazuh_metrics tool.
@@ -342,6 +357,13 @@ class DataVisualizer:
         """Function to plot the information from the api.log file."""
         self._plot_data(elements=['endpoint'], generic_label='Queries')
 
+    def _plot_wazuhdb_dataset(self):
+        """Function to plot the statistics from wazuh-wazuhdb."""
+        for element in WAZUHDB_CSV_HEADERS:
+            columns = WAZUHDB_CSV_HEADERS[element]['columns']
+            title = WAZUHDB_CSV_HEADERS[element]['title']
+            self._plot_data(elements=columns, title=title, generic_label=element)
+
     def plot(self):
         """Public function to plot the dataset."""
         if self.target == 'binary':
@@ -358,6 +380,8 @@ class DataVisualizer:
             self._plot_cluster_dataset()
         elif self.target == 'api':
             self._plot_api_dataset()
+        elif self.target == 'wazuhdb':
+            self._plot_wazuhdb_dataset()
         else:
             raise AttributeError(f"Invalid target {self.target}")
 
