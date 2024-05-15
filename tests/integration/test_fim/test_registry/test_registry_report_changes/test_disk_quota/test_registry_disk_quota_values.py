@@ -104,7 +104,7 @@ def get_configuration(request):
     return request.param
 
 
-@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by #4077.")
+
 @pytest.mark.parametrize("size", [(4096), (32768)])
 @pytest.mark.parametrize("key, subkey, arch, value_name",
                          [

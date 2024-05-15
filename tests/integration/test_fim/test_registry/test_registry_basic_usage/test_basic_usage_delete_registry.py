@@ -102,7 +102,6 @@ def get_configuration(request):
 
 
 # test
-@pytest.mark.skipif(sys.platform == 'win32', reason="Blocked by #4077.")
 @pytest.mark.parametrize('key, subkey, arch, value_list', [
     (key, sub_key_1, KEY_WOW64_64KEY, ['value1', 'value2', 'value3']),
     (key, sub_key_2, KEY_WOW64_32KEY, ['value1', 'value2', 'value3']),

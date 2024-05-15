@@ -127,7 +127,6 @@ def get_configuration(request):
 
 
 # Tests
-@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by #4077.")
 @pytest.mark.parametrize('key', [key])
 @pytest.mark.parametrize('subkey, key_checkers', [
     (registry, checkers_key),
@@ -197,7 +196,6 @@ def test_ambiguous_complex_checks(key, subkey, key_checkers,
                        options=key_checkers, time_travel=True)
 
 
-@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by #4077.")
 @pytest.mark.parametrize('key', [key])
 @pytest.mark.parametrize('subkey, value_list, report,', [
     (registry, ['test_value'], True),
@@ -281,7 +279,6 @@ def test_ambiguous_report_changes(key, subkey, value_list, report,
                        value_list=value_list, time_travel=True, validators_after_update=validator_after_update)
 
 
-@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by #4077.")
 @pytest.mark.parametrize('key', [key])
 @pytest.mark.parametrize('subkey, tag', [
     (registry, None),

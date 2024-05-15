@@ -103,7 +103,7 @@ def get_configuration(request):
 
 
 # Test
-@pytest.mark.skipif(sys.platform=='win32', reason="Blocked by #4077.")
+
 @pytest.mark.parametrize('tags_to_apply', [({'multiple_keys'})])
 def test_multiple_keys(tags_to_apply, get_configuration, configure_environment, restart_syscheckd):
     '''
