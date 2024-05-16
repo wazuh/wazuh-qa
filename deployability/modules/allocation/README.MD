@@ -366,6 +366,16 @@ python3 modules/allocation/main.py --action create --provider vagrant --size lar
 
 [Allocation.drawio.zip](https://github.com/wazuh/wazuh-qa/files/14868775/Allocation.drawio.zip)
 
+### Known issues
+
+Currently, the Allocation module may encounter the following issues:
+
+1. **Rocky Linux 9 ARM instance fails to start with `micro` size on AWS**
+
+   - **Issue:** When attempting to launch a Rocky Linux 9 ARM instance on AWS using the `micro` size, the instance fails to start. This occurs because the specified `micro` size is not supported by the AMI.
+   - **Symptoms:** The Allocator module fails to launch the instance. The error reported says that "The instance configuration for this AWS Marketplace product is not supported".
+   - **Workaround:**: This AMI does not support the `micro` size. Choose the `small` size or higher to launch this instance.
+
 
 ### License
 
