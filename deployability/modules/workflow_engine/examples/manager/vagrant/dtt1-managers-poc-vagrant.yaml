@@ -31,8 +31,11 @@ tasks:
           - provider: "{infra-provider}"
           - size: large
           - composite-name: "{manager}"
+          - instance-name: "{manager}"
           - inventory-output: "{working-dir}/manager-{manager}/inventory.yaml"
           - track-output: "{working-dir}/manager-{manager}/track.yaml"
+          - label-termination-date: "1d"
+          - label-team: "qa"
     on-error: "abort-all"
     foreach:
       - variable: manager-os
@@ -64,7 +67,7 @@ tasks:
           - component: "manager"
           - wazuh-version: "4.7.4"
           - wazuh-revision: "40717"
-          - live: "True"
+          - live: False
     depends-on:
       - "allocate-manager-linux-ubuntu-20.04-amd64"
       - "allocate-manager-linux-ubuntu-22.04-amd64"
@@ -78,3 +81,4 @@ tasks:
       - "allocate-manager-linux-debian-11-amd64"
       - "allocate-manager-linux-debian-12-amd64"
       - "allocate-manager-linux-oracle-9-amd64"
+
