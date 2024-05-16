@@ -29,12 +29,11 @@ class WazuhCentralComponents:
         release = '.'.join(wazuh_version.split('.')[:2])
 
 
-        logger.info(f'Installing Manager with https://{s3_url}/{release}/wazuh-install.sh')
+        logger.info(f'Installing the Wazuh manager with https://{s3_url}/{release}/wazuh-install.sh')
 
         if HostInformation.has_curl(inventory_path):
             commands = [
-                f"curl -sO https://{s3_url}/{release}/wazuh-install.sh",
-                f"sudo bash ./wazuh-install.sh -a --ignore-check"
+                f"curl -sO https://{s3_url}/{release}/wazuh-install.sh && sudo bash ./wazuh-install.sh -a --ignore-check"
             ]
         else:
             commands = [
