@@ -15,7 +15,7 @@ from .utils import Utils
 class WazuhManager:
 
     @staticmethod
-    def install_manager(inventory_path, node_name, wazuh_version) -> None:
+    def install_manager(inventory_path, node_name, wazuh_version, live: bool) -> None:
         """
         Installs Wazuh Manager in the host
 
@@ -25,17 +25,25 @@ class WazuhManager:
             wazuh_version (str): major.minor.patch
 
         """
-        wazuh_version = '.'.join(wazuh_version.split('.')[:2])
         os_name = HostInformation.get_os_name_from_inventory(inventory_path)
+
+        if live == "False":
+            s3_url = 'packages-dev.wazuh.com'
+        else:
+            s3_url = 'packages.wazuh.com'
+
+        release = '.'.join(wazuh_version.split('.')[:2])
+
+        logger.info(f'Installing Manager with https://{s3_url}/{release}/wazuh-install.sh')
 
         if os_name == 'debian':
             commands = [
-                    f"wget https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh",
+                    f"wget https://{s3_url}/{release}/wazuh-install.sh",
                     f"bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
             ]
         else:
             commands = [
-                    f"curl -sO https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh",
+                    f"curl -sO https://{s3_url}/{release}/wazuh-install.sh",
                     f"bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
             ]
         logger.info(f'Installing Manager in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
@@ -43,7 +51,7 @@ class WazuhManager:
 
 
     @staticmethod
-    def install_managers(inventories_paths=[], node_names=[], wazuh_versions=[]) -> None:
+    def install_managers(inventories_paths=[], node_names=[], wazuh_versions=[], live=[]) -> None:
         """
         Install Wazuh Managers in the hosts
 
@@ -56,7 +64,7 @@ class WazuhManager:
         for inventory in inventories_paths:
             for node_name in node_names:
                 for wazuh_version in wazuh_versions:
-                    WazuhManager.install_manager(inventory, node_name, wazuh_version)
+                    WazuhManager.install_manager(inventory, node_name, wazuh_version, live[index])
 
 
     @staticmethod
@@ -105,7 +113,7 @@ class WazuhManager:
 
     @staticmethod
     def _install_manager_callback(wazuh_params, manager_name, manager_params):
-        WazuhManager.install_manager(manager_params, manager_name, wazuh_params['wazuh_version'])
+        WazuhManager.install_manager(manager_params, manager_name, wazuh_params['wazuh_version'], wazuh_params['live'])
 
 
     @staticmethod

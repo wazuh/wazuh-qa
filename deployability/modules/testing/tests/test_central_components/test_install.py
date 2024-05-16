@@ -21,12 +21,14 @@ def wazuh_params(request):
     wazuh_revision = request.config.getoption('--wazuh_revision')
     dependencies = request.config.getoption('--dependencies')
     targets = request.config.getoption('--targets')
+    live = request.config.getoption('--live')
 
     return {
         'wazuh_version': wazuh_version,
         'wazuh_revision': wazuh_revision,
         'dependencies': dependencies,
-        'targets': targets
+        'targets': targets,
+        'live': live
     }
 
 
@@ -62,7 +64,7 @@ def test_installation(wazuh_params):
 
     # Install central components and perform checkfile testing
     for _, manager_params in wazuh_params['managers'].items():
-        WazuhCentralComponents.install_aio(manager_params, wazuh_params['wazuh_version'])
+        WazuhCentralComponents.install_aio(manager_params, wazuh_params['wazuh_version'], wazuh_params['live'])
 
     # Validation of directory of the components
     for manager in wazuh_params['managers'].values():

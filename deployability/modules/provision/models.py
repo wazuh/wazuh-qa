@@ -11,7 +11,7 @@ class ComponentInfo(BaseModel):
     type: str = "package"
     version: str = ""
     dependencies: dict | None = None
-    live : bool = False
+    live : bool = True
 
 
 class InputPayload(BaseModel):

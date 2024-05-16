@@ -15,12 +15,12 @@ class WazuhAgent:
     @staticmethod
     def install_agent(inventory_path, agent_name, wazuh_version, wazuh_revision, live) -> None:
 
-        if live:
-            s3_url = 'packages'
-            release = wazuh_version[:1] + ".x"
-        else:
+        if live == "False":
             s3_url = 'packages-dev'
-            release = 'pre-release'
+        else:
+            s3_url = 'packages'
+
+        release = '.'.join(wazuh_version.split('.')[:2])
 
         os_type = HostInformation.get_os_type(inventory_path)
         architecture = HostInformation.get_architecture(inventory_path)
@@ -122,7 +122,7 @@ class WazuhAgent:
         elif os_type == 'macos':
             try:
                 if 'amazonaws' in manager_host and 'amazonaws' in agent_host:
-                    host_ip = HostInformation.get_internal_ip_from_aws_dns(manager_host) 
+                    host_ip = HostInformation.get_internal_ip_from_aws_dns(manager_host)
                 else:
                     host_ip = HostInformation.get_public_ip_from_aws_dns(manager_host)
                 commands = [
