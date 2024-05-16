@@ -15,7 +15,7 @@ from .utils import Utils
 class WazuhManager:
 
     @staticmethod
-    def install_manager(inventory_path, node_name, wazuh_version, live: bool) -> None:
+    def install_manager(inventory_path, node_name, wazuh_version, live) -> None:
         """
         Installs Wazuh Manager in the host
 
