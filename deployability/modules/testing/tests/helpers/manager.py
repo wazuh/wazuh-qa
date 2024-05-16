@@ -49,7 +49,7 @@ class WazuhManager:
 
 
     @staticmethod
-    def install_managers(inventories_paths=[], node_names=[], wazuh_versions=[], live=[]) -> None:
+    def install_managers(inventories_paths=[], node_names=[], wazuh_versions=[]) -> None:
         """
         Install Wazuh Managers in the hosts
 
@@ -62,7 +62,7 @@ class WazuhManager:
         for inventory in inventories_paths:
             for node_name in node_names:
                 for wazuh_version in wazuh_versions:
-                    WazuhManager.install_manager(inventory, node_name, wazuh_version, live[index])
+                    WazuhManager.install_manager(inventory, node_name, wazuh_version)
 
 
     @staticmethod
