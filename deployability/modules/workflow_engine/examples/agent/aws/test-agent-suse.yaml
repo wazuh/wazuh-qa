@@ -83,7 +83,7 @@ tasks:
             - component: wazuh-manager
               type: assistant
               version: 4.7.4
-              live: True
+              live: False
     depends-on:
       - "allocate-manager-{manager-os}"
     on-error: "abort-all"
