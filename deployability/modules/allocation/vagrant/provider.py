@@ -240,6 +240,7 @@ class VagrantProvider(Provider):
         size_specs = cls._get_size_specs(params.size)
         os_specs = cls._get_os_specs(params.composite_name)
         # Parse the configuration.
+        config['ip'] = cls.__get_available_ip()
         config['box'] = str(os_specs['box'])
         config['box_version'] = str(os_specs['box_version'])
         config['virtualizer'] = str(os_specs['virtualizer'])
@@ -250,7 +251,6 @@ class VagrantProvider(Provider):
         config['name'] = instance_id
         config['platform'] = params.composite_name.split("-")[0]
         config['arch'] = params.composite_name.split("-")[3]
-        config['ip'] = cls.__get_available_ip()
 
         if config['platform'] == 'macos' and config['virtualizer'] == 'virtualbox' or config['virtualizer'] == 'docker':
             tmp_port_file = str(instance_dir) + "/port.txt"
