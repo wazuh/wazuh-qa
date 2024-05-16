@@ -280,23 +280,23 @@ If one wishes to execute the allocaation module without installing the Workflow 
 
   - --track-output
     This argument allows us to define which path we want the track file to write to. By default, it is saved in the instance directory, for example: **/tmp/wazuh-qa/allocation-test-4262/track.yml**
-      Valid options:
-        - Custom dir: **~/allocation-test**
-        - Custom filename: **~/allocation-test/manager-track.yml**
-        - Default (without parameter): **\<working-dir>/\<instance-dir>/track.yml**
-        - File extension: **.yml** or **.yaml**
-        - The file name must contain **track** string for easy identification
+    Valid options:
+      - Custom dir: **~/allocation-test**
+      - Custom filename: **~/allocation-test/manager-track.yml**
+      - Default (without parameter): **\<working-dir>/\<instance-dir>/track.yml**
+      - File extension: **.yml** or **.yaml**
+      - The file name must contain **track** string for easy identification
 
     >Note: this argument is mandatory for delete action.
 
   - --inventory-output
     This argument allows us to define which path we want the inventory file to write to. By default, it is saved in the instance directory, for example: **/tmp/wazuh-qa/allocation-test-4262/inventory.yml**
-      Valid options:
-        - Custom dir: **~/allocation-test**
-        - Custom filename: **~/allocation-test/manager-inventory.yml**
-        - Default (without parameter): **\<working-dir>/\<instance-dir>/inventory.yml**
-        - File extension: **.yml** or **.yaml**
-        - The file name must contain **inventory** string for easy identification
+    Valid options:
+      - Custom dir: **~/allocation-test**
+      - Custom filename: **~/allocation-test/manager-inventory.yml**
+      - Default (without parameter): **\<working-dir>/\<instance-dir>/inventory.yml**
+      - File extension: **.yml** or **.yaml**
+      - The file name must contain **inventory** string for easy identification
 
   - --working-dir
     This argument allows us to define in which directory the files referring to the VM will be generated. By default, **/tmp/wazuh-qa**
