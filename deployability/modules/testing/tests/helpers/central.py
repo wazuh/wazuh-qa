@@ -37,8 +37,7 @@ class WazuhCentralComponents:
             ]
         else:
             commands = [
-                f"wget https://{s3_url}/{release}/wazuh-install.sh",
-                f"sudo bash ./wazuh-install.sh -a --ignore-check"
+                f"wget https://{s3_url}/{release}/wazuh-install.sh && sudo bash ./wazuh-install.sh -a --ignore-check"
             ]
 
 
