@@ -35,7 +35,7 @@ class WazuhAgent:
                 ])
             elif distribution == 'rpm' and 'arm64' in architecture:
                 commands.extend([
-                    f"curl -o wazuh-agent-{wazuh_version}-1aarch64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.aarch64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.aarch64.rpm"
+                    f"curl -o wazuh-agent-{wazuh_version}-1.aarch64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.aarch64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.aarch64.rpm"
                 ])
             elif distribution == 'deb' and 'amd64' in architecture:
                 commands.extend([
