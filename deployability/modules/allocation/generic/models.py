@@ -44,6 +44,7 @@ class TrackOutput(BaseModel):
     ssh_port: int | None = None
     platform: str
     arch: str
+    virtualizer: str | None = None
 
 
 class InputPayload(BaseModel):
@@ -125,6 +126,7 @@ class InstancePayload(BaseModel):
     arch: str | None = None
     user: str | None = None
     docker_image: str | None = None
+    virtualizer: str | None = None
 
     @field_validator('ssh_port', mode='before')
     def validate_port(cls, value) -> str | None:

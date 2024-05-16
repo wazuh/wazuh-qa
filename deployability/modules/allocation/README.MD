@@ -43,7 +43,7 @@ To use this module, you should use a Debian-based system, we recommend using Ubu
   - cat
   - vagrant
   - chmod
-  
+
   These commands must be available to run on the Host Operating System.
 
 #### Use the Allocation module through the Workflow engine
@@ -269,7 +269,7 @@ If one wishes to execute the allocaation module without installing the Workflow 
     This argument defines the action that the module will perform. Allowed values are **create** or **delete**. By default: **create**
 
   - --ssh-key
-    This argument allows us to use a custom ssh key for the VM.
+    This argument allows us to use a custom ssh key for the VM. <br>
     Considerations:
     - must enter the path where the key is located, with the name of the complete key: **~/.ssh/allocation_test**
     - on the same path you have to have the pair of keys (private and public key with the same name): **~/.ssh/allocation_test** **~/.ssh/allocation_test.pub**
@@ -279,12 +279,24 @@ If one wishes to execute the allocaation module without installing the Workflow 
     This argument allows us to provide a configuration file with all the VM definitions.
 
   - --track-output
-    This argument allows us to define which path we want the track file to write to. By default, it is saved in the instance directory, for example: **/tmp/wazuh-qa/VAGRANT-F0753C57-713E-4294-9EA9-89D93D384844/track.yml**
+    This argument allows us to define which path we want the track file to write to. By default, it is saved in the instance directory, for example: **/tmp/wazuh-qa/allocation-test-4262/track.yml** <br>
+    Valid options:
+      - Custom dir: **~/allocation-test**
+      - Custom filename: **~/allocation-test/manager-track.yml**
+      - Default (without parameter): **\<working-dir>/\<instance-dir>/track.yml**
+      - File extension: **.yml** or **.yaml**
+      - The file name must contain **track** string for easy identification
 
     >Note: this argument is mandatory for delete action.
 
   - --inventory-output
-    This argument allows us to define which path we want the inventory file to write to. By default, it is saved in the instance directory, for example: **/tmp/wazuh-qa/VAGRANT-F0753C57-713E-4294-9EA9-89D93D384844/inventory.yml**
+    This argument allows us to define which path we want the inventory file to write to. By default, it is saved in the instance directory, for example: **/tmp/wazuh-qa/allocation-test-4262/inventory.yml** <br>
+    Valid options:
+      - Custom dir: **~/allocation-test**
+      - Custom filename: **~/allocation-test/manager-inventory.yml**
+      - Default (without parameter): **\<working-dir>/\<instance-dir>/inventory.yml**
+      - File extension: **.yml** or **.yaml**
+      - The file name must contain **inventory** string for easy identification
 
   - --working-dir
     This argument allows us to define in which directory the files referring to the VM will be generated. By default, **/tmp/wazuh-qa**
