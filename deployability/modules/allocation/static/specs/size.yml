@@ -17,21 +17,21 @@ aws:
       type: t2.small
       storage: 20
     arm64:
-      type: a1.medium
+      type: t4g.micro
       storage: 20
   small:
     amd64:
       type: t3.small
       storage: 20
     arm64:
-      type: a1.large
+      type: t4g.small
       storage: 20
   medium:
     amd64:
       type: t3a.medium
       storage: 20
     arm64:
-      type: a1.xlarge
+      type: t4g.medium
       storage: 20
   large:
     amd64:

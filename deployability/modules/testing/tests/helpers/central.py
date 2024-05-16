@@ -10,7 +10,7 @@ from modules.testing.utils import logger
 class WazuhCentralComponents:
 
     @staticmethod
-    def install_aio(inventory_path, wazuh_version) -> None:
+    def install_aio(inventory_path, wazuh_version, live) -> None:
         """
         Installs Wazuh central components (AIO) in the host
 
@@ -19,22 +19,30 @@ class WazuhCentralComponents:
             wazuh_version (str): major.minor.patch
 
         """
-        wazuh_version = '.'.join(wazuh_version.split('.')[:2])
         os_name = HostInformation.get_os_name_from_inventory(inventory_path)
+
+        if live == "False":
+            s3_url = 'packages-dev.wazuh.com'
+        else:
+            s3_url = 'packages.wazuh.com'
+
+        release = '.'.join(wazuh_version.split('.')[:2])
+
+
+        logger.info(f'Installing the Wazuh manager with https://{s3_url}/{release}/wazuh-install.sh')
 
         if HostInformation.has_curl(inventory_path):
             commands = [
-                f"curl -sO https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh && sudo bash ./wazuh-install.sh -a --ignore-check"
+                f"curl -sO https://{s3_url}/{release}/wazuh-install.sh && sudo bash ./wazuh-install.sh -a --ignore-check"
             ]
         else:
             commands = [
-                f"wget https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh && sudo bash ./wazuh-install.sh -a --ignore-check"
+                f"wget https://{s3_url}/{release}/wazuh-install.sh && sudo bash ./wazuh-install.sh -a --ignore-check"
             ]
 
 
         logger.info(f'Installing Wazuh central components (AIO) in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         ConnectionManager.execute_commands(inventory_path, commands)
-
 
     @staticmethod
     def uninstall_aio(inventory_path) -> None:
@@ -53,7 +61,7 @@ class WazuhCentralComponents:
 
     @staticmethod
     def _install_aio_callback(wazuh_params, host_params):
-        WazuhCentralComponents.install_aio(host_params, wazuh_params['wazuh_version'])
+        WazuhCentralComponents.install_aio(host_params, wazuh_params['wazuh_version'], wazuh_params['live'])
 
 
     @staticmethod

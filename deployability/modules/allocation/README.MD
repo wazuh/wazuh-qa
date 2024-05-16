@@ -182,13 +182,20 @@ If one wishes to execute the allocaation module without installing the Workflow 
 - Local deployment (Vagrant)
 
   ```bash
-  python3 modules/allocation/main.py --action create --provider '{{ vagrant }}' --size '{{ large }}' --composite-name '{{ composite-name }}' --inventory-output '{{ inventory }}' --track-output '{{ track }}'
+  python3 modules/allocation/main.py --action create --provider '{{ vagrant }}' --size '{{ large }}' --composite-name '{{ composite-name }}' --instance-name '{{ name }}' --inventory-output '{{ inventory }}' --track-output '{{ track }}'
 
   ```
 
+  >Note: In the case of Vagrant it is mandatory to specify either --instance-name or --label-issue parameters.
+
   Example:
   ```bash
-  python3 modules/allocation/main.py --action create --provider vagrant --size large --composite-name linux-ubuntu-22.04-amd64 --inventory-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml" --track-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml"
+  python3 modules/allocation/main.py --action create --provider vagrant --size large --composite-name linux-ubuntu-22.04-amd64 --instance-name "ubuntu_2204_amd_large" --inventory-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml" --track-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml"
+  ```
+
+  Example 2:
+  ```bash
+  python3 modules/allocation/main.py --action create --provider vagrant --size micro --composite-name linux-ubuntu-22.04-amd64 --label-issue "https://github.com/wazuh/internal-devel-requests/issues/1115" --inventory-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml" --track-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml"
   ```
 
 - AWS deployment
@@ -207,6 +214,16 @@ If one wishes to execute the allocaation module without installing the Workflow 
   Example:
   ```bash
   python3 modules/allocation/main.py --action create --provider aws --size large --composite-name linux-ubuntu-22.04-amd64 --inventory-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml" --track-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml" --label-termination-date "2024-03-20 21:00:00"  --label-team devops
+  ```
+
+  Example 2:
+  ```bash
+  python3 modules/allocation/main.py --action create --provider aws --size small --composite-name linux-ubuntu-22.04-amd64 --inventory-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml" --track-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml" --label-termination-date "3d"  --label-team devops --label-issue "https://github.com/wazuh/internal-devel-requests/issues/1115"
+  ```
+
+  Example 3:
+  ```bash
+  python3 modules/allocation/main.py --action create --provider aws --size small --composite-name linux-ubuntu-22.04-amd64 --inventory-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml" --track-output "/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml" --label-termination-date "1d"  --label-team devops --instance-name "ubuntu_2204_amd_large"
   ```
 
 2. Delete
@@ -273,7 +290,7 @@ If one wishes to execute the allocaation module without installing the Workflow 
     This argument allows us to define in which directory the files referring to the VM will be generated. By default, **/tmp/wazuh-qa**
 
   - --label-issue
-    This argument is only used in the case of AWS and is not mandatory, it allows us to create a label to reference the created instance to an issue on GitHub. It has to be a GitHub URL of a Wazuh repository, for example: **https://github.com/wazuh/internal-devel-requests/issues/1008**
+    This argument is mandatory for the Vagrant deploy if the **--instance-name** is not specified. For AWS deploy, it is not mandatory. It allows to create a label to reference the created instance to an issue on GitHub. It has to be a GitHub URL of a Wazuh repository, for example: **https://github.com/wazuh/internal-devel-requests/issues/1008**
 
   - --label-team
     This argument it is mandatory for AWS deploy, allows you to set the team that owns the VM to be able to track it. The valid options are: **qa**, **core**, **framework**, **devops**, **frontend**, **operations**, **cloud**, **threat-intel**, **marketing**, **documentation**
@@ -282,7 +299,7 @@ If one wishes to execute the allocaation module without installing the Workflow 
     This argument it is mandatory for AWS deploy, allows you to define the date on which the machine can be deleted. The allowed values are **1d** (where the **1** refers to the number of days the machine is needed) or with the following format **"2024-03-20 21:00:00"**
 
   - --instance-name
-    This argument allows us to define a custom name for the instance, if this argument is not used, the instance name is defined by other parameters entered, such as --label-issue or --composite-name.
+    This argument is mandatory for the Vagrant if the **--label-issue** is not specified. It allows us to define a custom name for the instance. In AWS deploy, if this argument is not used, the instance name is defined by other parameters entered, such as --label-issue or --composite-name.
 ---
 
 ### Technical documentation
@@ -348,6 +365,16 @@ python3 modules/allocation/main.py --action create --provider vagrant --size lar
 
 
 [Allocation.drawio.zip](https://github.com/wazuh/wazuh-qa/files/14868775/Allocation.drawio.zip)
+
+### Known issues
+
+Currently, the Allocation module may encounter the following issues:
+
+1. **Rocky Linux 9 ARM instance fails to start with `micro` size on AWS**
+
+   - **Issue:** When attempting to launch a Rocky Linux 9 ARM instance on AWS using the `micro` size, the instance fails to start. This occurs because the specified `micro` size is not supported by the AMI.
+   - **Symptoms:** The Allocator module fails to launch the instance. The error reported says that "The instance configuration for this AWS Marketplace product is not supported".
+   - **Workaround:**: This AMI does not support the `micro` size. Choose the `small` size or higher to launch this instance.
 
 
 ### License

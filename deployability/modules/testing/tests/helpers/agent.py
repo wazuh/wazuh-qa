@@ -15,12 +15,13 @@ class WazuhAgent:
     @staticmethod
     def install_agent(inventory_path, agent_name, wazuh_version, wazuh_revision, live) -> None:
 
-        if live:
-            s3_url = 'packages'
-            release = wazuh_version[:1] + ".x"
-        else:
+        if live == "False":
             s3_url = 'packages-dev'
             release = 'pre-release'
+        else:
+            s3_url = 'packages'
+            release = wazuh_version[:1] + ".x"
+
 
         os_type = HostInformation.get_os_type(inventory_path)
         architecture = HostInformation.get_architecture(inventory_path)
@@ -35,7 +36,7 @@ class WazuhAgent:
                 ])
             elif distribution == 'rpm' and 'arm64' in architecture:
                 commands.extend([
-                    f"curl -o wazuh-agent-{wazuh_version}-1aarch64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.aarch64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.aarch64.rpm"
+                    f"curl -o wazuh-agent-{wazuh_version}-1.aarch64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.aarch64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.aarch64.rpm"
                 ])
             elif distribution == 'deb' and 'amd64' in architecture:
                 commands.extend([
@@ -122,7 +123,7 @@ class WazuhAgent:
         elif os_type == 'macos':
             try:
                 if 'amazonaws' in manager_host and 'amazonaws' in agent_host:
-                    host_ip = HostInformation.get_internal_ip_from_aws_dns(manager_host) 
+                    host_ip = HostInformation.get_internal_ip_from_aws_dns(manager_host)
                 else:
                     host_ip = HostInformation.get_public_ip_from_aws_dns(manager_host)
                 commands = [

@@ -62,7 +62,7 @@ tasks:
           - component: "central_components"
           - wazuh-version: "4.7.4"
           - wazuh-revision: "40717"
-          - live: "True"
+          - live: False
     on-error: "abort-all"
     foreach:
       - variable: central_components-os
