@@ -105,7 +105,7 @@ tasks:
           - component: "agent"
           - wazuh-version: "4.7.4"
           - wazuh-revision: "40717"
-          - live: "True"
+          - live: False
     foreach:
       - variable: agent-os
         as: agent
