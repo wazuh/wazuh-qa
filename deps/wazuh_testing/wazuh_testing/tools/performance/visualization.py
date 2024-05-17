@@ -16,9 +16,9 @@ ANALYSISD_CSV_HEADERS = {
         'columns': [
             'Decoded from azure', 'Decoded from ciscat', 'Decoded from command', 'Decoded from docker',
             'Decoded from logcollector eventchannel', 'Decoded from logcollector eventlog',
-            'Decoded from logcollector macos','Decoded from logcollector others','Decoded from osquery',
-            'Decoded from rootcheck','Decoded from sca','Decoded from syscheck','Decoded from syscollector',
-            'Decoded from vulnerability','Decoded from agentd','Decoded from dbsync','Decoded from monitor',
+            'Decoded from logcollector macos', 'Decoded from logcollector others', 'Decoded from osquery',
+            'Decoded from rootcheck', 'Decoded from sca', 'Decoded from syscheck', 'Decoded from syscollector',
+            'Decoded from vulnerability', 'Decoded from agentd', 'Decoded from dbsync', 'Decoded from monitor',
             'Decoded from remote'
         ],
     },
@@ -51,9 +51,10 @@ ANALYSISD_CSV_HEADERS = {
     }
 }
 REMOTED_CSV_HEADERS = {
-    'events_info': {'title': 'Events sent and count',
+    'events_info': {
+        'title': 'Events sent and count',
         'columns': [
-            "Events count", "Control messages", "Discarded messages", "Queue usage",
+            'Events count', 'Control messages', 'Discarded messages', 'Queue usage',
             'Metrics-Bytes sent', 'Dequeued messages'
         ]
     },
