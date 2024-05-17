@@ -18,7 +18,7 @@ from typing import Dict
 from wazuh_testing.tools.system import HostManager
 
 
-WAZUH_STATES_VULNERABILITIES_INDEXNAME = 'wazuh-states-vulnerabilities'
+WAZUH_STATES_VULNERABILITIES_INDEXNAME = 'wazuh-states-vulnerabilities-wazuh'
 
 
 def create_vulnerability_states_indexer_filter(target_agent: str = None,
