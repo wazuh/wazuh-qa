@@ -1,0 +1,10 @@
+{
+    "binary_test": {
+        "title": "Usage during the test",
+        "columns": [
+            "PID", 
+            "Daemon", 
+            "Version"
+        ]
+    }
+}
