@@ -43,6 +43,7 @@ class AWSInstance(Instance):
         self.arch = instance_parameters.arch
         self.ssh_port = instance_parameters.ssh_port
         self._user = instance_parameters.user
+        self.virtualizer = instance_parameters.virtualizer
 
     def start(self) -> None:
         """Start the AWS EC2 instance."""
