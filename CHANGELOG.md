@@ -62,6 +62,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix multigroups guess system test ([#5396](https://github.com/wazuh/wazuh-qa/pull/5396)) \- (Tests)
 - Fix restart agent in change manager Vulnerability Detector E2E test case ([#5355](https://github.com/wazuh/wazuh-qa/pull/5355)) \- (Tests)
 - Fix E2E Vulnerability Detection Windows package installation error ([#5363](https://github.com/wazuh/wazuh-qa/pull/5363)) \- (Framework)
 - Fix shutdown messages system test ([#5298](https://github.com/wazuh/wazuh-qa/pull/5298)) \- (Framework + Tests)
