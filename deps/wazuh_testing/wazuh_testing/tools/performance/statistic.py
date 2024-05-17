@@ -155,7 +155,7 @@ class StatisticMonitor:
 
         API_URL = f"https://{self.ip}:{self.port}"
         DAEMONS_ENDPOINT= f"/manager/daemons/stats?daemons_list={self.daemon}&wait_for_complete=true"
-        VULNS_ENDOPOINT= f"/wazuh-states-vulnerabilities/_count"
+        VULNS_ENDOPOINT= f"/wazuh-states-vulnerabilities-wazuh/_count"
         ALERTS_ENDPOINT= f"/wazuh-alerts-4.x-*/_count"
         TOKEN_ENDPOINT="/security/user/authenticate"
 
@@ -164,7 +164,7 @@ class StatisticMonitor:
         max_retries = 3
         token_response = None
         daemon_response = None
-        data = None        
+        data = None
 
         if(self.target == "vulnerabilities"):
             for _ in range(max_retries):
@@ -244,14 +244,14 @@ class StatisticMonitor:
             csv_header = headers.agentd_header
 
         header = not isfile(csv_file)
-        
+
         with open(csv_file, 'a+') as log:
 
             if header:
                 log.write(f'{",".join(csv_header)}\n')
 
             timestamp = datetime.fromtimestamp(time()).strftime('%Y-%m-%d %H:%M:%S')
-            
+
             if self.use_state_file == False:
                 if target not in ["vulnerabilities", "alerts"]:
                     format = r"%Y-%m-%dT%H:%M:%S+%f:00"
@@ -259,7 +259,7 @@ class StatisticMonitor:
                     datetime_uptime = datetime.strptime(data['uptime'], format)
                     interval =  (datetime_timestamp - datetime_uptime).total_seconds()
 
-                if target == "analysis":                   
+                if target == "analysis":
                     metrics = data['metrics']
                     decoded = metrics['events']['received_breakdown']['decoded_breakdown']
                     decoded_modules = decoded['modules_breakdown']
@@ -425,11 +425,11 @@ class StatisticMonitor:
                         ag_bd['tables']['syscheck']['fim_file'],                                                    # 17
                         ag_bd['tables']['syscheck']['fim_registry'],                                                # 18
                         ag_bd['tables']['syscheck']['fim_registry_key'],                                            # 19
-                        ag_bd['tables']['syscheck']['fim_registry_value'],                                          # 20              
+                        ag_bd['tables']['syscheck']['fim_registry_value'],                                          # 20
                         ag_bd['tables']['syscollector']['syscollector_hotfixes'],                                    # 21
-                        ag_bd['tables']['syscollector']['syscollector_hwinfo'],                                      # 22 
+                        ag_bd['tables']['syscollector']['syscollector_hwinfo'],                                      # 22
                         ag_bd['tables']['syscollector']['syscollector_network_address'],                             # 23
-                        ag_bd['tables']['syscollector']['syscollector_network_iface'],                               # 24                          
+                        ag_bd['tables']['syscollector']['syscollector_network_iface'],                               # 24
                         ag_bd['tables']['syscollector']['syscollector_network_protocol'],                            # 25
                         ag_bd['tables']['syscollector']['syscollector_osinfo'],                                      # 26
                         ag_bd['tables']['syscollector']['syscollector_packages'],                                    # 27
@@ -438,7 +438,7 @@ class StatisticMonitor:
                         vulnerability_data,                                                                          # 30
                         received_breakdown['global'],                                                               # 31
                         glob_bd['db']['backup'],                                                                    # 32
-                        glob_bd['db']['sql'],                                                                       # 33       
+                        glob_bd['db']['sql'],                                                                       # 33
                         glob_bd['db']['vacuum'],                                                                    # 34
                         glob_bd['db']['get_fragmentation'],                                                         # 35
                         glob_bd['tables']['agent']['delete-agent'],                                                 # 36

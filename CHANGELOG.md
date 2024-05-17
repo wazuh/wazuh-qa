@@ -26,7 +26,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Disable debug evidences for Vulnerability Detector E2E tests by default ([#5331](https://github.com/wazuh/wazuh-qa/pull/5331)) \- ( Tests)
+- Include new package information from wdb ([#5350](https://github.com/wazuh/wazuh-qa/pull/5350)) \- (Tests)
+- Disable debug evidences for Vulnerability Detector E2E tests by default ([#5331](https://github.com/wazuh/wazuh-qa/pull/5331)) \- (Tests)
 - Include CVE-2023-4822 vulnerability to grafana packages ([#5332](https://github.com/wazuh/wazuh-qa/pull/5332)) \- (Framework)
 - Remove sslverify from host manager install package method ([#5339](https://github.com/wazuh/wazuh-qa/pull/5339)) \- (Framework)
 - Include additional Vulnerability Detector E2E tests ([#5287](https://github.com/wazuh/wazuh-qa/pull/5287)) \- (Framework + Tests)
@@ -62,6 +63,9 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Remove false positive from E2E Vulnerability Detection tests ([#5369](https://github.com/wazuh/wazuh-qa/pull/5369)) \- (Framework)
+- Fix multigroups guess system test ([#5396](https://github.com/wazuh/wazuh-qa/pull/5396)) \- (Tests)
+- Fix hotfixes syscollector agent simulator messages ([#5379](https://github.com/wazuh/wazuh-qa/pull/5379)) \- (Framework)
+- Fix restart agent in change manager Vulnerability Detector E2E test case ([#5355](https://github.com/wazuh/wazuh-qa/pull/5355)) \- (Tests)
 - Fix E2E Vulnerability Detection Windows package installation error ([#5363](https://github.com/wazuh/wazuh-qa/pull/5363)) \- (Framework)
 - Fix shutdown messages system test ([#5298](https://github.com/wazuh/wazuh-qa/pull/5298)) \- (Framework + Tests)
 - Fix upgrade macOS package cases for vulnerability scanner E2E ([#5334](https://github.com/wazuh/wazuh-qa/pull/5334)) \- (Tests)

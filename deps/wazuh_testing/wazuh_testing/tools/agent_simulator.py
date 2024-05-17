@@ -830,7 +830,7 @@ class Generator:
 
         self.syscollector_event_type_mapping = {
             'packages': 'dbsync_packages',
-            'hotfix': 'dbsync_hotfix',
+            'hotfix': 'dbsync_hotfixes',
             'hwinfo': 'dbsync_hwinfo',
             'ports': 'dbsync_ports',
             'osinfo': 'dbsync_osinfo',
