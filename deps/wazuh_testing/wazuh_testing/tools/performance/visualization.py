@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
+
 class DataVisualizer:
     """Class that allows to visualize the data collected using the wazuh_metrics tool.
 
@@ -31,7 +32,7 @@ class DataVisualizer:
         base_name (str, optional): base name used to store the images.
     """
     def __init__(self, dataframes, target, compare=False, store_path=gettempdir(), x_ticks_granularity='minutes',
-                 x_ticks_interval=1, base_name=None, columns_path = None):
+                 x_ticks_interval=1, base_name=None, columns_path=None):
         self.dataframes_paths = dataframes
         self.dataframe = None
         self.compare = compare
@@ -73,7 +74,7 @@ class DataVisualizer:
                 filename = self.target + 'd_csv_headers.json'
 
             complete_path = join(dirname(realpath(__file__)), '..', '..', 'data', 'data_visualizer', filename)
-                
+
         return json.load(complete_path)
 
     def _load_dataframes(self):
