@@ -184,7 +184,7 @@ class Allocator:
                                     ssh_port=port,
                                     platform=instance.platform,
                                     arch=instance.arch,
-                                    virtualizer=instance.virtualizer)
+                                    virtualizer=str(instance.virtualizer))
         track_path = Path(os.path.join(instance.path, 'track.yaml'))
         with open(track_path, 'w') as f:
             yaml.dump(track.model_dump(), f)

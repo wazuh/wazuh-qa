@@ -51,6 +51,7 @@ class Instance(ABC):
         self.platform: str = instance_parameters.platform
         self.arch: str = instance_parameters.arch
         self.user: str = instance_parameters.user
+        self.virtualizer: str = instance_parameters.virtualizer
 
     @abstractmethod
     def start(self) -> None:
