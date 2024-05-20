@@ -277,18 +277,16 @@ class Allocator:
             logger.info(f"The {file} file generated at {source}")
             return source
 
-        if str(path).endswith('.yml') or str(path).endswith('.yaml'):
-            path.parent.mkdir(parents=True, exist_ok=True)
         if not path.suffix.__contains__('.'):
-            path.mkdir(parents=True, exist_ok=True)
-
-        if path.is_dir():
+            if not path.exists():
+                path.mkdir(parents=True, exist_ok=True)
             destination = path / (file + '.yaml')
             os.replace(source, destination)
             logger.info(f"The {file} file generated at {destination}")
             return destination
 
         if str(path).endswith('.yml') or str(path).endswith('.yaml'):
+            path.parent.mkdir(parents=True, exist_ok=True)
             if file in os.path.basename(path):
                 os.replace(source, destination)
                 logger.info(f"The {file} file generated at {destination}")
