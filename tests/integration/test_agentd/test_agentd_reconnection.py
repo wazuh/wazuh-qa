@@ -177,6 +177,8 @@ def delete_keys():
     """Remove the agent's client.keys file."""
     os.remove(CLIENT_KEYS_PATH)
     sleep(1)
+    if os.path.exists(CLIENT_KEYS_PATH):
+        raise Exception(f"'{CLIENT_KEYS_PATH}' could not be removed")
 
 
 def set_keys():
