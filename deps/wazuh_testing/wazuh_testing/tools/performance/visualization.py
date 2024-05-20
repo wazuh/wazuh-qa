@@ -61,24 +61,22 @@ class DataVisualizer:
         return sns.hls_palette(size if size > 1 else 1, h=.5)
 
     def _load_columns_to_plot(self, columns_path):
-        complete_path = columns_path
+        full_path = columns_path
 
-        if complete_path is None:
+        if full_path is None:
             filename = None
 
-            if self.target == 'binary':
-                filename = self.target + '_non_printable_headers.json'
-            elif self.target == 'logcollector':
+            if self.target != 'binary':
                 filename = self.target + '_csv_headers.json'
             else:
-                filename = self.target + 'd_csv_headers.json'
+                filename = self.target + '_non_printable_headers.json'
 
-            complete_path = join(dirname(realpath(__file__)), '..', '..', 'data', 'data_visualizer', filename)
+            full_path = join(dirname(realpath(__file__)), '..', '..', 'data', 'data_visualizer', filename)
 
-        with open(complete_path, 'r') as columns_file:
-            columns_data = json.load(columns_file)
+        with open(full_path, 'r') as columns_file:
+            full_data = json.load(columns_file)
 
-        return columns_data
+        return full_data
 
     def _load_dataframes(self):
         """Load the dataframes from dataframes_paths."""
