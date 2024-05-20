@@ -75,7 +75,10 @@ class DataVisualizer:
 
             complete_path = join(dirname(realpath(__file__)), '..', '..', 'data', 'data_visualizer', filename)
 
-        return json.load(complete_path)
+        with open(complete_path, 'r') as columns_file:
+            columns_data = json.load(columns_file)
+
+        return columns_data
 
     def _load_dataframes(self):
         """Load the dataframes from dataframes_paths."""
