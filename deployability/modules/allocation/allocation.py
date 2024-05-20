@@ -276,12 +276,17 @@ class Allocator:
         if path is None:
             logger.info(f"The {file} file generated at {source}")
             return source
-        if path.exists() and path.is_dir():
-            destination = destination / (file + '.yaml')
+
+        if not path.suffix.__contains__('.'):
+            if not path.exists():
+                path.mkdir(parents=True, exist_ok=True)
+            destination = path / (file + '.yaml')
             os.replace(source, destination)
             logger.info(f"The {file} file generated at {destination}")
             return destination
+
         if str(path).endswith('.yml') or str(path).endswith('.yaml'):
+            path.parent.mkdir(parents=True, exist_ok=True)
             if file in os.path.basename(path):
                 os.replace(source, destination)
                 logger.info(f"The {file} file generated at {destination}")
