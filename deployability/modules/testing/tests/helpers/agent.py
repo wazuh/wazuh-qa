@@ -28,12 +28,12 @@ class WazuhAgent:
 
     @staticmethod
     def install_agent(inventory_path, agent_name, wazuh_version, wazuh_revision, live) -> None:
-        if live:
-            s3_url = 'packages'
-            release = wazuh_version[:1] + ".x"
-        else:
+        if live == "False":
             s3_url = 'packages-dev'
             release = 'pre-release'
+        else:
+            s3_url = 'packages'
+            release = wazuh_version[:1] + ".x"
 
         os_type = HostInformation.get_os_type(inventory_path)
         architecture = HostInformation.get_architecture(inventory_path)
