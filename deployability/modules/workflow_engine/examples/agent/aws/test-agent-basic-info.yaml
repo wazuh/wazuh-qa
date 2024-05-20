@@ -36,8 +36,10 @@ variables:
     #- windows-server-2022-amd64
 
   macos-agent-os:
-    #- macos-ventura-13.4.1-amd64
-    - macos-sonoma-14.4.1-amd64
+    - macos-ventura-13-amd64
+    - macos-ventura-13-arm64
+    - macos-sonoma-14-amd64
+    - macos-sonoma-14-arm64
 
   manager-os: linux-ubuntu-22.04-amd64
   infra-provider: aws

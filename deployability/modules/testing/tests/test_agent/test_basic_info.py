@@ -81,12 +81,11 @@ def test_wazuh_os_version(wazuh_params):
         expected_condition_func = lambda: 'active' == WazuhAgent.get_agent_status(wazuh_api, agent_names)
         Waits.dynamic_wait(expected_condition_func, cycles=20, waiting_time=30)
 
-        #if not os_type == 'windows':
         agent = get_agent_from_inventory(agent_params)
         agent_version = agent.get_os_version()
         agent_api_version = WazuhAgent.get_agent_os_version_by_name(wazuh_api, agent_names)
-        logger.info(f"Version obtained from agent: {agent_version}")
-        logger.info(f"Version obtained from Wazuh API: {agent_api_version}")
+        logger.debug(f"Version obtained from agent: {agent_version}")
+        logger.debug(f"Version obtained from Wazuh API: {agent_api_version}")
         assert agent_version in agent_api_version, logger.error('There is a mismatch between the OS version and the OS version of the installed agent')
 
         if os_type == 'macos':
