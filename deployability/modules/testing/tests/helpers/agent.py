@@ -704,7 +704,7 @@ class WindowsAgent(WazuhAgent):
         return os_version
 
 class MacOsAgent(WazuhAgent):
-    """Windows Agent Class."""
+    """MacOS Agent Class."""
 
     def get_os_version(self) -> str:
         """Get os version from the platform."""
