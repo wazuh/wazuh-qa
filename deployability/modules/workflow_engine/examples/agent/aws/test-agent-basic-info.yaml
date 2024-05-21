@@ -174,7 +174,7 @@ tasks:
           - wazuh-revision: "40717"
           - live: "True"
     foreach:
-      - variable: macos-agent-os
+      - variable: agent-os
         as: agent
     depends-on:
       - "allocate-agent-{agent}"

@@ -38,6 +38,14 @@ tasks:
     foreach:
       - variable: manager-os
         as: manager
+    cleanup:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: delete
+          - track-output: "{working-dir}/manager-{manager}/track.yaml"
 
   # Generic manager test task
   - task: "run-manager-tests"
