@@ -884,6 +884,10 @@ class HostManager:
 
         return user, password
 
+    def get_cluster_name(self) -> str:
+        cluster_name = self.get_host_variables('all').get('cluster_name', 'wazuh')
+        return cluster_name
+
     def get_indexer_credentials(self):
         default_user = 'admin'
         default_password = 'changeme'
