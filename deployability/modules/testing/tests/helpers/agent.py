@@ -1,27 +1,39 @@
 # Copyright (C) 2015, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+from typing import List, Optional
+from abc import abstractmethod
+import re
 import requests
 import yaml
 
-from typing import List, Optional
+from modules.testing.utils import logger
 from .constants import WAZUH_CONF, WAZUH_ROOT, WAZUH_WINDOWS_CONF, WAZUH_MACOS_CONF
 from .executor import WazuhAPI, ConnectionManager
 from .generic import HostInformation, CheckFiles
-from modules.testing.utils import logger
+
 
 class WazuhAgent:
+    """Root class for wazuh agents."""
+    def __init__(self, inventory_path: str):
+        self.inventory_path = inventory_path
+        track_file = inventory_path.replace('inventory', 'track')
+        with open(track_file, 'r', encoding='utf-8') as yaml_file:
+            self.inventory_dict = yaml.safe_load(yaml_file)
+
+    @abstractmethod
+    def get_os_version(self) -> str:
+        """Get the os version abstract method."""
+
 
     @staticmethod
     def install_agent(inventory_path, agent_name, wazuh_version, wazuh_revision, live) -> None:
-
         if live == "False":
             s3_url = 'packages-dev'
             release = 'pre-release'
         else:
             s3_url = 'packages'
             release = wazuh_version[:1] + ".x"
-
 
         os_type = HostInformation.get_os_type(inventory_path)
         architecture = HostInformation.get_architecture(inventory_path)
@@ -607,3 +619,121 @@ def agent_status_report(wazuh_api: WazuhAPI) -> dict:
         logger.error(f"Unexpected error: {e}")
         return {}
 
+
+class LinuxAgent(WazuhAgent):
+    """Linux Agent Class."""
+
+    @staticmethod
+    def __parse_systemd(cmd_output: str) -> str:
+        pattern = r'VERSION_ID="([0-9.]*)"'
+        match = re.search(pattern, cmd_output)
+        return  match.group(1) if match else ""
+
+    @staticmethod
+    def __parse_centos(cmd_output: str) -> str:
+        pattern = r".* ([0-9]{1,2})\.*[0-9]{0,2}.*"
+        match = re.search(pattern, cmd_output)
+        return  match.group(1) if match else ""
+
+    @staticmethod
+    def __parse_amazon(cmd_output: str) -> str:
+        pattern = r"Amazon Linux release (\d+)\.\d+\.\d+"
+        match = re.search(pattern, cmd_output)
+        return  match.group(1) if match else ""
+
+    @staticmethod
+    def __parse_rhel(cmd_output: str) -> str:
+        pattern = r".* ([0-9]{1,2})\.*[0-9]{0,2}.*"
+        match = re.search(pattern, cmd_output)
+        return  match.group(1) if match else ""
+
+    @staticmethod
+    def __parse_ubuntu(cmd_output: str) -> str:
+        pattern = r'VERSION_ID="([0-9.]*)"'
+        match = re.search(pattern, cmd_output)
+        return  match.group(1) if match else ""
+
+    __linux_version_cmds = {
+        "systemd": {"command": "cat /etc/os-release", "parser": __parse_systemd},
+        "centos": {"command": "cat /etc/centos-release", "parser": __parse_centos},
+        "amazon": {"command": "cat /etc/system-release", "parser": __parse_amazon},
+        "rhel": {"command": "cat /etc/redhat-release", "parser": __parse_rhel},
+        "oracle": {"command": "cat /etc/redhat-release", "parser": __parse_rhel},
+        "debian": {"command": "cat /etc/debian_version", "parser": lambda x: x},
+        "ubuntu": {"command": "cat /etc/lsb-release", "parser": __parse_ubuntu},
+    }
+
+    def __init__(self, inventory_path: str):
+        """LinuxAgent constructor. """
+        super().__init__(inventory_path=inventory_path)
+
+    def _get_os_version(self, platform: str) -> str:
+        cmd = LinuxAgent.__linux_version_cmds[platform]["command"]
+        parser = LinuxAgent.__linux_version_cmds[platform]["parser"]
+        cmd_output = ConnectionManager.execute_commands(self.inventory_path, cmd)
+        return parser(cmd_output.get('output')) if cmd_output.get('output', None) else ""
+
+    def get_os_version(self) -> str:
+        """Get os version from the OS platform."""
+        # detect platform
+        os_version: str = ""
+        if not (os_version := self._get_os_version('systemd')):
+            for platform in LinuxAgent.__linux_version_cmds:
+                if (os_version := self._get_os_version(platform)):
+                    logger.info(f"OS Version get using {platform} method.")
+                    break
+        else:
+            logger.info("OS Version get using systemd method.")
+        return os_version
+
+
+class WindowsAgent(WazuhAgent):
+    """Windows Agent Class."""
+
+    def get_os_version(self) -> str:
+        """Get os version from the platform."""
+
+        cmd = "[System.Environment]::OSVersion.Version.Major"
+        version_major = ConnectionManager.execute_commands(self.inventory_path, cmd)
+
+        cmd = "[System.Environment]::OSVersion.Version.Minor"
+        version_minor = ConnectionManager.execute_commands(self.inventory_path, cmd)
+
+        os_version: str = f"{version_major.get('output')}.{version_minor.get('output')}"
+
+        return os_version
+
+class MacOsAgent(WazuhAgent):
+    """MacOS Agent Class."""
+
+    def get_os_version(self) -> str:
+        """Get os version from the platform."""
+        cmd = "uname"
+        name = ConnectionManager.execute_commands(self.inventory_path, cmd)
+
+        if name.get('output') == 'Darwin':
+            cmd = "sw_vers -productVersion"
+            version = ConnectionManager.execute_commands(self.inventory_path, cmd)
+            return version.get('output')
+
+
+__platform_map = {
+    'linux': LinuxAgent,
+    'macos': MacOsAgent,
+    'windows': WindowsAgent,
+}
+
+
+def get_agent_from_inventory(inventory_path: str) -> WazuhAgent:
+    """Create a new WazuhAgent instance from the inventory path information."""
+    track_file = inventory_path.replace('inventory', 'track')
+    with open(track_file, 'r', encoding='utf-8') as yaml_file:
+        inventory_dict = yaml.safe_load(yaml_file)
+
+    os_type = inventory_dict.get('platform', None)
+    agent_class: WazuhAgent = __platform_map.get(os_type, None)
+
+    if not agent_class:
+        raise ValueError(f"Invalid OS type {os_type}")
+
+    return agent_class(inventory_path=inventory_path)
