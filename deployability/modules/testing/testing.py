@@ -95,11 +95,11 @@ class Tester:
         for test in test_list:
             rendering_var = {**extra_vars, 'test': test}
             template = str(cls._test_template)
-            playbook = ansible.render_playbook(template, rendering_var)
-            if not playbook:
-                logger.warning(f"Test {test} not found. Skipped.")
-                continue
-            ansible.run_playbook(playbook, extra_vars)
+            result = ansible.run_playbook(template, rendering_var)
+            if result.stats["failures"]:
+                for event in result.events:
+                    if "fatal" in event['stdout']:
+                        raise Exception(f"Test {test} failed with error: {event['stdout']}")
 
 
     @classmethod
@@ -111,10 +111,12 @@ class Tester:
             ansible (Ansible): The Ansible object to run the setup.
             extra_vars (str): The extra vars for the setup.
         """
-        rendering_var = {**extra_vars}
         template = str(cls._setup_playbook)
-        playbook = ansible.render_playbook(template, rendering_var)
-        ansible.run_playbook(playbook, extra_vars)
+        result = ansible.run_playbook(template, extra_vars)
+        if result.stats["failures"]:
+            for event in result.events:
+                if "fatal" in event['stdout']:
+                    raise Exception(f"Setup {template} failed with error: {event['stdout']}")
 
 
     @classmethod

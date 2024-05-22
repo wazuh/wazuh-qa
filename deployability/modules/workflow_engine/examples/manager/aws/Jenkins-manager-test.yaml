@@ -52,7 +52,7 @@ tasks:
           - component: "manager"
           - wazuh-version: "4.7.4"
           - wazuh-revision: "40717"
-          - live: False
+          - live: True
     depends-on:
       - "allocate-manager-linux-ubuntu-20.04-amd64"
 

@@ -7,6 +7,5 @@
   become_user: "{{ current_user }}"
   tasks:
     - name: Cleaning old key ssh-keygen registries
-      ansible.builtin.command:
-        cmd: "ssh-keygen -f /home/{{ current_user }}/.ssh/known_hosts -R '{{ item }}'"
-      loop: {{ hosts_ip }}
+      command: "ssh-keygen -f ~/.ssh/known_hosts -R '{{ item }}'"
+      loop: "{{ hosts_ip }}"
