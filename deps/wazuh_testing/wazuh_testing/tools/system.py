@@ -527,6 +527,9 @@ class HostManager:
 
         retry_installation_errors = [
             'This installation package could not be opened',
+            'Could not get lock',
+            'error: dpkg frontend lock was locked by another process with pid',
+            'yum lockfile is held by another process'
         ]
 
         result = {}
@@ -559,12 +562,13 @@ class HostManager:
                 or not (result.get('changed', False) or result.get('rc') == 0 or result.get('stderr', None) == '')
 
             if failed_installation:
-                if not any(re.search(error, result.get('msg', '')) for error in retry_installation_errors):
+                if not any(re.search(error, result.get('msg', '')) for error in retry_installation_errors) and \
+                    not any(re.search(error, result.get('stderr', '')) for error in retry_installation_errors):
                     logging.error("Installation failed. Installation will not be retried.")
                     raise RuntimeError(f"Failed to install package in {host}: {result}")
 
-                logging.error(f"Error installing {url} in {host}:"
-                              'Corrupted package detected. Retrying installation...')
+                logging.error(f"Error installing {url} in {host}: Retrying installation...")
+
                 sleep(retry_delay)
             else:
                 break
