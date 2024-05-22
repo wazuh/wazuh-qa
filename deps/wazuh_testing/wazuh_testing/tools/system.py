@@ -884,10 +884,10 @@ class HostManager:
 
         return user, password
 
-    def get_cluster_name(self) -> str:
+    def get_cluster_name(self):
         manager_list = self.get_group_hosts('manager')
         if not manager_list:
-            raise ValueError("No manager defined in the environment")
+            raise ValueError("No manager is defined in the environment")
 
         first_manager_vars = self.inventory_manager.get_host(manager_list[0])
         cluster_name = first_manager_vars.vars.get('cluster_name', 'wazuh')
