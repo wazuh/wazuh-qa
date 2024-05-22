@@ -5,7 +5,19 @@ Wazuh API Indexer Module.
 This module provides functions to interact with the Wazuh Indexer API.
 
 Functions:
-    - get_indexer_values: Retrieves values from the Indexer API.
+    - get_wazuh_states_vulnerabilities_indexname(cluster_name: str) -> str:
+        Generate the Wazuh states vulnerabilities index name for a given cluster.
+    - create_vulnerability_states_indexer_filter(target_agent: str = None,
+                                               greater_than_timestamp: str = None) -> dict
+        Create a filter for the Indexer API for the vulnerability state index.
+    - create_alerts_filter(target_agent: str = None, greater_than_timestamp: str = None) -> dict
+        Create a filter for the Indexer API for the alerts index.
+    - get_indexer_values(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'},
+                       index: str = 'wazuh-alerts*', filter: dict = None, size: int = 10000) -> Dict
+        Get values from the Wazuh Indexer API.
+    - delete_index(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'},
+                 index: str = 'wazuh-alerts*')
+        Delete index from the Wazuh Indexer API.
 
 Copyright (C) 2015, Wazuh Inc.
 Created by Wazuh, Inc. <info@wazuh.com>.
@@ -18,7 +30,28 @@ from typing import Dict
 from wazuh_testing.tools.system import HostManager
 
 
-WAZUH_STATES_VULNERABILITIES_INDEXNAME = 'wazuh-states-vulnerabilities'
+WAZUH_STATES_VULNERABILITIES_INDEXNAME_TEMPLATE = 'wazuh-states-vulnerabilities-{cluster_name}'
+
+
+def get_wazuh_states_vulnerabilities_indexname(cluster_name: str = 'wazuh') -> str:
+    """
+    Generate the Wazuh states vulnerabilities index name for a given cluster.
+
+    This function takes a cluster name as input and returns the corresponding
+    Wazuh states vulnerabilities index name by inserting the cluster name into
+    a predefined template.
+
+    Args:
+        cluster_name (str): The name of the cluster to be included in the index name.
+
+    Returns:
+        str: The formatted Wazuh states vulnerabilities index name.
+
+    Example:
+        >>> get_wazuh_states_vulnerabilities_indexname('cluster1')
+        'wazuh-states-vulnerabilities-cluster1'
+    """
+    return WAZUH_STATES_VULNERABILITIES_INDEXNAME_TEMPLATE.format(cluster_name=cluster_name)
 
 
 def create_vulnerability_states_indexer_filter(target_agent: str = None,
