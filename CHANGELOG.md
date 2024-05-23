@@ -64,6 +64,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Include logic to retry package installation if the lock file is currently in use ([#5421](https://github.com/wazuh/wazuh-qa/pull/5421)) \- (Framework)
 - Increase E2E Vulnerability detection change manager test timeout ([#5414](https://github.com/wazuh/wazuh-qa/pull/5414)) \- (Tests)
 - Fix filter vulnerabilities function in case of multiple packages are used ([#5419](https://github.com/wazuh/wazuh-qa/pull/5419)) \- (Framework)
 - Remove false positive from E2E Vulnerability Detection tests ([#5369](https://github.com/wazuh/wazuh-qa/pull/5369)) \- (Framework)
