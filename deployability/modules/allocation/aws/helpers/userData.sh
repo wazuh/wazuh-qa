@@ -162,7 +162,13 @@ fi
 
 if [ "$DIST_NAME" = "ubuntu" ] || [ "$DIST_NAME" = "debian" ]; then
     perl -pi -e "s/^#?Port 22$/Port ${SSH_PORT}/" /etc/ssh/sshd_config
-    service sshd restart || service ssh restart
+    if [ "$DIST_VER" = "24" ]; then
+        perl -pi -e "s/^#?ListenStream=22$/ListenStream=${SSH_PORT}/" /etc/systemd/system/sockets.target.wants/ssh.socket
+        systemctl daemon-reload
+        systemctl restart sshd || systemctl restart ssh 
+    else
+        service sshd restart || service ssh restart
+    fi
 fi
 
 if [ "$DIST_NAME" = "darwin" ]; then
