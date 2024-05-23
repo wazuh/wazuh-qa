@@ -421,7 +421,7 @@ aws:
     zone: us-east-1
     user: wazuh-user
   windows-sign-10-amd64:
-    ami: ami-05fb40a2b48162ac3
+    ami: ami-053a31c7736e82d06
     zone: us-east-1
     user: wazuh-user
   windows-server-2012r2-amd64:
