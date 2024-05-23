@@ -26,6 +26,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Include "Agent key already in use" in the E2E Vulnerability Detection expected error list. ([#5409](https://github.com/wazuh/wazuh-qa/pull/5409)) \- (Tests)
 - Update vulnerability state index name ([#5402](https://github.com/wazuh/wazuh-qa/pull/5402)) \- (Framework)
 - Include new package information from wdb ([#5350](https://github.com/wazuh/wazuh-qa/pull/5350)) \- (Tests)
 - Disable debug evidences for Vulnerability Detector E2E tests by default ([#5331](https://github.com/wazuh/wazuh-qa/pull/5331)) \- (Tests)
