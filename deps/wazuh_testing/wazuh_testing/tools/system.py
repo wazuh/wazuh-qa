@@ -888,6 +888,16 @@ class HostManager:
 
         return user, password
 
+    def get_cluster_name(self):
+        manager_list = self.get_group_hosts('manager')
+        if not manager_list:
+            raise ValueError("No manager is defined in the environment")
+
+        first_manager_vars = self.inventory_manager.get_host(manager_list[0])
+        cluster_name = first_manager_vars.vars.get('cluster_name', 'wazuh')
+
+        return cluster_name
+
     def get_indexer_credentials(self):
         default_user = 'admin'
         default_password = 'changeme'

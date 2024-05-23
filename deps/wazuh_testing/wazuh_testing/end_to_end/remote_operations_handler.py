@@ -97,6 +97,7 @@ def filter_vulnerabilities_by_packages(host_manager: HostManager,
                                        vulnerabilities: Dict, packages_data: List) -> Dict:
     filtered_vulnerabilities = {}
     for host in vulnerabilities.keys():
+        packages_to_filter = set()
         filtered_vulnerabilities[host] = []
         host_os_name = host_manager.get_host_variables(host)["os"].split("_")[0]
         host_os_arch = host_manager.get_host_variables(host)["architecture"]
@@ -105,10 +106,11 @@ def filter_vulnerabilities_by_packages(host_manager: HostManager,
             package_id = package_data[host_os_name][host_os_arch]
             data = load_packages_metadata()[package_id]
             package_name = data["package_name"]
+            packages_to_filter.add(package_name)
 
-            for vulnerability in vulnerabilities[host]:
-                if vulnerability.package_name == package_name:
-                    filtered_vulnerabilities[host].append(vulnerability)
+        for vulnerability in vulnerabilities[host]:
+            if vulnerability.package_name in list(packages_to_filter):
+                filtered_vulnerabilities[host].append(vulnerability)
 
     return filtered_vulnerabilities
 

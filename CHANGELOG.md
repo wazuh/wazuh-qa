@@ -26,6 +26,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Include "Agent key already in use" in the E2E Vulnerability Detection expected error list. ([#5409](https://github.com/wazuh/wazuh-qa/pull/5409)) \- (Tests)
+- Update vulnerability state index name ([#5402](https://github.com/wazuh/wazuh-qa/pull/5402)) \- (Framework)
 - Include new package information from wdb ([#5350](https://github.com/wazuh/wazuh-qa/pull/5350)) \- (Tests)
 - Disable debug evidences for Vulnerability Detector E2E tests by default ([#5331](https://github.com/wazuh/wazuh-qa/pull/5331)) \- (Tests)
 - Include CVE-2023-4822 vulnerability to grafana packages ([#5332](https://github.com/wazuh/wazuh-qa/pull/5332)) \- (Framework)
@@ -63,6 +65,9 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Include logic to retry package installation if the lock file is currently in use ([#5421](https://github.com/wazuh/wazuh-qa/pull/5421)) \- (Framework)
+- Increase E2E Vulnerability detection change manager test timeout ([#5414](https://github.com/wazuh/wazuh-qa/pull/5414)) \- (Tests)
+- Fix filter vulnerabilities function in case of multiple packages are used ([#5419](https://github.com/wazuh/wazuh-qa/pull/5419)) \- (Framework)
+- Remove false positive from E2E Vulnerability Detection tests ([#5369](https://github.com/wazuh/wazuh-qa/pull/5369)) \- (Framework)
 - Fix multigroups guess system test ([#5396](https://github.com/wazuh/wazuh-qa/pull/5396)) \- (Tests)
 - Fix hotfixes syscollector agent simulator messages ([#5379](https://github.com/wazuh/wazuh-qa/pull/5379)) \- (Framework)
 - Fix restart agent in change manager Vulnerability Detector E2E test case ([#5355](https://github.com/wazuh/wazuh-qa/pull/5355)) \- (Tests)
@@ -108,6 +113,7 @@ All notable changes to this project will be documented in this file.
 - Fix test cluster performance. ([#4780](https://github.com/wazuh/wazuh-qa/pull/4780)) \- (Framework)
 - Fixed the graphic generation for the logcollectord statistics files. ([#5021](https://github.com/wazuh/wazuh-qa/pull/5021)) \- (Framework)
 
+## [4.7.5] - TBD
 
 ## [4.7.4] - 29/04/2024
 
