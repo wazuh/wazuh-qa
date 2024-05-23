@@ -38,11 +38,13 @@ class WazuhManager:
 
         if os_name == 'debian':
             commands = [
-                    f"wget https://{s3_url}/{release}/wazuh-install.sh && bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
+                    f"wget https://{s3_url}/{release}/wazuh-install.sh",
+                    f"bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
             ]
         else:
             commands = [
-                    f"curl -sO https://{s3_url}/{release}/wazuh-install.sh && bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
+                    f"curl -sO https://{s3_url}/{release}/wazuh-install.sh",
+                    f"bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
             ]
         logger.info(f'Installing Manager in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         ConnectionManager.execute_commands(inventory_path, commands)
