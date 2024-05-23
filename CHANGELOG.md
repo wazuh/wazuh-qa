@@ -27,6 +27,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Migrate E2E Vulnerability Detector test packages to S3 repository ([#5376](https://github.com/wazuh/wazuh-qa/pull/5376)) \- (Tests)
+- Update vulnerability state index name ([#5402](https://github.com/wazuh/wazuh-qa/pull/5402)) \- (Framework)
 - Include new package information from wdb ([#5350](https://github.com/wazuh/wazuh-qa/pull/5350)) \- (Tests)
 - Disable debug evidences for Vulnerability Detector E2E tests by default ([#5331](https://github.com/wazuh/wazuh-qa/pull/5331)) \- (Tests)
 - Include CVE-2023-4822 vulnerability to grafana packages ([#5332](https://github.com/wazuh/wazuh-qa/pull/5332)) \- (Framework)
@@ -109,6 +110,7 @@ All notable changes to this project will be documented in this file.
 - Fix test cluster performance. ([#4780](https://github.com/wazuh/wazuh-qa/pull/4780)) \- (Framework)
 - Fixed the graphic generation for the logcollectord statistics files. ([#5021](https://github.com/wazuh/wazuh-qa/pull/5021)) \- (Framework)
 
+## [4.7.5] - TBD
 
 ## [4.7.4] - 29/04/2024
 
