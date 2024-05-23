@@ -209,6 +209,14 @@ vagrant:
 
 aws:
   # Ubuntu
+  linux-ubuntu-24.04-amd64:
+    ami: ami-04b70fa74e45c3917
+    zone: us-east-1
+    user: ubuntu
+  linux-ubuntu-24.04-arm64:
+    ami: ami-0eac975a54dfee8cb
+    zone: us-east-1
+    user: ubuntu
   linux-ubuntu-22.04-amd64:
     ami: ami-053b0d53c279acc90
     zone: us-east-1
