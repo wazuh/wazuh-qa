@@ -125,8 +125,8 @@ vagrant:
     box_version: 4.3.12
     virtualizer: virtualbox
   linux-rocky-9-amd64:
-    box: generic/rocky9
-    box_version: 4.3.12
+    box: rockylinux/9
+    box_version: 4.0.0
     virtualizer: virtualbox
   # Macos
   macos-highsierra-10.13-amd64:
@@ -391,11 +391,11 @@ aws:
     zone: us-east-1
     user: rocky
   linux-rocky-9-amd64:
-    ami: ami-09c77dc92e45bc3ea
+    ami: ami-09eb79aa215c2a900
     zone: us-east-1
     user: rocky
   linux-rocky-9-arm64:
-    ami: ami-001f90eb122403b4c
+    ami: ami-0151988e287370acc
     zone: us-east-1
     user: rocky
   # Macos
