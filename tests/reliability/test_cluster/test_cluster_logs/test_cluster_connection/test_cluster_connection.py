@@ -39,8 +39,15 @@ def test_cluster_connection(artifacts_path):
                             f'{node_name.search(log_file)[1]}')
 
             # Search if there are any connection attempts after the message found above.
-            if re.search(rb'^.*Could not connect to master. Trying.*$|^.*Successfully connected to master.*$',
-                         s[conn.end():], flags=re.MULTILINE):
+            if re.search(
+                rb'^.*Could not connect to master. Trying.*$|^.*Successfully connected to master.*$',
+                s[conn.end():],
+                flags=re.MULTILINE
+            ) and not re.search(
+                rb'^.*The master closed the connection.*$',
+                s[conn.end():],
+                flags=re.MULTILINE
+            ):
                 disconnected_nodes.append(node_name.search(log_file)[1])
 
     if disconnected_nodes:
