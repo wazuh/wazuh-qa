@@ -16,14 +16,15 @@ Copyright (C) 2015, Wazuh Inc.
 Created by Wazuh, Inc. <info@wazuh.com>.
 This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """
-import xml.dom.minidom
+import ast
 import logging
-
+import xml.dom.minidom
 from multiprocessing.pool import ThreadPool
 from typing import Dict, List
 
 from wazuh_testing.end_to_end import configuration_filepath_os
-from wazuh_testing.tools.configuration import set_section_wazuh_conf
+from wazuh_testing.tools.configuration import (load_configuration_template,
+                                               set_section_wazuh_conf)
 from wazuh_testing.tools.system import HostManager
 
 
@@ -223,3 +224,90 @@ def save_indexer_credentials_into_keystore(host_manager):
     for manager in host_manager.get_group_hosts('manager'):
         host_manager.run_command(manager, f"{keystore_path} -f indexer -k username -v {indexer_user}")
         host_manager.run_command(manager, f"{keystore_path} -f indexer -k password -v {indexer_password}")
+
+
+def change_agent_manager_ip(host_manager: HostManager, agent: str, new_manager_ip: str) -> None:
+    """Change the manager IP of an agent.
+
+    Args:
+        host_manager: An instance of the HostManager class containing information about hosts.
+        agent: The name of the agent to be configured.
+        new_manager_ip: The new manager IP for the agent.
+    """
+
+    server_block = {'server': {'elements': [{'address': {'value': new_manager_ip}}]}}
+    configuration = {'sections': [{'section': 'client', 'elements': [server_block]}]}
+
+    new_configuration = {f"{agent}": [configuration]}
+
+    configure_host(agent, new_configuration, host_manager)
+
+
+def load_vulnerability_detector_configurations(host_manager, configurations_paths, enable=True,
+                                               syscollector_interval='1m'):
+    """Returns the configurations for Vulnerability testing for the agent and manager roles
+
+    Args:
+        host_manager (HostManager): An instance of the HostManager class containing information about hosts.
+        configurations_paths (Dict): The paths to the configuration templates for the agent and manager roles.
+        enable (bool, optional): Enable or disable the vulnerability detector. Defaults to True.
+        syscollector_interval (str, optional): The syscollector interval. Defaults to '1m'.
+
+    Return:
+        Dict: Configurations for each role
+    """
+    configurations = {}
+    vd_enable_value = 'yes' if enable else 'no'
+
+    for host in host_manager.get_group_hosts('all'):
+        if host in host_manager.get_group_hosts('agent'):
+            configurations[host] = load_configuration_template(configurations_paths['agent'],
+                                                               [{}], [{}])
+
+            configuration_template_str = str(configurations[host])
+            configuration_variables = {
+                    'SYSCOLLECTOR_INTERVAL': syscollector_interval
+            }
+
+            for key, value in configuration_variables.items():
+                configuration_template_str = configuration_template_str.replace(key, value)
+                configurations[host] = ast.literal_eval(configuration_template_str)
+
+        elif host in host_manager.get_group_hosts('manager'):
+            configuration_template = load_configuration_template(configurations_paths['manager'], [{}], [{}])
+
+            # Replace placeholders by real values
+            manager_index = host_manager.get_group_hosts('manager').index(host) + 2
+            indexer_server = host_manager.get_group_hosts('indexer')[0]
+            indexer_server_variables = host_manager.get_host_variables(indexer_server)
+
+            default_filebeat_key_path = f"/etc/pki/filebeat/node-{manager_index}-key.pem"
+
+            filebeat_key = indexer_server_variables.get('filebeat_key_path',
+                                                        default_filebeat_key_path)
+
+            default_filebeat_certificate_path = f"/etc/pki/filebeat/node-{manager_index}.pem"
+            filebeat_certificate = indexer_server_variables.get('filebeat_certificate_path',
+                                                                default_filebeat_certificate_path)
+
+            default_filebeat_root_ca_path = '/etc/pki/filebeat/root-ca.pem'
+            filebeat_root_ca = indexer_server_variables.get('filebeat_root_ca_path',
+                                                            default_filebeat_root_ca_path)
+            indexer_server = indexer_server_variables.get('indexer_server',
+                                                          indexer_server_variables['ip'])
+
+            configuration_variables = {
+                'VULNERABILITY_DETECTOR_ENABLE': vd_enable_value,
+                'INDEXER_SERVER': indexer_server,
+                'FILEBEAT_ROOT_CA': filebeat_root_ca,
+                'FILEBEAT_CERTIFICATE': filebeat_certificate,
+                'FILEBEAT_KEY': filebeat_key,
+            }
+            configuration_template_str = str(configuration_template)
+
+            for key, value in configuration_variables.items():
+                configuration_template_str = configuration_template_str.replace(key, value)
+
+            configurations[host] = ast.literal_eval(configuration_template_str)
+
+    return configurations

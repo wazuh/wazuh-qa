@@ -108,7 +108,9 @@ def create_agent(args, custom_labels):
         'syscollector_frequency': args.syscollector_frequency,
         'syscollector_event_types': args.syscollector_event_types,
         'syscollector_legacy_messages': args.syscollector_legacy_messages,
-        'syscollector_packages_vuln_content': args.syscollector_packages_list_file
+        'vulnerability_events': args.vulnerability_events,
+        'vulnerability_packages_vuln_content': args.vulnerability_packages_list_file,
+        'vulnerability_frequency': args.vulnerability_frequency
     }
 
     agent = ag.Agent(**agent_args)
@@ -386,10 +388,10 @@ def main():
                             metavar='<syscollector_event_types>',
                             type=str,
                             help='''Space-separated list of event types for syscollector messages.
-                            Default is "packages". Available types are "packages", "processes", "ports",
+                            By default all are chosen. Available types are "packages", "process", "ports",
                             "network", "hotfix", "hwinfo", "osinfo"''',
                             required=False,
-                            default='packages',
+                            default='packages hotfix hwinfo ports osinfo network process',
                             dest='syscollector_event_types')
 
     arg_parser.add_argument('--syscollector-legacy-messages',
@@ -399,10 +401,28 @@ def main():
                             default=False,
                             dest='syscollector_legacy_messages')
 
-    arg_parser.add_argument('--syscollector-packages-list-file', metavar='<syscollector_packages_list_file>',
-                            type=str, help='''File containing a list of packages to be sent by syscollector.
-                            One package per line. Default is None.''', required=False, default=None,
-                            dest='syscollector_packages_list_file')
+    arg_parser.add_argument('--vulnerability-events',
+                            type=int,
+                            help='Number of vulnerabilities per agent',
+                            required=False,
+                            default=10,
+                            dest='vulnerability_events')
+
+    arg_parser.add_argument('--vulnerability-packages-list-file',
+                            metavar='<vulnerability_packages_list_file>',
+                            type=str,
+                            help='File containing a list of packages to be sent by syscollector. One package per line.',
+                            required=False,
+                            default=None,
+                            dest='vulnerability_packages_list_file')
+
+    arg_parser.add_argument('--vulnerability-frequency',
+                            metavar='<vulnerability_frequency>',
+                            type=int,
+                            help='Frequency of Vulnerability scans. Set to 1 for constant message sending.',
+                            required=False,
+                            default=60,
+                            dest='vulnerability_frequency')
 
     args = arg_parser.parse_args()
 
