@@ -3,21 +3,26 @@
 # This program is free software; you can redistribute it and/or modify it under the terms of GPLv2
 
 import json
-import tempfile
-import sys
-import os
 import logging
+import os
+import sys
+import tempfile
 import xml.dom.minidom as minidom
-from typing import Union, List
+import re
+
+from threading import Thread
+from typing import List, Union
+from time import sleep
+
 import testinfra
 import yaml
-
-from wazuh_testing.tools import WAZUH_CONF, WAZUH_API_CONF, API_LOG_FILE_PATH, WAZUH_LOCAL_INTERNAL_OPTIONS
-from wazuh_testing.tools.configuration import set_section_wazuh_conf
 from ansible.inventory.manager import InventoryManager
 from ansible.parsing.dataloader import DataLoader
 from ansible.vars.manager import VariableManager
 
+from wazuh_testing.tools import (API_LOG_FILE_PATH, WAZUH_API_CONF, WAZUH_CONF,
+                                 WAZUH_LOCAL_INTERNAL_OPTIONS)
+from wazuh_testing.tools.configuration import set_section_wazuh_conf
 
 logger = logging.getLogger('testinfra')
 logger.setLevel(logging.CRITICAL)
@@ -475,7 +480,7 @@ class HostManager:
 
         return result
 
-    def install_package(self, host, url, system='ubuntu'):
+    def install_package(self, host, url, system, retry=3, retry_delay=5):
         """
         Installs a package on the specified host.
 
@@ -491,28 +496,85 @@ class HostManager:
         Example:
             host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
         """
-        result = False
-        extension = '.msi'
+        def install_msi_package(host, url):
+            result = self.get_host(host).ansible("win_package",
+                                                 f"path={url} arguments=/passive", check=False)
 
-        if system == 'windows':
-            if url.lower().endswith(extension):
-                result = self.get_host(host).ansible("win_package", f"path={url} arguments=/passive", check=False)
-            else:
-                result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
-        elif system == 'ubuntu':
+            return result
+
+        def install_exe_package(host, url):
+            result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
+
+            return result
+
+        def install_apt_package(host, url):
             result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
-            if result['changed'] and result['stderr'] == '':
-                result = True
-        elif system == 'centos':
+
+            return result
+
+        def install_yum_package(host, url):
             result = self.get_host(host).ansible("yum", f"name={url} state=present "
-                                                'sslverify=false disable_gpg_check=True', check=False)
-        elif system == 'macos':
+                                                 'disable_gpg_check=True', check=False)
+            return result
+
+        def install_pkg_package(host, url):
             package_name = url.split('/')[-1]
             result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
             cmd = f"installer -pkg {package_name} -target /"
             result = self.get_host(host).ansible("command", cmd, check=False)
 
-        logging.info(f"Package installed result {result}")
+            return result
+
+        retry_installation_errors = [
+            'This installation package could not be opened',
+            'Could not get lock',
+            'error: dpkg frontend lock was locked by another process with pid',
+            'yum lockfile is held by another process'
+        ]
+
+        result = {}
+        failed_installation = False
+
+        extension = url.lower().split('.')[-1]
+
+        system_supported = ['windows', 'ubuntu', 'centos', 'macos']
+        installer_map = {
+            'msi': install_msi_package,
+            'exe': install_exe_package,
+            'deb': install_apt_package,
+            'rpm': install_yum_package,
+            'pkg': install_pkg_package
+        }
+
+        if system not in system_supported:
+            raise ValueError(f"Unsupported system: {system}")
+
+        for _ in range(retry):
+            installer_func = installer_map.get(extension, None)
+
+            if not installer_func:
+                raise ValueError(f"Unsupported extension: {extension} for {system}")
+
+            result = installer_func(host, url)
+
+            logging.debug(f"Package installation result {result}")
+            failed_installation = not (result.get('changed', False) or result.get('rc') == 0) \
+                or not (result.get('changed', False) or result.get('rc') == 0 or result.get('stderr', None) == '')
+
+            if failed_installation:
+                if not any(re.search(error, result.get('msg', '')) for error in retry_installation_errors) and \
+                    not any(re.search(error, result.get('stderr', '')) for error in retry_installation_errors):
+                    logging.error("Installation failed. Installation will not be retried.")
+                    raise RuntimeError(f"Failed to install package in {host}: {result}")
+
+                logging.error(f"Error installing {url} in {host}: Retrying installation...")
+
+                sleep(retry_delay)
+            else:
+                break
+
+        if failed_installation:
+            raise RuntimeError(f"Failed to install package in {host}: {result}")
 
         return result
 
@@ -606,7 +668,6 @@ class HostManager:
             host_manager.remove_package('my_host', 'my_package', system='ubuntu')
         """
         logging.info(f"Removing package {package_uninstall_name} from host {host}")
-        logging.info(f"System: {system}")
 
         remove_operation_result = False
 
@@ -616,8 +677,8 @@ class HostManager:
             remove_operation_result = self.run_playbook(host, custom_uninstall_playbook)
         elif package_uninstall_name:
             if os_name == 'windows':
-                remove_operation_result = self.get_host(host).ansible("win_command",
-                                                                      f"{package_uninstall_name} /uninstall /quiet /S",
+                remove_operation_result = self.get_host(host).ansible("win_package",
+                                                                      f"product_id={package_uninstall_name} state=absent",
                                                                       check=False)
             elif os_name == 'linux':
                 os = self.get_host_variables(host)['os'].split('_')[0]
@@ -634,7 +695,11 @@ class HostManager:
                                                                       f"brew uninstall {package_uninstall_name}",
                                                                       check=False)
 
-        logging.info(f"Package removed result {remove_operation_result}")
+        if not (remove_operation_result['changed'] or remove_operation_result.get('rc') == 0) \
+            or not (remove_operation_result['changed'] or remove_operation_result.get('stderr', None) == ''):
+            raise RuntimeError(f"Failed to remove package in {host}: {remove_operation_result}")
+
+        logging.debug(f"Package removed result {remove_operation_result}")
 
         return remove_operation_result
 
@@ -763,7 +828,7 @@ class HostManager:
 
         return result
 
-    def control_environment(self, operation, group_list):
+    def control_environment(self, operation, group_list, parallel=False):
         """
         Controls the Wazuh services on hosts in the specified groups.
 
@@ -774,9 +839,20 @@ class HostManager:
         Example:
             control_environment('restart', ['group1', 'group2'])
         """
-        for group in group_list:
-            for host in self.get_group_hosts(group):
-                self.handle_wazuh_services(host, operation)
+        if parallel:
+            threads = []
+            for group in group_list:
+                for host in self.get_group_hosts(group):
+                    thread = Thread(target=self.handle_wazuh_services, args=(host, operation))
+                    threads.append(thread)
+                    thread.start()
+
+            for thread in threads:
+                thread.join()
+        else:
+            for group in group_list:
+                for host in self.get_group_hosts(group):
+                    self.handle_wazuh_services(host, operation)
 
     def get_agents_ids(self):
         """
@@ -788,7 +864,9 @@ class HostManager:
         Returns:
             str: The ID of the agent.
         """
-        token = self.get_api_token(self.get_master())
+        user, password = self.get_api_credentials()
+
+        token = self.get_api_token(self.get_master(), user=user, password=password)
         agents = self.make_api_call(self.get_master(), endpoint='/agents/', token=token)['json']['data']
 
         agents_ids = []
@@ -798,6 +876,42 @@ class HostManager:
                 agents_ids.append(agent['id'])
 
         return agents_ids
+
+    def get_api_credentials(self):
+        default_user = 'wazuh'
+        default_password = 'wazuh'
+
+        master_variables = self.get_host_variables(self.get_master())
+
+        user = master_variables.get('api_user', default_user)
+        password = master_variables.get('api_password', default_password)
+
+        return user, password
+
+    def get_cluster_name(self):
+        manager_list = self.get_group_hosts('manager')
+        if not manager_list:
+            raise ValueError("No manager is defined in the environment")
+
+        first_manager_vars = self.inventory_manager.get_host(manager_list[0])
+        cluster_name = first_manager_vars.vars.get('cluster_name', 'wazuh')
+
+        return cluster_name
+
+    def get_indexer_credentials(self):
+        default_user = 'admin'
+        default_password = 'changeme'
+
+        try:
+            indexer_variables = self.get_host_variables(self.get_group_hosts('indexer')[0])
+        except IndexError:
+            logging.critical("Indexer not found in inventory")
+            raise
+
+        user = indexer_variables.get('indexer_user', default_user)
+        password = indexer_variables.get('indexer_password', default_password)
+
+        return user, password
 
     def remove_agents(self):
         """
@@ -809,7 +923,10 @@ class HostManager:
         Example:
             host_manager.remove_agent('my_host', 'my_agent_id')
         """
-        token = self.get_api_token(self.get_master())
+        user, password = self.get_api_credentials()
+
+        token = self.get_api_token(self.get_master(), user=user, password=password)
+
         agents_ids = self.get_agents_ids()
         result = self.make_api_call(
             host=self.get_master(),
@@ -841,6 +958,41 @@ class HostManager:
                 hosts_not_reachable.append(host)
 
         return hosts_not_reachable
+
+    def get_agents_summary_status(self, host):
+        """
+        Gets the agents summary status.
+
+        Returns:
+            result (str): Agents summary status returned by the API
+        """
+        token = self.get_api_token(host)
+        result = self.make_api_call(
+            host=host,
+            method='GET',
+            endpoint='/agents/summary/status',
+            token=token,
+        )
+
+        return result['json']
+
+    def clean_agents(self, restart_managers: bool = False) -> None:
+        """Clean and register agents
+
+        Args:
+            host_manager (HostManager): An instance of the HostManager class.
+            restart_managers (bool, optional): Whether to restart the managers. Defaults to False.
+        """
+        # Restart managers and stop agents
+        logging.info("Stopping agents")
+        self.control_environment("stop", ["agent"], parallel=True)
+
+        logging.info("Removing agents")
+        self.remove_agents()
+
+        if restart_managers:
+            logging.info("Restarting managers")
+            self.control_environment("restart", ["manager"], parallel=True)
 
 
 def clean_environment(host_manager, target_files):

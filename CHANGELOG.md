@@ -25,7 +25,9 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Add functionality to obtain statistics and metrics from the indexer. ([#5090](https://github.com/wazuh/wazuh-qa/pull/5090)) \- (Framework)
+- Add `Timestamp` field to the indexer statistics ([#5357](https://github.com/wazuh/wazuh-qa/pull/5357)) \- (Framework)
+- Add `GeneratorVulnerabilityEvents` in agent simulator ([#5265](https://github.com/wazuh/wazuh-qa/pull/5265)) \- (Framework)
+- Add functionality to obtain statistics and metrics from the indexer ([#5090](https://github.com/wazuh/wazuh-qa/pull/5090)) \- (Framework)
 - Add support for the installation/uninstallation of npm packages ([#5092](https://github.com/wazuh/wazuh-qa/pull/5092)) \- (Tests)
 - Add alert.json file to Vulnerability Detector E2E test report ([#5147](https://github.com/wazuh/wazuh-qa/pull/5147)) \- (Framework)
 - Add documentation about markers for system tests ([#5080](https://github.com/wazuh/wazuh-qa/pull/5080)) \- (Documentation)
@@ -44,6 +46,16 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Increase feed update time in Vulnerability Detection E2E tests to 10h ([#5424](https://github.com/wazuh/wazuh-qa/pull/5424)) \- (Tests)
+- Migrate E2E Vulnerability Detector test packages to S3 repository ([#5376](https://github.com/wazuh/wazuh-qa/pull/5376)) \- (Framework)
+- Include "Agent key already in use" in the E2E Vulnerability Detection expected error list. ([#5409](https://github.com/wazuh/wazuh-qa/pull/5409)) \- (Tests)
+- Update vulnerability state index name ([#5402](https://github.com/wazuh/wazuh-qa/pull/5402)) \- (Framework)
+- Include new package information from wdb ([#5350](https://github.com/wazuh/wazuh-qa/pull/5350)) \- (Tests)
+- Disable debug evidences for Vulnerability Detector E2E tests by default ([#5331](https://github.com/wazuh/wazuh-qa/pull/5331)) \- (Tests)
+- Include CVE-2023-4822 vulnerability to grafana packages ([#5332](https://github.com/wazuh/wazuh-qa/pull/5332)) \- (Framework)
+- Remove sslverify from host manager install package method ([#5339](https://github.com/wazuh/wazuh-qa/pull/5339)) \- (Framework)
+- Include additional Vulnerability Detector E2E tests ([#5287](https://github.com/wazuh/wazuh-qa/pull/5287)) \- (Framework + Tests)
+- Change Vulnerability Detection feed updated waiter ([#5227](https://github.com/wazuh/wazuh-qa/pull/5227)) \- (Tests)
 - Replace timestamp filter with vulnerabilities detected_at field.([#5266](https://github.com/wazuh/wazuh-qa/pull/5266)) \- (Framework + Tests)
 - Changes macOS packages with new ones that generate vulnerabilities ([#5174](https://github.com/wazuh/wazuh-qa/pull/5174)) \- (Tests)
 - Refactor initial scan Vulnerability E2E tests ([#5081](https://github.com/wazuh/wazuh-qa/pull/5081)) \- (Framework + Tests)
@@ -73,6 +85,18 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Include logic to retry package installation if the lock file is currently in use ([#5421](https://github.com/wazuh/wazuh-qa/pull/5421)) \- (Framework)
+- Increase E2E Vulnerability detection change manager test timeout ([#5414](https://github.com/wazuh/wazuh-qa/pull/5414)) \- (Tests)
+- Fix filter vulnerabilities function in case of multiple packages are used ([#5419](https://github.com/wazuh/wazuh-qa/pull/5419)) \- (Framework)
+- Remove false positive from E2E Vulnerability Detection tests ([#5369](https://github.com/wazuh/wazuh-qa/pull/5369)) \- (Framework)
+- Fix multigroups guess system test ([#5396](https://github.com/wazuh/wazuh-qa/pull/5396)) \- (Tests)
+- Fix hotfixes syscollector agent simulator messages ([#5379](https://github.com/wazuh/wazuh-qa/pull/5379)) \- (Framework)
+- Fix restart agent in change manager Vulnerability Detector E2E test case ([#5355](https://github.com/wazuh/wazuh-qa/pull/5355)) \- (Tests)
+- Fix E2E Vulnerability Detection Windows package installation error ([#5363](https://github.com/wazuh/wazuh-qa/pull/5363)) \- (Framework)
+- Fix shutdown messages system test ([#5298](https://github.com/wazuh/wazuh-qa/pull/5298)) \- (Framework + Tests)
+- Fix upgrade macOS package cases for vulnerability scanner E2E ([#5334](https://github.com/wazuh/wazuh-qa/pull/5334)) \- (Tests)
+- Fix test cases in Vulnerability Detection E2E test by adding new packages ([#5349](https://github.com/wazuh/wazuh-qa/pull/5349)) \- (Tests)
+- Fix macOS alert collection for E2E Vulnerability Detection tests ([#5337](https://github.com/wazuh/wazuh-qa/pull/5337)) \- (Framework)
 - Fix packages in Windows and macOS upgrade cases ([#5223](https://github.com/wazuh/wazuh-qa/pull/5223)) \- (Framework + Tests)
 - Fix vulnerabilities and add new packages to Vulnerability Detector E2E tests ([#5234](https://github.com/wazuh/wazuh-qa/pull/5234)) \- (Tests)
 - Fix provision macOS endpoints with npm ([#5128](https://github.com/wazuh/wazuh-qa/pull/5158)) \- (Tests)
@@ -109,6 +133,7 @@ All notable changes to this project will be documented in this file.
 - Fix test cluster performance. ([#4780](https://github.com/wazuh/wazuh-qa/pull/4780)) \- (Framework)
 - Fixed the graphic generation for the logcollectord statistics files. ([#5021](https://github.com/wazuh/wazuh-qa/pull/5021)) \- (Framework)
 
+## [4.7.5] - TBD
 
 ## [4.7.4] - 29/04/2024
 
