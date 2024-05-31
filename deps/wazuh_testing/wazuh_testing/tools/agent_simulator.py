@@ -22,7 +22,7 @@ import zlib
 import re
 from datetime import date
 from itertools import cycle
-from random import randint, sample, choice, getrandbits
+from random import randint, sample, choice, getrandbits, choice, getrandbits
 from stat import S_IFLNK, S_IFREG, S_IRWXU, S_IRWXG, S_IRWXO
 from string import ascii_letters, digits
 from struct import pack
@@ -60,70 +60,120 @@ class Agent:
         name (str, optional): Agent name. Specify only if it already exists.
         key (str, optional): Client key. Specify only if it already exists.
         version (str, optional): Wazuh agent version. Default v3.12.0.
-        labels (dict, optional): Wazuh agent labels. Each dict key will be a new label.
-        fim_eps (int, optional): Set the maximum event reporting throughput. Events are messages that will produce an
-                                 alert.
+        fim_eps (int, optional): Set the maximum event reporting throughput. Events are messages that
+            will produce an alert.
         fim_integrity_eps (int, optional): Set the maximum database synchronization message throughput.
-        authd_password (str), optional: Password for registration if needed.
+        sca_eps (int, optional): Set the maximum number of sca events.
+        syscollector_eps (int, optional): Set the maximum number of syscollector messages.
+        vulnerability_eps (int, optional): Set the maximum number of vulnerability events.
+        labels (dict, optional): Wazuh agent labels. Each dict key will be a new label.
+        rootcheck_eps (int, optional): Set the maximum number of rootcheck events.
+        logcollector_eps (int, optional): Set the maximum number of logcollector messages.
+        authd_password (str, optional): Password for registration if needed.
+        disable_all_modules (bool, optional): Disable all simulated modules for this agent.
+        rootcheck_frequency (int, optional): Frequency to run rootcheck scans.
+        rcv_msg_limit (int, optional): Max elements for the received message queue.
+        keep_alive_frequency (int, optional): Frequency to send keepalive messages.
+        sca_frequency (int, optional): Frequency to run sca_label scans.
+        syscollector_frequency (int, optional): Frequency to run syscollector scans.
+        vulnerability_frequency (int, optional): Frequency to run vulnerability scans.
+        syscollector_batch_size (int, optional): Size of the syscollector type batch events.
+        hostinfo_eps (int, optional): Hostinfo's maximum event reporting throughput.
+        winevt_eps (float): Winevt's maximum event reporting throughput.
+        fixed_message_size (int, optional): Fixed size of the agent modules messages in KB.
         registration_address (str, optional): Manager registration IP address.
-        retry_enrollment (bool, optional): retry then enrollment in case of error.
-        logcollector_msg_number (bool, optional): insert in the logcollector message the message number.
+        retry_enrollment (bool, optional): Retry then enrollment in case of error.
+        logcollector_msg_number (bool, optional): Insert in the logcollector message the message number.
         custom_logcollector_message (str): Custom logcollector message to be sent by the agent.
+        syscollector_event_types (list, optional): List of events available for syscollector.
+        syscollector_legacy_messages (bool, optional): Allows sending syscollector messages in the
+            style prior to version 4.2.
+        vulnerability_packages_vuln_content (str, optional): Path to the file with the list of packages
+            for vulnerability.
+        vulnerability_events (int, optional): Number of vulnerability events per agent.
     Attributes:
         id (str): ID of the agent.
         name (str): Agent name.
         key (str): Agent key. Used for creating an encryption_key.
-        long_version (str): Agent version in format x.y.z
-        short_version (str): Agent version in format x.y
+        long_version (str): Agent version in format `x.y.z`.
+        short_version (str): Agent version in format `x.y`.
+        labels (dict): Wazuh agent labels. Each dict key will be a new label. Default `None`.
         cypher (str): Encryption method for message communication.
         os (str): Agent operating system.
         fim_eps (int): Fim's maximum event reporting throughput. Default `1000`.
         fim_integrity_eps (int): Fim integrity's maximum event reporting throughput. Default `100`.
         syscollector_eps (int): Syscollector's maximum event reporting throughput. Default `100`.
+        syscollector_event_types (list): List of events available for syscollector. Default
+            `['network', 'port', 'hotfix', 'process', 'packages', 'osinfo', 'hwinfo']`.
+        syscollector_legacy_messages (bool): Allows sending syscollector messages in the style prior
+            to version 4.2. Default `False`.
+        vulnerability_eps (int): Set the maximum number of vulnerability events. Default `100`.
+        vulnerability_events (int): Number of vulnerability events per agent. Default `10`.
+        vulnerability_packages_vuln_content (str): Path to the file with the list of packages for
+            vulnerability. Default `None`.
+        vulnerability_frequency (int): Frequency to run vulnerability scans. Default `60.0`.
         rootcheck_eps (int): Rootcheck's maximum event reporting throughput. Default `100`.
-        hostinfo_eps (int): Hostinfo's maximum event reporting throughput. Default `100`.
-        winevt_eps (float): Winevt's maximum event reporting throughput. Default `100`.
         logcollector_eps (float): Logcollector's maximum event reporting throughput. Default `100`.
+        winevt_eps (float): Winevt's maximum event reporting throughput. Default `100`.
         sca_eps (float): sca_label's maximum event reporting throughput. Default `100`.
+        hostinfo_eps (int): Hostinfo's maximum event reporting throughput. Default `100`.
+        rootcheck_frequency (int): Frequency to run rootcheck scans. 0 to continuously send rootcheck
+            events.
+        sca_frequency (int): Frequency to run sca_label scans. 0 to continuously send sca_label events.
+        keepalive_frequency (int): Frequency to send keepalive messages. 0 to continuously send
+            keepalive messages.
+        syscollector_frequency (int): Frequency to run syscollector scans. 0 to continuously send
+            syscollector events.
         manager_address (str): Manager IP address.
+        registration_address (str): Manager registration IP address.
         encryption_key (bytes): Encryption key used for encrypt and decrypt the message.
-        keep_alive_event (bytes): Keep alive event (read from template data according to OS and parsed to an event).
+        keep_alive_event (bytes): Keep alive event (read from template data according to OS and parsed
+            to an event).
         keep_alive_raw_msg (string): Keep alive event in plain text.
         merged_checksum (string): Checksum of agent's merge.mg file.
         startup_msg (bytes): Startup event sent before the first keep alive event.
         authd_password (str): Password for manager registration.
+        sca (SCA): Object to simulate SCA events.
+        logcollector (Logcollector): Object to simulate Logcollector events.
+        syscollector_batch_size (int): Size of the syscollector type batch events.
         rootcheck_sample (str): File where are sample rootcheck messages.
         rootcheck (Rootcheck): Object to simulate rootcheck message events.
+        hostinfo (GeneratorHostinfo): Object to simulate host information.
+        winevt (GeneratorWinevt): Object to simulate winevt.
         fim (GeneratorFIM): Object to simulate FIM message events.
         fim_integrity (GeneratorIntegrityFIM): Object to simulate FIM integrity message events.
+        syscollector (GeneratorSyscollector): Object to simulate Syscollector message events.
+        vulnerability (GeneratorVulnerabilityEvents):  Object to simulate Vulnerability events.
         modules (dict): Agent modules with their associated configuration info.
         sha_key (str): Shared key between manager and agent for remote upgrading.
         upgrade_exec_result (int): Upgrade result status code.
-        send_upgrade_notification (boolean): If True, it will be sent the upgrade status message after "upgrading".
-        upgrade_script_result (int): Variable to mock the upgrade script result. Used for simulating a remote upgrade.
+        send_upgrade_notification (boolean): If True, it will be sent the upgrade status message
+            after "upgrading".
+        upgrade_script_result (int): Variable to mock the upgrade script result. Used for simulating a
+            remote upgrade.
         stop_receive (int): Flag to determine when to activate and deactivate the agent event listener.
         stage_disconnect (str): WPK process state variable.
+        retry_enrollment (bool): Retry then enrollment in case of error. Default `False`.
         rcv_msg_limit (int): max elements for the received message queue.
         rcv_msg_queue (monitoring.Queue): Queue to store received messages in the agent.
-        disable_all_modules (boolean): Disable all simulated modules for this agent.
-        rootcheck_frequency (int): frequency to run rootcheck scans. 0 to continuously send rootcheck events.
-        syscollector_frequency (int): frequency to run syscollector scans. 0 to continuously send syscollector events.
-        keepalive_frequency (int): frequency to send keepalive messages. 0 to continuously send keepalive messages.
-        sca_frequency (int): frequency to run sca_label scans. 0 to continuously send sca_label events.
-        syscollector_batch_size (int): Size of the syscollector type batch events.
         fixed_message_size (int): Fixed size of the agent modules messages in KB.
-        registration_address (str): Manager registration IP address.
+        logcollector_msg_number (bool): Insert in the logcollector message the message number.
+            Default `None`.
+        custom_logcollector_message (str): Custom logcollector message to be sent by the agent.
+            Default ``.
+        disable_all_modules (boolean): Disable all simulated modules for this agent.
     """
     def __init__(self, manager_address, cypher="aes", os=None, rootcheck_sample=None, id=None, name=None, key=None,
-                 version="v4.3.0", fim_eps=100, fim_integrity_eps=100, sca_eps=100, syscollector_eps=100, labels=None,
-                 rootcheck_eps=100, logcollector_eps=100, authd_password=None, disable_all_modules=False,
-                 rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0, sca_frequency=60,
-                 syscollector_frequency=60.0, syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100,
-                 fixed_message_size=None, registration_address=None, retry_enrollment=False,
-                 logcollector_msg_number=None, custom_logcollector_message='',
+                 version="v4.3.0", fim_eps=100, fim_integrity_eps=100, sca_eps=100, syscollector_eps=100,
+                 vulnerability_eps=100, labels=None, rootcheck_eps=100, logcollector_eps=100, authd_password=None,
+                 disable_all_modules=False, rootcheck_frequency=60.0, rcv_msg_limit=0, keepalive_frequency=10.0,
+                 sca_frequency=60, syscollector_frequency=60.0, vulnerability_frequency=60.0,
+                 syscollector_batch_size=10, hostinfo_eps=100, winevt_eps=100, fixed_message_size=None,
+                 registration_address=None, retry_enrollment=False, logcollector_msg_number=None,
+                 custom_logcollector_message='',
                  syscollector_event_types=['network', 'port', 'hotfix', 'process', 'packages', 'osinfo', 'hwinfo'],
-                 syscollector_packages_vuln_content=None,
-                 syscollector_legacy_messages=False):
+                 syscollector_legacy_messages=False, vulnerability_packages_vuln_content=None,
+                 vulnerability_events=10):
         self.id = id
         self.name = name
         self.key = key
@@ -141,7 +191,11 @@ class Agent:
         self.syscollector_eps = syscollector_eps
         self.syscollector_event_types = syscollector_event_types
         self.syscollector_legacy_messages = syscollector_legacy_messages
-        self.syscollector_packages_vuln_content = syscollector_packages_vuln_content
+
+        self.vulnerability_eps = vulnerability_eps
+        self.vulnerability_events = vulnerability_events
+        self.vulnerability_packages_vuln_content = vulnerability_packages_vuln_content
+        self.vulnerability_frequency = vulnerability_frequency
 
         self.rootcheck_eps = rootcheck_eps
         self.logcollector_eps = logcollector_eps
@@ -170,13 +224,20 @@ class Agent:
         self.fim = None
         self.fim_integrity = None
         self.syscollector = None
+        self.vulnerability = None
         self.modules = {
             'keepalive': {'status': 'enabled', 'frequency': self.keepalive_frequency},
             'fim': {'status': 'enabled', 'eps': self.fim_eps},
             'fim_integrity': {'status': 'disabled', 'eps': self.fim_integrity_eps},
-            'syscollector': {'status': 'disabled', 'frequency': self.syscollector_frequency,
-                             'eps': self.syscollector_eps},
-            'rootcheck': {'status': 'disabled', 'frequency': self.rootcheck_frequency, 'eps': self.rootcheck_eps},
+            'syscollector': {
+                'status': 'disabled', 'frequency': self.syscollector_frequency, 'eps': self.syscollector_eps
+            },
+            'vulnerability': {
+                'status': 'disabled', 'frequency': self.vulnerability_frequency, 'eps': self.vulnerability_eps
+            },
+            'rootcheck': {
+                'status': 'disabled', 'frequency': self.rootcheck_frequency, 'eps': self.rootcheck_eps
+            },
             'sca': {'status': 'disabled', 'frequency': self.sca_frequency, 'eps': self.sca_eps},
             'hostinfo': {'status': 'disabled', 'eps': self.hostinfo_eps},
             'winevt': {'status': 'disabled', 'eps': self.winevt_eps},
@@ -652,6 +713,8 @@ class Agent:
             self.init_sca()
         if self.modules['logcollector']['status'] == 'enabled':
             self.init_logcollector()
+        if self.modules['vulnerability']['status'] == 'enabled':
+            self.init_vulnerability()
 
     def init_logcollector(self):
         """Initialize logcollector module."""
@@ -669,8 +732,7 @@ class Agent:
         if self.syscollector is None:
             self.syscollector = GeneratorSyscollector(self.name, self.syscollector_event_types,
                                                       self.syscollector_legacy_messages,
-                                                      self.syscollector_batch_size,
-                                                      self.syscollector_packages_vuln_content)
+                                                      self.syscollector_batch_size)
 
     def init_rootcheck(self):
         """Initialize rootcheck module."""
@@ -697,6 +759,15 @@ class Agent:
         """Initialize winevt module."""
         if self.winevt is None:
             self.winevt = GeneratorWinevt(self.name, self.id)
+
+    def init_vulnerability(self):
+        """Initialize vulnerability module."""
+        if self.vulnerability is None:
+            self.vulnerability = GeneratorVulnerabilityEvents(
+                self.name,
+                self.vulnerability_events,
+                self.vulnerability_packages_vuln_content
+            )
 
     def get_agent_info(self, field):
         agent_info = wdb.query_wdb(f"global get-agent-info {self.id}")
@@ -748,53 +819,30 @@ class Agent:
         self.modules[module_name][attribute] = value
 
 
-class GeneratorSyscollector:
-    """This class allows the generation of syscollector events.
-    Create events of different syscollector event types Network, Process, Port, Packages, OS, Hardware and Hotfix.
-    In order to change messages events it randomized different fields of templates specified by <random_string>.
-    In order to simulate syscollector module, it send a set of the same syscollector type messages,
-    which size is specified by `batch_size` attribute. Example of syscollector message:
-        d:syscollector:{"type":"network","ID":18,"timestamp":"2021/03/26 00:00:00","iface":{"name":"O977Q1F55O",
-        "type":"ethernet","state":"up","MAC":"08:00:27:be:ce:3a","tx_packets":2135,"rx_packets":9091,"tx_bytes":210748,
-        "rx_bytes":10134272,"tx_errors":0,"rx_errors":0,"tx_dropped":0,"rx_dropped":0,"MTU":1500,"IPv4":
-        {"address":["10.0.2.15"],"netmask":["255.255.255.0"],"broadcast":["10.0.2.255"],
-        "metric":100,"gateway":"10.0.2.2","DHCP":"enabled"}}}
+class Generator:
+    """This class contains the common functions for generators
     Args:
         agent_name (str): Name of the agent.
-        batch_size (int): Number of messages of the same type
+        mq (str): By default 'd'
+        tag (str): By default 'syscollector'
     """
 
-    def __init__(self, agent_name, event_types_list, old_format, batch_size, syscollector_packages_vuln_content):
-        self.current_batch_events = -1
-        self.current_batch_events_size = 0
-        self.list_events = event_types_list
+    def __init__(self, agent_name, mq='d', tag='syscollector'):
+        self.agent_name = agent_name
+        self.mq = mq
+        self.tag = tag
+
         self.syscollector_event_type_mapping = {
             'packages': 'dbsync_packages',
-            'hotfix': 'dbsync_hotfix',
+            'hotfix': 'dbsync_hotfixes',
             'hwinfo': 'dbsync_hwinfo',
             'ports': 'dbsync_ports',
             'osinfo': 'dbsync_osinfo',
             'network': 'dbsync_network_iface',
             'process': 'dbsync_processes'
         }
-        self.syscollector_packages_vuln_content = syscollector_packages_vuln_content
 
-        self.packages = []
-
-        self.old_format = old_format
-        self.agent_name = agent_name
-        self.batch_size = batch_size
-        self.syscollector_tag = 'syscollector'
-        self.syscollector_mq = 'd'
         self.current_id = 1
-
-        self.default_packages_vuln_content = os.path.join(_data_path, 'syscollector_parsed_packages.json')
-        self.package_index = 0
-
-        if self.syscollector_packages_vuln_content:
-            self.packages = self.init_package_list(self.syscollector_packages_vuln_content)
-        else:
-            self.packages = self.init_package_list(self.default_packages_vuln_content)
 
     def parse_package_template(self, message, package_data):
         """Parse package template with package data.
@@ -804,84 +852,20 @@ class GeneratorSyscollector:
         Returns:
             str: Parsed syscollector event message.
         """
+
         template_package_fields = {
-                '<package_description>': package_data['description'],
-                '<package_architecture>': package_data['architecture'],
-                '<package_format>': package_data['format'],
-                '<package_name>':  package_data['product'],
-                '<package_source>': package_data['source'],
-                '<package_vendor>': package_data['vendor'],
-                '<package_version>': package_data['version'],
-                '<package_item_id>': package_data['item_id']
+            '<package_description>': package_data['description'],
+            '<package_architecture>': package_data['architecture'],
+            '<package_format>': package_data['format'],
+            '<package_name>':  package_data['product'],
+            '<package_source>': package_data['source'],
+            '<package_vendor>': package_data['vendor'],
+            '<package_version>': package_data['version'],
+            '<package_item_id>': package_data['item_id']
         }
 
         for package_key, package_value in template_package_fields.items():
             message = message.replace(package_key, package_value)
-
-        return message
-
-    def get_package_data(self):
-        """Get package data.
-        Returns:
-            dict: Package data.
-            str: Operation (INSERTED or DELETED).
-        """
-        operation = 'DELETED' if self.packages[self.package_index]['installed'] else 'INSERTED'
-
-        package_data = self.packages[self.package_index]
-
-        self.packages[self.package_index]['installed'] = not self.packages[self.package_index]['installed']
-        self.package_index = (self.package_index + 1) % len(self.packages)
-
-        return package_data, operation
-
-    def init_package_list(self, packages_file):
-        """Get package data from a json file.
-        Returns:
-            dict: Package data.
-        """
-        with open(os.path.join(_data_path, packages_file), 'r') as fp:
-            package_data = json.load(fp)
-
-        for package in package_data:
-            package['installed'] = False
-            if 'description' not in package:
-                package['description'] = ''
-            if 'architecture' not in package:
-                package['architecture'] = ''
-            if 'format' not in package:
-                package['format'] = ''
-            if 'source' not in package:
-                package['source'] = ''
-            if 'item_id' not in package:
-                package['item_id'] = get_random_string(10)
-
-        return package_data
-
-    def get_event_template_legacy(self, message_type):
-        """Get syscollector legacy message of the specified type.
-        Args:
-            message_type (str): Syscollector event type.
-        Return:
-            str: Syscollector legacy event message.
-        """
-        message = syscollector.LEGACY_SYSCOLLECTOR_HEADER
-        if message_type == 'network':
-            message += syscollector.LEGACY_SYSCOLLECTOR_NETWORK_EVENT_TEMPLATE
-        elif message_type == 'process':
-            message += syscollector.LEGACY_SYSCOLLECTOR_PROCESS_EVENT_TEMPLATE
-        elif message_type == 'ports':
-            message += syscollector.LEGACY_SYSCOLLECTOR_PORTS_EVENT_TEMPLATE
-        elif message_type == 'packages':
-            message += syscollector.LEGACY_SYSCOLLECTOR_PACKAGES_EVENT_TEMPLATE
-        elif message_type == 'osinfo':
-            message += syscollector.LEGACY_SYSCOLLECTOR_OS_EVENT_TEMPLATE
-        elif message_type == 'hwinfo':
-            message += syscollector.LEGACY_SYSCOLLECTOR_HARDWARE_EVENT_TEMPLATE
-        elif message_type == 'hotfix':
-            message += syscollector.LEGACY_SYSCOLLECTOR_HOTFIX_EVENT_TEMPLATE
-        elif 'end' in message_type:
-            message += '}'
 
         return message
 
@@ -893,8 +877,7 @@ class GeneratorSyscollector:
             str: Syscollector event message.
         """
         message_event_type = self.syscollector_event_type_mapping[message_type]
-        operation = 'INSERTED' if (message_type == 'osinfo' or message_type == 'packages') else 'MODIFIED'
-        message_operation = operation
+        message_operation = 'INSERTED' if (message_type == 'osinfo' or message_type == 'packages') else 'MODIFIED'
 
         message_data = {}
         package_data = {}
@@ -929,22 +912,111 @@ class GeneratorSyscollector:
         return message
 
     def format_event_template(self, template, message_type=None):
+        """Format syscollector message of the specified type.
+        Args:
+            template (str): Syscollector event message.
+            message_type (str): Syscollector event type.
+        Returns:
+            str: Syscollector event message.
+        """
+
         today = date.today()
         timestamp = today.strftime("%Y/%m/%d %H:%M:%S")
         message = template
 
         generics_fields_to_replace = [
-                        ('<agent_name>', self.agent_name), ('<random_int>', f"{self.current_id}"),
-                        ('<random_string>', get_random_string(10)),
-                        ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
-                    ]
+            ('<agent_name>', self.agent_name), ('<random_int>', f"{self.current_id}"),
+            ('<random_string>', get_random_string(10)),
+            ('<timestamp>', timestamp), ('<syscollector_type>', message_type)
+        ]
 
         for variable, value in generics_fields_to_replace:
             message = message.replace(variable, value)
 
-        final_mesage = f"{self.syscollector_mq}:{self.syscollector_tag}:{message}"
+        final_message = f"{self.mq}:{self.tag}:{message}"
 
-        return final_mesage
+        return final_message
+
+
+class GeneratorSyscollector(Generator):
+    """This class allows the generation of syscollector events.
+    Create events of different syscollector event types Network, Process, Port, Packages, OS, Hardware and Hotfix.
+    In order to change messages events it randomized different fields of templates specified by <random_string>.
+    In order to simulate syscollector module, it send a set of the same syscollector type messages,
+    which size is specified by `batch_size` attribute. Example of syscollector message:
+        d:syscollector:{"type":"network","ID":18,"timestamp":"2021/03/26 00:00:00","iface":{"name":"O977Q1F55O",
+        "type":"ethernet","state":"up","MAC":"08:00:27:be:ce:3a","tx_packets":2135,"rx_packets":9091,"tx_bytes":210748,
+        "rx_bytes":10134272,"tx_errors":0,"rx_errors":0,"tx_dropped":0,"rx_dropped":0,"MTU":1500,"IPv4":
+        {"address":["10.0.2.15"],"netmask":["255.255.255.0"],"broadcast":["10.0.2.255"],
+        "metric":100,"gateway":"10.0.2.2","DHCP":"enabled"}}}
+    Args:
+        agent_name (str): Name of the agent.
+        batch_size (int): Number of messages of the same type
+    """
+
+    def __init__(self, agent_name, event_types_list, old_format, batch_size):
+        super().__init__(agent_name, 'd', 'syscollector')
+
+        self.current_batch_events = -1
+        self.current_batch_events_size = 0
+        self.list_events = event_types_list
+
+        self.old_format = old_format
+        self.batch_size = batch_size
+
+    def get_package_data(self):
+        """Get package data.
+        Returns:
+            dict: Package data.
+            str: Operation (INSERTED or DELETED).
+        """
+        operation = str(choice(['INSERTED', 'DELETED']))
+
+        installed = bool(getrandbits(1))
+        item_id = get_random_string(10)
+        vendor_product = ''.join(sample(ascii_letters * 5, 10))
+        version = sample(digits, 1)[0]
+
+        package_data = {
+            "architecture": '',
+            "description": '',
+            "format": '',
+            "installed": installed,
+            "item_id": item_id,
+            "product": vendor_product,
+            "source": '',
+            "vendor": vendor_product,
+            "version": version
+        }
+
+        return package_data, operation
+
+    def get_event_template_legacy(self, message_type):
+        """Get syscollector legacy message of the specified type.
+        Args:
+            message_type (str): Syscollector event type.
+        Return:
+            str: Syscollector legacy event message.
+        """
+        message = syscollector.LEGACY_SYSCOLLECTOR_HEADER
+        if message_type == 'network':
+            message += syscollector.LEGACY_SYSCOLLECTOR_NETWORK_EVENT_TEMPLATE
+        elif message_type == 'process':
+            message += syscollector.LEGACY_SYSCOLLECTOR_PROCESS_EVENT_TEMPLATE
+        elif message_type == 'ports':
+            message += syscollector.LEGACY_SYSCOLLECTOR_PORTS_EVENT_TEMPLATE
+        elif message_type == 'packages':
+            message += syscollector.LEGACY_SYSCOLLECTOR_PACKAGES_EVENT_TEMPLATE
+        elif message_type == 'osinfo':
+            message += syscollector.LEGACY_SYSCOLLECTOR_OS_EVENT_TEMPLATE
+        elif message_type == 'hwinfo':
+            message += syscollector.LEGACY_SYSCOLLECTOR_HARDWARE_EVENT_TEMPLATE
+        elif message_type == 'hotfix':
+            message += syscollector.LEGACY_SYSCOLLECTOR_HOTFIX_EVENT_TEMPLATE
+        elif 'end' in message_type:
+            message += '}'
+
+        return message
 
     def generate_event(self):
         """Generate syscollector event.
@@ -972,6 +1044,101 @@ class GeneratorSyscollector:
 
         event_final = self.format_event_template(event_template, event)
         logging.debug(f"Syscollector Event  - {event_final}")
+
+        self.current_id += 1
+
+        return event_final
+
+
+class GeneratorVulnerabilityEvents(Generator):
+    """This class allows the generation of vulnerability events.
+    Create OS and Packages type events (syscollector events) to generate vulnerability events.
+    In order to change messages events it randomized different fields of templates specified by <random_string>.
+    In order to simulate syscollector module, it send a set of the same syscollector type messages, which size
+    is specified by `batch_size` attribute.
+    Args:
+        agent_name (str): Name of the agent.
+        events_number (int): Number of messages of the same type.
+        custom_packages_vuln_content (list): File containing a list of packages to be sent by syscollector.
+    """
+
+    def __init__(self, agent_name, events_number, custom_packages_vuln_content):
+        super().__init__(agent_name, 'd', 'syscollector')
+
+        self.current_events_number = 1
+        self.package_index = 0
+        self.current_event = 'osinfo'
+        self.events_number = events_number
+
+        self.packages = []
+        self.custom_packages_vuln_content = custom_packages_vuln_content
+        self.default_packages_vuln_content = os.path.join(_data_path, 'vulnerability_parsed_packages.json')
+
+        if self.custom_packages_vuln_content:
+            self.packages = self.init_package_list(self.custom_packages_vuln_content)
+        else:
+            self.packages = self.init_package_list(self.default_packages_vuln_content)
+
+    def get_package_data(self):
+        """Get package data.
+        Returns:
+            dict: Package data.
+            str: Operation (INSERTED or DELETED).
+        """
+
+        is_installed = self.packages[self.package_index]['installed']
+        operation = 'DELETED' if is_installed else 'INSERTED'
+
+        package_data = self.packages[self.package_index]
+
+        self.packages[self.package_index]['installed'] = not is_installed
+        self.package_index = (self.package_index + 1) % len(self.packages)
+
+        return package_data, operation
+
+    def init_package_list(self, packages_file):
+        """Get package data from a json file.
+        Returns:
+            dict: Package data.
+        """
+
+        with open(os.path.join(_data_path, packages_file), 'r') as fp:
+            package_data = json.load(fp)
+
+        for package in package_data:
+            package['installed'] = False
+            if 'description' not in package:
+                package['description'] = ''
+            if 'architecture' not in package:
+                package['architecture'] = ''
+            if 'format' not in package:
+                package['format'] = ''
+            if 'source' not in package:
+                package['source'] = ''
+            if 'item_id' not in package:
+                package['item_id'] = get_random_string(10)
+
+        return package_data
+
+    def generate_event(self):
+        """Generate vulnerability event.
+        The event types are selected sequentially, creating a number of events of the same
+        type specified in `events_number`.
+        Returns:
+            str: generated event with the desired format for syscollector
+        """
+
+        if self.current_events_number == 0:
+            self.current_event = 'packages'
+            self.current_events_number = self.events_number
+
+        self.current_events_number = self.current_events_number - 1
+
+        event_template = self.get_event_template(self.current_event)
+
+        event_final = self.format_event_template(event_template, self.current_event)
+
+        logging.debug(f"Vulnerability Event - {event_final}")
 
         self.current_id += 1
 
@@ -1777,6 +1944,9 @@ class InjectorThread(threading.Thread):
         elif module == 'logcollector':
             self.agent.init_logcollector()
             module_event_generator = self.agent.logcollector.generate_event
+        elif module == 'vulnerability':
+            self.agent.init_vulnerability()
+            module_event_generator = self.agent.vulnerability.generate_event
         else:
             raise ValueError('Invalid module selected')
 
