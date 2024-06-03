@@ -425,7 +425,7 @@ aws:
     user: ec2-user
   # Windows
   windows-desktop-10-amd64:
-    ami: ami-0a747df120215911a
+    ami: ami-03eb1fb8f55d01fde
     zone: us-east-1
     user: wazuh-user
   windows-sign-10-amd64:
