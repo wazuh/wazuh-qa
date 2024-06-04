@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Enhance the PR template. ([#4881](https://github.com/wazuh/wazuh-qa/pull/4881)) \- (Framework)
+- Updated the API script file name. ([#5351](https://github.com/wazuh/wazuh-qa/pull/5351)) \- (Framework)
 
 ### Fixed
 
