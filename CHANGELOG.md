@@ -26,6 +26,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Fix workload benchmark plots ([#5364](https://github.com/wazuh/wazuh-qa/pull/5364)) \- (Framework)
 - Increase feed update time in Vulnerability Detection E2E tests to 10h ([#5424](https://github.com/wazuh/wazuh-qa/pull/5424)) \- (Tests)
 - Migrate E2E Vulnerability Detector test packages to S3 repository ([#5376](https://github.com/wazuh/wazuh-qa/pull/5376)) \- (Framework)
 - Include "Agent key already in use" in the E2E Vulnerability Detection expected error list. ([#5409](https://github.com/wazuh/wazuh-qa/pull/5409)) \- (Tests)
