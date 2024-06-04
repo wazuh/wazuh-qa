@@ -8,8 +8,11 @@ import os
 import sys
 import tempfile
 import xml.dom.minidom as minidom
+import re
+
 from threading import Thread
 from typing import List, Union
+from time import sleep
 
 import testinfra
 import yaml
@@ -477,7 +480,7 @@ class HostManager:
 
         return result
 
-    def install_package(self, host, url, system):
+    def install_package(self, host, url, system, retry=3, retry_delay=5):
         """
         Installs a package on the specified host.
 
@@ -493,31 +496,87 @@ class HostManager:
         Example:
             host_manager.install_package('my_host', 'http://example.com/package.deb', system='ubuntu')
         """
-        extension = '.msi'
-        result = None
+        def install_msi_package(host, url):
+            result = self.get_host(host).ansible("win_package",
+                                                 f"path={url} arguments=/passive", check=False)
 
-        if system == 'windows':
-            if url.lower().endswith(extension):
-                result = self.get_host(host).ansible("win_package", f"path={url} arguments=/passive", check=False)
-            else:
-                result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
-        elif system == 'ubuntu':
+            return result
+
+        def install_exe_package(host, url):
+            result = self.get_host(host).ansible("win_package", f"path={url} arguments=/S", check=False)
+
+            return result
+
+        def install_apt_package(host, url):
             result = self.get_host(host).ansible("apt", f"deb={url}", check=False)
-        elif system == 'centos':
+
+            return result
+
+        def install_yum_package(host, url):
             result = self.get_host(host).ansible("yum", f"name={url} state=present "
-                                                'disable_gpg_check=True', check=False)
-        elif system == 'macos':
+                                                 'disable_gpg_check=True', check=False)
+            return result
+
+        def install_pkg_package(host, url):
             package_name = url.split('/')[-1]
             result = self.get_host(host).ansible("command", f"curl -LO {url}", check=False)
             cmd = f"installer -pkg {package_name} -target /"
             result = self.get_host(host).ansible("command", cmd, check=False)
-        else:
+
+            return result
+
+        retry_installation_errors = [
+            'This installation package could not be opened',
+            'Could not get lock',
+            'error: dpkg frontend lock was locked by another process with pid',
+            'yum lockfile is held by another process'
+        ]
+
+        result = {}
+        failed_installation = False
+
+        extension = url.lower().split('.')[-1]
+
+        system_supported = ['windows', 'ubuntu', 'centos', 'macos']
+        installer_map = {
+            'msi': install_msi_package,
+            'exe': install_exe_package,
+            'deb': install_apt_package,
+            'rpm': install_yum_package,
+            'pkg': install_pkg_package
+        }
+
+        if system not in system_supported:
             raise ValueError(f"Unsupported system: {system}")
 
-        logging.info(f"Package installed result {result}")
+        for _ in range(retry):
+            installer_func = installer_map.get(extension, None)
 
-        if not (result['changed'] or result.get('rc') == 0) or not (result['changed'] or result.get('stderr', None) == ''):
+            if not installer_func:
+                raise ValueError(f"Unsupported extension: {extension} for {system}")
+
+            result = installer_func(host, url)
+
+            logging.debug(f"Package installation result {result}")
+            failed_installation = not (result.get('changed', False) or result.get('rc') == 0) \
+                or not (result.get('changed', False) or result.get('rc') == 0 or result.get('stderr', None) == '')
+
+            if failed_installation:
+                if not any(re.search(error, result.get('msg', '')) for error in retry_installation_errors) and \
+                    not any(re.search(error, result.get('stderr', '')) for error in retry_installation_errors):
+                    logging.error("Installation failed. Installation will not be retried.")
+                    raise RuntimeError(f"Failed to install package in {host}: {result}")
+
+                logging.error(f"Error installing {url} in {host}: Retrying installation...")
+
+                sleep(retry_delay)
+            else:
+                break
+
+        if failed_installation:
             raise RuntimeError(f"Failed to install package in {host}: {result}")
+
+        return result
 
     def install_npm_package(self, host, url, system='ubuntu'):
         """
@@ -609,7 +668,6 @@ class HostManager:
             host_manager.remove_package('my_host', 'my_package', system='ubuntu')
         """
         logging.info(f"Removing package {package_uninstall_name} from host {host}")
-        logging.info(f"System: {system}")
 
         remove_operation_result = False
 
@@ -641,7 +699,7 @@ class HostManager:
             or not (remove_operation_result['changed'] or remove_operation_result.get('stderr', None) == ''):
             raise RuntimeError(f"Failed to remove package in {host}: {remove_operation_result}")
 
-        logging.info(f"Package removed result {remove_operation_result}")
+        logging.debug(f"Package removed result {remove_operation_result}")
 
         return remove_operation_result
 
@@ -829,6 +887,16 @@ class HostManager:
         password = master_variables.get('api_password', default_password)
 
         return user, password
+
+    def get_cluster_name(self):
+        manager_list = self.get_group_hosts('manager')
+        if not manager_list:
+            raise ValueError("No manager is defined in the environment")
+
+        first_manager_vars = self.inventory_manager.get_host(manager_list[0])
+        cluster_name = first_manager_vars.vars.get('cluster_name', 'wazuh')
+
+        return cluster_name
 
     def get_indexer_credentials(self):
         default_user = 'admin'
