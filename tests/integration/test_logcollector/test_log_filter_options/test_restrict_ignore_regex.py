@@ -75,7 +75,7 @@ configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_restrict_
 cases_path = os.path.join(TEST_CASES_PATH, 'cases_restrict_ignore_regex_values.yaml')
 
 # Test configurations
-test_file = os.path.join(PREFIX, 'test')
+test_file = os.path.join(PREFIX, 'test.log')
 
 configuration_parameters, configuration_metadata, case_ids = get_test_cases_data(cases_path)
 for count, value in enumerate(configuration_parameters):

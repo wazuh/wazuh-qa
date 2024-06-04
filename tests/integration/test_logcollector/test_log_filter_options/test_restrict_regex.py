@@ -70,7 +70,7 @@ CONFIGURATIONS_PATH = os.path.join(TEST_DATA_PATH, 'configuration_template')
 TEST_CASES_PATH = os.path.join(TEST_DATA_PATH, 'test_cases')
 
 # Test configurations and cases data
-test_file = os.path.join(PREFIX, 'test')
+test_file = os.path.join(PREFIX, 'test.log')
 
 # --------------------------------TEST_RESTRICT_MULTIPLE_REGEX-------------------------------------------
 configurations_path = os.path.join(CONFIGURATIONS_PATH, 'configuration_restrict_multiple_regex.yaml')
