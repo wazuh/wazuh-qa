@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Add functionality to obtain metrics from the dashboard ([#5432](https://github.com/wazuh/wazuh-qa/pull/5432)) \- (Framework)
 - Add `Timestamp` field to the indexer statistics ([#5357](https://github.com/wazuh/wazuh-qa/pull/5357)) \- (Framework)
 - Add `GeneratorVulnerabilityEvents` in agent simulator ([#5265](https://github.com/wazuh/wazuh-qa/pull/5265)) \- (Framework)
 - Add functionality to obtain statistics and metrics from the indexer ([#5090](https://github.com/wazuh/wazuh-qa/pull/5090)) \- (Framework)
