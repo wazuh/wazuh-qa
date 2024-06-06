@@ -128,12 +128,14 @@ if [ ! -r "/etc/os-release" ] || [ "$DIST_NAME" = "centos" ]; then
     fi
 fi
 
-if [ "$DIST_NAME" = "amzn" ] || [ "$DIST_NAME" = "sles" ] || [ "$DIST_NAME" = "opensuse-leap" ]; then
+if [ "$DIST_NAME" = "amzn" ] || [ "$DIST_NAME" = "sles" ] \
+    || [ "$DIST_NAME" = "opensuse-leap" ]; then
     sudo sed -i "s/#Port\s22/Port ${SSH_PORT}/" /etc/ssh/sshd_config
     sudo systemctl restart sshd.service
 fi
 
-if [ "$DIST_NAME" = "rhel" ] || [ "$DIST_NAME" = "centos" ] || [ "$DIST_NAME" = "rocky" ] || [ "$DIST_NAME" = "fedora" ]; then
+if [ "$DIST_NAME" = "rhel" ] || [ "$DIST_NAME" = "centos" ] || [ "$DIST_NAME" = "rocky" ] \
+    || [ "$DIST_NAME" = "fedora" ] || [ "$DIST_NAME" = "almalinux" ]; then
     sudo sed -i "s/#Port\s22/Port ${SSH_PORT}/" /etc/ssh/sshd_config
     if [ "$DIST_NAME" = "centos" ] && [ "$DIST_VER" != "7" ]; then
         sudo yum -y install policycoreutils-python-utils
@@ -165,7 +167,7 @@ if [ "$DIST_NAME" = "ubuntu" ] || [ "$DIST_NAME" = "debian" ]; then
     if [ "$DIST_VER" = "24" ]; then
         perl -pi -e "s/^#?ListenStream=22$/ListenStream=${SSH_PORT}/" /etc/systemd/system/sockets.target.wants/ssh.socket
         systemctl daemon-reload
-        systemctl restart sshd || systemctl restart ssh 
+        systemctl restart sshd || systemctl restart ssh
     else
         service sshd restart || service ssh restart
     fi
