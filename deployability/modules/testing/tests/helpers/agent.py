@@ -68,7 +68,7 @@ class WazuhAgent:
             commands.extend(system_commands)
         elif os_type == 'windows' :
             commands.extend([
-                f"Invoke-WebRequest -Uri https://packages.wazuh.com/{release}/windows/wazuh-agent-{wazuh_version}-1.msi "
+                f"Invoke-WebRequest -Uri https://{s3_url}.wazuh.com/{release}/windows/wazuh-agent-{wazuh_version}-1.msi "
                 "-OutFile $env:TEMP\wazuh-agent.msi"
             ])
             commands.extend([

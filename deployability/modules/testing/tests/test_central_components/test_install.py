@@ -60,7 +60,7 @@ def test_installation(wazuh_params):
         HostConfiguration.disable_firewall(manager_params)
 
     # Certs create and scp from master to worker
-    HostConfiguration.certs_create(wazuh_params['wazuh_version'], wazuh_params['master'], wazuh_params['dashboard'], wazuh_params['indexers'], wazuh_params['workers'])
+    HostConfiguration.certs_create(wazuh_params['wazuh_version'], wazuh_params['master'], wazuh_params['dashboard'], wazuh_params['indexers'], wazuh_params['workers'], wazuh_params['live'])
 
     # Install central components and perform checkfile testing
     for _, manager_params in wazuh_params['managers'].items():

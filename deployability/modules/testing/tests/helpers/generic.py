@@ -260,7 +260,7 @@ class HostInformation:
 
         Args:
             dns_name (str): host's dns public dns name
-            
+
         Returns:
             str: public ip
         """
@@ -292,7 +292,7 @@ class HostInformation:
             client_key = ConnectionManager.execute_commands(inventory_path, f'Get-Content "{WINDOWS_CLIENT_KEYS}"').get('output')
         elif os_type == 'macos':
             client_key = ConnectionManager.execute_commands(inventory_path, f'cat {MACOS_CLIENT_KEYS}').get('output')
-        
+
         if client_key != None:
             lines = client_key.split('\n')[:-1]
             for line in lines:
@@ -372,7 +372,7 @@ class HostConfiguration:
             return [Utils.extract_ansible_host(path) for path in paths]
 
     @staticmethod
-    def certs_create(wazuh_version, master_path, dashboard_path, indexer_paths=[], worker_paths=[]) -> None:
+    def certs_create(wazuh_version, master_path, dashboard_path, indexer_paths=[], worker_paths=[], live="") -> None:
         """
         Creates wazuh certificates
 
@@ -399,16 +399,22 @@ class HostConfiguration:
 
         ##Basic commands to setup the config file, add the ip for the master & dashboard
         os_name = HostInformation.get_os_name_from_inventory(master_path)
+
+        if live == "False":
+            s3_url = 'packages-dev.wazuh.com'
+        else:
+            s3_url = 'packages.wazuh.com'
+
         if os_name == 'debian':
             commands = [
-                f'wget https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh',
-                f'wget https://packages.wazuh.com/{wazuh_version}/config.yml',
+                f'wget https://{s3_url}/{wazuh_version}/wazuh-install.sh',
+                f'wget https://{s3_url}/{wazuh_version}/config.yml',
                 f"sed -i '/^\s*#/d' {current_directory}/config.yml"
             ]
         else:
             commands = [
-                f'curl -sO https://packages.wazuh.com/{wazuh_version}/wazuh-install.sh',
-                f'curl -sO https://packages.wazuh.com/{wazuh_version}/config.yml',
+                f'curl -sO https://{s3_url}/{wazuh_version}/wazuh-install.sh',
+                f'curl -sO https://{s3_url}/{wazuh_version}/config.yml',
                 f"sed -i '/^\s*#/d' {current_directory}/config.yml"
             ]
 
@@ -866,11 +872,11 @@ class GeneralComponentActions:
             return result.get('success')
 
         elif os_type == 'macos':
-            result = ConnectionManager.execute_commands(inventory_path, f'launchctl list | grep com.{host_role.replace("-", ".")}').get('output')
-            if result == None:
+            result = ConnectionManager.execute_commands(inventory_path, f'ps aux | grep {host_role} | grep -v grep')
+            if result.get('output') == None:
                 return False
             else:
-                return f'com.{host_role.replace("-", ".")}' in result
+                return result.get('success')
 
 
 class Waits:
