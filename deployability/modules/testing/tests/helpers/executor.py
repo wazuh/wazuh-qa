@@ -49,26 +49,16 @@ class ConnectionManager:
         executor = ConnectionManager._get_executor(inventory_path)
         if isinstance(commands, str):
             try:
-                print("command" , "#"*10)
-                print(commands)
-                print("command" , "#"*10)
                 result = executor._execute_command(ConectionInventory._get_inventory_data(inventory_path), commands)
             except Exception as e:
                 raise Exception(f'Error executing command: {commands} with error: {e}')
-            print("result" , "#"*20)
-            print(result)
             return result
         else:
             results = {}
             for command in commands:
-                print("command" , "#"*10)
-                print(command)
-                print("command" , "#"*10)
                 result = executor._execute_command(ConectionInventory._get_inventory_data(inventory_path), command)
                 results[command] = result
 
-            print("result" , "#"*20)
-            print(result)
             return results
 
 class WindowsExecutor():
