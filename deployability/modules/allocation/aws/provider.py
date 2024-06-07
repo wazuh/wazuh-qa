@@ -380,7 +380,7 @@ class AWSProvider(Provider):
             result = subprocess.run(['bash', '-c', f"apt list --installed 2>/dev/null | grep -q -E ^{dependency}*"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if result.returncode != 0:
                 if dependency == 'awscli':
-                    aws_binary = subprocess.run(['which', '/usr/local/bin/aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    aws_binary = subprocess.run(['which', 'aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     if aws_binary.returncode != 0:
                         missing_dependencies.append(dependency)
                 else:
