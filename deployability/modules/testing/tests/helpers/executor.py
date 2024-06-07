@@ -58,7 +58,6 @@ class ConnectionManager:
             for command in commands:
                 result = executor._execute_command(ConectionInventory._get_inventory_data(inventory_path), command)
                 results[command] = result
-
             return results
 
 class WindowsExecutor():
