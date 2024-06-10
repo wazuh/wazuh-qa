@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
 - Add an IT to check that the agent erases its wazuh-agent.state file ([#4716](https://github.com/wazuh/wazuh-qa/pull/4716)) \- (Core)
 - Fix manager_agent system tests environment ([#4808](https://github.com/wazuh/wazuh-qa/pull/4808)) \- (Framework)
 - Fixed agent_simulator response for active-response configuration commands. ([#4895](https://github.com/wazuh/wazuh-qa/pull/4895)) \- (Framework)
+- Fixed stability in cluster reliability tests. ([#5448](https://github.com/wazuh/wazuh-qa/pull/5448)) \- (Framework)
 
 ## [4.8.0] - TBD
 
