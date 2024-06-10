@@ -7,7 +7,7 @@ import pytest
 from glob import glob
 from mmap import mmap, ACCESS_READ
 from os.path import join
-from datetime import datetime, timedelta
+from datetime import timedelta
 from dateutil import parser
 
 DATETIME_FORMAT = '%Y/%m/%d %H:%M'
@@ -18,13 +18,13 @@ node_name = re.compile(r'.*/(master|worker_[\d]+)/logs/cluster.log')
 
 
 def get_master_mmap(artifacts_path):
-    """Read the master cluster log and retunr a mmap with the content.
+    """Read the master cluster log and return a mmap with the content.
 
     Args:
         artifacts_path (str): Path where folders with cluster information can be found.
 
     Returns:
-        mmap: with the master logs.
+        mmap (mmap): A mmap object with the master logs.
     """
     with open(join(artifacts_path, 'master', 'logs', 'cluster.log')) as master_log:
         return mmap(master_log.fileno(), 0, access=ACCESS_READ)
