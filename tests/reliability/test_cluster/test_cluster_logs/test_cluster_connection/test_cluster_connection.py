@@ -10,7 +10,7 @@ from os.path import join
 from datetime import datetime, timedelta
 from dateutil import parser
 
-DATETIME_FORMAT = '%Y/%m/%d %H:%M:%S'
+DATETIME_FORMAT = '%Y/%m/%d %H:%M'
 SIGTERM_PATTERN = rb'SIGNAL \[\(15\)-\(SIGTERM\)\]'
 
 disconnected_nodes = []
@@ -66,12 +66,11 @@ def test_cluster_connection(artifacts_path):
             )
             if finds:
                 # Search for SIGTERM in the worker log
-                end_log_timestamp = re.search(rb'(\d{4}\/\d{2}\/\d{2} \d{2}\:\d{2}\:\d{2})', finds.group()).group()
-                start_datetime = parser.parse(end_log_timestamp.decode()) - timedelta(seconds=10)
+                end_log_timestamp = re.search(rb'(\d{4}\/\d{2}\/\d{2} \d{2}\:\d{2})', finds.group()).group()
+                start_datetime = parser.parse(end_log_timestamp.decode()) - timedelta(minutes=1)
                 start_log_timestamp = start_datetime.strftime(DATETIME_FORMAT)
 
                 start_log = re.search(fr'{start_log_timestamp}.*'.encode(), s)
-
                 worker_sigterm = re.search(SIGTERM_PATTERN, s[start_log.start():finds.start()])
 
                 if not worker_sigterm:
