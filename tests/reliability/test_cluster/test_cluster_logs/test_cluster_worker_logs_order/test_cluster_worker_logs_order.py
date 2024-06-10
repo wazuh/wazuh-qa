@@ -40,10 +40,9 @@ logs_order = {
         'node': 'root'
     } for filename in os.listdir(test_data_path)
 }
+order_restarter = re.compile(r'.* The master closed the connection')
 
 
-@pytest.mark.xfail(reason="known cluster log issue due to cluster logging refactor "
-                          "to be worked in https://github.com/wazuh/wazuh/issues/20162")
 def test_check_logs_order_workers(artifacts_path):
     """Check that cluster logs appear in the expected order.
 
@@ -65,7 +64,14 @@ def test_check_logs_order_workers(artifacts_path):
 
         with open(log_file) as file:
             for line in file.readlines():
+
+                if order_restarter.search(line):
+                    for log_order in logs_order.values():
+                        log_order['node'] = 'root'
+                    continue
+
                 result = worker_logs_format.search(line)
+
                 if result:
                     if result.group(1) in logs_order and result.group(1) not in failed_tasks:
                         tree_info = logs_order[result.group(1)]
