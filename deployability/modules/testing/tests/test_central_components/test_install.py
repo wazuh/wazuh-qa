@@ -164,3 +164,8 @@ def test_indexer_port(wazuh_params):
 
 def test_filebeat_status(wazuh_params):
     assert 'active' in GeneralComponentActions.get_component_status(wazuh_params['master'], 'filebeat'), logger.error(f"The Filebeat in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is not active")
+
+
+def test_indexer_conexion(wazuh_params):
+    for indexer_params in wazuh_params['indexers']:
+        assert WazuhManager.get_indexer_status(indexer_params), logger.error(f'IndexerConnector initialization failed {HostInformation.get_os_name_and_version_from_inventory(indexer_params)}')

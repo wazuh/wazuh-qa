@@ -5,7 +5,7 @@
 import requests
 import time
 
-from .constants import CLUSTER_CONTROL, AGENT_CONTROL, WAZUH_CONF, WAZUH_ROOT
+from .constants import CLUSTER_CONTROL, AGENT_CONTROL, WAZUH_CONF, WAZUH_ROOT, WAZUH_LOG
 from .executor import WazuhAPI, ConnectionManager
 from .generic import HostInformation, CheckFiles
 from modules.testing.utils import logger
@@ -438,3 +438,21 @@ class WazuhManager:
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
             return f"Unexpected error: {e}"
+
+    @staticmethod
+    def get_indexer_status(inventory_path) -> None:
+        """
+        Returns if Wazuh indexer is connected to Wazuh manager
+
+        Args:
+            inventory_path: host's inventory path
+
+        Returns:
+            str: Agents status
+        """
+
+        indexerConnection = ConnectionManager.execute_commands(inventory_path, f'cat {WAZUH_LOG} | grep "IndexerConnector initialized successfully" | tail -n1').get('output')
+
+        if indexerConnection is not None and indexerConnection.strip():
+            return True
+        return False
