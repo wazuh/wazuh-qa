@@ -60,7 +60,7 @@ def test_installation(wazuh_params):
         HostConfiguration.disable_firewall(manager_params)
 
     # Certs create and scp from master to worker
-    HostConfiguration.certs_create(wazuh_params['wazuh_version'], wazuh_params['master'], wazuh_params['dashboard'], wazuh_params['indexers'], wazuh_params['workers'])
+    HostConfiguration.certs_create(wazuh_params['wazuh_version'], wazuh_params['master'], wazuh_params['dashboard'], wazuh_params['indexers'], wazuh_params['workers'], wazuh_params['live'])
 
     # Install central components and perform checkfile testing
     for _, manager_params in wazuh_params['managers'].items():
@@ -164,3 +164,8 @@ def test_indexer_port(wazuh_params):
 
 def test_filebeat_status(wazuh_params):
     assert 'active' in GeneralComponentActions.get_component_status(wazuh_params['master'], 'filebeat'), logger.error(f"The Filebeat in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params['master'])} is not active")
+
+
+def test_indexer_conexion(wazuh_params):
+    for indexer_params in wazuh_params['indexers']:
+        assert WazuhManager.get_indexer_status(indexer_params), logger.error(f'IndexerConnector initialization failed {HostInformation.get_os_name_and_version_from_inventory(indexer_params)}')
