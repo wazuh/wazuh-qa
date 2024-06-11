@@ -128,6 +128,11 @@ vagrant:
     box: rockylinux/9
     box_version: 4.0.0
     virtualizer: virtualbox
+  # Alma Linux
+  linux-alma-8-amd64:
+    box: almalinux/8
+    box_version: 8.10.20240604
+    virtualizer: virtualbox
   # Macos
   macos-highsierra-10.13-amd64:
     box: development/macos-high-sierra
@@ -303,13 +308,13 @@ aws:
     zone: us-east-1
     user: centos
   linux-centos-8-amd64:
-    ami: ami-05f2b469e504202f7
+    ami: ami-0d8e399bc6283a29e
     zone: us-east-1
     user: cloud-user
   linux-centos-8-arm64:
-    ami: ami-012947942cdc60db6
+    ami: ami-063078a79d6ca4ca0
     zone: us-east-1
-    user: centos
+    user: cloud-user
   linux-centos-9-amd64:
     ami: ami-0259c451b16b72e24
     zone: us-east-1
@@ -398,6 +403,15 @@ aws:
     ami: ami-0151988e287370acc
     zone: us-east-1
     user: rocky
+  # Alma Linux
+  linux-alma-8-amd64:
+    ami: ami-059c62b4890c5498a
+    zone: us-east-1
+    user: ec2-user
+  linux-alma-8-arm64:
+    ami: ami-01e3e647c7acbc64b
+    zone: us-east-1
+    user: ec2-user
   # Macos
   macos-ventura-13-amd64:
     ami: ami-0e94a57427e4e0611

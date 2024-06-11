@@ -190,10 +190,14 @@ class AWSProvider(Provider):
         Returns:
             str: Identifier of the created instance.
         """
-        client = boto3.resource('ec2')
+        client = boto3.client('ec2')
+        resource = boto3.resource('ec2')
 
         userData_file = Path(__file__).parent.parent / 'aws' / 'helpers' / 'userData.sh'
         windosUserData_file = Path(__file__).parent.parent / 'aws' / 'helpers' / 'windowsUserData.ps1'
+        # Describe the AMI to get the root device name
+        ami = client.describe_images(ImageIds=[config.ami])
+        root_device_name = ami['Images'][0]['RootDeviceName']
 
         if config.platform == 'windows':
             with open(windosUserData_file, 'r') as file:
@@ -209,7 +213,7 @@ class AWSProvider(Provider):
             'SecurityGroupIds': config.security_groups,
             'BlockDeviceMappings': [
                 {
-                    'DeviceName': '/dev/sda1',
+                    'DeviceName': root_device_name,
                     'Ebs': {
 
                         'DeleteOnTermination': True,
@@ -240,7 +244,7 @@ class AWSProvider(Provider):
         if config.issue:
             params['TagSpecifications'][0]['Tags'].append({'Key': 'issue', 'Value': config.issue})
 
-        instance = client.create_instances(**params)[0]
+        instance = resource.create_instances(**params)[0]
         # Wait until the instance is running.
         instance.wait_until_running()
         return instance.instance_id
@@ -376,7 +380,7 @@ class AWSProvider(Provider):
             result = subprocess.run(['bash', '-c', f"apt list --installed 2>/dev/null | grep -q -E ^{dependency}*"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if result.returncode != 0:
                 if dependency == 'awscli':
-                    aws_binary = subprocess.run(['which', '/usr/local/bin/aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    aws_binary = subprocess.run(['which', 'aws'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     if aws_binary.returncode != 0:
                         missing_dependencies.append(dependency)
                 else:
