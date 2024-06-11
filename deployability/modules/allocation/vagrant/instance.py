@@ -103,7 +103,7 @@ class VagrantInstance(Instance):
                             Skipping deletion.")
             return
         self.__run_vagrant_command(['destroy', '-f'])
-        if self.host_instance_dir:
+        if str(self.host_identifier) == "macstadium":
             self.__cleanup_remote_host()
 
     def status(self) -> str:
@@ -268,10 +268,9 @@ class VagrantInstance(Instance):
         Returns:
             None
         """
-        if str(self.host_identifier) == "macstadium":
-            logger.debug(f"Deleting remote directory {self.host_instance_dir}")
-            VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.remote_host_parameters)
-            if self.virtualizer == 'parallels':
-                logger.debug(f"Killing remote process on port {self.ssh_port}")
-                proccess = VagrantUtils.remote_command(f"sudo lsof -Pi :{self.ssh_port} -sTCP:LISTEN -t", self.remote_host_parameters)
-                VagrantUtils.remote_command(f"sudo kill -9 {proccess}", self.remote_host_parameters)
+        logger.debug(f"Deleting remote directory {self.host_instance_dir}")
+        VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.remote_host_parameters)
+        if self.virtualizer == 'parallels':
+            logger.debug(f"Killing remote process on port {self.ssh_port}")
+            proccess = VagrantUtils.remote_command(f"sudo lsof -Pi :{self.ssh_port} -sTCP:LISTEN -t", self.remote_host_parameters)
+            VagrantUtils.remote_command(f"sudo kill -9 {proccess}", self.remote_host_parameters)
