@@ -103,13 +103,8 @@ class VagrantInstance(Instance):
                             Skipping deletion.")
             return
         self.__run_vagrant_command(['destroy', '-f'])
-        if str(self.host_identifier) == "macstadium":
-            logger.debug(f"Deleting remote directory {self.host_instance_dir}")
-            VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.remote_host_parameters)
-            if self.virtualizer == 'parallels':
-                logger.debug(f"Killing remote process on port {self.ssh_port}")
-                proccess = VagrantUtils.remote_command(f"sudo lsof -Pi :{self.ssh_port} -sTCP:LISTEN -t", self.remote_host_parameters)
-                VagrantUtils.remote_command(f"sudo kill -9 {proccess}", self.remote_host_parameters)
+        if self.host_instance_dir:
+            self.__cleanup_remote_host()
 
     def status(self) -> str:
         """
@@ -120,18 +115,24 @@ class VagrantInstance(Instance):
         """
         output = self.__run_vagrant_command('status')
         vagrant_status = self.__parse_vagrant_status(output)
-        if vagrant_status == None:
-            if VagrantUtils.remote_command(f"sudo ls {self.host_instance_dir} > /dev/null 2>&1", self.remote_host_parameters):
-                if VagrantUtils.remote_command(f"sudo /usr/local/bin/prlctl list -a | grep {self.identifier} > /dev/null 2>&1", self.remote_host_parameters):
-                    logger.warning(f"The instance was found, it will be deleted. The creation of the instance must be restarted again.")
-                    self.delete()
-                else:
-                    VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.remote_host_parameters)
-                    raise ValueError(f"Instance {self.identifier} is not running, remote instance dir {self.host_instance_dir} was removed.")
+        if vagrant_status is None:
+            if self.remote_host_parameters['server_ip'] == None:
+                raise ValueError(f"Cannot obtain the status of the instance {self.identifier}, please remove the instance manually.")
             else:
-                raise ValueError(f"Instance {self.host_instance_dir} not found.")
+                output = VagrantUtils.remote_command(f"sudo test -d {self.host_instance_dir} && echo 'Directory exists' || echo 'Directory does not exist'", self.remote_host_parameters)
+                if 'Directory exists' in output:
+                    if VagrantUtils.remote_command(f"sudo /usr/local/bin/prlctl list -a | grep {self.identifier}", self.remote_host_parameters):
+                        logger.warning(f"The instance was found, it will be deleted. The creation of the instance must be restarted again.")
+                        self.__run_vagrant_command(['destroy', '-f'])
+                        self.__cleanup_remote_host()
+                        raise ValueError(f"Cannot obtain the status of the instance {self.identifier}, the creation of the instance must be restarted again.")
+                    else:
+                        VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.remote_host_parameters)
+                        raise ValueError(f"Instance {self.identifier} is not running, remote instance dir {self.host_instance_dir} was removed.")
+                else:
+                    raise ValueError(f"Instance {self.host_instance_dir} not found.")
         else:
-            return self.__parse_vagrant_status(output)
+            return vagrant_status
 
     def ssh_connection_info(self) -> ConnectionInfo:
         """
@@ -259,3 +260,18 @@ class VagrantInstance(Instance):
                 status = ' '.join(status_line.split()[1:])
                 status = status.split('(')[0].strip()
                 return status
+
+    def __cleanup_remote_host(self) -> None:
+        """
+        Cleans up the remote host.
+
+        Returns:
+            None
+        """
+        if str(self.host_identifier) == "macstadium":
+            logger.debug(f"Deleting remote directory {self.host_instance_dir}")
+            VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.remote_host_parameters)
+            if self.virtualizer == 'parallels':
+                logger.debug(f"Killing remote process on port {self.ssh_port}")
+                proccess = VagrantUtils.remote_command(f"sudo lsof -Pi :{self.ssh_port} -sTCP:LISTEN -t", self.remote_host_parameters)
+                VagrantUtils.remote_command(f"sudo kill -9 {proccess}", self.remote_host_parameters)
