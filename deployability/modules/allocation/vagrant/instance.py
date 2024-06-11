@@ -122,15 +122,15 @@ class VagrantInstance(Instance):
                 output = VagrantUtils.remote_command(f"sudo test -d {self.host_instance_dir} && echo 'Directory exists' || echo 'Directory does not exist'", self.remote_host_parameters)
                 if 'Directory exists' in output:
                     if VagrantUtils.remote_command(f"sudo /usr/local/bin/prlctl list -a | grep {self.identifier}", self.remote_host_parameters):
-                        logger.warning(f"The instance was found, it will be deleted. The creation of the instance must be restarted again.")
+                        logger.warning(f"The instance was found, it will be deleted. The creation of the instance must be retried..")
                         self.__run_vagrant_command(['destroy', '-f'])
                         self.__cleanup_remote_host()
-                        raise ValueError(f"Cannot obtain the status of the instance {self.identifier}, the creation of the instance must be restarted again.")
+                        raise ValueError(f"Cannot obtain the status of the instance {self.identifier}, the creation of the instance must be retried..")
                     else:
                         VagrantUtils.remote_command(f"sudo rm -rf {self.host_instance_dir}", self.remote_host_parameters)
-                        raise ValueError(f"Instance {self.identifier} is not running, remote instance dir {self.host_instance_dir} was removed.")
+                        raise ValueError(f"Instance {self.identifier} is not running, remote instance dir {self.host_instance_dir} was removed. The creation of the instance must be retried.")
                 else:
-                    raise ValueError(f"Instance {self.host_instance_dir} not found.")
+                    raise ValueError(f"Instance {self.host_instance_dir} not found. The creation of the instance must be retried.")
         else:
             return vagrant_status
 
