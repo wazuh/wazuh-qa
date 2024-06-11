@@ -453,6 +453,4 @@ class WazuhManager:
 
         indexerConnection = ConnectionManager.execute_commands(inventory_path, f'cat {WAZUH_LOG} | grep "IndexerConnector initialized successfully" | tail -n1').get('output')
 
-        if indexerConnection is not None and indexerConnection.strip():
-            return True
-        return False
+        return indexerConnection is not None and indexerConnection.strip()
