@@ -23,10 +23,13 @@ All notable changes to this project will be documented in this file.
 - Fixed agent_simulator response for active-response configuration commands. ([#4895](https://github.com/wazuh/wazuh-qa/pull/4895)) \- (Framework)
 - Fixed stability in cluster reliability tests. ([#5448](https://github.com/wazuh/wazuh-qa/pull/5448)) \- (Framework)
 
-## [4.8.0] - TBD
+## [4.8.1] - TBD
+
+## [4.8.0] - 12/06/2024
 
 ### Added
 
+- Add functionality to obtain metrics from the dashboard ([#5432](https://github.com/wazuh/wazuh-qa/pull/5432)) \- (Framework)
 - Add `Timestamp` field to the indexer statistics ([#5357](https://github.com/wazuh/wazuh-qa/pull/5357)) \- (Framework)
 - Add `GeneratorVulnerabilityEvents` in agent simulator ([#5265](https://github.com/wazuh/wazuh-qa/pull/5265)) \- (Framework)
 - Add functionality to obtain statistics and metrics from the indexer ([#5090](https://github.com/wazuh/wazuh-qa/pull/5090)) \- (Framework)
@@ -48,6 +51,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Fix workload benchmark plots ([#5364](https://github.com/wazuh/wazuh-qa/pull/5364)) \- (Framework)
 - Increase feed update time in Vulnerability Detection E2E tests to 10h ([#5424](https://github.com/wazuh/wazuh-qa/pull/5424)) \- (Tests)
 - Migrate E2E Vulnerability Detector test packages to S3 repository ([#5376](https://github.com/wazuh/wazuh-qa/pull/5376)) \- (Framework)
 - Include "Agent key already in use" in the E2E Vulnerability Detection expected error list. ([#5409](https://github.com/wazuh/wazuh-qa/pull/5409)) \- (Tests)
@@ -87,6 +91,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Set a stable `requets` version ([#5476](https://github.com/wazuh/wazuh-qa/pull/5476)) \- (Framework)
 - Include logic to retry package installation if the lock file is currently in use ([#5421](https://github.com/wazuh/wazuh-qa/pull/5421)) \- (Framework)
 - Increase E2E Vulnerability detection change manager test timeout ([#5414](https://github.com/wazuh/wazuh-qa/pull/5414)) \- (Tests)
 - Fix filter vulnerabilities function in case of multiple packages are used ([#5419](https://github.com/wazuh/wazuh-qa/pull/5419)) \- (Framework)
@@ -135,7 +140,9 @@ All notable changes to this project will be documented in this file.
 - Fix test cluster performance. ([#4780](https://github.com/wazuh/wazuh-qa/pull/4780)) \- (Framework)
 - Fixed the graphic generation for the logcollectord statistics files. ([#5021](https://github.com/wazuh/wazuh-qa/pull/5021)) \- (Framework)
 
-## [4.7.5] - TBD
+## [4.7.5] - 31/05/2024
+
+- No changes
 
 ## [4.7.4] - 29/04/2024
 

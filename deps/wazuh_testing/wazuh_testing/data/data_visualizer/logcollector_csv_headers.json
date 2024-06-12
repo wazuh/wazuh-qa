@@ -1,0 +1,20 @@
+{
+    "events": {
+        "title": "Events generated",
+        "columns": [
+            "Events"
+        ]
+    },
+    "bytes_sent": {
+        "title": "Bytes sent",
+        "columns": [
+            "Bytes"
+        ]
+    },
+    "drops": {
+        "title": "Events dropped",
+        "columns": [
+            "Target Drops"
+        ]
+    }
+}
