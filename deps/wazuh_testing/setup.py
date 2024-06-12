@@ -33,7 +33,8 @@ package_data_list = [
     'data/vulnerability_parsed_packages.json',
     'tools/migration_tool/delta_schema.json',
     'end_to_end/vulnerability_detector_packages/vuln_packages.json',
-    'tools/migration_tool/CVE_JSON_5.0_bundled.json'
+    'tools/migration_tool/CVE_JSON_5.0_bundled.json',
+    'data/data_visualizer/*'
 ]
 
 scripts_list = [
