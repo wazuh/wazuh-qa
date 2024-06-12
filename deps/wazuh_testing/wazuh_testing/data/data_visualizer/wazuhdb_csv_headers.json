@@ -1,0 +1,65 @@
+{
+    "database_queries_counts": {
+        "title": "Database queries counts",
+        "columns": [
+            "Received queries", "Agent queries", "Global queries"
+        ]
+    },
+    "agent_queries_breakdown": {
+        "title": "Agent queries breakdown",
+        "columns": [
+            "db-begin", "db-close", "db-commit", "db-remove", "db-sql", "db-vacuum", "db-get_fragmentation"
+        ]
+    },
+    "agent_tables_breakdown": {
+        "title": "Agent tables breakdown",
+        "columns": [
+            "Table CisCat", "Table Rootcheck", "Table SCA", "Table dbsync", "Table Syscheck",
+            "Table Syscheck file", "Table Syscheck registry", "Table Syscheck registry_key",
+            "Table Syscheck registry_value", "Table Syscollector hotfixes", "Table Syscollector hwinfo",
+            "Table Syscollector network_address", "Table Syscollector network_iface",
+            "Table Syscollector network_protocol", "Table Syscollector os_info",
+            "Table Syscollector packages", "Table Syscollector ports", "Table Syscollector processes",
+            "Table Vulnerability CVEs"
+        ]
+    },
+    "global_queries_breakdown": {
+        "title": "Global queries breakdown",
+        "columns": [
+            "db-backup", "db-sql", "db-vacuum", "db-get_fragmentation"
+        ]
+    },
+    "global_agent_queries": {
+        "title": "Global agent queries",
+        "columns": [
+            "agent-delete-agent", "agent-disconnect-agents", "agent-find-agent", "agent-get-agent-info",
+            "agent-get-agents-by-connection-status", "agent-get-all-agents", "agent-get-distinct-groups",
+            "agent-get-groups-integrity", "agent-insert-agent", "agent-reset-agents-connection",
+            "agent-select-agent-group", "agent-select-agent-name", "agent-set-agent-groups",
+            "agent-sync-agent-groups-get", "agent-sync-agent-info-get", "agent-sync-agent-info-set",
+            "agent-update-agent-data", "agent-update-agent-name", "agent-update-connection-status",
+            "agent-update-status-code", "agent-update-keepalive"
+        ]
+    },
+    "global_group_queries": {
+        "title": "Global group queries",
+        "columns": [
+            "belongs-get-group-agents", "belongs-select-group-belong", "group-delete-group",
+            "group-find-group", "group-insert-agent-group", "group-select-groups"
+        ]
+    },
+    "task_queries_breakdown": {
+        "title": "Task queries breakdown",
+        "columns": [
+            "tasks-delete old task", "tasks-set timeout", "tasks-upgrade", "tasks-upgrade cancel",
+            "tasks-upgrade custom", "tasks-upgrade get status", "tasks-upgrade results",
+            "tasks-upgrade update status"
+        ]
+    },
+    "queries_time_metrics": {
+        "title": "Queries time metrics",
+        "columns": [
+            "Total Execution Time",	"Agent ExecTime", "Global Queries ExecTime"
+        ]
+    }
+}
