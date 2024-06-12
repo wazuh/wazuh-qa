@@ -128,9 +128,9 @@ def test_drop_privileges(tags_to_apply, get_configuration, configure_api_environ
     drop_privileges = get_configuration['configuration']['drop_privileges']
 
     # Get wazuh-apid process info
-    api_process = get_process_cmd('/api/scripts/wazuh-apid.py')
+    api_process = get_process_cmd('/api/scripts/wazuh_apid.py')
     if not api_process:
-        pytest.fail("The process '/api/scripts/wazuh-apid.py' could not be found")
+        pytest.fail("The process '/api/scripts/wazuh_apid.py' could not be found")
 
     # Get current user of the process
     proc_stat_file = os.stat("/proc/%d" % api_process.pid)

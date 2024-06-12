@@ -1,64 +1,13 @@
-from os.path import join
+from os.path import dirname, join, realpath
 from re import sub
 from tempfile import gettempdir
+from matplotlib.ticker import LinearLocator
 
+import json
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from matplotlib.ticker import LinearLocator
-
-BINARY_NON_PRINTABLE_HEADERS = ['PID', 'Daemon', 'Version']
-
-ANALYSISD_CSV_HEADERS = {
-    'decoded_events': {'title': 'Events decoded per queue',
-                       'columns': ['total_events_decoded', 'syscheck_events_decoded',
-                                   'syscollector_events_decoded', 'rootcheck_events_decoded',
-                                   'sca_events_decoded', 'hostinfo_events_decoded', 'winevt_events_decoded',
-                                   'other_events_decoded', 'dbsync_messages_dispatched'],
-                       },
-    'queue_usage': {'title': 'Queue usage during the test',
-                    'columns': ['syscheck_queue_usage', 'syscollector_queue_usage', 'rootcheck_queue_usage',
-                                'sca_queue_usage', 'hostinfo_queue_usage', 'winevt_queue_usage',
-                                'dbsync_queue_usage', 'upgrade_queue_usage', 'event_queue_usage',
-                                'rule_matching_queue_usage', 'alerts_queue_usage', 'firewall_queue_usage',
-                                'statistical_queue_usage', 'archives_queue_usage'],
-                    },
-    'events_decoded_per_second': {'title': 'Events decoded per second',
-                                  'columns': ['syscheck_edps', 'syscollector_edps', 'rootcheck_edps',
-                                              'sca_edps', 'hostinfo_edps', 'winevt_edps',
-                                              'other_events_edps', 'events_edps', 'dbsync_mdps'],
-                                  },
-    'alerts_info': {'title': 'Alerts and events info.',
-                    'columns': ['events_processed', 'events_received', 'events_dropped', 'alerts_written',
-                                'firewall_written', 'fts_written'],
-                    }
-}
-REMOTED_CSV_HEADERS = {
-    'events_info': {'title': 'Events sent and count',
-                    'columns': ["evt_count", "ctrl_msg_count", "discarded_count", "queued_msgs",
-                                'sent_bytes', 'dequeued_after_close']
-                    },
-    'queue_size': {'title': 'Queue status',
-                   'columns': ['queue_size', 'total_queue_size']
-                   },
-    'tcp_sessions': {'title': 'TCP sessions',
-                     'columns': ['tcp_sessions']},
-    'recv_bytes': {'title': 'Bytes received',
-                   'columns': ['recv_bytes']}
-}
-AGENTD_CSV_HEADERS = {
-    'messages_info': {'title': 'Messages generated and total',
-                      'columns': ['msg_count', 'msg_sent', 'msg_buffer']},
-    'buffered_messages': {'title': 'Events in the anti-flooding buffer', 'columns': ['msg_buffer']},
-    'ack_and_keepalive_diff': {'title': 'Difference between the last ACK and KeepAlive', 'columns': ['diff_seconds']}
-}
-
-LOGCOLLECTOR_CSV_HEADERS = {
-    'events': {'title': 'Events generated', 'columns': ['Events']},
-    'bytes_sent': {'title': 'Bytes sent', 'columns': ['Bytes']},
-    'drops': {'title': 'Events dropped', 'columns': ['Target Drops']},
-}
 
 
 class DataVisualizer:
@@ -83,7 +32,7 @@ class DataVisualizer:
         base_name (str, optional): base name used to store the images.
     """
     def __init__(self, dataframes, target, compare=False, store_path=gettempdir(), x_ticks_granularity='minutes',
-                 x_ticks_interval=1, base_name=None):
+                 x_ticks_interval=1, base_name=None, columns_path=None):
         self.dataframes_paths = dataframes
         self.dataframe = None
         self.compare = compare
@@ -94,6 +43,10 @@ class DataVisualizer:
         self.x_ticks_interval = x_ticks_interval
         self.base_name = base_name
         sns.set(rc={'figure.figsize': (26, 9)})
+        self.columns_to_plot = None
+
+        if target in ['binary', 'analysis', 'remote', 'agent', 'logcollector', 'wazuhdb']:
+            self.columns_to_plot = self._load_columns_to_plot(columns_path)
 
     @staticmethod
     def _color_palette(size):
@@ -106,6 +59,24 @@ class DataVisualizer:
             list: list of colors. The colors are represented as a tuple of float values.
         """
         return sns.hls_palette(size if size > 1 else 1, h=.5)
+
+    def _load_columns_to_plot(self, columns_path):
+        full_path = columns_path
+
+        if full_path is None:
+            filename = None
+
+            if self.target != 'binary':
+                filename = self.target + '_csv_headers.json'
+            else:
+                filename = self.target + '_non_printable_headers.json'
+
+            full_path = join(dirname(realpath(__file__)), '..', '..', 'data', 'data_visualizer', filename)
+
+        with open(full_path, 'r') as columns_file:
+            full_data = json.load(columns_file)
+
+        return full_data
 
     def _load_dataframes(self):
         """Load the dataframes from dataframes_paths."""
@@ -246,21 +217,16 @@ class DataVisualizer:
 
     def _plot_binaries_dataset(self):
         """Function to plot the hardware data of the binary."""
-        elements = self.dataframe.columns.drop(BINARY_NON_PRINTABLE_HEADERS)
-        self._plot_data(elements, title="usage during the test")
+        for element in self.columns_to_plot:
+            columns = self.dataframe.columns.drop(self.columns_to_plot[element]['columns'])
+            title = self.columns_to_plot[element]['title']
+            self._plot_data(elements=columns, title=title)
 
-    def _plot_analysisd_dataset(self):
-        """Function to plot the statistics from wazuh-analysisd."""
-        for element in ANALYSISD_CSV_HEADERS:
-            columns = ANALYSISD_CSV_HEADERS[element]['columns']
-            title = ANALYSISD_CSV_HEADERS[element]['title']
-            self._plot_data(elements=columns, title=title, generic_label=element)
-
-    def _plot_remoted_dataset(self):
-        """Function to plot the statistics from wazuh-remoted."""
-        for element in REMOTED_CSV_HEADERS:
-            columns = REMOTED_CSV_HEADERS[element]['columns']
-            title = REMOTED_CSV_HEADERS[element]['title']
+    def _plot_generic_dataset(self):
+        """Function to plot the statistics from analysisd, remoted, logcollector and wazuhdb."""
+        for element in self.columns_to_plot:
+            columns = self.columns_to_plot[element]['columns']
+            title = self.columns_to_plot[element]['title']
             self._plot_data(elements=columns, title=title, generic_label=element)
 
     def _plot_agentd_dataset(self):
@@ -270,16 +236,9 @@ class DataVisualizer:
                                                  pd.to_datetime(self.dataframe['last_ack']))
             self.dataframe['diff_seconds'] = self.dataframe.diff_seconds.dt.total_seconds()
 
-        for element in AGENTD_CSV_HEADERS:
-            columns = AGENTD_CSV_HEADERS[element]['columns']
-            title = AGENTD_CSV_HEADERS[element]['title']
-            self._plot_data(elements=columns, title=title, generic_label=element)
-
-    def _plot_logcollector_dataset(self):
-        """Function to plot the statistics from a single file of logcollector."""
-        for element in LOGCOLLECTOR_CSV_HEADERS:
-            columns = LOGCOLLECTOR_CSV_HEADERS[element]['columns']
-            title = LOGCOLLECTOR_CSV_HEADERS[element]['title']
+        for element in self.columns_to_plot:
+            columns = self.columns_to_plot[element]['columns']
+            title = self.columns_to_plot[element]['title']
             self._plot_data(elements=columns, title=title, generic_label=element)
 
     def _plot_cluster_dataset(self):
@@ -295,17 +254,19 @@ class DataVisualizer:
         if self.target == 'binary':
             self._plot_binaries_dataset()
         elif self.target == 'analysis':
-            self._plot_analysisd_dataset()
+            self._plot_generic_dataset()
         elif self.target == 'remote':
-            self._plot_remoted_dataset()
+            self._plot_generic_dataset()
         elif self.target == 'agent':
             self._plot_agentd_dataset()
         elif self.target == 'logcollector':
-            self._plot_logcollector_dataset()
+            self._plot_generic_dataset()
         elif self.target == 'cluster':
             self._plot_cluster_dataset()
         elif self.target == 'api':
             self._plot_api_dataset()
+        elif self.target == 'wazuhdb':
+            self._plot_generic_dataset()
         else:
             raise AttributeError(f"Invalid target {self.target}")
 

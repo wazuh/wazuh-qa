@@ -1,0 +1,14 @@
+{
+    "number_of_events_and_messages": {
+        "title": "Number of events and messages",
+        "columns": [
+            "Number of generated events", "Number of messages", "Number of events buffered"
+        ]
+    },
+    "ack_and_keepalive": {
+        "title": "Last ACK and KeepAlive",
+        "columns": [
+            "Last ACK", "Last Keepalive"
+        ]
+    }
+}
