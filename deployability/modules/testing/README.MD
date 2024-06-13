@@ -7,13 +7,13 @@ It is designed so that you can perform installations, actions on components and 
 This module must receive allocated and provisioned infrastructure. (From Allocation and Provision modules)
 
 This module can be executed as follows:
-  A. Installing and using Workflow engine
+  A. Installing and using the JobFlow engine
   B. Direct execution
 
 
-#### A. Installing and using Workflow engine
+#### A. Installing and using the JobFlow engine
 
-The execution of the workflow is done through the installation of its library.
+The execution of the JobFlow engine is done through the installation of its library.
 
 Initially, Python libraries must be installed, we recommended the use of virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
 
@@ -48,13 +48,13 @@ To use this module, you should use a Debian-based system, we recommend using Ubu
 	pip3 install -r deployability/deps/requirements.txt
 	```
 
-5. Install the Workflow engine library and its launcher:
+5. Install the JobFlow engine and its launcher:
 
 	While in wazuh-qa:
 
 	```bash
 	cd modules
-	pip3 uninstall -y workflow_engine && pip3 install .
+	pip3 uninstall -y jobflow && pip3 install .
 	```
 
 6. The module may execute any of these commands:
@@ -70,13 +70,13 @@ To use this module, you should use a Debian-based system, we recommend using Ubu
 
       It will be necessary to create a fixture (YAML file) where the infrastructure, provisioning, and tests to be executed will be declared.
 
-      >Note: It is possible to find some fixture examples in '[deployability/modules/workflow_engine/examples/](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/workflow_engine/examples)'
+      >Note: It is possible to find some fixture examples in '[deployability/modules/jobflow/examples/](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/jobflow/examples)'
 
       Example:
 
       ```bash
       version: 0.1
-      description: This workflow is used to test agents' deployment for DDT1 PoC
+      description: This YAML is used to test agents' deployment for DDT1 PoC
       variables:
         agents-os:
           - linux-ubuntu-22.04-amd64
@@ -185,18 +185,18 @@ To use this module, you should use a Debian-based system, we recommend using Ubu
 	Execute the command by referencing the parameters required by the library (launcher).
 
 	```bash
-	python3 -m workflow_engine {.yaml fixture path}
+	python3 -m jobflow {.yaml fixture path}
 	```
 
 	Example
 
 	```bash
-	python3 -m workflow_engine modules/workflow_engine/examples/dtt1-agents-poc.yaml
+	python3 -m jobflow modules/jobflow/examples/dtt1-agents-poc.yaml
 	```
 
 #### B. Direct execution
 
-To execute the testing module without installing the Workflow engine, it can be done by using the launcher ('[module/testing/main.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/main.py)'):
+To execute the testing module without installing the JobFlow engine, it can be done by using the launcher ('[module/testing/main.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/main.py)'):
 
 1. Execution
 
@@ -229,7 +229,7 @@ To execute the testing module without installing the Workflow engine, it can be 
 
 The testing module allows the execution of tests on agents and central components.
 
-Instructions can be received from the fixture and executed through the Workflow Engine or run through commands on an already provisioned infrastructure.
+Instructions can be received from the fixture and executed through the JobFlow engine or run through commands on an already provisioned infrastructure.
 
 In both cases, the following information will be required:
 
@@ -264,9 +264,9 @@ For manual execution, an example command would be:
 
 The module is composed of:
 
-- **Launcher** ('[/wazuh-qa/deployability/modules/testing/main.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/main.py)'): Entry point for the workflow or the user who wishes to execute a test.
+- **Launcher** ('[/wazuh-qa/deployability/modules/testing/main.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/main.py)'): Entry point for the jobflow or the user who wishes to execute a test.
 
-- **Parameter validator** ('[/wazuh-qa/deployability/modules/testing/models.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/models.py)'): Validator for parameters entered by the Workflow or the user.
+- **Parameter validator** ('[/wazuh-qa/deployability/modules/testing/models.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/models.py)'): Validator for parameters entered by the JobFlow or the user.
 
 - **Module functions** ('[/wazuh-qa/deployability/modules/testing/testing.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/testing.py)'): Module-specific functions responsible for triggering the test.
 
@@ -281,12 +281,12 @@ The module is composed of:
 - **Conftest** ('[/wazuh-qa/deployability/modules/tests/conftest.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/tests/conftest.py)'): Contains information that will be transferred from the parameter validator to the tests.
 
 
-![image](https://github.com/wazuh/wazuh-qa/assets/125690423/58332378-489a-49da-a73a-4d87d6bed3bc)
+![image](https://github.com/wazuh/wazuh-qa/assets/2949519/f2c08ca6-5505-40d7-a9eb-6ab37b3d1ba5)
 
 
 The testing module receives the infrastructure generated and provisioned by the allocation and provision modules. The module has the ability to execute actions on the hosts as well as perform the necessary validation.
 
-[Testing.drawio.zip](https://github.com/wazuh/wazuh-qa/files/14372508/Testing.drawio.zip)
+[Testing.drawio.zip](https://github.com/user-attachments/files/15792385/Testing.drawio.zip)
 
 The test module must recieve the infrastructure generated and provisioned by the allocation and provision modules. The module can execute actions on the hosts as well as perform the necessary validation.
 

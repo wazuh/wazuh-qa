@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 
 class InputPayload(BaseModel):
-    workflow_file: str | Path
+    jobflow_file: str | Path
     threads: int = 1
     dry_run: bool = False
     log_level: Literal['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] = 'INFO'

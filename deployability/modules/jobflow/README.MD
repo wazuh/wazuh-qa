@@ -1,8 +1,8 @@
-## Workflow engine
+## JobFlow engine
 
 ### User documentation
 
-The execution of the Workflow is done through the installation of its library.
+The execution of the JobFlow engine is done through the installation of its library.
 
 Initially, Python libraries must be installed. It is recommended to use virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
 
@@ -29,26 +29,26 @@ To use this module, you should use a Debian-based system, we recommend using Ubu
 	pip3 install -r deployability/deps/requirements.txt
 	```
 
-4. Install the Workflow engine library and its launcher:
+4. Install the JobFlow engine library and its launcher:
 
 	While in wazuh-qa:
 
 	```bash
 	cd modules
-	pip3 uninstall -y workflow_engine && pip3 install .
+	pip3 uninstall -y jobflow && pip3 install .
 	```
 
 5. Test Fixture to Execute:
 
-      It will be necessary to create a fixture (yaml file) where the infrastructure, provisioning, and tests to be executed will be declared.
+      It will be necessary to create a fixture (YAML file) where the infrastructure, provisioning, and tests to be executed will be declared.
 
-      >Note: It is possible to find some fixture examples in deployability/modules/workflow_engine/examples/
+      >Note: It is possible to find some fixture examples in deployability/modules/jobflow/examples/
 
       Example:
 
       ```bash
       version: 0.1
-      description: This workflow is used to test agents' deployment for DDT1 PoC
+      description: This YAML is used to test agents' deployment for DDT1 PoC
       variables:
         agents-os:
           - linux-ubuntu-22.04-amd64
@@ -240,13 +240,13 @@ To use this module, you should use a Debian-based system, we recommend using Ubu
 	Execute the command by referencing the parameters required by the library (launcher).
 
 	```bash
-	python3 -m workflow_engine {.yaml fixture path}
+	python3 -m jobflow {.yaml fixture path}
 	```
 
 	Example
 
 	```bash
-	python3 -m workflow_engine modules/workflow_engine/examples/dtt1-agents-poc.yaml
+	python3 -m jobflow modules/jobflow/examples/dtt1-agents-poc.yaml
 	```
 
 	> Note The command execution can also be mediated through Jenkins.
@@ -255,12 +255,12 @@ To use this module, you should use a Debian-based system, we recommend using Ubu
 
 ### Technical documentation
 
-`Workflow Engine` is the orchestrator of the deployability test architecture.
+`JobFlow engine` is the orchestrator of the deployability test architecture.
 
 Its function is to allow the ordered and structured execution in steps of allocation, provision, and testing.
 
-`The Workflow Engine` receives instructions through a `YAML document`, the structure of which can be exemplified in tests found in:
-`wazuh-qa/deployability/modules/workflow_engine/examples`
+`The JobFlow engine` receives instructions through a `YAML document`, the structure of which can be exemplified in tests found in:
+`wazuh-qa/deployability/modules/jobflow/examples`
 
 **In these tests**:
 	- Tasks: define the steps.
@@ -303,19 +303,19 @@ tasks:
         as: agent
 ```
 
-These tasks are executed by the `Workflow Engine` launcher installed as workflow_engine library in your virtual environment.
+These tasks are executed by the `JobFlow engine` launcher installed as jobflow library in your virtual environment.
 
 This launcher receives the parameters, sets up the test logs, and proceeds with the ordered execution.
 
-The parameters sent from the launcher are processed by deployability/modules/workflow_engine/models.py, which checks the nature of the parameters sent and filters out incorrect parameters.
+The parameters sent from the launcher are processed by deployability/modules/jobflow/models.py, which checks the nature of the parameters sent and filters out incorrect parameters.
 
-![image](https://github.com/wazuh/wazuh-qa/assets/125690423/32aa77b7-f294-41ac-af93-db8a084dbad1)
+![image](https://github.com/wazuh/wazuh-qa/assets/2949519/ee6231c2-9c97-4d9b-8c7d-af1cdce92d28)
 
-These are then sent to `deployability/modules/workflow_engine/workflow_processor.py`, where using `deployability/modules/schemas`, instructions in YAML are received and the schema of the instructions is checked.
+These are then sent to `deployability/modules/jobflow/jobflow_processor.py`, where using `deployability/modules/schemas`, instructions in YAML are received and the schema of the instructions is checked.
 
-The commands are executed in the WorkflowProcessor of the same file, which also handles parallel executions and aborts failed executions.
+The commands are executed in the JobFlowProcessor of the same file, which also handles parallel executions and aborts failed executions.
 
-[WF.drawio.zip](https://github.com/wazuh/wazuh-qa/files/14167559/WF.drawio.zip)
+[WF.drawio.zip](https://github.com/user-attachments/files/15792275/WF.drawio.zip)
 
 
 ### License

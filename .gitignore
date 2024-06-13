@@ -6,7 +6,7 @@ venv
 wazuh_testing.egg-info
 dist
 deployability/modules/build
-deployability/modules/workflow_engine.egg-info
+deployability/modules/jobflow.egg-info
 
 # Python bytecode files
 *.pyc

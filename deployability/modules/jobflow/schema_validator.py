@@ -9,7 +9,7 @@ from jsonschema.exceptions import ValidationError
 from pathlib import Path
 from ruamel.yaml import YAML
 
-from workflow_engine.logger.logger import logger
+from jobflow.logger.logger import logger
 
 class SchemaValidator:
     """
@@ -75,7 +75,7 @@ class SchemaValidator:
 
     def validateSchema(self) -> None:
         """
-        Validate the Workflow schema
+        Validate the JobFlow schema
 
         Raises:
             ValidationError: If the YAML data is not valid.

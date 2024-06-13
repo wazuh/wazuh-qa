@@ -35,27 +35,27 @@ git checkout {project-branch}
 pip3 install -r deployability/deps/requirements.txt
 ```
 
-4. Install the Workflow engine library and its launcher:
+4. Install the JobFlow engine library and its launcher:
 
 While in wazuh-qa:
 
 ```
 cd modules
-pip3 uninstall -y workflow_engine && pip3 install .
+pip3 uninstall -y jobflow && pip3 install .
 ```
 
 5. Test Fixture to Execute
 
 It will be necessary to create a fixture (yaml file) where the infrastructure, provisioning, and tests to be executed will be declared.
 
-> Note:  It is possible to find some fixture examples in deployability/modules/workflow_engine/examples/
+> Note:  It is possible to find some fixture examples in deployability/modules/jobflow/examples/
 
 
 Example:
 
 ```
 version: 0.1
-description: This workflow is used to test agents' deployment for DDT1 PoC
+description: This YAML is used to test agents' deployment for DDT1 PoC
 variables:
   agents-os:
     - linux-ubuntu-22.04-amd64
@@ -247,13 +247,13 @@ depends-on
 Execute the command by referencing the parameters required by the library (launcher).
 
 ```
-python3 -m workflow_engine {.yaml fixture path}
+python3 -m jobflow {.yaml fixture path}
 ```
 
 Example
 
 ```
-python3 -m workflow_engine modules/workflow_engine/examples/dtt1-agents-poc.yaml
+python3 -m jobflow modules/jobflow/examples/dtt1-agents-poc.yaml
 ```
 
 
@@ -263,11 +263,11 @@ python3 -m workflow_engine modules/workflow_engine/examples/dtt1-agents-poc.yaml
 
 - Modules
 
-The framework has 4 modules (`allocation`, `provision`, `testing`, `observability`) that must act consecutively, and a 5th module that orchestrates the previous modules (`Workflow`).
+The framework has 4 modules (`allocation`, `provision`, `testing`, `observability`) that must act consecutively, and a 5th module that orchestrates the previous modules (`Jobflow`).
 
 |Module|Description
 |--|--|
-|Workflow (Orchestrator)|Receives a YAML containing all the instructions to execute for the test development. It contains instructions for allocation, provision, and testing.
+|JobFlow (Orchestrator)|Receives a YAML containing all the instructions to execute for the test development. It contains instructions for allocation, provision, and testing.
 |Allocation| Receives instructions for the desired architecture and creates the structures, generating IPs, and ports either in AWS or locally with Vagrant.
 |Provision| Installs applications on the structures created in allocation.
 |Testing| Executes tests on the previously defined structures and triggers actions depending on the test.
@@ -285,7 +285,7 @@ wazuh-qa/
     │   ├── generic
     │   ├── provision
     │   ├── testing
-    │   └── workflow_engine
+    │   └── jobflow
     └── plugins
 ```
 Deployability contains the following directories:
@@ -299,18 +299,18 @@ Deployability contains the following directories:
 
 #### Overview
 
-![image](https://github.com/wazuh/wazuh-qa/assets/125690423/d09dfa61-67cb-410d-8677-bd904d5c4d51)
+![image](https://github.com/wazuh/wazuh-qa/assets/2949519/29b600cf-44bd-412c-b02f-9b08353babde)
 
 #### Allocator, provision & test process
 
-![image](https://github.com/wazuh/wazuh-qa/assets/125690423/b1e24a43-13d7-4035-a3e5-5ace4667ec10)
+![image](https://github.com/wazuh/wazuh-qa/assets/2949519/9338ccc4-2ffa-47d4-b4cc-86c2a8aa5851)
 
 
 
 ----
 
 
-[draw-plot.zip](https://github.com/wazuh/wazuh-qa/files/14330528/plot.zip)
+[draw-plot.zip](https://github.com/user-attachments/files/15792115/draw-plot.zip)
 
 
 

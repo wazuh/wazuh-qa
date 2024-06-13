@@ -5,12 +5,12 @@
 The Provision module installs libraries, dependencies and applications on the allocated infrastructure (From Allocation module)
 
 This module can be executed as follows:
-  A. Installing and using Workflow engine
+  A. Installing and using the JobFlow engine
   B. Direct execution
 
-#### A. Installing and using Workflow engine
+#### A. Installing and using the JobFlow engine
 
-The execution of the workflow is done through the installation of its library.
+The execution of the JobFlow engine is done through the installation of its library.
 
 Initially, Python libraries must be installed. we recommended the use of virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
 
@@ -44,13 +44,13 @@ To use this module, you should use a Debian-based system, we recommend using Ubu
 	pip3 install -r deployability/deps/requirements.txt
 	```
 
-5. Install the Workflow engine library and its launcher:
+5. Install the JobFlow engine and its launcher:
 
 	While in wazuh-qa:
 
 	```bash
 	cd modules
-	pip3 uninstall -y workflow_engine && pip3 install .
+	pip3 uninstall -y jobflow && pip3 install .
 	```
 
   Run the module by doing the following steps:
@@ -59,13 +59,13 @@ To use this module, you should use a Debian-based system, we recommend using Ubu
 
       It is required to create a fixture (YAML file) where the infrastructure, provisioning, and tests to be executed is declared.
 
-      >Note: You can find some fixture examples in '[deployability/modules/workflow_engine/examples/](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/workflow_engine/examples)'
+      >Note: You can find some fixture examples in '[deployability/modules/jobflow/examples/](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/jobflow/examples)'
 
       Example:
 
       ```bash
       version: 0.1
-      description: This workflow is used to provision agent hosts for DDT1 PoC
+      description: This YAML is used to provision agent hosts for DDT1 PoC
       variables:
         agents-os:
           - linux-ubuntu-22.04-amd64
@@ -155,18 +155,18 @@ To use this module, you should use a Debian-based system, we recommend using Ubu
 	Execute the command by referencing the parameters required by the library (launcher).
 
 	```bash
-	python3 -m workflow_engine {.yaml fixture path}
+	python3 -m jobflow {.yaml fixture path}
 	```
 
 	Example
 
 	```bash
-	python3 -m workflow_engine modules/workflow_engine/examples/dtt1-agents-poc.yaml
+	python3 -m jobflow modules/jobflow/examples/dtt1-agents-poc.yaml
 	```
 
 #### B. Direct execution
 
-To execute the Allocation module without installing the Workflow engine, you can use the launcher ('[module/provision/main.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/provision/main.py)'):
+To execute the Allocation module without installing the JobFlow engine, you can use the launcher ('[module/provision/main.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/provision/main.py)'):
 
 1. Execution
 
@@ -187,7 +187,7 @@ To execute the Allocation module without installing the Workflow engine, you can
 
 The `provision module` allows for the installation and uninstallation of libraries, dependencies, and applications in the infrastructure.
 
-It can receive instructions either through the command line or be mediated through the Workflow Engine.
+It can receive instructions either through the command line or be mediated through the JobFlow engine.
 
 In both cases, the following information is required:
 
@@ -222,17 +222,17 @@ In both cases, the following information is required:
         as: agent
 ```
 
-The snippet obtained from a Workflow fixture highlights the parameters necessary for its operation. These include the inventory path, the dependency/library to install, and the installation type.
+The snippet obtained from a JobFlow fixture highlights the parameters necessary for its operation. These include the inventory path, the dependency/library to install, and the installation type.
 
 It requires an infrastructure on which to perform its actions.
 
 The module is composed of:
 
 - Launcher ('[/wazuh-qa/deployability/modules/provision/main.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/provision/main.py)')
-  Entry point for the workflow or the user who wishes to execute a provision.
+  Entry point for the jobflow or the user who wishes to execute a provision.
 
 - Parameter validator ('[/wazuh-qa/deployability/modules/provision/models.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/provision/models.py)')
-  Validator for parameters entered by the Workflow engine or the user.
+  Validator for parameters entered by the JobFlow engine or the user.
 
 - Module functions ('[/wazuh-qa/deployability/modules/provision/provision.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/provision/provision.py)')
   Module-specific functions responsible for triggering the provision.
@@ -247,10 +247,10 @@ The module is composed of:
   Enables reading and changing the format of YAML files to executable formats.
 
 
-![image](https://github.com/wazuh/wazuh-qa/assets/125690423/e06fb59c-6497-4396-b20c-a21a68a5e883)
+![image](https://github.com/wazuh/wazuh-qa/assets/2949519/326c1198-79a9-4098-9a52-d35c7065d629)
 
 
-[Provision.drawio.zip](https://github.com/wazuh/wazuh-qa/files/14241269/Provision.drawio.zip)
+[Provision.drawio.zip](https://github.com/user-attachments/files/15788313/Provision.drawio.zip)
 
 
 ### License

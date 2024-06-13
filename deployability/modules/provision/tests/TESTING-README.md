@@ -108,7 +108,7 @@ deployability/modules/provision/models.py:64
 ============================================================================= 51 passed, 2 warnings in 0.16s ==============================================================================
 ```
 
-The `.github/workflow/provision-unit-tests.yaml` automatically runs the unit tests in the GitHub environment.
+The `.github/jobflow/provision-unit-tests.yaml` automatically runs the unit tests in the GitHub environment.
 The run results are shown in the `checks` tab or your GitHub pull request.
 
 ## Relevant Files

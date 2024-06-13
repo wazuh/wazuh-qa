@@ -6,7 +6,7 @@ import random
 import time
 
 from abc import ABC, abstractmethod
-from workflow_engine.logger.logger import logger
+from jobflow.logger.logger import logger
 
 class Task(ABC):
     """Abstract base class for tasks."""
