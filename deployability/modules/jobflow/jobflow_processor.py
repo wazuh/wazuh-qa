@@ -11,31 +11,31 @@ import os
 from pathlib import Path
 from itertools import product
 
-from workflow_engine.logger.logger import logger
-from workflow_engine.schema_validator import SchemaValidator
-from workflow_engine.task import Task, TASKS_HANDLERS
+from jobflow.logger.logger import logger
+from jobflow.schema_validator import SchemaValidator
+from jobflow.task import Task, TASKS_HANDLERS
 
-class WorkflowFile:
-    """Class for loading and processing a workflow file."""
+class JobFlowFile:
+    """Class for loading and processing a JobFlow workflow file."""
     schema_path = Path(__file__).parent / 'schemas' / 'schema_v1.json'
 
-    def __init__(self, workflow_file_path: Path | str, schema_path: Path | str = None) -> None:
+    def __init__(self, jobflow_file_path: Path | str, schema_path: Path | str = None) -> None:
         self.schema_path = schema_path or self.schema_path
-        self.__validate_schema(workflow_file_path)
-        self.workflow_raw_data = self.__load_workflow(workflow_file_path)
+        self.__validate_schema(jobflow_file_path)
+        self.jobflow_raw_data = self.__load_workflow(jobflow_file_path)
         self.task_collection = self.__process_workflow()
         self.__static_workflow_validation()
 
-    def __validate_schema(self, workflow_file: Path | str) -> None:
+    def __validate_schema(self, jobflow_file: Path | str) -> None:
         """
         Validate the workflow file against the schema.
 
         Args:
-            workflow_file (Path | str): Path to the workflow file.
+            jobflow_file (Path | str): Path to the workflow file.
         """
         try:
-            logger.debug(f"Validating input file: {workflow_file}")
-            validator = SchemaValidator(self.schema_path, workflow_file)
+            logger.debug(f"Validating input file: {jobflow_file}")
+            validator = SchemaValidator(self.schema_path, jobflow_file)
             validator.preprocess_data()
             validator.validateSchema()
         except Exception as e:
@@ -50,7 +50,7 @@ class WorkflowFile:
             file_path (str): Path to the workflow file.
 
         Returns:
-            dict: Workflow data.
+            dict: workflow data.
         """
 
         if not os.path.exists(file_path):
@@ -65,8 +65,8 @@ class WorkflowFile:
         """Process the workflow and return a list of tasks."""
         logger.debug("Process workflow.")
         task_collection = []
-        variables = self.workflow_raw_data.get('variables', {})
-        for task in self.workflow_raw_data.get('tasks', []):
+        variables = self.jobflow_raw_data.get('variables', {})
+        for task in self.jobflow_raw_data.get('tasks', []):
             task_collection.extend(self.__expand_task(task, variables))
 
         if not task_collection:
@@ -261,15 +261,15 @@ class DAG():
         return execution_plan
 
 
-class WorkflowProcessor:
+class JobFlowProcessor:
     """Class for processing a workflow."""
 
-    def __init__(self, workflow_file: str, dry_run: bool, threads: int, log_level: str = 'INFO', schema_file: Path | str = None):
+    def __init__(self, jobflow_file: str, dry_run: bool, threads: int, log_level: str = 'INFO', schema_file: Path | str = None):
         """
-        Initialize WorkflowProcessor.
+        Initialize JobFlowProcessor.
 
         Args:
-            workflow_file (str): Path to the workflow file (YAML format).
+            jobflow_file (str): Path to the workflow file (YAML format).
             dry_run (bool): Display the plan without executing tasks.
             threads (int): Number of threads to use for parallel execution.
             log_level (str): Log level.
@@ -277,7 +277,7 @@ class WorkflowProcessor:
         """
         logger.setLevel(log_level)
         # Initialize the instance variables.
-        self.task_collection = WorkflowFile(workflow_file, schema_file).task_collection
+        self.task_collection = JobFlowFile(jobflow_file, schema_file).task_collection
         self.dry_run = dry_run
         self.threads = threads
 
@@ -366,7 +366,7 @@ class WorkflowProcessor:
 
 
         except Exception as e:
-            logger.error("Error in Workflow: %s", e)
+            logger.error("Error in workflow: %s", e)
 
 
     def handle_interrupt(self, signum, frame):

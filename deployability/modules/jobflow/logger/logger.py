@@ -21,4 +21,4 @@ def _load_config() -> None:
 
 _load_config()
 
-logger = logging.getLogger("workflow_engine")
+logger = logging.getLogger("jobflow")

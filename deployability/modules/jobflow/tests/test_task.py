@@ -6,7 +6,7 @@ from subprocess import CompletedProcess, CalledProcessError
 from unittest.mock import patch, MagicMock, call
 import pytest
 
-from workflow_engine.task import ProcessTask
+from jobflow.task import ProcessTask
 
 @pytest.fixture
 def task(request) -> ProcessTask:
@@ -40,7 +40,7 @@ def test_process_task_constructor(task: ProcessTask):
                                   ('task5', {"path": "/mypath",
                                              "args": [{"param1": "value1"}, {"param2": "value2"}]})
                                   ], indirect=True)
-@patch("workflow_engine.task.logger")
+@patch("jobflow.task.logger")
 def test_process_task_execute(logger_mock: MagicMock, task: ProcessTask):
     """Test ProcessTask.execute method normal flow.
     Check that ProcessTask.execute calls subprocess.run to run commands with the defined parameters. The
@@ -66,7 +66,7 @@ def test_process_task_execute(logger_mock: MagicMock, task: ProcessTask):
                               stderr="")
     debug_calls = [call(f'Running task "{task.task_name}" with arguments: '
                         f'{results[task.task_name]["parm_list"][1:]}')]
-    with patch("workflow_engine.task.subprocess.run", return_value=result) as proc_run_mock, \
+    with patch("jobflow.task.subprocess.run", return_value=result) as proc_run_mock, \
          patch.object(logger_mock, "debug") as logger_debug_mock:
         debug_calls.append(call(f'Finished task "{task.task_name}" execution '
                                 f'with result:\n{str(result.stdout)}'))
@@ -104,7 +104,7 @@ def test_process_task_execute_ko(subproc_retval: int, subproc_run_exc: List[Tupl
     result = CompletedProcess(args=["--param1=value1"],
                               returncode=subproc_retval, stdout="command output",
                               stderr=stderr)
-    with patch("workflow_engine.task.subprocess.run", return_value=result) as proc_run_mock:
+    with patch("jobflow.task.subprocess.run", return_value=result) as proc_run_mock:
         if raise_exc:
             proc_run_mock.side_effect = CalledProcessError(returncode=1,
                                                            cmd=task.task_parameters['path'],

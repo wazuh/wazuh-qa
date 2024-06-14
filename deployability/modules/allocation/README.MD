@@ -6,7 +6,7 @@ The Allocation module allows you to create and destroy VMs both locally and in A
 
 #### Set the environment
 
-The execution of the allocation is carried out through the Workflow engine library, or by executing them manually through commands.
+The execution of the allocation is carried out through the JobFlow engine, or by executing them manually through commands.
 Execution can be done from any operating system.
 
 Initially, you have to install the required Python libraries. We recommend using virtual environments. Follow the technical documentation at https://docs.python.org/3/library/venv.html.
@@ -46,30 +46,30 @@ To use this module, you should use a Debian-based system, we recommend using Ubu
 
   These commands must be available to run on the Host Operating System.
 
-#### Use the Allocation module through the Workflow engine
+#### Use the Allocation module through the JobFlow engine
 
 Now, it is possible to use the Worklow engine library to launch the provision module by doing the following steps:
 
-1. Install the Workflow engine library and its launcher:
+1. Install the JobFlow engine and its launcher:
 
   While in wazuh-qa:
 
   ```bash
   cd modules
-  pip3 uninstall -y workflow_engine && pip3 install .
+  pip3 uninstall -y jobflow && pip3 install .
   ```
 
 2. Test Fixture to Execute:
 
       It will be necessary to create a fixture (yaml file) where the infrastructure, provisioning, and tests to be executed will be declared.
 
-      >Note: It is possible to find some fixture examples in [deployability/modules/workflow_engine/examples/](../workflow_engine/examples)
+      >Note: It is possible to find some fixture examples in [deployability/modules/jobflow/examples/](../jobflow/examples)
 
       Example:
 
       ```bash
       version: 0.1
-      description: This workflow is used to test agents' deployment for DDT1 PoC
+      description: This YAML file is used to test agents' deployment for DDT1 PoC
       variables:
         agent-os:
           - linux-ubuntu-18.04-amd64
@@ -161,19 +161,19 @@ Now, it is possible to use the Worklow engine library to launch the provision mo
   Execute the command by referencing the parameters required by the library (launcher).
 
   ```bash
-  python3 -m workflow_engine {.yaml fixture path}
+  python3 -m jobflow {.yaml fixture path}
   ```
 
   Example
 
   ```bash
-  python3 -m workflow_engine modules/workflow_engine/examples/dtt1-agents-poc.yaml
+  python3 -m jobflow modules/jobflow/examples/dtt1-agents-poc.yaml
   ```
 
 
 #### Manual execution of the Allocation module
 
-If one wishes to execute the allocaation module without installing the Workflow engine, they can proceed by using the launcher ([module/allocation/main.py](main.py)):
+If one wishes to execute the allocaation module without installing the JobFlow engine, they can proceed by using the launcher ([module/allocation/main.py](main.py)):
 
 1. Create
 
@@ -318,7 +318,7 @@ If one wishes to execute the allocaation module without installing the Workflow 
 
 The allocation module allows creating infrastructure on both AWS and locally (using Vagrant).
 
-Instructions can be initiated from the fixture and executed through the Workflow engine or executed using Python commands.
+Instructions can be initiated from the fixture and executed through the JobFlow engine or executed using Python commands.
 
 In either case, the following information will be needed:
 
@@ -350,7 +350,7 @@ python3 modules/allocation/main.py --action create --provider vagrant --size lar
 
 #### General-specific functions
 
-- **Launcher** ([/wazuh-qa/deployability/modules/allocation/main.py](main.py)): The entry point for the workflow or the user who wishes to execute a test.
+- **Launcher** ([/wazuh-qa/deployability/modules/allocation/main.py](main.py)): The entry point of the module. The command line or the JobFlow engine typically invokes this entry point.
 
 - **Module functions** ([/wazuh-qa/deployability/modules/allocation/allocation.py](allocation.py)): Module-specific functions responsible for triggering the allocation.
 
@@ -373,10 +373,10 @@ python3 modules/allocation/main.py --action create --provider vagrant --size lar
 
 #### Diagram
 
-![image](https://github.com/wazuh/wazuh-qa/assets/64099752/d302f96b-70c0-4fbc-869b-914973ee8186)
+![image](https://github.com/wazuh/wazuh-qa/assets/2949519/c673b3ec-ac6a-4ca0-b625-9f98be422f20)
 
 
-[Allocation.drawio.zip](https://github.com/wazuh/wazuh-qa/files/14868775/Allocation.drawio.zip)
+[Allocation.drawio.zip](https://github.com/user-attachments/files/15792190/Allocation.drawio.zip)
 
 ### Known issues
 

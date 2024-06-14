@@ -30,6 +30,7 @@ tasks:
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
           - label-termination-date: "1d"
           - label-team: "qa"
+          - instance-name: "manager"
     on-error: "abort-all"
     cleanup:
       this: process
@@ -57,6 +58,7 @@ tasks:
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
           - label-termination-date: "1d"
           - label-team: "qa"
+          - instance-name: "agent-instance-{agent}"
     on-error: "abort-all"
     foreach:
       - variable: agent-os
@@ -86,7 +88,7 @@ tasks:
             - component: wazuh-manager
               type: assistant
               version: 4.7.4
-              live: False
+              live: True
     depends-on:
       - "allocate-manager-{manager-os}"
     on-error: "abort-all"
@@ -108,7 +110,7 @@ tasks:
           - component: "agent"
           - wazuh-version: "4.7.4"
           - wazuh-revision: "40717"
-          - live: False
+          - live: True
     foreach:
       - variable: agent-os
         as: agent

@@ -7,7 +7,7 @@ import graphlib
 from unittest.mock import patch, MagicMock
 import pytest
 
-from workflow_engine.workflow_processor import DAG, WorkflowProcessor
+from jobflow.jobflow_processor import DAG, JobFlowProcessor
 
 DEFAULT_TASK_COLLECTION = [
     {'task': 'task1', 'path': '/cmd1', 'args': [{"param1": "value1"}]},
@@ -19,7 +19,7 @@ DEFAULT_TASK_COLLECTION = [
 @pytest.fixture
 def logger_mock(request) -> MagicMock:
     """Fixture to mock common logger methods."""
-    logger_to_patch = request.param.get('logger_to_patch', "workflow_engine.workflow_processor.logger")
+    logger_to_patch = request.param.get('logger_to_patch', "jobflow.jobflow_processor.logger")
     with patch(logger_to_patch) as l_mock:
         patch.object(l_mock, 'warning')
         patch.object(l_mock, 'info')
@@ -39,9 +39,9 @@ def dag(request) -> DAG:
         gl_dag = graphlib.TopologicalSorter()
         dep_dict = {'task1': 'task2'}
         with patch.object(gl_dag, 'prepare'), \
-            patch('workflow_engine.workflow_processor.DAG._DAG__build_dag',
+            patch('jobflow.jobflow_processor.DAG._DAG__build_dag',
                 return_value=(gl_dag, dep_dict)), \
-            patch('workflow_engine.workflow_processor.DAG._DAG__create_execution_plan',
+            patch('jobflow.jobflow_processor.DAG._DAG__create_execution_plan',
                 return_value=execution_plan_dict):
             ret_dag = DAG(task_collection=task_collection, reverse=reverse)
     else:
@@ -54,22 +54,22 @@ def dag(request) -> DAG:
 
 
 @pytest.fixture
-def w_processor(request) -> WorkflowProcessor:
-    """Create a mocked WorkflowProcessor instance."""
+def w_processor(request) -> JobFlowProcessor:
+    """Create a mocked JobFlowProcessor instance."""
 
-    workflow_file = request.param.get('workflow_file', 'workflow.yaml')
+    jobflow_file = request.param.get('jobflow_file', 'jobflow.yaml')
     dry_run = request.param.get('dry_run', False)
     threads = request.param.get('threads', 1)
     log_level = request.param.get('log_level', 'info')
     schema_file = request.param.get('schema_file', 'schema.yaml')
-    with patch("workflow_engine.workflow_processor.WorkflowFile") as file_mock:
-        workflow_file_instance = file_mock.return_value
-        workflow_file_instance.task_collection = request.param.get('task_collection', DEFAULT_TASK_COLLECTION)
+    with patch("jobflow.jobflow_processor.JobFlowFile") as file_mock:
+        jobflow_file_instance = file_mock.return_value
+        jobflow_file_instance.task_collection = request.param.get('task_collection', DEFAULT_TASK_COLLECTION)
         if request.param.get('patch', True):
-            with patch('workflow_engine.workflow_processor.logger.setLevel'):
-                processor = WorkflowProcessor(workflow_file, dry_run, threads,
+            with patch('jobflow.jobflow_processor.logger.setLevel'):
+                processor = JobFlowProcessor(jobflow_file, dry_run, threads,
                                               log_level, schema_file)
         else:
-            processor = WorkflowProcessor(workflow_file, dry_run,
+            processor = JobFlowProcessor(jobflow_file, dry_run,
                                           threads, log_level, schema_file)
     return processor

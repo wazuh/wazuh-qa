@@ -6,12 +6,12 @@ import graphlib
 from unittest.mock import patch, MagicMock, call
 import pytest
 
-from workflow_engine.workflow_processor import DAG
+from jobflow.jobflow_processor import DAG
 
 
 @pytest.mark.parametrize("reverse", [True, False])
-@patch("workflow_engine.workflow_processor.DAG._DAG__build_dag")
-@patch("workflow_engine.workflow_processor.DAG._DAG__create_execution_plan")
+@patch("jobflow.jobflow_processor.DAG._DAG__build_dag")
+@patch("jobflow.jobflow_processor.DAG._DAG__create_execution_plan")
 def test_dag_constructor(create_exec_plan_mock: MagicMock, build_dag_mock: MagicMock, reverse: bool):
     """Test ProcessTask constructor
     Check all the dag object state after initialization and if the private dag methods are called during the instance
@@ -169,7 +169,7 @@ def test_build_dag(dag: DAG):
     dag : DAG
         DAG fixture defined in conftest.py with task_collection parameterized.
     """
-    with patch('workflow_engine.workflow_processor.graphlib.TopologicalSorter.add') as mock_add:
+    with patch('jobflow.jobflow_processor.graphlib.TopologicalSorter.add') as mock_add:
         res_dag, res_dependency_dict = dag._DAG__build_dag()
     assert isinstance(res_dag, graphlib.TopologicalSorter)
     call_list = []
