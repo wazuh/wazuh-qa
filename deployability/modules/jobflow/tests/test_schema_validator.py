@@ -37,7 +37,7 @@ def test_schema_validator_constructor(logger_mock: MagicMock):
     validator = SchemaValidator(schema_path, wf_file_path)
     assert validator.schema_data == schema_data
     assert validator.yaml_data == yaml_data
-    calls = [call(f"Loading schema file: {schema_path}"), 
+    calls = [call(f"Loading schema file: {schema_path}"),
              call(f"Loading yaml file: {wf_file_path}")]
     logger_mock.debug.assert_has_calls(calls)
 
@@ -97,7 +97,7 @@ def test_validate_schema():
                          indirect=True)
 def test_validate_schema_ko(logger_mock: MagicMock):
     """Test SchemaValidator validate_schema error flows.
-    Check the messages sent to the log when an invalid jobflow yml file is used.
+    Check the messages sent to the log when an invalid workflow yml file is used.
 
     Parameters
     ----------

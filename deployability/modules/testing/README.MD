@@ -61,7 +61,7 @@ To use this module, you should use a Debian-based system, we recommend using Ubu
 
   - ssh
   - scp
-  
+
   These commands must be available to run on the Host Operating System.
 
   Run the module by doing the following steps:
@@ -264,7 +264,7 @@ For manual execution, an example command would be:
 
 The module is composed of:
 
-- **Launcher** ('[/wazuh-qa/deployability/modules/testing/main.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/main.py)'): Entry point for the jobflow or the user who wishes to execute a test.
+- **Launcher** ('[/wazuh-qa/deployability/modules/testing/main.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/main.py)'): Entry point for the workflow or the user who wishes to execute a test.
 
 - **Parameter validator** ('[/wazuh-qa/deployability/modules/testing/models.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/testing/models.py)'): Validator for parameters entered by the JobFlow or the user.
 

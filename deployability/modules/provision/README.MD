@@ -229,7 +229,7 @@ It requires an infrastructure on which to perform its actions.
 The module is composed of:
 
 - Launcher ('[/wazuh-qa/deployability/modules/provision/main.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/provision/main.py)')
-  Entry point for the jobflow or the user who wishes to execute a provision.
+  Entry point for the workflow or the user who wishes to execute a provision.
 
 - Parameter validator ('[/wazuh-qa/deployability/modules/provision/models.py](https://github.com/wazuh/wazuh-qa/tree/master/deployability/modules/provision/models.py)')
   Validator for parameters entered by the JobFlow engine or the user.
