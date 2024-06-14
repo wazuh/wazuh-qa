@@ -31,7 +31,7 @@ tasks:
           - provider: "{infra-provider}"
           - size: large
           - composite-name: "{manager}"
-          - instance-name: "{manager}"
+          - instance-name: "[QA]-Test-Example-Please-Edit-Me"
           - inventory-output: "{working-dir}/manager-{manager}/inventory.yaml"
           - track-output: "{working-dir}/manager-{manager}/track.yaml"
           - label-termination-date: "1d"

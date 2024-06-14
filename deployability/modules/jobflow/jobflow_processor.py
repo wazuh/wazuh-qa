@@ -297,12 +297,12 @@ class JobFlowProcessor:
                 logger.info("[%s] Finished task in %.2f seconds.", task_name, time.time() - start_time)
                 dag.set_status(task_name, 'successful')
             except KeyboardInterrupt as e:
-                logger.error("[%s] Task failed with error: %s.", task_name, e)
+                logger.error("[%s] Task failed with error: %s", task_name, e)
                 dag.set_status(task_name, 'failed')
                 dag.cancel_dependant_tasks(task_name, task.get('on-error', 'abort-related-flows'))
                 raise KeyboardInterrupt
             except Exception as e:
-                logger.error("[%s] Task failed with error: %s.", task_name, e)
+                logger.error("[%s] Task failed with error: %s", task_name, e)
                 dag.set_status(task_name, 'failed')
                 dag.cancel_dependant_tasks(task_name, task.get('on-error', 'abort-related-flows'))
                 raise
@@ -359,6 +359,7 @@ class JobFlowProcessor:
 
                 logger.info("Executing Reverse DAG tasks.")
                 reversed_dag = DAG(self.task_collection, reverse=True)
+                reversed_dag.to_be_canceled = dag.to_be_canceled - dag.finished_tasks_status["successful"]
                 self.execute_tasks_parallel(reversed_dag, reverse=True)
             else:
                 dag = DAG(self.task_collection)

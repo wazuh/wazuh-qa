@@ -26,6 +26,7 @@ tasks:
           - provider: "{infra-provider}"
           - size: large
           - composite-name: "{manager-os}"
+          - instance-name: "[QA]-Test-Example-Please-Edit-Me"
           - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
     on-error: "abort-all"
@@ -51,6 +52,7 @@ tasks:
           - provider: "{infra-provider}"
           - size: small
           - composite-name: "{agent}"
+          - instance-name: "[QA]-Test-Example-Please-Edit-Me"
           - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
     on-error: "abort-all"
