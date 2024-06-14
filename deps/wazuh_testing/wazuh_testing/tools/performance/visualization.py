@@ -32,7 +32,7 @@ class DataVisualizer:
         base_name (str, optional): base name used to store the images.
     """
     def __init__(self, dataframes, target, compare=False, store_path=gettempdir(), x_ticks_granularity='minutes',
-                 x_ticks_interval=1, base_name=None, columns_path=None):
+                 x_ticks_interval=1, base_name=None, columns_path=None, unify=False):
         self.dataframes_paths = dataframes
         self.dataframe = None
         self.compare = compare
@@ -47,6 +47,9 @@ class DataVisualizer:
 
         if target in ['binary', 'analysis', 'remote', 'agent', 'logcollector', 'wazuhdb']:
             self.columns_to_plot = self._load_columns_to_plot(columns_path)
+
+        if unify:
+            self._unify_dataframes()
 
     @staticmethod
     def _color_palette(size):
@@ -86,6 +89,17 @@ class DataVisualizer:
             else:
                 new_csv = pd.read_csv(df_path, index_col="Timestamp", parse_dates=True)
                 self.dataframe = pd.concat([self.dataframe, new_csv])
+
+    def _unify_dataframes(self):
+        """Unify dataframe values."""
+        df_row = self.dataframe.iloc[0]
+        df_names = [df_row['Daemon'], df_row['Version'], df_row['PID']]
+        columns_to_drop = ['Daemon', 'Version', 'PID']
+        columns_to_sum = self.dataframe.columns.drop(columns_to_drop)
+        self.dataframe = self.dataframe.groupby('Timestamp')[columns_to_sum].sum().reset_index(drop=False)
+
+        for index, value in enumerate(df_names):
+            self.dataframe.insert(index, columns_to_drop[index], value)
 
     def _set_x_ticks_interval(self, ax):
         """Set the number of labels that will appear in the X axis and their format.
