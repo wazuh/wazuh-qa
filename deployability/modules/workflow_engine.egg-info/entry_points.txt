@@ -1,2 +1,0 @@
-[console_scripts]
-engine = workflow_engine.__main__:main
