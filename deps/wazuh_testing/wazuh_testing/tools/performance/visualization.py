@@ -48,7 +48,7 @@ class DataVisualizer:
         if target in ['binary', 'analysis', 'remote', 'agent', 'logcollector', 'wazuhdb']:
             self.columns_to_plot = self._load_columns_to_plot(columns_path)
 
-        if unify:
+        if unify.lower() in ["true"]:
             self._unify_dataframes()
 
     @staticmethod
