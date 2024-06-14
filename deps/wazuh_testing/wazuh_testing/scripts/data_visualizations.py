@@ -21,7 +21,7 @@ def get_script_arguments():
     parser.add_argument('-c', '--columns', dest='columns', default=None,
                         help=f'Path to Json with Columns to Plot. Default {None}.')
     parser.add_argument('-u', '--unify', dest='unify', default=False,
-                        help=f'Unify process values. Default {False}.')  
+                        help=f'Unify process values. Default {False}.')
 
     return parser.parse_args()
 
