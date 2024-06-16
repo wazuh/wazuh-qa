@@ -23,6 +23,7 @@ tasks:
           - provider: "aws"
           - size: large
           - composite-name: "{manager-os}"
+          - instance-name: "[QA]-Test-Example-Please-Edit-Me"
           - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
           - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
           - label-termination-date: "1d"
@@ -50,6 +51,7 @@ tasks:
           - provider: "{infra-provider}"
           - size: small
           - composite-name: "{agent}"
+          - instance-name: "[QA]-Test-Example-Please-Edit-Me"
           - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
           - track-output: "{working-dir}/agent-{agent}/track.yaml"
           - label-termination-date: "1d"

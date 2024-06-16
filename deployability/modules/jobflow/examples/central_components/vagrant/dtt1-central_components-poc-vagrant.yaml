@@ -30,7 +30,7 @@ tasks:
           - provider: "{infra-provider}"
           - size: large
           - composite-name: "{central_components}"
-          - instance-name: "{central_components}"
+          - instance-name: "[QA]-Test-Example-Please-Edit-Me"
           - inventory-output: "{working-dir}/central_components-{central_components}/inventory.yaml"
           - track-output: "{working-dir}/central_components-{central_components}/track.yaml"
           - label-termination-date: "1d"
