@@ -34,7 +34,7 @@ def main():
         makedirs(destination)
     dv = DataVisualizer(dataframes=options.csv_list, target=options.visualization_target,
                         compare=False, store_path=options.destination, base_name=options.name,
-                        columns_path=options.columns, unify=options.unify)
+                        columns_path=options.columns, unify_child_daemon_metrics=options.unify)
     dv.plot()
 
 

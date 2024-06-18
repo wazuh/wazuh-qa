@@ -32,7 +32,7 @@ class DataVisualizer:
         base_name (str, optional): base name used to store the images.
     """
     def __init__(self, dataframes, target, compare=False, store_path=gettempdir(), x_ticks_granularity='minutes',
-                 x_ticks_interval=1, base_name=None, columns_path=None, unify=False):
+                 x_ticks_interval=1, base_name=None, columns_path=None, unify_child_daemon_metrics=False):
         self.dataframes_paths = dataframes
         self.dataframe = None
         self.compare = compare
@@ -48,7 +48,7 @@ class DataVisualizer:
         if target in ['binary', 'analysis', 'remote', 'agent', 'logcollector', 'wazuhdb']:
             self.columns_to_plot = self._load_columns_to_plot(columns_path)
 
-        if unify.lower() in ["true"]:
+        if unify_child_daemon_metrics.lower() in ["true"]:
             self._unify_dataframes()
 
     @staticmethod
