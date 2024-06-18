@@ -203,7 +203,7 @@ class AWSProvider(Provider):
             with open(windosUserData_file, 'r') as file:
                 userData = file.read()
                 userData = userData.replace('ChangeMe', config.key_name)
-            config.storage = 60
+            config.storage = 80
         else:
             with open(userData_file, 'r') as file:
                 userData = file.read()

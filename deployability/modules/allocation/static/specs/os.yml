@@ -438,6 +438,14 @@ aws:
     zone: us-east-1
     user: ec2-user
   # Windows
+  windows-desktop-11.24-amd64:
+    ami: ami-096ed5ef39519e559
+    zone: us-east-1
+    user: wazuh-user
+  windows-desktop-11-amd64:
+    ami: ami-0672138154b9c27f8
+    zone: us-east-1
+    user: wazuh-user
   windows-desktop-10-amd64:
     ami: ami-03eb1fb8f55d01fde
     zone: us-east-1
