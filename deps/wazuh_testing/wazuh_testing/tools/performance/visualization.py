@@ -48,7 +48,8 @@ class DataVisualizer:
         if target in ['binary', 'analysis', 'remote', 'agent', 'logcollector', 'wazuhdb']:
             self.columns_to_plot = self._load_columns_to_plot(columns_path)
 
-        if unify_child_daemon_metrics.lower() in ["true"]:
+        if unify_child_daemon_metrics.lower() in ["true"] and target in ['binary']:
+            self.dataframe = self.dataframe.reset_index(drop=False)
             self._unify_dataframes()
 
     @staticmethod
