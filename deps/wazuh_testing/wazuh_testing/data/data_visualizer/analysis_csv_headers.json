@@ -34,7 +34,8 @@
     "alerts_info": {
         "title": "Alerts and events info.",
         "columns": [
-            "Events processed", "Events received", "Written alerts", "Written firewall", "Written fts"
+            "Events processed", "Events received", "Written alerts", "Written firewall", "Written fts",
+            "Written archives", "Written stats"
         ]
     }
 }

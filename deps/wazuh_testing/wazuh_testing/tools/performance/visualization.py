@@ -8,9 +8,10 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from abc import ABC, abstractmethod
 
 
-class DataVisualizer:
+class DataVisualizer(ABC):
     """Class that allows to visualize the data collected using the wazuh_metrics tool.
 
     Args:
@@ -31,8 +32,9 @@ class DataVisualizer:
         x_ticks_interval (int): interval of the x-label.
         base_name (str, optional): base name used to store the images.
     """
-    def __init__(self, dataframes, target, compare=False, store_path=gettempdir(), x_ticks_granularity='minutes',
-                 x_ticks_interval=1, base_name=None, columns_path=None):
+    def __init__(self, dataframes, target, compare=False, store_path=gettempdir(),
+                 x_ticks_granularity='minutes',
+                 x_ticks_interval=1, base_name=None):
         self.dataframes_paths = dataframes
         self.dataframe = None
         self.compare = compare
@@ -43,10 +45,43 @@ class DataVisualizer:
         self.x_ticks_interval = x_ticks_interval
         self.base_name = base_name
         sns.set(rc={'figure.figsize': (26, 9)})
-        self.columns_to_plot = None
+        # self.columns_to_plot = None
 
-        if target in ['binary', 'analysis', 'remote', 'agent', 'logcollector', 'wazuhdb']:
-            self.columns_to_plot = self._load_columns_to_plot(columns_path)
+        # if target in ['binary', 'analysis', 'remote', 'agent', 'logcollector', 'wazuhdb']:
+        #     self.columns_to_plot = self._load_columns_to_plot(columns_path)
+
+    def _validate_dataframe(self) -> None:
+        self._check_missing_mandatory_fields()
+        self._check_no_duplicated()
+        self._check_unexpected_values()
+
+    @abstractmethod
+    def _get_expected_fields(self):
+        pass
+
+    @abstractmethod
+    def _get_mandatory_fields(self):
+        pass
+
+    def _get_data_columns(self):
+        return list(self.dataframe.columns)
+
+    def _check_no_duplicated(self):
+        if self.dataframe.columns.duplicated().any():
+            raise ValueError('Duplicate column names found in the CSV file.')
+
+    def _check_missing_mandatory_fields(self):
+        if not set(self._get_mandatory_fields()).issubset(self._get_data_columns()):
+            raise ValueError(f"Missing some of the mandatory values: {self._get_mandatory_fields()}")
+
+    def _check_unexpected_values(self):
+        print(sorted(set(self._get_expected_fields())))
+
+        print(sorted(set(self._get_data_columns())))
+
+        if not set(self._get_data_columns()).issubset(set(self._get_expected_fields())):
+            raise ValueError('Column names do not match the expected metrics.')
+
 
     @staticmethod
     def _color_palette(size):
@@ -157,123 +192,150 @@ class DataVisualizer:
             svg_name = f"{self.base_name}_{svg_name}"
         plt.savefig(join(self.store_path, f"{svg_name}.svg"), dpi=1200, format='svg')
 
-    def _plot_data(self, elements, title=None, generic_label=None):
-        """Function to plot the different types of dataframes.
 
-        Args:
-            elements (list, pandas.columns): columns to plot.
-            title (str, optional): title of the plot.
-            generic_label (str, optional): set a generic label to plot all the columns.
-        """
-        if self.target == 'binary':
-            for element in elements:
-                fig, ax = plt.subplots()
-                daemons = self._get_daemons()
-                colors = self._color_palette(len(daemons))
-                for daemon, color in zip(daemons, colors):
-                    self._basic_plot(ax, self.dataframe[self.dataframe.Daemon == daemon][element],
-                                     label=daemon, color=color)
-                self._save_custom_plot(ax, element, f"{element} {title}")
+    @abstractmethod
+    def plot(self):
+        pass
 
-        elif self.target == 'logcollector':
-            for element in elements:
-                fig, ax = plt.subplots()
-                targets = self._get_logcollector_targets()
-                colors = self._color_palette(len(targets))
-                for target, color in zip(targets, colors):
-                    self._basic_plot(ax, self.dataframe[self.dataframe.Target == target][element],
-                                     label=target, color=color)
-                self._save_custom_plot(ax, element, title)
+class BinaryDatavisualizer(DataVisualizer):
+    binary_metrics = ["CPU", "VMS", "RSS", "USS",
+        "PSS", "SWAP", "FD", "Read_Ops", "Write_Ops", "Disk_Read",
+        "Disk_Written", "Disk_Read_Speed", "Disk_Write_Speed"]
+    expected_binary_fields = ["Daemon", "Version", "PID"] + binary_metrics
+    mandatory_fields = ["Daemon"]
 
-        elif self.target == 'cluster':
-            for element in elements:
-                fig, ax = plt.subplots()
-                nodes = self.dataframe[self.dataframe.activity == element]['node_name'].unique()
-                current_df = self.dataframe[self.dataframe.activity == element]
-                current_df.reset_index(drop=True, inplace=True)
-                for node, color in zip(nodes, self._color_palette(len(nodes))):
-                    self._basic_plot(ax=ax, dataframe=current_df[current_df.node_name == node]['time_spent(s)'],
-                                     label=node, color=color)
-                self._save_custom_plot(ax, 'time_spent(s)', element.replace(' ', '_').lower(), cluster_log=True,
-                                       statistics=DataVisualizer._get_statistics(
-                                           current_df['time_spent(s)'], calculate_mean=True, calculate_median=True))
+    def __init__(self, dataframes, target, compare=False, store_path=gettempdir(),
+                 x_ticks_granularity='minutes',
+                 x_ticks_interval=1, base_name=None):
 
-        elif self.target == 'api':
-            for element in elements:
-                fig, ax = plt.subplots()
-                queries = self.dataframe.endpoint.unique()
-                colors = self._color_palette(len(queries))
-                for endpoint, color in zip(queries, colors):
-                    self._basic_plot(ax, self.dataframe[self.dataframe.endpoint == endpoint]['time_spent(s)'],
-                                     label=endpoint, color=color)
-                self._save_custom_plot(ax, element, 'API Response time')
+        super().__init__(dataframes, target, compare, store_path, x_ticks_granularity, x_ticks_interval)
+        self._validate_dataframe()
 
-        else:
-            fig, ax = plt.subplots()
-            colors = self._color_palette(len(elements))
-            for element, color in zip(elements, colors):
-                self._basic_plot(ax, self.dataframe[element], label=element, color=color)
-            self._save_custom_plot(ax, generic_label, title)
+    def _get_mandatory_fields(self):
+        return self.mandatory_fields
 
-    def _plot_binaries_dataset(self):
-        """Function to plot the hardware data of the binary."""
-        for element in self.columns_to_plot:
-            columns = self.dataframe.columns.drop(self.columns_to_plot[element]['columns'])
-            title = self.columns_to_plot[element]['title']
-            self._plot_data(elements=columns, title=title)
+    def _get_expected_fields(self):
+        return self.expected_binary_fields
 
-    def _plot_generic_dataset(self):
-        """Function to plot the statistics from analysisd, remoted, logcollector and wazuhdb."""
-        for element in self.columns_to_plot:
-            columns = self.columns_to_plot[element]['columns']
-            title = self.columns_to_plot[element]['title']
-            self._plot_data(elements=columns, title=title, generic_label=element)
+    def _normalize_column_name(self, column_name: str):
+        if '(' in column_name:
+            return column_name.split('(')[0].strip()
+        return column_name
 
-    def _plot_agentd_dataset(self):
-        """Function to plot the statistics from wazuh-agentd."""
-        if 'diff_seconds' not in self.dataframe.columns:
-            self.dataframe['diff_seconds'] = abs(pd.to_datetime(self.dataframe['last_keepalive']) -
-                                                 pd.to_datetime(self.dataframe['last_ack']))
-            self.dataframe['diff_seconds'] = self.dataframe.diff_seconds.dt.total_seconds()
+    def _get_data_columns(self):
+        column_names = self.dataframe.columns
+        normalized_columns = [self._normalize_column_name(col) for col in column_names.tolist()]
 
-        for element in self.columns_to_plot:
-            columns = self.columns_to_plot[element]['columns']
-            title = self.columns_to_plot[element]['title']
-            self._plot_data(elements=columns, title=title, generic_label=element)
+        return normalized_columns
 
-    def _plot_cluster_dataset(self):
-        """Function to plot the information from the cluster.log file."""
-        self._plot_data(elements=list(self.dataframe['activity'].unique()), generic_label='Managers')
+    def _get_fields_to_plot(self):
+        column_names = self.dataframe.columns
+        fields_to_plot = []
 
-    def _plot_api_dataset(self):
-        """Function to plot the information from the api.log file."""
-        self._plot_data(elements=['endpoint'], generic_label='Queries')
+        for field_to_plot in column_names:
+            if self._normalize_column_name(field_to_plot) in self.binary_metrics:
+                fields_to_plot.append(field_to_plot)
+
+        return fields_to_plot
 
     def plot(self):
-        """Public function to plot the dataset."""
-        if self.target == 'binary':
-            self._plot_binaries_dataset()
-        elif self.target == 'analysis':
-            self._plot_generic_dataset()
-        elif self.target == 'remote':
-            self._plot_generic_dataset()
-        elif self.target == 'agent':
-            self._plot_agentd_dataset()
-        elif self.target == 'logcollector':
-            self._plot_generic_dataset()
-        elif self.target == 'cluster':
-            self._plot_cluster_dataset()
-        elif self.target == 'api':
-            self._plot_api_dataset()
-        elif self.target == 'wazuhdb':
-            self._plot_generic_dataset()
-        else:
-            raise AttributeError(f"Invalid target {self.target}")
+        columns_to_plot = self._get_fields_to_plot()
+        for element in columns_to_plot:
+            _, ax = plt.subplots()
+            daemons = self._get_daemons()
+            colors = self._color_palette(len(daemons))
+            for daemon, color in zip(daemons, colors):
+                self._basic_plot(ax, self.dataframe[self.dataframe.Daemon == daemon][element],
+                                label=daemon, color=color)
+
+            self._save_custom_plot(ax, element, f"{element} {element}")
 
     def _get_daemons(self):
         """Get the list of Wazuh Daemons in the dataset."""
         return self.dataframe.Daemon.unique()
 
-    def _get_logcollector_targets(self):
+
+class DaemonStatisticsVisualizer(DataVisualizer):
+    mandatory_fields = ['API Timestamp', 'Interval (Timestamp-Uptime)', 'Events processed', 'Events received']
+
+    def __init__(self, dataframes, daemon, compare=False, store_path=gettempdir(),
+                 x_ticks_granularity='minutes',
+                 x_ticks_interval=1, base_name=None):
+        self.daemon = daemon
+        super().__init__(dataframes, daemon, compare, store_path, x_ticks_granularity, x_ticks_interval)
+        self.plots_data = self._load_columns_to_plot()
+        self.expected_fields = []
+        for graph in self.plots_data.values():
+            for column in graph['columns']:
+                self.expected_fields.append(column)
+        self.expected_fields.extend(self.mandatory_fields)
+        self._validate_dataframe()
+
+
+    def _load_columns_to_plot(self):
+        filename = self.daemon + '_csv_headers.json'
+        full_path = join(dirname(realpath(__file__)), '..', '..', 'data', 'data_visualizer', filename)
+
+        with open(full_path, 'r') as columns_file:
+            full_data = json.load(columns_file)
+
+        return full_data
+
+    def _get_mandatory_fields(self):
+        return self.mandatory_fields
+
+    def _get_expected_fields(self):
+        return self.expected_fields
+
+    def plot(self):
+        for element in self.plots_data.values():
+            columns = element['columns']
+            title = element['title']
+            colors = self._color_palette(len(columns))
+
+            fig, ax = plt.subplots()
+            for element, color in zip(columns, colors):
+                self._basic_plot(ax, self.dataframe[element], label=element, color=color)
+
+            self._save_custom_plot(ax, element, title)
+
+
+class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
+    mandatory_fields = ['Location', 'Target']
+
+    def __init__(self, dataframes, compare=False, store_path=gettempdir(),
+                 x_ticks_granularity='minutes',
+                 x_ticks_interval=1, base_name=None):
+        super().__init__(dataframes, 'logcollector', compare, store_path, x_ticks_granularity, x_ticks_interval)
+
+    def _get_logcollector_location(self):
         """Get the list of unique logcollector targets (sockets) in the dataset."""
-        return self.dataframe.Target.unique()
+        return self.dataframe.Location.unique()
+
+    def plot(self, filter_by_target):
+        for element in self.plots_data.values():
+            fig, ax = plt.subplots()
+            targets = self._get_logcollector_location()
+            colors = self._color_palette(len(targets))
+            for target, color in zip(targets, colors):
+                self._basic_plot(ax, self.dataframe[self.dataframe.Location == target][element['columns']],
+                                     label=target, color=color)
+
+            self._save_custom_plot(ax, element['title'], element['title'])
+
+# class ClusterStatisticsVisualizer(DaemonStatisticsVisualizer):
+#     def plot(self):
+#         elements = list(self.dataframe['activity'].unique())
+#         self._plot_data(elements=elements, generic_label='Managers')
+
+#         for element in elements:
+#             fig, ax = plt.subplots()
+#             nodes = self.dataframe[self.dataframe.activity == element]['node_name'].unique()
+#             current_df = self.dataframe[self.dataframe.activity == element]
+#             current_df.reset_index(drop=True, inplace=True)
+#             for node, color in zip(nodes, self._color_palette(len(nodes))):
+#                 self._basic_plot(ax=ax, dataframe=current_df[current_df.node_name == node]['time_spent(s)'],
+#                                     label=node, color=color)
+#             self._save_custom_plot(ax, 'time_spent(s)', element.replace(' ', '_').lower(), cluster_log=True,
+#                                     statistics=DataVisualizer._get_statistics(
+#                                         current_df['time_spent(s)'], calculate_mean=True, calculate_median=True))

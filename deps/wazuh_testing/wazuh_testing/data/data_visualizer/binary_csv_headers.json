@@ -1,0 +1,29 @@
+{
+    "cput": {
+        "title": "CPU(%)",
+        "columns": [
+            "Events"
+        ]
+    },
+    "bytes_sent": {
+        "title": "Bytes sent",
+        "columns": [
+            "Bytes"
+        ]
+    },
+    "drops": {
+        "title": "Events dropped",
+        "columns": [
+            "Target Drops"
+        ]
+    }
+}
+
+
+
+
+
+
+
+
+CPU(%)	VMS(KB)	RSS(KB)	USS(KB)	PSS(KB)	SWAP(KB)	FD	Read_Ops	Write_Ops	Disk_Read(KB)	Disk_Written(KB)	Disk_Read_Speed(KB/s)	Disk_Write_Speed(KB/s)
