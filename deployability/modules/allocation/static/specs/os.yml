@@ -329,7 +329,7 @@ aws:
     zone: us-east-1
     user: ec2-user
   linux-redhat-8-amd64:
-    ami: ami-054333d53aa32850c
+    ami: ami-00d00bcb416b79a1a
     zone: us-east-1
     user: ec2-user
   linux-redhat-8-arm64:
