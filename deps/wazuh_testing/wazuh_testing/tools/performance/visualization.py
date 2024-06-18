@@ -93,14 +93,19 @@ class DataVisualizer:
 
     def _unify_dataframes(self):
         """Unify dataframe values."""
+        daemons_list = [daemon_name for daemon_name in self._get_daemons() if "child" not in daemon_name]
+
+        for daemon_name in daemons_list:
+            self.dataframe.loc[self.dataframe['Daemon'].str.contains(daemon_name, na=False), 'Daemon'] = daemon_name
+
         df_row = self.dataframe.iloc[0]
-        df_names = [df_row['Daemon'], df_row['Version'], df_row['PID']]
-        columns_to_drop = ['Daemon', 'Version', 'PID']
+        df_names = [df_row['Version'], df_row['PID']]
+        columns_to_drop = ['Timestamp', 'Daemon', 'Version', 'PID']
         columns_to_sum = self.dataframe.columns.drop(columns_to_drop)
-        self.dataframe = self.dataframe.groupby('Timestamp')[columns_to_sum].sum().reset_index(drop=False)
+        self.dataframe = self.dataframe.groupby(['Timestamp', 'Daemon'])[columns_to_sum].sum().reset_index(drop=False)
 
         for index, value in enumerate(df_names):
-            self.dataframe.insert(index, columns_to_drop[index], value)
+            self.dataframe.insert(index+2, columns_to_drop[index+2], value)
 
     def _set_x_ticks_interval(self, ax):
         """Set the number of labels that will appear in the X axis and their format.
