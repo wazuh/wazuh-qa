@@ -1,87 +1,68 @@
+import json
+from abc import ABC, abstractmethod
 from os.path import dirname, join, realpath
 from re import sub
 from tempfile import gettempdir
-from matplotlib.ticker import LinearLocator
 
-import json
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from abc import ABC, abstractmethod
+from matplotlib.ticker import LinearLocator
 
 
 class DataVisualizer(ABC):
     """Class that allows to visualize the data collected using the wazuh_metrics tool.
 
     Args:
-        dataframes (list): list containing the paths.
-        target (str): string to set the visualization type.
-        compare (bool): boolean to compare the different datasets.
+        dataframes_paths (list): list containing the paths.
         store_path (str): path to store the CSV images. Defaults to the temp directory.
-        x_ticks_granularity (string): granularity of the Timestamp. It is set by default to minutes.
-        x_ticks_interval (int): interval of the x-label.
         base_name (str, optional): base name used to store the images.
     Attributes:
         dataframes_paths (list): paths of the CSVs.
         dataframe (pandas.Dataframe): dataframe containing the info from all the CSVs.
-        compare (bool): boolean to compare the different datasets.
-        target (str): string to set the visualization type.
         store_path (str): path to store the CSV images. Defaults to the temp directory.
-        x_ticks_granularity (string): granularity of the Timestamp. It is set by default to minutes.
-        x_ticks_interval (int): interval of the x-label.
         base_name (str, optional): base name used to store the images.
     """
-    def __init__(self, dataframes, target, compare=False, store_path=gettempdir(),
-                 x_ticks_granularity='minutes',
-                 x_ticks_interval=1, base_name=None):
-        self.dataframes_paths = dataframes
-        self.dataframe = None
-        self.compare = compare
-        self.target = target
+    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None):
+        self.dataframes_paths = dataframes_paths
         self.store_path = store_path
-        self._load_dataframes()
-        self.x_ticks_granularity = x_ticks_granularity
-        self.x_ticks_interval = x_ticks_interval
         self.base_name = base_name
-        sns.set(rc={'figure.figsize': (26, 9)})
-        # self.columns_to_plot = None
+        self.dataframe = pd.DataFrame()
 
-        # if target in ['binary', 'analysis', 'remote', 'agent', 'logcollector', 'wazuhdb']:
-        #     self.columns_to_plot = self._load_columns_to_plot(columns_path)
+        self._load_dataframes()
+        sns.set_theme(rc={'figure.figsize': (26, 9)})
+
+    @abstractmethod
+    def _get_expected_fields(self) -> list:
+        pass
+
+    @abstractmethod
+    def plot(self) -> None:
+        pass
 
     def _validate_dataframe(self) -> None:
         self._check_missing_mandatory_fields()
         self._check_no_duplicated()
         self._check_unexpected_values()
 
-    @abstractmethod
-    def _get_expected_fields(self):
-        pass
-
-    @abstractmethod
-    def _get_mandatory_fields(self):
-        pass
-
-    def _get_data_columns(self):
-        return list(self.dataframe.columns)
-
     def _check_no_duplicated(self):
         if self.dataframe.columns.duplicated().any():
             raise ValueError('Duplicate column names found in the CSV file.')
 
     def _check_missing_mandatory_fields(self):
-        if not set(self._get_mandatory_fields()).issubset(self._get_data_columns()):
-            raise ValueError(f"Missing some of the mandatory values: {self._get_mandatory_fields()}")
+        if not (self._get_expected_fields() == self._get_data_columns()):
+            raise ValueError(f"Missing some of the mandatory values. Expected values: {self._get_expected_fields()}")
 
     def _check_unexpected_values(self):
-        print(sorted(set(self._get_expected_fields())))
-
-        print(sorted(set(self._get_data_columns())))
-
         if not set(self._get_data_columns()).issubset(set(self._get_expected_fields())):
             raise ValueError('Column names do not match the expected metrics.')
 
+    def _get_data_columns(self) -> list:
+        try:
+            return list(self.dataframe.columns)
+        except StopIteration:
+            return []
 
     @staticmethod
     def _color_palette(size):
@@ -95,30 +76,9 @@ class DataVisualizer(ABC):
         """
         return sns.hls_palette(size if size > 1 else 1, h=.5)
 
-    def _load_columns_to_plot(self, columns_path):
-        full_path = columns_path
-
-        if full_path is None:
-            filename = None
-
-            if self.target != 'binary':
-                filename = self.target + '_csv_headers.json'
-            else:
-                filename = self.target + '_non_printable_headers.json'
-
-            full_path = join(dirname(realpath(__file__)), '..', '..', 'data', 'data_visualizer', filename)
-
-        with open(full_path, 'r') as columns_file:
-            full_data = json.load(columns_file)
-
-        return full_data
-
     def _load_dataframes(self):
         """Load the dataframes from dataframes_paths."""
         for df_path in self.dataframes_paths:
-            if self.dataframe is None and self.target != 'cluster':
-                self.dataframe = pd.read_csv(df_path, index_col="Timestamp", parse_dates=True)
-            else:
                 new_csv = pd.read_csv(df_path, index_col="Timestamp", parse_dates=True)
                 self.dataframe = pd.concat([self.dataframe, new_csv])
 
@@ -128,10 +88,7 @@ class DataVisualizer(ABC):
         Args:
             ax (axes.SubplotBase): subplot base where the data will be printed.
         """
-        if self.x_ticks_granularity == 'seconds':
-            ax.xaxis.set_major_locator(LinearLocator(30))
-        elif self.x_ticks_granularity == 'minutes':
-            ax.xaxis.set_major_locator(LinearLocator(30))
+        ax.xaxis.set_major_locator(LinearLocator(30))
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M:%S'))
 
     @staticmethod
@@ -193,29 +150,20 @@ class DataVisualizer(ABC):
         plt.savefig(join(self.store_path, f"{svg_name}.svg"), dpi=1200, format='svg')
 
 
-    @abstractmethod
-    def plot(self):
-        pass
 
 class BinaryDatavisualizer(DataVisualizer):
-    binary_metrics = ["CPU", "VMS", "RSS", "USS",
-        "PSS", "SWAP", "FD", "Read_Ops", "Write_Ops", "Disk_Read",
-        "Disk_Written", "Disk_Read_Speed", "Disk_Write_Speed"]
-    expected_binary_fields = ["Daemon", "Version", "PID"] + binary_metrics
-    mandatory_fields = ["Daemon"]
+    binary_metrics_fields = ["Daemon", "Version", "PID",
+                             "CPU", "VMS", "RSS", "USS",
+                             "PSS", "SWAP", "FD", "Read_Ops",
+                             "Write_Ops", "Disk_Read", "Disk_Written",
+                             "Disk_Read_Speed", "Disk_Write_Speed"]
 
-    def __init__(self, dataframes, target, compare=False, store_path=gettempdir(),
-                 x_ticks_granularity='minutes',
-                 x_ticks_interval=1, base_name=None):
-
-        super().__init__(dataframes, target, compare, store_path, x_ticks_granularity, x_ticks_interval)
+    def __init__(self, dataframes, store_path=gettempdir(), base_name=None):
+        super().__init__(dataframes, store_path, base_name)
         self._validate_dataframe()
 
-    def _get_mandatory_fields(self):
-        return self.mandatory_fields
-
-    def _get_expected_fields(self):
-        return self.expected_binary_fields
+    def _get_expected_fields(self) -> list:
+        return self.binary_metrics_fields
 
     def _normalize_column_name(self, column_name: str):
         if '(' in column_name:
@@ -228,12 +176,16 @@ class BinaryDatavisualizer(DataVisualizer):
 
         return normalized_columns
 
+    def _get_daemons(self):
+        """Get the list of Wazuh Daemons in the dataset."""
+        return self.dataframe.Daemon.unique()
+
     def _get_fields_to_plot(self):
         column_names = self.dataframe.columns
         fields_to_plot = []
 
         for field_to_plot in column_names:
-            if self._normalize_column_name(field_to_plot) in self.binary_metrics:
+            if self._normalize_column_name(field_to_plot) in self.binary_metrics_fields:
                 fields_to_plot.append(field_to_plot)
 
         return fields_to_plot
@@ -250,42 +202,33 @@ class BinaryDatavisualizer(DataVisualizer):
 
             self._save_custom_plot(ax, element, f"{element} {element}")
 
-    def _get_daemons(self):
-        """Get the list of Wazuh Daemons in the dataset."""
-        return self.dataframe.Daemon.unique()
 
 
 class DaemonStatisticsVisualizer(DataVisualizer):
-    mandatory_fields = ['API Timestamp', 'Interval (Timestamp-Uptime)', 'Events processed', 'Events received']
+    general_fields = ['API Timestamp', 'Interval (Timestamp-Uptime)', 'Events processed', 'Events received']
+    statistics_plot_data_directory = join(dirname(realpath(__file__)), '..', '..', 'data', 'data_visualizer')
+    statistics_filename_suffix = '_csv_headers.json'
 
-    def __init__(self, dataframes, daemon, compare=False, store_path=gettempdir(),
-                 x_ticks_granularity='minutes',
-                 x_ticks_interval=1, base_name=None):
+    def __init__(self, dataframes, daemon, store_path=gettempdir(), base_name=None):
         self.daemon = daemon
-        super().__init__(dataframes, daemon, compare, store_path, x_ticks_granularity, x_ticks_interval)
-        self.plots_data = self._load_columns_to_plot()
+        super().__init__(dataframes, daemon, store_path)
+        self.plots_data = self._load_plot_data()
         self.expected_fields = []
         for graph in self.plots_data.values():
             for column in graph['columns']:
                 self.expected_fields.append(column)
-        self.expected_fields.extend(self.mandatory_fields)
+        self.expected_fields.extend(self.general_fields)
         self._validate_dataframe()
 
+    def _get_statistic_plot_data_file(self):
+        return join(self.statistics_plot_data_directory, self.daemon + self.statistics_filename_suffix)
 
-    def _load_columns_to_plot(self):
-        filename = self.daemon + '_csv_headers.json'
-        full_path = join(dirname(realpath(__file__)), '..', '..', 'data', 'data_visualizer', filename)
-
-        with open(full_path, 'r') as columns_file:
+    def _load_plot_data(self):
+        statistic_plot_data = self._get_statistic_plot_data_file()
+        with open(statistic_plot_data, 'r') as columns_file:
             full_data = json.load(columns_file)
 
         return full_data
-
-    def _get_mandatory_fields(self):
-        return self.mandatory_fields
-
-    def _get_expected_fields(self):
-        return self.expected_fields
 
     def plot(self):
         for element in self.plots_data.values():
@@ -293,26 +236,23 @@ class DaemonStatisticsVisualizer(DataVisualizer):
             title = element['title']
             colors = self._color_palette(len(columns))
 
-            fig, ax = plt.subplots()
+            _, ax = plt.subplots()
             for element, color in zip(columns, colors):
                 self._basic_plot(ax, self.dataframe[element], label=element, color=color)
 
             self._save_custom_plot(ax, element, title)
 
-
 class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
-    mandatory_fields = ['Location', 'Target']
+    general_fields = ['Location', 'Target']
 
-    def __init__(self, dataframes, compare=False, store_path=gettempdir(),
-                 x_ticks_granularity='minutes',
-                 x_ticks_interval=1, base_name=None):
-        super().__init__(dataframes, 'logcollector', compare, store_path, x_ticks_granularity, x_ticks_interval)
+    def __init__(self, dataframes, store_path=gettempdir(), base_name=None):
+        super().__init__(dataframes, 'logcollector', store_path)
 
     def _get_logcollector_location(self):
         """Get the list of unique logcollector targets (sockets) in the dataset."""
         return self.dataframe.Location.unique()
 
-    def plot(self, filter_by_target):
+    def plot(self):
         for element in self.plots_data.values():
             fig, ax = plt.subplots()
             targets = self._get_logcollector_location()
@@ -323,19 +263,61 @@ class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
 
             self._save_custom_plot(ax, element['title'], element['title'])
 
-# class ClusterStatisticsVisualizer(DaemonStatisticsVisualizer):
-#     def plot(self):
-#         elements = list(self.dataframe['activity'].unique())
-#         self._plot_data(elements=elements, generic_label='Managers')
+class ClusterStatisticsVisualizer(DataVisualizer):
+    expected_cluster_fields= ['node_name', 'activity', 'time_spent(s)']
 
-#         for element in elements:
-#             fig, ax = plt.subplots()
-#             nodes = self.dataframe[self.dataframe.activity == element]['node_name'].unique()
-#             current_df = self.dataframe[self.dataframe.activity == element]
-#             current_df.reset_index(drop=True, inplace=True)
-#             for node, color in zip(nodes, self._color_palette(len(nodes))):
-#                 self._basic_plot(ax=ax, dataframe=current_df[current_df.node_name == node]['time_spent(s)'],
-#                                     label=node, color=color)
-#             self._save_custom_plot(ax, 'time_spent(s)', element.replace(' ', '_').lower(), cluster_log=True,
-#                                     statistics=DataVisualizer._get_statistics(
-#                                         current_df['time_spent(s)'], calculate_mean=True, calculate_median=True))
+    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None):
+        super().__init__(dataframes_paths, store_path, base_name)
+        self._validate_dataframe()
+
+    def _get_expected_fields(self) -> list:
+        return self.expected_cluster_fields
+
+    def plot(self):
+        elements = list(self.dataframe['activity'].unique())
+
+        for element in elements:
+            _, ax = plt.subplots()
+            nodes = self.dataframe[self.dataframe.activity == element]['node_name'].unique()
+            current_df = self.dataframe[self.dataframe.activity == element]
+            current_df.reset_index(drop=True, inplace=True)
+            for node, color in zip(nodes, self._color_palette(len(nodes))):
+                self._basic_plot(ax=ax, dataframe=current_df[current_df.node_name == node]['time_spent(s)'],
+                                    label=node, color=color)
+            self._save_custom_plot(ax, 'time_spent(s)', element.replace(' ', '_').lower(), cluster_log=True,
+                                    statistics=DataVisualizer._get_statistics(
+                                        current_df['time_spent(s)'], calculate_mean=True, calculate_median=True))
+
+
+class IndexerAlerts(DataVisualizer):
+    expected_fields = ['Total alerts']
+
+    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None):
+        super().__init__(dataframes_paths, store_path, base_name)
+        self._validate_dataframe()
+
+    def _plot_agregated_alerts(self):
+        _, ax = plt.subplots()
+        df['Difference'] = df['Total alerts'].diff()
+
+
+    def _plot_plain_alerts(self):
+        _, ax = plt.subplots()
+        self._basic_plot(ax=ax, dataframe=self.dataframe, label='alerts', self._color_palette(1))
+
+
+    def plot(self):
+        self._plot_plain_alerts()
+        self._plot_agregated_alerts()
+
+
+class IndexerVulnerabilities(DataVisualizer):
+    expected_fields = ['Vulnerabilities']
+
+    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None):
+        super().__init__(dataframes_paths, store_path, base_name)
+        self._validate_dataframe()
+
+    def plot(self):
+        pass
+

@@ -3,7 +3,9 @@ from os import makedirs
 from os.path import exists
 from tempfile import gettempdir
 
-from wazuh_testing.tools.performance.visualization import BinaryDatavisualizer, DaemonStatisticsVisualizer, LogcollectorStatisticsVisualizer
+from wazuh_testing.tools.performance.visualization import BinaryDatavisualizer, DaemonStatisticsVisualizer, \
+                                                          LogcollectorStatisticsVisualizer, \
+                                                          ClusterStatisticsVisualizer
 
 
 def get_script_arguments():
@@ -30,8 +32,8 @@ def main():
 
     if not exists(destination):
         makedirs(destination)
-    dv = LogcollectorStatisticsVisualizer(dataframes=options.csv_list,
-                        compare=False, store_path=options.destination, base_name=options.name)
+    dv = ClusterStatisticsVisualizer(dataframes_paths=options.csv_list, store_path=options.destination,
+                                     base_name=options.name)
     dv.plot()
 
 
