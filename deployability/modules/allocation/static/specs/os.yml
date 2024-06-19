@@ -291,7 +291,7 @@ aws:
     user: ec2-user
   # SUSE Linux
   linux-suse-15-amd64:
-    ami: ami-08f3662e2d5b3989a
+    ami: ami-0be64cd2cd475e3b4
     zone: us-east-1
     user: ec2-user
   linux-suse-15-arm64:
