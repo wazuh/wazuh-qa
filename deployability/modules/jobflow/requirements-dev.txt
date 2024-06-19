@@ -1,0 +1,2 @@
+-r ../../deps/requirements.txt
+-r ../../deps/remote_requirements.txt

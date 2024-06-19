@@ -1,0 +1,42 @@
+vagrant:
+  micro:
+      cpu: 1
+      memory: 1024
+  small:
+      cpu: 1
+      memory: 2048
+  medium:
+      cpu: 2
+      memory: 4096
+  large:
+      cpu: 4
+      memory: 8192
+aws:
+  micro:
+    amd64:
+      type: t2.small
+      storage: 20
+    arm64:
+      type: t4g.micro
+      storage: 20
+  small:
+    amd64:
+      type: t3.small
+      storage: 20
+    arm64:
+      type: t4g.small
+      storage: 20
+  medium:
+    amd64:
+      type: t3a.medium
+      storage: 20
+    arm64:
+      type: t4g.medium
+      storage: 20
+  large:
+    amd64:
+      type: c5ad.xlarge
+      storage: 30
+    arm64:
+      type: c6g.xlarge
+      storage: 30
