@@ -4,6 +4,7 @@ from tempfile import gettempdir
 from matplotlib.ticker import LinearLocator
 
 import json
+import logging
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -48,9 +49,12 @@ class DataVisualizer:
         if target in ['binary', 'analysis', 'remote', 'agent', 'logcollector', 'wazuhdb']:
             self.columns_to_plot = self._load_columns_to_plot(columns_path)
 
-        if unify_child_daemon_metrics.lower() in ["true"] and target in ['binary']:
-            self.dataframe = self.dataframe.reset_index(drop=False)
-            self._unify_dataframes()
+        if unify_child_daemon_metrics:
+            if target == 'binary':
+                self.dataframe = self.dataframe.reset_index(drop=False)
+                self._unify_dataframes()
+            else:
+                logging.warning("Enabled unify is only available for binary data. Ignoring")
 
     @staticmethod
     def _color_palette(size):
@@ -92,7 +96,8 @@ class DataVisualizer:
                 self.dataframe = pd.concat([self.dataframe, new_csv])
 
     def _unify_dataframes(self):
-        """Unify dataframe values."""
+        """Unify the data of each process with their respective sub-processes.
+        """
         pids = self.dataframe[['Daemon', 'PID']].drop_duplicates()
         versions = self.dataframe[['Daemon', 'Version']].drop_duplicates()
 
