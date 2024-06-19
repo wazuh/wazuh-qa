@@ -1,6 +1,6 @@
 ---
 
-wazuh_agent_version: 4.8.0
+wazuh_agent_version: 4.10.0
 
 # Custom packages installation
 
@@ -56,8 +56,8 @@ wazuh_winagent_config:
   check_md5: True
   md5: a03806b7302767d0470d65d3f103fabb
 
-wazuh_winagent_config_url: https://packages.wazuh.com/4.x/windows/wazuh-agent-4.8.0-1.msi
-wazuh_winagent_package_name: wazuh-agent-4.8.0-1.msi
+wazuh_winagent_config_url: https://packages.wazuh.com/4.x/windows/wazuh-agent-4.10.0-1.msi
+wazuh_winagent_package_name: wazuh-agent-4.10.0-1.msi
 wazuh_winagent_package_name_generic: wazuh-agent.msi
 wazuh_dir: "/var/ossec"
 macos_wazuh_dir: "/Library/Ossec"
