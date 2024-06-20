@@ -4,6 +4,7 @@ from tempfile import gettempdir
 from matplotlib.ticker import LinearLocator
 
 import json
+import logging
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -32,7 +33,7 @@ class DataVisualizer:
         base_name (str, optional): base name used to store the images.
     """
     def __init__(self, dataframes, target, compare=False, store_path=gettempdir(), x_ticks_granularity='minutes',
-                 x_ticks_interval=1, base_name=None, columns_path=None):
+                 x_ticks_interval=1, base_name=None, columns_path=None, unify_child_daemon_metrics=False):
         self.dataframes_paths = dataframes
         self.dataframe = None
         self.compare = compare
@@ -47,6 +48,13 @@ class DataVisualizer:
 
         if target in ['binary', 'analysis', 'remote', 'agent', 'logcollector', 'wazuhdb']:
             self.columns_to_plot = self._load_columns_to_plot(columns_path)
+
+        if unify_child_daemon_metrics:
+            if target == 'binary':
+                self.dataframe = self.dataframe.reset_index(drop=False)
+                self._unify_dataframes()
+            else:
+                logging.warning("Enabled unify is only available for binary data. Ignoring")
 
     @staticmethod
     def _color_palette(size):
@@ -86,6 +94,25 @@ class DataVisualizer:
             else:
                 new_csv = pd.read_csv(df_path, index_col="Timestamp", parse_dates=True)
                 self.dataframe = pd.concat([self.dataframe, new_csv])
+
+    def _unify_dataframes(self):
+        """Unify the data of each process with their respective sub-processes.
+        """
+        pids = self.dataframe[['Daemon', 'PID']].drop_duplicates()
+        versions = self.dataframe[['Daemon', 'Version']].drop_duplicates()
+
+        daemons_list = [daemon_name for daemon_name in self._get_daemons() if "child" not in daemon_name]
+
+        for daemon_name in daemons_list:
+            self.dataframe.loc[self.dataframe['Daemon'].str.contains(daemon_name, na=False), 'Daemon'] = daemon_name
+
+        columns_to_drop = ['Timestamp', 'Daemon', 'Version', 'PID']
+        columns_to_sum = self.dataframe.columns.drop(columns_to_drop)
+
+        self.dataframe = self.dataframe.groupby(['Timestamp', 'Daemon'])[columns_to_sum].sum().reset_index(drop=False)
+
+        self.dataframe = self.dataframe.merge(pids[['Daemon', 'PID']], on='Daemon', how='left')
+        self.dataframe = self.dataframe.merge(versions[['Daemon', 'Version']], on='Daemon', how='left')
 
     def _set_x_ticks_interval(self, ax):
         """Set the number of labels that will appear in the X axis and their format.

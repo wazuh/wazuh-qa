@@ -20,6 +20,8 @@ def get_script_arguments():
                         help=f'Base name for the images. Default {None}.')
     parser.add_argument('-c', '--columns', dest='columns', default=None,
                         help=f'Path to Json with Columns to Plot. Default {None}.')
+    parser.add_argument('-u', '--unify', dest='unify', action='store_true',
+                        help=f'Unify data of the binary processes with their subprocesses to plot.')
 
     return parser.parse_args()
 
@@ -32,7 +34,7 @@ def main():
         makedirs(destination)
     dv = DataVisualizer(dataframes=options.csv_list, target=options.visualization_target,
                         compare=False, store_path=options.destination, base_name=options.name,
-                        columns_path=options.columns)
+                        columns_path=options.columns, unify_child_daemon_metrics=options.unify)
     dv.plot()
 
 
