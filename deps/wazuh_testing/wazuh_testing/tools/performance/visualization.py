@@ -79,8 +79,8 @@ class DataVisualizer(ABC):
     def _load_dataframes(self):
         """Load the dataframes from dataframes_paths."""
         for df_path in self.dataframes_paths:
-                new_csv = pd.read_csv(df_path, index_col="Timestamp", parse_dates=True)
-                self.dataframe = pd.concat([self.dataframe, new_csv])
+            new_csv = pd.read_csv(df_path, index_col="Timestamp", parse_dates=True)
+            self.dataframe = pd.concat([self.dataframe, new_csv])
 
     def _set_x_ticks_interval(self, ax):
         """Set the number of labels that will appear in the X axis and their format.
@@ -120,7 +120,7 @@ class DataVisualizer(ABC):
         """
         ax.plot(dataframe, label=label, color=color)
 
-    def _save_custom_plot(self, ax, y_label, title, rotation=90, cluster_log=False, statistics=None):
+    def _save_custom_plot(self, ax, y_label, title, rotation=90, disable_x_labels=False, statistics=None):
         """Function to add info to the plot, the legend and save the SVG image.
 
         Args:
@@ -138,7 +138,7 @@ class DataVisualizer(ABC):
         ax.set_ylabel(y_label)
         ax.set_title(title)
 
-        if not cluster_log:
+        if not disable_x_labels:
             self._set_x_ticks_interval(ax)
             plt.xticks(rotation=rotation)
             svg_name = sub(pattern=r'\(.*\)', string=y_label, repl='')
@@ -147,8 +147,8 @@ class DataVisualizer(ABC):
 
         if self.base_name is not None:
             svg_name = f"{self.base_name}_{svg_name}"
-        plt.savefig(join(self.store_path, f"{svg_name}.svg"), dpi=1200, format='svg')
 
+        plt.savefig(join(self.store_path, f"{svg_name}.svg"), dpi=1200, format='svg')
 
 
 class BinaryDatavisualizer(DataVisualizer):
@@ -203,7 +203,6 @@ class BinaryDatavisualizer(DataVisualizer):
             self._save_custom_plot(ax, element, f"{element} {element}")
 
 
-
 class DaemonStatisticsVisualizer(DataVisualizer):
     general_fields = ['API Timestamp', 'Interval (Timestamp-Uptime)', 'Events processed', 'Events received']
     statistics_plot_data_directory = join(dirname(realpath(__file__)), '..', '..', 'data', 'data_visualizer')
@@ -211,7 +210,7 @@ class DaemonStatisticsVisualizer(DataVisualizer):
 
     def __init__(self, dataframes, daemon, store_path=gettempdir(), base_name=None):
         self.daemon = daemon
-        super().__init__(dataframes, daemon, store_path)
+        super().__init__(dataframes, store_path, base_name)
         self.plots_data = self._load_plot_data()
         self.expected_fields = []
         for graph in self.plots_data.values():
@@ -219,6 +218,9 @@ class DaemonStatisticsVisualizer(DataVisualizer):
                 self.expected_fields.append(column)
         self.expected_fields.extend(self.general_fields)
         self._validate_dataframe()
+
+    def _get_expected_fields(self):
+        return self.expected_fields
 
     def _get_statistic_plot_data_file(self):
         return join(self.statistics_plot_data_directory, self.daemon + self.statistics_filename_suffix)
@@ -243,10 +245,13 @@ class DaemonStatisticsVisualizer(DataVisualizer):
             self._save_custom_plot(ax, element, title)
 
 class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
-    general_fields = ['Location', 'Target']
+    expected_fields = ['Location', 'Target']
 
     def __init__(self, dataframes, store_path=gettempdir(), base_name=None):
-        super().__init__(dataframes, 'logcollector', store_path)
+        super().__init__(dataframes, 'logcollector', store_path, base_name)
+
+    def _get_expected_fields(self):
+        return self.expected_fields
 
     def _get_logcollector_location(self):
         """Get the list of unique logcollector targets (sockets) in the dataset."""
@@ -254,7 +259,7 @@ class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
 
     def plot(self):
         for element in self.plots_data.values():
-            fig, ax = plt.subplots()
+            _, ax = plt.subplots()
             targets = self._get_logcollector_location()
             colors = self._color_palette(len(targets))
             for target, color in zip(targets, colors):
@@ -296,14 +301,27 @@ class IndexerAlerts(DataVisualizer):
         super().__init__(dataframes_paths, store_path, base_name)
         self._validate_dataframe()
 
+    def _get_expected_fields(self):
+        return self.expected_fields
+
+    def _calculate_timestamp_interval(self):
+        interval = self.dataframe.index[1] - self.dataframe.index[0]
+        return interval.total_seconds()
+
     def _plot_agregated_alerts(self):
         _, ax = plt.subplots()
-        df['Difference'] = df['Total alerts'].diff()
+        self.dataframe['Difference'] = self.dataframe['Total alerts'].diff()
+        self.dataframe['Difference'] = self.dataframe['Difference'] / self._calculate_timestamp_interval()
 
+        self._basic_plot(ax=ax, dataframe=self.dataframe['Difference'], label='Alerts per timestamp',
+                         color=self._color_palette(1)[0])
+        self._save_custom_plot(ax, 'Different alerts', 'Difference alerts')
 
     def _plot_plain_alerts(self):
         _, ax = plt.subplots()
-        self._basic_plot(ax=ax, dataframe=self.dataframe, label='alerts', self._color_palette(1))
+        self._basic_plot(ax=ax, dataframe=self.dataframe['Total alerts'], label='Total alerts',
+                         color=self._color_palette(1)[0])
+        self._save_custom_plot(ax, 'Total alerts', 'Total alerts')
 
 
     def plot(self):
@@ -312,12 +330,18 @@ class IndexerAlerts(DataVisualizer):
 
 
 class IndexerVulnerabilities(DataVisualizer):
-    expected_fields = ['Vulnerabilities']
+    expected_fields = ['Total vulnerabilities']
+
+    def _get_expected_fields(self):
+        return self.expected_fields
 
     def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None):
         super().__init__(dataframes_paths, store_path, base_name)
         self._validate_dataframe()
 
     def plot(self):
-        pass
+        _, ax = plt.subplots()
+        self._basic_plot(ax=ax, dataframe=self.dataframe['Total vulnerabilities'], label='Indexed Vulnerabilities',
+                         color=self._color_palette(1)[0])
+        self._save_custom_plot(ax, 'Total Vulnerabilities', 'Total vulnerabilities')
 
