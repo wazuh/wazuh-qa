@@ -6,22 +6,26 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Add integration tests for Update field to CPE_Helper. ([#4574](https://github.com/wazuh/wazuh-qa/pull/4574)) \- (Core)
-- Updated integration tests README ([#4742](https://github.com/wazuh/wazuh-qa/pull/4742)) \- (Framework)
-- Removed configobj library from requirements.txt ([#4803](https://github.com/wazuh/wazuh-qa/pull/4803)) \- (Framework)
+- Add Deployability testing tier 1 ([#5190](https://github.com/wazuh/wazuh-qa/pull/5190)) \- (Framework + Documentation + Tests)
 - Add Workflow module to Wazuh-qa repository ([#4990](https://github.com/wazuh/wazuh-qa/pull/4990)) \- (Tests)
+- Add an IT to check that the agent erases its wazuh-agent.state file ([#4716](https://github.com/wazuh/wazuh-qa/pull/4716)) \- (Tests)
+- Add integration tests for Update field to CPE_Helper ([#4574](https://github.com/wazuh/wazuh-qa/pull/4574)) \- (Framework + Tests)
 
 ### Changed
 
-- Enhance the PR template. ([#4881](https://github.com/wazuh/wazuh-qa/pull/4881)) \- (Framework)
-- Updated the API script file name. ([#5351](https://github.com/wazuh/wazuh-qa/pull/5351)) \- (Framework)
+- Update the API script file name ([#5351](https://github.com/wazuh/wazuh-qa/pull/5351)) \- (Framework + Tests)
+- Enhance the PR template ([#4881](https://github.com/wazuh/wazuh-qa/pull/4881)) \- (Framework)
+- Update integration tests README ([#4742](https://github.com/wazuh/wazuh-qa/pull/4742)) \- (Documentation)
 
 ### Fixed
 
-- Add an IT to check that the agent erases its wazuh-agent.state file ([#4716](https://github.com/wazuh/wazuh-qa/pull/4716)) \- (Core)
+- Fix stability in cluster reliability tests ([#5477](https://github.com/wazuh/wazuh-qa/pull/5477)) \- (Tests)
+- Fix agent_simulator response for active-response configuration commands ([#4895](https://github.com/wazuh/wazuh-qa/pull/4895)) \- (Framework + Tests)
 - Fix manager_agent system tests environment ([#4808](https://github.com/wazuh/wazuh-qa/pull/4808)) \- (Framework)
-- Fixed agent_simulator response for active-response configuration commands. ([#4895](https://github.com/wazuh/wazuh-qa/pull/4895)) \- (Framework)
-- Fixed stability in cluster reliability tests. ([#5448](https://github.com/wazuh/wazuh-qa/pull/5448)) \- (Framework)
+
+### Deleted
+
+- Remove configobj library from requirements.txt ([#4803](https://github.com/wazuh/wazuh-qa/pull/4803)) \- (Framework)
 
 ## [4.8.1] - TBD
 
