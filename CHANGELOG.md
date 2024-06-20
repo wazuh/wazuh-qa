@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.8.1] - TBD
 
+### Changed
+
+- Fix test_consistency_initial_scans by adding a 30-minute wait before collecting vulnerabilities. ([#5507](https://github.com/wazuh/wazuh-qa/pull/5507)) \- (Tests)
+
 ## [4.8.0] - 12/06/2024
 
 ### Added
