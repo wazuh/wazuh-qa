@@ -289,7 +289,7 @@ class ClusterStatisticsVisualizer(DataVisualizer):
             for node, color in zip(nodes, self._color_palette(len(nodes))):
                 self._basic_plot(ax=ax, dataframe=current_df[current_df.node_name == node]['time_spent(s)'],
                                     label=node, color=color)
-            self._save_custom_plot(ax, 'time_spent(s)', element.replace(' ', '_').lower(), cluster_log=True,
+            self._save_custom_plot(ax, 'time_spent(s)', element.replace(' ', '_').lower(), disable_x_labels=True,
                                     statistics=DataVisualizer._get_statistics(
                                         current_df['time_spent(s)'], calculate_mean=True, calculate_median=True))
 
@@ -344,4 +344,3 @@ class IndexerVulnerabilities(DataVisualizer):
         self._basic_plot(ax=ax, dataframe=self.dataframe['Total vulnerabilities'], label='Indexed Vulnerabilities',
                          color=self._color_palette(1)[0])
         self._save_custom_plot(ax, 'Total Vulnerabilities', 'Total vulnerabilities')
-
