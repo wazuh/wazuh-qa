@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 
 - Add functionality to unify data of the binary processes with their subprocesses to plot ([#5500](https://github.com/wazuh/wazuh-qa/pull/5500)) \- (Framework)
 
+### Changed
+
+- Fix test_consistency_initial_scans by adding a 30-minute wait before collecting vulnerabilities. ([#5507](https://github.com/wazuh/wazuh-qa/pull/5507)) \- (Tests)
+
 ## [4.8.0] - 12/06/2024
 
 ### Added
