@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.8.1] - TBD
 
+### Added
+
+- Add functionality to unify data of the binary processes with their subprocesses to plot ([#5500](https://github.com/wazuh/wazuh-qa/pull/5500)) \- (Framework)
+
 ## [4.8.0] - 12/06/2024
 
 ### Added
