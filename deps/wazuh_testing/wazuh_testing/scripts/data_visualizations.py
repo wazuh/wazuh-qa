@@ -30,10 +30,10 @@ def create_destination_directory(destination_directory):
 
 def validate_arguments(options):
     if options.visualization_target != 'binary' and options.unify:
-        raise ValueError("Unify option is not allowed for non binary data plotting")
+        raise ValueError('Unify option is not allowed for non binary data plotting')
 
 def get_script_arguments():
-    parser = argparse.ArgumentParser(usage="%(prog)s [options]", description="Script to generate data visualizations",
+    parser = argparse.ArgumentParser(usage='%(prog)s [options]', description='Script to generate data visualizations',
                                      formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-s', '--sources', dest='csv_list', required=True, type=str, nargs='+', action='store',
                         help='Paths to the CSV files separated by whitespace.')
