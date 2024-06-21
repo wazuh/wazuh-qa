@@ -1,4 +1,5 @@
 import json
+import logging
 from abc import ABC, abstractmethod
 from os.path import dirname, join, realpath
 from re import sub
@@ -51,12 +52,14 @@ class DataVisualizer(ABC):
             raise ValueError('Duplicate column names found in the CSV file.')
 
     def _check_missing_mandatory_fields(self):
-        if not (self._get_expected_fields() == self._get_data_columns()):
-            raise ValueError(f"Missing some of the mandatory values. Expected values: {self._get_expected_fields()}")
+        if not (set(self._get_expected_fields()).issubset(set(self._get_data_columns()))):
+            missing_fields = (set(self._get_expected_fields()) - set(self._get_data_columns()))
+            raise ValueError(f"Missing some of the mandatory values: {missing_fields}")
 
     def _check_unexpected_values(self):
-        if not set(self._get_data_columns()).issubset(set(self._get_expected_fields())):
-            raise ValueError('Column names do not match the expected metrics.')
+        if not (set(self._get_data_columns()).issubset(set(self._get_expected_fields()))):
+            missing_fields = (set(self._get_data_columns()) - set(self._get_expected_fields()))
+            logging.warning(f"Unexpected fields provided. These will not be plotted: {missing_fields}")
 
     def _get_data_columns(self) -> list:
         try:
@@ -101,10 +104,11 @@ class DataVisualizer(ABC):
             calculate_median (bool, optional): specify whether or not the median will be calculated.
         """
         statistics = str()
+
         if calculate_mean:
-            statistics += f"Mean: {round(pd.DataFrame.mean(df), 3)}\n"
+            statistics += f"Mean: {round(pd.Series.mean(df), 3)}\n"
         if calculate_median:
-            statistics += f"Median: {round(pd.DataFrame.median(df), 3)}\n"
+            statistics += f"Median: {round(pd.Series.median(df), 3)}\n"
 
         return statistics
 
@@ -152,11 +156,12 @@ class DataVisualizer(ABC):
 
 
 class BinaryDatavisualizer(DataVisualizer):
-    binary_metrics_fields = ["Daemon", "Version", "PID",
-                             "CPU", "VMS", "RSS", "USS",
-                             "PSS", "SWAP", "FD", "Read_Ops",
-                             "Write_Ops", "Disk_Read", "Disk_Written",
-                             "Disk_Read_Speed", "Disk_Write_Speed"]
+    binary_metrics_fields_to_plot = ["CPU", "VMS", "RSS", "USS",
+                                       "PSS", "SWAP", "FD", "Read_Ops",
+                                       "Write_Ops", "Disk_Read", "Disk_Written",
+                                       "Disk_Read_Speed", "Disk_Write_Speed"]
+    binary_metrics_extra_fields = ["Daemon", "Version", "PID"]
+    binary_metrics_fields = binary_metrics_fields_to_plot + binary_metrics_extra_fields
 
     def __init__(self, dataframes, store_path=gettempdir(), base_name=None):
         super().__init__(dataframes, store_path, base_name)
@@ -185,7 +190,7 @@ class BinaryDatavisualizer(DataVisualizer):
         fields_to_plot = []
 
         for field_to_plot in column_names:
-            if self._normalize_column_name(field_to_plot) in self.binary_metrics_fields:
+            if self._normalize_column_name(field_to_plot) in self.binary_metrics_fields_to_plot:
                 fields_to_plot.append(field_to_plot)
 
         return fields_to_plot
@@ -200,11 +205,11 @@ class BinaryDatavisualizer(DataVisualizer):
                 self._basic_plot(ax, self.dataframe[self.dataframe.Daemon == daemon][element],
                                 label=daemon, color=color)
 
-            self._save_custom_plot(ax, element, f"{element} {element}")
+            self._save_custom_plot(ax, element, element)
 
 
 class DaemonStatisticsVisualizer(DataVisualizer):
-    general_fields = ['API Timestamp', 'Interval (Timestamp-Uptime)', 'Events processed', 'Events received']
+    general_fields = ['API Timestamp', 'Interval (Timestamp-Uptime)']
     statistics_plot_data_directory = join(dirname(realpath(__file__)), '..', '..', 'data', 'data_visualizer')
     statistics_filename_suffix = '_csv_headers.json'
 
@@ -239,19 +244,19 @@ class DaemonStatisticsVisualizer(DataVisualizer):
             colors = self._color_palette(len(columns))
 
             _, ax = plt.subplots()
-            for element, color in zip(columns, colors):
-                self._basic_plot(ax, self.dataframe[element], label=element, color=color)
-
-            self._save_custom_plot(ax, element, title)
+            for column, color in zip(columns, colors):
+                self._basic_plot(ax, self.dataframe[column], label=column, color=color)
+            print(title)
+            self._save_custom_plot(ax, title, title)
 
 class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
-    expected_fields = ['Location', 'Target']
+    general_fields = ['Location', 'Target']
 
     def __init__(self, dataframes, store_path=gettempdir(), base_name=None):
         super().__init__(dataframes, 'logcollector', store_path, base_name)
 
     def _get_expected_fields(self):
-        return self.expected_fields
+        return self.general_fields
 
     def _get_logcollector_location(self):
         """Get the list of unique logcollector targets (sockets) in the dataset."""
