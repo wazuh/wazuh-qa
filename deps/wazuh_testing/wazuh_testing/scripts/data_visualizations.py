@@ -28,6 +28,9 @@ def create_destination_directory(destination_directory):
     if not exists(destination_directory):
         makedirs(destination_directory)
 
+def validate_arguments(options):
+    if options.visualization_target != 'binary' and options.unify:
+        raise ValueError("Unify option is not allowed for non binary data plotting")
 
 def get_script_arguments():
     parser = argparse.ArgumentParser(usage="%(prog)s [options]", description="Script to generate data visualizations",
@@ -43,6 +46,8 @@ def get_script_arguments():
                         help=f'Base name for the images. Default {None}.')
     parser.add_argument('-c', '--columns', dest='columns', default=None,
                         help=f'Path to Json with Columns to Plot. Default {None}.')
+    parser.add_argument('-u', '--unify', dest='unify', action='store_true',
+                        help=f'Unify data of the binary processes with their subprocesses to plot.')
 
     return parser.parse_args()
 
@@ -52,11 +57,17 @@ def main():
     create_destination_directory(options.destination)
 
     target = options.visualization_target
+    validate_arguments(options)
 
     if target in ['analysis', 'remote', 'wazuhdb']:
         dv = DaemonStatisticsVisualizer(options.csv_list, daemon=target,
                                         store_path=options.destination,
                                         base_name=options.name)
+    elif target == 'binary':
+        dv = BinaryDatavisualizer(options.csv_list,
+                                    store_path=options.destination,
+                                    base_name=options.name,
+                                    unify_child_daemon_metrics=options.unify)
     else:
         dv = strategy_plot_by_target[target](options.csv_list,
                                         store_path=options.destination,

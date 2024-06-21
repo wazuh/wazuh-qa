@@ -163,9 +163,12 @@ class BinaryDatavisualizer(DataVisualizer):
     binary_metrics_extra_fields = ["Daemon", "Version", "PID"]
     binary_metrics_fields = binary_metrics_fields_to_plot + binary_metrics_extra_fields
 
-    def __init__(self, dataframes, store_path=gettempdir(), base_name=None):
+    def __init__(self, dataframes, store_path=gettempdir(), base_name=None, unify_child_daemon_metrics=False):
         super().__init__(dataframes, store_path, base_name)
         self._validate_dataframe()
+        if unify_child_daemon_metrics:
+            self.dataframe = self.dataframe.reset_index(drop=False)
+            self._unify_dataframes()
 
     def _get_expected_fields(self) -> list:
         return self.binary_metrics_fields
@@ -194,6 +197,25 @@ class BinaryDatavisualizer(DataVisualizer):
                 fields_to_plot.append(field_to_plot)
 
         return fields_to_plot
+
+    def _unify_dataframes(self):
+        """Unify the data of each process with their respective sub-processes.
+        """
+        pids = self.dataframe[['Daemon', 'PID']].drop_duplicates()
+        versions = self.dataframe[['Daemon', 'Version']].drop_duplicates()
+
+        daemons_list = [daemon_name for daemon_name in self._get_daemons() if "child" not in daemon_name]
+
+        for daemon_name in daemons_list:
+            self.dataframe.loc[self.dataframe['Daemon'].str.contains(daemon_name, na=False), 'Daemon'] = daemon_name
+
+        columns_to_drop = ['Timestamp', 'Daemon', 'Version', 'PID']
+        columns_to_sum = self.dataframe.columns.drop(columns_to_drop)
+
+        self.dataframe = self.dataframe.groupby(['Timestamp', 'Daemon'])[columns_to_sum].sum().reset_index(drop=False)
+
+        self.dataframe = self.dataframe.merge(pids[['Daemon', 'PID']], on='Daemon', how='left')
+        self.dataframe = self.dataframe.merge(versions[['Daemon', 'Version']], on='Daemon', how='left')
 
     def plot(self):
         columns_to_plot = self._get_fields_to_plot()
