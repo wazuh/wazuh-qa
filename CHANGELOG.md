@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Added the capability to plot indexer alerts and vulnerability data. ([#5518](https://github.com/wazuh/wazuh-qa/pull/5518)) \- (Framework)
+- Added the capability to plot indexed alerts and vulnerabilities. ([#5518](https://github.com/wazuh/wazuh-qa/pull/5518)) \- (Framework)
 - Add functionality to unify data of the binary processes with their subprocesses to plot ([#5500](https://github.com/wazuh/wazuh-qa/pull/5500)) \- (Framework)
 
 ### Changed
