@@ -28,9 +28,11 @@ def create_destination_directory(destination_directory):
     if not exists(destination_directory):
         makedirs(destination_directory)
 
+
 def validate_arguments(options):
     if options.visualization_target != 'binary' and options.unify:
         raise ValueError('Unify option is not allowed for non binary data plotting')
+
 
 def get_script_arguments():
     parser = argparse.ArgumentParser(usage='%(prog)s [options]', description='Script to generate data visualizations',
