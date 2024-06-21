@@ -54,7 +54,7 @@ def main():
     target = options.visualization_target
 
     if target in ['analysis', 'remote', 'wazuhdb']:
-        dv = DaemonStatisticsVisualizer(options.csv_list, daemon=options.target,
+        dv = DaemonStatisticsVisualizer(options.csv_list, daemon=target,
                                         store_path=options.destination,
                                         base_name=options.name)
     else:
