@@ -9,6 +9,10 @@
       mode: 0400
     notify: restart filebeat
 
+  - name: Debug Wazuh version and template branch
+    debug:
+      msg: "Wazuh version is '{{ wazuh_version }}', Template branch is '{{ wazuh_template_branch }}'"
+
   - name: Fetch latest Wazuh alerts template
     get_url:
       url: https://raw.githubusercontent.com/wazuh/wazuh/{{ wazuh_template_branch }}/extensions/elasticsearch/7.x/wazuh-template.json
