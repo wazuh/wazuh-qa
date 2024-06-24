@@ -1,6 +1,6 @@
 ---
 
-wazuh_agent_version: "{{ wazuh_version }}"
+wazuh_agent_version: "{{ WAZUH_VERSION }}"
 
 # Custom packages installation
 

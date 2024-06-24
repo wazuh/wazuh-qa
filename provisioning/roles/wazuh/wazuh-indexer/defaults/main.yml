@@ -5,7 +5,7 @@ wazuh_custom_packages_installation_indexer_deb_url: ""
 wazuh_custom_packages_installation_indexer_rpm_url: ""
 
 # Cluster Settings
-indexer_version: "{{ wazuh_version }}"
+indexer_version: "{{ WAZUH_VERSION }}"
 
 single_node: false
 indexer_node_name: node-1

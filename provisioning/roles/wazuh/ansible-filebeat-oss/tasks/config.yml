@@ -11,7 +11,7 @@
 
   - name: Debug Wazuh version and template branch
     debug:
-      msg: "Wazuh version is '{{ wazuh_version }}', Template branch is '{{ wazuh_template_branch }}'"
+      msg: "Wazuh version is '{{ WAZUH_VERSION }}', Template branch is '{{ wazuh_template_branch }}'"
 
   - name: Fetch latest Wazuh alerts template
     get_url:
