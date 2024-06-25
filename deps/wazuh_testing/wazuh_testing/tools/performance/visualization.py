@@ -465,7 +465,6 @@ class ClusterStatisticsVisualizer(DataVisualizer):
             store_path (str, optional): Path to store visualizations. Defaults to system temp directory.
             base_name (str, optional): Base name for saved visualizations. Defaults to None.
         """
-
         super().__init__(dataframes_paths, store_path, base_name)
         self._validate_dataframe()
 
@@ -569,8 +568,7 @@ class IndexerAlerts(DataVisualizer):
 
 
 class IndexerVulnerabilities(DataVisualizer):
-    """
-    A class for visualizing indexer vulnerabilities data.
+    """A class for visualizing indexer vulnerabilities data.
 
     Attributes:
         dataframes_paths (list): paths of the CSVs.
