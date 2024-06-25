@@ -458,13 +458,14 @@ class ClusterStatisticsVisualizer(DataVisualizer):
     expected_cluster_fields= ['node_name', 'activity', 'time_spent(s)']
 
     def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None):
-       """Initialize the ClusterStatisticsVisualizer.
+        """Initialize the ClusterStatisticsVisualizer.
 
         Args:
             dataframes_paths (list): List of paths to dataframes containing cluster statistics data.
             store_path (str, optional): Path to store visualizations. Defaults to system temp directory.
             base_name (str, optional): Base name for saved visualizations. Defaults to None.
         """
+
         super().__init__(dataframes_paths, store_path, base_name)
         self._validate_dataframe()
 
