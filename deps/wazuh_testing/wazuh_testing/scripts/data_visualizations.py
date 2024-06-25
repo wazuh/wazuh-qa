@@ -18,6 +18,7 @@ supported_targets = ['binary', 'analysis', 'remote', 'wazuhdb', 'logcollector',
                      'indexer-vulnerabilities']
 strategy_plot_by_target = {
     'binary': BinaryDatavisualizer,
+    'daemon-statistics': DaemonStatisticsVisualizer,
     'cluster': ClusterStatisticsVisualizer,
     'logcollector': LogcollectorStatisticsVisualizer,
     'indexer-alerts': IndexerAlerts,
@@ -61,19 +62,20 @@ def main():
     target = options.visualization_target
     validate_arguments(options)
 
+    visualization_options = {
+        'dataframes': options.csv_list,
+        'store_path': options.destination,
+        'base_name': options.name
+    }
+
+    strategy = target
     if target in ['analysis', 'remote', 'wazuhdb']:
-        dv = DaemonStatisticsVisualizer(options.csv_list, daemon=target,
-                                        store_path=options.destination,
-                                        base_name=options.name)
+        visualization_options['daemon'] = target
+        strategy = 'daemon-statistics'
     elif target == 'binary':
-        dv = BinaryDatavisualizer(options.csv_list,
-                                    store_path=options.destination,
-                                    base_name=options.name,
-                                    unify_child_daemon_metrics=options.unify)
-    else:
-        dv = strategy_plot_by_target[target](options.csv_list,
-                                        store_path=options.destination,
-                                        base_name=options.name)
+        visualization_options['unify_child_daemon_metrics'] = options.unify
+
+    dv = strategy_plot_by_target[strategy](**visualization_options)
 
     dv.plot()
 
