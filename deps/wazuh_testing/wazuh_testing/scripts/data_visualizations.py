@@ -12,7 +12,6 @@ from wazuh_testing.tools.performance.visualization import (
     LogcollectorStatisticsVisualizer,
 )
 
-
 supported_targets = ['binary', 'analysis', 'remote', 'wazuhdb', 'logcollector',
                      'cluster', 'indexer-alerts',
                      'indexer-vulnerabilities']
@@ -25,6 +24,7 @@ strategy_plot_by_target = {
     'indexer-alerts': IndexerAlerts,
     'indexer-vulnerabilities': IndexerVulnerabilities
 }
+
 
 def create_destination_directory(destination_directory):
     if not exists(destination_directory):

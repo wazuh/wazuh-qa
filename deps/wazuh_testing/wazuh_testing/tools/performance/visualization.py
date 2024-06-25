@@ -21,6 +21,7 @@ class DataVisualizer(ABC):
         store_path (str): path to store the CSV images. Defaults to the temp directory.
         base_name (str, optional): base name used to store the images.
     """
+
     def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None):
         """Initializes the DataVisualizer.
 
@@ -202,9 +203,9 @@ class BinaryDatavisualizer(DataVisualizer):
         binary_metrics_fields (list): Combined list of binary metrics fields.
     """
     binary_metrics_fields_to_plot = ["CPU", "VMS", "RSS", "USS",
-                                       "PSS", "SWAP", "FD", "Read_Ops",
-                                       "Write_Ops", "Disk_Read", "Disk_Written",
-                                       "Disk_Read_Speed", "Disk_Write_Speed"]
+                                     "PSS", "SWAP", "FD", "Read_Ops",
+                                     "Write_Ops", "Disk_Read", "Disk_Written",
+                                     "Disk_Read_Speed", "Disk_Write_Speed"]
     binary_metrics_extra_fields = ["Daemon", "Version", "PID"]
     binary_metrics_fields = binary_metrics_fields_to_plot + binary_metrics_extra_fields
 
@@ -308,7 +309,7 @@ class BinaryDatavisualizer(DataVisualizer):
             colors = self._color_palette(len(daemons))
             for daemon, color in zip(daemons, colors):
                 self._basic_plot(ax, self.dataframe[self.dataframe.Daemon == daemon][element],
-                                label=daemon, color=color)
+                                 label=daemon, color=color)
 
             self._save_custom_plot(ax, element, element)
 
@@ -392,6 +393,7 @@ class DaemonStatisticsVisualizer(DataVisualizer):
                 self._basic_plot(ax, self.dataframe[column], label=column, color=color)
             self._save_custom_plot(ax, title, title)
 
+
 class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
     """A class for visualizing logcollector statistics data.
 
@@ -441,9 +443,10 @@ class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
             colors = self._color_palette(len(targets))
             for target, color in zip(targets, colors):
                 self._basic_plot(ax, self.dataframe[self.dataframe.Location == target][element['columns']],
-                                     label=target, color=color)
+                                 label=target, color=color)
 
             self._save_custom_plot(ax, element['title'], element['title'])
+
 
 class ClusterStatisticsVisualizer(DataVisualizer):
     """A class for visualizing cluster statistics data.
@@ -455,7 +458,7 @@ class ClusterStatisticsVisualizer(DataVisualizer):
         base_name (str, optional): base name used to store the images.
         expected_cluster_fields (list): List of expected fields for cluster statistics.
     """
-    expected_cluster_fields= ['node_name', 'activity', 'time_spent(s)']
+    expected_cluster_fields = ['node_name', 'activity', 'time_spent(s)']
 
     def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None):
         """Initialize the ClusterStatisticsVisualizer.
@@ -490,9 +493,9 @@ class ClusterStatisticsVisualizer(DataVisualizer):
             current_df.reset_index(drop=True, inplace=True)
             for node, color in zip(nodes, self._color_palette(len(nodes))):
                 self._basic_plot(ax=ax, dataframe=current_df[current_df.node_name == node]['time_spent(s)'],
-                                    label=node, color=color)
+                                 label=node, color=color)
             self._save_custom_plot(ax, 'time_spent(s)', element.replace(' ', '_').lower(), disable_x_labels=True,
-                                    statistics=DataVisualizer._get_statistics(
+                                   statistics=DataVisualizer._get_statistics(
                                         current_df['time_spent(s)'], calculate_mean=True, calculate_median=True))
 
 
@@ -596,7 +599,6 @@ class IndexerVulnerabilities(DataVisualizer):
             list: List of expected fields.
         """
         return self.expected_fields
-
 
     def plot(self):
         """Plot the indexer vulnerabilities data.
