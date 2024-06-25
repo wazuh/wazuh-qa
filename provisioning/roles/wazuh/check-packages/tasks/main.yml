@@ -1,7 +1,7 @@
 ---
   - name: Check packages
     shell: |
-      ./check_packages.sh {{ WAZUH_VERSION }}
+      ./check_packages.sh {{ WAZUH_VERSION_REFERENCE }}
     args:
       warn: false
       executable: /bin/bash
