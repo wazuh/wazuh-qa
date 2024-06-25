@@ -1,2 +1,2 @@
 ---
-dashboard_version: "{{ WAZUH_VERSION }}"
+dashboard_version: "{{ WAZUH_VERSION_REFERENCE }}"
