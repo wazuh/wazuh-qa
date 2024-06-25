@@ -16,6 +16,7 @@ from wazuh_testing.tools.performance.visualization import (
 supported_targets = ['binary', 'analysis', 'remote', 'wazuhdb', 'logcollector',
                      'cluster', 'indexer-alerts',
                      'indexer-vulnerabilities']
+daemon_supported_statistics = ['analysis', 'remote', 'wazuhdb']
 strategy_plot_by_target = {
     'binary': BinaryDatavisualizer,
     'daemon-statistics': DaemonStatisticsVisualizer,
@@ -69,7 +70,7 @@ def main():
     }
 
     strategy = target
-    if target in ['analysis', 'remote', 'wazuhdb']:
+    if target in daemon_supported_statistics:
         visualization_options['daemon'] = target
         strategy = 'daemon-statistics'
     elif target == 'binary':
