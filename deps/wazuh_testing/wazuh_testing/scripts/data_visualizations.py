@@ -64,7 +64,7 @@ def main():
     validate_arguments(options)
 
     visualization_options = {
-        'dataframes': options.csv_list,
+        'dataframes_paths': options.csv_list,
         'store_path': options.destination,
         'base_name': options.name
     }
