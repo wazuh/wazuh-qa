@@ -1,2 +1,2 @@
 ---
-wazuh_version: "{{ WAZUH_VERSION_REFERENCE }}"
+wazuh_version: 4.8.0

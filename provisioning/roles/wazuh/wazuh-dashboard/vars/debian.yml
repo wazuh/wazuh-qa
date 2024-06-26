@@ -1,2 +1,2 @@
 ---
-dashboard_version: "{{ WAZUH_VERSION_REFERENCE }}"
+dashboard_version: 4.8.0
