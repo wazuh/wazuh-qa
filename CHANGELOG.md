@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.8.1] - TBD
 
+### Changed
+
+- Remove hardcode reference to branch in provision playbook for E2E tests ([#5509](https://github.com/wazuh/wazuh-qa/issues/5509)) \- (Tests)
+
 ## [4.8.0] - 12/06/2024
 
 ### Added
