@@ -18,30 +18,6 @@
   when:
     - not check_path.stat.exists
 
-- name: Windows | Check if Wazuh installer is already downloaded
-  win_stat:
-    path: "{{ wazuh_winagent_config.download_dir }}{{ wazuh_winagent_package_name }}"
-  register: wazuh_package_downloaded
-
-- name: Windows | Verify the Wazuh Agent installer
-  win_stat:
-    path: "{{ wazuh_winagent_config.download_dir }}{{ wazuh_winagent_package_name }}"
-    get_checksum: true
-    checksum_algorithm: md5
-  register: wazuh_agent_status
-  failed_when:
-    - wazuh_agent_status.stat.checksum != wazuh_winagent_config.md5
-  when:
-    - wazuh_winagent_config.check_md5
-    - not wazuh_custom_packages_installation_agent_enabled
-
-
-- name: Windows | Install Agent if not already installed
-  win_package:
-    path: "{{ wazuh_winagent_config.download_dir }}{{ wazuh_winagent_package_name }}"
-    state: present
-  when: not wazuh_custom_packages_installation_agent_enabled
-
 - name: Windows | Check if client.keys exists
   win_stat:
     path: "{{ wazuh_agent_win_path }}client.keys"
@@ -85,11 +61,6 @@
   notify: Windows | Restart Wazuh Agent
   tags:
     - config
-
-- name: Windows | Delete downloaded Wazuh agent installer file
-  win_file:
-    path: "{{ wazuh_winagent_config.download_dir }}{{ wazuh_winagent_package_name }}"
-    state: absent
 
 - include_tasks: "installation_from_custom_packages.yml"
   when:
