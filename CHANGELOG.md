@@ -79,6 +79,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix indexer data visualizaiton class generation ([#5520](https://github.com/wazuh/wazuh-qa/pull/5520)) \- (Framework)
 - Set a stable `requets` version ([#5476](https://github.com/wazuh/wazuh-qa/pull/5476)) \- (Framework)
 - Include logic to retry package installation if the lock file is currently in use ([#5421](https://github.com/wazuh/wazuh-qa/pull/5421)) \- (Framework)
 - Increase E2E Vulnerability detection change manager test timeout ([#5414](https://github.com/wazuh/wazuh-qa/pull/5414)) \- (Tests)
