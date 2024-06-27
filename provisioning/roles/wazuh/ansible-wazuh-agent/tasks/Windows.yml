@@ -23,14 +23,6 @@
     path: "{{ wazuh_winagent_config.download_dir }}{{ wazuh_winagent_package_name }}"
   register: wazuh_package_downloaded
 
-- name: Windows | Download Wazuh Agent package
-  win_get_url:
-    url: "{{ wazuh_winagent_config_url }}"
-    dest: "{{ wazuh_winagent_config.download_dir }}"
-  when:
-    - not wazuh_package_downloaded.stat.exists
-    - not wazuh_custom_packages_installation_agent_enabled
-
 - name: Windows | Verify the Wazuh Agent installer
   win_stat:
     path: "{{ wazuh_winagent_config.download_dir }}{{ wazuh_winagent_package_name }}"
