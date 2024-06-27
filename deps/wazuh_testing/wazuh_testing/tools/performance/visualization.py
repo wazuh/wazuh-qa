@@ -209,7 +209,7 @@ class BinaryDatavisualizer(DataVisualizer):
     binary_metrics_extra_fields = ["Daemon", "Version", "PID"]
     binary_metrics_fields = binary_metrics_fields_to_plot + binary_metrics_extra_fields
 
-    def __init__(self, dataframes, store_path=gettempdir(), base_name=None, unify_child_daemon_metrics=False):
+    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None, unify_child_daemon_metrics=False):
         """Initialize the BinaryDatavisualizer.
 
         Args:
@@ -331,7 +331,7 @@ class DaemonStatisticsVisualizer(DataVisualizer):
     statistics_plot_data_directory = join(dirname(realpath(__file__)), '..', '..', 'data', 'data_visualizer')
     statistics_filename_suffix = '_csv_headers.json'
 
-    def __init__(self, dataframes, daemon, store_path=gettempdir(), base_name=None):
+    def __init__(self, dataframes_paths, daemon, store_path=gettempdir(), base_name=None):
         """Initialize the DaemonStatisticsVisualizer.
 
         Args:
@@ -406,7 +406,7 @@ class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
     """
     general_fields = ['Location', 'Target']
 
-    def __init__(self, dataframes, store_path=gettempdir(), base_name=None):
+    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None):
         """Initialize the LogcollectorStatisticsVisualizer.
 
         Args:
