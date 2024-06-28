@@ -1,5 +1,5 @@
 name: Code analysis
-on: # yamllint disable-line rule:truthy
+on: # yamllint disable-line rule:truthy comments
   pull_request:
     types:
       - opened
