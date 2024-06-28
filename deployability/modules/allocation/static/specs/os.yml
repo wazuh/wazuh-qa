@@ -281,7 +281,7 @@ aws:
     zone: us-east-1
     user: ec2-user
   linux-oracle-9-amd64:
-    ami: ami-01453ca80e53609e3
+    ami: ami-097ad3c47f3a500e1
     zone: us-east-1
     user: ec2-user
   # openSUSE Linux
