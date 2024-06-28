@@ -7,7 +7,7 @@ on: # yamllint disable-line rule:truthy
       - synchronize
 jobs:
   Linting:
-    if: ${{ github.event.pull_request.draft }}
+    if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-20.04
     steps:
       - name: Download files

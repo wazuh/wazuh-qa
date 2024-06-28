@@ -218,7 +218,7 @@ class BinaryDatavisualizer(DataVisualizer):
             base_name (str, optional): Base name for saved visualizations. Defaults to None.
             unify_child_daemon_metrics (bool, optional): Whether to unify child daemon metrics. Defaults to False.
         """
-        super().__init__(dataframes_paths, store_path, base_name)
+        super().__init__(testing, store_path, base_name)
         self._validate_dataframe()
         if unify_child_daemon_metrics:
             self.dataframe = self.dataframe.reset_index(drop=False)
