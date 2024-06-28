@@ -218,7 +218,7 @@ class BinaryDatavisualizer(DataVisualizer):
             base_name (str, optional): Base name for saved visualizations. Defaults to None.
             unify_child_daemon_metrics (bool, optional): Whether to unify child daemon metrics. Defaults to False.
         """
-        super().__init__(dataframes, store_path, base_name)
+        super().__init__(dataframes_paths, store_path, base_name)
         self._validate_dataframe()
         if unify_child_daemon_metrics:
             self.dataframe = self.dataframe.reset_index(drop=False)
@@ -341,7 +341,7 @@ class DaemonStatisticsVisualizer(DataVisualizer):
             base_name (str, optional): Base name for saved visualizations. Defaults to None.
         """
         self.daemon = daemon
-        super().__init__(dataframes, store_path, base_name)
+        super().__init__(dataframes_paths, store_path, base_name)
         self.plots_data = self._load_plot_data()
         self.expected_fields = []
         for graph in self.plots_data.values():
@@ -414,7 +414,7 @@ class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
             store_path (str, optional): Path to store visualizations. Defaults to system temp directory.
             base_name (str, optional): Base name for saved visualizations. Defaults to None.
         """
-        super().__init__(dataframes, 'logcollector', store_path, base_name)
+        super().__init__(dataframes_paths, 'logcollector', store_path, base_name)
 
     def _get_expected_fields(self):
         """Get the list of expected fields for logcollector statistics.
