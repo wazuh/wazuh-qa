@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install pycodestyle and yamllint linter
-        run: python -m pip install pycodestyle==2.8.0 yamllint==1.26.3
+        run: python -m pip install pycodestyle==2.8.0 yamllint==1.26.3 flake8==6.0.0
 
       - name: Get the updated files
         id: updated_files
