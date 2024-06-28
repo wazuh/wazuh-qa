@@ -1,10 +1,13 @@
 name: Code analysis
-on:
+"on":
   pull_request:
-    types: [opened, ready_for_review, synchronize]
+    types:
+      - opened
+      - ready_for_review
+      - synchronize
 jobs:
   Linting:
-    if: ${{ github.event.pull_request.draft == false }}
+    if: ${{ github.event.pull_request.draft }}
     runs-on: ubuntu-20.04
     steps:
       - name: Download files
