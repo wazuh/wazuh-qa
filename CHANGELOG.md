@@ -11,7 +11,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Remove hardcode reference to branch in provision playbook for E2E tests ([#5509](https://github.com/wazuh/wazuh-qa/issues/5509)) \- (Tests)
+- Remove hardcode references to branch in provision playbook for E2E tests ([#5509](https://github.com/wazuh/wazuh-qa/issues/5509)) \- (Tests)
 - Fix test_consistency_initial_scans by adding a 30-minute wait before collecting vulnerabilities. ([#5507](https://github.com/wazuh/wazuh-qa/pull/5507)) \- (Tests)
 
 ## [4.8.0] - 12/06/2024
