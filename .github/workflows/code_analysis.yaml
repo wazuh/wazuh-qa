@@ -1,10 +1,7 @@
 name: Code analysis
 on:
   pull_request:
-    types:
-      - opened
-      - ready_for_review
-      - synchronize
+    types: [opened, ready_for_review, synchronize]
 jobs:
   Linting:
     if: ${{ github.event.pull_request.draft == false }}

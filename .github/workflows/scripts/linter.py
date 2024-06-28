@@ -93,7 +93,6 @@ def run_python_linter(python_files):
         print('No python files were found. Skipping python linter analysis')
         return 0
 
-
     linters_data = {
         'pycodestyle': {
             'command': 'pycodestyle',
