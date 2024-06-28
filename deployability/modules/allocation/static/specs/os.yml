@@ -388,7 +388,7 @@ aws:
     user: fedora
   # Rocky Linux
   linux-rocky-8-amd64:
-    ami: ami-011ef2017d41cb239
+    ami: ami-0f140a092576bd147
     zone: us-east-1
     user: rocky
   linux-rocky-8-arm64:
