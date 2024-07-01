@@ -286,7 +286,7 @@ aws:
     user: ec2-user
   # openSUSE Linux
   linux-opensuse-15-amd64:
-    ami: ami-06b6eb8f8fb7f2916
+    ami: ami-012c22f49f1c32f31
     zone: us-east-1
     user: ec2-user
   # SUSE Linux
