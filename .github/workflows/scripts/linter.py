@@ -93,11 +93,28 @@ def run_python_linter(python_files):
         print('No python files were found. Skipping python linter analysis')
         return 0
 
-    # Set the linter parameters
-    parameters = ['pycodestyle', '--max-line-length=120']
-    parameters.extend(python_files)
+    linters_data = {
+        'pycodestyle': {
+            'command': 'pycodestyle',
+            'parameters': ['--max-line-length=120']
+        },
+        'flake8': {
+            'command': 'flake8',
+            'parameters': ['--max-line-length=120']
+        }
+    }
 
-    return subprocess.run(parameters).returncode
+    linters_result = {}
+
+    # Set the linter parameters
+    for linter, linter_data in linters_data.items():
+        full_command = [linter_data['command']]
+        full_command.extend(linter_data['parameters'])
+        full_command.extend(python_files)
+
+        linters_result[linter] = subprocess.run(full_command).returncode
+
+    return linters_result
 
 
 def run_yaml_linter(yaml_files, config_files_path):
@@ -175,13 +192,14 @@ def main():
     yaml_files = get_yaml_files(updated_files)
 
     # Run the python linter analysis process
-    python_linter_status = run_python_linter(python_files)
+    python_linter_results = run_python_linter(python_files)
+    python_linter_failed = any(status != 0 for linter, status in python_linter_results.items())
 
     # Run the yaml linter analysis process
     yaml_linter_status = run_yaml_linter(yaml_files, script_parameters.config_path)
 
     # Return failure code if some check has not passed
-    if python_linter_status != 0 or yaml_linter_status != 0:
+    if python_linter_failed or yaml_linter_status != 0:
         sys.exit(1)
 
 
