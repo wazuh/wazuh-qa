@@ -14,6 +14,11 @@ All notable changes to this project will be documented in this file.
 - Remove hardcoded references in provision playbook for E2E tests ([#5517](https://github.com/wazuh/wazuh-qa/pull/5517)) \- (Framework)
 - Fix test_consistency_initial_scans by adding a 30-minute wait before collecting vulnerabilities. ([#5507](https://github.com/wazuh/wazuh-qa/pull/5507)) \- (Tests)
 
+
+### Fixed
+
+- Fix indexer data visualizaiton class generation ([#5520](https://github.com/wazuh/wazuh-qa/pull/5520)) \- (Framework)
+
 ## [4.8.0] - 12/06/2024
 
 ### Added
@@ -80,7 +85,6 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-- Fix indexer data visualizaiton class generation ([#5520](https://github.com/wazuh/wazuh-qa/pull/5520)) \- (Framework)
 - Set a stable `requets` version ([#5476](https://github.com/wazuh/wazuh-qa/pull/5476)) \- (Framework)
 - Include logic to retry package installation if the lock file is currently in use ([#5421](https://github.com/wazuh/wazuh-qa/pull/5421)) \- (Framework)
 - Increase E2E Vulnerability detection change manager test timeout ([#5414](https://github.com/wazuh/wazuh-qa/pull/5414)) \- (Tests)
