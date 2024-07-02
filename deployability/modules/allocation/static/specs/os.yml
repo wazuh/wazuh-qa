@@ -354,11 +354,11 @@ aws:
     zone: us-east-1
     user: ec2-user
   linux-amazon-2023-amd64:
-    ami: ami-067d1e60475437da2
+    ami: ami-0d4e679eb7361c9c9
     zone: us-east-1
     user: ec2-user
   linux-amazon-2023-arm64:
-    ami: ami-08b46fd32a1a5be7f
+    ami: ami-0a7fdbc9c086df09c
     zone: us-east-1
     user: ec2-user
   # Fedora
