@@ -300,11 +300,11 @@ aws:
     user: ec2-user
   # Centos
   linux-centos-7-amd64:
-    ami: ami-0aedf6b1cb669b4c7
+    ami: ami-0474061d40b48401a
     zone: us-east-1
     user: centos
   linux-centos-7-arm64:
-    ami: ami-08dbbdbfc4fa2f393
+    ami: ami-0376b30fe00ea638b
     zone: us-east-1
     user: centos
   linux-centos-8-amd64:
