@@ -264,11 +264,11 @@ aws:
     zone: us-east-1
     user: admin
   linux-debian-12-amd64:
-    ami: ami-058bd2d568351da34
+    ami: ami-055c8118725fe3a84
     zone: us-east-1
     user: admin
   linux-debian-12-arm64:
-    ami: ami-0f58aa386a2280f35
+    ami: ami-06703877c23c4ddf1
     zone: us-east-1
     user: admin
   # Oracle Linux
