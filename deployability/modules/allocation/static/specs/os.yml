@@ -61,8 +61,8 @@ vagrant:
     virtualizer: virtualbox
   # Centos
   linux-centos-7-amd64:
-    box: centos/7
-    box_version: 2004.01
+    box: vagrant_devel/centos-7
+    box_version: 1.1.0
     virtualizer: virtualbox
   linux-centos-7-ppc64:
     box: testing-centos-image
