@@ -99,19 +99,6 @@
     state: present
   when: wazuh_manager_sources_installation.enabled
 
-- name: CentOS/RedHat/Amazon | Install wazuh-manager
-  package:
-    name: "wazuh-manager-{{ wazuh_manager_version }}"
-    state: "{{ wazuh_manager_package_state }}"
-  register: wazuh_manager_main_packages_installed
-  until: wazuh_manager_main_packages_installed is succeeded
-  when:
-    - ansible_os_family|lower == "redhat"
-    - not wazuh_manager_sources_installation.enabled
-    - not wazuh_custom_packages_installation_manager_enabled
-  tags:
-    - init
-
 - include_tasks: "../tasks/installation_from_sources.yml"
   when:
     - wazuh_manager_sources_installation.enabled
