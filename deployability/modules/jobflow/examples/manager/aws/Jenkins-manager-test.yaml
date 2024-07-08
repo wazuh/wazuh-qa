@@ -1,0 +1,58 @@
+version: 0.1
+description: This workflow is used to test manager deployment for DDT1 PoC
+variables:
+  manager-os:
+    - linux-ubuntu-20.04-amd64
+  infra-provider: aws
+  working-dir: /tmp/dtt1-poc
+
+tasks:
+  # Unique manager allocate task
+  - task: "allocate-manager-{manager}"
+    description: "Allocate resources for the manager."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: create
+          - provider: "{infra-provider}"
+          - size: large
+          - composite-name: "{manager}"
+          - inventory-output: "{working-dir}/manager-{manager}/inventory.yaml"
+          - track-output: "{working-dir}/manager-{manager}/track.yaml"
+          - label-termination-date: "1d"
+          - label-team: "qa"
+    on-error: "abort-all"
+    foreach:
+      - variable: manager-os
+        as: manager
+    cleanup:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: delete
+          - track-output: "{working-dir}/manager-{manager}/track.yaml"
+
+  # Generic manager test task
+  - task: "run-manager-tests"
+    description: "Run tests install for the manager."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/testing/main.py
+          - targets:
+            - wazuh-1: "{working-dir}/manager-linux-ubuntu-20.04-amd64/inventory.yaml"
+          - tests: "install,restart,stop,uninstall"
+          - component: "manager"
+          - wazuh-version: "4.7.4"
+          - wazuh-revision: "40717"
+          - live: True
+    depends-on:
+      - "allocate-manager-linux-ubuntu-20.04-amd64"
+

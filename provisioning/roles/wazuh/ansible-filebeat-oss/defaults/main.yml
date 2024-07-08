@@ -1,7 +1,11 @@
 ---
 filebeat_version: 7.10.2
 
+<<<<<<< HEAD
 wazuh_template_branch: "{{ SOURCE_REFERENCE }}"
+=======
+wazuh_template_branch: 4.9.0
+>>>>>>> 5a460cbb266f502fd2376326ab69cf7ab35759da
 
 filebeat_node_name: node-1
 

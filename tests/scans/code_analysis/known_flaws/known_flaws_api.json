@@ -17,7 +17,7 @@
         },
         {
             "code": "                                )\n     app.add_api('spec.yaml',\n                 arguments={'title': 'Wazuh API',\n                            'protocol': 'https' if api_conf['https']['enabled'] else 'http',\n                            'host': api_conf['host'],\n                            'port': api_conf['port']\n                            },\n                 strict_validation=True,\n                 validate_responses=False,\n82                 pass_context_arg_name='request',\n83                 options={\"middlewares\": [response_postprocessing, security_middleware, request_logging,\n84                                          set_secure_headers]})\n85 \n",
-            "filename": "api/scripts/wazuh-apid.py",
+            "filename": "api/scripts/wazuh_apid.py",
             "issue_confidence": "MEDIUM",
             "issue_severity": "LOW",
             "issue_text": "Possible hardcoded password: 'request'",

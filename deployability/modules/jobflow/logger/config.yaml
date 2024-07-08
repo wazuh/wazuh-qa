@@ -1,0 +1,31 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+version: 1
+formatters:
+  simple:
+    format: '[%(asctime)s] [%(levelname)s] [%(process)d] [%(threadName)s] [%(name)s]: %(message)s'
+  colored:
+    (): colorlog.ColoredFormatter
+    format: '%(log_color)s[%(asctime)s] [%(levelname)s] [%(process)d] [%(threadName)s] [%(name)s]: %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+    log_colors:
+      DEBUG:    cyan
+      INFO:     green
+      WARNING:  yellow
+      ERROR:    red
+      CRITICAL: red,bg_white
+handlers:
+  console:
+    class: colorlog.StreamHandler
+    level: DEBUG
+    formatter: colored
+    stream: ext://sys.stdout
+  file:
+    class: logging.FileHandler
+    level: DEBUG
+    formatter: simple
+    filename: /tmp/jobflow.log
+root:
+  level: DEBUG
+  handlers: [console, file]

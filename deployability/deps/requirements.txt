@@ -1,0 +1,15 @@
+ansible_runner==2.3.4
+boto3==1.29.1
+pydantic==2.5.2
+ansible
+ruamel.yaml==0.18.5
+ruamel.yaml.clib==0.2.8
+graphlib==0.9.5
+jsonschema==3.2.0
+PyYAML==6.0.1
+colorlog==6.8.0
+pytest==7.4.4
+paramiko==3.4.0
+requests==2.31.0
+chardet==5.2.0
+pywinrm==0.4.3

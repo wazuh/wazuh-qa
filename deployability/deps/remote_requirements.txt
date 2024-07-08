@@ -1,0 +1,6 @@
+pytest>=7.4.2,<8.0.0
+chardet==5.2.0
+pytest-tinybird==0.2.0
+requests>=2.31.0
+psutil>=5.8.0
+colored>=1.4.0,<2.0.0

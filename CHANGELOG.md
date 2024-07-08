@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.9.0] - TBD
+
+### Added
+
+- Add Deployability testing tier 1 ([#5190](https://github.com/wazuh/wazuh-qa/pull/5190)) \- (Framework + Documentation + Tests)
+- Add Workflow module to Wazuh-qa repository ([#4990](https://github.com/wazuh/wazuh-qa/pull/4990)) \- (Tests)
+- Add an IT to check that the agent erases its wazuh-agent.state file ([#4716](https://github.com/wazuh/wazuh-qa/pull/4716)) \- (Tests)
+- Add integration tests for Update field to CPE_Helper ([#4574](https://github.com/wazuh/wazuh-qa/pull/4574)) \- (Framework + Tests)
+
+### Changed
+
+- Update the API script file name ([#5351](https://github.com/wazuh/wazuh-qa/pull/5351)) \- (Framework + Tests)
+- Enhance the PR template ([#4881](https://github.com/wazuh/wazuh-qa/pull/4881)) \- (Framework)
+- Update integration tests README ([#4742](https://github.com/wazuh/wazuh-qa/pull/4742)) \- (Documentation)
+
+### Fixed
+
+- Fix stability in cluster reliability tests ([#5477](https://github.com/wazuh/wazuh-qa/pull/5477)) \- (Tests)
+- Fix agent_simulator response for active-response configuration commands ([#4895](https://github.com/wazuh/wazuh-qa/pull/4895)) \- (Framework + Tests)
+- Fix manager_agent system tests environment ([#4808](https://github.com/wazuh/wazuh-qa/pull/4808)) \- (Framework)
+
+### Deleted
+
+- Remove configobj library from requirements.txt ([#4803](https://github.com/wazuh/wazuh-qa/pull/4803)) \- (Framework)
+
 ## [4.8.1] - TBD
 
 ### Added
@@ -41,6 +66,7 @@ All notable changes to this project will be documented in this file.
 - Added tests for checking agent status upon ungraceful closure.([#4146](https://github.com/wazuh/wazuh-qa/pull/4146)) \- (Tests)
 - Agent syncronization testing after group deleting ([#4143](https://github.com/wazuh/wazuh-qa/pull/4143)) \- (Tests)
 - Add test for AWS Custom Logs. ([#4675](https://github.com/wazuh/wazuh-qa/pull/4675)) \- (Tests)
+- Add new behaviour for endpoints marked as xfail in api_endpoints_performance test ([#4657](https://github.com/wazuh/wazuh-qa/pull/4657)) \ (Tests)
 
 ### Changed
 
@@ -62,8 +88,6 @@ All notable changes to this project will be documented in this file.
 - Reduced test_shutdown_message runtime ([#4986](https://github.com/wazuh/wazuh-qa/pull/4986)) \- (Tests)
 - Change e2e vd configuration keystore ([#4952](https://github.com/wazuh/wazuh-qa/pull/4952)) \- (Framework)
 - Updating tests after removing references to the legacy vulnerability detector module ([#4872](https://github.com/wazuh/wazuh-qa/pull/4872)) \- (Tests)
-- Fix test cluster performance ([#4780](https://github.com/wazuh/wazuh-qa/pull/4780)) \- (Tests)
-- Fixed IT control_service Windows loop ([#4765](https://github.com/wazuh/wazuh-qa/pull/4765)) \- (Framework)
 - Fix wazuhdb API statistics parsing ([#5007](https://github.com/wazuh/wazuh-qa/pull/5007)) \- (Framework)
 - Enhance StatisticMonitor with API support ([#4970](https://github.com/wazuh/wazuh-qa/pull/4970)) \- (Framework)
 - Deactivate tests and update vulnerability-detector configuration ([#4784](https://github.com/wazuh/wazuh-qa/pull/4784)) \- (Framework + Tests)
@@ -81,6 +105,7 @@ All notable changes to this project will be documented in this file.
 - Update the JSON schema with the required fields for the output content of the migration tool ([#4375](https://github.com/wazuh/wazuh-qa/pull/4375)) \- (Tests)
 - Update framework known flaws file ([#4443](https://github.com/wazuh/wazuh-qa/pull/4443)) \- (Tests)
 - Align migration tool system tests to the tool's new output directory structure ([#4561](https://github.com/wazuh/wazuh-qa/pull/4561)) \- (Tests)
+- Update the migration tool's system tests to match the new log file naming convention ([#4618](https://github.com/wazuh/wazuh-qa/pull/4618)) \- (Tests)
 - Update file descriptors threshold values used in cluster performance tests ([#5073](https://github.com/wazuh/wazuh-qa/pull/5073)) \- (Tests)
 
 ### Fixed
@@ -121,7 +146,6 @@ All notable changes to this project will be documented in this file.
 - Fix install package HostManager method ([#4954](https://github.com/wazuh/wazuh-qa/pull/4954)) \- (Framework)
 - Fix Modify file method in system module ([#4953](https://github.com/wazuh/wazuh-qa/pull/4953)) \- (Framework)
 - Fix timeout and performance issues in E2E Vulnerability Detector tests ([#5003](https://github.com/wazuh/wazuh-qa/pull/5003)) \- (Framework)
-- Fix E2E Vulnerability Detection monitoring function ([#4959](https://github.com/wazuh/wazuh-qa/pull/4959)) \- (Framework)
 - Fixed Filebeat provisioning role with pre-release and staging URLs ([#4950](https://github.com/wazuh/wazuh-qa/pull/4950)) \- (Framework)
 - Fix macOS Vulnerability Detection handler provision in E2E tests ([#4948](https://github.com/wazuh/wazuh-qa/pull/4948)) \- (Framework)
 - Migrate Vulnerability Detection timeouts variables to the waiters module ([#4949](https://github.com/wazuh/wazuh-qa/pull/4949)) \- (Framework)

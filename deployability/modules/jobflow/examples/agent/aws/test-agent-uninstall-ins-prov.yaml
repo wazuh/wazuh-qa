@@ -1,0 +1,145 @@
+version: 0.1
+description: Test agent restart with provisioning agents with provision module
+variables:
+  agent-os:
+    - linux-ubuntu-18.04-amd64
+    - linux-ubuntu-20.04-amd64
+    - linux-ubuntu-22.04-amd64
+    - linux-debian-10-amd64
+    - linux-debian-11-amd64
+    - linux-debian-12-amd64
+    - linux-oracle-9-amd64
+    - linux-centos-7-amd64
+    - linux-centos-8-amd64
+    - linux-redhat-7-amd64
+    - linux-redhat-8-amd64
+    - linux-redhat-9-amd64
+    - linux-amazon-2-amd64
+  manager-os: linux-ubuntu-22.04-amd64
+  infra-provider: aws
+  working-dir: /tmp/dtt1-poc
+
+tasks:
+  # Unique manager allocate task
+  - task: "allocate-manager-{manager-os}"
+    description: "Allocate resources for the manager."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: create
+          - provider: "{infra-provider}"
+          - size: large
+          - composite-name: "{manager-os}"
+          - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+          - label-termination-date: "1d"
+          - label-team: "qa"
+    on-error: "abort-all"
+    cleanup:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: delete
+          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+
+  # Unique agent allocate task
+  - task: "allocate-agent-{agent}"
+    description: "Allocate resources for the agent."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: create
+          - provider: "{infra-provider}"
+          - size: small
+          - composite-name: "{agent}"
+          - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
+          - track-output: "{working-dir}/agent-{agent}/track.yaml"
+          - label-termination-date: "1d"
+          - label-team: "qa"
+    on-error: "abort-all"
+    foreach:
+      - variable: agent-os
+        as: agent
+    cleanup:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: delete
+          - track-output: "{working-dir}/agent-{agent}/track.yaml"
+
+  # Unique manager provision task
+  - task: "provision-manager-{manager-os}"
+    description: "Provision the manager."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/provision/main.py
+          - inventory: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - install:
+            - component: wazuh-manager
+              type: assistant
+              version: 4.7.4
+              live: False
+    depends-on:
+      - "allocate-manager-{manager-os}"
+    on-error: "abort-all"
+
+  # Generic agent provision task
+  - task: "provision-install-{agent}"
+    description: "Provision resources for the {agent} agent."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/provision/main.py
+          - inventory: "{working-dir}/agent-{agent}/inventory.yaml"
+          - dependencies:
+            - manager: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - install:
+            - component: wazuh-agent
+              type: package
+              version: 4.7.4
+              live: False
+    depends-on:
+      - "allocate-agent-{agent}"
+      - "provision-manager-{manager-os}"
+    on-error: "abort-all"
+    foreach:
+      - variable: agent-os
+        as: agent
+
+  # Generic agent test task
+  - task: "run-agent-{agent}-tests"
+    description: "Run tests install for the agent {agent}."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/testing/main.py
+          - targets:
+            - wazuh-1: "{working-dir}/manager-{manager-os}/inventory.yaml"
+            - agent: "{working-dir}/agent-{agent}/inventory.yaml"
+          - tests: "uninstall"
+          - component: "agent"
+          - wazuh-version: "4.7.4"
+          - wazuh-revision: "40717"
+          - live: False
+    foreach:
+      - variable: agent-os
+        as: agent
+    depends-on:
+      - "provision-install-{agent}"
