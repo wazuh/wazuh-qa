@@ -38,11 +38,12 @@ All notable changes to this project will be documented in this file.
 
 - Remove hardcoded references in provision playbook for E2E tests ([#5517](https://github.com/wazuh/wazuh-qa/pull/5517)) \- (Framework)
 - Fix test_consistency_initial_scans by adding a 30-minute wait before collecting vulnerabilities. ([#5507](https://github.com/wazuh/wazuh-qa/pull/5507)) \- (Tests)
+- Update `wazuh_template_branch` in filebeat provision template
 
 
 ### Fixed
 
-- Fix indexer data visualizaiton class generation ([#5520](https://github.com/wazuh/wazuh-qa/pull/5520)) \- (Framework)
+- Fix indexer data visualizaiton class generation ([#5520](https://github.com/wazuh/wazuh-qa/pull/5520)) \- (Framework) and ([#5526]https://github.com/wazuh/wazuh-qa/pull/5526)
 
 
 ## [4.8.0] - 12/06/2024
