@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Add RockyLinux 8.10 to Allocator module ([#5524](https://github.com/wazuh/wazuh-qa/pull/5524)) \- (Framework)
 - Add Deployability testing tier 1 ([#5190](https://github.com/wazuh/wazuh-qa/pull/5190)) \- (Framework + Documentation + Tests)
 - Add Workflow module to Wazuh-qa repository ([#4990](https://github.com/wazuh/wazuh-qa/pull/4990)) \- (Tests)
 - Add an IT to check that the agent erases its wazuh-agent.state file ([#4716](https://github.com/wazuh/wazuh-qa/pull/4716)) \- (Tests)
@@ -13,12 +14,19 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Update CentOS 7 Vagrant box ([#5546](https://github.com/wazuh/wazuh-qa/pull/5546)) \- (Framework)
+- Update CentOS 7 AMIs ([#5545](https://github.com/wazuh/wazuh-qa/pull/5545)) \- (Framework)
+- Update OpenSUSE 15 AMI ([#5536](https://github.com/wazuh/wazuh-qa/pull/5536)) \- (Framework)
+- Update Debian 12 AMIs ([#5529](https://github.com/wazuh/wazuh-qa/pull/5529)) \- (Framework)
+- Update AL2023 AMIs ([#5530](https://github.com/wazuh/wazuh-qa/pull/5530)) \- (Framework)
+- Update Oracle Linux 9 AMI ([#5525](https://github.com/wazuh/wazuh-qa/pull/5525)) \- (Framework)
 - Update the API script file name ([#5351](https://github.com/wazuh/wazuh-qa/pull/5351)) \- (Framework + Tests)
 - Enhance the PR template ([#4881](https://github.com/wazuh/wazuh-qa/pull/4881)) \- (Framework)
 - Update integration tests README ([#4742](https://github.com/wazuh/wazuh-qa/pull/4742)) \- (Documentation)
 
 ### Fixed
 
+- Fix CentOS 9 AMI in Allocator module ([#5523](https://github.com/wazuh/wazuh-qa/pull/5523)) \- (Framework)
 - Fix stability in cluster reliability tests ([#5477](https://github.com/wazuh/wazuh-qa/pull/5477)) \- (Tests)
 - Fix agent_simulator response for active-response configuration commands ([#4895](https://github.com/wazuh/wazuh-qa/pull/4895)) \- (Framework + Tests)
 - Fix manager_agent system tests environment ([#4808](https://github.com/wazuh/wazuh-qa/pull/4808)) \- (Framework)
