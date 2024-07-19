@@ -5,6 +5,8 @@ __pycache__
 venv
 wazuh_testing.egg-info
 dist
+deployability/modules/build
+deployability/modules/jobflow.egg-info
 
 # Python bytecode files
 *.pyc
