@@ -104,16 +104,6 @@
     state: present
   when: wazuh_manager_sources_installation.enabled
 
-- name: Debian/Ubuntu | Install wazuh-manager
-  apt:
-    name:
-      - "wazuh-manager={{ wazuh_manager_version }}-*"
-    state: present
-  tags: init
-  when:
-    - not wazuh_manager_sources_installation.enabled
-    - not wazuh_custom_packages_installation_manager_enabled
-
 - include_tasks: "installation_from_sources.yml"
   when:
     - wazuh_manager_sources_installation.enabled

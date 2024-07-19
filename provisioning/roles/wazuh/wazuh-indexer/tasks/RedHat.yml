@@ -43,14 +43,6 @@
       - wget
       - unzip
 
-  - name: Install Wazuh indexer
-    package:
-      name: wazuh-indexer-{{ indexer_version }}
-      state: present
-    register: install
-    tags: install
-    when: not wazuh_custom_packages_installation_indexer_enabled
-
   tags:
   - install
 
