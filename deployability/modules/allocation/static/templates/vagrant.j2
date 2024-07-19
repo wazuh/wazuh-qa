@@ -1,0 +1,29 @@
+Vagrant.configure("2") do |config|
+    # Box image settings
+    config.vm.box = "{{ config.box }}"
+    config.vm.box_version = "{{ config.box_version }}"
+
+    # Copy the public key to the VM
+    config.vm.provision "file", source: "{{ config.public_key }}", destination: ".ssh/authorized_keys"
+
+    # VirtualBox specific settings
+    config.vm.provider "virtualbox" do |v|
+        v.memory = "{{ config.memory }}"
+        v.cpus = "{{ config.cpu }}"
+        v.name = "{{ config.name }}"
+    end
+
+    # Network settings
+    config.vm.network "private_network", ip:"{{ config.ip }}"
+    config.ssh.forward_agent = true
+    # Create a file to indicate that the VM has been initialized
+    init_indicator = "./init"
+    if not ::File.exists?(init_indicator)
+        File.write(init_indicator, "initialized")
+    else
+        # Use the IP address of the VM to connect via SSH
+        config.ssh.host = "{{ config.ip }}"
+        config.ssh.port = 22
+        config.ssh.private_key_path = "{{ config.private_key }}"
+    end
+end
