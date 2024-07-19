@@ -1,0 +1,76 @@
+- name: Update repositories
+  {% if ansible_os_family == 'debian' %}
+  shell: sudo apt-get update -y
+  {% endif %}
+  {% if ansible_os_family.lower() in ['redhat', 'centos', 'oraclelinux'] %}
+  shell: sudo yum update -y
+  {% endif %}
+
+- name: Upgrade packages
+  {% if ansible_os_family == 'debian' %}
+  shell: sudo apt-get upgrade -y
+  {% endif %}
+  {% if ansible_os_family.lower() in ['redhat', 'centos', 'oraclelinux'] %}
+  shell: sudo yum upgrade -y
+  {% endif %}
+
+- name: Install dependencies
+  {% if ansible_os_family == 'debian' %}
+  shell: |
+    sudo apt-get install build-essential -y
+    sudo apt-get install libreadline-dev -y
+    sudo apt-get install libncursesw5-dev -y
+    sudo apt-get install libssl-dev -y
+    sudo apt-get install libsqlite3-dev -y
+    sudo apt-get install libgdbm-dev -y
+    sudo apt-get install libc6-dev -y
+    sudo apt-get install libbz2-dev -y
+    sudo apt-get install libffi-dev -y
+    sudo apt-get install zlib1g-dev -y
+  {% endif %}
+  {% if ansible_os_family.lower() in ['redhat', 'centos', 'oraclelinux'] %}
+  shell: |
+    sudo yum install zlib-devel -y
+    sudo yum install gcc -y
+    sudo yum install openssl-devel -y
+    sudo yum install bzip2-devel -y
+    sudo yum install libffi-devel -y
+
+  {% endif %}
+
+- name: Download and extract Python {{ version }}
+  get_url:
+    url: "https://www.python.org/ftp/python/{{ version }}/Python-{{ version }}.tgz"
+    dest: "/tmp/Python-{{ version }}.tgz"
+    mode: 0755
+  register: download_python
+
+- name: Extract Python {{ version }}
+  unarchive:
+    src: "/tmp/Python-{{ version }}.tgz"
+    dest: "/tmp"
+    remote_src: yes
+  when: download_python.changed
+
+- name: Build Python {{ version }}
+  shell: |
+    cd /tmp/Python-{{ version }}
+    ./configure --enable-optimizations
+  args:
+    chdir: "/tmp/Python-{{ version }}"
+  when: download_python.changed
+  register: build_python
+
+- name: Install Python {{ version }}
+  shell: |
+    cd /tmp/Python-{{ version }}
+    sudo make
+    sudo make install
+  when: build_python.changed
+  register: install_python
+
+- name: Set default Python version to {{ version }}
+  shell: |
+    sudo update-alternatives --install /usr/bin/python3 python3 /usr/local/bin/python{{ ".".join(version.split(".")[:-1]) }} 1
+    sudo update-alternatives --install /usr/bin/pip3 pip3 /usr/local/bin/pip{{ ".".join(version.split(".")[:-1]) }} 1
+  when: install_python.changed

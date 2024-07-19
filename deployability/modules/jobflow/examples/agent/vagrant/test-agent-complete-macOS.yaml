@@ -1,0 +1,115 @@
+version: 0.1
+description: This workflow is used to test agents deployment for DDT1 PoC
+variables:
+  agent-os:
+    # Run one at a time as there are limitations on the number of hosts
+    - macos-sonoma-14.0-arm64
+    #- macos-ventura-13.4.1-arm64
+  manager-os: linux-ubuntu-22.04-amd64
+  infra-provider: vagrant
+  working-dir: /tmp/dtt1-poc
+
+tasks:
+  # Unique manager allocate task
+  - task: "allocate-manager-{manager-os}"
+    description: "Allocate resources for the manager."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: create
+          - provider: "aws"
+          - size: large
+          - composite-name: "{manager-os}"
+          - instance-name: "[QA]-Test-Example-Please-Edit-Me"
+          - inventory-output: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+          - label-termination-date: "1d"
+          - label-team: "qa"
+    on-error: "abort-all"
+    cleanup:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: delete
+          - track-output: "{working-dir}/manager-{manager-os}/track.yaml"
+
+  # Unique agent allocate task
+  - task: "allocate-agent-{agent}"
+    description: "Allocate resources for the agent."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: create
+          - provider: "{infra-provider}"
+          - size: small
+          - composite-name: "{agent}"
+          - instance-name: "[QA]-Test-Example-Please-Edit-Me"
+          - inventory-output: "{working-dir}/agent-{agent}/inventory.yaml"
+          - track-output: "{working-dir}/agent-{agent}/track.yaml"
+          - label-termination-date: "1d"
+          - label-team: "qa"
+    on-error: "abort-all"
+    foreach:
+      - variable: agent-os
+        as: agent
+    cleanup:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/allocation/main.py
+          - action: delete
+          - track-output: "{working-dir}/agent-{agent}/track.yaml"
+    depends-on:
+      - "provision-manager-{manager-os}"
+
+  # Unique manager provision task
+  - task: "provision-manager-{manager-os}"
+    description: "Provision the manager."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/provision/main.py
+          - inventory: "{working-dir}/manager-{manager-os}/inventory.yaml"
+          - install:
+            - component: wazuh-manager
+              type: assistant
+              version: 4.7.4
+              live: False
+    depends-on:
+      - "allocate-manager-{manager-os}"
+    on-error: "abort-all"
+
+
+  # Generic agent test task
+  - task: "run-agent-{agent}-tests"
+    description: "Run tests install for the agent {agent}."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - modules/testing/main.py
+          - targets:
+            - wazuh-1: "{working-dir}/manager-{manager-os}/inventory.yaml"
+            - agent: "{working-dir}/agent-{agent}/inventory.yaml"
+          - tests: "install,registration,basic_info,connection,restart,stop,uninstall"
+          - component: "agent"
+          - wazuh-version: "4.7.4"
+          - wazuh-revision: "40717"
+          - live: False
+    foreach:
+      - variable: agent-os
+        as: agent
+    depends-on:
+      - "allocate-agent-{agent}"

@@ -1,0 +1,37 @@
+
+{% if ansible_os_family.lower() in ['debian'] %}
+
+- name: Update packages cache
+  command: apt-get update -y
+
+- name: Install packages
+  command: apt-get -y install curl gnupg apt-transport-https
+
+- name: Install GPG key
+  shell: "curl -s https://{{ 'packages.wazuh.com' if live else 'packages-dev.wazuh.com' }}/key/GPG-KEY-WAZUH | gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && chmod 644 /usr/share/keyrings/wazuh.gpg"
+
+- name: Add Wazuh repository
+  shell: "echo \"deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://{{ 'packages.wazuh.com' if live else 'packages-dev.wazuh.com' }}/{{ '4.x' if live else 'pre-release' }}/apt/ {{ 'stable' if live else 'unstable' }} main\" | tee -a /etc/apt/sources.list.d/wazuh.list"
+
+- name: Update package information
+  command: "apt-get update"
+{% endif %}
+
+{% if ansible_os_family.lower() in ['redhat', 'oraclelinux', 'amazon', 'centos'] %}
+- name: Update packages cache
+  command: yum makecache
+
+- name: Import the GPG key
+  command: "rpm --import https://{{ 'packages.wazuh.com' if live else 'packages-dev.wazuh.com' }}/key/GPG-KEY-WAZUH"
+
+- name: Add Wazuh repository
+  shell: "echo -e '[wazuh]\ngpgcheck=1\ngpgkey=https://{{ 'packages.wazuh.com' if live else 'packages-dev.wazuh.com' }}/key/GPG-KEY-WAZUH\nenabled=1\nname=EL-$releasever - Wazuh\nbaseurl=https://{{ 'packages.wazuh.com' if live else 'packages-dev.wazuh.com' }}/{{ '4.x' if live else 'pre-release' }}/yum/\nprotect=1' | tee /etc/yum.repos.d/wazuh.repo"
+{% endif %}
+
+{% if ansible_os_family.lower() in ['suse']%}
+- name: Import the GPG key
+  command: "rpm --import https://{{ 'packages.wazuh.com' if live else 'packages-dev.wazuh.com' }}/key/GPG-KEY-WAZUH"
+- name: Add Wazuh repository
+  shell: "echo -e '[wazuh]\ngpgcheck=1\ngpgkey=https://{{ 'packages.wazuh.com' if live else 'packages-dev.wazuh.com' }}/key/GPG-KEY-WAZUH\nenabled=1\nname=EL-$releasever - Wazuh\nbaseurl=https://{{ 'packages.wazuh.com' if live else 'packages-dev.wazuh.com' }}/{{ '4.x' if live else 'pre-release' }}/yum/\nprotect=1' | tee /etc/zypp/repos.d/wazuh.repo"
+
+{% endif %}

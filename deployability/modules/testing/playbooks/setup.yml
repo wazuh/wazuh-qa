@@ -1,0 +1,11 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+- hosts: localhost
+  become: true
+  become_user: "{{ current_user }}"
+  tasks:
+    - name: Cleaning old key ssh-keygen registries
+      command: "ssh-keygen -f ~/.ssh/known_hosts -R '{{ item }}'"
+      loop: "{{ hosts_ip }}"

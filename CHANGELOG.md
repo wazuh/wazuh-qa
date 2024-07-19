@@ -8,24 +8,53 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Add integration tests for Update field to CPE_Helper. ([#4574](https://github.com/wazuh/wazuh-qa/pull/4574)) \- (Core)
-- Updated integration tests README ([#4742](https://github.com/wazuh/wazuh-qa/pull/4742)) \- (Framework)
-- Removed configobj library from requirements.txt ([#4803](https://github.com/wazuh/wazuh-qa/pull/4803)) \- (Framework)
+- Add RockyLinux 8.10 to Allocator module ([#5524](https://github.com/wazuh/wazuh-qa/pull/5524)) \- (Framework)
+- Add Deployability testing tier 1 ([#5190](https://github.com/wazuh/wazuh-qa/pull/5190)) \- (Framework + Documentation + Tests)
 - Add Workflow module to Wazuh-qa repository ([#4990](https://github.com/wazuh/wazuh-qa/pull/4990)) \- (Tests)
+- Add an IT to check that the agent erases its wazuh-agent.state file ([#4716](https://github.com/wazuh/wazuh-qa/pull/4716)) \- (Tests)
+- Add integration tests for Update field to CPE_Helper ([#4574](https://github.com/wazuh/wazuh-qa/pull/4574)) \- (Framework + Tests)
 
 ### Changed
 
-- Enhance the PR template. ([#4881](https://github.com/wazuh/wazuh-qa/pull/4881)) \- (Framework)
-- Updated the API script file name. ([#5351](https://github.com/wazuh/wazuh-qa/pull/5351)) \- (Framework)
+- Update CentOS 7 Vagrant box ([#5546](https://github.com/wazuh/wazuh-qa/pull/5546)) \- (Framework)
+- Update CentOS 7 AMIs ([#5545](https://github.com/wazuh/wazuh-qa/pull/5545)) \- (Framework)
+- Update OpenSUSE 15 AMI ([#5536](https://github.com/wazuh/wazuh-qa/pull/5536)) \- (Framework)
+- Update Debian 12 AMIs ([#5529](https://github.com/wazuh/wazuh-qa/pull/5529)) \- (Framework)
+- Update AL2023 AMIs ([#5530](https://github.com/wazuh/wazuh-qa/pull/5530)) \- (Framework)
+- Update Oracle Linux 9 AMI ([#5525](https://github.com/wazuh/wazuh-qa/pull/5525)) \- (Framework)
+- Update the API script file name ([#5351](https://github.com/wazuh/wazuh-qa/pull/5351)) \- (Framework + Tests)
+- Enhance the PR template ([#4881](https://github.com/wazuh/wazuh-qa/pull/4881)) \- (Framework)
+- Update integration tests README ([#4742](https://github.com/wazuh/wazuh-qa/pull/4742)) \- (Documentation)
 
 ### Fixed
 
-- Add an IT to check that the agent erases its wazuh-agent.state file ([#4716](https://github.com/wazuh/wazuh-qa/pull/4716)) \- (Core)
+- Fix CentOS 9 AMI in Allocator module ([#5523](https://github.com/wazuh/wazuh-qa/pull/5523)) \- (Framework)
+- Fix stability in cluster reliability tests ([#5477](https://github.com/wazuh/wazuh-qa/pull/5477)) \- (Tests)
+- Fix agent_simulator response for active-response configuration commands ([#4895](https://github.com/wazuh/wazuh-qa/pull/4895)) \- (Framework + Tests)
 - Fix manager_agent system tests environment ([#4808](https://github.com/wazuh/wazuh-qa/pull/4808)) \- (Framework)
-- Fixed agent_simulator response for active-response configuration commands. ([#4895](https://github.com/wazuh/wazuh-qa/pull/4895)) \- (Framework)
-- Fixed stability in cluster reliability tests. ([#5448](https://github.com/wazuh/wazuh-qa/pull/5448)) \- (Framework)
+
+### Deleted
+
+- Remove configobj library from requirements.txt ([#4803](https://github.com/wazuh/wazuh-qa/pull/4803)) \- (Framework)
 
 ## [4.8.1] - TBD
+
+### Added
+
+- Added the capability to plot indexed alerts and vulnerabilities. ([#5518](https://github.com/wazuh/wazuh-qa/pull/5518)) \- (Framework)
+- Add functionality to unify data of the binary processes with their subprocesses to plot ([#5500](https://github.com/wazuh/wazuh-qa/pull/5500)) \- (Framework)
+s
+### Changed
+
+- Remove hardcoded references in provision playbook for E2E tests ([#5517](https://github.com/wazuh/wazuh-qa/pull/5517)) \- (Framework)
+- Fix test_consistency_initial_scans by adding a 30-minute wait before collecting vulnerabilities. ([#5507](https://github.com/wazuh/wazuh-qa/pull/5507)) \- (Tests)
+- Update `wazuh_template_branch` in filebeat provision template ([#5499]https://github.com/wazuh/wazuh-qa/pull/5499) \- (Test)
+
+
+### Fixed
+
+- Fix indexer data visualizaiton class generation ([#5520](https://github.com/wazuh/wazuh-qa/pull/5520)) and ([#5526]https://github.com/wazuh/wazuh-qa/pull/5526) \- (Framework)
+
 
 ## [4.8.0] - 12/06/2024
 
