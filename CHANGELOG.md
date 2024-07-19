@@ -35,7 +35,7 @@ All notable changes to this project will be documented in this file.
 
 - Remove configobj library from requirements.txt ([#4803](https://github.com/wazuh/wazuh-qa/pull/4803)) \- (Framework)
 
-## [4.8.1] - TBD
+## [4.8.1] - 18/07/2024
 
 ### Added
 
