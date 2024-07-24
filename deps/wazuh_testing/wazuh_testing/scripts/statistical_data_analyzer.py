@@ -77,7 +77,7 @@ def basic_statistics(dataframe):
         print(table)
 
 def data_comparison_test(dataframe_ref, dataframe, percentage=95):
-    """Calculate statistics values for Mann-Whitney U, t-Student and Levene tests. Also,
+    """Calculate statistics values for Mann-Whitney U, t-Student, Levene tests and ANOVA test. Also,
     it detect if there are significant difference detected between both values.
 
     Args:
@@ -92,55 +92,60 @@ def data_comparison_test(dataframe_ref, dataframe, percentage=95):
         ref_daemon_data = dataframe_ref[dataframe_ref['Daemon'] == daemon]
         new_daemon_data = dataframe[dataframe['Daemon'] == daemon]
 
-        for value in STATS_MAPPING.values():
+        for value in ['CPU(%)', 'RSS(KB)']:
             ref_values = ref_daemon_data[value].dropna()
             new_values = new_daemon_data[value].dropna()
 
             # Mann-Whitney U
-            u_stat, u_p_value = mannwhitneyu(ref_values, new_values, alternative='two-sided')
+            #u_stat, u_p_value = mannwhitneyu(ref_values, new_values, alternative='two-sided')
             # t-Student
             t_stat, t_p_value = ttest_ind(ref_values, new_values, equal_var=False)
             # Levene
             l_stat, l_p_value = levene(ref_values, new_values)
+            # Anova
+            a_stat, a_p_value = f_oneway(ref_values, new_values)
 
             print(f"\nMetric '{value}':")
-            print(f"    - Mann-Whitney U Test: U-Statistic={u_stat}, p-value={u_p_value}")
+            #print(f"    - Mann-Whitney U Test: U-Statistic={u_stat}, p-value={u_p_value}")
             print(f"    - t-Student Test: t-Statistic={t_stat}, p-value={t_p_value}")
             print(f"    - Levene's Test: Statistic={l_stat}, p-value={l_p_value}")
+            print(f"    - ANOVA's Test: Statistic={a_stat}, p-value={a_p_value}")
 
-            if u_p_value < alpha:
-                print(f"\n  Significant difference detected in '{value}' with {percentage}% confidence (Mann-Whitney U Test).")
+            #if u_p_value < alpha:
+             #   print(f"\n  Significant difference detected in '{value}' with {percentage}% confidence (Mann-Whitney U Test).")
             if t_p_value < alpha:
                 print(f"\n  Significant difference detected in '{value}' with {percentage}% confidence (t-Test).")
             if l_p_value < alpha:
                 print(f"\n  Variance difference detected in '{value}' with {percentage}% confidence (Levene's Test).")
+            if a_p_value < alpha:
+                print(f"\n  Means difference detected in '{value}' with {percentage}% confidence (ANOVA's Test).")
         print("\n")
 
-def anova_analysis(dataframe_ref, dataframe, percentage=95):
-    """ Analyze the data from both dataframes using ANOVA analysis.
+# def anova_analysis(dataframe_ref, dataframe, percentage=95):
+#     """ Analyze the data from both dataframes using ANOVA analysis.
     
-    Args:
-        dataframe_ref: data frame with the references values.
-        dataframe: data frame with the values to compare.
-        percentage: percentage of confidence level.
-    """
-    alpha = float((100 - percentage) / 100)
-    daemons = dataframe_ref['Daemon'].unique()
-    for daemon in daemons:
-        print(f"\n\nDaemon: {daemon}")
-        ref_daemon_data = dataframe_ref[dataframe_ref['Daemon'] == daemon]
-        new_daemon_data = dataframe[dataframe['Daemon'] == daemon]
+#     Args:
+#         dataframe_ref: data frame with the references values.
+#         dataframe: data frame with the values to compare.
+#         percentage: percentage of confidence level.
+#     """
+#     alpha = float((100 - percentage) / 100)
+#     daemons = dataframe_ref['Daemon'].unique()
+#     for daemon in daemons:
+#         print(f"\n\nDaemon: {daemon}")
+#         ref_daemon_data = dataframe_ref[dataframe_ref['Daemon'] == daemon]
+#         new_daemon_data = dataframe[dataframe['Daemon'] == daemon]
 
-        for value in STATS_MAPPING.values():
-            ref_values = ref_daemon_data[value].dropna()
-            new_values = new_daemon_data[value].dropna()
-            f_stat, p_value = f_oneway(ref_values, new_values)
+#         for value in STATS_MAPPING.values():
+#             ref_values = ref_daemon_data[value].dropna()
+#             new_values = new_daemon_data[value].dropna()
+#             f_stat, p_value = f_oneway(ref_values, new_values)
 
-            print(f"\nANOVA result for {value}:")
-            print(f"  F-statistic: {f_stat}")
-            print(f"  p-value: {p_value}")
-            if p_value < alpha:
-                print(f"\n  Significant difference detected (p-value < {alpha}). The means are significantly different.")
+#             print(f"\nANOVA result for {value}:")
+#             print(f"  F-statistic: {f_stat}")
+#             print(f"  p-value: {p_value}")
+#             if p_value < alpha:
+#                 print(f"\n  Significant difference detected (p-value < {alpha}). The means are significantly different.")
 
 def calculate_percentage_change(dataframe_ref, dataframe):  
     """Calculate the percentage change of the mean of the values for each metric, 
@@ -156,7 +161,7 @@ def calculate_percentage_change(dataframe_ref, dataframe):
         ref_daemon_data = dataframe_ref[dataframe_ref['Daemon'] == daemon]
         new_daemon_data = dataframe[dataframe['Daemon'] == daemon]
         
-        for value in STATS_MAPPING.values():
+        for value in ['CPU(%)', 'RSS(KB)']:
             ref_mean = ref_daemon_data[value].mean()
             new_mean = new_daemon_data[value].mean()
             ref_values = ref_daemon_data[value].dropna().values
@@ -189,9 +194,9 @@ def main():
     dataframe = pd.read_csv(parameters.data_source)
     validate_parameters(parameters, dataframe)
     #basic_statistics(dataframe)
-    data_comparison_test(baseline_dataframe, dataframe)
+    #data_comparison_test(baseline_dataframe, dataframe)
     #anova_analysis(baseline_dataframe, dataframe)
-    #calculate_percentage_change(baseline_dataframe, dataframe)
+    calculate_percentage_change(baseline_dataframe, dataframe)
 
 if __name__ == '__main__':
     main()
