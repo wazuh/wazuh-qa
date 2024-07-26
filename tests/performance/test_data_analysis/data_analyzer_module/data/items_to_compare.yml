@@ -1,0 +1,13 @@
+---
+Daemons:
+  - "wazuh-modulesd"
+  - "wazuh-remoted"
+
+Metrics:
+  - "CPU(%)"
+  - "RSS(KB)"
+
+Stats:
+  - "Mean"
+  - "Max value"
+  - "Variance"
