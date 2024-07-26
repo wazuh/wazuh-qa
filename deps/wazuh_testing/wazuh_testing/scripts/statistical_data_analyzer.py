@@ -20,6 +20,8 @@ STATS_MAPPING = {
     'swap': 'SWAP(KB)',
 }
 
+STATISTICS_LIST = ['Mean', 'Median', 'Max value', 'Min value', 'Standard deviation', 'Variance']
+
 def get_parameters():
     """Get and process script parameters.
     
@@ -36,7 +38,7 @@ def get_parameters():
     
     return arg_parser.parse_args()
 
-def validate_parameters(parameters, dataframe):
+def validate_parameters(parameters, datasource):
     """Validate the input parameters
 
     Args:
@@ -49,34 +51,121 @@ def validate_parameters(parameters, dataframe):
         sys.exit(1)
     
     # Check that the source file has more than 0 rows
+    dataframe = load_dataframe(datasource)
     data_length = len(dataframe)    
     if data_length == 0:
         print(f"The source '{dataframe}' has not data rows or it has not CSV format")
         sys.exit(1)
 
-def basic_statistics(dataframe):
+def load_dataframe(datasource):
+    """Read the CSV and convert it to dataframe
+
+    Args:
+        datasource: Data source file path.
+
+    Returns:
+        DataFrame: dataframe object.
+    """
+    return pd.read_csv(datasource)
+
+def calculate_basic_statistics(dataframe):
     """Calculate basic statistics on the data source file for comparison.
     
     Args:
         data_source: Data file to compare.
-    """    
-    print(f"\nStatistics values of each daemon:\n")
+    
+    Returns:
+
+    """
+    #dataframe = load_dataframe(datasource)
+    results = {}
     daemons = dataframe['Daemon'].unique()
     for daemon in daemons:
-        table = PrettyTable()
-        table.title = daemon
-        table.field_names = ['Metric', 'Mean', 'Median', 'Max value', 'Min value', 'Standard deviation', 'Variance']
-
         daemon_data = dataframe[dataframe['Daemon'] == daemon]
+        stats = []
         for value in STATS_MAPPING.values():
-            table.add_row([value, round(daemon_data[value].mean(), 2), round(daemon_data[value].median(), 2),
-                           round(daemon_data[value].max(), 2), round(daemon_data[value].min(), 2),
-                           round(daemon_data[value].std(), 2), round(daemon_data[value].var(), 2)])
-        
-        print("\n")
-        print(table)
+            stat = {
+                'Metric': value,
+                'Mean': round(float(daemon_data[value].mean()), 2),
+                'Median': round(float(daemon_data[value].median()), 2),
+                'Max value': round(float(daemon_data[value].max()), 2),
+                'Min value': round(float(daemon_data[value].min()), 2),
+                'Standard deviation': round(float(daemon_data[value].std()), 2),
+                'Variance': round(float(daemon_data[value].var()), 2)
+            }
+            stats.append(stat)
+        results[daemon] = stats
+    
+    return results
 
-def data_comparison_test(dataframe_ref, dataframe, percentage=95):
+def get_stat_value(metrics, value, stat):
+    for metric in metrics:
+        if metric['Metric'] == value:
+            return metric[stat]
+
+def comparison_basic_statistics(baseline, datasource, daemon, value, stat, threshold=0.05):
+    """
+    
+    """
+    # baseline_dataframe = load_dataframe(baseline)
+    # dataframe = load_dataframe(datasource)
+    baseline_statistics = calculate_basic_statistics(baseline)
+    dataframe_statistics = calculate_basic_statistics(datasource)
+    # daemons = set(baseline_statistics.keys())
+    discrepancie = 0
+
+    # for daemon in daemons:
+    #     for value in STATS_MAPPING.values():
+    #         for stat in STATISTICS_LIST:
+    baseline_value = get_stat_value(baseline_statistics[daemon], value, stat)
+    dataframe_value = get_stat_value(dataframe_statistics[daemon], value, stat)
+    if baseline_value != 0:
+        diff = abs(baseline_value - dataframe_value) / baseline_value
+    else:
+        diff = abs(baseline_value - dataframe_value)
+    
+    if diff >= threshold:
+        discrepancie = 1
+    
+    return discrepancie
+
+def t_student_test(baseline, datasource, value):
+    """
+    
+    """
+    ref_values = baseline[value].dropna()
+    new_values = datasource[value].dropna() 
+
+    t_stat, t_p_value = ttest_ind(ref_values, new_values, equal_var=False)
+    #print(f"    - t-Student Test: t-Statistic={t_stat}, p-value={t_p_value}")
+
+    return t_p_value  
+
+def t_levene_test(baseline, datasource, value):
+    """
+    
+    """
+    ref_values = baseline[value].dropna()
+    new_values = datasource[value].dropna() 
+
+    l_stat, l_p_value = levene(ref_values, new_values)
+    #print(f"    - Levene's Test: Statistic={l_stat}, p-value={l_p_value}")
+
+    return l_p_value
+
+def t_anova_test(baseline, datasource, value):
+    """
+    
+    """
+    ref_values = baseline[value].dropna()
+    new_values = datasource[value].dropna() 
+
+    a_stat, a_p_value = f_oneway(ref_values, new_values)
+    #print(f"    - ANOVA's Test: Statistic={a_stat}, p-value={a_p_value}")
+
+    return a_p_value
+
+def data_comparison_test(datasource_ref, datasource, percentage=95):
     """Calculate statistics values for Mann-Whitney U, t-Student, Levene tests and ANOVA test. Also,
     it detect if there are significant difference detected between both values.
 
@@ -84,7 +173,17 @@ def data_comparison_test(dataframe_ref, dataframe, percentage=95):
         dataframe_ref: data frame with the references values.
         dataframe: data frame with the values to compare.
         percentage: percentage of confidence level.
+    
+    Returns:
+        student_discrepancy:
+        levene_discrepancy:
+        anova_discrepancy:
     """
+    student_discrepancy = 0
+    levene_discrepancy = 0
+    anova_discrepancy = 0
+    dataframe_ref = load_dataframe(datasource_ref)
+    dataframe = load_dataframe(datasource)
     alpha = float((100 - percentage) / 100)
     daemons = dataframe_ref['Daemon'].unique()
     for daemon in daemons:
@@ -92,7 +191,7 @@ def data_comparison_test(dataframe_ref, dataframe, percentage=95):
         ref_daemon_data = dataframe_ref[dataframe_ref['Daemon'] == daemon]
         new_daemon_data = dataframe[dataframe['Daemon'] == daemon]
 
-        for value in ['CPU(%)', 'RSS(KB)']:
+        for value in STATS_MAPPING.values():
             ref_values = ref_daemon_data[value].dropna()
             new_values = new_daemon_data[value].dropna()
 
@@ -115,11 +214,16 @@ def data_comparison_test(dataframe_ref, dataframe, percentage=95):
              #   print(f"\n  Significant difference detected in '{value}' with {percentage}% confidence (Mann-Whitney U Test).")
             if t_p_value < alpha:
                 print(f"\n  Significant difference detected in '{value}' with {percentage}% confidence (t-Test).")
+                student_discrepancy = 1
             if l_p_value < alpha:
                 print(f"\n  Variance difference detected in '{value}' with {percentage}% confidence (Levene's Test).")
+                levene_discrepancy = 1
             if a_p_value < alpha:
                 print(f"\n  Means difference detected in '{value}' with {percentage}% confidence (ANOVA's Test).")
+                anova_discrepancy = 1
         print("\n")
+
+    return student_discrepancy, levene_discrepancy, anova_discrepancy
 
 # def anova_analysis(dataframe_ref, dataframe, percentage=95):
 #     """ Analyze the data from both dataframes using ANOVA analysis.
@@ -161,7 +265,7 @@ def calculate_percentage_change(dataframe_ref, dataframe):
         ref_daemon_data = dataframe_ref[dataframe_ref['Daemon'] == daemon]
         new_daemon_data = dataframe[dataframe['Daemon'] == daemon]
         
-        for value in ['CPU(%)', 'RSS(KB)']:
+        for value in STATS_MAPPING.values():
             ref_mean = ref_daemon_data[value].mean()
             new_mean = new_daemon_data[value].mean()
             ref_values = ref_daemon_data[value].dropna().values
@@ -190,13 +294,11 @@ def calculate_percentage_change(dataframe_ref, dataframe):
 
 def main():
     parameters = get_parameters()
-    baseline_dataframe = pd.read_csv(parameters.baseline_data)
-    dataframe = pd.read_csv(parameters.data_source)
-    validate_parameters(parameters, dataframe)
-    #basic_statistics(dataframe)
+    validate_parameters(parameters, parameters.data_source)
+    calculate_basic_statistics(parameters.baseline_data)
     #data_comparison_test(baseline_dataframe, dataframe)
     #anova_analysis(baseline_dataframe, dataframe)
-    calculate_percentage_change(baseline_dataframe, dataframe)
+    #calculate_percentage_change(baseline_dataframe, dataframe)
 
 if __name__ == '__main__':
     main()
