@@ -32,7 +32,7 @@ def pytest_addoption(parser):
         '--threshold',
         action='store',
         metavar='THRESHOLD',
-        default=None,
+        default=5,
         type=float,
         help='Threshold for comparison',
     )
@@ -40,7 +40,7 @@ def pytest_addoption(parser):
         '--confidence_level',
         action='store',
         metavar='CONFIDENCE_LEVEL',
-        default=None,
+        default=95,
         type=float,
         help='Level of confidence for the analysis',
     )

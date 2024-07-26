@@ -6,6 +6,7 @@ Daemons:
 Metrics:
   - "CPU(%)"
   - "RSS(KB)"
+  - "FD"
 
 Stats:
   - "Mean"

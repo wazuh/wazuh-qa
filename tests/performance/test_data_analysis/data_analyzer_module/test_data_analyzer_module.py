@@ -11,7 +11,7 @@ def test_comparison(load_data, config):
     metrics = config['Metrics']
     stats = config['Stats']
     threshold_value = threshold / 100
-    confidence_level_value = (100 - confidence_level) / 100
+    p_value = (100 - confidence_level) / 100
 
     for daemon in daemons:
         for value in metrics:
@@ -19,10 +19,10 @@ def test_comparison(load_data, config):
             l_p_value =  t_levene_test(baseline, datasource, value)
             a_p_value =  t_anova_test(baseline, datasource, value)
 
-            if t_p_value or l_p_value or a_p_value < 0.05:
+            if t_p_value < p_value or l_p_value < p_value or a_p_value < p_value:
                 for stat in stats:
                     try:
-                        assert comparison_basic_statistics(baseline, datasource, daemon, value, stat, threshold_value) != 0
+                        assert comparison_basic_statistics(baseline, datasource, daemon, value, stat, threshold_value) != 1
                     except AssertionError:
                         errors.append(f"Difference over {threshold_value*100}% detected in '{daemon}' - '{value}' - '{stat}'")
 
