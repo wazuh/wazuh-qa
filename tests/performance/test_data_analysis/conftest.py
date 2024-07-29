@@ -32,14 +32,6 @@ def pytest_addoption(parser):
         help='Items yaml file path',
     )
     parser.addoption(
-        '--threshold',
-        action='store',
-        metavar='THRESHOLD',
-        default=5,
-        type=float,
-        help='Threshold for comparison',
-    )
-    parser.addoption(
         '--confidence_level',
         action='store',
         metavar='CONFIDENCE_LEVEL',
@@ -65,7 +57,6 @@ def load_data(pytestconfig):
     """
     baseline_file = pytestconfig.getoption("baseline")
     datasource_file = pytestconfig.getoption("datasource")
-    threshold = pytestconfig.getoption("threshold")
     conf_level = pytestconfig.getoption("confidence_level")
 
     if not baseline_file or not datasource_file:
@@ -77,7 +68,7 @@ def load_data(pytestconfig):
     baseline = load_dataframe(baseline_file)
     datasource = load_dataframe(datasource_file)
 
-    return baseline, datasource, threshold, conf_level
+    return baseline, datasource, conf_level
 
 
 @pytest.fixture
@@ -111,7 +102,7 @@ def pytest_runtest_makereport(item, call):
     report.extra = getattr(report, 'extra', [])
 
     if report.when == 'call' and report.failed:
-        baseline, datasource, threshold, confidence_level = item.funcargs['load_data']
+        baseline, datasource, confidence_level = item.funcargs['load_data']
         
         report_dir = os.path.dirname(item.config.option.htmlpath)
         assets_dir = os.path.join(report_dir, "assets")

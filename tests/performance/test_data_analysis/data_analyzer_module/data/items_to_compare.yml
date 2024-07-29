@@ -4,11 +4,17 @@ Daemons:
   - "wazuh-remoted"
 
 Metrics:
-  - "CPU(%)"
-  - "RSS(KB)"
-  - "FD"
+  CPU(%):
+    Mean: 10
+    Max value: 15
+    Variance: 10
 
-Stats:
-  - "Mean"
-  - "Max value"
-  - "Variance"
+  RSS(KB):
+    Mean: 10
+    Max value: 25
+    Variance: 5
+
+  FD:
+    Mean: 15
+    Max value: 25
+    Variance: 5

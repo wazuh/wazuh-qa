@@ -118,7 +118,7 @@ def get_stat_value(metrics, value, stat):
             return metric[stat]
 
 
-def comparison_basic_statistics(baseline, datasource, daemon, value, stat, threshold=0.05):
+def comparison_basic_statistics(baseline, datasource, daemon, value, stat, threshold):
     """Compares the percentage change in a given statistic between the two data sets, and 
     returns whether there is a significant change based on a threshold value.
 
