@@ -13,7 +13,7 @@ from yaml import safe_load
 test_data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 logs_format = re.compile(
     r'(.*) \[(Local agent-groups|Agent-groups send full|Agent-groups send)] (.*)')
-incorrect_order = []
+incorrect_order = {}
 
 
 # Classes
@@ -90,11 +90,11 @@ def test_check_logs_order_master(artifacts_path):
                                 tree_info['tree'].children(child.identifier) else 'root'
                             break
                     else:
-                        incorrect_order.append({'node': name, 'log_type': log_tag,
+                        incorrect_order[name].append({'node': name, 'log_type': log_tag,
                                                 'expected_logs': [log.tag for log in
                                                                   tree_info['tree'].children(tree_info['node'])],
                                                 'found_log': full_log})
-                        pytest.fail(f"[{incorrect_order[0]['node']}]"
-                                    f"\n - Log type: {incorrect_order[0]['log_type']}"
-                                    f"\n - Expected logs: {incorrect_order[0]['expected_logs']}"
-                                    f"\n - Found log: {incorrect_order[0]['found_log']}")
+                        pytest.fail(f"[{incorrect_order[name]['node']}]"
+                                    f"\n - Log type: {incorrect_order[name]['log_type']}"
+                                    f"\n - Expected logs: {incorrect_order[name]['expected_logs']}"
+                                    f"\n - Found log: {incorrect_order[name]['found_log']}")
