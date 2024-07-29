@@ -1,9 +1,14 @@
 import pytest
-from wazuh_testing.scripts.statistical_data_analyzer import comparison_basic_statistics, STATS_MAPPING, t_student_test, t_levene_test, t_anova_test, STATISTICS_LIST
+from wazuh_testing.scripts.statistical_data_analyzer import comparison_basic_statistics, t_student_test, t_levene_test, t_anova_test
 
 def test_comparison(load_data, config):
-    """
-    
+    """The main test of the module. It checks if any statistical test detects significant changes and if so, 
+    compares the statistics of both data sets to detect changes with respect to a threshold value.  
+
+    Args:
+        load_data: fixture that contains baseline and data source Dataframes, and the
+        threshold and confidence level values.
+        config: Dict that contains the items to be analyzed.
     """
     baseline, datasource, threshold, confidence_level = load_data
     errors = []

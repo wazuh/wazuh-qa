@@ -47,6 +47,18 @@ def pytest_addoption(parser):
 
 @pytest.fixture
 def load_data(pytestconfig):
+    """Fixture to convert the CSV files passed in Dataframes and to load them in 
+    the test together with the other parameters.
+    
+    Args:
+        pytestconfig: that returns the :class:`_pytest.config.Config` object.
+    
+    Returns:
+        baseline: Dataframe with the baseline data.
+        datasource: Dataframe with the data for comparison.
+        threshold: threshold value for change detection.
+        conf_level: level of confidence por the statistic analysis.
+    """
     baseline_file = pytestconfig.getoption("baseline")
     datasource_file = pytestconfig.getoption("datasource")
     threshold = pytestconfig.getoption("threshold")
@@ -65,6 +77,14 @@ def load_data(pytestconfig):
 
 @pytest.fixture
 def config(pytestconfig):
+    """Fixture to process the YML file with the elements to be analyzed
+    during the test.
+
+    Args:
+        pytestconfig: that returns the :class:`_pytest.config.Config` object.
+    Returns:
+        config: Dict with the items to be analyzed.
+    """
     config_file = pytestconfig.getoption("items_yaml")
 
     if not config_file:
