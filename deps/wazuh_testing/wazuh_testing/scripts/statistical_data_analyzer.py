@@ -252,6 +252,32 @@ def data_comparison_test(baseline, datasource, percentage=95):
         print("\n")
 
 
+def print_dataframes_stats(baseline, datasource):
+    """Print a PrettyTable with the statistics for each daemon and metric.
+
+    Args:
+        baseline: Dataframe with the baseline values.
+        datasource: Dataframe with the values to compare.
+    """
+    daemons = baseline['Daemon'].unique()
+
+    for daemon in daemons:
+        baseline_data = baseline[baseline['Daemon'] == daemon]
+        datasource_data = datasource[datasource['Daemon'] == daemon]
+
+        for value in STATS_MAPPING.values():
+            table = PrettyTable()
+            table.title = daemon + " - " + value
+            table.field_names = ['Name', 'Mean', 'Max value', 'Min value', 'Standard deviation', 'Variance']
+            table.add_row(["Baseline", round(baseline_data[value].mean(), 2),
+                        baseline_data[value].max(), baseline_data[value].min(),
+                        round(baseline_data[value].std(), 2), round(baseline_data[value].var(), 2)])
+            table.add_row(["Data source", round(datasource_data[value].mean(), 2),
+                        datasource_data[value].max(), datasource_data[value].min(),
+                        round(datasource_data[value].std(), 2), round(datasource_data[value].var(), 2)])
+            print(table)
+
+
 def calculate_percentage_change(dataframe_ref, dataframe):  
     """Calculate the percentage change of the mean of the values for each metric, 
     as well as the maximum percentage change of the individual values, in order to detect peaks.
@@ -300,6 +326,7 @@ def main():
     validate_parameters(parameters, parameters.data_source)
     baseline = load_dataframe(parameters.baseline_data)
     datasource = load_dataframe(parameters.data_source)
+    print_dataframes_stats(baseline, datasource)
     #calculate_basic_statistics(baseline)
     #data_comparison_test(parameters.baseline_data, parameters.data_source)
     #calculate_percentage_change(baseline, datasource)
