@@ -260,6 +260,7 @@ def print_dataframes_stats(baseline, datasource):
         datasource: Dataframe with the values to compare.
     """
     daemons = baseline['Daemon'].unique()
+    output = ""
 
     for daemon in daemons:
         baseline_data = baseline[baseline['Daemon'] == daemon]
@@ -275,7 +276,9 @@ def print_dataframes_stats(baseline, datasource):
             table.add_row(["Data source", round(datasource_data[value].mean(), 2),
                         datasource_data[value].max(), datasource_data[value].min(),
                         round(datasource_data[value].std(), 2), round(datasource_data[value].var(), 2)])
-            print(table)
+            output += table.get_string() + "\n\n"
+    
+    return output
 
 
 def calculate_percentage_change(dataframe_ref, dataframe):  

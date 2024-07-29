@@ -1,7 +1,10 @@
 import pytest
 import os
 import yaml
-from wazuh_testing.scripts.statistical_data_analyzer import load_dataframe
+import io
+import pytest_html
+from contextlib import redirect_stdout
+from wazuh_testing.scripts.statistical_data_analyzer import load_dataframe, print_dataframes_stats
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -45,6 +48,7 @@ def pytest_addoption(parser):
         help='Level of confidence for the analysis',
     )
 
+
 @pytest.fixture
 def load_data(pytestconfig):
     """Fixture to convert the CSV files passed in Dataframes and to load them in 
@@ -75,6 +79,7 @@ def load_data(pytestconfig):
 
     return baseline, datasource, threshold, conf_level
 
+
 @pytest.fixture
 def config(pytestconfig):
     """Fixture to process the YML file with the elements to be analyzed
@@ -97,3 +102,28 @@ def config(pytestconfig):
         config = yaml.safe_load(file)
 
     return config
+
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    report = outcome.get_result()
+    report.extra = getattr(report, 'extra', [])
+
+    if report.when == 'call' and report.failed:
+        baseline, datasource, threshold, confidence_level = item.funcargs['load_data']
+        
+        report_dir = os.path.dirname(item.config.option.htmlpath)
+        assets_dir = os.path.join(report_dir, "assets")
+        if not os.path.exists(assets_dir):
+            os.makedirs(assets_dir)
+
+        output = print_dataframes_stats(baseline, datasource)
+
+        test_name = item.name
+        log_file = os.path.join(assets_dir, f"{test_name}_stats.log")
+        with open(log_file, 'w') as file:
+            file.write(output)
+
+        relative_log_file = os.path.relpath(log_file, report_dir)
+        report.extra.append(pytest_html.extras.url(relative_log_file, name='Statistical comparison'))
