@@ -147,6 +147,8 @@ Metrics:
     Variance: 5
 ```
 
+This file indicates all possible daemons, metrics, and statistics to be analyzed. The value accompanying each statistic is the threshold (percentage) which must be exceeded in the comparison of the two data sets to detect an error. All possible values to be analyzed are contained in this example YML file.
+
 Threshold values can be conveniently changed, and demons, metrics, or statistics can be deleted as required to make the test more concrete.
 
 ### Example
@@ -155,4 +157,4 @@ Threshold values can be conveniently changed, and demons, metrics, or statistics
 python3 -m pytest test_data_analyzer_module.py --baseline ./data/4.8.0-rc4-vdr.csv --datasource ./data/4.8.1-rc2-vdr.csv --items_yaml ./data/items_to_compare.yml --html=report.html
 ```
 
-[report.zip](https://github.com/user-attachments/files/16424221/report.zip)
+- Result: [report.zip](https://github.com/user-attachments/files/16424221/report.zip)
