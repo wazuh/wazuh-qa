@@ -1,3 +1,25 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+
+"""
+Statistical Data Analyzer Module Test
+-------------------------------------
+
+Brief:
+    This module contains a basic test that allows you to perform statistical analysis and calculations on two data sets and to 
+    make comparisons between them. This allows to detect significant differences between the two sets automatically.
+
+    This test uses t-Student, Levene and ANOVA tests to detect possible significant differences in the metrics of the data sets. 
+    If such differences exist, comparisons are made between the main statistics with respect to a threshold value which, if 
+    exceeded, is marked as an error and reported conveniently.
+
+Tests:
+    - test_comparison: detects significant differences between metrics of two data sets
+
+Issue: https://github.com/wazuh/wazuh/issues/24688
+"""
+
 import pytest
 from wazuh_testing.scripts.statistical_data_analyzer import comparison_basic_statistics, t_student_test, t_levene_test, t_anova_test
 

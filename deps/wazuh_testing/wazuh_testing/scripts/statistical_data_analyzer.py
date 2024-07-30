@@ -3,7 +3,7 @@ import os
 import sys
 import pandas as pd
 from prettytable import PrettyTable
-from scipy.stats import mannwhitneyu, ttest_ind, levene, f_oneway
+from scipy.stats import ttest_ind, levene, f_oneway
 
 STATS_MAPPING = {
     'cpu': 'CPU(%)',
