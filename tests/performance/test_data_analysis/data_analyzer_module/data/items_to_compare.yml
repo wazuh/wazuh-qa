@@ -1,5 +1,15 @@
 ---
 Daemons:
+  - "wazuh-clusterd"
+  - "wazuh-integratord"
+  - "wazuh-execd"
+  - "wazuh-logcollector"
+  - "wazuh-analysisd"
+  - "wazuh-db"
+  - "wazuh-maild"
+  - "wazuh-authd"
+  - "wazuh-syscheckd"
+  - "wazuh-monitord"
   - "wazuh-modulesd"
   - "wazuh-remoted"
 
@@ -7,14 +17,83 @@ Metrics:
   CPU(%):
     Mean: 10
     Max value: 15
+    Min value: 5
+    Standard deviation: 5
     Variance: 10
 
   RSS(KB):
     Mean: 10
     Max value: 25
+    Min value: 5
+    Standard deviation: 5
+    Variance: 5
+  
+  Disk_Read(B):
+    Mean: 10
+    Max value: 25
+    Min value: 5
+    Standard deviation: 5
+    Variance: 5
+
+  Disk_Written(B):
+    Mean: 10
+    Max value: 25
+    Min value: 5
+    Standard deviation: 5
+    Variance: 5
+
+  VMS(KB):
+    Mean: 10
+    Max value: 25
+    Min value: 5
+    Standard deviation: 5
     Variance: 5
 
   FD:
     Mean: 15
     Max value: 25
+    Min value: 5
+    Standard deviation: 5
+    Variance: 5
+  
+  Read_Ops:
+    Mean: 10
+    Max value: 25
+    Min value: 5
+    Standard deviation: 5
+    Variance: 5
+
+  Write_Ops:
+    Mean: 10
+    Max value: 25
+    Min value: 5
+    Standard deviation: 5
+    Variance: 5
+
+  Disk(%):
+    Mean: 10
+    Max value: 25
+    Min value: 5
+    Standard deviation: 5
+    Variance: 5
+  
+  USS(KB):
+    Mean: 10
+    Max value: 25
+    Min value: 5
+    Standard deviation: 5
+    Variance: 5
+  
+  PSS(KB):
+    Mean: 10
+    Max value: 25
+    Min value: 5
+    Standard deviation: 5
+    Variance: 5
+  
+  SWAP(KB):
+    Mean: 10
+    Max value: 25
+    Min value: 5
+    Standard deviation: 5
     Variance: 5

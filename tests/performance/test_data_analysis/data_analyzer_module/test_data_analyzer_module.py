@@ -14,12 +14,10 @@ def test_comparison(load_data, config):
     errors = []
     daemons = config['Daemons']
     metrics = config['Metrics']
-    #stats = config['Stats']
     p_value = (100 - confidence_level) / 100
 
     for daemon in daemons:
         for value, thresholds in metrics.items():
-            #threshold_value = float(threshold_str) / 100
             t_p_value =  t_student_test(baseline, datasource, value)
             l_p_value =  t_levene_test(baseline, datasource, value)
             a_p_value =  t_anova_test(baseline, datasource, value)
