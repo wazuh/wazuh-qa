@@ -198,12 +198,15 @@ class AWSProvider(Provider):
         # Describe the AMI to get the root device name
         ami = client.describe_images(ImageIds=[config.ami])
         root_device_name = ami['Images'][0]['RootDeviceName']
+        ami_storage = ami['Images'][0]['BlockDeviceMappings'][0]['Ebs']['VolumeSize']
+
+        if ami_storage > config.storage:
+            config.storage = ami_storage
 
         if config.platform == 'windows':
             with open(windosUserData_file, 'r') as file:
                 userData = file.read()
                 userData = userData.replace('ChangeMe', config.key_name)
-            config.storage = 60
         else:
             with open(userData_file, 'r') as file:
                 userData = file.read()
@@ -278,12 +281,11 @@ class AWSProvider(Provider):
         # Parse the configuration.
         if platform == 'macos':
             os_specs['zone'] = os_specs['zone'] + 'c'
+            config['storage'] = 0
             if arch == 'arm64':
                 config['type'] = 'mac2.metal'
-                config['storage'] = 100
             if arch == 'amd64':
                 config['type'] = 'mac1.metal'
-                config['storage'] = 100
         else:
             for spec in size_specs:
                 if fnmatch.fnmatch(arch, spec):
