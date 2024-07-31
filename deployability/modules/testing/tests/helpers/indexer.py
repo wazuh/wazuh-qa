@@ -95,6 +95,7 @@ class WazuhIndexer:
         Returns:
             str: OS name.
         """
+        time.sleep(5)
         wait_cycles = 0
         while wait_cycles < cycles:
             ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":9200"').get('output') or ""
