@@ -22,6 +22,116 @@ STATS_MAPPING = {
 
 STATISTICS_LIST = ['Mean', 'Median', 'Max value', 'Min value', 'Standard deviation', 'Variance']
 
+class DataLoader:
+    """
+    """
+    def __init__(self, baseline_path, datasource_path):
+        """
+        """
+        self.baseline_path = baseline_path
+        self.datasource_path = datasource_path
+        self.validate_paths()
+        self.baseline = self.load_dataframe(baseline_path)
+        self.datasource = self.load_dataframe(datasource_path)
+        self.metrics = self.load_metrics()
+
+    def validate_paths(self):
+        """
+        """
+        if not os.path.exists(self.baseline_path) or not os.path.exists(self.datasource_path):
+            raise ValueError(f"One or both of the provided files do not exist")   
+
+    def load_dataframe(path):
+        """
+        """
+        dataframe = pd.read_csv(path)
+        if len(dataframe) == 0:
+            raise ValueError(f"The file {path} has not data rows or it has not CSV format")
+        
+    def load_metrics(self):
+        """
+        """
+        metrics = [col for col in self.baseline.columns if pd.api.types.is_numeric_dtype(self.baseline[col])]
+        return metrics
+
+
+class StatisticalComparator:
+    """
+    """
+    def __init__(self, dataframe, metrics):
+        """
+        """
+        self.dataframe = dataframe
+        self.metrics = metrics
+        
+
+    def calculate_basic_statistics(self):
+        """Calculate basic statistics on the Dataframe for comparison.
+        
+        Args:
+            dataframe: Dataframe on which to calculate the statistics.
+        
+        Returns:
+            results: dict that contains all the statistics calculate for the dataframe
+        """
+        results = {}
+        daemons = self.dataframe['Daemon'].unique()
+
+        for daemon in daemons:
+            daemon_data = self.dataframe[self.dataframe['Daemon'] == daemon]
+            stats = []
+            for metric in self.metrics.values():
+                stat = {
+                    'Metric': metric,
+                    'Mean': round(float(daemon_data[metric].mean()), 2),
+                    'Median': round(float(daemon_data[metric].median()), 2),
+                    'Max value': round(float(daemon_data[metric].max()), 2),
+                    'Min value': round(float(daemon_data[metric].min()), 2),
+                    'Standard deviation': round(float(daemon_data[metric].std()), 2),
+                    'Variance': round(float(daemon_data[metric].var()), 2)
+                }
+                stats.append(stat)
+            results[daemon] = stats
+        
+        return results
+
+
+    def comparison_basic_statistics(baseline, datasource, daemon, value, stat, threshold):
+        """Compares the percentage change in a given statistic between the two data sets, and 
+        returns whether there is a significant change based on a threshold value.
+
+        Args:
+            baseline: Dataframe with the baseline data.
+            datasource: Dataframe with the data source.
+            daemon: concrete daemon on which to obtain the values.
+            value: metric from which the statistics to be compared are obtained.
+            stat: concrete statistic to be compared.
+            threshold: Threshold for comparison. If not specified, default is 5%.
+
+        Returns:
+            discrepancie: If the percentage difference is greater than the threshold,
+            it returns 1, otherwise it returns 0.
+        """
+        baseline_statistics = calculate_basic_statistics(baseline)
+        dataframe_statistics = calculate_basic_statistics(datasource)
+        discrepancy = 0
+        baseline_value = get_stat_value(baseline_statistics[daemon], value, stat)
+        dataframe_value = get_stat_value(dataframe_statistics[daemon], value, stat)
+
+        if baseline_value != 0:
+            diff = abs(baseline_value - dataframe_value) / baseline_value
+        else:
+            diff = abs(baseline_value - dataframe_value)
+        
+        if diff >= threshold:
+            discrepancy = 1
+        
+        return discrepancy
+
+
+
+
+
 def get_parameters():
     """Get and process script parameters.
     
@@ -118,37 +228,7 @@ def get_stat_value(metrics, value, stat):
             return metric[stat]
 
 
-def comparison_basic_statistics(baseline, datasource, daemon, value, stat, threshold):
-    """Compares the percentage change in a given statistic between the two data sets, and 
-    returns whether there is a significant change based on a threshold value.
 
-    Args:
-        baseline: Dataframe with the baseline data.
-        datasource: Dataframe with the data source.
-        daemon: concrete daemon on which to obtain the values.
-        value: metric from which the statistics to be compared are obtained.
-        stat: concrete statistic to be compared.
-        threshold: Threshold for comparison. If not specified, default is 5%.
-
-    Returns:
-        discrepancie: If the percentage difference is greater than the threshold,
-        it returns 1, otherwise it returns 0.
-    """
-    baseline_statistics = calculate_basic_statistics(baseline)
-    dataframe_statistics = calculate_basic_statistics(datasource)
-    discrepancie = 0
-    baseline_value = get_stat_value(baseline_statistics[daemon], value, stat)
-    dataframe_value = get_stat_value(dataframe_statistics[daemon], value, stat)
-
-    if baseline_value != 0:
-        diff = abs(baseline_value - dataframe_value) / baseline_value
-    else:
-        diff = abs(baseline_value - dataframe_value)
-    
-    if diff >= threshold:
-        discrepancie = 1
-    
-    return discrepancie
 
 
 def t_student_test(baseline, datasource, value):
