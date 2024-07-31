@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 import subprocess
 
 from modules.allocation.generic import Provider
-from modules.allocation.generic.models import CreationPayload, InstancePayload, InstancePayload
+from modules.allocation.generic.models import CreationPayload, InstancePayload
 from modules.allocation.generic.utils import logger
 from .credentials import AWSCredentials
 from .instance import AWSInstance
@@ -129,6 +129,7 @@ class AWSProvider(Provider):
 
         instance_params = {}
         instance_params['instance_dir'] = instance_dir
+        instance_params['name'] = config.name
         instance_params['identifier'] = instance_id
         instance_params['platform'] = platform
         instance_params['host_identifier'] = host_identifier
