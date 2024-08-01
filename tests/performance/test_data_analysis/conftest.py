@@ -1,10 +1,8 @@
 import pytest
 import os
-import yaml
-import io
 import pytest_html
 from contextlib import redirect_stdout
-from wazuh_testing.scripts.statistical_data_analyzer import load_dataframe, print_dataframes_stats
+from wazuh_testing.tools.performance.statistical_data_analyzer import DataLoader
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -59,16 +57,10 @@ def load_data(pytestconfig):
     datasource_file = pytestconfig.getoption("datasource")
     conf_level = pytestconfig.getoption("confidence_level")
 
-    if not baseline_file or not datasource_file:
-        pytest.fail("Both baseline file and data source file must be specified")
+    if not (0 <= conf_level <= 100):
+        pytest.fail(f"The value of confidence_level is not valid")
 
-    if not os.path.exists(baseline_file) or not os.path.exists(datasource_file):
-        pytest.fail("Files specified does not exist")
-    
-    baseline = load_dataframe(baseline_file)
-    datasource = load_dataframe(datasource_file)
-
-    return baseline, datasource, conf_level
+    return baseline_file, datasource_file, conf_level
 
 
 @pytest.fixture
@@ -84,15 +76,9 @@ def config(pytestconfig):
     config_file = pytestconfig.getoption("items_yaml")
 
     if not config_file:
-        pytest.fail("File with the items to analyze must be specified")
+        pytest.fail(f"File with the items to analyze must be specified")
 
-    if not os.path.exists(config_file):
-        pytest.fail(f"Items yaml file '{config_file}' does not exist")
-
-    with open(config_file, 'r') as file:
-        config = yaml.safe_load(file)
-
-    return config
+    return config_file
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -102,14 +88,16 @@ def pytest_runtest_makereport(item, call):
     report.extra = getattr(report, 'extra', [])
 
     if report.when == 'call' and report.failed:
-        baseline, datasource, confidence_level = item.funcargs['load_data']
+        baseline_file, datasource_file, _ = item.funcargs['load_data']
+        items_yaml_path = item.config.getoption("items_yaml")
+
+        data_loader = DataLoader(baseline_file, datasource_file, items_yaml_path)
+        output = data_loader.print_dataframes_stats()
         
         report_dir = os.path.dirname(item.config.option.htmlpath)
         assets_dir = os.path.join(report_dir, "assets")
         if not os.path.exists(assets_dir):
             os.makedirs(assets_dir)
-
-        output = print_dataframes_stats(baseline, datasource)
 
         test_name = item.name
         log_file = os.path.join(assets_dir, f"{test_name}_stats.log")

@@ -21,7 +21,7 @@ Issue: https://github.com/wazuh/wazuh/issues/24688
 """
 
 import pytest
-from wazuh_testing.scripts.statistical_data_analyzer import comparison_basic_statistics, t_student_test, t_levene_test, t_anova_test
+from wazuh_testing.tools.performance.statistical_data_analyzer import DataLoader, StatisticalComparator, StatisticalTests
 
 def test_comparison(load_data, config):
     """The main test of the module. It checks if any statistical test detects significant changes and if so, 
@@ -32,25 +32,33 @@ def test_comparison(load_data, config):
         threshold and confidence level values.
         config: Dict that contains the items to be analyzed.
     """
-    baseline, datasource, confidence_level = load_data
-    errors = []
-    daemons = config['Daemons']
+    baseline_file, datasource_file, confidence_level = load_data
+    config_file = config
+
+    data = DataLoader(baseline_file, datasource_file, config_file)
+    stats_comp = StatisticalComparator()
+    stats_tests = StatisticalTests()
+    
+    errors = []    
     metrics = config['Metrics']
     p_value = (100 - confidence_level) / 100
 
-    for daemon in daemons:
-        for value, thresholds in metrics.items():
-            t_p_value =  t_student_test(baseline, datasource, value)
-            l_p_value =  t_levene_test(baseline, datasource, value)
-            a_p_value =  t_anova_test(baseline, datasource, value)
+    for process in data.processes:
+        baseline_data = data.baseline[data.baseline[data.process_name] == process]
+        datasource_data = data.datasource[data.datasource[data.process_name] == process]
+
+        for value, stats in metrics.items():
+            t_p_value =  stats_tests.t_student_test(baseline_data, datasource_data, value)
+            l_p_value =  stats_tests.t_levene_test(baseline_data, datasource_data, value)
+            a_p_value =  stats_tests.t_anova_test(baseline_data, datasource_data, value)
 
             if t_p_value < p_value or l_p_value < p_value or a_p_value < p_value:
-                for stat, threshold_value in thresholds.items():
+                for stat, threshold_value in stats.items():
                     threshold_value = threshold_value / 100
                     try:
-                        assert comparison_basic_statistics(baseline, datasource, daemon, value, stat, threshold_value) != 1
+                        assert stats_comp.comparison_basic_statistics(baseline_data, datasource_data, value, stat, threshold_value) != 1
                     except AssertionError:
-                        errors.append(f"Difference over {threshold_value*100}% detected in '{daemon}' - '{value}' - '{stat}'")
+                        errors.append(f"Difference over {threshold_value*100}% detected in '{process}' - '{value}' - '{stat}'")
 
     if errors:
         pytest.fail("\n".join(errors))

@@ -1,17 +1,18 @@
 ---
-Daemons:
-  - "wazuh-clusterd"
-  - "wazuh-integratord"
-  - "wazuh-execd"
-  - "wazuh-logcollector"
-  - "wazuh-analysisd"
-  - "wazuh-db"
-  - "wazuh-maild"
-  - "wazuh-authd"
-  - "wazuh-syscheckd"
-  - "wazuh-monitord"
-  - "wazuh-modulesd"
-  - "wazuh-remoted"
+Processes:
+  Daemons:
+    - "wazuh-clusterd"
+    - "wazuh-integratord"
+    - "wazuh-execd"
+    - "wazuh-logcollector"
+    - "wazuh-analysisd"
+    - "wazuh-db"
+    - "wazuh-maild"
+    - "wazuh-authd"
+    - "wazuh-syscheckd"
+    - "wazuh-monitord"
+    - "wazuh-modulesd"
+    - "wazuh-remoted"
 
 Metrics:
   CPU(%):
