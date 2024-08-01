@@ -38,16 +38,15 @@ def test_comparison(load_data, config):
     data = DataLoader(baseline_file, datasource_file, config_file)
     stats_comp = StatisticalComparator()
     stats_tests = StatisticalTests()
-    
-    errors = []    
-    metrics = config['Metrics']
+
+    errors = []
     p_value = (100 - confidence_level) / 100
 
     for process in data.processes:
         baseline_data = data.baseline[data.baseline[data.process_name] == process]
         datasource_data = data.datasource[data.datasource[data.process_name] == process]
 
-        for value, stats in metrics.items():
+        for value, stats in data.metrics.items():
             t_p_value =  stats_tests.t_student_test(baseline_data, datasource_data, value)
             l_p_value =  stats_tests.t_levene_test(baseline_data, datasource_data, value)
             a_p_value =  stats_tests.t_anova_test(baseline_data, datasource_data, value)
@@ -56,7 +55,8 @@ def test_comparison(load_data, config):
                 for stat, threshold_value in stats.items():
                     threshold_value = threshold_value / 100
                     try:
-                        assert stats_comp.comparison_basic_statistics(baseline_data, datasource_data, value, stat, threshold_value) != 1
+                        assert stats_comp.comparison_basic_statistics(baseline_data, datasource_data, 
+                                                                      value, stat, threshold_value) != 1
                     except AssertionError:
                         errors.append(f"Difference over {threshold_value*100}% detected in '{process}' - '{value}' - '{stat}'")
 

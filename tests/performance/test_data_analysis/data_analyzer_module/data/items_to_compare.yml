@@ -1,6 +1,6 @@
 ---
 Processes:
-  Daemons:
+  Daemon:
     - "wazuh-clusterd"
     - "wazuh-integratord"
     - "wazuh-execd"

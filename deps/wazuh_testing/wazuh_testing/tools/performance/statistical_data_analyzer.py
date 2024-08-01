@@ -16,8 +16,8 @@ class DataLoader:
         self.validate_paths()
         self.baseline = self.load_dataframe(baseline_path)
         self.datasource = self.load_dataframe(datasource_path)
-        self.metrics = self.load_metrics()
-        self.process_name, self.processes = self.load_yaml_items(self.items_path)
+        #self.metrics = self.load_metrics()
+        self.process_name, self.processes, self.metrics = self.load_yaml_items(self.items_path)
         
 
     def validate_paths(self):
@@ -40,11 +40,11 @@ class DataLoader:
         return dataframe
         
         
-    def load_metrics(self):
-        """
-        """
-        metrics = [col for col in self.baseline.columns if pd.api.types.is_numeric_dtype(self.baseline[col])]
-        return metrics
+    # def load_metrics(self):
+    #     """
+    #     """
+    #     metrics = [col for col in self.baseline.columns if pd.api.types.is_numeric_dtype(self.baseline[col])]
+    #     return metrics
     
     
     def load_yaml_items(self, yaml_path):
@@ -59,8 +59,9 @@ class DataLoader:
         processes_section = config.get('Processes', {})
         process_name = list(processes_section.keys())[0]
         processes = processes_section[process_name]
+        metrics = config.get('Metrics', {})
 
-        return process_name, processes
+        return process_name, processes, metrics
     
     
     def print_dataframes_stats(self):
@@ -147,7 +148,17 @@ class StatisticalComparator:
 class StatisticalTests:
     """
     """
-    def t_student_test(baseline, datasource, value):
+    def perform_test(self, baseline, datasource, metric, test_func, **args):
+        """
+        """
+        ref_values = baseline[metric].dropna()
+        new_values = datasource[metric].dropna()
+
+        _, p_value = test_func(ref_values, new_values, **args)
+        return p_value
+    
+
+    def t_student_test(self, baseline, datasource, metric):
         """Function that performs the statistical analysis using the t-student test.
 
         Args:
@@ -158,15 +169,10 @@ class StatisticalTests:
         Returns:
             t_p_value: p value returned by the t-student test.
         """
-        ref_values = baseline[value].dropna()
-        new_values = datasource[value].dropna() 
-
-        _, t_p_value = ttest_ind(ref_values, new_values, equal_var=False)
-
-        return t_p_value  
+        return self.perform_test(baseline, datasource, metric, ttest_ind, equal_var=False) 
 
 
-    def t_levene_test(baseline, datasource, value):
+    def t_levene_test(self, baseline, datasource, metric):
         """Function that performs the statistical analysis using the Levene test.
 
         Args:
@@ -177,15 +183,10 @@ class StatisticalTests:
         Returns:
             l_p_value: p value returned by the Levene test.
         """
-        ref_values = baseline[value].dropna()
-        new_values = datasource[value].dropna() 
-
-        _, l_p_value = levene(ref_values, new_values)
-
-        return l_p_value
+        return self.perform_test(baseline, datasource, metric, levene)
 
 
-    def t_anova_test(baseline, datasource, value):
+    def t_anova_test(self, baseline, datasource, metric):
         """Function that performs the statistical analysis using the ANOVA test.
 
         Args:
@@ -196,9 +197,4 @@ class StatisticalTests:
         Returns:
             a_p_value: p value returned by the ANOVA test.
         """
-        ref_values = baseline[value].dropna()
-        new_values = datasource[value].dropna() 
-
-        _, a_p_value = f_oneway(ref_values, new_values)
-
-        return a_p_value
+        return self.perform_test(baseline, datasource, metric, f_oneway)
