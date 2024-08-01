@@ -42,7 +42,7 @@ def change_dir(new_path):
 
 
 def run_service(service_name, port, database_path, certs_path):
-    project_path = Path(__file__).resolve().parent.parent / 'manager_mockers' / service_name
+    project_path = Path(__file__).resolve().parent.parent / 'manager_services' / service_name
     cert_path = os.path.join(certs_path, 'cert.pem')
     key_path = os.path.join(certs_path, 'private_key.pem')
 

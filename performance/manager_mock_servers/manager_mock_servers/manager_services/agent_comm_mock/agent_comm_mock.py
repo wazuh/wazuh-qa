@@ -1,28 +1,21 @@
-from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel
-from fastapi.responses import JSONResponse
-import jwt
+import argparse
+import asyncio
 import datetime
 import logging
-from typing import Optional, List
-from fastapi import FastAPI, HTTPException, Depends, Request, status, Query, Header
-import sqlite3
-import asyncio
-import threading
-import argparse
 import os
-import uvicorn
+import sqlite3
 from contextlib import asynccontextmanager
-from models import AuthRequest, StatelessEvent, StatefullData
+from typing import Optional
 
+import jwt
+import uvicorn
+from fastapi import Depends, FastAPI, Header, HTTPException
+from fastapi.responses import JSONResponse
+
+from manager_mock_servers.manager_services.agent_comm_mock.models import AuthRequest, StatefullData, StatelessEvent
+from manager_mock_servers.utils.vars import DEFAULT_AUD, DEFAULT_ISS, DEFAULT_EXPIRATION_TIME
 
 global database_directory
-# Your global variables and constants
-GLOBAL_AGENTS_PUBLIC_KEY = ''
-default_iss = 'wazuh'
-default_aud = 'Wazuh Agent comms API'
-default_expiration_time = 900
-# Initialize logging
 
 logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger('uvicorn.error')
@@ -30,6 +23,25 @@ logger.setLevel(logging.DEBUG)
 
 # uuid - token
 valid_tokens = {}
+
+
+# class BrotliMiddleware(BaseHTTPMiddleware):
+#     async def dispatch(self, request: Request, call_next):
+#         response = await call_next(request)
+#         if 'accept-encoding' in request.headers and 'br' in request.headers['accept-encoding']:
+#             if response.status_code == 200:
+#                 content = response.body
+#                 compressed_content = brotli.compress(content)
+#                 headers = dict(response.headers)
+#                 headers['Content-Encoding'] = 'br'
+#                 headers['Content-Length'] = str(len(compressed_content))
+#                 return Response(content=compressed_content, headers=headers, status_code=response.status_code)
+#         return response
+
+
+def set_database_path(db_path):
+    global database_directory
+    database_directory = db_path
 
 
 def get_token_secret_key(token):
@@ -50,17 +62,16 @@ def get_token_secret_key(token):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global database_directory
     if not os.path.exists(database_directory):
         raise ValueError(f"Directory {database_directory} does not exist")
 
-    print(f"Database directory set to: {database_directory}")
+    logging.error(f"Database directory set to: {database_directory}")
 
     loop = asyncio.get_event_loop()
     loop.create_task(remove_expired_tokens())
 
     yield
-
-
 
 app = FastAPI(
     lifespan=lifespan
@@ -98,8 +109,7 @@ async def get_token(authorization: Optional[str] = Header(None)) -> str:
     try:
         secret_key = get_token_secret_key(token)
         # Decode the token
-        logger.debug(secret_key)
-        decoded_token = jwt.decode(token, secret_key, algorithms=["HS256"], audience=default_aud, issuer=default_iss)
+        decoded_token = jwt.decode(token, secret_key, algorithms=["HS256"], audience=DEFAULT_AUD, issuer=DEFAULT_ISS)
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired")
     except jwt.InvalidTokenError:
@@ -122,7 +132,8 @@ def get_token_secret_key(token: str) -> str:
 
 
 def connect_db():
-    return sqlite3.connect('../agents.db')
+    global database_directory
+    return sqlite3.connect(database_directory)
 
 
 @app.post('/authentication')
@@ -133,47 +144,45 @@ async def authenticate(auth_request: AuthRequest):
 
     # Get agent credentials
     conn = connect_db()
+    logger.error(database_directory)
     cursor = conn.cursor()
 
     cursor.execute(f'SELECT * FROM agents WHERE uuid = "{user_id}"')
-    existing_agent = cursor.fetchone()
-
-    if not existing_agent:
-        return JSONResponse(status_code=409, content={'message': 'Agent with uuid does not exists'})
-
     cursor.execute(f'SELECT credential FROM agents WHERE uuid = "{user_id}"')
-    credential = cursor.fetchone()[0]
+    existing_agent = cursor.fetchone()
+    credential = cursor.fetchone()
 
     conn.commit()
     conn.close()
 
-    logger.debug(credential)
-    logger.debug(key)
+
+
+    if not existing_agent:
+        return JSONResponse(status_code=409, content={'message': 'Agent with uuid does not exists'})
 
     if key != credential:
         return JSONResponse(status_code=409, content={'message': 'Invalid Key provided'})
 
-    # Generate the timestamp and token
     timestamp = int(datetime.datetime.now().timestamp())
 
     iat = timestamp
-    exp = timestamp + default_expiration_time
-    token = TokenManager.generate_token(default_iss, default_aud, iat, exp, user_id, credential)
+    exp = timestamp + DEFAULT_EXPIRATION_TIME
+    token = TokenManager.generate_token(DEFAULT_ISS, DEFAULT_AUD, iat, exp, user_id, credential)
 
     valid_tokens[token] = (user_id, exp)
 
-    # Return the token as a JSON response
     return JSONResponse(content={'token': token})
+
 
 @app.post('/events/stateless')
 async def stateless_event(event: StatelessEvent, authorization: str = Depends(get_token)):
     logger.debug(event.events[0])
     return {'message': 'Event received'}
 
+
 @app.post('/events/stateful')
 async def stateful_event(event: StatefullData, authorization: str = Depends(get_token)):
     return {'message': 'Event is being processed and will be persisted'}
-
 
 
 if __name__ == "__main__":

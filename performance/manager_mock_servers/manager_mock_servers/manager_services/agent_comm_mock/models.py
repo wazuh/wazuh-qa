@@ -3,24 +3,11 @@ from typing import Optional, List
 import jwt
 import datetime
 import logging
+from uuid6 import uuid7
 
-# Configuration and constants
-GLOBAL_AGENTS_PUBLIC_KEY = ''
-default_iss = 'wazuh'
-default_aud = 'Wazuh Agent comms API'
-default_expiration_time = 900
 
-# Initialize logging
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
-logger = logging.getLogger('uvicorn.error')
-logger.setLevel(logging.DEBUG)
-
-# Global token storage (in-memory)
-valid_tokens = {}
-
-# Pydantic Models
 class AuthRequest(BaseModel):
-    uuid: str
+    uuid: uuid7
     key: Optional[str] = None
 
 class StatelessEventData(BaseModel):
