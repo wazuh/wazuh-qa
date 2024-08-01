@@ -182,7 +182,7 @@ def get_script_arguments():
                         help=f'Directory to store the Sessions. Default ".auth".')
 
     parser.add_argument('-a', '--artillery', dest='artillery', type=str, default="artillery.yml",
-                        help=f'Path to the Artillery Script.')
+                        help=f'Path to the Artillery Script. Default "artillery.yml".')
 
     parser.add_argument('-u', '--user', dest='user', type=str, default= 'admin',
                         help=f'Wazuh User for the Dashboard. Default "admin".')
