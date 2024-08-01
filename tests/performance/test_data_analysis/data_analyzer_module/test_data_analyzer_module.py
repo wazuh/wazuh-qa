@@ -64,7 +64,7 @@ def test_comparison(get_data, config):
                                                                       value, stat, threshold_value) != 1
                     except AssertionError:
                         errors.append(f"Difference over {threshold_value*100}% detected in '{process}'" +
-                                      " - '{value}' - '{stat}'")
+                                      f" - '{value}' - '{stat}'")
 
     if errors:
         pytest.fail("\n".join(errors))
