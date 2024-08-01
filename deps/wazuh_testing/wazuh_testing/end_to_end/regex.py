@@ -49,7 +49,7 @@ REGEX_PATTERNS = {
         'regex':  'CVE.* affects.*"?'
     },
     'vuln_mitigated': {
-        'regex': "The .* that affected .* was solved due to a package removal.*"
+        'regex': "The .* that affected .* was solved due to an update in the agent or feed.*"
     }
 }
 
