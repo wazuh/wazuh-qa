@@ -241,6 +241,7 @@ class WazuhManager:
         Returns:
             bool: True if port is opened.
         """
+        time.sleep(5)
         wait_cycles = 0
         while wait_cycles < cycles:
             ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":443"').get('output') or ""
@@ -266,6 +267,7 @@ class WazuhManager:
         Returns:
             bool: True if port is opened.
         """
+        time.sleep(5)
         wait_cycles = 0
         while wait_cycles < cycles:
             ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":1514"').get('output') or ""
@@ -291,6 +293,7 @@ class WazuhManager:
         Returns:
             bool: True if port is opened.
         """
+        time.sleep(5)
         wait_cycles = 0
         while wait_cycles < cycles:
             ports = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":443"').get('output') or ""
