@@ -1,10 +1,43 @@
-"""Testing."""
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+r"""Manager Management API Mocker.
+
+This module implements a mock Wazuh management server for managing agent authentication and registration.
+It uses FastAPI for the web framework and SQLite for data storage.
+
+Example:
+    $ python3 manager_server_mock.py \
+      --port 2700 \
+      --key certs/private_key.pem \
+      --cert certs/certificate.pem \
+      --database_path database/agents.db
+Issue:
+
+Todo
+# app = FastAPI(
+#     title="ChimichangApp",
+#     description=description,
+#     summary="Deadpool's favorite app. Nuff said.",
+#     version="0.0.1",
+#     terms_of_service="http://example.com/terms/",
+#     contact={
+#         "name": "Deadpoolio the Amazing",
+#         "url": "http://x-force.example.com/contact/",
+#         "email": "dp@x-force.example.com",
+#     },
+#     license_info={
+#         "name": "Apache 2.0",
+#         "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
+#     },
+# )
+
+Logging
+"""
 import argparse
 import logging
 import os
-import secrets
 import sqlite3
-import string
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional
@@ -12,15 +45,20 @@ from typing import Optional
 import uvicorn
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import JSONResponse
-from manager_mock_servers.manager_services.manager_server_mock.models import AgentData, AuthData, TokenManager
-from manager_mock_servers.utils.vars import DEFAULT_AUD, DEFAULT_EXPIRATION_TIME, DEFAULT_ISS
 
-# Initialize logging
+from manager_mock_servers.manager_services.manager_server_mock.models import AgentData, AuthData
+from manager_mock_servers.utils.token_manager import TokenManager
+from manager_mock_servers.utils.vars import (
+    DEFAULT_AUD,
+    DEFAULT_EXPIRATION_TIME,
+    DEFAULT_ISS,
+    MANAGER_MOCK_TOKEN_SECRET_KEY,
+)
+
 logger = logging.getLogger('uvicorn.error')
 logger.setLevel(logging.INFO)
 
 global DATABASE_PATH
-VALID_TOKENS = []
 
 
 @asynccontextmanager
@@ -31,13 +69,6 @@ async def lifespan(app: FastAPI):
 
     yield
 
-def generate_random_string(length=32):
-    """Testing."""
-    characters = string.ascii_letters + string.digits + string.punctuation
-    random_string = ''.join(secrets.choice(characters) for _ in range(length))
-
-    return random_string
-
 
 async def get_token(authorization: Optional[str] = Header(None)) -> str:
     """Testing."""
@@ -45,33 +76,37 @@ async def get_token(authorization: Optional[str] = Header(None)) -> str:
         raise HTTPException(status_code=401, detail="Authorization header missing or malformed")
 
     token = authorization.split(" ")[1]
-    # No token validation required for management server mockup
-    if token not in VALID_TOKENS:
-        raise HTTPException(status_code=403, detail="Invalid JWT token")
+
+    try:
+        TokenManager.decode_token(token, DEFAULT_ISS, DEFAULT_AUD, MANAGER_MOCK_TOKEN_SECRET_KEY)
+    except Exception as exception:
+        raise HTTPException(status_code=403, detail="Invalid JWT token") from exception
 
     return token
 
 
 def check_if_agent_exists(agent_name):
     """Testing."""
-    conn = sqlite3.connect(DATABASE_PATH)
-    cursor = conn.cursor()
-    cursor.execute(f'SELECT * FROM agents WHERE name = "{agent_name}"')
-    existing_agent = cursor.fetchone()
-    conn.close()
+    with sqlite3.connect(DATABASE_PATH) as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM agents WHERE name = ?', (agent_name,))
+        existing_agent = cursor.fetchone()
 
     return existing_agent
 
+
 def insert_new_agent(uuid, key, name):
-    """Testing."""
-    conn = sqlite3.connect(DATABASE_PATH)
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO agents (uuid, credential, name)
-        VALUES (?, ?, ?)
-    ''', (uuid, key, name))
-    conn.commit()
-    conn.close()
+    """Insert a new agent into the database."""
+    try:
+        with sqlite3.connect(DATABASE_PATH) as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO agents (uuid, credential, name)
+                VALUES (?, ?, ?)
+            ''', (uuid, key, name))
+            conn.commit()
+    except sqlite3.Error as e:
+        logger.error(f"Database error: {e}")
 
 
 def start_server_manager(application, database_path, port, ssl_keyfile, ssl_certfile):
@@ -90,6 +125,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+
 @app.post("/authentication")
 async def authenticate(data: AuthData):
     """Testing."""
@@ -97,8 +133,7 @@ async def authenticate(data: AuthData):
     exp = timestamp + DEFAULT_EXPIRATION_TIME
 
     token = TokenManager.generate_token(DEFAULT_ISS, DEFAULT_AUD, timestamp, exp,
-                                        data.user, generate_random_string(10))
-    VALID_TOKENS.append(token)
+                                        data.user, MANAGER_MOCK_TOKEN_SECRET_KEY)
 
     return JSONResponse(content={'token': token})
 
