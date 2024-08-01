@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Test Report</title>
+    <link href="assets/style.css" rel="stylesheet" type="text/css"/></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) { // eslint-disable-line no-redeclare
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function findAll(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sortColumn(elem) {
+    toggleSortStates(elem);
+    const colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    let key;
+    if (elem.classList.contains('result')) {
+        key = keyResult;
+    } else if (elem.classList.contains('links')) {
+        key = keyLink;
+    } else {
+        key = keyAlpha;
+    }
+    sortTable(elem, key(colIndex));
+}
+
+function showAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(showExtras);
+}
+
+function hideAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(hideExtras);
+}
+
+function showExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.remove('collapsed');
+    expandcollapse.classList.remove('expander');
+    expandcollapse.classList.add('collapser');
+}
+
+function hideExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.add('collapsed');
+    expandcollapse.classList.remove('collapser');
+    expandcollapse.classList.add('expander');
+}
+
+function showFilters() {
+    const filterItems = document.getElementsByClassName('filter');
+    for (let i = 0; i < filterItems.length; i++)
+        filterItems[i].hidden = false;
+}
+
+function addCollapse() {
+    // Add links for show/hide all
+    const resulttable = find('table#results-table');
+    const showhideall = document.createElement('p');
+    showhideall.innerHTML = '<a href="javascript:showAllExtras()">Show all details</a> / ' +
+                            '<a href="javascript:hideAllExtras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    findAll('.col-result').forEach(function(elem) {
+        const collapsed = getQueryParameter('collapsed') || 'Passed';
+        const extras = elem.parentNode.nextElementSibling;
+        const expandcollapse = document.createElement('span');
+        if (extras.classList.contains('collapsed')) {
+            expandcollapse.classList.add('expander');
+        } else if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add('collapsed');
+            expandcollapse.classList.add('expander');
+        } else {
+            expandcollapse.classList.add('collapser');
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener('click', function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains('collapsed')) {
+                showExtras(event.currentTarget);
+            } else {
+                hideExtras(event.currentTarget);
+            }
+        });
+    });
+}
+
+function getQueryParameter(name) {
+    const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () { // eslint-disable-line no-unused-vars
+    resetSortHeaders();
+
+    addCollapse();
+
+    showFilters();
+
+    sortColumn(find('.initial-sort'));
+
+    findAll('.sortable').forEach(function(elem) {
+        elem.addEventListener('click',
+            function() {
+                sortColumn(elem);
+            }, false);
+    });
+}
+
+function sortTable(clicked, keyFunc) {
+    const rows = findAll('.results-table-row');
+    const reversed = !clicked.classList.contains('asc');
+    const sortedRows = sort(rows, keyFunc, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    const thead = document.getElementById('results-table-head');
+    document.getElementById('results-table').remove();
+    const parent = document.createElement('table');
+    parent.id = 'results-table';
+    parent.appendChild(thead);
+    sortedRows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName('BODY')[0].appendChild(parent);
+}
+
+function sort(items, keyFunc, reversed) {
+    const sortArray = items.map(function(item, i) {
+        return [keyFunc(item), i];
+    });
+
+    sortArray.sort(function(a, b) {
+        const keyA = a[0];
+        const keyB = b[0];
+
+        if (keyA == keyB) return 0;
+
+        if (reversed) {
+            return keyA < keyB ? 1 : -1;
+        } else {
+            return keyA > keyB ? 1 : -1;
+        }
+    });
+
+    return sortArray.map(function(item) {
+        const index = item[1];
+        return items[index];
+    });
+}
+
+function keyAlpha(colIndex) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[colIndex].firstChild.data.toLowerCase();
+    };
+}
+
+function keyLink(colIndex) {
+    return function(elem) {
+        const dataCell = elem.childNodes[1].childNodes[colIndex].firstChild;
+        return dataCell == null ? '' : dataCell.innerText.toLowerCase();
+    };
+}
+
+function keyResult(colIndex) {
+    return function(elem) {
+        const strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+            'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[colIndex].firstChild.data);
+    };
+}
+
+function resetSortHeaders() {
+    findAll('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    findAll('.sortable').forEach(function(elem) {
+        const icon = document.createElement('div');
+        icon.className = 'sort-icon';
+        icon.textContent = 'vvv';
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove('desc', 'active');
+        elem.classList.add('asc', 'inactive');
+    });
+}
+
+function toggleSortStates(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        resetSortHeaders();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function isAllRowsHidden(value) {
+    return value.hidden == false;
+}
+
+function filterTable(elem) { // eslint-disable-line no-unused-vars
+    const outcomeAtt = 'data-test-result';
+    const outcome = elem.getAttribute(outcomeAtt);
+    const classOutcome = outcome + ' results-table-row';
+    const outcomeRows = document.getElementsByClassName(classOutcome);
+
+    for(let i = 0; i < outcomeRows.length; i++){
+        outcomeRows[i].hidden = !elem.checked;
+    }
+
+    const rows = findAll('.results-table-row').filter(isAllRowsHidden);
+    const allRowsHidden = rows.length == 0 ? true : false;
+    const notFoundMessage = document.getElementById('not-found-message');
+    notFoundMessage.hidden = !allRowsHidden;
+}
+</script>
+    <h1>report.html</h1>
+    <p>Report generated on 01-Aug-2024 at 12:21:56 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
+    <h2>Summary</h2>
+    <p>1 tests ran in 4.38 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">0 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">1 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable" col="duration">Duration</th>
+          <th class="sortable links" col="links">Links</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">performance/test_data_analysis/data_analyzer_module/test_data_analyzer_module.py::test_comparison</td>
+          <td class="col-duration">3.33</td>
+          <td class="col-links"><a class="url" href="assets/test_comparison_stats.log" target="_blank">Statistical comparison</a> </td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">load_data = (&#x27;./data_analyzer_module/data/4.8.0-rc4-vdr.csv&#x27;, &#x27;./data_analyzer_module/data/4.8.0-beta6-vdr-leak.csv&#x27;, 95), config = &#x27;./data_analyzer_module/data/items_to_compare.yml&#x27;<br/><br/>    def test_comparison(load_data, config):<br/>        &quot;&quot;&quot;The main test of the module. It checks if any statistical test detects significant changes and if so,<br/>        compares the statistics of both data sets to detect changes with respect to a threshold value.<br/>    <br/>        Args:<br/>            load_data: fixture that contains baseline and data source Dataframes, and the<br/>            threshold and confidence level values.<br/>            config: Dict that contains the items to be analyzed.<br/>        &quot;&quot;&quot;<br/>        baseline_file, datasource_file, confidence_level = load_data<br/>        config_file = config<br/>    <br/>        data = DataLoader(baseline_file, datasource_file, config_file)<br/>        stats_comp = StatisticalComparator()<br/>        stats_tests = StatisticalTests()<br/>    <br/>        errors = []<br/>        p_value = (100 - confidence_level) / 100<br/>    <br/>        for process in data.processes:<br/>            baseline_data = data.baseline[data.baseline[data.process_name] == process]<br/>            datasource_data = data.datasource[data.datasource[data.process_name] == process]<br/>    <br/>            for value, stats in data.metrics.items():<br/>                t_p_value =  stats_tests.t_student_test(baseline_data, datasource_data, value)<br/>                l_p_value =  stats_tests.t_levene_test(baseline_data, datasource_data, value)<br/>                a_p_value =  stats_tests.t_anova_test(baseline_data, datasource_data, value)<br/>    <br/>                if t_p_value &lt; p_value or l_p_value &lt; p_value or a_p_value &lt; p_value:<br/>                    for stat, threshold_value in stats.items():<br/>                        threshold_value = threshold_value / 100<br/>                        try:<br/>                            assert stats_comp.comparison_basic_statistics(baseline_data, datasource_data,<br/>                                                                          value, stat, threshold_value) != 1<br/>                        except AssertionError:<br/>                            errors.append(f&quot;Difference over {threshold_value*100}% detected in &#x27;{process}&#x27;&quot; +<br/>                                          &quot; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;&quot;)<br/>    <br/>        if errors:<br/>&gt;           pytest.fail(&quot;\n&quot;.join(errors))<br/><span class="error">E           Failed: Difference over 5.0% detected in &#x27;wazuh-execd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-execd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-execd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-execd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-execd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-execd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-execd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-execd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-execd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-logcollector&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-logcollector&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-logcollector&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-logcollector&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-logcollector&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-logcollector&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-logcollector&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-logcollector&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-logcollector&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-logcollector&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-logcollector&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-analysisd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-analysisd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-analysisd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-analysisd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-analysisd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-analysisd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-analysisd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-analysisd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-analysisd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-analysisd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-analysisd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-analysisd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-analysisd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-db&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-authd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-authd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-authd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-authd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-authd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-authd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-authd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-syscheckd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-syscheckd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-syscheckd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-syscheckd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-syscheckd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-syscheckd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-syscheckd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-syscheckd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-syscheckd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-syscheckd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-syscheckd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-syscheckd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-syscheckd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-syscheckd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-syscheckd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-monitord&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-monitord&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-monitord&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-monitord&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-monitord&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-monitord&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-monitord&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-monitord&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-monitord&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-monitord&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-monitord&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-monitord&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-monitord&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-monitord&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 15.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-modulesd&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-remoted&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-remoted&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-remoted&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-remoted&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-remoted&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-remoted&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-remoted&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-remoted&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 25.0% detected in &#x27;wazuh-remoted&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 10.0% detected in &#x27;wazuh-remoted&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-remoted&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-remoted&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-remoted&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><span class="error">E           Difference over 5.0% detected in &#x27;wazuh-remoted&#x27; - &#x27;{value}&#x27; - &#x27;{stat}&#x27;</span><br/><br/>data_analyzer_module/test_data_analyzer_module.py:65: Failed<br/></div></td></tr></tbody></table></body></html>
