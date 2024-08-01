@@ -8,12 +8,12 @@ Statistical Data Analyzer Module Test
 
 Brief:
     This module contains a basic test that allows you to perform statistical analysis and calculations
-    on two data sets and to make comparisons between them. This allows to detect significant 
+    on two data sets and to make comparisons between them. This allows to detect significant
     differences between the two sets automatically.
 
     This test uses t-Student, Levene and ANOVA tests to detect possible significant differences in the
-    metrics of the data sets. If such differences exist, comparisons are made between the main 
-    statistics with respect to a threshold value which, if exceeded, is marked as an error and 
+    metrics of the data sets. If such differences exist, comparisons are made between the main
+    statistics with respect to a threshold value which, if exceeded, is marked as an error and
     reported conveniently.
 
 Tests:
@@ -27,9 +27,10 @@ import pytest
 from wazuh_testing.tools.performance.statistical_data_analyzer import DataLoader, \
     StatisticalComparator, StatisticalTests
 
+
 def test_comparison(get_data, config):
-    """The main test of the module. It checks if any statistical test detects significant changes and 
-    if so, compares the statistics of both data sets to detect changes with respect to a threshold value.  
+    """The main test of the module. It checks if any statistical test detects significant changes and
+    if so, compares the statistics of both data sets to detect changes with respect to a threshold value.
 
     Args:
         load_data: fixture that contains baseline, incoming data source Dataframes, and the
@@ -51,9 +52,9 @@ def test_comparison(get_data, config):
         datasource_data = data.datasource[data.datasource[data.process_name] == process]
 
         for value, stats in data.metrics.items():
-            t_p_value =  stats_tests.t_student_test(baseline_data, datasource_data, value)
-            l_p_value =  stats_tests.t_levene_test(baseline_data, datasource_data, value)
-            a_p_value =  stats_tests.t_anova_test(baseline_data, datasource_data, value)
+            t_p_value = stats_tests.t_student_test(baseline_data, datasource_data, value)
+            l_p_value = stats_tests.t_levene_test(baseline_data, datasource_data, value)
+            a_p_value = stats_tests.t_anova_test(baseline_data, datasource_data, value)
 
             if t_p_value < p_value or l_p_value < p_value or a_p_value < p_value:
                 for stat, threshold_value in stats.items():

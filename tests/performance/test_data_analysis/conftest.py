@@ -9,6 +9,7 @@ import pytest_html
 from contextlib import redirect_stdout
 from wazuh_testing.tools.performance.statistical_data_analyzer import DataLoader
 
+
 def pytest_addoption(parser):
     """Function that collects the parameters used to execute the test.
 
@@ -52,10 +53,10 @@ def pytest_addoption(parser):
 @pytest.fixture
 def get_data(pytestconfig):
     """Fixture that collects the CSV files and the confidence level passed by parameters to the test.
-    
+
     Args:
         pytestconfig: returns the :class:`_pytest.config.Config` object.
-    
+
     Returns:
         baseline: path to the baseline data file.
         datasource: path to the incoming data file.
@@ -103,7 +104,7 @@ def pytest_runtest_makereport(item, call):
 
         data_loader = DataLoader(baseline_file, datasource_file, items_yaml_path)
         output = data_loader.print_dataframes_stats()
-        
+
         report_dir = os.path.dirname(item.config.option.htmlpath)
         assets_dir = os.path.join(report_dir, "assets")
         if not os.path.exists(assets_dir):
