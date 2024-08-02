@@ -23,6 +23,7 @@ All notable changes to this project will be documented in this file.
 - Update the API script file name ([#5351](https://github.com/wazuh/wazuh-qa/pull/5351)) \- (Framework + Tests)
 - Enhance the PR template ([#4881](https://github.com/wazuh/wazuh-qa/pull/4881)) \- (Framework)
 - Update integration tests README ([#4742](https://github.com/wazuh/wazuh-qa/pull/4742)) \- (Documentation)
+- Modify the directory name for machines deployed in AWS ([#5635](https://github.com/wazuh/wazuh-qa/pull/5635)) \- (Framework)
 
 ### Fixed
 
