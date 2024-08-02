@@ -118,11 +118,10 @@ class AWSProvider(Provider):
         # Generate the instance.
         instance_id = cls.__create_ec2_instance(config)
         # Rename the temp directory to its real name.
-        if not params.instance_name and not params.label_issue:
-            instance_dir = Path(base_dir, f"{params.composite_name}-{instance_id[3:9]}")
-        else:
-            instance_dir = Path(base_dir, f"{name}-{instance_id[3:9]}")
-
+        while True:
+            instance_dir = Path(base_dir, f"{name}-{str(random.randint(0000, 9999))}")
+            if not instance_dir.exists():
+                break
         logger.debug(f"Renaming temp {temp_dir} directory to {instance_dir}")
         os.rename(temp_dir, instance_dir)
         if platform != "windows":
