@@ -2,6 +2,7 @@ import argparse
 import json
 import pandas as pd
 import time
+import yaml
 
 from datetime import datetime
 from os import makedirs
@@ -88,6 +89,54 @@ def create_session_file(path: str, user: str) -> None:
         file.write('{}')
 
 
+def gen_artillery_params(args: argparse) -> dict:
+    """Format all parameters for Artillery.
+
+    Args:
+        args (argparse): Script parameters.
+
+    Returns:
+        dict: Artillery parameters.
+    """
+    artillery_params = {
+        'username': args.user,
+        'password': args.password,
+        'screenshots': args.screenshots,
+        'session': args.session
+    }
+
+    return artillery_params
+
+
+def add_options_to_artillery(config: str, options: dict) -> None:
+    """Add missing parameters to Artillery config.
+
+    Args:
+        config (str): YAML de Artillery.
+        options (dict): Parametros de Artillery.
+    """
+    # Open YML
+    with open(config) as f:
+        data = yaml.safe_load(f)
+
+    # Check `config` in Artillery YAML
+    if 'config' not in data.keys():
+        data['config'] = {}
+
+    # Check `variables` in Artillery YAML
+    if 'variables' not in data['config'].keys():
+        data['config']['variables'] = {}
+
+    # Add Options to Artillery
+    for key in options:
+        if key not in data['config']['variables'].keys():
+            data['config']['variables'][key] = f'{{{{ { key } }}}}'
+
+    # Save YML
+    with open(config, "w") as f:
+        yaml.dump(data, f)
+
+
 def process_script_arguments(args: argparse) -> None:
     """Process script arguments, create folders and generate necessary files.
 
@@ -103,24 +152,8 @@ def process_script_arguments(args: argparse) -> None:
     # Create Session File
     create_session_file(args.session, args.user)
 
-
-def gen_artillery_params(args: argparse) -> str:
-    """Format all parameters for Artillery.
-
-    Args:
-        args (argparse): Script parameters.
-
-    Returns:
-        str: Formatted Artillery parameters.
-    """
-    artillery_params = {
-        'username': args.user,
-        'password': args.password,
-        'screenshots': args.screenshots,
-        'session': args.session
-    }
-
-    return json.dumps(artillery_params)
+    # Check Artillery Parameters
+    add_options_to_artillery(args.artillery, gen_artillery_params(args))
 
 
 def gen_log_filename(log_path: str) -> str:
@@ -187,7 +220,7 @@ def run_artillery(args: argparse) -> None:
     """
     json_filename = gen_log_filename(args.logs)
 
-    params = f"-v '{gen_artillery_params(args)}'"
+    params = f"-v '{json.dumps(gen_artillery_params(args))}'"
     target = f"-t {gen_url(args.ip)}"
 
     # Enable Quiet Mode (Artillery)
@@ -200,8 +233,6 @@ def run_artillery(args: argparse) -> None:
     script = f"{args.artillery}"
 
     command = f'artillery run {params} {target} {quiet} {output} {script}'
-
-    print(command)
 
     run(command, shell=True)
     convert_json_to_csv(args, json_filename)
