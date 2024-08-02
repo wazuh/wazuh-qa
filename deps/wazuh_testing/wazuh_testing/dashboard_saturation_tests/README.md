@@ -95,6 +95,15 @@ python3 -m dashboard_saturation_tests.py --password <wazuh_pass> --ip <dashboard
 - `--artillery` needs to receive a valid Artillery configuration file.
 - `--type` only accepts the options received in the Artillery JSON file with the results.
 
+### Check PEP 8
+
+The Python script complies with the PEP 8 standard. To verify that it continues to comply with the standard (after making changes) you just have to execute the following commands:
+
+```shell script
+python3 -m pip install pycodestyle
+pycodestyle dashboard_saturation_tests.py
+```
+
 ### Example
 
 ```shell script
