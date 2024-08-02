@@ -104,19 +104,6 @@ def process_script_arguments(args: argparse) -> None:
     create_session_file(args.session, args.user)
 
 
-def format_artillery_params(key: str, value: str) -> str:
-    """Format options for Artillery.
-
-    Args:
-        key (str): Name of the Artillery option.
-        value (str): Value of the Artillery option.
-
-    Returns:
-        str: Formatted Artillery option.
-    """
-    return f"\"{key}\": \"{value}\""
-
-
 def gen_artillery_params(args: argparse) -> str:
     """Format all parameters for Artillery.
 
@@ -126,14 +113,14 @@ def gen_artillery_params(args: argparse) -> str:
     Returns:
         str: Formatted Artillery parameters.
     """
-    user = format_artillery_params('username', args.user)
-    password = format_artillery_params('password', args.password)
-    screenshots = format_artillery_params('screenshots', args.screenshots)
-    session = format_artillery_params('session', args.session)
+    artillery_params = {
+        'username': args.user,
+        'password': args.password,
+        'screenshots': args.screenshots,
+        'session': args.session
+    }
 
-    params = f"\'{{{user}, {password}, {screenshots}, {session}}}\'"
-
-    return params
+    return json.dumps(artillery_params)
 
 
 def gen_log_filename(log_path: str) -> str:
@@ -200,19 +187,21 @@ def run_artillery(args: argparse) -> None:
     """
     json_filename = gen_log_filename(args.logs)
 
-    params = f"-v {gen_artillery_params(args)}"
+    params = f"-v '{gen_artillery_params(args)}'"
     target = f"-t {gen_url(args.ip)}"
 
     # Enable Quiet Mode (Artillery)
     quiet = ''
 
     if not args.debug:
-        quiet = f"-q"
+        quiet = f'-q'
 
     output = f"-o {json_filename}"
-    script = f'{args.artillery}'
+    script = f"{args.artillery}"
 
-    command = f"artillery run {params} {target} {quiet} {output} {script}"
+    command = f'artillery run {params} {target} {quiet} {output} {script}'
+
+    print(command)
 
     run(command, shell=True)
     convert_json_to_csv(args, json_filename)
