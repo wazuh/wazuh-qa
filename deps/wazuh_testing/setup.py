@@ -35,6 +35,7 @@ package_data_list = [
     'end_to_end/vulnerability_detector_packages/vuln_packages.json',
     'tools/migration_tool/CVE_JSON_5.0_bundled.json',
     'data/data_visualizer/*'
+    'tools/performance/statistical_data_analyzer.py'
 ]
 
 scripts_list = [
