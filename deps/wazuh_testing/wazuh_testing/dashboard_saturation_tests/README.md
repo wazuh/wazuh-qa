@@ -83,7 +83,7 @@ python3 -m dashboard_saturation_tests.py --password <wazuh_pass> --ip <dashboard
 | `-a`, `--artillery` | `Path to the Artillery Script` | `str` | No | `artillery.yml` |
 | `-u`, `--user` | `Wazuh User for the Dashboard` | `str` | No | `admin` |
 | `-p`, `--password` | `Wazuh Password for the Dashboard` | `str` | Yes | None |
-| `-q`, `--quantity` | `Number of Tests to Run` | `int` | No | `1` |
+| `-q`, `--iterations` | `Number of Tests to Run` | `int` | No | `1` |
 | `-i`, `--ip` | `Set the Dashboard IP` | `str` | Yes | None |
 | `-t`, `--type` | `JSON data to create the CSV` | `list` | No | `['aggregate', 'intermediate']` |
 | `-w`, `--wait` | `Waiting Time between Executions` | `int` | No | `1` |

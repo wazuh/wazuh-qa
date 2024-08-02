@@ -185,7 +185,7 @@ def get_script_arguments():
                                      description='Script to Run Dashboard Saturation Tests',
                                      formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument('-l', '--logs', dest='logs', default='logs/',
+    parser.add_argument('-l', '--log', dest='logs', default='logs/',
                         help=f'Directory to store the logs. Default "logs".')
     
     parser.add_argument('-s', '--screenshots', dest='screenshots', default='screenshots/',
@@ -206,7 +206,7 @@ def get_script_arguments():
     parser.add_argument('-p', '--password', dest='password', type=str, required=True,
                         help=f'Wazuh Password for the Dashboard.')
     
-    parser.add_argument('-q', '--quantity', dest='quantity', type=int, default=1,
+    parser.add_argument('-q', '--iterations', dest='iterations', type=int, default=1,
                         help=f'Number of Tests to Run. Default {1}')
     
     parser.add_argument('-i', '--ip', dest='ip', type=str, required=True,
@@ -229,7 +229,7 @@ def main():
 
     process_script_arguments(script_args)
 
-    for n in range(0, script_args.quantity):    
+    for n in range(0, script_args.iterations):    
         run_artillery(script_args)
         time.sleep(script_args.wait)
 
