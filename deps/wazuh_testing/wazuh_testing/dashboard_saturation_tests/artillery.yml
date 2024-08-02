@@ -1,6 +1,4 @@
 config:
-  # Dashboard Base URL
-  target: https://127.0.0.1/
   # Setting Duration and Concurrent Users
   phases:
     - duration: 10

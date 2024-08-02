@@ -1,15 +1,31 @@
 import argparse
 import json
 import pandas as pd
+import time
 
 from datetime import datetime
 from os import makedirs
-from os.path import exists
+from os.path import join
 from subprocess import run
 
 # Global Configuration Variables
-csv_types = ['aggregate', 'intermediate']
-url_format = 'https://'
+artillery_result_type = [
+    'aggregate',   # Test-wide statistics, which correspond to the final statistics printed to the console at the end of a test
+    'intermediate' # Statistics that print to the console while a test is running
+]
+
+def check_artillery_result_types(types):
+    """Check that a valid type of Artillery result has been chosen to generate the CSV.
+    Args:
+        types (list): List of types.
+    """
+    for value in types:
+        if value not in artillery_result_type:
+            msg = f'The Artillery result type to generate the CSV is not valid.'
+            accepted_values = f'Accepted Values: {artillery_result_type}.'
+            received_value = f'Value received {value}.'
+
+            raise Exception(f'{msg} {accepted_values} {received_value}') 
 
 def format_directory(directory):
     """Check the paths of the directories and format them if necessary.
@@ -18,24 +34,31 @@ def format_directory(directory):
     Returns:
         string: Formatted path.
     """
-    return directory if directory.endswith("/") else f'{directory}/'
-
-def check_csv_types(types):
-    """Check that the CSV type is valid.
-    Args:
-        types (list): List of types.
-    """
-    for value in types:
-        if (value not in csv_types):
-            raise Exception("CSV type is not valid") 
-        
+    return join(directory, '')
+  
 def create_directories(directory):
     """Create directory that does not exist.
     Args:
         directory (str): Path of directory.
     """
-    if not exists(directory):
-        makedirs(directory)
+    makedirs(directory, exist_ok=True)
+
+def provide_directories(args):
+    """Format the paths of the directories and create them (if they do not exist).
+    Args:
+        args (ArgumentParser): Script parameters.
+    """
+    # Format Directories
+    args.logs = format_directory(args.logs)
+    args.screenshots = format_directory(args.screenshots)
+    args.csv = format_directory(args.csv)
+    args.session = format_directory(args.session)
+
+    # Create Directories
+    create_directories(args.logs)
+    create_directories(args.screenshots)
+    create_directories(args.csv)
+    create_directories(args.session)
 
 def create_session_file(path, user):
     """Create file to save the browser session.
@@ -53,20 +76,11 @@ def process_script_arguments(args):
     Args:
         args (ArgumentParser): Script parameters.
     """
-    # Format Directories
-    args.logs = format_directory(args.logs)
-    args.screenshots = format_directory(args.screenshots)
-    args.csv = format_directory(args.csv)
-    args.session = format_directory(args.session)
+    # Check Artillery Result Types
+    check_artillery_result_types(args.type)
 
-    # Check CSV Types
-    check_csv_types(args.type)
-
-    # Create Directories
-    create_directories(args.logs)
-    create_directories(args.screenshots)
-    create_directories(args.csv)
-    create_directories(args.session)
+    # Provide Necessary Directories
+    provide_directories(args)
 
     # Create Session File
     create_session_file(args.session, args.user)
@@ -113,6 +127,8 @@ def gen_url(ip):
     Returns:
         str: Complete url of the dashboard.
     """
+    url_format = 'https://'
+
     return f'{url_format}{ip}'
 
 def gen_csv_filename(csv_path, type):
@@ -200,8 +216,11 @@ def get_script_arguments():
                         default=['aggregate', 'intermediate'],
                         help=f'JSON data to create the CSV.')
     
+    parser.add_argument('-w', '--wait', dest='wait', type=int, default=5,
+                        help=f'Waiting Time between Executions.')
+    
     parser.add_argument('-d', '--debug', dest='debug', action='store_true', required=False,
-                        default=False, help='Enable debug mode')
+                        default=False, help='Enable Debug Mode')
 
     return parser.parse_args()
 
@@ -212,6 +231,7 @@ def main():
 
     for n in range(0, script_args.quantity):    
         run_artillery(script_args)
+        time.sleep(script_args.wait)
 
 if __name__ == "__main__":
     main()
