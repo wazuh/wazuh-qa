@@ -121,7 +121,7 @@ class AWSProvider(Provider):
         if not params.instance_name and not params.label_issue:
             instance_dir = Path(base_dir, f"{params.composite_name}-{instance_id[3:9]}")
         else:
-            instance_dir = Path(base_dir, f"{name}{instance_id[3:9]}")
+            instance_dir = Path(base_dir, f"{name}-{instance_id[3:9]}")
 
         logger.debug(f"Renaming temp {temp_dir} directory to {instance_dir}")
         os.rename(temp_dir, instance_dir)
