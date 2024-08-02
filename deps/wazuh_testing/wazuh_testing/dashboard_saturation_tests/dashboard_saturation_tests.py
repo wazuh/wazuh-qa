@@ -8,6 +8,7 @@ from os import makedirs
 from os.path import join
 from subprocess import run
 
+
 # Global Configuration Variables
 artillery_result_type = [
     # Final statistics printed to the console at the end of a test
@@ -17,7 +18,7 @@ artillery_result_type = [
 ]
 
 
-def check_artillery_result_types(types):
+def check_artillery_result_types(types: list) -> None:
     """Check that a valid type of Artillery result has been
     chosen to generate the CSV.
 
@@ -33,19 +34,19 @@ def check_artillery_result_types(types):
             raise Exception(msg)
 
 
-def format_directory(directory):
+def format_directory(directory: str) -> str:
     """Check the paths of the directories and format them if necessary.
 
     Args:
-        args (string): Path of a directory.
+        args (str): Path of a directory.
 
     Returns:
-        string: Formatted path.
+        str: Formatted path.
     """
     return join(directory, '')
 
 
-def create_directories(directory):
+def create_directories(directory: str) -> None:
     """Create directory that does not exist.
 
     Args:
@@ -54,12 +55,12 @@ def create_directories(directory):
     makedirs(directory, exist_ok=True)
 
 
-def provide_directories(args):
+def provide_directories(args: argparse) -> None:
     """Format the paths of the directories and create them
     (if they do not exist).
 
     Args:
-        args (ArgumentParser): Script parameters.
+        args (argparse): Script parameters.
     """
     # Format Directories
     args.logs = format_directory(args.logs)
@@ -74,7 +75,7 @@ def provide_directories(args):
     create_directories(args.session)
 
 
-def create_session_file(path, user):
+def create_session_file(path: str, user: str) -> None:
     """Create file to save the browser session.
 
     Args:
@@ -87,11 +88,11 @@ def create_session_file(path, user):
         file.write('{}')
 
 
-def process_script_arguments(args):
+def process_script_arguments(args: argparse) -> None:
     """Process script arguments, create folders and generate necessary files.
 
     Args:
-        args (ArgumentParser): Script parameters.
+        args (argparse): Script parameters.
     """
     # Check Artillery Result Types
     check_artillery_result_types(args.type)
@@ -103,7 +104,7 @@ def process_script_arguments(args):
     create_session_file(args.session, args.user)
 
 
-def format_artillery_params(key, value):
+def format_artillery_params(key: str, value: str) -> str:
     """Format options for Artillery.
 
     Args:
@@ -116,11 +117,11 @@ def format_artillery_params(key, value):
     return f"\"{key}\": \"{value}\""
 
 
-def gen_artillery_params(args):
+def gen_artillery_params(args: argparse) -> str:
     """Format all parameters for Artillery.
 
     Args:
-        args (ArgumentParser): Script parameters.
+        args (argparse): Script parameters.
 
     Returns:
         str: Formatted Artillery parameters.
@@ -135,7 +136,7 @@ def gen_artillery_params(args):
     return params
 
 
-def gen_log_filename(log_path):
+def gen_log_filename(log_path: str) -> str:
     """Generate log file name.
 
     Args:
@@ -147,7 +148,7 @@ def gen_log_filename(log_path):
     return log_path + datetime.now().strftime(f"log-%Y%m%d%H%M%S.log")
 
 
-def gen_url(ip):
+def gen_url(ip: str) -> str:
     """Generate dashboard url.
 
     Args:
@@ -161,7 +162,7 @@ def gen_url(ip):
     return f'{url_format}{ip}'
 
 
-def gen_csv_filename(csv_path, type):
+def gen_csv_filename(csv_path: str, type: str) -> str:
     """Generate csv file name (per type).
 
     Args:
@@ -174,11 +175,11 @@ def gen_csv_filename(csv_path, type):
     return csv_path + datetime.now().strftime(f"{type}-%Y%m%d%H%M%S.csv")
 
 
-def convert_json_to_csv(args, json_output):
+def convert_json_to_csv(args: argparse, json_output: str) -> None:
     """Convert data from JSON format to CSV format.
 
     Args:
-        args (ArgumentParser): Script parameters.
+        args (argparse): Script parameters.
         json_output (str): Path and file name of the log.
     """
     for type in args.type:
@@ -191,11 +192,11 @@ def convert_json_to_csv(args, json_output):
         df.to_csv(csv_filename, index=False)
 
 
-def run_artillery(args):
+def run_artillery(args: argparse) -> None:
     """Execute Artillery tests.
 
     Args:
-        args (ArgumentParser): Script parameters.
+        args (argparse): Script parameters.
     """
     json_filename = gen_log_filename(args.logs)
 
@@ -217,7 +218,13 @@ def run_artillery(args):
     convert_json_to_csv(args, json_filename)
 
 
-def get_script_arguments():
+def get_script_arguments() -> argparse:
+    """Add and Receive the Script Parameters.
+
+    Returns:
+        argparse: Script parameters.
+    """
+
     parser = argparse.ArgumentParser(
         usage='%(prog)s [options]',
         description='Script to Run Dashboard Saturation Tests',
@@ -320,7 +327,9 @@ def get_script_arguments():
     return parser.parse_args()
 
 
-def main():
+def main() -> None:
+    """Run the Script.
+    """
     script_args = get_script_arguments()
 
     process_script_arguments(script_args)
