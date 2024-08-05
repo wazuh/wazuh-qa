@@ -6,17 +6,23 @@ The Python script needs some input parameters to perform the tests and get the r
 
 ```shell script
 dashboard_saturation_tests/
-├── lib/
-│   ├── CookieManager.py
-│   ├── PathManager.py
-│   └── ScreenshotManager.py
-├── test/
-│   ├── EndpointTest.js
-│   ├── LoginTest.js
-│   └── OverviewTest.js
-├── artillery.yml
-├── dashboard_saturation_tests.py
-└── processor.js
+├── data/
+│   ├── lib/
+│   │   ├── CookieManager.js
+│   │   ├── PathManager.js
+│   │   └── ScreenshotManager.js
+│   ├── tests/
+│   │   ├── EndpointTest.js
+│   │   ├── LoginTest.js
+│   │   └── OverviewTest.js
+│   ├── __init__.py
+│   ├── artillery.xml
+│   ├── dashboard_saturation_tests.py
+│   └── processor.js
+├── README.md
+├── requirements.txt
+├── setup.py
+└── version.json
 ```
 
 ## Prerequisites
@@ -51,16 +57,15 @@ playwright --version
 
 ## Initial setup
 
-To run these tests, we need the wazuh-testing package. So first, we need to install all these Python dependencies, we can use this command:
+To run these tests, we need the package. So first, we need to install all these Python dependencies, we can use this command:
 
 ```shell script
-pip3 install -r requirements.txt
+python3 -m pip install -r requirements.txt
 ```
 
 Then, we need to install the package:
 
 ```shell script
-cd deps/wazuh_testing
 python3 setup.py install
 ```
 
@@ -69,7 +74,7 @@ python3 setup.py install
 To run the tests, we will need to use the following command:
 
 ```shell script
-python3 -m dashboard_saturation_tests.py --password <wazuh_pass> --ip <dashboard_ip>
+dashboard_saturation_tests --password <wazuh_pass> --ip <dashboard_ip>
 ```
 
 ### Parameters
@@ -100,14 +105,13 @@ python3 -m dashboard_saturation_tests.py --password <wazuh_pass> --ip <dashboard
 The Python script complies with the PEP 8 standard. To verify that it continues to comply with the standard (after making changes) you just have to execute the following commands:
 
 ```shell script
-python3 -m pip install pycodestyle
 pycodestyle dashboard_saturation_tests.py
 ```
 
 ### Example
 
 ```shell script
-python3 -m dashboard_saturation_tests -p password -i 172.16.1.36
+dashboard_saturation_tests -p password -i 172.16.1.36
 ```
 
 - Result: [report.zip](https://github.com/user-attachments/files/16456792/report.zip)
