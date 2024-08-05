@@ -3,11 +3,11 @@ from typing import Optional, List
 import jwt
 import datetime
 import logging
-from uuid6 import uuid7
+from uuid import UUID
 
 
 class AuthRequest(BaseModel):
-    uuid: uuid7
+    uuid: UUID
     key: Optional[str] = None
 
 class StatelessEventData(BaseModel):
@@ -20,17 +20,3 @@ class StatelessEvent(BaseModel):
 class StatefullData(BaseModel):
     # Add fields as required for stateful data
     pass
-
-
-class TokenManager:
-    @staticmethod
-    def generate_token(iss: str, aud: str, iat: int, exp: int, uuid: str, credential: str) -> str:
-        payload = {
-            'iss': iss,
-            'aud': aud,
-            'iat': iat,
-            'exp': exp,
-            'uuid': uuid
-        }
-        token = jwt.encode(payload, credential, algorithm='HS256')
-        return token

@@ -3,7 +3,7 @@
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 r"""Manager Management API Mocker.
 
-This module implements a mock Wazuh management server for managing agent authentication and registration.
+This module implements a mock Wazuh management server for managing agent registration.
 It uses FastAPI for the web framework and SQLite for agent data storage.
 
 Usage:
@@ -56,7 +56,7 @@ from fastapi.responses import JSONResponse
 
 from manager_mock_servers.manager_services.manager_server_mock.models import AgentData, AuthData
 from manager_mock_servers.utils.token_manager import TokenManager
-from manager_mock_servers.utils.agent_database_handler import insert_new_agent, check_if_agent_exists
+from manager_mock_servers.utils.agent_database_handler import insert_new_agent, check_if_agent_exists, check_if_uuid_exists
 from manager_mock_servers.utils.vars import (
     DEFAULT_AUD,
     DEFAULT_EXPIRATION_TIME,
@@ -261,16 +261,22 @@ async def agents(data: AgentData, authorization: str = Depends(get_token)):
         raise HTTPException(status_code=400, detail="Missing parameters!")
 
     try:
-        existing_agent = check_if_agent_exists(name)
+        existing_agent = check_if_agent_exists(DATABASE_PATH, name)
+        existing_uuid = check_if_uuid_exists(DATABASE_PATH, str(uuid))
     except sqlite3.Error as e:
         logger.error(f"Database error: {e}")
         existing_agent = False
+        existing_uuid = False
 
     if existing_agent:
         return JSONResponse(status_code=409, content={'error': 'Agent with this credential already registered',
-                                                      'uuid': existing_agent[1]})
+                                                      'name': name})
+    if existing_uuid:
+        return JSONResponse(status_code=409, content={'error': 'Agent with this credential already registered',
+                                                      'uuid': str(uuid)})
+
     try:
-        insert_new_agent(uuid, key, name)
+        insert_new_agent(DATABASE_PATH, uuid, key, name)
     except sqlite3.Error as e:
         logger.error(f"Database error: {e}")
         raise HTTPException(status_code=500, detail=f"Unexpected database error {e}")

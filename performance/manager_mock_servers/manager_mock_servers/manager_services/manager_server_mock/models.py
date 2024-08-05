@@ -13,6 +13,7 @@ Classes:
     AgentData: Represents information about an agent, including uuid, key, and name.
 """
 from pydantic import BaseModel
+from uuid import UUID
 
 
 class AuthData(BaseModel):
@@ -34,6 +35,6 @@ class AgentData(BaseModel):
         key (str): A secret key associated with the agent.
         name (str): The name of the agent.
     """
-    uuid: str
+    uuid: UUID
     key: str
     name: str
