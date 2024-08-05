@@ -13,7 +13,9 @@ class PathManager {
     requests = {
         'login': '/ui/logos/wazuh_dashboard_login_background.svg', 
         'overview': '/bundles/plugin/data/data.chunk.5.js',
-        'endpoint-summary': '/48104/bundles/plugin/wazuh/0317d582b93c20f68e059e389aecab33.woff2'
+        'endpoint-summary': '/bundles/plugin/wazuh/0317d582b93c20f68e059e389aecab33.woff2',
+        'agents': '/bundles/plugin/visTypeVislib/visTypeVislib.chunk.2.js',
+        'threat-hunting': '/elastic/visualizations/agents-general/wazuh-alerts-*'
     }
 
     // Check that Menu Exist

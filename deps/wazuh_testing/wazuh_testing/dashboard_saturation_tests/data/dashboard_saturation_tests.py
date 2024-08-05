@@ -5,8 +5,8 @@ import time
 import yaml
 
 from datetime import datetime
-from os import makedirs
-from os.path import join
+from os import makedirs, getcwd
+from os.path import join, isabs
 from subprocess import run
 
 
@@ -143,6 +143,10 @@ def process_script_arguments(args: argparse) -> None:
     Args:
         args (argparse): Script parameters.
     """
+    # Format .auth Path
+    if not isabs(args.session):
+        args.session = f'{getcwd()}/{args.session}'
+
     # Check Artillery Result Types
     check_artillery_result_types(args.type)
 

@@ -24,7 +24,7 @@ class CookieManager {
 
     // Convert External File with Cookies to JSON
     getSavedSession() {
-        return JSON.parse(fs.readFileSync(__dirname + `/../` + this.filename));
+        return JSON.parse(fs.readFileSync(this.filename));
     }
 
     // Recover Cookies from External File

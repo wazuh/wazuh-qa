@@ -28,3 +28,6 @@ scenarios:
 - engine: playwright
   name: test_03_access_endpoint
   testFunction: test_accessEndpoint
+- engine: playwright
+  name: test_04_access_alerts
+  testFunction: test_accessAlerts
