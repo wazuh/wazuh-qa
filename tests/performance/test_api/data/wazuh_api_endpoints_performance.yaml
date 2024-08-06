@@ -114,7 +114,14 @@ test_cases:
     method: put
     parameters: {}
     body:
-      command: custom
+      command: host-deny
+      arguments:
+        - "add"
+      alert:
+        data:
+          srcip: "192.168.33.44"
+          srcport: "51104"
+          dstuser: "root"
     restart: False
 
   - endpoint: /rootcheck
