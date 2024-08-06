@@ -56,7 +56,8 @@ from fastapi.responses import JSONResponse
 
 from manager_mock_servers.manager_services.manager_server_mock.models import AgentData, AuthData
 from manager_mock_servers.utils.token_manager import TokenManager
-from manager_mock_servers.utils.agent_database_handler import insert_new_agent, check_if_agent_exists, check_if_uuid_exists
+from manager_mock_servers.utils.agent_database_handler import insert_new_agent, check_if_agent_exists, check_if_uuid_exists, \
+    create_agents_database
 from manager_mock_servers.utils.vars import (
     DEFAULT_AUD,
     DEFAULT_EXPIRATION_TIME,
@@ -152,7 +153,8 @@ def set_database_path(db_path: str):
                        to locate or initialize the database.
     """
     global DATABASE_PATH
-    DATABASE_PATH = db_path
+    create_agents_database(db_path)
+    DATABASE_PATH = os.path.join(db_path, 'agents.db')
 
 
 app = FastAPI(

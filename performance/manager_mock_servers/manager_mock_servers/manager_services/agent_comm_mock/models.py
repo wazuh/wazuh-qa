@@ -14,9 +14,12 @@ class StatelessEventData(BaseModel):
     id: int
     data: str
 
+class StatefullEventData(BaseModel):
+    id: int
+    data: str
+
 class StatelessEvent(BaseModel):
     events: List[StatelessEventData]
 
 class StatefullData(BaseModel):
-    # Add fields as required for stateful data
-    pass
+    events: List[StatefullEventData]

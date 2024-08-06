@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 def init_csv_header(report_path, csv_header_fields):
-    with open(report_path, mode='a', newline='') as file:
+    with open(report_path, mode='w+', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(csv_header_fields)
 

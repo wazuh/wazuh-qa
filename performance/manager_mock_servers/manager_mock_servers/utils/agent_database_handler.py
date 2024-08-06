@@ -9,6 +9,30 @@ Functions:
 """
 
 import sqlite3
+import os
+import logging
+
+
+def create_agents_database(database_path):
+    database_path = os.path.join(database_path, 'agents.db')
+    if os.path.exists(database_path):
+        logging.info("Detected existing database. Removing")
+        os.remove(database_path)
+
+    conn = sqlite3.connect(database_path)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS agents (
+            id INTEGER PRIMARY KEY,
+            uuid TEXT NOT NULL,
+            credential TEXT NOT NULL,
+            name TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+    return database_path
 
 
 def check_if_agent_exists(database_path, agent_name):

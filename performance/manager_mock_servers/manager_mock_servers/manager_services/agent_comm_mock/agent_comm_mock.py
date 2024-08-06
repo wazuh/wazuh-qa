@@ -66,7 +66,7 @@ from starlette.requests import Request
 
 from manager_mock_servers.manager_services.agent_comm_mock.models import AuthRequest, StatefullData, StatelessEvent
 from manager_mock_servers.manager_services.agent_comm_mock.middlewares.brotli import BrotliMiddleware
-from manager_mock_servers.manager_services.agent_comm_mock.utils.csv import init_csv_header, write_counts_to_csv
+from manager_mock_servers.utils.csv import init_csv_header, write_counts_to_csv
 
 from manager_mock_servers.utils.token_manager import TokenManager
 from manager_mock_servers.utils.vars import (
@@ -79,7 +79,7 @@ from manager_mock_servers.utils.vars import (
 
 logger = logging.getLogger('AgentCommMock')
 
-metrics_report = 'metrics.csv'
+report_file = 'metrics.csv'
 metrics_header = ["Timestamp", "Event type", "Number of events", 'Stateless/Statefull']
 router_version = APIRouter()
 
@@ -89,15 +89,15 @@ statefull_events_types = ['undeterminated']
 stateless_events: Dict[str, int] = {key: 0 for key in stateless_events_types}
 statefull_events: Dict[str, int] = {key: 0 for key in statefull_events_types}
 reset_interval = timedelta(seconds=10)
-
+database_directory = os.path.join(os.path.abspath(__file__), 'agents.db')
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global database_directory
-    global metrics_report
+    global report_file
 
-    init_csv_header(metrics_report, metrics_header)
+    init_csv_header(report_file, metrics_header)
 
     if not os.path.exists(database_directory):
         raise ValueError(f"Directory {database_directory} does not exist")
@@ -114,14 +114,13 @@ app = FastAPI(
 async def reset_and_log_counts():
     while True:
         await asyncio.sleep(reset_interval.total_seconds())
-
         measurement_datetime = datetime.utcnow().isoformat()
 
         for event_type in stateless_events_types:
-            write_counts_to_csv([measurement_datetime, event_type, statefull_events[event_type], 'stateless'])
+            write_counts_to_csv(report_file, [measurement_datetime, event_type, statefull_events[event_type], 'stateless'])
 
         for event_type in statefull_events_types:
-            write_counts_to_csv([measurement_datetime, event_type, statefull_events[event_type], 'statefull'])
+            write_counts_to_csv(report_file, [measurement_datetime, event_type, statefull_events[event_type], 'statefull'])
 
 
 def set_database_path(db_path):
@@ -199,6 +198,10 @@ async def stateful_event(event: StatefullData, authorization: str = Depends(get_
 
     return {'message': 'Event is being processed and will be persisted'}
 
+def set_report_file(report):
+    global report_file
+    report_file = report
+
 
 def validate_parameters():
     pass
@@ -215,12 +218,11 @@ def main():
     parser.add_argument('--api-version', type=str, required=False, help='API version', dest="api_version", default='/v1')
 
 
-    global report_file
     global database_directory
 
     args = parser.parse_args()
 
-    report_file = args.report_path
+    set_report_file(args.report_path)
 
     # Register the routers with the main app
     app.include_router(router_version, prefix=args.api_version)

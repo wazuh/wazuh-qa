@@ -10,31 +10,16 @@ from manager_mock_servers.manager_services.manager_server_mock.manager_server_mo
     set_database_path,
 )
 
+
 client = TestClient(app)
-
 DATABASE_NAME = 'agents.db'
-
 
 @pytest.fixture(scope="session", autouse=True)
 def init_db(tmp_path_factory):
     """Set up and tear down the test database."""
     temporal_dir = tmp_path_factory.mktemp('agents_database')
     db_path = os.path.join(temporal_dir, DATABASE_NAME)
-    set_database_path(db_path)
-
-    # Create tables
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE agents (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            uuid TEXT NOT NULL,
-            credential TEXT NOT NULL,
-            name TEXT NOT NULL
-        )
-    ''')
-    conn.commit()
-    conn.close()
+    set_database_path(temporal_dir)
 
     yield db_path
 
@@ -53,7 +38,6 @@ def clean_database(init_db):
     cursor = conn.cursor()
 
     cursor.execute(f'DELETE FROM agents;')
-    cursor.execute(f'DELETE FROM sqlite_sequence WHERE name="agents";')
     conn.commit()
     conn.close()
 
