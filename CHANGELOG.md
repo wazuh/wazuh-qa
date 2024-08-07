@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Modify the directory name for machines deployed in AWS ([#5635](https://github.com/wazuh/wazuh-qa/pull/5635)) \- (Framework)
 - Add task information in the allocation logs when create or delete an instance ([#5623](https://github.com/wazuh/wazuh-qa/pull/5623)) \- (Framework)
 - Changed _run_tests in testing.py ([#5621](https://github.com/wazuh/wazuh-qa/pull/5621)) \- (Framework)
 - Deleted custom field from PUT /active-response performance test. ([#5612](https://github.com/wazuh/wazuh-qa/pull/5612)) \- (Tests)
