@@ -114,7 +114,7 @@ test_cases:
     method: put
     parameters: {}
     body:
-      command: !wazuh-restart
+      command: wazuh-restart
     restart: True
 
   - endpoint: /rootcheck

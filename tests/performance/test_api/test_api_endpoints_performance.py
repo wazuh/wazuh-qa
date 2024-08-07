@@ -17,6 +17,9 @@ xfailed_items = {
     '/agents/group': {'message': 'Investigate performance issues with PUT /agents/group API endpoint: '
                                  'https://github.com/wazuh/wazuh/issues/13872',
                       'method': 'put'},
+    '/active-response': {'message': 'Investigate invalid commands with PUT /active-response endpoint: '
+                                    'https://github.com/wazuh/wazuh-qa/issues/5648',
+                         'method': 'put'}
 }
 
 
