@@ -114,15 +114,8 @@ test_cases:
     method: put
     parameters: {}
     body:
-      command: host-deny
-      arguments:
-        - "add"
-      alert:
-        data:
-          srcip: "192.168.33.44"
-          srcport: "51104"
-          dstuser: "root"
-    restart: False
+      command: wazuh-restart
+    restart: True
 
   - endpoint: /rootcheck
     method: put
