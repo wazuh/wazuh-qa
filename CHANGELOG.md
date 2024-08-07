@@ -29,7 +29,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-- Fixed dashboard deploy in wazuh-qa-environment pipeline ([#5637](https://github.com/wazuh/wazuh-qa/pull/5637)) \- (Tests)
+- Fixed dashboard deploy in wazuh-qa-environment pipeline ([#5643](https://github.com/wazuh/wazuh-qa/pull/5643)) \- (Tests)
 - Changed 'Ensure that the manager version is' expected warning to an agnostic version of regex ([#5630](https://github.com/wazuh/wazuh-qa/pull/5630)) \- (Tests)
 - Adding fixed and dynamic waits to port status checks ([#5627](https://github.com/wazuh/wazuh-qa/pull/5627)) (Framework)
 - Fixed custom storage for AMIs ([#5625](https://github.com/wazuh/wazuh-qa/pull/5625)) \- (Framework)
