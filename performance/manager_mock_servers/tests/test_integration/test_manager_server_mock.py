@@ -1,6 +1,10 @@
+"""Tests for manager server mock."""
 import os
-import pytest
 import sqlite3
+from typing import Generator
+
+import pytest
+from _pytest.tmpdir import TempPathFactory
 from fastapi import status
 from fastapi.testclient import TestClient
 
@@ -8,15 +12,13 @@ from manager_mock_servers.manager_services.manager_server_mock.manager_server_mo
     app,
     set_database_path,
 )
-from _pytest.tmpdir import TempPathFactory
-from typing import Protocol
-
 
 client = TestClient(app)
 DATABASE_NAME = 'agents.db'
 
+
 @pytest.fixture(scope="session", autouse=True)
-def init_db(tmp_path_factory: TempPathFactory):
+def init_db(tmp_path_factory: TempPathFactory) -> Generator:
     """Set up and tear down the test database.
 
     Creates a temporary SQLite database for the tests and sets the database
@@ -31,11 +33,10 @@ def init_db(tmp_path_factory: TempPathFactory):
     """
     temporal_dir = tmp_path_factory.mktemp('agents_database')
     db_path = os.path.join(temporal_dir, DATABASE_NAME)
-    set_database_path(temporal_dir)
+    set_database_path(str(temporal_dir))
 
     yield db_path
 
-    # Teardown
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('DROP TABLE agents')
@@ -45,7 +46,7 @@ def init_db(tmp_path_factory: TempPathFactory):
 
 
 @pytest.fixture(scope="function")
-def clean_database(init_db: Protocol):
+def clean_database(init_db: str):
     """Clean up the database before each test.
 
     Deletes all entries from the 'agents' table in the database to ensure
@@ -57,14 +58,13 @@ def clean_database(init_db: Protocol):
     conn = sqlite3.connect(init_db)
     cursor = conn.cursor()
 
-    cursor.execute(f'DELETE FROM agents;')
+    cursor.execute('DELETE FROM agents;')
     conn.commit()
     conn.close()
 
 
-
 @pytest.fixture
-def auth_token():
+def auth_token() -> Generator:
     """Obtain an authentication token.
 
     Makes a request to the authentication endpoint using predefined
@@ -73,10 +73,10 @@ def auth_token():
     Yields:
         str: Authentication token.
     """
-    username = "username"
-    password = "password"
-    response = client.post("/authentication",
-                           json={"user": username, "password": password}
+    username = 'username'
+    password = 'password'
+    response = client.post('/authentication',
+                           json={'user': username, 'password': password}
                            )
 
     assert response.status_code == status.HTTP_200_OK
@@ -85,18 +85,21 @@ def auth_token():
     yield response.json().get('token')
 
 
-def test_token(auth_token: Protocol):
+def test_token(auth_token: str):
     """Test that the authentication token is valid.
 
     Verifies that the token obtained from the auth_token fixture is not None.
 
     Args:
         auth_token: The token obtained from the auth_token fixture.
+
+    Assertions:
+        Asserts auth token is not None
     """
     assert auth_token is not None
 
 
-def test_agents(auth_token: Protocol, clean_database: Protocol):
+def test_agents(auth_token: str, clean_database: None):
     """Test successful agent registration.
 
     Registers a new agent using valid data and verifies that the response
@@ -105,17 +108,22 @@ def test_agents(auth_token: Protocol, clean_database: Protocol):
     Args:
         auth_token: The token obtained from the auth_token fixture.
         clean_database: Fixture to ensure the database is clean before each test.
+
+    Assertions:
+        Asserts status_code is 200
+        Asserts that response match with the expected agent correctly registered
     """
     headers = {"Authorization": f"Bearer {auth_token}"}
     response = client.post("/agents",
-                            json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73be", "key": "key", "name": "agent_name"},
-                            headers=headers
+                           json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73be",
+                                 "key": "key", "name": "agent_name"},
+                           headers=headers
                            )
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {'message': 'Agent was correctly registered'}
 
 
-def test_invalid_token(clean_database: Protocol):
+def test_invalid_token(clean_database: None):
     """Test response with an invalid authentication token.
 
     Attempts to register an agent using an invalid token and verifies that
@@ -123,17 +131,21 @@ def test_invalid_token(clean_database: Protocol):
 
     Args:
         clean_database: Fixture to ensure the database is clean before each test.
+
+    Assertions:
+        Asserts status_code is 403.
+        Asserts that response match with the expected invalid jwt token.
     """
     headers = {"Authorization": "Bearer invalidtoken"}
     response = client.post("/agents",
-                            json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73be", "key": "key", "name": "agent_name"},
-                            headers=headers
+                           json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73be", "key": "key", "name": "agent_name"},
+                           headers=headers
                            )
     assert response.status_code == status.HTTP_403_FORBIDDEN
     assert response.json() == {'detail': 'Invalid JWT token'}
 
 
-def test_missing_field(auth_token: Protocol, clean_database: Protocol):
+def test_missing_field(auth_token: str, clean_database: None):
     """Test agent registration with missing fields.
 
     Attempts to register an agent with missing required fields and verifies
@@ -142,6 +154,10 @@ def test_missing_field(auth_token: Protocol, clean_database: Protocol):
     Args:
         auth_token: The token obtained from the auth_token fixture.
         clean_database: Fixture to ensure the database is clean before each test.
+
+    Assertions:
+        Asserts status_code is 422 when a request is perform with missing fields.
+        Asserts that response match with expected missing field value.
     """
     def check_missing_field_in_response(response, field):
         return field in response.json()['detail'][0]['loc']
@@ -150,30 +166,30 @@ def test_missing_field(auth_token: Protocol, clean_database: Protocol):
 
     # Missing 'uuid'
     response = client.post("/agents",
-                            json={"key": "key", "name": "agent_name"},
-                            headers=headers
+                           json={"key": "key", "name": "agent_name"},
+                           headers=headers
                            )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert check_missing_field_in_response(response, 'uuid')
 
     # Missing 'key'
     response = client.post("/agents",
-                            json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73be", "name": "agent_name"},
-                            headers=headers
+                           json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73be", "name": "agent_name"},
+                           headers=headers
                            )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert check_missing_field_in_response(response, 'key')
 
     # Missing 'name'
     response = client.post("/agents",
-                            json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73bc", "key": "key"},
-                            headers=headers
+                           json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73bc", "key": "key"},
+                           headers=headers
                            )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert check_missing_field_in_response(response, 'name')
 
 
-def test_invalid_data(auth_token: Protocol, clean_database: Protocol):
+def test_invalid_data(auth_token: str, clean_database: None):
     """Test agent registration with invalid data.
 
     Attempts to register an agent with invalid data (e.g., invalid UUID or
@@ -183,27 +199,29 @@ def test_invalid_data(auth_token: Protocol, clean_database: Protocol):
     Args:
         auth_token: The token obtained from the auth_token fixture.
         clean_database: Fixture to ensure the database is clean before each test.
+
+    Assertions:
+        Asserts status_code is 422 when a request is perform with invalid data.
+        Asserts that response match with the expected in case of invalid data is provided.
     """
     headers = {"Authorization": f"Bearer {auth_token}"}
 
-    # Invalid 'uuid'
     response = client.post("/agents",
-                            json={"uuid": "INVALID-UUID", "key": "key", "name": "agent_name"},
-                            headers=headers
+                           json={"uuid": "INVALID-UUID", "key": "key", "name": "agent_name"},
+                           headers=headers
                            )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert 'Input should be a valid UUID' in response.text
 
-    # Invalid 'name'
     response = client.post("/agents",
-                            json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73bc", "key": "key", "name": ""},  # Empty name
-                            headers=headers
+                           json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73bc", "key": "key", "name": ""},
+                           headers=headers
                            )
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert 'Missing parameters' in response.text
 
 
-def test_duplicate_agent_uuid(auth_token: Protocol, clean_database: Protocol):
+def test_duplicate_agent_uuid(auth_token: str, clean_database: None):
     """Test attempting to register an agent with a duplicate UUID.
 
     Registers an agent with a specific UUID and then attempts to register
@@ -213,28 +231,33 @@ def test_duplicate_agent_uuid(auth_token: Protocol, clean_database: Protocol):
     Args:
         auth_token: The token obtained from the auth_token fixture.
         clean_database: Fixture to ensure the database is clean before each test.
+
+    Assertions:
+        Asserts status_code is 409 when user tries to register an agent with duplicated uuid
+        Asserts that response match with the expected in case of duplicated agent
     """
     headers = {"Authorization": f"Bearer {auth_token}"}
 
     # Register first agent
     response = client.post("/agents",
-                            json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73be", "key": "key1", "name": "agent_name1"},
-                            headers=headers
+                           json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73be", "key": "key1", "name": "agent_name1"},
+                           headers=headers
                            )
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {'message': 'Agent was correctly registered'}
 
     # Attempt to register duplicate agent
     response = client.post("/agents",
-                            json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73be", "key": "key2", "name": "agent_name2"},
-                            headers=headers
+                           json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73be", "key": "key2",
+                                 "name": "agent_name2"},
+                           headers=headers
                            )
     assert response.status_code == status.HTTP_409_CONFLICT
-    assert response.json() == {'error': 'Agent with this credential already registered', "uuid": "019121d5-712b-7bc4-8645-3124bc8d73be"}
+    assert response.json() == {'error': 'Agent with this credential already registered',
+                               "uuid": "019121d5-712b-7bc4-8645-3124bc8d73be"}
 
 
-
-def test_duplicate_agent_name(auth_token: Protocol, clean_database: Protocol):
+def test_duplicate_agent_name(auth_token: str, clean_database: None):
     """Test attempting to register an agent with a duplicate name.
 
     Registers an agent with a specific name and then attempts to register
@@ -244,22 +267,25 @@ def test_duplicate_agent_name(auth_token: Protocol, clean_database: Protocol):
     Args:
         auth_token: The token obtained from the auth_token fixture.
         clean_database: Fixture to ensure the database is clean before each test.
-    """
 
+    Assertions:
+        Asserts status_code is 409 when user tries to register an agent with duplicated agent name
+        Asserts that response match with the expected in case of duplicated agent
+    """
     headers = {"Authorization": f"Bearer {auth_token}"}
 
     # Register first agent
     response = client.post("/agents",
-                            json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73be", "key": "key1", "name": "agent_name1"},
-                            headers=headers
+                           json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73be", "key": "key1", "name": "agent_name1"},
+                           headers=headers
                            )
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {'message': 'Agent was correctly registered'}
 
     # Attempt to register duplicate agent
     response = client.post("/agents",
-                            json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73be", "key": "key2", "name": "agent_name1"},
-                            headers=headers
+                           json={"uuid": "019121d5-712b-7bc4-8645-3124bc8d73be", "key": "key2", "name": "agent_name1"},
+                           headers=headers
                            )
     assert response.status_code == status.HTTP_409_CONFLICT
     assert response.json() == {'error': 'Agent with this credential already registered', "name": "agent_name1"}
