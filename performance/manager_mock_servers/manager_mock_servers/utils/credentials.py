@@ -37,7 +37,7 @@ def create_private_key() -> ec.EllipticCurvePrivateKey:
     """
     return ec.generate_private_key(ec.SECP256R1())
 
-def create_public_key(private_key: ec.EllipticCurve) -> ec.EllipticCurvePublicKey:
+def create_public_key(private_key: ec.EllipticCurvePrivateKey) -> ec.EllipticCurvePublicKey:
     """Generate the public key corresponding to the provided EC private key.
 
     Args:
@@ -48,7 +48,7 @@ def create_public_key(private_key: ec.EllipticCurve) -> ec.EllipticCurvePublicKe
     """
     return private_key.public_key()
 
-def create_certificate(public_key: ec.EllipticCurvePublicKey, private_key: ec.EllipticCurvePublicKey, country: str='US', province: str='California', locality: str='San Francisco', org: str='Wazuh',
+def create_certificate(public_key: ec.EllipticCurvePublicKey, private_key: ec.EllipticCurvePrivateKey, country: str='US', province: str='California', locality: str='San Francisco', org: str='Wazuh',
                        commom_name: str='wazuh.com') -> Certificate:
     """Create a self-signed X.509 certificate using the provided public and private keys.
 
@@ -86,7 +86,7 @@ def create_certificate(public_key: ec.EllipticCurvePublicKey, private_key: ec.El
 
     return cert
 
-def write_private_key(private_key: ec.EllipticCurve, credentials_path: str, private_key_pem_name: str='private_key.pem') -> None:
+def write_private_key(private_key: ec.EllipticCurvePrivateKey, credentials_path: str, private_key_pem_name: str='private_key.pem') -> None:
     """Write the provided EC private key to a PEM file.
 
     Args:
@@ -107,7 +107,7 @@ def write_private_key(private_key: ec.EllipticCurve, credentials_path: str, priv
         private_file.write(private_pem)
 
 
-def write_public_key(public_key: ec.EllipticCurve, credentials_path: str, private_key_pem_name: str='public_key.pem') -> None:
+def write_public_key(public_key: ec.EllipticCurvePublicKey, credentials_path: str, private_key_pem_name: str='public_key.pem') -> None:
     """Write the provided EC public key to a PEM file.
 
     Args:
