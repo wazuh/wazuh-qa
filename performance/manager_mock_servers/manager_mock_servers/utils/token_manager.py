@@ -53,7 +53,6 @@ class TokenManager:
         Raises:
             HTTPException: If the token has expired or is invalid.
         """
-
         try:
             decoded_token = jwt.decode(token, secret_key, algorithms=["HS256"],
                                        audience=audience, issuer=issuer)
