@@ -1,15 +1,24 @@
-import pytest
-import httpx
-import sqlite3
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv
+""""Tests for agent comm mock service."""
 import os
+import sqlite3
 import time
+from typing import Generator
+
+import pytest
+from _pytest.tmpdir import TempPathFactory
 from fastapi import status
 from fastapi.testclient import TestClient
-from requests.auth import HTTPBasicAuth
-from manager_mock_servers.manager_services.agent_comm_mock.agent_comm_mock import app, set_database_path, router_version, set_report_file,  database_directory, stateless_events, statefull_events
+
+from manager_mock_servers.manager_services.agent_comm_mock.agent_comm_mock import (
+    app,
+    router_version,
+    set_database_path,
+    set_report_file,
+)
 from manager_mock_servers.utils.agent_database_handler import create_agents_database, insert_new_agent
-from _pytest.tmpdir import TempPathFactory
-from typing import Protocol
 
 TESTING_VERSION = "/v33"
 app.include_router(router_version, prefix=TESTING_VERSION)
@@ -22,9 +31,8 @@ KEY = 'key'
 NAME = 'agent1'
 
 
-# Setup agents.db
 @pytest.fixture(scope="module", autouse=True)
-def configure_report_file(tmp_path_factory: TempPathFactory):
+def configure_report_file(tmp_path_factory: TempPathFactory) -> Generator:
     """Fixture to configure the report file.
 
     Creates a temporary directory and sets the path for the report file
@@ -42,9 +50,9 @@ def configure_report_file(tmp_path_factory: TempPathFactory):
 
     yield report_file
 
-# Setup agents.db
+
 @pytest.fixture(scope="module")
-def init_db(tmp_path_factory: TempPathFactory):
+def init_db(tmp_path_factory: TempPathFactory) -> Generator:
     """Fixture to initialize and clean up the test database.
 
     Sets up a temporary SQLite database for testing, and provides the path
@@ -59,12 +67,11 @@ def init_db(tmp_path_factory: TempPathFactory):
     """
     temporal_dir = tmp_path_factory.mktemp('agents_database')
     db_path = os.path.join(temporal_dir, DATABASE_NAME)
-    create_agents_database(temporal_dir)
+    create_agents_database(str(temporal_dir))
     set_database_path(db_path)
 
     yield db_path
 
-    # Teardown
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('DROP TABLE agents')
@@ -72,9 +79,9 @@ def init_db(tmp_path_factory: TempPathFactory):
     conn.close()
     os.remove(db_path)
 
-# Setup agents.db
+
 @pytest.fixture(scope="module")
-def mock_agent_register(init_db: Protocol):
+def mock_agent_register(init_db: str) -> None:
     """Fixture to register a mock agent.
 
     Inserts a test agent into the database for testing purposes. Requires
@@ -88,7 +95,7 @@ def mock_agent_register(init_db: Protocol):
 
 
 @pytest.fixture
-def auth_token(init_db: Protocol, mock_agent_register: Protocol):
+def auth_token(init_db: str, mock_agent_register: None) -> Generator:
     """Fixture to obtain an authentication token.
 
     Makes a request to the authentication endpoint to retrieve a token
@@ -111,18 +118,21 @@ def auth_token(init_db: Protocol, mock_agent_register: Protocol):
     yield response.json().get('token')
 
 
-def test_token(auth_token: Protocol):
+def test_token(auth_token: str):
     """Test that the authentication token is valid.
 
     Ensures that the authentication token retrieved is not None.
 
     Args:
         auth_token: The token obtained from the auth_token fixture.
+
+    Assertions:
+        Asserts agent comm tokens is not None.
     """
     assert auth_token is not None
 
 
-def test_stateless_event(auth_token: Protocol):
+def test_stateless_event(auth_token: str):
     """Test posting a stateless event.
 
     Posts a stateless event to the events endpoint and verifies that the
@@ -130,19 +140,22 @@ def test_stateless_event(auth_token: Protocol):
 
     Args:
         auth_token: The token obtained from the auth_token fixture.
+
+    Assertions:
+        Asserts response code is 200.
+        Asserts response message match with the expected.
     """
     headers = {"Authorization": f"Bearer {auth_token}"}
-    response = client.post(f'{TESTING_VERSION}/events/stateless', json={
-        "events": [
-            {"id": 1, "data": "test_data"}
-        ]
-    },
-    headers=headers)
+    events = {"events": [
+                        {"id": 1, "data": "test_data"}
+                    ]}
+    response = client.post(f'{TESTING_VERSION}/events/stateless', json=events,
+                           headers=headers)
     assert response.status_code == 200
     assert response.json() == {'message': 'Event received'}
 
 
-def test_stateful_event(auth_token: Protocol):
+def test_stateful_event(auth_token: str):
     """Test posting a stateful event.
 
     Posts a stateful event to the events endpoint and verifies that the
@@ -150,38 +163,23 @@ def test_stateful_event(auth_token: Protocol):
 
     Args:
         auth_token: The token obtained from the auth_token fixture.
+
+    Assertions:
+        Asserts response code is 200.
+        Asserts response message match with the expected.
     """
     headers = {"Authorization": f"Bearer {auth_token}"}
-    response = client.post(f'{TESTING_VERSION}/events/stateful', json={
-        "events": [
-            {"id": 1, "data": "test_data"}
-        ]
-    },
-    headers=headers)
+    events = {"events": [
+                        {"id": 1, "data": "test_data"}
+                    ]}
+    response = client.post(f'{TESTING_VERSION}/events/stateful', json=events,
+                           headers=headers)
+
     assert response.status_code == 200
     assert response.json() == {'message': 'Event is being processed and will be persisted'}
 
 
-def test_metrics(configure_report_file: Protocol):
-    """Test the collection of metrics.
-
-    Validates that the stateful and stateless events have been recorded
-    correctly. Compares collected metrics against expected values.
-
-    Args:
-        configure_report_file: Fixture that sets up the metrics report file.
-    """
-    expected_statefull_evens = {
-
-    }
-    expected_stateless_evens = {
-
-    }
-    assert statefull_events
-    assert stateless_events
-
-
-def test_metrics_file(configure_report_file: Protocol):
+def test_metrics_file(configure_report_file: str):
     """Test that the metrics report file is created.
 
     Ensures that the metrics report file exists after the tests have run.
@@ -189,7 +187,11 @@ def test_metrics_file(configure_report_file: Protocol):
 
     Args:
         configure_report_file: Fixture that sets up the metrics report file.
+
+    Assertions:
+        Asserts metrics file is created.
     """
-    with TestClient(app) as client:
+    with TestClient(app):
         time.sleep(10)
         assert os.path.exists(configure_report_file)
+

@@ -259,7 +259,7 @@ async def stateful_event(event: StatefullData, authorization: str = Depends(get_
 
     return {'message': 'Event is being processed and will be persisted'}
 
-def set_report_file(report: StatefullData) -> dict:
+def set_report_file(report: str) -> dict:
     """Sets the path for the metrics CSV file.
 
     Args:
