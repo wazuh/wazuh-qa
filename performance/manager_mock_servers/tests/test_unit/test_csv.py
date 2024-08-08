@@ -1,3 +1,6 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """Tests for CSV module."""
 import csv
 import os
@@ -13,7 +16,6 @@ from manager_mock_servers.utils.csv import init_csv_header, write_row_to_csv
 def csv_file(tmp_path_factory: TempPathFactory) -> Generator:
     """Fixture that provides a temporary CSV file for testing.
 
-    This fixture uses pytest's `tmpdir` to create a temporary file named `test_report.csv`.
     The file's path is returned to be used in tests to ensure no actual files are modified
     during testing.
 
@@ -73,9 +75,6 @@ def test_write_row_to_csv(csv_file: str):
         reader = csv.reader(file)
         rows = list(reader)
 
-    # Check that the header is the first row
     assert rows[0] == headers
-
-    # Check the data row, which should include a timestamp and data
     assert len(rows) == 2  # Should be 2 rows: header + one data row
     assert rows[1][0:] == data

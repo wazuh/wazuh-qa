@@ -11,14 +11,14 @@ from manager_mock_servers.utils.token_manager import TokenManager
 
 
 @pytest.fixture
-def token_data():
+def token_data() -> dict:
     """Fixture that provides a dictionary of token data for testing.
 
     This fixture generates and returns a dictionary containing the necessary data
     to create and verify tokens. The dictionary includes issuer, audience, issue time,
     expiration time, UUID, and a credential.
 
-    Returns:
+    Yield:
         dict: A dictionary with keys 'iss', 'aud', 'iat', 'exp', 'uuid', and 'credential',
               representing the data used to generate and verify tokens.
     """
@@ -32,7 +32,7 @@ def token_data():
     }
 
 
-def test_generate_token(token_data):
+def test_generate_token(token_data: dict):
     """Test that the `generate_token` method creates a token of type string.
 
     This test verifies that the `TokenManager.generate_token` method returns a string
@@ -52,7 +52,7 @@ def test_generate_token(token_data):
     assert isinstance(token, str)
 
 
-def test_decode_token(token_data):
+def test_decode_token(token_data: dict):
     """Test that the `decode_token` method correctly decodes a valid token.
 
     This test checks that the `TokenManager.decode_token` method can decode a token
@@ -80,7 +80,7 @@ def test_decode_token(token_data):
     assert decoded_token['uuid'] == token_data['uuid']
 
 
-def test_decode_token_expired(token_data):
+def test_decode_token_expired(token_data: dict):
     """Test that the `decode_token` method raises an HTTPException for an expired token.
 
     This test checks that the `TokenManager.decode_token` method raises an HTTPException
@@ -108,7 +108,7 @@ def test_decode_token_expired(token_data):
     assert exc_info.value.detail == "Token has expired"
 
 
-def test_decode_token_invalid(token_data):
+def test_decode_token_invalid(token_data: dict):
     """Test that the `decode_token` method raises an HTTPException for a token with an invalid secret.
 
     This test verifies that the `TokenManager.decode_token` method raises an HTTPException
