@@ -1,26 +1,32 @@
-import os
-import pytest
+"""Tests for CSV module."""
 import csv
-from datetime import datetime
+import os
+from typing import Generator
+
+import pytest
+from _pytest.tmpdir import TempPathFactory
+
 from manager_mock_servers.utils.csv import init_csv_header, write_row_to_csv
 
+
 @pytest.fixture
-def csv_file(tmpdir):
-    """
-    Fixture that provides a temporary CSV file for testing.
+def csv_file(tmp_path_factory: TempPathFactory) -> Generator:
+    """Fixture that provides a temporary CSV file for testing.
 
     This fixture uses pytest's `tmpdir` to create a temporary file named `test_report.csv`.
     The file's path is returned to be used in tests to ensure no actual files are modified
     during testing.
 
-    Returns:
+    Yield:
         str: Path to the temporary CSV file.
     """
-    return tmpdir.join("test_report.csv")
+    temporal_dir = tmp_path_factory.mktemp('metrics')
 
-def test_init_csv_header(csv_file):
-    """
-    Test that the CSV header is initialized correctly.
+    yield os.path.join(temporal_dir, "test_report.csv")
+
+
+def test_init_csv_header(csv_file: str):
+    """Test that the CSV header is initialized correctly.
 
     This test verifies that the `init_csv_header` function correctly writes the specified
     headers to the CSV file. After calling `init_csv_header`, the test reads the first row
@@ -35,14 +41,14 @@ def test_init_csv_header(csv_file):
     headers = ["Date", "Count"]
     init_csv_header(str(csv_file), headers)
 
-    with open(str(csv_file), mode='r') as file:
+    with open(str(csv_file)) as file:
         reader = csv.reader(file)
         row = next(reader)
         assert row == headers
 
-def test_write_row_to_csv(csv_file):
-    """
-    Test that data is appended correctly to the CSV file.
+
+def test_write_row_to_csv(csv_file: str):
+    """Test that data is appended correctly to the CSV file.
 
     This test checks that the `write_row_to_csv` function appends data rows to the CSV file
     after initializing it with a header. The test first sets up the CSV file with headers,
@@ -63,7 +69,7 @@ def test_write_row_to_csv(csv_file):
     data = ['3', '5']
     write_row_to_csv(str(csv_file), data)
 
-    with open(str(csv_file), mode='r') as file:
+    with open(str(csv_file)) as file:
         reader = csv.reader(file)
         rows = list(reader)
 

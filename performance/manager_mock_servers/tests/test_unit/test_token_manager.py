@@ -1,4 +1,7 @@
-"""Test module for TokenManager class."""
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+"""Tests for TokenManager class."""
 from datetime import datetime, timedelta
 
 import pytest
@@ -91,8 +94,8 @@ def test_decode_token_expired(token_data):
         Asserts that decoding an expired token raises an HTTPException with the correct status code
         and detail message.
     """
-    expired_iat = int((datetime.utcnow() - timedelta(hours=2)).timestamp())
-    expired_exp = int((datetime.utcnow() - timedelta(hours=1)).timestamp())
+    expired_iat = int((datetime.now() - timedelta(hours=2)).timestamp())
+    expired_exp = int((datetime.now() - timedelta(hours=1)).timestamp())
     token = TokenManager.generate_token(
         token_data['iss'], token_data['aud'], expired_iat, expired_exp,
         token_data['uuid'], token_data['credential']

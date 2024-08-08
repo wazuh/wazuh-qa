@@ -14,7 +14,7 @@ import csv
 from datetime import datetime
 
 
-def init_csv_header(report_path: str, csv_header_fields: str) -> None:
+def init_csv_header(report_path: str, csv_header_fields: list) -> None:
     """Initializes a CSV file with specified header fields.
 
     This function creates a new CSV file (or overwrites an existing one) and writes
