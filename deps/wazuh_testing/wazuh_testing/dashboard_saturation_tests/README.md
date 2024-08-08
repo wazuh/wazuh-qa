@@ -13,6 +13,7 @@ dashboard_saturation_tests/
 │   │   └── ScreenshotManager.js
 │   ├── tests/
 │   │   ├── EndpointTest.js
+│   │   ├── EventTest.js
 │   │   ├── LoginTest.js
 │   │   └── OverviewTest.js
 │   ├── __init__.py
@@ -74,7 +75,7 @@ python3 setup.py install
 To run the tests, we will need to use the following command:
 
 ```shell script
-dashboard_saturation_tests --password <wazuh_pass> --ip <dashboard_ip>
+dashboard-saturation-tests --password <wazuh_pass> --ip <dashboard_ip>
 ```
 
 ### Parameters
@@ -85,7 +86,7 @@ dashboard_saturation_tests --password <wazuh_pass> --ip <dashboard_ip>
 | `-s`, `--screenshots` | `Directory to store the screenshots` | `str` | No | `screenshot/` |
 | `-c`, `--csv` | `Directory to store the CSVs` | `str` | No | `csv/` |
 | `-o`, `--session` | `Directory to store the Sessions` | `str` | No | `.auth/` |
-| `-a`, `--artillery` | `Path to the Artillery Script` | `str` | No | `artillery.yml` |
+| `-a`, `--artillery` | `Path to the Artillery Script` | `str` | No | `data/artillery.yml` |
 | `-u`, `--user` | `Wazuh User for the Dashboard` | `str` | No | `admin` |
 | `-p`, `--password` | `Wazuh Password for the Dashboard` | `str` | Yes | None |
 | `-q`, `--iterations` | `Number of Tests to Run` | `int` | No | `1` |
@@ -111,7 +112,7 @@ pycodestyle dashboard_saturation_tests.py
 ### Example
 
 ```shell script
-dashboard_saturation_tests -p password -i 172.16.1.36
+dashboard-saturation-tests -p password -i 172.16.1.36
 ```
 
-- Result: [report.zip](https://github.com/user-attachments/files/16456792/report.zip)
+- Result: [report.zip](https://github.com/user-attachments/files/16542340/report.zip)

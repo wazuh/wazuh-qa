@@ -3,7 +3,7 @@ const { PathManager } = require("./../lib/PathManager.js");
 const { CookieManager } = require("./../lib/CookieManager.js");
 const { ScreenshotManager } = require("./../lib/ScreenshotManager.js");
 
-class AlertTest {
+class EventTest {
 
     page = null;
     vuContext = null;
@@ -26,7 +26,7 @@ class AlertTest {
     }
 
     // Access the Dashboard (Endpoints)
-    async accessEndpoint() {
+    async accessEventTab() {
         await this.pathManager.goto('endpoint-summary');
         await this.pathManager.waitfor('endpoint-summary');
 
@@ -38,7 +38,7 @@ class AlertTest {
     // Access the Agent Section
     async accessAgent() {
         await this.page.getByText('001').click();
-        await this.pathManager.waitfor('agent');
+        await this.pathManager.waitfor('agents');
 
         await this.screenshotManager.takeAnScreenshot('test_04_agent_section_is_loaded');
     }
@@ -53,22 +53,25 @@ class AlertTest {
 
     async checkEvents() {
         await this.page.getByText('Events').click();
+        await this.pathManager.waitfor('threat-hunting-event');
 
-        await expect(this.page.getByLabel('td').count()).toBeGreaterThanOrEqual(1);
+        await this.screenshotManager.takeAnScreenshot('test_04_events_tab_is_loaded');
+
+        expect(await this.page.getByLabel('tr').count()).toBeGreaterThanOrEqual(1);
     }
 
     // Run the Full Test
     async executeTest() {
         await this.restoreSession();
         
-        this.accessEndpoint();
-        //this.accessAgent();
-        //this.accessAlerts();
-        //this.checkEvents();
+        await this.accessEventTab();
+        await this.accessAgent();
+        await this.accessAlerts();
+        await this.checkEvents();
 
         await this.page.close();
     }
-  
+
 }
 
-module.exports = { AlertTest };
+module.exports = { EventTest };

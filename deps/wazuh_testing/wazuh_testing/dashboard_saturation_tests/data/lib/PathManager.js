@@ -7,7 +7,10 @@ class PathManager {
     options = {
         'login': this.root + '/login?', 
         'overview': this.root + '/wz-home', 
-        'endpoint-summary': this.root + '/endpoints-summary'
+        'endpoint-summary': this.root + '/endpoints-summary',
+        'agents': this.root + '/endpoints-summary#/agents?',
+        'threat-hunting': this.root + '/threat-hunting#/overview/?',
+        'threat-hunting-event': this.root + '/threat-hunting#/overview/?'
     };
 
     requests = {
@@ -15,8 +18,9 @@ class PathManager {
         'overview': '/bundles/plugin/data/data.chunk.5.js',
         'endpoint-summary': '/bundles/plugin/wazuh/0317d582b93c20f68e059e389aecab33.woff2',
         'agents': '/bundles/plugin/visTypeVislib/visTypeVislib.chunk.2.js',
-        'threat-hunting': '/elastic/visualizations/agents-general/wazuh-alerts-*'
-    }
+        'threat-hunting': '/elastic/samplealerts',
+        'threat-hunting-event': '/ui/logos/opensearch_mark_on_light.svg'
+    };
 
     // Check that Menu Exist
     check_option(option) {

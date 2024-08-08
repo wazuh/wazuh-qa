@@ -286,7 +286,7 @@ def get_script_arguments() -> argparse:
         '-a', '--artillery',
         dest='artillery',
         type=str,
-        default="artillery.yml",
+        default="data/artillery.yml",
         help=f'Path to the Artillery Script. Default "artillery.yml".'
     )
 
