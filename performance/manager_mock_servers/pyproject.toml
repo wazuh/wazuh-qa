@@ -2,20 +2,16 @@
 name = "WazuhManagerMockers"
 version = "0.0.1"
 authors = [
-  { name="Example Author", email="author@example.com" },
+  { name="Wazuh", email="hello@wazuh.com" },
 ]
-description = "A small example package"
+description = "Wazuh Library for mocking manager services"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: GPLv2",
     "Operating System :: OS Independent",
 ]
-
-[project.urls]
-Homepage = "https://github.com/pypa/sampleproject"
-Issues = "https://github.com/pypa/sampleproject/issues"
 
 
 [project.scripts]

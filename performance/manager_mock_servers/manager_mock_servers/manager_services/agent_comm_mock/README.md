@@ -1,23 +1,35 @@
-# Server Manager
-curl -X POST https://127.0.0.1:55000/authentication -H "Content-Type: application/json" -d '{"user":"testing", "password": "fdsa"}' -k
+## Overview
 
+The Manager Agent Comm API Mocker is a mock server designed to handle agent authentication and manage events sent by agents. It uses FastAPI for the web framework and SQLite for storing agent data. This mock server simulates the behavior of a real agent communication server, facilitating testing and development.
 
-curl -X POST https://127.0.0.1:55000/agents -H "Content-Type: application/json"  -H "Authorization: Bearer $TOKEN" -d '{"uuid":"98e0c02d-a632-4d13-90f4-1a16aba915a6", "key":"mykey", "name":"testing1"}' -k
+## Usage
 
-# --------------
+To start the mock server, use the following command:
 
+```bash
+python script.py --database-path /path/to/db \
+    --port 8000 \
+    --cert /path/to/cert \
+    --key /path/to/key \
+    --report-path /path/to/metrics.csv \
+    --api-version /v1
+```
 
-curl -X POST https://127.0.0.1:2700/authentication -H "Content-Type: application/json" -d '{"uuid":"98e0c02d-a632-4d13-90f4-1B16aba915a6", "key": "testing2"}' -k
+### Arguments
 
-curl -X POST "https://127.0.0.1:2700/events/stateless" -H "Authorization: Bearer $TOKEN"  -H "Content-Type: application/json"  -d '{
-    "events": [
-        {
-            "id": 1,
-            "data": "DATA"
-        },
-        {
-            "id": 2,
-            "data": "DATA"
-        }
-    ]
-}' -k
+    --database-path: Path to the SQLite database directory.
+    --port: Port number for the FastAPI server.
+    --cert: Path to the SSL certificate file.
+    --key: Path to the SSL key file.
+    --report-path: Path to the CSV file where metrics will be logged.
+    --api-version: API version prefix (default is /v1).
+
+### Example
+
+```bash
+python script.py --database-path /var/lib/sqlite --port 8000 --cert /etc/ssl/cert.pem --key /etc/ssl/key.pem --report-path /var/log/metrics.csv
+```
+
+## Files
+
+    metrics.csv: The CSV file used for logging metrics.

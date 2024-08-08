@@ -7,6 +7,9 @@ import socket
 import time
 import sqlite3
 
+from pytest import FixtureRequest
+from typing import Protocol
+
 
 simulate_manager_parameters = {
     'manager_api_port': 55001,
@@ -16,7 +19,27 @@ simulate_manager_parameters = {
 }
 
 @pytest.fixture(scope='function', params=[simulate_manager_parameters])
-def launch_manager_simulator(request):
+def launch_manager_simulator(request: FixtureRequest):
+    """
+    Fixture to launch a mock manager simulator.
+
+    This fixture starts a mock manager simulator as a subprocess with parameters
+    defined in `simulate_manager_parameters`. It waits for the services to start
+    before yielding the parameters and process handle to the test function. After
+    the test completes, it terminates the process and performs cleanup.
+
+    Parameters:
+        request (FixtureRequest): The pytest request object which provides access
+                                  to the parameters.
+
+    Yields:
+        dict: A dictionary containing:
+              - 'manager_api_port': Port for manager API.
+              - 'agent_comm_api_port': Port for agent communication API.
+              - 'server_path': Path to the server directory.
+              - 'report_path': Path to the report file.
+              - 'process': The subprocess handle for the mock manager simulator.
+    """
     params = request.param
     manager_api_port = params['manager_api_port']
     agent_comm_api_port = params['agent_comm_api_port']
@@ -49,15 +72,36 @@ def launch_manager_simulator(request):
     shutil.rmtree(server_path)
     # os.remove(report_path)
 
-def test_simulate_manager(launch_manager_simulator):
+def test_simulate_manager(launch_manager_simulator: Protocol):
+    """
+    Test that verifies the manager simulator is running and correctly set up.
+
+    This test function checks the following:
+    - The manager API and agent communication API services are running on the expected ports.
+    - The database file exists and contains tables.
+    - The required credentials (private key and certificate) are present in the server directory.
+
+    Parameters:
+        launch_manager_simulator (dict): Dictionary of parameters and process handle
+                                         yielded by the `launch_manager_simulator` fixture.
+    """
     params = launch_manager_simulator
     manager_api_port = params['manager_api_port']
     agent_comm_api_port = params['agent_comm_api_port']
     server_path = params['server_path']
     report_path = params['report_path']
 
-    # Ensure the services are running on the provided ports
-    def is_port_open(port, host='localhost'):
+    def is_port_open(port: int, host: str ='localhost'):
+        """
+        Check if a given port on a host is open.
+
+        Parameters:
+            port (int): The port number to check.
+            host (str): The host name or IP address. Defaults to 'localhost'.
+
+        Returns:
+            bool: True if the port is open, False otherwise.
+        """
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.settimeout(1)
             result = sock.connect_ex((host, port))

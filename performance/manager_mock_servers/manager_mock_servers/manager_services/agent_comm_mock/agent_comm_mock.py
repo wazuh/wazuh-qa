@@ -48,26 +48,21 @@ Dependencies:
 """
 import argparse
 import asyncio
-import csv
 import logging
 import logging.config
 import os
 import sqlite3
-from collections import defaultdict
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from typing import Dict, Optional
 
-import brotli
 import uvicorn
 from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException
-from fastapi.responses import JSONResponse, Response
-from starlette.requests import Request
+from fastapi.responses import JSONResponse
 
-from manager_mock_servers.manager_services.agent_comm_mock.models import AuthRequest, StatefullData, StatelessEvent
 from manager_mock_servers.manager_services.agent_comm_mock.middlewares.brotli import BrotliMiddleware
-from manager_mock_servers.utils.csv import init_csv_header, write_counts_to_csv
-
+from manager_mock_servers.manager_services.agent_comm_mock.models import AuthRequest, StatefullData, StatelessEvent
+from manager_mock_servers.utils.csv import init_csv_header, write_row_to_csv
 from manager_mock_servers.utils.token_manager import TokenManager
 from manager_mock_servers.utils.vars import (
     DEFAULT_AUD,
@@ -75,7 +70,6 @@ from manager_mock_servers.utils.vars import (
     DEFAULT_ISS,
     MANAGER_MOCK_TOKEN_SECRET_KEY,
 )
-
 
 logger = logging.getLogger('AgentCommMock')
 
@@ -93,7 +87,20 @@ database_directory = os.path.join(os.path.abspath(__file__), 'agents.db')
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> None:
+    """Initializes the application lifespan, including setting up the CSV file for metrics logging
+    and verifying the existence of the database directory. Starts a periodic task to reset and
+    log event counts.
+
+    Args:
+        app (FastAPI): The FastAPI application instance.
+
+    Yields:
+        None: Context manager that yields control to the application during its lifespan.
+
+    Raises:
+        ValueError: If the database directory does not exist.
+    """
     global database_directory
     global report_file
 
@@ -111,25 +118,45 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-async def reset_and_log_counts():
+async def reset_and_log_counts() -> None:
+    """Periodically resets the event counts and logs them to the CSV file.
+
+    This function runs in an infinite loop, sleeping for a predefined interval, then writing
+    the current counts of stateless and stateful events to the CSV file.
+    """
     while True:
         await asyncio.sleep(reset_interval.total_seconds())
         measurement_datetime = datetime.utcnow().isoformat()
 
         for event_type in stateless_events_types:
-            write_counts_to_csv(report_file, [measurement_datetime, event_type, statefull_events[event_type], 'stateless'])
+            write_row_to_csv(report_file, [measurement_datetime, event_type, statefull_events[event_type], 'stateless'])
 
         for event_type in statefull_events_types:
-            write_counts_to_csv(report_file, [measurement_datetime, event_type, statefull_events[event_type], 'statefull'])
+            write_row_to_csv(report_file, [measurement_datetime, event_type, statefull_events[event_type], 'statefull'])
 
 
-def set_database_path(db_path):
+def set_database_path(db_path: str):
+    """Sets the path to the SQLite database directory.
+
+    Args:
+        db_path (str): The new path to the SQLite database directory.
+    """
     global database_directory
     database_directory = db_path
 
 
 async def get_token(authorization: Optional[str] = Header(None)) -> str:
-    """Testing."""
+    """Retrieves and validates the token from the Authorization header.
+
+    Args:
+        authorization (Optional[str]): The Authorization header from the request, expected to be in the format "Bearer <token>".
+
+    Returns:
+        str: The validated token.
+
+    Raises:
+        HTTPException: If the Authorization header is missing, malformed, or the token is invalid or expired.
+    """
     if authorization is None or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Authorization header missing or malformed")
     try:
@@ -143,8 +170,16 @@ async def get_token(authorization: Optional[str] = Header(None)) -> str:
 
 
 @router_version.post('/authentication')
-async def authenticate(auth_request: AuthRequest):
-    """Testing."""
+async def authenticate(auth_request: AuthRequest) -> JSONResponse:
+    """Authenticates an agent and returns a JWT token if the authentication is successful.
+
+    Args:
+        auth_request (AuthRequest): The authentication request containing the agent UUID and optional key.
+
+    Returns:
+        JSONResponse: A response containing the JWT token if authentication is successful,
+                      or an error message if the agent does not exist or the key is invalid.
+    """
     user_id = str(auth_request.uuid)
     key = auth_request.key
 
@@ -177,13 +212,31 @@ async def authenticate(auth_request: AuthRequest):
     return JSONResponse(content={'token': token})
 
 
-def get_event_type(event):
+def get_event_type(event: StatelessEvent) -> str:
+    """Determines the type of the event. This function currently returns a placeholder value.
+
+    Args:
+        event (StatelessEvent): The event data.
+
+    Returns:
+        str: The event type. Defaults to 'undeterminated'.
+
+    TODO: Replace this logic when events format has been determinated
+    """
     return 'undeterminated'
 
 
 @router_version.post('/events/stateless')
 async def stateless_event(event: StatelessEvent, authorization: str = Depends(get_token)):
-    """Testing."""
+    """Handles stateless events and increments the count for the corresponding event type.
+
+    Args:
+        event (StatelessEvent): The stateless event data.
+        authorization (str): The valid JWT token for authorization.
+
+    Returns:
+        dict: A message confirming the receipt of the event.
+    """
     global stateless_events
     stateless_events[get_event_type(event)] += 1
 
@@ -191,24 +244,70 @@ async def stateless_event(event: StatelessEvent, authorization: str = Depends(ge
 
 
 @router_version.post('/events/stateful')
-async def stateful_event(event: StatefullData, authorization: str = Depends(get_token)):
-    """Testing."""
+async def stateful_event(event: StatefullData, authorization: str = Depends(get_token)) -> dict:
+    """Handles stateful events and increments the count for the corresponding event type.
+
+    Args:
+        event (StatefullData): The stateful event data.
+        authorization (str): The valid JWT token for authorization.
+
+    Returns:
+        dict: A message confirming that the event is being processed.
+    """
     global statefull_events
     statefull_events[get_event_type(event)] += 1
 
     return {'message': 'Event is being processed and will be persisted'}
 
-def set_report_file(report):
+def set_report_file(report: StatefullData) -> dict:
+    """Sets the path for the metrics CSV file.
+
+    Args:
+        report (str): The path to the CSV file where metrics will be logged.
+    """
     global report_file
     report_file = report
 
 
-def validate_parameters():
-    pass
+def validate_parameters(args: argparse.Namespace) -> None:
+    """Validates command-line arguments for starting the FastAPI server.
+
+    Args:
+        args (argparse.Namespace): The command-line arguments parsed by argparse.
+
+    Raises:
+        ValueError: If any argument fails validation checks, such as incorrect API version format,
+                    missing or invalid file paths, or invalid port number.
+    """
+    # Validate API version
+    if not args.api_version.startswith('/'):
+        raise ValueError("API version should start with '/'")
+
+    # Validate port number
+    if not (1 <= args.port <= 65535):
+        raise ValueError("Port number should be between 1 and 65535")
+
+    # Validate file paths
+    def validate_file_path(path: str):
+        if not os.path.isfile(path):
+            raise ValueError(f"File not found: {path}")
+
+    # Validate SSL certificate and key files
+    validate_file_path(args.cert)
+    validate_file_path(args.key)
+
+    # Validate database directory (should be a directory, not a file)
+    if not os.path.isdir(args.database_path):
+        raise ValueError(f"Directory not found: {args.database_path}")
+
 
 def main():
-    parser = argparse.ArgumentParser(description='Start FastAPI with database path')
+    """Parses command-line arguments, configures the FastAPI app, and runs the server.
 
+    Parses the necessary command-line arguments, sets up the application, and starts the Uvicorn server
+    to run the FastAPI application with the provided configuration.
+    """
+    parser = argparse.ArgumentParser(description='Start FastAPI with database path')
     parser.add_argument('--database-path', type=str, required=True, help='Path to the database directory',
                         dest="database_path")
     parser.add_argument('--port', type=int, required=True, help='Port', dest="port")
@@ -221,6 +320,7 @@ def main():
     global database_directory
 
     args = parser.parse_args()
+    validate_parameters(args)
 
     set_report_file(args.report_path)
 

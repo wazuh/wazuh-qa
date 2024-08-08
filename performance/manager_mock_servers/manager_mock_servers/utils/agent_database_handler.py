@@ -13,7 +13,28 @@ import os
 import logging
 
 
-def create_agents_database(database_path):
+def create_agents_database(database_path: str) -> str:
+    """
+    Creates a new SQLite database for storing agent information.
+
+    This function sets up a new SQLite database at the specified `database_path` location.
+    If a database file already exists at the given location, it will be deleted before creating a new one.
+    The new database will contain a table named `agents` with the following columns:
+        - `id`: An integer primary key for uniquely identifying each agent.
+        - `uuid`: A text field to store the UUID of the agent, which is required.
+        - `credential`: A text field to store credentials associated with the agent, which is required.
+        - `name`: A text field to store the name of the agent, which is optional.
+
+    Args:
+        database_path (str): The path to the directory where the database file should be created. The file will be named 'agents.db'.
+
+    Returns:
+        str: The full path to the newly created database file.
+
+    Raises:
+        OSError: If there is an error accessing or modifying the file system.
+        sqlite3.Error: If there is an error executing SQLite commands.
+    """
     database_path = os.path.join(database_path, 'agents.db')
     if os.path.exists(database_path):
         logging.info("Detected existing database. Removing")
@@ -35,7 +56,7 @@ def create_agents_database(database_path):
     return database_path
 
 
-def check_if_agent_exists(database_path, agent_name):
+def check_if_agent_exists(database_path: str, agent_name: str) -> tuple or None:
     """
     Check if an agent with the specified name exists in the database.
 
@@ -55,7 +76,7 @@ def check_if_agent_exists(database_path, agent_name):
 
 
 
-def check_if_uuid_exists(database_path, uuid):
+def check_if_uuid_exists(database_path: str, uuid: str) -> tuple or None:
     """Check if an agent with the specified uuid exists in the database.
 
     Args:
@@ -73,7 +94,7 @@ def check_if_uuid_exists(database_path, uuid):
     return existing_agent
 
 
-def insert_new_agent(database_path, uuid, key, name):
+def insert_new_agent(database_path: str, uuid: str, key: str, name: str) -> None:
     """
     Insert a new agent into the database.
 

@@ -1,13 +1,17 @@
+"""Module for Brotli compression middleware in a FastAPI application.
 
-from starlette.middleware.base import BaseHTTPMiddleware
+This module defines the `BrotliMiddleware` class, which is a custom middleware for compressing HTTP responses
+using Brotli compression. It checks if the client supports Brotli (indicated by the 'accept-encoding' header
+containing 'br') and compresses the response body if the response status code is 200.
+"""
 import brotli
+from fastapi.responses import Response
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from fastapi.responses import JSONResponse, Response
 
 
 class BrotliMiddleware(BaseHTTPMiddleware):
-    """
-    Middleware to compress HTTP responses using Brotli compression if the client supports it.
+    """Middleware to compress HTTP responses using Brotli compression if the client supports it.
 
     This middleware checks if the incoming request's 'accept-encoding' header includes 'br' (Brotli).
     If so, and if the response status code is 200, it compresses the response body using Brotli
@@ -35,3 +39,4 @@ class BrotliMiddleware(BaseHTTPMiddleware):
                 headers['Content-Length'] = str(len(compressed_content))
                 return Response(content=compressed_content, headers=headers, status_code=response.status_code)
         return response
+
