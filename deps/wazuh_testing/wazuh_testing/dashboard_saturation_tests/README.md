@@ -32,6 +32,8 @@ dashboard_saturation_tests/
 
 You need to have a Wazuh installation (including the Dashboard). You also need (for some tests) Agents connected to the Manager. The Dashboard must be accessible and have the user data and password to log in.
 
+To run the script you need to have Python and Pip installed.
+
 ### Install Artillery + Playwright
 
 Artillery, Playwright and all the dependencies required for them to run correctly must be installed. Some dependencies are libraries that can be used in tests.
@@ -58,16 +60,10 @@ playwright --version
 
 ## Initial setup
 
-To run these tests, we need the package. So first, we need to install all these Python dependencies, we can use this command:
+To run the tests, it is necessary to install the dependencies and the package. This can be done by running the following command:
 
 ```shell script
-python3 -m pip install -r requirements.txt
-```
-
-Then, we need to install the package:
-
-```shell script
-python3 setup.py install
+python3 -m pip install .
 ```
 
 ## Artillery + Playwright

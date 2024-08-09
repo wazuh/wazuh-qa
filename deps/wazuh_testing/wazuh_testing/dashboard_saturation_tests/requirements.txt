@@ -1,3 +1,0 @@
-pandas>=2.2.2
-setuptools>=72.1.0
-pycodestyle>=2.12.1
