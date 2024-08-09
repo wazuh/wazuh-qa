@@ -4,8 +4,8 @@ Classes:
 - AuthRequest: Represents an authentication request with a unique identifier and an optional key.
 - StatelessEventData: Represents the data for a stateless event, including a unique identifier and associated data.
 - StatefullEventData: Represents the data for a stateful event, including a unique identifier and associated data.
-- StatelessEvent: Represents a collection of stateless events.
-- StatefullData: Represents a collection of stateful events.
+- StatelessEvents: Represents a collection of stateless events.
+- StatefullEvents: Represents a collection of stateful events.
 """
 
 from typing import List, Optional
