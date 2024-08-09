@@ -349,12 +349,12 @@ def main():
                         dest="report_path")
     parser.add_argument('--api-version', type=str, required=False, help='API version', dest="api_version",
                         default='/v1')
-    arg_parser.add_argument('-v', '--debug',
-                            help='Enable debug mode',
-                            required=False,
-                            action='store_true',
-                            default=False,
-                            dest='debug')
+    parser.add_argument('-v', '--debug',
+                        help='Enable debug mode',
+                        required=False,
+                        action='store_true',
+                        default=False,
+                        dest='debug')
 
     global database_directory
 
