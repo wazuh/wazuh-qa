@@ -67,7 +67,7 @@ def launch_manager_simulator(request: FixtureRequest) -> Generator:
     report_path = params['report_path']
 
     process = subprocess.Popen([
-        'run-mock-managers-services',
+        'simulate-manager',
         '--manager-api-port', str(manager_api_port),
         '--agent-comm-api-port', str(agent_comm_api_port),
         '--server-path', server_path,
