@@ -24,7 +24,7 @@ def csv_file(tmp_path_factory: TempPathFactory) -> Generator:
     """
     temporal_dir = tmp_path_factory.mktemp('metrics')
 
-    yield os.path.join(temporal_dir, "test_report.csv")
+    yield os.path.join(temporal_dir, 'test_report.csv')
 
 
 def test_init_csv_header(csv_file: str):
