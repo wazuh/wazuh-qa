@@ -5,17 +5,18 @@
 
 Functions:
 - check_if_agent_exists(database_path, agent_name): Checks if an agent with the given name exists in the database.
-- insert_new_agent(database_path, uuid, key, name): Inserts a new agent with the provided UUID, credential, and name into the database.
+- insert_new_agent(database_path, uuid, key, name): Inserts a new agent with the provided UUID, credential,
+                                                    and name into the database.
 """
-
 import sqlite3
 import os
 import logging
 
+from typing import Union
+
 
 def create_agents_database(database_path: str) -> str:
-    """
-    Creates a new SQLite database for storing agent information.
+    """Creates a new SQLite database for storing agent information.
 
     This function sets up a new SQLite database at the specified `database_path` location.
     If a database file already exists at the given location, it will be deleted before creating a new one.
@@ -26,7 +27,8 @@ def create_agents_database(database_path: str) -> str:
         - `name`: A text field to store the name of the agent, which is optional.
 
     Args:
-        database_path (str): The path to the directory where the database file should be created. The file will be named 'agents.db'.
+        database_path (str): The path to the directory where the database file should be created.
+        The file will be named 'agents.db'.
 
     Returns:
         str: The full path to the newly created database file.
@@ -56,9 +58,8 @@ def create_agents_database(database_path: str) -> str:
     return database_path
 
 
-def check_if_agent_exists(database_path: str, agent_name: str) -> tuple or None:
-    """
-    Check if an agent with the specified name exists in the database.
+def check_if_agent_exists(database_path: str, agent_name: str) -> Union[tuple, None]:
+    """Check if an agent with the specified name exists in the database.
 
     Args:
         database_path (str): The file path to the SQLite database.
@@ -75,8 +76,7 @@ def check_if_agent_exists(database_path: str, agent_name: str) -> tuple or None:
     return existing_agent
 
 
-
-def check_if_uuid_exists(database_path: str, uuid: str) -> tuple or None:
+def check_if_uuid_exists(database_path: str, uuid: str) -> Union[tuple, None]:
     """Check if an agent with the specified uuid exists in the database.
 
     Args:
@@ -95,17 +95,13 @@ def check_if_uuid_exists(database_path: str, uuid: str) -> tuple or None:
 
 
 def insert_new_agent(database_path: str, uuid: str, key: str, name: str) -> None:
-    """
-    Insert a new agent into the database.
+    """Insert a new agent into the database.
 
     Args:
         database_path (str): The file path to the SQLite database.
         uuid (str): The unique identifier for the agent.
         key (str): The credential or key for the agent.
         name (str): The name of the agent.
-
-    Returns:
-        None
     """
     with sqlite3.connect(database_path) as conn:
         cursor = conn.cursor()
