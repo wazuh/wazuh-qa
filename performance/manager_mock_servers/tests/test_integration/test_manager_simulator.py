@@ -14,6 +14,7 @@ from typing import Generator
 import pytest
 from pytest import FixtureRequest
 
+
 simulate_manager_parameters = {
     'manager_api_port': 55001,
     'agent_comm_api_port': 2901,
