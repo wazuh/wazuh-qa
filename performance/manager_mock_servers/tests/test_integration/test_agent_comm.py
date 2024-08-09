@@ -208,4 +208,3 @@ def test_metrics_file(configure_report_file: str):
     with TestClient(app):
         time.sleep(10)
         assert os.path.exists(configure_report_file)
-
