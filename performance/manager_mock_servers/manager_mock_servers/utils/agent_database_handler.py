@@ -4,7 +4,9 @@
 """This module provides functions to interact with an SQLite database for managing agents.
 
 Functions:
+- create_agents_database(database_path): Creates a new SQLite database for storing agent information.
 - check_if_agent_exists(database_path, agent_name): Checks if an agent with the given name exists in the database.
+- check_if_uuid_exists(database_path, agent_name): Checks if an agent with the given uuid exists in the database.
 - insert_new_agent(database_path, uuid, key, name): Inserts a new agent with the provided UUID, credential,
                                                     and name into the database.
 """
