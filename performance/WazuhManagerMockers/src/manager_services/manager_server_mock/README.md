@@ -11,26 +11,6 @@ The Manager Management API Mocker is a module designed to simulate a Wazuh manag
 - **Secure Connections**: Supports SSL/TLS encryption for secure communication.
 - **Database Storage**: Uses SQLite to manage agent data.
 
-## Prerequisites
-
-- **Python 3.6+**
-- **Dependencies**:
-  - FastAPI
-  - Uvicorn
-  - SQLite
-
-## Installation
-
-1. **Clone the repository** (if applicable):
-    ```bash
-    git clone https://github.com/your-repository.git
-    cd your-repository
-    ```
-
-2. **Install the required Python packages**:
-    ```bash
-    pip install fastapi uvicorn sqlite
-    ```
 
 ## Configuration
 
@@ -50,17 +30,14 @@ python3 manager_server_mock.py --port 2700 --key certs/private_key.pem --cert ce
 
 ### Arguments
 
-    --database-path: Path to the directory where the SQLite database is located.
-    --key: Path to the SSL private key file.
-    --cert: Path to the SSL certificate file.
-    --port: Port number on which the server will listen.
+- `--database-path`: Path to the directory where the SQLite database is located.
+- `--key`: Path to the SSL private key file.
+- `--cert`: Path to the SSL certificate file.
+- `--port`: Port number on which the server will listen.
 
 
 ### Example
-```
+
+```bash
 python3 manager_server_mock.py --port 2700 --key certs/private_key.pem --cert certs/certificate.pem --database-path database/agents.db
 ```
-
-## Logging
-
-The server uses the uvicorn.error logger for logging purposes. Logs are output to the console by default.

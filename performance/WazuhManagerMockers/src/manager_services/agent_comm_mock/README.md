@@ -7,7 +7,7 @@ The Manager Agent Comm API Mocker is a mock server designed to handle agent auth
 To start the mock server, use the following command:
 
 ```shell
-python script.py --database-path /path/to/db \
+python agent_comm_mock.py --database-path /path/to/db \
     --port 8000 \
     --cert /path/to/cert \
     --key /path/to/key \
