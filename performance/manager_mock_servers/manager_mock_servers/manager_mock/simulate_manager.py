@@ -37,6 +37,8 @@ from manager_mock_servers.utils.credentials import create_manager_credentials
 
 current_file_path = os.path.abspath(__file__)
 
+logger = logging.getLogger('simulate-manager')
+logger.setLevel(logging.INFO)
 
 @contextmanager
 def change_dir(new_path):
@@ -59,13 +61,14 @@ def change_dir(new_path):
         os.chdir(original_path)
 
 
-def run_server_management(port, database_path, certs_path):
+def run_server_management(port, database_path, certs_path, debug=False):
     """Starts a mock server management service as a subprocess.
 
     Args:
         port (int): The port number on which the server will listen.
         database_path (str): Path to the database file.
         certs_path (str): Path to the directory containing SSL certificates.
+        debug (bool): Enable debug.
 
     Returns:
         subprocess.Popen: The subprocess object representing the started server process.
@@ -87,14 +90,16 @@ def run_server_management(port, database_path, certs_path):
         "--key",
         key_path,
         "--cert",
-        cert_path
+        cert_path,
     ]
+    if debug:
+        command.extend(['-v'])
 
     logging.info(f"Starting {service_name} on port {port}...")
     return subprocess.Popen(command, preexec_fn=preexec_function)
 
 
-def run_agent_comm(port, database_path, certs_path, report_path):
+def run_agent_comm(port, database_path, certs_path, report_path, debug=False):
     """Starts a mock agent communication service as a subprocess.
 
     Args:
@@ -102,6 +107,7 @@ def run_agent_comm(port, database_path, certs_path, report_path):
         database_path (str): Path to the database file.
         certs_path (str): Path to the directory containing SSL certificates.
         report_path (str): Path to the CSV file where metrics will be reported.
+        debug (bool): Enable debug.
 
     Returns:
         subprocess.Popen: The subprocess object representing the started agent communication process.
@@ -127,8 +133,10 @@ def run_agent_comm(port, database_path, certs_path, report_path):
         '--report-path',
         report_path
     ]
+    if debug:
+        command.extend(['-v'])
 
-    logging.info(f"Starting {service_name} on port {port}...")
+    logger.info(f"Starting {service_name} on port {port}...")
     return subprocess.Popen(command, preexec_fn=preexec_function)
 
 
@@ -143,8 +151,7 @@ def preexec_function():
     """
     # Set the child process to receive a SIGKILL when the parent dies
     libc = ctypes.CDLL('libc.so.6')
-    PR_SET_PDEATHSIG = 1
-    libc.prctl(PR_SET_PDEATHSIG, signal.SIGKILL)
+    libc.prctl(1, signal.SIGKILL)
 
 
 def generate_certificates(server_path):
@@ -161,13 +168,13 @@ def generate_certificates(server_path):
         OSError: If there is an error creating directories or files.
     """
     if not server_path:
-        logging.info("Creating server directory")
+        logger.info("Creating server directory")
         server_path = tempfile.mkdtemp()
-        logging.info(server_path)
+        logger.info(server_path)
 
     credentials_path = os.path.join(server_path, 'certs')
     if os.path.exists(credentials_path):
-        logging.info("Detected existing certs. Removing")
+        logger.info("Detected existing certs. Removing")
         shutil.rmtree(credentials_path)
 
     os.mkdir(credentials_path)
@@ -187,15 +194,18 @@ def main():
     """
     arguments = parse_parameters()
 
+    if arguments.debug:
+        logger.setLevel(logging.DEBUG)
+
     server_path = arguments.server_path
     credentials_path = generate_certificates(server_path)
 
     processes = []
     processes.append(run_server_management(arguments.manager_api_port, arguments.server_path,
-                     credentials_path))
+                     credentials_path, arguments.debug))
     time.sleep(3)
     processes.append(run_agent_comm(arguments.agent_comm_api_port, arguments.server_path, credentials_path,
-                     arguments.report_path))
+                     arguments.report_path, arguments.debug))
 
     try:
         for proc in processes:
@@ -227,9 +237,10 @@ def parse_parameters():
     arg_parser.add_argument('--server-path', metavar='<server_path>', type=str, required=False,
                             help='Server files path', dest='server_path')
 
-    arg_parser.add_argument('--report-path', type=str, required=True, help='Metrics report CSV file path', dest="report_path")
+    arg_parser.add_argument('--report-path', type=str, required=True, help='Metrics report CSV file path',
+                            dest="report_path")
 
-    arg_parser.add_argument('--debug',
+    arg_parser.add_argument('-v', '--debug',
                             help='Enable debug mode',
                             required=False,
                             action='store_true',

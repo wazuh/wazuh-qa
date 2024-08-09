@@ -132,6 +132,20 @@ def test_token(auth_token: str):
     assert auth_token is not None
 
 
+def test_commands(auth_token: str):
+    """Ensures that commands endpoint returns a timeout exception.
+
+    Args:
+        auth_token: The token obtained from the auth_token fixture.
+
+    Assertsions:
+        Asserts that commands endpoint response a 408 status code
+    """
+    headers = {"Authorization": f"Bearer {auth_token}"}
+    response = client.get(f"{TESTING_VERSION}/commands", headers=headers)
+    assert response.status_code == 408
+
+
 def test_stateless_event(auth_token: str):
     """Test posting a stateless event.
 
@@ -194,3 +208,4 @@ def test_metrics_file(configure_report_file: str):
     with TestClient(app):
         time.sleep(10)
         assert os.path.exists(configure_report_file)
+

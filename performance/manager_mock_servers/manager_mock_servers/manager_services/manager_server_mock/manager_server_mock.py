@@ -311,9 +311,15 @@ def main():
     parser = argparse.ArgumentParser(description='Start FastAPI with database path')
     parser.add_argument('--database-path', type=str, required=True, help='Path to the database directory',
                         dest="database_path")
-    parser.add_argument('--key', type=str, required=True, help='Port', dest="key")
-    parser.add_argument('--cert', type=str, required=True, help='Port', dest="cert")
+    parser.add_argument('--key', type=str, required=True, help='Key path', dest="key")
+    parser.add_argument('--cert', type=str, required=True, help='Cert path', dest="cert")
     parser.add_argument('--port', type=int, required=True, help='Port', dest="port")
+    parser.add_argument('-v', '--debug',
+                            help='Enable debug mode',
+                            required=False,
+                            action='store_true',
+                            default=False,
+                            dest='debug')
 
     args = parser.parse_args()
     start_server_manager(app, args.database_path, args.port, args.key, args.cert)

@@ -24,7 +24,8 @@ Arguments:
     --api-version: The API version prefix (default is '/v1').
 
 Example:
-    $ python script.py --database-path /var/lib/sqlite --port 8000 --cert /etc/ssl/cert.pem --key /etc/ssl/key.pem --report-path /var/log/metrics.csv
+    $ python script.py --database-path /var/lib/sqlite --port 8000 --cert /etc/ssl/cert.pem --key /etc/ssl/key.pem \
+    --report-path /var/log/metrics.csv
 
 Environment Variables:
     None.
@@ -61,7 +62,7 @@ from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException
 from fastapi.responses import JSONResponse
 
 from manager_mock_servers.manager_services.agent_comm_mock.middlewares.brotli import BrotliMiddleware
-from manager_mock_servers.manager_services.agent_comm_mock.models import AuthRequest, StatefullData, StatelessEvent
+from manager_mock_servers.manager_services.agent_comm_mock.models import AuthRequest, StatefullEvents, StatelessEvents
 from manager_mock_servers.utils.csv import init_csv_header, write_row_to_csv
 from manager_mock_servers.utils.token_manager import TokenManager
 from manager_mock_servers.utils.vars import (
@@ -71,7 +72,8 @@ from manager_mock_servers.utils.vars import (
     MANAGER_MOCK_TOKEN_SECRET_KEY,
 )
 
-logger = logging.getLogger('AgentCommMock')
+
+logger = logging.getLogger('uvicorn.error')
 
 report_file = 'metrics.csv'
 metrics_header = ["Timestamp", "Event type", "Number of events", 'Stateless/Statefull']
@@ -80,17 +82,18 @@ router_version = APIRouter()
 stateless_events_types = ['undeterminated']
 statefull_events_types = ['undeterminated']
 
-stateless_events: Dict[str, int] = {key: 0 for key in stateless_events_types}
-statefull_events: Dict[str, int] = {key: 0 for key in statefull_events_types}
+stateless_events_counts: Dict[str, int] = {key: 0 for key in stateless_events_types}
+statefull_events_counts: Dict[str, int] = {key: 0 for key in statefull_events_types}
 reset_interval = timedelta(seconds=10)
 database_directory = os.path.join(os.path.abspath(__file__), 'agents.db')
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> None:
-    """Initializes the application lifespan, including setting up the CSV file for metrics logging
-    and verifying the existence of the database directory. Starts a periodic task to reset and
-    log event counts.
+async def lifespan(app: FastAPI):
+    """Initializes the application lifespan.
+
+    Set up the CSV file for metrics logging and verifying the existence of the database directory.
+    Also it starts a periodic task to reset and log event counts.
 
     Args:
         app (FastAPI): The FastAPI application instance.
@@ -118,6 +121,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+
 async def reset_and_log_counts() -> None:
     """Periodically resets the event counts and logs them to the CSV file.
 
@@ -126,13 +130,15 @@ async def reset_and_log_counts() -> None:
     """
     while True:
         await asyncio.sleep(reset_interval.total_seconds())
-        measurement_datetime = datetime.utcnow().isoformat()
+        measurement_datetime = datetime.now().isoformat()
 
         for event_type in stateless_events_types:
-            write_row_to_csv(report_file, [measurement_datetime, event_type, statefull_events[event_type], 'stateless'])
+            write_row_to_csv(report_file, [measurement_datetime, event_type,
+                                           statefull_events_counts[event_type], 'stateless'])
 
         for event_type in statefull_events_types:
-            write_row_to_csv(report_file, [measurement_datetime, event_type, statefull_events[event_type], 'statefull'])
+            write_row_to_csv(report_file, [measurement_datetime, event_type,
+                                           statefull_events_counts[event_type], 'statefull'])
 
 
 def set_database_path(db_path: str):
@@ -149,7 +155,8 @@ async def get_token(authorization: Optional[str] = Header(None)) -> str:
     """Retrieves and validates the token from the Authorization header.
 
     Args:
-        authorization (Optional[str]): The Authorization header from the request, expected to be in the format "Bearer <token>".
+        authorization (Optional[str]): The Authorization header from the request, expected
+        to be in the format "Bearer <token>".
 
     Returns:
         str: The validated token.
@@ -212,22 +219,36 @@ async def authenticate(auth_request: AuthRequest) -> JSONResponse:
     return JSONResponse(content={'token': token})
 
 
-def get_event_type(event: StatelessEvent) -> str:
+def count_statefull_events(statefull_events: StatelessEvents) -> None:
     """Determines the type of the event. This function currently returns a placeholder value.
 
     Args:
-        event (StatelessEvent): The event data.
-
-    Returns:
-        str: The event type. Defaults to 'undeterminated'.
+        statefull_events (StatelessEvent): The event data.
 
     TODO: Replace this logic when events format has been determinated
     """
-    return 'undeterminated'
+    global statefull_events_counts
+
+    for _ in statefull_events.events:
+        statefull_events_counts['undeterminated'] += 1
+
+
+def count_stateless_events(stateless_events: StatelessEvents) -> None:
+    """Count received stateless events types.
+
+    Args:
+        stateless_events (StatelessEvent): The event data.
+
+    TODO: Replace this logic when events format has been determinated
+    """
+    global stateless_events_counts
+
+    for _ in stateless_events.events:
+        stateless_events_counts['undeterminated'] += 1
 
 
 @router_version.post('/events/stateless')
-async def stateless_event(event: StatelessEvent, authorization: str = Depends(get_token)):
+async def stateless_event(event: StatelessEvents, authorization: str = Depends(get_token)):
     """Handles stateless events and increments the count for the corresponding event type.
 
     Args:
@@ -237,14 +258,25 @@ async def stateless_event(event: StatelessEvent, authorization: str = Depends(ge
     Returns:
         dict: A message confirming the receipt of the event.
     """
-    global stateless_events
-    stateless_events[get_event_type(event)] += 1
+    count_stateless_events(event)
 
     return {'message': 'Event received'}
 
 
+@router_version.get('/commands')
+async def get_commands(authorization: str = Depends(get_token)):
+    """Mocked command endpoint.
+
+    Emulate the behaviour of agent_comm commands endpoint in case of no new commands, returning a request timeout
+
+    Raises:
+        HTTPException: Requests timeout exception.
+    """
+    raise HTTPException(status_code=408)
+
+
 @router_version.post('/events/stateful')
-async def stateful_event(event: StatefullData, authorization: str = Depends(get_token)) -> dict:
+async def stateful_event(event: StatefullEvents, authorization: str = Depends(get_token)) -> dict:
     """Handles stateful events and increments the count for the corresponding event type.
 
     Args:
@@ -254,12 +286,12 @@ async def stateful_event(event: StatefullData, authorization: str = Depends(get_
     Returns:
         dict: A message confirming that the event is being processed.
     """
-    global statefull_events
-    statefull_events[get_event_type(event)] += 1
+    count_statefull_events(event)
 
     return {'message': 'Event is being processed and will be persisted'}
 
-def set_report_file(report: str) -> dict:
+
+def set_report_file(report: str) -> None:
     """Sets the path for the metrics CSV file.
 
     Args:
@@ -313,9 +345,16 @@ def main():
     parser.add_argument('--port', type=int, required=True, help='Port', dest="port")
     parser.add_argument('--cert', type=str, required=True, help='SSL certificate file', dest="cert")
     parser.add_argument('--key', type=str, required=True, help='SSL key file', dest="key")
-    parser.add_argument('--report-path', type=str, required=True, help='Metrics report CSV file path', dest="report_path")
-    parser.add_argument('--api-version', type=str, required=False, help='API version', dest="api_version", default='/v1')
-
+    parser.add_argument('--report-path', type=str, required=True, help='Metrics report CSV file path',
+                        dest="report_path")
+    parser.add_argument('--api-version', type=str, required=False, help='API version', dest="api_version",
+                        default='/v1')
+    arg_parser.add_argument('-v', '--debug',
+                            help='Enable debug mode',
+                            required=False,
+                            action='store_true',
+                            default=False,
+                            dest='debug')
 
     global database_directory
 

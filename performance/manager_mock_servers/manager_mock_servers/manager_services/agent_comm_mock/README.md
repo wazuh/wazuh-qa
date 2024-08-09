@@ -6,7 +6,7 @@ The Manager Agent Comm API Mocker is a mock server designed to handle agent auth
 
 To start the mock server, use the following command:
 
-```bash
+```shell
 python script.py --database-path /path/to/db \
     --port 8000 \
     --cert /path/to/cert \
@@ -17,19 +17,15 @@ python script.py --database-path /path/to/db \
 
 ### Arguments
 
-    --database-path: Path to the SQLite database directory.
-    --port: Port number for the FastAPI server.
-    --cert: Path to the SSL certificate file.
-    --key: Path to the SSL key file.
-    --report-path: Path to the CSV file where metrics will be logged.
-    --api-version: API version prefix (default is /v1).
+- `--database-path`: Path to the SQLite database directory.
+- `--port`: Port number for the FastAPI server.
+- `--cert`: Path to the SSL certificate file.
+- `--key`: Path to the SSL key file.
+- `--report-path`: Path to the CSV file where metrics will be logged.
+- `--api-version`: API version prefix (default is /v1).
 
 ### Example
 
 ```bash
 python script.py --database-path /var/lib/sqlite --port 8000 --cert /etc/ssl/cert.pem --key /etc/ssl/key.pem --report-path /var/log/metrics.csv
 ```
-
-## Files
-
-    metrics.csv: The CSV file used for logging metrics.

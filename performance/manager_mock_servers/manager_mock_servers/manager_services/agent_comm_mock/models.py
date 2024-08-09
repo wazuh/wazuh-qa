@@ -8,12 +8,10 @@ Classes:
 - StatefullData: Represents a collection of stateful events.
 """
 
-from pydantic import BaseModel
-from typing import Optional, List
-import jwt
-import datetime
-import logging
+from typing import List, Optional
 from uuid import UUID
+
+from pydantic import BaseModel
 
 
 class AuthRequest(BaseModel):
@@ -26,6 +24,7 @@ class AuthRequest(BaseModel):
     uuid: UUID
     key: Optional[str] = None
 
+
 class StatelessEventData(BaseModel):
     """Represents the data for a stateless event.
 
@@ -35,6 +34,7 @@ class StatelessEventData(BaseModel):
     """
     id: int
     data: str
+
 
 class StatefullEventData(BaseModel):
     """Represents the data for a stateful event.
@@ -46,7 +46,8 @@ class StatefullEventData(BaseModel):
     id: int
     data: str
 
-class StatelessEvent(BaseModel):
+
+class StatelessEvents(BaseModel):
     """Represents a collection of stateless events.
 
     Attributes:
@@ -54,7 +55,8 @@ class StatelessEvent(BaseModel):
     """
     events: List[StatelessEventData]
 
-class StatefullData(BaseModel):
+
+class StatefullEvents(BaseModel):
     """Represents a collection of stateful events.
 
     Attributes:
