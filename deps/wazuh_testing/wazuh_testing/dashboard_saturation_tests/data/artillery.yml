@@ -1,0 +1,33 @@
+before:
+  engine: playwright
+  flowFunction: test_login
+  name: test_01_login
+config:
+  engines:
+    playwright:
+      contextOptions:
+        ignoreHTTPSErrors: true
+  phases:
+  - arrivalRate: 1
+    duration: 10
+    name: Initial Phase
+    rampTo: 1
+  processor: ./processor.js
+  variables:
+    password: '{{ password }}'
+    screenshots: '{{ screenshots }}'
+    session: '{{ session }}'
+    username: '{{ username }}'
+scenarios:
+- engine: playwright
+  name: test_01_login
+  testFunction: test_login
+- engine: playwright
+  name: test_02_access_dashboard
+  testFunction: test_accessDashboard
+- engine: playwright
+  name: test_03_access_endpoint
+  testFunction: test_accessEndpoint
+- engine: playwright
+  name: test_04_access_event
+  testFunction: test_accessEvent
