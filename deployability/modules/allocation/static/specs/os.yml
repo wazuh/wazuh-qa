@@ -25,6 +25,10 @@ vagrant:
     box: testing-debian-image
     box_version: latest
     virtualizer: docker
+  linux-debian-builder-ppc64:
+    box: build-debian-image
+    box_version: latest
+    virtualizer: docker
   linux-debian-10-amd64:
     box: generic/debian10
     box_version: 4.3.8
@@ -66,6 +70,10 @@ vagrant:
     virtualizer: virtualbox
   linux-centos-7-ppc64:
     box: testing-centos-image
+    box_version: latest
+    virtualizer: docker
+  linux-centos-builder-ppc64:
+    box: build-centos-image
     box_version: latest
     virtualizer: docker
   linux-centos-8-amd64:
