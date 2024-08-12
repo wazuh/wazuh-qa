@@ -363,7 +363,7 @@ def main():
     app.include_router(router_version, prefix=args.api_version)
     app.add_middleware(BrotliMiddleware)
 
-    database_directory = args.database_path
+    database_directory = os.path.join(args.database_path, 'agents.db')
     uvicorn.run(app, host='0.0.0.0', port=args.port, ssl_keyfile=args.key, ssl_certfile=args.cert)
 
 

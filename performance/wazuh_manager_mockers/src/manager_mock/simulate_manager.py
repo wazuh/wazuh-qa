@@ -210,22 +210,25 @@ def main():
     Raises:
         SystemExit: If an unexpected error occurs during script execution.
     """
+    global processes
     arguments = parse_parameters()
 
     if arguments.debug:
         logger.setLevel(logging.DEBUG)
 
-    server_path = arguments.server_path
-    credentials_path = generate_certificates(server_path)
+    database_path = os.path.join(arguments.server_path, 'agents.db')
+    credentials_path = generate_certificates(arguments.server_path)
 
-    global processes
+
     processes = []
     processes.append(run_server_management(arguments.manager_api_port, arguments.server_path,
                      credentials_path, arguments.debug))
     time.sleep(3)
-    processes.append(run_agent_comm(arguments.agent_comm_api_port, arguments.server_path, credentials_path,
-                     arguments.report_path, arguments.api_version, arguments.debug))
-
+    processes.append(run_agent_comm(arguments.agent_comm_api_port, arguments.server_path,
+                                    credentials_path,
+                                    arguments.report_path,
+                                    arguments.api_version,
+                                    arguments.debug))
     try:
         for proc in processes:
             proc.wait()
@@ -245,6 +248,7 @@ def parse_parameters() -> argparse.Namespace:
     Raises:
         SystemExit: If there is an error in argument parsing or validation.
     """
+
     arg_parser = argparse.ArgumentParser()
 
     arg_parser.add_argument('--manager-api-port', metavar='<manager_port_address>', type=str, required=False,
