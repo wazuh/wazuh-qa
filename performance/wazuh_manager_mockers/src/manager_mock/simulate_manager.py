@@ -40,7 +40,29 @@ current_file_path = os.path.abspath(__file__)
 
 logger = logging.getLogger('simulate-manager')
 logger.setLevel(logging.INFO)
+processes = []
 
+
+def signal_handler(sig: int, frame: None) -> None:
+    """Handle incoming signals to terminate child processes and exit the parent process.
+
+    Args:
+        sig (int): The signal number received.
+
+    Actions:
+        - Sets the global variable `is_killed` to True.
+        - Iterates through the list of child processes and terminates each one.
+        - Exits the parent process with status code 0.
+    """
+    global processes
+    logger.info(f"Received signal {sig}, killing child processes...")
+    for proc in processes:
+        proc.terminate()
+    sys.exit(0)
+
+
+signal.signal(signal.SIGTERM, signal_handler)
+signal.signal(signal.SIGINT, signal_handler)
 @contextmanager
 def change_dir(new_path):
     """Context manager for temporarily changing the current working directory.
@@ -203,6 +225,7 @@ def main():
     server_path = arguments.server_path
     credentials_path = generate_certificates(server_path)
 
+    global processes
     processes = []
     processes.append(run_server_management(arguments.manager_api_port, arguments.server_path,
                      credentials_path, arguments.debug))
