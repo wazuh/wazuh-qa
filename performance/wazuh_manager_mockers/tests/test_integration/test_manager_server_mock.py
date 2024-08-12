@@ -11,7 +11,7 @@ from _pytest.tmpdir import TempPathFactory
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from manager_mock_servers.manager_services.manager_server_mock.manager_server_mock import (
+from manager_mock_services.manager_server_mock.manager_server_mock import (
     app,
     set_database_path,
 )

@@ -23,7 +23,6 @@ Example:
     --report-path /path/to/report.csv
 """
 import argparse
-import ctypes
 import logging
 import os
 import shutil
@@ -36,7 +35,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator
 
-from manager_mock_servers.utils.credentials import create_manager_credentials
+from utils.credentials import create_manager_credentials
 
 
 current_file_path = os.path.abspath(__file__)
@@ -105,7 +104,7 @@ def run_server_management(port: int, database_path: str, certs_path: str, debug:
         FileNotFoundError: If the script or certificates are not found.
     """
     service_name = 'manager_server_mock'
-    service_path = Path(__file__).resolve().parent.parent / 'manager_services' / service_name / service_name
+    service_path = Path(__file__).resolve().parent.parent / 'manager_mock_services' / service_name / service_name
     cert_path = os.path.join(certs_path, 'cert.pem')
     key_path = os.path.join(certs_path, 'private_key.pem')
 
@@ -146,7 +145,7 @@ def run_agent_comm(port: str, database_path: str, certs_path: str, report_path: 
         FileNotFoundError: If the script or certificates are not found.
     """
     service_name = 'agent_comm_mock'
-    service_path = Path(__file__).resolve().parent.parent / 'manager_services' / service_name / service_name
+    service_path = Path(__file__).resolve().parent.parent / 'manager_mock_services' / service_name / service_name
     cert_path = os.path.join(certs_path, 'cert.pem')
     key_path = os.path.join(certs_path, 'private_key.pem')
 
@@ -167,6 +166,7 @@ def run_agent_comm(port: str, database_path: str, certs_path: str, report_path: 
     ]
     if debug:
         command.extend(['-v'])
+    print(command)
 
     logger.info(f"Starting {service_name} on port {port}...")
     return subprocess.Popen(command)

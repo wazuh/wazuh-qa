@@ -12,13 +12,14 @@ from _pytest.tmpdir import TempPathFactory
 from fastapi import status
 from fastapi.testclient import TestClient
 
-from manager_mock_servers.manager_services.agent_comm_mock.agent_comm_mock import (
+from manager_mock_services.agent_comm_mock.agent_comm_mock import (
     app,
     router_version,
     set_database_path,
     set_report_file,
 )
-from manager_mock_servers.utils.agent_database_handler import create_agents_database, insert_new_agent
+from utils.agent_database_handler import create_agents_database, insert_new_agent
+
 
 TESTING_VERSION = "/v33"
 app.include_router(router_version, prefix=TESTING_VERSION)

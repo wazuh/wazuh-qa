@@ -9,7 +9,7 @@ from typing import Generator
 import pytest
 from _pytest.tmpdir import TempPathFactory
 
-from manager_mock_servers.utils.agent_database_handler import (
+from utils.agent_database_handler import (
     check_if_agent_exists,
     check_if_uuid_exists,
     create_agents_database,

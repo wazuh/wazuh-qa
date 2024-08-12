@@ -8,7 +8,7 @@ from _pytest.tmpdir import TempPathFactory
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509 import Certificate
 
-from manager_mock_servers.utils.credentials import (
+from utils.credentials import (
     create_certificate,
     create_manager_credentials,
     create_private_key,

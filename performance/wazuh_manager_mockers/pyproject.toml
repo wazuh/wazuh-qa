@@ -1,5 +1,5 @@
 [project]
-name = "WazuhManagerMockers"
+name = "wazuh_manager_mockers"
 version = "0.0.1"
 authors = [
   { name="Wazuh", email="hello@wazuh.com" },
@@ -21,7 +21,6 @@ dependencies = [
     "uvicorn==0.30.5"
 ]
 
-
 [project.optional-dependencies]
 test = [
     "pytest==8.3.2",
@@ -29,6 +28,6 @@ test = [
 ]
 
 [project.scripts]
-simulate-manager = "manager_mock_servers.manager_mock.simulate_manager:main"
-simulate-agent-comm = "manager_mock_servers.manager_services.manager_mock:main"
-simulate-management-server = "manager_mock_servers.manager.services.manager_mock:main"
+simulate-manager = "manager_mock.simulate_manager:main"
+simulate-agent-comm = "manager_mock_services.agent_comm_mock.agent_comm_mock:main"
+simulate-management-server = "manager_mock_services.manager_server_mock.manager_server_mock:main"

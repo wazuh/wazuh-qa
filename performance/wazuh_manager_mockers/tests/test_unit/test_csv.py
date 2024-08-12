@@ -9,7 +9,7 @@ from typing import Generator
 import pytest
 from _pytest.tmpdir import TempPathFactory
 
-from manager_mock_servers.utils.csv import init_csv_header, write_row_to_csv
+from utils.csv import init_csv_header, write_row_to_csv
 
 
 @pytest.fixture

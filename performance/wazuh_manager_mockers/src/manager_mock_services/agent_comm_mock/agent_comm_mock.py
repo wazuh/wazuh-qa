@@ -61,11 +61,11 @@ import uvicorn
 from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException
 from fastapi.responses import JSONResponse
 
-from manager_mock_servers.manager_services.agent_comm_mock.middlewares.brotli import BrotliMiddleware
-from manager_mock_servers.manager_services.agent_comm_mock.models import AuthRequest, StatefullEvents, StatelessEvents
-from manager_mock_servers.utils.csv import init_csv_header, write_row_to_csv
-from manager_mock_servers.utils.token_manager import TokenManager
-from manager_mock_servers.utils.vars import (
+from manager_mock_services.agent_comm_mock.middlewares.brotli import BrotliMiddleware
+from manager_mock_services.agent_comm_mock.models import AuthRequest, StatefullEvents, StatelessEvents
+from utils.csv import init_csv_header, write_row_to_csv
+from utils.token_manager import TokenManager
+from utils.vars import (
     DEFAULT_AUD,
     DEFAULT_EXPIRATION_TIME,
     DEFAULT_ISS,
@@ -112,7 +112,7 @@ async def lifespan(app: FastAPI):
     if not os.path.exists(database_directory):
         raise ValueError(f"Directory {database_directory} does not exist")
 
-    logger.error(f"Database directory set to: {database_directory}")
+    logger.info(f"Database directory set to: {database_directory}")
     asyncio.create_task(reset_and_log_counts())
 
     yield
@@ -191,7 +191,6 @@ async def authenticate(auth_request: AuthRequest) -> JSONResponse:
     key = auth_request.key
 
     conn = sqlite3.connect(database_directory)
-    logger.error(database_directory)
     cursor = conn.cursor()
 
     cursor.execute(f'SELECT * FROM agents WHERE uuid = "{user_id}"')
@@ -205,9 +204,6 @@ async def authenticate(auth_request: AuthRequest) -> JSONResponse:
     if not existing_agent:
         return JSONResponse(status_code=409, content={'message': 'Agent with uuid does not exist'})
     if not credential or key != credential[0]:
-        logger.error(key)
-        logger.error(credential)
-
         return JSONResponse(status_code=409, content={'message': 'Invalid Key provided'})
 
     timestamp = int(datetime.now().timestamp())

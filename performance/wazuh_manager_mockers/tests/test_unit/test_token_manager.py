@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import pytest
 from fastapi import HTTPException
 
-from manager_mock_servers.utils.token_manager import TokenManager
+from utils.token_manager import TokenManager
 
 
 @pytest.fixture
