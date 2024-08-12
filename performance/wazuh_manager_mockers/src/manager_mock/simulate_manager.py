@@ -99,7 +99,7 @@ def run_server_management(port, database_path, certs_path, debug=False):
     return subprocess.Popen(command, preexec_fn=preexec_function)
 
 
-def run_agent_comm(port, database_path, certs_path, report_path, debug=False):
+def run_agent_comm(port, database_path, certs_path, report_path, api_version, debug=False):
     """Starts a mock agent communication service as a subprocess.
 
     Args:
@@ -131,7 +131,9 @@ def run_agent_comm(port, database_path, certs_path, report_path, debug=False):
         "--cert",
         cert_path,
         '--report-path',
-        report_path
+        report_path,
+        '--api-version',
+        api_version
     ]
     if debug:
         command.extend(['-v'])
@@ -205,7 +207,7 @@ def main():
                      credentials_path, arguments.debug))
     time.sleep(3)
     processes.append(run_agent_comm(arguments.agent_comm_api_port, arguments.server_path, credentials_path,
-                     arguments.report_path, arguments.debug))
+                     arguments.report_path, arguments.api_version, arguments.debug))
 
     try:
         for proc in processes:
@@ -239,6 +241,9 @@ def parse_parameters():
 
     arg_parser.add_argument('--report-path', type=str, required=True, help='Metrics report CSV file path',
                             dest="report_path")
+
+    arg_parser.add_argument('--api-version', type=str, required=False, help='API version', dest="api_version",
+                            default='/v1')
 
     arg_parser.add_argument('-v', '--debug',
                             help='Enable debug mode',

@@ -9,7 +9,7 @@ Run the script as a standalone program. The simulate_manager script handles the 
 **Example Usage:**
 
 ```sh
-simulate-manager --manager-api-port <management-port> --agent-comm-api-port <agent-comm-port> --server-path </path/to/server> --report-path </path/to/report.csv> --debug
+simulate-manager --manager-api-port <management-port> --agent-comm-api-port <agent-comm-port> --server-path </path/to/server> --report-path </path/to/report.csv> --api-version /v1 --debug
 ```
 
 ### Arguments
@@ -18,4 +18,5 @@ simulate-manager --manager-api-port <management-port> --agent-comm-api-port <age
 - `--manager-api-port`: Port for the mock server management service. Default is 55000.
 - `--agent-comm-api-port`: Port for the mock agent communication service. Default is 2900.
 - `--server-path`: Path to the directory where server files are located. If not specified, a temporary directory will be used.
+- `--api-version`: Version of the agent comm API.
 - `--debug`: Enable debug mode.
