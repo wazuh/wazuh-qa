@@ -1,3 +1,6 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """Manager Service Mocks.
 
 This package provides tools and scripts for simulating the Wazuh manager's Agent Communication and
@@ -26,4 +29,3 @@ Testing:
 Note:
     Refer to the respective README files for detailed instructions and further information.
 """
-

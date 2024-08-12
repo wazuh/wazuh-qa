@@ -1,3 +1,6 @@
+# Copyright (C) 2015, Wazuh Inc.
+# Created by Wazuh, Inc. <info@wazuh.com>.
+# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """This script is designed to manage and run mock server services for testing purposes.
 
 It includes functionalities to start server and agent communication services, generate necessary SSL certificates,
