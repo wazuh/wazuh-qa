@@ -3,8 +3,7 @@
 > ![WARNING]
 > This library is currently under development and is not yet fully functional.
 
-
-This module contains a set of tools and libraries that are being developed for performance testing.
+This module contains a set of packages, libraries and scripts that are being developed for performance testing.
 
 ### Packages
 
