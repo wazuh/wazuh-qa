@@ -32,6 +32,7 @@ import tempfile
 import time
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Generator
 
 from manager_mock_servers.utils.credentials import create_manager_credentials
 
@@ -63,8 +64,10 @@ def signal_handler(sig: int, frame: None) -> None:
 
 signal.signal(signal.SIGTERM, signal_handler)
 signal.signal(signal.SIGINT, signal_handler)
+
+
 @contextmanager
-def change_dir(new_path):
+def change_dir(new_path: str) -> Generator:
     """Context manager for temporarily changing the current working directory.
 
     Args:
@@ -84,7 +87,7 @@ def change_dir(new_path):
         os.chdir(original_path)
 
 
-def run_server_management(port, database_path, certs_path, debug=False):
+def run_server_management(port: int, database_path: str, certs_path: str, debug: bool = False) -> subprocess.Popen:
     """Starts a mock server management service as a subprocess.
 
     Args:
@@ -122,7 +125,8 @@ def run_server_management(port, database_path, certs_path, debug=False):
     return subprocess.Popen(command, preexec_fn=preexec_function)
 
 
-def run_agent_comm(port, database_path, certs_path, report_path, api_version, debug=False):
+def run_agent_comm(port: str, database_path: str, certs_path: str, report_path: str,
+                   api_version: str, debug: bool = False) -> subprocess.Popen:
     """Starts a mock agent communication service as a subprocess.
 
     Args:
@@ -130,6 +134,7 @@ def run_agent_comm(port, database_path, certs_path, report_path, api_version, de
         database_path (str): Path to the database file.
         certs_path (str): Path to the directory containing SSL certificates.
         report_path (str): Path to the CSV file where metrics will be reported.
+        api_version (str): agent comm version
         debug (bool): Enable debug.
 
     Returns:
