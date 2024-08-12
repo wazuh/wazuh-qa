@@ -9,7 +9,7 @@ Run the script as a standalone program. The simulate_manager script handles the 
 **Example Usage:**
 
 ```sh
-simulate-manager --manager-api-port 60000 --agent-comm-api-port 3000 --server-path /path/to/server --report-path /path/to/report.csv
+simulate-manager --manager-api-port <management-port> --agent-comm-api-port <agent-comm-port> --server-path </path/to/server> --report-path </path/to/report.csv> --debug
 ```
 
 ### Arguments
