@@ -170,12 +170,16 @@ vagrant:
     box: development/macos-sonoma
     box_version: 0.0.0
     virtualizer: parallels
-  macos-sonoma-14.5-amd64:
-    box: development/macos-sonoma-1450
-    box_version: 0.0.0
-    virtualizer: parallels
   macos-sonoma-14-arm64:
     box: macos-14
+    box_version: 0.0.0
+    virtualizer: parallels
+  macos-sonoma-14.6-arm64:
+    box: macos-1460
+    box_version: 0.0.0
+    virtualizer: parallels
+  macos-sonoma-14.6-amd64:
+    box: development/macos-sonoma-1460
     box_version: 0.0.0
     virtualizer: parallels
   macos-ventura-sign-arm64:
