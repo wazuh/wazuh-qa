@@ -19,7 +19,6 @@ Example:
     python script.py --manager-api-port 60000 --agent-comm-api-port 3000 --server-path /path/to/server \
     --report-path /path/to/report.csv
 """
-
 import argparse
 import ctypes
 import logging
@@ -122,7 +121,7 @@ def run_server_management(port: int, database_path: str, certs_path: str, debug:
         command.extend(['-v'])
 
     logging.info(f"Starting {service_name} on port {port}...")
-    return subprocess.Popen(command, preexec_fn=preexec_function)
+    return subprocess.Popen(command)
 
 
 def run_agent_comm(port: str, database_path: str, certs_path: str, report_path: str,
@@ -167,24 +166,10 @@ def run_agent_comm(port: str, database_path: str, certs_path: str, report_path: 
         command.extend(['-v'])
 
     logger.info(f"Starting {service_name} on port {port}...")
-    return subprocess.Popen(command, preexec_fn=preexec_function)
+    return subprocess.Popen(command)
 
 
-def preexec_function():
-    """Configures the child process to receive a SIGKILL signal if the parent process dies.
-
-    This function is used as a `preexec_fn` argument in `subprocess.Popen` to ensure that the child process
-    is terminated if the parent process is killed.
-
-    Raises:
-        OSError: If the `prctl` function call fails.
-    """
-    # Set the child process to receive a SIGKILL when the parent dies
-    libc = ctypes.CDLL('libc.so.6')
-    libc.prctl(1, signal.SIGKILL)
-
-
-def generate_certificates(server_path):
+def generate_certificates(server_path: str) -> str:
     """Creates and returns the path to SSL certificates for server communication.
 
     Args:
@@ -248,7 +233,7 @@ def main():
             proc.wait()
 
 
-def parse_parameters():
+def parse_parameters() -> argparse.Namespace:
     """Parses command-line arguments for configuring the mock services.
 
     Returns:
