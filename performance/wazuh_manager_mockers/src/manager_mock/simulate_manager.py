@@ -35,6 +35,7 @@ from pathlib import Path
 
 from manager_mock_servers.utils.credentials import create_manager_credentials
 
+
 current_file_path = os.path.abspath(__file__)
 
 logger = logging.getLogger('simulate-manager')
