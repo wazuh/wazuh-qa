@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Increase Feed update timeout in waiters.py ([#5668](https://github.com/wazuh/wazuh-qa/pull/5668)) \- (Framework)
 - Set `/active-response` as xfail ([#5660](https://github.com/wazuh/wazuh-qa/pull/5660)) \- (Tests)
 - Modify the directory name for machines deployed in AWS ([#5635](https://github.com/wazuh/wazuh-qa/pull/5635)) \- (Framework)
 - Add task information in the allocation logs when create or delete an instance ([#5623](https://github.com/wazuh/wazuh-qa/pull/5623)) \- (Framework)
