@@ -57,7 +57,10 @@ class VagrantInstance(Instance):
             None
         """
         if self.arch == 'ppc64':
-            cmd = f"sudo docker run -itd --name={self.identifier} -p {self.ssh_port}:22 {self.docker_image}"
+            if self.docker_image.__contains__("build"):
+                cmd = f"sudo docker run -itd --name={self.identifier} --privileged -v /var/run/docker.sock:/var/run/docker.sock -p {self.ssh_port}:22 {self.docker_image}"
+            else:
+                cmd = f"sudo docker run -itd --name={self.identifier} -p {self.ssh_port}:22 {self.docker_image}"
             output = VagrantUtils.remote_command(cmd, self.remote_host_parameters)
             container_id = output.split("\n")[0]
             public_key = subprocess.run(["cat", str(self.credentials.key_path) + ".pub"],
