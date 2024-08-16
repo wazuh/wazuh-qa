@@ -87,5 +87,3 @@ tasks:
       - "allocate-manager-linux-debian-10-amd64"
       - "allocate-manager-linux-debian-11-amd64"
       - "allocate-manager-linux-debian-12-amd64"
-
-
