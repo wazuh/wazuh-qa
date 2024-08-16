@@ -1,5 +1,5 @@
 version: 0.1
-description: This workflow is used to test the Wazuh manager deployment for DDT1 PoC
+description: This workflow is used to test the Wazuh manager deployment for DDT
 variables:
   central_components-os:
     - linux-ubuntu-20.04-amd64
@@ -36,6 +36,7 @@ tasks:
           - label-termination-date: "1d"
           - label-team: "qa"
           - label-issue: "https://github.com/wazuh/wazuh/issues/<issue_number>"
+    on-error: "abort-all"
     foreach:
       - variable: central_components-os
         as: central_components

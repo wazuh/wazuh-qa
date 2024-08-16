@@ -1,5 +1,5 @@
 version: 0.1
-description: This workflow is used to test agents deployment for DDT1 PoC
+description: This workflow is used to test agents deployment for DDT
 variables:
   agent-os:
     - linux-redhat-7-amd64
@@ -65,6 +65,7 @@ tasks:
           - label-termination-date: "1d"
           - label-team: "qa"
           - label-issue: "https://github.com/wazuh/wazuh/issues/<issue_number>"
+    on-error: "abort-all"
     cleanup:
       this: process
       with:
@@ -111,6 +112,7 @@ tasks:
           - label-termination-date: "1d"
           - label-team: "qa"
           - label-issue: "https://github.com/wazuh/wazuh/issues/<issue_number>"
+    on-error: "abort-all"
     foreach:
       - variable: agent-os
         as: agent
@@ -166,6 +168,7 @@ tasks:
           - label-termination-date: "1d"
           - label-team: "qa"
           - label-issue: "https://github.com/wazuh/wazuh/issues/<issue_number>"
+    on-error: "abort-all"
     foreach:
       - variable: macos-agent-os
         as: agent
@@ -221,6 +224,7 @@ tasks:
           - label-termination-date: "1d"
           - label-team: "qa"
           - label-issue: "https://github.com/wazuh/wazuh/issues/<issue_number>"
+    on-error: "abort-all"
     foreach:
       - variable: windows-agent-os
         as: agent
