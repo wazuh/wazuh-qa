@@ -61,7 +61,7 @@ tasks:
             - wazuh-1: "{working-dir}/central_components-{central_components}/inventory.yaml"
           - tests: "install,restart,stop,uninstall"
           - component: "central_components"
-          - wazuh-version: "<version>"
+          - wazuh-version: "<major.minor.patch>"
           - wazuh-revision: "<revision>"
           - live: False
     foreach:

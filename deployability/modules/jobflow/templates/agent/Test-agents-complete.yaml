@@ -87,7 +87,7 @@ tasks:
           - install:
             - component: wazuh-manager
               type: assistant
-              version: <version>
+              version: <major.minor.patch>
               live: False
     depends-on:
       - "allocate-manager-{manager-os}"
@@ -139,7 +139,7 @@ tasks:
             - agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - tests: "install,registration,connection,basic_info,restart,stop,uninstall"
           - component: "agent"
-          - wazuh-version: "<version>"
+          - wazuh-version: "<major.minor.patch>"
           - wazuh-revision: "<revision>"
           - live: False
     foreach:
@@ -194,7 +194,7 @@ tasks:
             - agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - tests: "install,registration,connection,basic_info,restart,stop,uninstall"
           - component: "agent"
-          - wazuh-version: "<version>"
+          - wazuh-version: "<major.minor.patch>"
           - wazuh-revision: "<revision>"
           - live: False
     foreach:
@@ -249,7 +249,7 @@ tasks:
             - agent: "{working-dir}/agent-{agent}/inventory.yaml"
           - tests: "install,registration,connection,basic_info,restart,stop,uninstall"
           - component: "agent"
-          - wazuh-version: "<version>"
+          - wazuh-version: "<major.minor.patch>"
           - wazuh-revision: "<revision>"
           - live: False
     foreach:
