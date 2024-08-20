@@ -7,6 +7,8 @@ import yaml
 import pandas as pd
 
 from prettytable import PrettyTable
+from collections.abc import Callable
+from typing import Any
 from scipy.stats import ttest_ind, levene, f_oneway
 
 
@@ -32,13 +34,13 @@ class DataLoader:
         metrics: metrics to be analyzed. These must be specified in the file items_path.
     """
 
-    def __init__(self, baseline_path, datasource_path, items_path):
+    def __init__(self, baseline_path: str, datasource_path: str, items_path: str) -> None:
         """Initializes the DataLoader.
 
         Args:
-            baseline_path: path to the CSV file containing the baseline data.
-            datasource_path: path to the CSV file containing the data to be compared.
-            items_path: path to the YML file containing the processes, metrics, and statistics
+            baseline_path (str): path to the CSV file containing the baseline data.
+            datasource_path (str): path to the CSV file containing the data to be compared.
+            items_path (str): path to the YML file containing the processes, metrics, and statistics
             to be analyzed.
         """
         self.baseline_path = baseline_path
@@ -49,7 +51,7 @@ class DataLoader:
         self.datasource = self.load_dataframe(datasource_path)
         self.process_name, self.processes, self.metrics = self.load_yaml_items(self.items_path)
 
-    def validate_paths(self):
+    def validate_paths(self) -> None:
         """Validates the existence of the files used by the module."""
         if not os.path.exists(self.baseline_path) or not os.path.exists(self.datasource_path):
             raise ValueError(f"One or both of the provided CSV files do not exist")
@@ -57,15 +59,15 @@ class DataLoader:
         if not os.path.exists(self.items_path):
             raise ValueError(f"The YML file does not exit")
 
-    def load_dataframe(self, csv_path):
+    def load_dataframe(self, csv_path: str) -> pd.DataFrame:
         """Read the CSV and convert it to dataframe. Also check that the format is valid (CSV)
         and that the file is not empty.
 
         Args:
-            csv_path: path to the CSV file to be converted in Dataframe.
+            csv_path (str): path to the CSV file to be converted in Dataframe.
 
         Returns:
-            dataframe: Dataframe corresponding to the CSV.
+            dataframe (pd.Dataframe): Dataframe corresponding to the CSV.
         """
         dataframe = pd.read_csv(csv_path)
         if len(dataframe) == 0:
@@ -73,17 +75,17 @@ class DataLoader:
 
         return dataframe
 
-    def load_yaml_items(self, yaml_path):
+    def load_yaml_items(self, yaml_path: str) -> tuple[str, list[str], dict[str, str]]:
         """Process the YML file containing the elements to be analyzed during the test. In addition,
         it obtains from this file the attributes of 'process_name', 'processes' and 'metrics'.
 
         Args:
-            yaml_path: path to the YML file containing the elements to be analyzed.
+            yaml_path (str): path to the YML file containing the elements to be analyzed.
 
         Returns:
-            process_name: name of the process to be analyzed.
-            processes: the different processes that are included in the 'process_name'.
-            metrics: metrics to be analyzed.
+            process_name (str): name of the process to be analyzed.
+            processes (list[str]): the different processes that are included in the 'process_name'.
+            metrics (dict[str, str]): metrics to be analyzed.
         """
         with open(yaml_path, 'r') as file:
             config = yaml.safe_load(file)
@@ -95,11 +97,11 @@ class DataLoader:
 
         return process_name, processes, metrics
 
-    def print_dataframes_stats(self):
+    def print_dataframes_stats(self) -> str:
         """Generate a PrettyTable with the statistics for each process and metric.
 
         Returns:
-            output: String containing the comparative table.
+            output (str): String containing the comparative table.
         """
         output = ""
 
@@ -136,16 +138,16 @@ class StatisticalComparator:
     set in the YML file.
     """
 
-    def calculate_basic_statistics(self, dataframe, metric, stat):
+    def calculate_basic_statistics(self, dataframe: pd.DataFrame, metric: str, stat: str) -> float:
         """Calculates the basic statistic of a data set for a specific metric.
 
         Args:
-            dataframe: Dataframe containing the specific data for the calculation.
-            metric: Metrics on which the statistic will be calculated.
-            stat: statistics to be calculated.
+            dataframe (pd.DataFrame): Dataframe containing the specific data for the calculation.
+            metric (str): Metrics on which the statistic will be calculated.
+            stat (str): statistics to be calculated.
 
         Returns:
-            value: value of the calculated statistic.
+            value (float): value of the calculated statistic.
         """
         value = 0
         if stat == 'Mean':
@@ -163,19 +165,20 @@ class StatisticalComparator:
 
         return value
 
-    def comparison_basic_statistics(self, baseline, datasource, metric, stat, threshold):
+    def comparison_basic_statistics(self, baseline : pd.DataFrame, datasource: pd.DataFrame, metric: str,
+                                    stat: str, threshold: float) -> int:
         """Compares the percent change in a statistic between the two data sets to determine
         if there is a significant change based on the threshold value.
 
         Args:
-            baseline: Dataframe with the baseline data.
-            datasource: Dataframe with the incoming data source.
-            metric: metric from which the statistic to be compared are obtained.
-            stat: concrete statistic to be compared.
-            threshold: threshold for comparison.
+            baseline (pd.DataFrame): Dataframe with the baseline data.
+            datasource (pd.DataFrame): Dataframe with the incoming data source.
+            metric (str): metric from which the statistic to be compared are obtained.
+            stat (str): concrete statistic to be compared.
+            threshold (float): threshold for comparison.
 
         Returns:
-            discrepancie: if the percentage difference is greater than the threshold,
+            discrepancie (int): if the percentage difference is greater than the threshold,
             it returns 1, otherwise it returns 0.
         """
         discrepancy = 0
@@ -198,18 +201,19 @@ class StatisticalTests:
     to detect significant differences between them.
     """
 
-    def perform_test(self, baseline, datasource, metric, test_func, **args):
+    def perform_test(self, baseline: pd.DataFrame, datasource: pd.DataFrame, metric: str,
+                     test_func: Callable[..., float], **args: Any) -> float:
         """A general method that performs a statistical test on two sets of data.
 
         Args:
-            baseline: Dataframe with the baseline data.
-            datasource: Dataframe with the incoming data source.
-            metric: metric on which the test is performed.
-            test_func: the function of the statistical test to be executed.
-            args: additional arguments for the test function.
+            baseline (pd.DataFrame): Dataframe with the baseline data.
+            datasource (pd.DataFrame): Dataframe with the incoming data source.
+            metric (str): metric on which the test is performed.
+            test_func (Callable[..., float]): the function of the statistical test to be executed.
+            args (Any): additional arguments for the test function.
 
         Returns:
-            p_value: p value of the statistical test performed.
+            p_value (float): p value of the statistical test performed.
         """
         baseline_values = baseline[metric].dropna()
         datasource_values = datasource[metric].dropna()
@@ -218,41 +222,41 @@ class StatisticalTests:
 
         return p_value
 
-    def t_student_test(self, baseline, datasource, metric):
+    def t_student_test(self, baseline: pd.DataFrame, datasource: pd.DataFrame, metric: str) -> float:
         """Performs the statistical analysis using the t-student test.
 
         Args:
-            baseline: Dataframe with the baseline data.
-            datasource: Dataframe with the incoming data source.
-            metric: metric on which the test is performed
+            baseline (pd.DataFrame): Dataframe with the baseline data.
+            datasource (pd.DataFrame): Dataframe with the incoming data source.
+            metric (str): metric on which the test is performed
 
         Returns:
-            p value returned by the t-student test.
+            (float): p value returned by the t-student test.
         """
         return self.perform_test(baseline, datasource, metric, ttest_ind, equal_var=False)
 
-    def t_levene_test(self, baseline, datasource, metric):
+    def t_levene_test(self, baseline: pd.DataFrame, datasource: pd.DataFrame, metric: str) -> float:
         """Performs the statistical analysis using the Levene test.
 
         Args:
-            baseline: Dataframe with the baseline data.
-            datasource: Dataframe with the incoming data source.
-            metric: metric on which the test is performed.
+            baseline (pd.DataFrame): Dataframe with the baseline data.
+            datasource (pd.DataFrame): Dataframe with the incoming data source.
+            metric (str): metric on which the test is performed.
 
         Returns:
-            p value returned by the Levene test.
+            (float): p value returned by the Levene test.
         """
         return self.perform_test(baseline, datasource, metric, levene)
 
-    def t_anova_test(self, baseline, datasource, metric):
+    def t_anova_test(self, baseline: pd.DataFrame, datasource: pd.DataFrame, metric: str) -> float:
         """Performs the statistical analysis using the ANOVA test.
 
         Args:
-            baseline: Dataframe with the baseline data.
-            datasource: Dataframe with the incoming data source.
-            metric: metric on which the test is performed.
+            baseline (pd.DataFrame): Dataframe with the baseline data.
+            datasource (pd.DataFrame): Dataframe with the incoming data source.
+            metric (str): metric on which the test is performed.
 
         Returns:
-            p value returned by the ANOVA test.
+            (float): p value returned by the ANOVA test.
         """
         return self.perform_test(baseline, datasource, metric, f_oneway)

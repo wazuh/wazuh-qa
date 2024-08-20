@@ -24,18 +24,19 @@ Issue: https://github.com/wazuh/wazuh/issues/24688
 
 import pytest
 
+from collections.abc import Callable
 from wazuh_testing.tools.performance.statistical_data_analyzer import DataLoader, \
     StatisticalComparator, StatisticalTests
 
 
-def test_comparison(get_data, config):
+def test_comparison(get_data: Callable[[], tuple[str, str, float]], config: Callable[[], str]) -> None:
     """The main test of the module. It checks if any statistical test detects significant changes and
     if so, compares the statistics of both data sets to detect changes with respect to a threshold value.
 
     Args:
-        load_data: fixture that contains baseline, incoming data source Dataframes, and the
-        confidence level values.
-        config: fixture that contains the YML file with the items to be analyzed.
+        load_data (Callable[[], tuple[str, str, float]]): fixture that contains baseline, incoming data
+        source Dataframes, and the confidence level values.
+        config (Callable[[], str]): fixture that contains the YML file with the items to be analyzed.
     """
     baseline_file, datasource_file, confidence_level = get_data
     config_file = config

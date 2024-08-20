@@ -7,14 +7,15 @@ import os
 import pytest_html
 
 from contextlib import redirect_stdout
+from typing import Generator
 from wazuh_testing.tools.performance.statistical_data_analyzer import DataLoader
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser: pytest.Parser) -> None:
     """Function that collects the parameters used to execute the test.
 
     Args:
-        parser: the parser for command line arguments and ini-file values.
+        parser (pytest.Parser): the parser for command line arguments and ini-file values.
     """
     parser.addoption(
         '--baseline',
@@ -51,16 +52,16 @@ def pytest_addoption(parser):
 
 
 @pytest.fixture
-def get_data(pytestconfig):
+def get_data(pytestconfig: pytest.Config) -> tuple[str, str, float]:
     """Fixture that collects the CSV files and the confidence level passed by parameters to the test.
 
     Args:
-        pytestconfig: returns the :class:`_pytest.config.Config` object.
+        pytestconfig (pytest.Config): returns the :class:`_pytest.config.Config` object.
 
     Returns:
-        baseline: path to the baseline data file.
-        datasource: path to the incoming data file.
-        conf_level: level of confidence por the statistic analysis.
+        baseline (str): path to the baseline data file.
+        datasource (str): path to the incoming data file.
+        conf_level (float): level of confidence por the statistic analysis.
     """
     baseline_file = pytestconfig.getoption("baseline")
     datasource_file = pytestconfig.getoption("datasource")
@@ -73,15 +74,15 @@ def get_data(pytestconfig):
 
 
 @pytest.fixture
-def config(pytestconfig):
+def config(pytestconfig: pytest.Config) -> str:
     """Fixture that collects the YML file with the elements to be analyzed
     during the test.
 
     Args:
-        pytestconfig: returns the :class:`_pytest.config.Config` object.
+        pytestconfig (pytest.Config): returns the :class:`_pytest.config.Config` object.
 
     Returns:
-        config: path to the YML file.
+        config (str): path to the YML file.
     """
     config_file = pytestconfig.getoption("items_yaml")
 
@@ -92,7 +93,7 @@ def config(pytestconfig):
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item, call):
+def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo) -> Generator[None, None, None]:
     """Add to the final Pytest report a file with the statistical comparison tables."""
     outcome = yield
     report = outcome.get_result()
