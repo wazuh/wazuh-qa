@@ -6,9 +6,8 @@ import pytest
 import os
 import pytest_html
 
-from contextlib import redirect_stdout
 from typing import Generator
-from wazuh_testing.tools.performance.statistical_data_analyzer import DataLoader
+from statistical_data_analyzer import DataLoader
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:

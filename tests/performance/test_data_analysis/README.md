@@ -8,17 +8,20 @@ The analysis is performed specifically for the processes, metrics and statistics
 
 ## Initial setup
 
-To run these tests, we need the wazuh-testing package. So first, we need to install all these Python dependencies, we can use this command:
+To run these tests, we need to install the package. So we can follow these steps:
+
+1. Move to the `performance/test_data_analysis` directory.
+2. Create and activate the Python environment.
 
 ```shell script
-pip3 install -r requirements.txt
+python3 -m venv env
+source env/bin/activate
 ```
 
-Then, we need to install the package:
+3. Install the packages
 
 ```shell script
-cd deps/wazuh_testing
-python3 setup.py install
+python3 -m pip install .
 ```
 
 ## Pytest
@@ -26,7 +29,7 @@ python3 setup.py install
 To run the tests, we will need to use the following command:
 
 ```shell script
-python3 -m pytest test_data_analyzer_module.py --baseline <baseline_csv_file> --datasource <data_csv_file> --items_yaml <yml_file> --<options>
+python3 -m pytest test_data_analyzer_module.py --baseline <baseline_csv_file> --datasource <data_csv_file> --items_yaml <yml_file> --html=<html_file> <--optional_parameters>
 ```
 
 ### Parameters

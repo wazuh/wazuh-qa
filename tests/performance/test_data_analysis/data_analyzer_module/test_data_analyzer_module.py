@@ -25,7 +25,7 @@ Issue: https://github.com/wazuh/wazuh/issues/24688
 import pytest
 
 from collections.abc import Callable
-from wazuh_testing.tools.performance.statistical_data_analyzer import DataLoader, \
+from statistical_data_analyzer import DataLoader, \
     StatisticalComparator, StatisticalTests
 
 
