@@ -25,11 +25,12 @@ Issue: https://github.com/wazuh/wazuh/issues/24688
 import pytest
 
 from collections.abc import Callable
+from typing import Tuple
 from statistical_data_analyzer import DataLoader, \
     StatisticalComparator, StatisticalTests
 
 
-def test_comparison(get_data: Callable[[], tuple[str, str, float]], config: Callable[[], str]) -> None:
+def test_comparison(get_data: Callable[[], Tuple[str, str, float]], config: Callable[[], str]) -> None:
     """The main test of the module. It checks if any statistical test detects significant changes and
     if so, compares the statistics of both data sets to detect changes with respect to a threshold value.
 

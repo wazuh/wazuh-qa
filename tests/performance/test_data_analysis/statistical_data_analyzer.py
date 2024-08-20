@@ -8,7 +8,7 @@ import pandas as pd
 
 from prettytable import PrettyTable
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Tuple, List, Dict
 from scipy.stats import ttest_ind, levene, f_oneway
 
 
@@ -75,7 +75,7 @@ class DataLoader:
 
         return dataframe
 
-    def load_yaml_items(self, yaml_path: str) -> tuple[str, list[str], dict[str, str]]:
+    def load_yaml_items(self, yaml_path: str) -> Tuple[str, List[str], Dict[str, Dict[str, float]]]:
         """Process the YML file containing the elements to be analyzed during the test. In addition,
         it obtains from this file the attributes of 'process_name', 'processes' and 'metrics'.
 
@@ -85,7 +85,7 @@ class DataLoader:
         Returns:
             process_name (str): name of the process to be analyzed.
             processes (list[str]): the different processes that are included in the 'process_name'.
-            metrics (dict[str, str]): metrics to be analyzed.
+            metrics (Dict[str, Dict[str, float]]): metrics to be analyzed.
         """
         with open(yaml_path, 'r') as file:
             config = yaml.safe_load(file)

@@ -6,7 +6,7 @@ import pytest
 import os
 import pytest_html
 
-from typing import Generator
+from typing import Generator, Tuple
 from statistical_data_analyzer import DataLoader
 
 
@@ -51,7 +51,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
 
 
 @pytest.fixture
-def get_data(pytestconfig: pytest.Config) -> tuple[str, str, float]:
+def get_data(pytestconfig: pytest.Config) -> Tuple[str, str, float]:
     """Fixture that collects the CSV files and the confidence level passed by parameters to the test.
 
     Args:
@@ -99,21 +99,22 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo) -> Gener
     report.extra = getattr(report, 'extra', [])
 
     if report.when == 'call' and report.failed:
-        baseline_file, datasource_file, _ = item.funcargs['get_data']
-        items_yaml_path = item.config.getoption("items_yaml")
+        if 'get_data' in item.funcargs:
+            baseline_file, datasource_file, _ = item.funcargs['get_data']
+            items_yaml_path = item.config.getoption("items_yaml")
 
-        data_loader = DataLoader(baseline_file, datasource_file, items_yaml_path)
-        output = data_loader.print_dataframes_stats()
+            data_loader = DataLoader(baseline_file, datasource_file, items_yaml_path)
+            output = data_loader.print_dataframes_stats()
 
-        report_dir = os.path.dirname(item.config.option.htmlpath)
-        assets_dir = os.path.join(report_dir, "assets")
-        if not os.path.exists(assets_dir):
-            os.makedirs(assets_dir)
+            report_dir = os.path.dirname(item.config.option.htmlpath)
+            assets_dir = os.path.join(report_dir, "assets")
+            if not os.path.exists(assets_dir):
+                os.makedirs(assets_dir)
 
-        test_name = item.name
-        log_file = os.path.join(assets_dir, f"{test_name}_stats.log")
-        with open(log_file, 'w') as file:
-            file.write(output)
+            test_name = item.name
+            log_file = os.path.join(assets_dir, f"{test_name}_stats.log")
+            with open(log_file, 'w') as file:
+                file.write(output)
 
-        relative_log_file = os.path.relpath(log_file, report_dir)
-        report.extra.append(pytest_html.extras.url(relative_log_file, name='Statistical comparison'))
+            relative_log_file = os.path.relpath(log_file, report_dir)
+            report.extra.append(pytest_html.extras.url(relative_log_file, name='Statistical comparison'))
