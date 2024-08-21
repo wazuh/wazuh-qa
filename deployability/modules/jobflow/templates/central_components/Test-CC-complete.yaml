@@ -4,6 +4,7 @@ variables:
   central_components-os:
     - linux-ubuntu-20.04-amd64
     - linux-ubuntu-22.04-amd64
+    - linux-ubuntu-24.04-amd64
     - linux-amazon-2-amd64
     - linux-redhat-7-amd64
     - linux-redhat-8-amd64
@@ -71,6 +72,7 @@ tasks:
     depends-on:
       - "allocate-central_components-linux-ubuntu-20.04-amd64"
       - "allocate-central_components-linux-ubuntu-22.04-amd64"
+      - "allocate-central_components-linux-ubuntu-24.04-amd64"
       - "allocate-central_components-linux-amazon-2-amd64"
       - "allocate-central_components-linux-redhat-7-amd64"
       - "allocate-central_components-linux-redhat-8-amd64"
