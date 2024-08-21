@@ -23,6 +23,7 @@ def sample_data1() -> pd.DataFrame:
     }
     return pd.DataFrame(data)
 
+
 @pytest.fixture
 def sample_data2() -> pd.DataFrame:
     """Fixture that returns a DataFrame for the second data set.
@@ -35,6 +36,7 @@ def sample_data2() -> pd.DataFrame:
         'Metric2': [100, 200, 300, 400]
     }
     return pd.DataFrame(data)
+
 
 def test_calculate_basic_statistics(sample_data1: pd.DataFrame) -> None:
     """Test that checks the accuracy of the statistics calculation.
@@ -51,10 +53,11 @@ def test_calculate_basic_statistics(sample_data1: pd.DataFrame) -> None:
     var_value = comparator.calculate_basic_statistics(sample_data1, 'Metric2', 'Variance')
     assert mean_value == 25
     assert median_value == 25
-    assert max_value == 400    
+    assert max_value == 400
     assert min_value == 100
     assert std_value == 12.91
     assert var_value == 16666.67
+
 
 def test_comparison_basic_statistics(sample_data1: pd.DataFrame, sample_data2: pd.DataFrame) -> None:
     """Test that checks the accuracy of the statistics comparison.
@@ -67,7 +70,7 @@ def test_comparison_basic_statistics(sample_data1: pd.DataFrame, sample_data2: p
     median_discrepancy = comparator.comparison_basic_statistics(sample_data1, sample_data2, 'Metric1', 'Median', 0.1)
     max_discrepancy = comparator.comparison_basic_statistics(sample_data1, sample_data2, 'Metric1', 'Max value', 0.1)
     min_discrepancy = comparator.comparison_basic_statistics(sample_data1, sample_data2, 'Metric2', 'Min value', 0.1)
-    std_discrepancy = comparator.comparison_basic_statistics(sample_data1, sample_data2, 'Metric2', 
+    std_discrepancy = comparator.comparison_basic_statistics(sample_data1, sample_data2, 'Metric2',
                                                              'Standard deviation', 0.1)
     var_discrepancy = comparator.comparison_basic_statistics(sample_data1, sample_data2, 'Metric2', 'Variance', 0.1)
     assert mean_discrepancy == 1

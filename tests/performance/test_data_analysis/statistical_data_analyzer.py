@@ -177,7 +177,7 @@ class StatisticalComparator:
 
         return value
 
-    def comparison_basic_statistics(self, baseline : pd.DataFrame, datasource: pd.DataFrame, metric: str,
+    def comparison_basic_statistics(self, baseline: pd.DataFrame, datasource: pd.DataFrame, metric: str,
                                     stat: str, threshold: float) -> int:
         """Compares the percent change in a statistic between the two data sets to determine
         if there is a significant change based on the threshold value.

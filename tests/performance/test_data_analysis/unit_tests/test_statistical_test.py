@@ -23,6 +23,7 @@ def sample_data1() -> pd.DataFrame:
     }
     return pd.DataFrame(data)
 
+
 @pytest.fixture
 def sample_data2() -> None:
     """Fixture that returns a DataFrame for the second data set.
@@ -35,6 +36,7 @@ def sample_data2() -> None:
         'Metric2': [1000, 2000, 3000, 4000]
     }
     return pd.DataFrame(data)
+
 
 def test_t_student_test(sample_data1: pd.DataFrame, sample_data2: pd.DataFrame) -> None:
     """Test that checks the accuracy of the t_student test function.
@@ -49,6 +51,7 @@ def test_t_student_test(sample_data1: pd.DataFrame, sample_data2: pd.DataFrame) 
     p_value = stats_tests.t_student_test(sample_data1, sample_data2, 'Metric2')
     assert p_value < 0.95
 
+
 def test_levene_test(sample_data1: pd.DataFrame, sample_data2: pd.DataFrame) -> None:
     """Test that checks the accuracy of the Levene test function.
 
@@ -61,6 +64,7 @@ def test_levene_test(sample_data1: pd.DataFrame, sample_data2: pd.DataFrame) -> 
     assert p_value == 1.0
     p_value = stats_tests.t_levene_test(sample_data1, sample_data2, 'Metric2')
     assert p_value < 0.95
+
 
 def test_anova_test(sample_data1: pd.DataFrame, sample_data2: pd.DataFrame) -> None:
     """Test that checks the accuracy of the ANOVA test function.
