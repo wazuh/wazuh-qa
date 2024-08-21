@@ -2,12 +2,11 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-"""Tests for the DataLoader class"""
+"""Unit tests for the DataLoader class"""
 
 import pandas as pd
 
 from statistical_data_analyzer import DataLoader
-from unittest.mock import MagicMock
 from pytest_mock import MockerFixture
 
 
@@ -22,12 +21,12 @@ def test_dataloader_initialization(mocker: MockerFixture) -> None:
     mocker.patch("pandas.read_csv", return_value=pd.DataFrame({"col1": [1, 2], "col2": [3, 4]}))
     mocker.patch("builtins.open", mocker.mock_open(read_data="""
     Processes:
-      proc1:
-        - process1
+      proc:
+        - p1
     Metrics:
       metric1:
-        stat1: 10"""))
-    mocker.patch("yaml.safe_load", return_value={"Processes": {"proc1": ["p1"]}, 
+        stat1: 5"""))
+    mocker.patch("yaml.safe_load", return_value={"Processes": {"proc": ["p1"]}, 
                                                  "Metrics": {"metric1": {"stat1": 5}}})
     
     dataloader = DataLoader("baseline.csv", "datasource.csv", "items.yml")
@@ -37,7 +36,7 @@ def test_dataloader_initialization(mocker: MockerFixture) -> None:
     assert dataloader.items_path == "items.yml"
     assert not dataloader.baseline.empty
     assert not dataloader.datasource.empty
-    assert dataloader.process_name == "proc1"
+    assert dataloader.process_name == "proc"
     assert dataloader.processes == ["p1"]
     assert dataloader.metrics == {"metric1": {"stat1": 5}}
 
@@ -51,12 +50,12 @@ def test_load_dataframe(mocker: MockerFixture) -> None:
     mocker.patch("pandas.read_csv", return_value=pd.DataFrame({"col1": [1, 2], "col2": [3, 4]}))
     mocker.patch("builtins.open", mocker.mock_open(read_data="""
     Processes:
-      proc1:
-        - process1
+      proc:
+        - p1
     Metrics:
       metric1:
         stat1: 10"""))
-    mocker.patch("yaml.safe_load", return_value={"Processes": {"proc1": ["p1"]},
+    mocker.patch("yaml.safe_load", return_value={"Processes": {"proc": ["p1"]},
                                                  "Metrics": {"metric1": {"stat1": 10}}})
     
     dataloader = DataLoader("baseline.csv", "datasource.csv", "items.yml")
@@ -74,17 +73,18 @@ def test_load_yaml_items(mocker: MockerFixture) -> None:
     mocker.patch("os.path.exists", return_value=True)
     mocker.patch("builtins.open", mocker.mock_open(read_data="""
     Processes:
-      proc1:
-        - process1
+      proc:
+        - p1
     Metrics:
       metric1:
         stat1: 10"""))
-    mocker.patch("yaml.safe_load", return_value={"Processes": {"proc1": ["p1"]}, "Metrics": {"metric1": {"stat1": 10}}})
+    mocker.patch("yaml.safe_load", return_value={"Processes": {"proc": ["p1"]},
+                                                "Metrics": {"metric1": {"stat1": 10}}})
     
     dataloader = DataLoader("baseline.csv", "datasource.csv", "items.yml")
     process_name, processes, metrics = dataloader.load_yaml_items("items.yml")
     
-    assert process_name == "proc1"
+    assert process_name == "proc"
     assert processes == ["p1"]
     assert metrics == {"metric1": {"stat1": 10}}
 
@@ -96,17 +96,17 @@ def test_print_dataframes_stats(mocker: MockerFixture) -> None:
     """
     mocker.patch("os.path.exists", return_value=True)
     mocker.patch("pandas.read_csv", side_effect=[
-        pd.DataFrame({"process": ["p1"], "metric1": 10, "metric2": 1000}),
-        pd.DataFrame({"process": ["process1"], "metric1": 15, "metric2": 1500})
+        pd.DataFrame({"proc": ["p1"], "metric1": 10, "metric2": 1000}),
+        pd.DataFrame({"proc": ["process1"], "metric1": 15, "metric2": 1500})
     ])
     mocker.patch("builtins.open", mocker.mock_open(read_data="""
     Processes:
-      process:
+      proc:
         - p1
     Metrics:
       metric1:
         stat1: 10"""))
-    mocker.patch("yaml.safe_load", return_value={"Processes": {"process": ["p1"]}, "Metrics": {"metric1": {"stat1": 10, "stat2": 100}}})
+    mocker.patch("yaml.safe_load", return_value={"Processes": {"proc": ["p1"]}, "Metrics": {"metric1": {"stat1": 10, "stat2": 100}}})
     
     dataloader = DataLoader("baseline.csv", "datasource.csv", "items.yml")
     

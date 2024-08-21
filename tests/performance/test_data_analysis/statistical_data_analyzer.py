@@ -2,6 +2,18 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+"""
+Library of the Statistical Data Analyzer Module
+
+This library contains the classes and methods necessary to perform statistical analysis and calculations
+on different data sets.
+
+Classes:
+    - DataLoader: class that obtains and loads all the necessary information in their respective variables.
+    - StatisticalComparator: class that performs a comparison between the statistics of two data sets.
+    - StatisticalTests: class that performs statistical tests to detect significant differences in the data.
+"""
+
 import os
 import yaml
 import pandas as pd

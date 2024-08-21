@@ -4,17 +4,16 @@
 
 """
 Statistical Data Analyzer Module Test
--------------------------------------
 
-Brief:
-    This module contains a basic test that allows you to perform statistical analysis and calculations
-    on two data sets and to make comparisons between them. This allows to detect significant
-    differences between the two sets automatically.
 
-    This test uses t-Student, Levene and ANOVA tests to detect possible significant differences in the
-    metrics of the data sets. If such differences exist, comparisons are made between the main
-    statistics with respect to a threshold value which, if exceeded, is marked as an error and
-    reported conveniently.
+This module contains a basic test that allows you to perform statistical analysis and calculations
+on two data sets and to make comparisons between them. This allows to detect significant
+differences between the two sets automatically.
+
+This test uses t-Student, Levene and ANOVA tests to detect possible significant differences in the
+metrics of the data sets. If such differences exist, comparisons are made between the main
+statistics with respect to a threshold value which, if exceeded, is marked as an error and
+reported conveniently.
 
 Tests:
     - test_comparison: detects significant differences between metrics of two data sets.
@@ -26,8 +25,7 @@ import pytest
 
 from collections.abc import Callable
 from typing import Tuple
-from statistical_data_analyzer import DataLoader, \
-    StatisticalComparator, StatisticalTests
+from statistical_data_analyzer import DataLoader, StatisticalComparator, StatisticalTests
 
 
 def test_comparison(get_data: Callable[[], Tuple[str, str, float]], config: Callable[[], str]) -> None:

@@ -2,7 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-"""Tests for the StatisticalComparator class"""
+"""Unit tests for the StatisticalComparator class"""
 
 import pytest
 import pandas as pd
@@ -52,7 +52,7 @@ def test_calculate_basic_statistics(sample_data1: pd.DataFrame) -> None:
     assert mean_value == 25
     assert median_value == 25
     assert max_value == 400    
-    assert min_value == 1000
+    assert min_value == 100
     assert std_value == 12.91
     assert var_value == 16666.67
 

@@ -2,6 +2,18 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+"""
+Pytest configuration for Statistical Data Analysis tests
+
+This module contains fixtures that allow to obtain the test input data and to manage the final report.
+
+Functions:
+    - pytest_addoption: defines the input parameters when running the test.
+    - get_data: fixture that gets the CSV files and the confidence level passed as parameters.
+    - config: fixture that gets the YAML file with the configuration of the test.
+    - pytest_runtest_makereport: generates the necessary information in the final test report.
+"""
+
 import pytest
 import os
 import pytest_html
