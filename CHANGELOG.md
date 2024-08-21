@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Adding jobflow templates ([#5680](https://github.com/wazuh/wazuh-qa/pull/5680/)) \- (Framework)
 - Add RockyLinux 8.10 to Allocator module ([#5524](https://github.com/wazuh/wazuh-qa/pull/5524)) \- (Framework)
 - Add Deployability testing tier 1 ([#5190](https://github.com/wazuh/wazuh-qa/pull/5190)) \- (Framework + Documentation + Tests)
 - Add Workflow module to Wazuh-qa repository ([#4990](https://github.com/wazuh/wazuh-qa/pull/4990)) \- (Tests)
@@ -32,6 +33,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix playbook cleanup.yaml ([#5672](https://github.com/wazuh/wazuh-qa/pull/5672)) \- (Tests)
 - Fixed unnecesary reference to debian file in dashboard provisioning task ([#5643](https://github.com/wazuh/wazuh-qa/pull/5643)) \- (Framework)
 - Changed 'Ensure that the manager version is' expected warning to an agnostic version of regex ([#5630](https://github.com/wazuh/wazuh-qa/pull/5630)) \- (Tests)
 - Adding fixed and dynamic waits to port status checks ([#5627](https://github.com/wazuh/wazuh-qa/pull/5627)) (Framework)
