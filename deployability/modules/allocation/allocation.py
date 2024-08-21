@@ -13,7 +13,7 @@ import winrm
 
 from .aws.provider import AWSProvider, AWSConfig
 from .generic import Instance, Provider, models
-from .generic.utils import logger
+from .generic.utils import logger, logger_with_instance_name
 from .vagrant.provider import VagrantProvider, VagrantConfig
 
 
@@ -58,6 +58,9 @@ class Allocator:
         config = cls.___get_custom_config(payload)
         instance = provider.create_instance(
             payload.working_dir, instance_params, config, payload.ssh_key)
+
+        global logger
+        logger = logger_with_instance_name(instance)
         logger.info(f"Instance {instance.identifier} created.")
         # Start the instance.
         instance.start()
@@ -74,10 +77,10 @@ class Allocator:
                 logger.warning(f"Rolling back instance creation.")
                 track_payload = {'track_output': track_file}
                 cls.__delete(track_payload)
-                logger.info(f"Instance {instance.identifier} deleted.")
             else:
                 logger.warning(f'The VM will not be automatically removed. Please remove it executing Allocation module with --action delete.')
-        logger.info(f"Instance {instance.identifier} created successfully.")
+        else:
+            logger.info(f"Instance {instance.identifier} created successfully.")
 
     @classmethod
     def __delete(cls, payload: models.InstancePayload) -> None:
@@ -94,6 +97,9 @@ class Allocator:
             track = models.TrackOutput(**yaml.safe_load(f))
         provider = PROVIDERS[track.provider]()
         provider.destroy_instance(models.InstancePayload(**dict(track)))
+
+        global logger
+        logger = logger_with_instance_name(track)
         logger.info(f"Instance {track.identifier} deleted.")
 
     @staticmethod
@@ -176,6 +182,7 @@ class Allocator:
             inventory = models.InventoryOutput(**yaml.safe_load(f))
         port = inventory.ansible_port
         track = models.TrackOutput(identifier=instance.identifier,
+                                    name=instance.name,
                                     provider=provider_name,
                                     instance_dir=str(instance.path),
                                     key_path=str(instance.credentials.key_path),

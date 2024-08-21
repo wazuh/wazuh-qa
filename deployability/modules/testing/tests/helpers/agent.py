@@ -6,6 +6,7 @@ from abc import abstractmethod
 import re
 import requests
 import yaml
+import time
 
 from modules.testing.utils import logger
 from .constants import WAZUH_CONF, WAZUH_ROOT, WAZUH_WINDOWS_CONF, WAZUH_MACOS_CONF
@@ -444,26 +445,46 @@ class WazuhAgent:
             str: Os name.
         """
         os_type = HostInformation.get_os_type(inventory_path)
+        time.sleep(5)
         if os_type == 'linux':
-            result = ConnectionManager.execute_commands(inventory_path, 'ss -t -a -n | grep ":1514" | grep ESTAB')
-            if result.get('success'):
-                return 'ESTAB' in result.get('output')
-            else:
-                return False
+            for attempt in range(3):
+                result = ConnectionManager.execute_commands(
+                    inventory_path, 
+                    'ss -t -a -n | grep ":1514" | grep ESTAB'
+                )
+                if result.get('success'):
+                    if 'ESTAB' in result.get('output'):
+                        return True
+                if attempt < 2:
+                    time.sleep(5)
+            return False
 
         elif os_type == 'windows':
-            result = ConnectionManager.execute_commands(inventory_path, 'netstat -ano | Select-String -Pattern "TCP" | Select-String -Pattern "ESTABLISHED" | Select-String -Pattern ":1514"')
-            if result.get('success'):
-                return 'ESTABLISHED' in result.get('output')
-            else:
-                return False
+            for attempt in range(3):
+                result = ConnectionManager.execute_commands(
+                    inventory_path, 
+                    'netstat -ano | Select-String -Pattern "TCP" | Select-String -Pattern "ESTABLISHED" | Select-String -Pattern ":1514"'
+                )
+                if result.get('success'):
+                    if 'ESTABLISHED' in result.get('output'):
+                        return True
+                if attempt < 2:
+                    time.sleep(5)
+            return False
 
         elif os_type == 'macos':
-            result = ConnectionManager.execute_commands(inventory_path, 'netstat -an | grep ".1514 " | grep ESTABLISHED')
-            if result.get('success'):
-                return 'ESTABLISHED' in result.get('output')
-            else:
-                return False
+            for attempt in range(3):
+                result = ConnectionManager.execute_commands(
+                    inventory_path, 
+                    'netstat -an | grep ".1514 " | grep ESTABLISHED'
+                )
+                if result.get('success'):
+                    if 'ESTABLISHED' in result.get('output'):
+                        return True
+                if attempt < 2:
+                    time.sleep(5)
+            return False
+
 
     def get_agents_information(wazuh_api: WazuhAPI) -> list:
         """
