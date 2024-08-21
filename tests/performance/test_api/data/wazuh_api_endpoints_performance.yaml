@@ -115,7 +115,6 @@ test_cases:
     parameters: {}
     body:
       command: custom
-      custom: True
     restart: False
 
   - endpoint: /rootcheck

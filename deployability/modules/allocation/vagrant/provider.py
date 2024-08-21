@@ -121,6 +121,7 @@ class VagrantProvider(Provider):
         instance_params = {}
         instance_params['instance_dir'] = instance_dir
         instance_params['identifier'] = instance_id
+        instance_params['name'] = config.name
         instance_params['platform'] = platform
         instance_params['host_identifier'] = host_identifier
         instance_params['host_instance_dir'] = host_instance_dir

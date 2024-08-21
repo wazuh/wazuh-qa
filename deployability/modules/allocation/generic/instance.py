@@ -4,7 +4,6 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from .utils import logger
 
 from .credentials import Credentials
 from .models import ConnectionInfo, InstancePayload
@@ -43,6 +42,7 @@ class Instance(ABC):
 
         self.path: Path = path
         self.identifier: str = str(instance_parameters.identifier)
+        self.name: str = instance_parameters.name
         self.credentials: Credentials = credentials
         self.host_identifier: str = instance_parameters.host_identifier
         self.host_instance_dir: Path = instance_parameters.host_instance_dir
