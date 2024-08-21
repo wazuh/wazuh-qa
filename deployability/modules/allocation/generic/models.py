@@ -36,6 +36,7 @@ class InventoryOutput(BaseModel):
 
 class TrackOutput(BaseModel):
     identifier: str
+    name: str
     provider: str
     instance_dir: str
     key_path: str
@@ -116,6 +117,7 @@ class TrackPayload(BaseModel):
 
 class InstancePayload(BaseModel):
     identifier: str
+    name: str | None = None
     instance_dir: str | Path
     key_path: Path | None = None
     host_identifier: str  | None = None

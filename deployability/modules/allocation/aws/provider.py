@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 import subprocess
 
 from modules.allocation.generic import Provider
-from modules.allocation.generic.models import CreationPayload, InstancePayload, InstancePayload
+from modules.allocation.generic.models import CreationPayload, InstancePayload
 from modules.allocation.generic.utils import logger
 from .credentials import AWSCredentials
 from .instance import AWSInstance
@@ -118,7 +118,10 @@ class AWSProvider(Provider):
         # Generate the instance.
         instance_id = cls.__create_ec2_instance(config)
         # Rename the temp directory to its real name.
-        instance_dir = Path(base_dir, instance_id)
+        while True:
+            instance_dir = Path(base_dir, f"{name}-{str(random.randint(0000, 9999))}")
+            if not instance_dir.exists():
+                break
         logger.debug(f"Renaming temp {temp_dir} directory to {instance_dir}")
         os.rename(temp_dir, instance_dir)
         if platform != "windows":
@@ -129,6 +132,7 @@ class AWSProvider(Provider):
 
         instance_params = {}
         instance_params['instance_dir'] = instance_dir
+        instance_params['name'] = config.name
         instance_params['identifier'] = instance_id
         instance_params['platform'] = platform
         instance_params['host_identifier'] = host_identifier
@@ -198,12 +202,15 @@ class AWSProvider(Provider):
         # Describe the AMI to get the root device name
         ami = client.describe_images(ImageIds=[config.ami])
         root_device_name = ami['Images'][0]['RootDeviceName']
+        ami_storage = ami['Images'][0]['BlockDeviceMappings'][0]['Ebs']['VolumeSize']
+
+        if ami_storage > config.storage:
+            config.storage = ami_storage
 
         if config.platform == 'windows':
             with open(windosUserData_file, 'r') as file:
                 userData = file.read()
                 userData = userData.replace('ChangeMe', config.key_name)
-            config.storage = 60
         else:
             with open(userData_file, 'r') as file:
                 userData = file.read()
@@ -278,12 +285,11 @@ class AWSProvider(Provider):
         # Parse the configuration.
         if platform == 'macos':
             os_specs['zone'] = os_specs['zone'] + 'c'
+            config['storage'] = 0
             if arch == 'arm64':
                 config['type'] = 'mac2.metal'
-                config['storage'] = 100
             if arch == 'amd64':
                 config['type'] = 'mac1.metal'
-                config['storage'] = 100
         else:
             for spec in size_specs:
                 if fnmatch.fnmatch(arch, spec):
