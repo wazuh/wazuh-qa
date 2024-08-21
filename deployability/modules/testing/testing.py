@@ -96,10 +96,12 @@ class Tester:
             rendering_var = {**extra_vars, 'test': test}
             template = str(cls._test_template)
             result = ansible.run_playbook(template, rendering_var)
+            for event in result.events:
+                logger.info(f"{event['stdout']}")
             if result.stats["failures"]:
                 for event in result.events:
                     if "fatal" in event['stdout']:
-                        raise Exception(f"Test {test} failed with error: {event['stdout']}")
+                        raise Exception(f"Test {test} failed with error")
 
 
     @classmethod

@@ -16,6 +16,12 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Increase Feed update timeout in waiters.py ([#5668](https://github.com/wazuh/wazuh-qa/pull/5668)) \- (Framework)
+- Set `/active-response` as xfail ([#5660](https://github.com/wazuh/wazuh-qa/pull/5660)) \- (Tests)
+- Modify the directory name for machines deployed in AWS ([#5635](https://github.com/wazuh/wazuh-qa/pull/5635)) \- (Framework)
+- Add task information in the allocation logs when create or delete an instance ([#5623](https://github.com/wazuh/wazuh-qa/pull/5623)) \- (Framework)
+- Changed _run_tests in testing.py ([#5621](https://github.com/wazuh/wazuh-qa/pull/5621)) \- (Framework)
+- Deleted custom field from PUT /active-response performance test. ([#5612](https://github.com/wazuh/wazuh-qa/pull/5612)) \- (Tests)
 - Update CentOS 7 Vagrant box ([#5546](https://github.com/wazuh/wazuh-qa/pull/5546)) \- (Framework)
 - Update CentOS 7 AMIs ([#5545](https://github.com/wazuh/wazuh-qa/pull/5545)) \- (Framework)
 - Update OpenSUSE 15 AMI ([#5536](https://github.com/wazuh/wazuh-qa/pull/5536)) \- (Framework)
@@ -28,6 +34,12 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fixed unnecesary reference to debian file in dashboard provisioning task ([#5643](https://github.com/wazuh/wazuh-qa/pull/5643)) \- (Framework)
+- Changed 'Ensure that the manager version is' expected warning to an agnostic version of regex ([#5630](https://github.com/wazuh/wazuh-qa/pull/5630)) \- (Tests)
+- Adding fixed and dynamic waits to port status checks ([#5627](https://github.com/wazuh/wazuh-qa/pull/5627)) (Framework)
+- Fixed custom storage for AMIs ([#5625](https://github.com/wazuh/wazuh-qa/pull/5625)) \- (Framework)
+- Vulnerability regex changed to match with 4.9.0 solved vulnerability alerts ([#5624](https://github.com/wazuh/wazuh-qa/pull/5624)) \- (Tests)
+- Fix cluster reliability test internal error ([#5620](https://github.com/wazuh/wazuh-qa/pull/5620)) \- (Tests)
 - Fix CentOS 9 AMI in Allocator module ([#5523](https://github.com/wazuh/wazuh-qa/pull/5523)) \- (Framework)
 - Fix stability in cluster reliability tests ([#5477](https://github.com/wazuh/wazuh-qa/pull/5477)) \- (Tests)
 - Fix agent_simulator response for active-response configuration commands ([#4895](https://github.com/wazuh/wazuh-qa/pull/4895)) \- (Framework + Tests)
@@ -36,6 +48,8 @@ All notable changes to this project will be documented in this file.
 ### Deleted
 
 - Remove configobj library from requirements.txt ([#4803](https://github.com/wazuh/wazuh-qa/pull/4803)) \- (Framework)
+
+## [4.8.2] - 20/08/2024
 
 ## [4.8.1] - 18/07/2024
 
