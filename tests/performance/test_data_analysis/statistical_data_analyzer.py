@@ -66,10 +66,10 @@ class DataLoader:
     def validate_paths(self) -> None:
         """Validates the existence of the files used by the module."""
         if not os.path.exists(self.baseline_path) or not os.path.exists(self.datasource_path):
-            raise ValueError(f"One or both of the provided CSV files do not exist")
+            raise ValueError("One or both of the provided CSV files do not exist")
 
         if not os.path.exists(self.items_path):
-            raise ValueError(f"The YML file does not exit")
+            raise ValueError("The YML file does not exit")
 
     def load_dataframe(self, csv_path: str) -> pd.DataFrame:
         """Read the CSV and convert it to dataframe. Also check that the format is valid (CSV)

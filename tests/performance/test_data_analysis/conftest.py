@@ -14,8 +14,8 @@ Functions:
     - pytest_runtest_makereport: generates the necessary information in the final test report.
 """
 
-import pytest
 import os
+import pytest
 import pytest_html
 
 from typing import Generator, Tuple
@@ -78,8 +78,8 @@ def get_data(pytestconfig: pytest.Config) -> Tuple[str, str, float]:
     datasource_file = pytestconfig.getoption("datasource")
     conf_level = pytestconfig.getoption("confidence_level")
 
-    if not (0 <= conf_level <= 100):
-        pytest.fail(f"The value of confidence_level is not valid")
+    if not 0 <= conf_level <= 100:
+        pytest.fail("The value of confidence_level is not valid")
 
     return baseline_file, datasource_file, conf_level
 
@@ -98,7 +98,7 @@ def config(pytestconfig: pytest.Config) -> str:
     config_file = pytestconfig.getoption("items_yaml")
 
     if not config_file:
-        pytest.fail(f"File with the items to analyze must be specified")
+        pytest.fail("File with the items to analyze must be specified")
 
     return config_file
 

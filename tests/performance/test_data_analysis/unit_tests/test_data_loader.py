@@ -6,8 +6,8 @@
 
 import pandas as pd
 
-from statistical_data_analyzer import DataLoader
 from pytest_mock import MockerFixture
+from statistical_data_analyzer import DataLoader
 
 
 def test_dataloader_initialization(mocker: MockerFixture) -> None:
