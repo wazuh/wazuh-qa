@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.9.1] - TBD
 
+### Added
+
+- Added support for macOS 14.6 to the Allocation module (Vagrant) ([#5671](https://github.com/wazuh/wazuh-qa/pull/5671)) \- (Framework)
+
 ## [4.9.0] - TBD
 
 ### Added

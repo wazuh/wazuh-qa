@@ -170,12 +170,16 @@ vagrant:
     box: development/macos-sonoma
     box_version: 0.0.0
     virtualizer: parallels
-  macos-sonoma-14.5-amd64:
-    box: development/macos-sonoma-1450
-    box_version: 0.0.0
-    virtualizer: parallels
   macos-sonoma-14-arm64:
     box: macos-14
+    box_version: 0.0.0
+    virtualizer: parallels
+  macos-sonoma-14.6-arm64:
+    box: macos-1460
+    box_version: 0.0.0
+    virtualizer: parallels
+  macos-sonoma-14.6-amd64:
+    box: development/macos-sonoma-1460
     box_version: 0.0.0
     virtualizer: parallels
   macos-ventura-sign-arm64:
@@ -414,27 +418,27 @@ aws:
     user: ec2-user
   # Macos
   macos-ventura-13-amd64:
-    ami: ami-0e94a57427e4e0611
+    ami: ami-0c5acb9ce557a3477
     zone: us-east-1
     user: ec2-user
   macos-ventura-13-arm64:
-    ami: ami-0b288e8fb0e803b12
+    ami: ami-01aa3973cdaf40134 
     zone: us-east-1
     user: ec2-user
   macos-sonoma-14-amd64:
-    ami: ami-0873bd33f11079049
+    ami: ami-0c82be92b15ae585f
     zone: us-east-1
     user: ec2-user
   macos-sonoma-14-arm64:
-    ami: ami-0dd07a50e5e3d3ccb
+    ami: ami-083104674423416b8
     zone: us-east-1
     user: ec2-user
   macos-monterey-12-arm64:
-    ami: ami-0225fc57a58689798
+    ami: ami-03539bbaad2b27b75
     zone: us-east-1
     user: ec2-user
   macos-monterey-12-amd64:
-    ami: ami-0a410356d12928dbc
+    ami: ami-069e306e29db9ed55
     zone: us-east-1
     user: ec2-user
   # Windows
