@@ -1,3 +1,15 @@
+"""Dashboard Saturation Tests Module
+
+This script allows you to run dashboard stress tests. These tests
+are performed with Artillery and Playwright. Artillery and
+Playwright must be installed for it to work properly.
+"""
+
+__author__ = "Wazuh"
+__copyright__ = "Copyright (C) 2024 Wazuh"
+__license__ = "GPLv2"
+__version__ = "1.0.0"
+
 import argparse
 import json
 import pandas as pd
@@ -258,6 +270,7 @@ def get_script_arguments() -> argparse:
     parser.add_argument(
         '-l', '--log',
         dest='logs',
+        type=str,
         default='logs/',
         help=f'Directory to store the logs. Default "logs".'
     )
@@ -265,12 +278,14 @@ def get_script_arguments() -> argparse:
     parser.add_argument(
         '-s', '--screenshots',
         dest='screenshots',
+        type=str,
         default='screenshots/',
         help=f'Directory to store the screenshots. Default "screenshot".')
 
     parser.add_argument(
         '-c', '--csv',
         dest='csv',
+        type=str,
         default='csv/',
         help=f'Directory to store the CSVs. Default "csv".'
     )
@@ -278,6 +293,7 @@ def get_script_arguments() -> argparse:
     parser.add_argument(
         '-o', '--session',
         dest='session',
+        type=str,
         default='.auth/',
         help=f'Directory to store the Sessions. Default ".auth".'
     )

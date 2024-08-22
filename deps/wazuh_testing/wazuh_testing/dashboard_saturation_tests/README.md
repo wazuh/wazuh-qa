@@ -21,9 +21,7 @@ dashboard_saturation_tests/
 │   ├── dashboard_saturation_tests.py
 │   └── processor.js
 ├── README.md
-├── requirements.txt
-├── setup.py
-└── version.json
+└── pyproject.toml
 ```
 
 ## Prerequisites
@@ -94,8 +92,8 @@ dashboard-saturation-tests --password <wazuh_pass> --ip <dashboard_ip>
 ### Parameters restrictions
 
 - `--logs`, `--screenshots`, `--csv`, and `--session` are directories (if they do not exist, they are created in the Script).
-- `--artillery` needs to receive a valid Artillery configuration file.
-- `--type` only accepts the options received in the Artillery JSON file with the results.
+- `--artillery` needs to receive a valid Artillery configuration file (for example, `artillery.yml`).
+- `--type` only accepts two values ​​(`aggregate` or `intermediate`). Either or both can be chosen.
 
 ### Check PEP 8
 
