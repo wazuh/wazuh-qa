@@ -426,11 +426,11 @@ aws:
     zone: us-east-1
     user: ec2-user
   macos-sonoma-14-amd64:
-    ami: ami-0cdb66d9dacb7e395
+    ami: ami-0c82be92b15ae585f
     zone: us-east-1
     user: ec2-user
   macos-sonoma-14-arm64:
-    ami: ami-0c45f2bf394dee00c
+    ami: ami-083104674423416b8
     zone: us-east-1
     user: ec2-user
   macos-monterey-12-arm64:
