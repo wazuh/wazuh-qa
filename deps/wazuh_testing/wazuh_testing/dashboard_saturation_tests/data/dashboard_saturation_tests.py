@@ -9,11 +9,6 @@ are performed with Artillery and Playwright. Artillery and
 Playwright must be installed for it to work properly.
 """
 
-__author__ = "Wazuh"
-__copyright__ = "Copyright (C) 2024 Wazuh"
-__license__ = "GPLv2"
-__version__ = "1.0.0"
-
 import argparse
 import json
 import pandas as pd
