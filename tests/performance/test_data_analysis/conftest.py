@@ -2,8 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-"""
-Pytest configuration for Statistical Data Analysis tests
+"""Pytest configuration for Statistical Data Analysis tests.
 
 This module contains fixtures that allow to obtain the test input data and to manage the final report.
 
@@ -15,10 +14,11 @@ Functions:
 """
 
 import os
+from typing import Generator, Tuple
+
 import pytest
 import pytest_html
 
-from typing import Generator, Tuple
 from statistical_data_analyzer import DataLoader
 
 
@@ -50,7 +50,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         metavar='ITEMS_YAML_PATH',
         default=None,
         type=str,
-        help='Items yaml file path',
+        help='Items with the resource metrics comparison',
     )
     parser.addoption(
         '--confidence_level',
@@ -85,7 +85,7 @@ def get_data(pytestconfig: pytest.Config) -> Tuple[str, str, float]:
 
 
 @pytest.fixture
-def config(pytestconfig: pytest.Config) -> str:
+def get_comparison_config(pytestconfig: pytest.Config) -> str:
     """Fixture that collects the YML file with the elements to be analyzed
     during the test.
 
@@ -105,7 +105,15 @@ def config(pytestconfig: pytest.Config) -> str:
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo) -> Generator[None, None, None]:
-    """Add to the final Pytest report a file with the statistical comparison tables."""
+    """Add to the final Pytest report a file with the statistical comparison tables.
+
+    Args:
+        item (pytest.Item): Pytest object containing information about the current test.
+        call (pytest.CallInfo): object containing information about the test result.
+
+    Returns:
+        (Generator[None, None, None]): yield, no value is returned.
+    """
     outcome = yield
     report = outcome.get_result()
     report.extra = getattr(report, 'extra', [])

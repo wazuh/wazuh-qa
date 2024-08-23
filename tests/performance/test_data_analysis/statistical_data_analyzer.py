@@ -2,8 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-"""
-Library of the Statistical Data Analyzer Module
+"""Library of the Statistical Data Analyzer Module.
 
 This library contains the classes and methods necessary to perform statistical analysis and calculations
 on different data sets.
@@ -15,22 +14,24 @@ Classes:
 """
 
 import os
-import yaml
-import pandas as pd
-
-from prettytable import PrettyTable
 from collections.abc import Callable
-from typing import Any, Tuple, List, Dict
-from scipy.stats import ttest_ind, levene, f_oneway
+from typing import Any, List, Dict, Tuple
+
+import pandas as pd
+import yaml
+from prettytable import PrettyTable
+from scipy.stats import f_oneway, levene, ttest_ind
 
 
 class DataLoader:
-    """Class that validates and loads in the variables all the necessary data for the execution
-    of the module. The CSV files that are saved in this class must contain different columns
-    that collect the data of the different metrics analyzed. The names of these columns must be
-    the names of the metrics in question. In addition, it must contain another column with the
-    process or processes to be analyzed. The names of these columns must match those specified
-    in the incoming YML file.
+    """Validates and loads all the necessary data for the execution of the module.
+
+    Description:
+        Class that validates and loads in the variables the required information. The CSV files that are saved in
+        this class must contain different columns that collect the data of the different metrics analyzed. The
+        names of these columns must be the names of the metrics in question. In addition, it must contain another
+        column with the process or processes to be analyzed. The names of these columns must match those specified
+        in the incoming YML file.
 
     Attributes:
         baseline_path: path to the CSV file containing the baseline data.
@@ -88,8 +89,7 @@ class DataLoader:
         return dataframe
 
     def load_yaml_items(self, yaml_path: str) -> Tuple[str, List[str], Dict[str, Dict[str, float]]]:
-        """Process the YML file containing the elements to be analyzed during the test. In addition,
-        it obtains from this file the attributes of 'process_name', 'processes' and 'metrics'.
+        """Process the YML file containing the elements to be analyzed during the test.
 
         Args:
             yaml_path (str): path to the YML file containing the elements to be analyzed.
@@ -99,7 +99,7 @@ class DataLoader:
             processes (list[str]): the different processes that are included in the 'process_name'.
             metrics (Dict[str, Dict[str, float]]): metrics to be analyzed.
         """
-        with open(yaml_path, 'r') as file:
+        with open(yaml_path) as file:
             config = yaml.safe_load(file)
 
         processes_section = config.get('Processes', {})
@@ -145,9 +145,12 @@ class DataLoader:
 
 
 class StatisticalComparator:
-    """Class that contains the necessary methods to perform a comparison between the statistics
-    of a certain process and a metric. The comparison is made around a threshold value which is
-    set in the YML file.
+    """Perform a comparison between statistics.
+
+    Description:
+        Class that contains the necessary methods to perform a comparison between the statistics
+        of a certain process and a metric. The comparison is made around a threshold value which is
+        set in the YML file.
     """
 
     def calculate_basic_statistics(self, dataframe: pd.DataFrame, metric: str, stat: str) -> float:
@@ -179,8 +182,7 @@ class StatisticalComparator:
 
     def comparison_basic_statistics(self, baseline: pd.DataFrame, datasource: pd.DataFrame, metric: str,
                                     stat: str, threshold: float) -> int:
-        """Compares the percent change in a statistic between the two data sets to determine
-        if there is a significant change based on the threshold value.
+        """Compares the percent change in a statistic between the two data sets to determine changes.
 
         Args:
             baseline (pd.DataFrame): Dataframe with the baseline data.
@@ -209,8 +211,11 @@ class StatisticalComparator:
 
 
 class StatisticalTests:
-    """Class responsible for performing statistical tests on two sets of data, which allows
-    to detect significant differences between them.
+    """Perform statistical tests between two data sets.
+
+    Description:
+        Class responsible for performing statistical tests on two sets of data, which allows
+        to detect significant differences between them.
     """
 
     def perform_test(self, baseline: pd.DataFrame, datasource: pd.DataFrame, metric: str,

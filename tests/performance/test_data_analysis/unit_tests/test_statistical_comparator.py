@@ -2,10 +2,10 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-"""Unit tests for the StatisticalComparator class"""
+"""Unit tests for the StatisticalComparator class."""
 
-import pytest
 import pandas as pd
+import pytest
 
 from statistical_data_analyzer import StatisticalComparator
 
@@ -64,6 +64,7 @@ def test_comparison_basic_statistics(sample_data1: pd.DataFrame, sample_data2: p
 
     Args:
         sample_data1 (pd.Dataframe): first Dataframe.
+        sample_data2 (pd.Dataframe): second Dataframe.
     """
     comparator = StatisticalComparator()
     mean_discrepancy = comparator.comparison_basic_statistics(sample_data1, sample_data2, 'Metric1', 'Mean', 0.1)

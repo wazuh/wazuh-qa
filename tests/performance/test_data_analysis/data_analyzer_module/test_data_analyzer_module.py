@@ -2,9 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-"""
-Statistical Data Analyzer Module Test
-
+"""Statistical Data Analyzer Module Test.
 
 This module contains a basic test that allows you to perform statistical analysis and calculations
 on two data sets and to make comparisons between them. This allows to detect significant
@@ -21,24 +19,28 @@ Tests:
 Issue: https://github.com/wazuh/wazuh/issues/24688
 """
 
-import pytest
-
 from collections.abc import Callable
 from typing import Tuple
+
+import pytest
+
 from statistical_data_analyzer import DataLoader, StatisticalComparator, StatisticalTests
 
 
-def test_comparison(get_data: Callable[[], Tuple[str, str, float]], config: Callable[[], str]) -> None:
-    """The main test of the module. It checks if any statistical test detects significant changes and
-    if so, compares the statistics of both data sets to detect changes with respect to a threshold value.
+def test_comparison(get_data: Callable[[], Tuple[str, str, float]], get_comparison_config: Callable[[], str]) -> None:
+    """Detect significant differences and compare the statistics.
+
+    Description:
+        It checks if any statistical test detects significant changes and if so, compares the statistics
+        of both data sets to detect changes with respect to a threshold value.
 
     Args:
-        load_data (Callable[[], tuple[str, str, float]]): fixture that contains baseline, incoming data
+        get_data (Callable[[], tuple[str, str, float]]): fixture that contains baseline, incoming data
         source Dataframes, and the confidence level values.
         config (Callable[[], str]): fixture that contains the YML file with the items to be analyzed.
     """
     baseline_file, datasource_file, confidence_level = get_data
-    config_file = config
+    config_file = get_comparison_config
 
     data = DataLoader(baseline_file, datasource_file, config_file)
     stats_comp = StatisticalComparator()

@@ -2,17 +2,16 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
-"""Unit tests for the DataLoader class"""
+"""Unit tests for the DataLoader class."""
 
 import pandas as pd
-
 from pytest_mock import MockerFixture
+
 from statistical_data_analyzer import DataLoader
 
 
 def test_dataloader_initialization(mocker: MockerFixture) -> None:
-    """Test that verifies that the class is initialized correctly and that the
-    attributes contain the correct values.
+    """Verifies that the class is initialized correctly and that the attributes contain the correct values.
 
     Args:
         mocker (MockerFixture): mocker to simulate the files.
@@ -109,7 +108,8 @@ def test_print_dataframes_stats(mocker: MockerFixture) -> None:
     Metrics:
       metric1:
         stat1: 10"""))
-    mocker.patch("yaml.safe_load", return_value={"Processes": {"proc": ["p1"]}, "Metrics": {"metric1": {"stat1": 10, "stat2": 100}}})
+    mocker.patch("yaml.safe_load", return_value={"Processes": {"proc": ["p1"]},
+                                                 "Metrics": {"metric1": {"stat1": 10, "stat2": 100}}})
 
     dataloader = DataLoader("baseline.csv", "datasource.csv", "items.yml")
 

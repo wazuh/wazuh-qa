@@ -4,7 +4,7 @@ version = "0.0.1"
 authors = [
   { name="Wazuh", email="hello@wazuh.com" },
 ]
-description = "Test to analyze statistical data"
+description = "Statistical Data Analyzer Module"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
