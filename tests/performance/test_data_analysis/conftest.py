@@ -70,9 +70,10 @@ def get_data(pytestconfig: pytest.Config) -> Tuple[str, str, float]:
         pytestconfig (pytest.Config): returns the :class:`_pytest.config.Config` object.
 
     Returns:
-        baseline (str): path to the baseline data file.
-        datasource (str): path to the incoming data file.
-        conf_level (float): level of confidence por the statistic analysis.
+        Tuple[str, str, float]: a tuple containing:
+            - baseline (str): path to the baseline data file.
+            - datasource (str): path to the incoming data file.
+            - conf_level (float): level of confidence por the statistic analysis.
     """
     baseline_file = pytestconfig.getoption("baseline")
     datasource_file = pytestconfig.getoption("datasource")

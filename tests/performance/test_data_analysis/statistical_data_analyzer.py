@@ -63,6 +63,7 @@ class DataLoader:
         self.baseline = self.load_dataframe(baseline_path)
         self.datasource = self.load_dataframe(datasource_path)
         self.process_name, self.processes, self.metrics = self.load_yaml_items(self.items_path)
+        self.validate_data()
 
     def validate_paths(self) -> None:
         """Validates the existence of the files used by the module."""
@@ -71,6 +72,37 @@ class DataLoader:
 
         if not os.path.exists(self.items_path):
             raise ValueError("The YML file does not exit")
+        
+    def validate_data(self) -> None:
+        """Validate that the data provided is valid and consistent."""
+        baseline_columns = set(self.baseline.columns)
+        datasource_columns = set(self.datasource.columns)
+
+        if baseline_columns != datasource_columns:
+            raise ValueError("Error: CSV files do not have the same columns")
+
+        baseline_processes = set(self.baseline[self.process_name].unique())
+        datasource_processes = set(self.datasource[self.process_name].unique())
+
+        if baseline_processes != datasource_processes:
+            raise ValueError(f"Error: The column '{self.process_name}' does not contain the same values " \
+                             "in both CSV files")
+
+        items_yaml = set(self.processes)
+        items_csv = set(self.baseline[self.process_name].unique())        
+        missing_processes = items_yaml - items_csv
+
+        if missing_processes:
+            raise ValueError("Error: The item process specified in the YML file " \
+                             f"is not found in the CSV: {', '.join(missing_processes)}")
+
+        metrics_yaml = set(self.metrics.keys())
+        metrics_csv = set(self.baseline.columns)
+        missing_metrics = metrics_yaml - metrics_csv
+
+        if missing_metrics:
+            raise ValueError("Error: The metric specified in the YML file is not " \
+                             f"found in the CSV: {', '.join(missing_metrics)}")
 
     def load_dataframe(self, csv_path: str) -> pd.DataFrame:
         """Read the CSV and convert it to dataframe. Also check that the format is valid (CSV)
@@ -95,16 +127,17 @@ class DataLoader:
             yaml_path (str): path to the YML file containing the elements to be analyzed.
 
         Returns:
-            process_name (str): name of the process to be analyzed.
-            processes (list[str]): the different processes that are included in the 'process_name'.
-            metrics (Dict[str, Dict[str, float]]): metrics to be analyzed.
+            Tuple[str, List[str], Dict[str, Dict[str, float]]]: a tuple containing:
+                - process_name (str): name of the process to be analyzed.
+                - processes (list[str]): the different processes that are included in the 'process_name'.
+                - metrics (Dict[str, Dict[str, float]]): metrics to be analyzed.
         """
         with open(yaml_path) as file:
             config = yaml.safe_load(file)
 
-        processes_section = config.get('Processes', {})
-        process_name = list(processes_section.keys())[0]
-        processes = processes_section[process_name]
+        items_section = config.get('Items_to_analyze', {})
+        process_name = list(items_section.keys())[0]
+        processes = items_section[process_name]
         metrics = config.get('Metrics', {})
 
         return process_name, processes, metrics

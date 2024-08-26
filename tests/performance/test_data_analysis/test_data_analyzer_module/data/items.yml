@@ -1,0 +1,15 @@
+---
+Items_to_analyze:
+  Value:
+    - "wazuh-remoted"
+
+Metrics:
+  CPU(%):
+    Mean: 10
+    Max value: 15
+    Min value: 5
+    Standard deviation: 5
+    Variance: 10
+  
+  Metric2:
+    Mean: 10

@@ -1,5 +1,5 @@
 ---
-Processes:
+Items_to_analyze:
   Daemon:
     - "wazuh-clusterd"
     - "wazuh-integratord"
