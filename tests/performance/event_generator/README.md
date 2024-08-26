@@ -24,7 +24,7 @@ Modify the config.yaml file to set the types of events, frequency, target paths 
 ```yaml
 files:
   - module: logcollector
-    path: / path/to/logfile.log
+    path: /path/to/logfile.log
     operations: 100
     rate: 2
     max_file_size: 10
@@ -32,7 +32,7 @@ files:
     cleanup: true
 
   - module: syscheck
-    path: / path/to/test/directory
+    path: /path/to/test/directory
     operations: 50
     rate: 1
     cleanup: true
