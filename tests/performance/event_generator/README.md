@@ -23,7 +23,7 @@ Modify the config.yaml file to set the types of events, frequency, target paths 
 
 ```yaml
 files:
-    - module: logcollector
+  - module: logcollector
     path: / path/to/logfile.log
     operations: 100
     rate: 2
@@ -31,7 +31,7 @@ files:
     template_path: templates/syslog_template.json
     cleanup: true
 
-    - module: syscheck
+  - module: syscheck
     path: / path/to/test/directory
     operations: 50
     rate: 1
