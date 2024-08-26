@@ -1,0 +1,27 @@
+[project]
+name = "event_generator"
+version = "0.0.1"
+authors = [{ name = "Wazuh", email = "hello@wazuh.com" }]
+description = "A package for generating log and system file events for testing"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = ["pyyaml>=6.0.2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.3.2"]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+packages = ["event_generator"]
+include-package-data = true
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-data]
+event_generator = ["templates/*.json"]
