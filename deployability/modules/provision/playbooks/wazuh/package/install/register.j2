@@ -1,0 +1,7 @@
+{% if component == 'wazuh-agent' %}
+- name: Modify Wazuh manager IP in Wazuh agent
+  replace:
+    path: "/var/ossec/etc/ossec.conf"
+    regexp: "MANAGER_IP"
+    replace: {{ dependencies['manager'] }}
+{% endif %}

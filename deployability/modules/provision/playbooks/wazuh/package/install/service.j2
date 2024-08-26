@@ -1,0 +1,5 @@
+- name: Enable {{ component }} service
+  shell: "systemctl daemon-reload && systemctl enable {{ component }}"
+
+- name: Start {{ component }} service
+  shell: "systemctl start {{ component }}"

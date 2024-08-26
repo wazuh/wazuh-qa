@@ -1,0 +1,464 @@
+vagrant:
+  # Ubuntu
+  linux-ubuntu-16.04-amd64:
+    box: generic/ubuntu1604
+    box_version: 4.3.8
+    virtualizer: virtualbox
+  linux-ubuntu-18.04-amd64:
+    box: ubuntu/bionic64
+    box_version: 20230607.0.0
+    virtualizer: virtualbox
+  linux-ubuntu-20.04-amd64:
+    box: ubuntu/focal64
+    box_version: 20240130.0.0
+    virtualizer: virtualbox
+  linux-ubuntu-22.04-amd64:
+    box: ubuntu/jammy64
+    box_version: 20240131.0.0
+    virtualizer: virtualbox
+  # Debian
+  linux-debian-9-amd64:
+    box: generic/debian9
+    box_version: 4.3.8
+    virtualizer: virtualbox
+  linux-debian-9-ppc64:
+    box: testing-debian-image
+    box_version: latest
+    virtualizer: docker
+  linux-debian-10-amd64:
+    box: generic/debian10
+    box_version: 4.3.8
+    virtualizer: virtualbox
+  linux-debian-11-amd64:
+    box: debian/bullseye64
+    box_version: 11.20231211.1
+    virtualizer: virtualbox
+  linux-debian-12-amd64:
+    box: debian/bookworm64
+    box_version: 12.20231211.1
+    virtualizer: virtualbox
+  # Oracle Linux
+  linux-oracle-7-amd64:
+    box: generic/oracle7
+    box_version: 4.3.12
+    virtualizer: virtualbox
+  linux-oracle-8-amd64:
+    box: generic/oracle8
+    box_version: 4.3.12
+    virtualizer: virtualbox
+  linux-oracle-9-amd64:
+    box: generic/oracle9
+    box_version: 4.3.12
+    virtualizer: virtualbox
+  # openSUSE Linux
+  linux-opensuse-15-amd64:
+    box: generic/opensuse15
+    box_version: 4.3.8
+    virtualizer: virtualbox
+  linux-opensuse-tumbleweed-amd64:
+    box: opensuse/Tumbleweed.x86_64
+    box_version: 1.0.20240207
+    virtualizer: virtualbox
+  # Centos
+  linux-centos-7-amd64:
+    box: vagrant_devel/centos-7
+    box_version: 1.1.0
+    virtualizer: virtualbox
+  linux-centos-7-ppc64:
+    box: testing-centos-image
+    box_version: latest
+    virtualizer: docker
+  linux-centos-8-amd64:
+    box: generic/centos8
+    box_version: 4.3.8
+    virtualizer: virtualbox
+  linux-centos-9-amd64:
+    box: generic/centos9s
+    box_version: 4.3.12
+    virtualizer: virtualbox
+  # Redhat
+  linux-redhat-7-amd64:
+    box: generic/rhel7
+    box_version: 3.6.8
+    virtualizer: virtualbox
+  linux-redhat-8-amd64:
+    box: generic/rhel8
+    box_version: 3.6.8
+    virtualizer: virtualbox
+  linux-redhat-9-amd64:
+    box: generic/rhel9
+    box_version: 4.3.12
+    virtualizer: virtualbox
+  # Amazon
+  linux-amazon-2-amd64:
+    box: bento/amazonlinux-2
+    box_version: 202305.26.0
+    virtualizer: virtualbox
+  # Fedora
+  linux-fedora-28-amd64:
+    box: generic/fedora28
+    box_version: 4.3.8
+    virtualizer: virtualbox
+  linux-fedora-29-amd64:
+    box: generic/fedora29
+    box_version: 4.3.8
+    virtualizer: virtualbox
+  linux-fedora-31-amd64:
+    box: generic/fedora31
+    box_version: 4.3.8
+    virtualizer: virtualbox
+  linux-fedora-32-amd64:
+    box: generic/fedora32
+    box_version: 4.3.8
+    virtualizer: virtualbox
+  linux-fedora-37-amd64:
+    box: generic/fedora37
+    box_version: 4.3.8
+    virtualizer: virtualbox
+  linux-fedora-38-amd64:
+    box: alvistack/fedora-38
+    box_version: 20240206.1.1
+    virtualizer: virtualbox
+  # Rocky Linux
+  linux-rocky-8-amd64:
+    box: generic/rocky8
+    box_version: 4.3.12
+    virtualizer: virtualbox
+  linux-rocky-9-amd64:
+    box: rockylinux/9
+    box_version: 4.0.0
+    virtualizer: virtualbox
+  # Alma Linux
+  linux-alma-8-amd64:
+    box: almalinux/8
+    box_version: 8.10.20240604
+    virtualizer: virtualbox
+  # Macos
+  macos-highsierra-10.13-amd64:
+    box: development/macos-high-sierra
+    box_version: 0.0.0
+    virtualizer: virtualbox
+  macos-mojave-10.14-amd64:
+    box: development/macos-mojave
+    box_version: 0.0.0
+    virtualizer: virtualbox
+  macos-sierra-10.12-amd64:
+    box: development/macos-sierra
+    box_version: 0.0.0
+    virtualizer: virtualbox
+  macos-sierracmake-10.12-amd64:
+    box: development/macos-sierra_cmake
+    box_version: 0.0.0
+    virtualizer: virtualbox
+  macos-sierragcc9-10.12-amd64:
+    box: development/macos-sierra_gcc9
+    box_version: 0.0.0
+    virtualizer: virtualbox
+  macos-monterey-12-arm64:
+    box: macos-12
+    box_version: 0.0.0
+    virtualizer: parallels
+  macos-ventura-13-amd64:
+    box: development/macos-ventura
+    box_version: 0.0.0
+    virtualizer: parallels
+  macos-ventura-13-arm64:
+    box: macos-13
+    box_version: 0.0.0
+    virtualizer: parallels
+  macos-sonoma-14-amd64:
+    box: development/macos-sonoma
+    box_version: 0.0.0
+    virtualizer: parallels
+  macos-sonoma-14.5-amd64:
+    box: development/macos-sonoma-1450
+    box_version: 0.0.0
+    virtualizer: parallels
+  macos-sonoma-14-arm64:
+    box: macos-14
+    box_version: 0.0.0
+    virtualizer: parallels
+  macos-ventura-sign-arm64:
+    box: macos-ventura-sign
+    box_version: 0.0.0
+    virtualizer: parallels
+  # Windows
+  windows-desktop-10-amd64:
+    box: gusztavvargadr/windows-10
+    box_version: 2202.0.2312
+    virtualizer: virtualbox
+  windows-desktop-11-amd64:
+    box: gusztavvargadr/windows-11
+    box_version: 2302.0.2312
+    virtualizer: virtualbox
+  windows-server-2012-amd64:
+    box: jborean93/WindowsServer2012
+    box_version: 1.2.0
+    virtualizer: virtualbox
+  windows-server-2012r2-amd64:
+    box: addle/windows-server-2012-r2
+    box_version: 1.20170205.1
+    virtualizer: virtualbox
+  windows-server-2016-amd64:
+    box: mwrock/Windows2016
+    box_version: 0.3.0
+    virtualizer: virtualbox
+  windows-server-2019-amd64:
+    box: gusztavvargadr/windows-server-2019-standard
+    box_version: 1809.0.2402
+    virtualizer: virtualbox
+  windows-server-2022-amd64:
+    box: gusztavvargadr/windows-server-2022-standard
+    box_version: 2102.0.2312
+    virtualizer: virtualbox
+
+aws:
+  # Ubuntu
+  linux-ubuntu-24.04-amd64:
+    ami: ami-04b70fa74e45c3917
+    zone: us-east-1
+    user: ubuntu
+  linux-ubuntu-24.04-arm64:
+    ami: ami-0eac975a54dfee8cb
+    zone: us-east-1
+    user: ubuntu
+  linux-ubuntu-22.04-amd64:
+    ami: ami-053b0d53c279acc90
+    zone: us-east-1
+    user: ubuntu
+  linux-ubuntu-22.04-arm64:
+    ami: ami-016485166ec7fa705
+    zone: us-east-1
+    user: ubuntu
+  linux-ubuntu-18.04-amd64:
+    ami: ami-0d23ec1228995e83b
+    zone: us-east-1
+    user: ubuntu
+  linux-ubuntu-18.04-arm64:
+    ami: ami-0c7625066eaff908f
+    zone: us-east-1
+    user: ubuntu
+  linux-ubuntu-20.04-amd64:
+    ami: ami-0261755bbcb8c4a84
+    zone: us-east-1
+    user: ubuntu
+  linux-ubuntu-20.04-arm64:
+    ami: ami-05f45f2e962205865
+    zone: us-east-1
+    user: ubuntu
+  # Debian
+  linux-debian-10-amd64:
+    ami: ami-0aef3e5090bf17640
+    zone: us-east-1
+    user: admin
+  linux-debian-10-arm64:
+    ami: ami-0638210d31ea53567
+    zone: us-east-1
+    user: admin
+  linux-debian-11-amd64:
+    ami: ami-0f63aa666117f7cc1
+    zone: us-east-1
+    user: admin
+  linux-debian-11-arm64:
+    ami: ami-02a23764e4c26b541
+    zone: us-east-1
+    user: admin
+  linux-debian-12-amd64:
+    ami: ami-055c8118725fe3a84
+    zone: us-east-1
+    user: admin
+  linux-debian-12-arm64:
+    ami: ami-06703877c23c4ddf1
+    zone: us-east-1
+    user: admin
+  # Oracle Linux
+  linux-oracle-7-amd64:
+    ami: ami-0fb08d5eb039a9ebd
+    zone: us-east-1
+    user: ec2-user
+  linux-oracle-8-amd64:
+    ami: ami-04921b5223c6ab7f0
+    zone: us-east-1
+    user: ec2-user
+  linux-oracle-9-amd64:
+    ami: ami-097ad3c47f3a500e1
+    zone: us-east-1
+    user: ec2-user
+  # openSUSE Linux
+  linux-opensuse-15-amd64:
+    ami: ami-012c22f49f1c32f31
+    zone: us-east-1
+    user: ec2-user
+  # SUSE Linux
+  linux-suse-15-amd64:
+    ami: ami-08f3662e2d5b3989a
+    zone: us-east-1
+    user: ec2-user
+  linux-suse-15-arm64:
+    ami: ami-0b9eb3aa813f0e4d7
+    zone: us-east-1
+    user: ec2-user
+  # Centos
+  linux-centos-7-amd64:
+    ami: ami-0474061d40b48401a
+    zone: us-east-1
+    user: centos
+  linux-centos-7-arm64:
+    ami: ami-0376b30fe00ea638b
+    zone: us-east-1
+    user: centos
+  linux-centos-8-amd64:
+    ami: ami-0d8e399bc6283a29e
+    zone: us-east-1
+    user: cloud-user
+  linux-centos-8-arm64:
+    ami: ami-063078a79d6ca4ca0
+    zone: us-east-1
+    user: cloud-user
+  linux-centos-9-amd64:
+    ami: ami-0df2a11dd1fe1f8e3
+    zone: us-east-1
+    user: ec2-user
+  # Redhat
+  linux-redhat-7-amd64:
+    ami: ami-0bd83a2aad0515b35
+    zone: us-east-1
+    user: ec2-user
+  linux-redhat-7-arm64:
+    ami: ami-0e97b0e0c6dce1d4e
+    zone: us-east-1
+    user: ec2-user
+  linux-redhat-8-amd64:
+    ami: ami-00d00bcb416b79a1a
+    zone: us-east-1
+    user: ec2-user
+  linux-redhat-8-arm64:
+    ami: ami-05bcb9a3c5cfe07c9
+    zone: us-east-1
+    user: ec2-user
+  linux-redhat-9-amd64:
+    ami: ami-026ebd4cfe2c043b2
+    zone: us-east-1
+    user: ec2-user
+  linux-redhat-9-arm64:
+    ami: ami-03d6a5256a46c9feb
+    zone: us-east-1
+    user: ec2-user
+  # Amazon
+  linux-amazon-2-amd64:
+    ami: ami-0bb4c991fa89d4b9b
+    zone: us-east-1
+    user: ec2-user
+  linux-amazon-2-arm64:
+    ami: ami-03c5a38d438cf3d3e
+    zone: us-east-1
+    user: ec2-user
+  linux-amazon-2023-amd64:
+    ami: ami-0d4e679eb7361c9c9
+    zone: us-east-1
+    user: ec2-user
+  linux-amazon-2023-arm64:
+    ami: ami-0a7fdbc9c086df09c
+    zone: us-east-1
+    user: ec2-user
+  # Fedora
+  linux-fedora-34-amd64:
+    ami: ami-00c998fee16a6efd1
+    zone: us-east-1
+    user: fedora
+  linux-fedora-35-amd64:
+    ami: ami-0009c66e36c13502d
+    zone: us-east-1
+    user: fedora
+  linux-fedora-36-amd64:
+    ami: ami-07299ccc184de5105
+    zone: us-east-1
+    user: fedora
+  linux-fedora-37-amd64:
+    ami: ami-0aab397f94a2c8536
+    zone: us-east-1
+    user: fedora
+  linux-fedora-38-amd64:
+    ami: ami-00eda974dc333e48f
+    zone: us-east-1
+    user: fedora
+  linux-fedora-39-amd64:
+    ami: ami-05e56180581b70076
+    zone: us-east-1
+    user: fedora
+  # Rocky Linux
+  linux-rocky-8-amd64:
+    ami: ami-0f140a092576bd147
+    zone: us-east-1
+    user: rocky
+  linux-rocky-8-arm64:
+    ami: ami-0ad512af1b9f6ef91
+    zone: us-east-1
+    user: rocky
+  linux-rocky-9-amd64:
+    ami: ami-09eb79aa215c2a900
+    zone: us-east-1
+    user: rocky
+  linux-rocky-9-arm64:
+    ami: ami-0151988e287370acc
+    zone: us-east-1
+    user: rocky
+  # Alma Linux
+  linux-alma-8-amd64:
+    ami: ami-059c62b4890c5498a
+    zone: us-east-1
+    user: ec2-user
+  linux-alma-8-arm64:
+    ami: ami-01e3e647c7acbc64b
+    zone: us-east-1
+    user: ec2-user
+  # Macos
+  macos-ventura-13-amd64:
+    ami: ami-0e94a57427e4e0611
+    zone: us-east-1
+    user: ec2-user
+  macos-ventura-13-arm64:
+    ami: ami-0b288e8fb0e803b12
+    zone: us-east-1
+    user: ec2-user
+  macos-sonoma-14-amd64:
+    ami: ami-0873bd33f11079049
+    zone: us-east-1
+    user: ec2-user
+  macos-sonoma-14-arm64:
+    ami: ami-0dd07a50e5e3d3ccb
+    zone: us-east-1
+    user: ec2-user
+  macos-monterey-12-arm64:
+    ami: ami-0225fc57a58689798
+    zone: us-east-1
+    user: ec2-user
+  macos-monterey-12-amd64:
+    ami: ami-0a410356d12928dbc
+    zone: us-east-1
+    user: ec2-user
+  # Windows
+  windows-desktop-10-amd64:
+    ami: ami-03eb1fb8f55d01fde
+    zone: us-east-1
+    user: wazuh-user
+  windows-sign-10-amd64:
+    ami: ami-053a31c7736e82d06
+    zone: us-east-1
+    user: wazuh-user
+  windows-server-2012r2-amd64:
+    ami: ami-05710c71113d5a40e
+    zone: us-east-1
+    user: wazuh-user
+  windows-server-2016-amd64:
+    ami: ami-0f279f6c0764bef8f
+    zone: us-east-1
+    user: wazuh-user
+  windows-server-2019-amd64:
+    ami: ami-06cc514f1012a7431
+    zone: us-east-1
+    user: wazuh-user
+  windows-server-2022-amd64:
+    ami: ami-0f9c44e98edf38a2b
+    zone: us-east-1
+    user: wazuh-user

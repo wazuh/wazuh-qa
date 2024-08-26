@@ -74,11 +74,11 @@ class Monitor:
             # These two binaries are executed using the Python interpreter instead of
             # directly execute them as daemons. That's why we need to search the .py file in
             # the cmdline instead of searching it in the name
-            if process_name in ['wazuh_clusterd', 'wazuh-apid']:
+            if process_name in ['wazuh_clusterd', 'wazuh_apid']:
                 if any(filter(lambda x: f'{process_name}.py' in x, proc.cmdline())):
                     pid = proc.pid
                     break
-            elif process_name == 'wazuh-indexer':
+            elif process_name in ['wazuh-indexer', 'wazuh-dashboard']:
                 if any(filter(lambda x: f'{process_name}' in x, proc.cmdline())):
                     pid = proc.pid
                     break

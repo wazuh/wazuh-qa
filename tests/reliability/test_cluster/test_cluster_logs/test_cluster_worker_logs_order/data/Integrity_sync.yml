@@ -20,15 +20,9 @@
   tag: 'Updating local files: Start.*'
 - log_id: log13
   parent: log12
-  tag: 'Received [0-9]* missing files to update from master.'
+  tag: 'Updating local files: End.'
 - log_id: log14
   parent: log13
-  tag: 'Received [0-9]* shared files to update from master.*'
-- log_id: log15
-  parent: log14
-  tag: 'Updating local files: End.'
-- log_id: log16
-  parent: log15
   tag: 'Finished in .*'
 
 # No sync needed.

@@ -7,9 +7,27 @@ import pytest
 from glob import glob
 from mmap import mmap, ACCESS_READ
 from os.path import join
+from datetime import timedelta
+from dateutil import parser
+
+DATETIME_FORMAT = '%Y/%m/%d %H:%M'
+SIGTERM_PATTERN = rb'SIGNAL \[\(15\)-\(SIGTERM\)\]'
 
 disconnected_nodes = []
 node_name = re.compile(r'.*/(master|worker_[\d]+)/logs/cluster.log')
+
+
+def get_master_mmap(artifacts_path):
+    """Read the master cluster log and return a mmap with the content.
+
+    Args:
+        artifacts_path (str): Path where folders with cluster information can be found.
+
+    Returns:
+        mmap (mmap): A mmap object with the master logs.
+    """
+    with open(join(artifacts_path, 'master', 'logs', 'cluster.log')) as master_log:
+        return mmap(master_log.fileno(), 0, access=ACCESS_READ)
 
 
 def test_cluster_connection(artifacts_path):
@@ -29,6 +47,8 @@ def test_cluster_connection(artifacts_path):
     if len(cluster_log_files) == 0:
         pytest.fail(f'No files found inside {artifacts_path}.')
 
+    master_mmap = get_master_mmap(artifacts_path=artifacts_path)
+
     for log_file in cluster_log_files:
         with open(log_file) as f:
             s = mmap(f.fileno(), 0, access=ACCESS_READ)
@@ -39,9 +59,27 @@ def test_cluster_connection(artifacts_path):
                             f'{node_name.search(log_file)[1]}')
 
             # Search if there are any connection attempts after the message found above.
-            if re.search(rb'^.*Could not connect to master. Trying.*$|^.*Successfully connected to master.*$',
-                         s[conn.end():], flags=re.MULTILINE):
-                disconnected_nodes.append(node_name.search(log_file)[1])
+            finds = re.search(
+                rb'^.*Could not connect to master. Trying.*$|^.*Successfully connected to master.*$',
+                s[conn.end():],
+                flags=re.MULTILINE
+            )
+            if finds:
+                # Search for SIGTERM in the worker log
+                end_log_timestamp = re.search(rb'(\d{4}\/\d{2}\/\d{2} \d{2}\:\d{2})', finds.group()).group()
+                start_datetime = parser.parse(end_log_timestamp.decode()) - timedelta(minutes=1)
+                start_log_timestamp = start_datetime.strftime(DATETIME_FORMAT)
+
+                start_log = re.search(fr'{start_log_timestamp}.*'.encode(), s)
+                worker_sigterm = re.search(SIGTERM_PATTERN, s[start_log.start():finds.start()])
+
+                if not worker_sigterm:
+                    # Search for SIGTERM in the master log
+                    master_start_log = re.search(fr'{start_log_timestamp}.*'.encode(), master_mmap)
+                    master_sigterm = re.search(SIGTERM_PATTERN, master_mmap[master_start_log.start():])
+
+                    if not master_sigterm:
+                        disconnected_nodes.append(node_name.search(log_file)[1])
 
     if disconnected_nodes:
         pytest.fail(f'The following nodes disconnected from master at any point:\n- ' + '\n- '.join(disconnected_nodes))
