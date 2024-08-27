@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 
 - Add saturation tools for Wazuh agent's modules ([#5697](https://github.com/wazuh/wazuh-qa/pull/5697)) \- (Framework + Tests)
 
+## [4.10.0] - TBD
+
 ## [4.9.0] - TBD
 
 ### Added
