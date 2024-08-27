@@ -120,12 +120,13 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo) -> Gener
     report.extra = getattr(report, 'extra', [])
 
     if report.when == 'call' and report.failed:
-        if 'get_data' in item.funcargs:
+        if 'get_data' in item.funcargs and 'metric' in item.funcargs:
             baseline_file, datasource_file, _ = item.funcargs['get_data']
             items_yaml_path = item.config.getoption("items_yaml")
+            metric = item.funcargs['metric']
 
             data_loader = DataLoader(baseline_file, datasource_file, items_yaml_path)
-            output = data_loader.print_dataframes_stats()
+            output = data_loader.print_dataframes_stats(metric)
 
             report_dir = os.path.dirname(item.config.option.htmlpath)
             assets_dir = os.path.join(report_dir, "assets")

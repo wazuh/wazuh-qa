@@ -142,37 +142,42 @@ class DataLoader:
 
         return process_name, processes, metrics
 
-    def print_dataframes_stats(self) -> str:
+    def print_dataframes_stats(self, metric: str) -> str:
         """Generate a PrettyTable with the statistics for each process and metric.
+
+        Args:
+            metric (str): metric from which to generate the table.
 
         Returns:
             output (str): String containing the comparative table.
         """
         output = ""
 
+        if metric not in self.metrics:
+            raise ValueError(f"The metric '{metric}' is not available in the loaded data.")
+
         for process in self.processes:
             baseline_data = self.baseline[self.baseline[self.process_name] == process]
             datasource_data = self.datasource[self.datasource[self.process_name] == process]
 
-            for metric in self.metrics:
-                table = PrettyTable()
-                table.title = process + " - " + metric
-                table.field_names = ['Name', 'Mean', 'Max value', 'Min value', 'Standard deviation', 'Variance']
-                table.add_row([
-                    "Baseline",
-                    round(baseline_data[metric].mean(), 2),
-                    baseline_data[metric].max(), baseline_data[metric].min(),
-                    round(baseline_data[metric].std(), 2),
-                    round(baseline_data[metric].var(), 2)
-                ])
-                table.add_row([
-                    "Data source",
-                    round(datasource_data[metric].mean(), 2),
-                    datasource_data[metric].max(), datasource_data[metric].min(),
-                    round(datasource_data[metric].std(), 2),
-                    round(datasource_data[metric].var(), 2)
-                ])
-                output += table.get_string() + "\n\n"
+            table = PrettyTable()
+            table.title = process + " - " + metric
+            table.field_names = ['Name', 'Mean', 'Max value', 'Min value', 'Standard deviation', 'Variance']
+            table.add_row([
+                "Baseline",
+                round(baseline_data[metric].mean(), 2),
+                baseline_data[metric].max(), baseline_data[metric].min(),
+                round(baseline_data[metric].std(), 2),
+                round(baseline_data[metric].var(), 2)
+            ])
+            table.add_row([
+                "Data source",
+                round(datasource_data[metric].mean(), 2),
+                datasource_data[metric].max(), datasource_data[metric].min(),
+                round(datasource_data[metric].std(), 2),
+                round(datasource_data[metric].var(), 2)
+            ])
+            output += table.get_string() + "\n\n"
 
         return output
 
