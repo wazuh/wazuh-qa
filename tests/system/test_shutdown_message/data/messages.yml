@@ -1,0 +1,5 @@
+---
+wazuh-master:
+  - regex: '.*HC_SHUTDOWN.*'
+    path: "/var/ossec/logs/ossec.log"
+    timeout: 60

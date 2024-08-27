@@ -18,17 +18,6 @@
       state: present
     ignore_errors: yes
 
-  - name: Install Wazuh dashboard
-    package:
-      name: "wazuh-dashboard-{{ dashboard_version }}"
-      state: present
-      update_cache: yes
-    register: install
-
-  tags:
-    - install
-  when: not wazuh_custom_packages_installation_dashboard_enabled
-
 - include_tasks: "install_from_custom_package.yml"
   when:
     - wazuh_custom_packages_installation_dashboard_enabled

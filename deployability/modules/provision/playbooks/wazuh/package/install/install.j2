@@ -1,0 +1,14 @@
+{% if ansible_os_family.lower() in ['debian'] %}
+- name: Install the {{ component }}
+  command: "apt-get -y install {{ component }}"
+{% endif %}
+
+{% if ansible_os_family.lower() in ['redhat', 'oraclelinux', 'amazon', 'centos'] %}
+- name: Install the {{ component }}
+  command: "yum -y install {{ component }}"
+{% endif %}
+
+{% if ansible_os_family.lower() in ['suse'] %}
+- name: Install the {{ component }}
+  command: "zypper -n install {{ component }}"
+{% endif %}

@@ -48,6 +48,7 @@ from system.test_cluster.test_agent_groups.common import register_agent
 from system import (ERR_MSG_CLIENT_KEYS_IN_MASTER_NOT_FOUND, check_agent_groups, check_keys_file,
                     create_new_agent_group, delete_agent_group, remove_cluster_agents,
                     assign_agent_to_new_group, restart_cluster)
+from wazuh_testing import T_10, T_20
 from wazuh_testing.tools.system import HostManager
 from wazuh_testing.tools.file import replace_regex_in_file
 from wazuh_testing.tools.system_monitoring import HostMonitor
@@ -73,8 +74,6 @@ tmp_path = os.path.join(local_path, 'tmp')
 # Variables
 group_id = 'group_test'
 multigroups_id = 'default,group_test'
-# this timeout is temporality, this test will be update
-timeout = 20
 
 
 # Fixtures
@@ -135,7 +134,7 @@ def test_guess_single_group(target_node, status_guess_agent_group, clean_environ
     '''
     # Restart master to apply local internal options
     restart_cluster([test_infra_managers[0]], host_manager)
-    time.sleep(timeout)
+    time.sleep(T_20)
 
     # Create new group
     create_new_agent_group(test_infra_managers[0], group_id, host_manager)
@@ -156,7 +155,7 @@ def test_guess_single_group(target_node, status_guess_agent_group, clean_environ
         # Remove agent from default to test single group guess (not multigroup)
         host_manager.run_command(test_infra_managers[0], f"/var/ossec/bin/agent_groups -q -r -i {agent_id} -g default")
 
-        time.sleep(timeout)
+        time.sleep(T_20)
 
         # Check that agent has group set to group_test on Managers
         check_agent_groups(agent_id, group_id, test_infra_managers, host_manager)
@@ -173,7 +172,7 @@ def test_guess_single_group(target_node, status_guess_agent_group, clean_environ
 
         # Restart agent
         restart_cluster([test_infra_agents[0]], host_manager)
-        time.sleep(timeout)
+        time.sleep(T_20)
 
         # Check if remoted.guess_agent_group is disabled
         expected_group = 'default' if int(status_guess_agent_group) == 0 else group_id
@@ -228,7 +227,7 @@ def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clea
     '''
     # Restart master to apply local internal options
     restart_cluster([test_infra_managers[0]], host_manager)
-    time.sleep(timeout)
+    time.sleep(T_20)
 
     # Create new group
     create_new_agent_group(test_infra_managers[0], group_id, host_manager)
@@ -241,6 +240,7 @@ def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clea
 
     # Restart agent
     restart_cluster(test_infra_agents, host_manager)
+    time.sleep(T_10)
 
     # Check that agent has client key file
     for agent in range(n_agents):
@@ -250,7 +250,7 @@ def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clea
         # Create new group and assing agent
         for agent in range(n_agents):
             assign_agent_to_new_group(test_infra_managers[0], group_id, agents_data[agent][1], host_manager)
-        time.sleep(timeout)
+        time.sleep(T_20)
 
         # Check that agent has group set to group_test on Managers
         for agent in range(n_agents):
@@ -268,7 +268,7 @@ def test_guess_multigroups(n_agents, target_node, status_guess_agent_group, clea
 
         # Restart agent
         restart_cluster([test_infra_agents[0]], host_manager)
-        time.sleep(timeout)
+        time.sleep(T_20)
 
         # Check if remoted.guess_agent_group is disabled
         expected_group = 'default' if int(status_guess_agent_group) == 0 or n_agents == 1 else multigroups_id

@@ -1,0 +1,15 @@
+{% if ansible_os_family.lower() in ['debian'] %}
+- name: Uninstall {{ component }}
+  command: "apt-get remove --purge {{ component }} -y"
+{% endif %}
+
+{% if ansible_os_family.lower() in ['redhat', 'oraclelinux', 'amazon', 'centos'] %}
+- name: Uninstall {{ component }}
+  command: "yum -y remove {{ component }}"
+{% endif %}
+
+{% if ansible_os_family.lower() in ['suse'] %}
+- name: Uninstall {{ component }}
+  command: "zypper -y remove {{ component }}"
+{% endif %}
+

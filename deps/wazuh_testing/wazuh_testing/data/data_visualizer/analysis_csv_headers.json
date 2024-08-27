@@ -1,0 +1,41 @@
+{
+    "decoded_events": {
+        "title": "Events decoded per queue",
+        "columns": [
+            "Decoded from azure", "Decoded from ciscat", "Decoded from command", "Decoded from docker",
+            "Decoded from logcollector eventchannel", "Decoded from logcollector eventlog",
+            "Decoded from logcollector macos", "Decoded from logcollector others", "Decoded from osquery",
+            "Decoded from rootcheck", "Decoded from sca", "Decoded from syscheck", "Decoded from syscollector",
+            "Decoded from vulnerability", "Decoded from agentd", "Decoded from dbsync", "Decoded from monitor",
+            "Decoded from remote"
+        ]
+    },
+    "dropped_events": {
+        "title": "Events dropped per queue",
+        "columns": [
+            "Dropped from azure", "Dropped from ciscat", "Dropped from command", "Dropped from docker",
+            "Dropped from logcollector eventchannel", "Dropped from logcollector eventlog",
+            "Dropped from logcollector macos", "Dropped from logcollector others", "Dropped from osquery",
+            "Dropped from rootcheck", "Dropped from sca", "Dropped from syscheck", "Dropped from syscollector",
+            "Dropped from vulnerability", "Dropped from agentd", "Dropped from dbsync", "Dropped from monitor",
+            "Dropped from remote"
+        ]
+    },
+    "events_decoded_per_second": {
+        "title": "Events decoded per second",
+        "columns": [
+            "EDPS from azure", "EDPS from ciscat", "EDPS from command", "EDPS from docker",
+            "EDPS from logcollector eventchannel", "EDPS from logcollector eventlog", "EDPS from logcollector macos",
+            "EDPS from logcollector others", "EDPS from osquery", "EDPS from rootcheck", "EDPS from sca",
+            "EDPS from syscheck", "EDPS from syscollector", "EDPS from vulnerability", "EDPS from agentd",
+            "EDPS from dbsync", "EDPS from monitor", "EDPS from remote"
+        ]
+    },
+    "alerts_info": {
+        "title": "Alerts and events info",
+        "columns": [
+            "Events processed", "Events received", "Written alerts", "Written firewall", "Written fts",
+            "Written archives", "Written stats"
+        ]
+    }
+}
