@@ -62,7 +62,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def get_data(pytestconfig: pytest.Config) -> Tuple[str, str, float]:
     """Fixture that collects the CSV files and the confidence level passed by parameters to the test.
 
@@ -85,7 +85,7 @@ def get_data(pytestconfig: pytest.Config) -> Tuple[str, str, float]:
     return baseline_file, datasource_file, conf_level
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def get_comparison_config(pytestconfig: pytest.Config) -> str:
     """Fixture that collects the YML file with the elements to be analyzed
     during the test.

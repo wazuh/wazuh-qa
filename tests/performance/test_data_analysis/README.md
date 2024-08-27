@@ -32,6 +32,8 @@ To run the tests, we will need to use the following command:
 python3 -m pytest test_data_analyzer_module.py --baseline <baseline_csv_file> --datasource <data_csv_file> --items_yaml <yml_file> --html=<html_file> <--optional_parameters>
 ```
 
+It is recommended to use the `-v` option to obtain more details of the test for each metric analyzed.
+
 ### Parameters
 
 | Parameter | Description | Default | Type | Required |
@@ -208,7 +210,7 @@ Metrics:
 ### Example
 
 ```shell script
-python3 -m pytest test_data_analyzer_module.py --baseline ./data/4.8.0-rc4-vdr.csv --datasource ./data/4.8.1-rc2-vdr.csv --items_yaml ./data/items_to_compare.yml --html=report.html
+python3 -m pytest test_data_analyzer_module.py --baseline ./data/4.8.0-rc4-vdr.csv --datasource ./data/4.8.1-rc2-vdr.csv --items_yaml ./data/items_to_compare.yml --html=report.html -v
 ```
 
 - Result: [report.zip](https://github.com/user-attachments/files/16454337/report.zip)
