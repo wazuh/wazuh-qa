@@ -1,22 +1,22 @@
 files:
   - module: logcollector
-    path: /home/santipa/Escritorio/event_generator/wazuh-logcollector1.log
+    path: ./wazuh-logcollector1.log
     operations: 5
     rate: 1
     max_file_size: 10
-    template_path: /home/santipa/Escritorio/event_generator/templates/syslog_template.json
+    template_path: ./templates/syslog_template.json
     cleanup: false
 
   - module: logcollector
-    path: /home/santipa/Escritorio/event_generator/wazuh-logcollector2.log
+    path: ./wazuh-logcollector2.log
     operations: 5
     rate: 1
     max_file_size: 15
-    template_path: /home/santipa/Escritorio/event_generator/templates/syslog_template.json
+    template_path: ./templates/syslog_template.json
     cleanup: false
 
   - module: syscheck
-    path: /home/santipa/Escritorio/event_generator/syscheck_test
+    path: ./syscheck_test
     operations: 5
     rate: 1
     cleanup: false
