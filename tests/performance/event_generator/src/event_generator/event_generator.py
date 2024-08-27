@@ -183,6 +183,10 @@ class LogEventGenerator(EventGenerator):
 
 
 class SyscheckEventGenerator(EventGenerator):
+    """
+    Subclass of EventGenerator specifically designed for file creation, modification and deletion.
+    """
+
     def __init__(self, rate, path, operations):
         """
         Initialize the SyscheckEventGenerator with specific parameters to simulate file system events.
