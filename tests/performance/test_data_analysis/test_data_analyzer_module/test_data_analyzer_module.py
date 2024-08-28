@@ -89,10 +89,10 @@ def test_comparison(get_data: Callable[[], Tuple[str, str, float]], get_comparis
                                                                     metric, stat, threshold_value) != 1
                 except AssertionError:
                     errors.append(f"Difference over {threshold_value*100}% detected in '{process}'" +
-                                    f" - '{metric}' - '{stat}'. t_student p-value: {t_p_value}," +
+                                    f" - '{metric}' - '{stat}'. t_student p-value: {t_p_value}, " +
                                     f"levene p-value: {l_p_value}, anova p-value: {a_p_value}")
         else:
-           p_values.append(f"t_student p-value: {t_p_value}, " f"levene p-value: {l_p_value}," +
+           p_values.append(f"t_student p-value: {t_p_value}, " f"levene p-value: {l_p_value}, " +
                            f"anova p-value: {a_p_value}")
 
     if errors:
