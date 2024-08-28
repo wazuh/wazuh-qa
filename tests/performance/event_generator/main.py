@@ -39,7 +39,11 @@ def delete_file(path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Module saturation script.")
+    parser = argparse.ArgumentParser(
+        description="Module saturation script.",
+        usage='%(prog)s [options]',
+        formatter_class=argparse.RawTextHelpFormatter
+    )
     parser.add_argument('--config', type=str, required=False,
                         help='Path to YAML config file')
     args = parser.parse_args()
