@@ -226,7 +226,7 @@ We assume that the confidence level is 95% (default value) so p = 0.05:
 ### Example
 
 ```shell script
-python3 -m pytest test_data_analyzer_module.py --baseline ./data/4.8.0-rc4-vdr.csv --datasource ./data/4.8.1-rc2-vdr.csv --items_yaml ./data/items_to_compare.yml --html=report.html -v
+pytest test_data_analyzer_module.py --baseline ./data/4.8.0-rc4-vdr.csv --datasource ./data/4.8.1-rc2-vdr.csv --items_yaml ./data/resource_metrics_comparison.yml --html=report.html -v
 ```
 
-- Result: [report.zip](https://github.com/user-attachments/files/16454337/report.zip)
+- Result: [report.zip](https://github.com/user-attachments/files/16783566/report.zip)
