@@ -207,6 +207,22 @@ Metrics:
     Max value: 5
 ```
 
+### Analysis of results
+
+The test will generate an html report where you can see all the results. If run with the -v option (recommended) there will be a section for each metric. In each of them there will be a link where you can see the statistics comparison tables. If a test fails, it will indicate exactly where it has failed, indicating process, metric, statistic and the percentage of threshold that has been exceeded. In addition, for any test, whether it fails or not, the p-values for each test statistic will be displayed. The p-values can take the following values:
+
+We assume that the confidence level is 95% (default value) so p = 0.05:
+
+- p_value < 0.05: There are significant differences between the two data sets.
+
+- p_value > 0.05: The test has not detected any significant differences.
+
+- p_value == 1: The data are very similar and there are no differences between them.
+
+- p_value == 0: Indicates that there is an extremely significant difference between the data.
+
+- p_value == nan: The data are exactly the same and the p_value cannot be calculated because there is no variability between them.
+
 ### Example
 
 ```shell script

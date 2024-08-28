@@ -119,7 +119,7 @@ def pytest_runtest_makereport(item: pytest.Item, call: pytest.CallInfo) -> Gener
     report = outcome.get_result()
     report.extra = getattr(report, 'extra', [])
 
-    if report.when == 'call' and report.failed:
+    if report.when == 'call':
         if 'get_data' in item.funcargs and 'metric' in item.funcargs:
             baseline_file, datasource_file, _ = item.funcargs['get_data']
             items_yaml_path = item.config.getoption("items_yaml")

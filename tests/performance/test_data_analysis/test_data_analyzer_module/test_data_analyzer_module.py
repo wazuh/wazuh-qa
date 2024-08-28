@@ -47,8 +47,7 @@ def pytest_generate_tests(metafunc: Metafunc) -> None:
         metafunc.parametrize("metric", metrics)
 
 
-def test_comparison(get_data: Callable[[], Tuple[str, str, float]], 
-                    get_comparison_config: Callable[[], str], 
+def test_comparison(get_data: Callable[[], Tuple[str, str, float]], get_comparison_config: Callable[[], str],
                     metric: str) -> None:
     """Detect significant differences and compare the statistics.
 
@@ -69,6 +68,7 @@ def test_comparison(get_data: Callable[[], Tuple[str, str, float]],
     stats_tests = StatisticalTests()
 
     errors = []
+    p_values = []
     p_value = (100 - confidence_level) / 100
 
     for process in data.processes:
@@ -89,7 +89,14 @@ def test_comparison(get_data: Callable[[], Tuple[str, str, float]],
                                                                     metric, stat, threshold_value) != 1
                 except AssertionError:
                     errors.append(f"Difference over {threshold_value*100}% detected in '{process}'" +
-                                    f" - '{metric}' - '{stat}'")
+                                    f" - '{metric}' - '{stat}'. t_student p-value: {t_p_value}," +
+                                    f"levene p-value: {l_p_value}, anova p-value: {a_p_value}")
+        else:
+           p_values.append(f"t_student p-value: {t_p_value}, " f"levene p-value: {l_p_value}," +
+                           f"anova p-value: {a_p_value}")
 
     if errors:
         pytest.fail("\n".join(errors))
+    else:
+        print(f"P-values for metric '{metric}':")
+        print("\n".join(p_values))
