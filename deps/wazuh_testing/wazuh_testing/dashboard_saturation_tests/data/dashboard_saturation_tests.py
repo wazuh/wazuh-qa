@@ -11,14 +11,16 @@ Playwright must be installed for it to work properly.
 
 import argparse
 import json
-import pandas as pd
 import time
-import yaml
 
+from argparse import Namespace
 from datetime import datetime
-from os import makedirs, getcwd
-from os.path import join, isabs
+from os import getcwd, makedirs
+from os.path import isabs, join
 from subprocess import run
+
+import pandas as pd
+import yaml
 
 
 # Global Configuration Variables
@@ -31,17 +33,19 @@ artillery_result_type = [
 
 
 def check_artillery_result_types(types: list) -> None:
-    """Check that a valid type of Artillery result has been
-    chosen to generate the CSV.
+    """Check that the CSV type is valid.
+
+    Check that the type chosen to generate the CSV with the
+    Artillery results is valid.
 
     Args:
         types (list): List of types.
     """
     for value in types:
         if value not in artillery_result_type:
-            msg = f'The Artillery result type to generate the CSV is not ' \
-                'valid. Accepted Values: {artillery_result_type}. ' \
-                'Value received {value}.'
+            msg = f'The Artillery result type to generate the CSV is not \
+                valid. Accepted Values: {artillery_result_type}. Value \
+                received {value}.'
 
             raise Exception(msg)
 
@@ -50,7 +54,7 @@ def format_directory(directory: str) -> str:
     """Check the paths of the directories and format them if necessary.
 
     Args:
-        args (str): Path of a directory.
+        directory (str): Path of a directory.
 
     Returns:
         str: Formatted path.
@@ -67,12 +71,14 @@ def create_directories(directory: str) -> None:
     makedirs(directory, exist_ok=True)
 
 
-def provide_directories(args: argparse) -> None:
-    """Format the paths of the directories and create them
-    (if they do not exist).
+def provide_directories(args: Namespace) -> None:
+    """Formatting and creating directories.
+    
+    Format directory paths to ensure they are valid and
+    create such directories if they do not exist.
 
     Args:
-        args (argparse): Script parameters.
+        args (Namespace): Script parameters.
     """
     # Format Directories
     args.logs = format_directory(args.logs)
@@ -100,11 +106,11 @@ def create_session_file(path: str, user: str) -> None:
         file.write('{}')
 
 
-def gen_artillery_params(args: argparse) -> dict:
+def gen_artillery_params(args: Namespace) -> dict:
     """Format all parameters for Artillery.
 
     Args:
-        args (argparse): Script parameters.
+        args (Namespace): Script parameters.
 
     Returns:
         dict: Artillery parameters.
@@ -148,11 +154,11 @@ def add_options_to_artillery(config: str, options: dict) -> None:
         yaml.dump(data, f)
 
 
-def process_script_arguments(args: argparse) -> None:
+def process_script_arguments(args: Namespace) -> None:
     """Process script arguments, create folders and generate necessary files.
 
     Args:
-        args (argparse): Script parameters.
+        args (Namespace): Script parameters.
     """
     # Format .auth Path
     if not isabs(args.session):
@@ -180,7 +186,7 @@ def gen_log_filename(log_path: str) -> str:
     Returns:
         str: File name of the log (include path).
     """
-    return log_path + datetime.now().strftime(f"log-%Y%m%d%H%M%S.log")
+    return log_path + datetime.now().strftime("log-%Y%m%d%H%M%S.log")
 
 
 def gen_url(ip: str) -> str:
@@ -210,11 +216,11 @@ def gen_csv_filename(csv_path: str, type: str) -> str:
     return csv_path + datetime.now().strftime(f"{type}-%Y%m%d%H%M%S.csv")
 
 
-def convert_json_to_csv(args: argparse, json_output: str) -> None:
+def convert_json_to_csv(args: Namespace, json_output: str) -> None:
     """Convert data from JSON format to CSV format.
 
     Args:
-        args (argparse): Script parameters.
+        args (Namespace): Script parameters.
         json_output (str): Path and file name of the log.
     """
     for type in args.type:
@@ -227,11 +233,11 @@ def convert_json_to_csv(args: argparse, json_output: str) -> None:
         df.to_csv(csv_filename, index=False)
 
 
-def run_artillery(args: argparse) -> None:
+def run_artillery(args: Namespace) -> None:
     """Execute Artillery tests.
 
     Args:
-        args (argparse): Script parameters.
+        args (Namespace): Script parameters.
     """
     json_filename = gen_log_filename(args.logs)
 
@@ -367,13 +373,12 @@ def get_script_arguments() -> argparse:
 
 
 def main() -> None:
-    """Run the Script.
-    """
+    """Run the Script."""
     script_args = get_script_arguments()
 
     process_script_arguments(script_args)
 
-    for n in range(0, script_args.iterations):
+    for _ in range(0, script_args.iterations):
         run_artillery(script_args)
         time.sleep(script_args.wait)
 
