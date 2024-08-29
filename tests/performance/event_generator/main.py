@@ -38,19 +38,20 @@ def delete_file(path):
         print(f"Error deleting {path}: {e}")
 
 
-def main():
+def parse_arguments():
+    """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description="Module saturation script.",
-        usage='%(prog)s [options]',
+        usage="%(prog)s [options]",
         formatter_class=argparse.RawTextHelpFormatter
     )
-    parser.add_argument('--config', type=str, required=False,
+    parser.add_argument('--config', type=str, required=True,
                         help='Path to YAML config file')
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    if not args.config:
-        print("Configuration file must be provided.")
-        return
+
+def main():
+    args = parse_arguments()
 
     with open(args.config, 'r') as file:
         config = yaml.safe_load(file)
