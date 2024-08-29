@@ -1,6 +1,7 @@
 # Copyright (C) 2024, Wazuh Inc.
 # Created by Wazuh, Inc. <info@wazuh.com>.
-# This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
+# This program is a free software; you can redistribute it and/or
+# modify it under the terms of GPLv2
 
 """Dashboard Saturation Tests Module
 
@@ -73,7 +74,7 @@ def create_directories(directory: str) -> None:
 
 def provide_directories(args: Namespace) -> None:
     """Formatting and creating directories.
-    
+
     Format directory paths to ensure they are valid and
     create such directories if they do not exist.
 
@@ -285,7 +286,7 @@ def get_script_arguments() -> argparse:
         dest='screenshots',
         type=str,
         default='screenshots/',
-        help=f'Directory to store the screenshots. Default "screenshot".')
+        help=f'Directory to store the screenshots. Default "screenshots".')
 
     parser.add_argument(
         '-c', '--csv',

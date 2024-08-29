@@ -61,8 +61,12 @@ playwright --version
 To run the tests, it is necessary to install the dependencies and the package. This can be done by running the following command:
 
 ```shell script
+python3 -m venv env
+source env/bin/activate
 python3 -m pip install .
 ```
+
+Note: The use of the environment is optional,
 
 ## Artillery + Playwright
 
@@ -77,7 +81,7 @@ dashboard-saturation-tests --password <wazuh_pass> --ip <dashboard_ip>
 | Parameter | Description | Type | Required | Default |
 | --------- | ----------- | ---- | -------- | ------- |
 | `-l`, `--logs` | `Directory to store the logs` | `str` | No | `logs/` |
-| `-s`, `--screenshots` | `Directory to store the screenshots` | `str` | No | `screenshot/` |
+| `-s`, `--screenshots` | `Directory to store the screenshots` | `str` | No | `screenshots/` |
 | `-c`, `--csv` | `Directory to store the CSVs` | `str` | No | `csv/` |
 | `-o`, `--session` | `Directory to store the Sessions` | `str` | No | `.auth/` |
 | `-a`, `--artillery` | `Path to the Artillery Script` | `str` | No | `data/artillery.yml` |
@@ -103,10 +107,21 @@ The Python script complies with the PEP 8 standard. To verify that it continues 
 pycodestyle dashboard_saturation_tests.py
 ```
 
-### Example
+## Using Docker
+
+It is possible to use the `Docker` image with the entire environment set up for running tests. To facilitate its use, there is a `makefile` file with the necessary instructions. An example of use would be:
 
 ```shell script
-dashboard-saturation-tests -p password -i 172.16.1.36
+make init
+make test COMMAND_OPTIONS='--password <wazuh_pass> --ip <dashboard_ip>'
+```
+
+By default, test results are saved in an `artifacts` folder on the host machine.
+
+## Example
+
+```shell script
+dashboard-saturation-tests -p password -i ip
 ```
 
 - Result: [report.zip](https://github.com/user-attachments/files/16542340/report.zip)
