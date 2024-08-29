@@ -38,7 +38,22 @@ def delete_file(path):
 
 
 def parse_arguments():
-    """Parse command line arguments."""
+    """
+    Parse command line arguments using argparse and validate them.
+
+    This function sets up an argparse.ArgumentParser to read command line
+    arguments. It specifically looks for a '--config' argument which is mandatory.
+    It then validates these arguments using the validate_parameters function.
+
+    Returns:
+        argparse.Namespace: An object containing attributes that correspond to
+            the parsed arguments. This object will specifically contain 'config'
+            which holds the path to a YAML configuration file.
+
+    Raises:
+        ValueError: If the arguments fail validation checks within the
+            validate_parameters function.
+    """
     parser = argparse.ArgumentParser(
         description="Module saturation script.",
         usage="%(prog)s [options]",
@@ -46,7 +61,29 @@ def parse_arguments():
     )
     parser.add_argument('--config', type=str, required=True,
                         help='Path to YAML config file')
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    validate_parameters(args)
+
+    return args
+
+
+def validate_parameters(args):
+    """
+    Validate the command line arguments provided.
+
+    Args:
+        args (argparse.Namespace): The arguments provided to the command line.
+
+    Raises:
+        ValueError: If any required arguments are missing or invalid.
+
+    Ensures that the 'config' argument is provided and that it points to a valid file.
+    """
+    if not args.config:
+        raise ValueError("Configuration file must be provided.")
+    if not os.path.isfile(args.config):
+        raise ValueError("Invalid configuration file.")
 
 
 def main():
