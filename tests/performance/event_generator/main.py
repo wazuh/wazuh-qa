@@ -19,7 +19,6 @@ This tool is ideal for testing the robustness and performance of systems that mo
 import argparse
 import yaml
 import threading
-import time
 import os
 import shutil
 from event_generator import LogEventGenerator, SyscheckEventGenerator
