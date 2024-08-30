@@ -302,6 +302,7 @@ class BinaryDatavisualizer(DataVisualizer):
 
         This method creates and saves plots for each binary metric field.
         """
+        title = "4.9.0\n"
         columns_to_plot = self._get_fields_to_plot()
         for element in columns_to_plot:
             _, ax = plt.subplots()
@@ -311,7 +312,7 @@ class BinaryDatavisualizer(DataVisualizer):
                 self._basic_plot(ax, self.dataframe[self.dataframe.Daemon == daemon][element],
                                  label=daemon, color=color)
 
-            self._save_custom_plot(ax, element, element)
+            self._save_custom_plot(ax, element, title)
 
 
 class DaemonStatisticsVisualizer(DataVisualizer):
