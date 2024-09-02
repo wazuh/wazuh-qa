@@ -57,6 +57,11 @@ source env/bin/activate
 python3 -m pip install .
 ```
 
+5. Running the application
+```bash
+event-generator --config config.yaml
+```
+
 # Tests
 
 To run the package tests, follow these steps:
