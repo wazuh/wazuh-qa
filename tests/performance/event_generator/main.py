@@ -86,6 +86,56 @@ def validate_parameters(args):
         raise ValueError("Invalid configuration file.")
 
 
+def get_logcollector_generator(file_config):
+    """
+    Create and return a LogEventGenerator instance configured according to the provided file configuration.
+
+    Args:
+        file_config (dict): Configuration settings specific to the logcollector module. It must include
+                            necessary parameters like module, path, operations, rate, max_file size, and
+                            template path.
+
+    Returns:
+        LogEventGenerator: An instance of LogEventGenerator configured as per the file_config.
+
+    Raises:
+        ValueError: If any required parameters are missing in file_config for logcollector.
+    """
+    required_params = ['module', 'path', 'operations', 'rate', 'max_file_size', 'template_path']
+    if not all(param in file_config for param in required_params):
+        raise ValueError("Missing required config parameters for logcollector.")
+    return LogEventGenerator(
+        rate=file_config['rate'],
+        path=file_config['path'],
+        operations=file_config['operations'],
+        max_file_size=file_config['max_file_size'],
+        template_path=file_config['template_path']
+    )
+
+
+def get_syscheck_generator(file_config):
+    """
+    Create and return a SyscheckEventGenerator instance based on the provided file configuration.
+
+    Args:
+        file_config (dict): Configuration settings specific to the syscheck module. It should include
+                            necessary parameters like module, path, operations, and rate.
+
+    Returns:
+        SyscheckEventGenerator: An instance of SyscheckEventGenerator configured according to the file_config.
+
+    Raises:
+        ValueError: If any required parameters are missing in file_config for syscheck.
+    """
+    required_params = ['module', 'path', 'operations', 'rate']
+    if not all(param in file_config for param in required_params):
+        raise ValueError("Missing required config parameters for syscheck.")
+    return SyscheckEventGenerator(
+        rate=file_config['rate'],
+        path=file_config['path'],
+        operations=file_config['operations']
+    )
+
 def main():
     args = parse_arguments()
 
@@ -94,37 +144,12 @@ def main():
 
     threads = []
     for file_config in config.get('files', []):
-        # Adjust required parameters based on the module
         if file_config['module'] == 'logcollector':
-            required_params = ['module', 'path', 'operations',
-                               'rate', 'max_file_size', 'template_path']
+            generator = get_logcollector_generator(file_config)
         elif file_config['module'] == 'syscheck':
-            required_params = ['module', 'path', 'operations', 'rate']
+            generator = get_syscheck_generator(file_config)
         else:
-            raise ValueError(
-                "Unsupported module specified in the configuration.")
-
-        if not all(param in file_config for param in required_params):
-            raise ValueError(
-                "Missing one or more required config parameters for a file.")
-
-        if file_config['module'] == 'logcollector':
-            generator = LogEventGenerator(
-                rate=file_config['rate'],
-                path=file_config['path'],
-                operations=file_config['operations'],
-                max_file_size=file_config['max_file_size'],
-                template_path=file_config['template_path']
-            )
-        elif file_config['module'] == 'syscheck':
-            generator = SyscheckEventGenerator(
-                rate=file_config['rate'],
-                path=file_config['path'],
-                operations=file_config['operations']
-            )
-        else:
-            raise ValueError(
-                "Unsupported module specified in the configuration.")
+            raise ValueError("Unsupported module specified in the configuration.")
 
         thread = threading.Thread(target=generator.start)
         thread.start()
