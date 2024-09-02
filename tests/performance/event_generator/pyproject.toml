@@ -25,3 +25,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.package-data]
 event_generator = ["templates/*.json"]
+
+[project.scripts]
+event-generator = "event_generator.main:main"
