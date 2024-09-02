@@ -16,6 +16,7 @@ Where:
 This tool is ideal for testing the robustness and performance of systems that monitor or log file and system activities by simulating realistic operational loads.
 """
 
+from typing import Any, Dict
 import argparse
 import yaml
 import threading
@@ -24,7 +25,7 @@ import shutil
 from event_generator import LogEventGenerator, SyscheckEventGenerator
 
 
-def delete_file(path):
+def delete_file(path: str) -> None:
     """Delete the specified file or directory."""
     try:
         if os.path.isdir(path):
@@ -37,7 +38,7 @@ def delete_file(path):
         print(f"Error deleting {path}: {e}")
 
 
-def parse_arguments():
+def parse_arguments() -> argparse.Namespace:
     """
     Parse command line arguments using argparse and validate them.
 
@@ -68,7 +69,7 @@ def parse_arguments():
     return args
 
 
-def validate_parameters(args):
+def validate_parameters(args: argparse.Namespace) -> None:
     """
     Validate the command line arguments provided.
 
@@ -86,7 +87,7 @@ def validate_parameters(args):
         raise ValueError("Invalid configuration file.")
 
 
-def get_logcollector_generator(file_config):
+def get_logcollector_generator(file_config: Dict[str, Any]) -> LogEventGenerator:
     """
     Create and return a LogEventGenerator instance configured according to the provided file configuration.
 
@@ -113,7 +114,7 @@ def get_logcollector_generator(file_config):
     )
 
 
-def get_syscheck_generator(file_config):
+def get_syscheck_generator(file_config: Dict[str, Any]) -> SyscheckEventGenerator:
     """
     Create and return a SyscheckEventGenerator instance based on the provided file configuration.
 
@@ -136,7 +137,8 @@ def get_syscheck_generator(file_config):
         operations=file_config['operations']
     )
 
-def main():
+def main() -> None:
+    """Main function to parse arguments and initiate event generation based on configurations."""
     args = parse_arguments()
 
     with open(args.config, 'r') as file:

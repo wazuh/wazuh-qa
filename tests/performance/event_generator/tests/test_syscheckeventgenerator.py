@@ -6,11 +6,12 @@
 
 import os
 import pytest
+from pathlib import Path
 from event_generator import SyscheckEventGenerator
 
 
 @pytest.fixture
-def setup_syscheck_generator(tmp_path):
+def setup_syscheck_generator(tmp_path: Path) -> tuple:
     """
     Setup for SyscheckEventGenerator with a temporary directory.
 
@@ -25,7 +26,7 @@ def setup_syscheck_generator(tmp_path):
     return generator, path
 
 
-def test_file_operations(setup_syscheck_generator):
+def test_file_operations(setup_syscheck_generator: tuple):
     """
     Test file operations (create, modify, delete) performed by SyscheckEventGenerator.
 
@@ -39,7 +40,7 @@ def test_file_operations(setup_syscheck_generator):
                ), "There should be some file operations in the directory"
 
 
-def test_file_creation(setup_syscheck_generator):
+def test_file_creation(setup_syscheck_generator: tuple):
     """
     Test if files are being created by the generator.
 
@@ -51,7 +52,7 @@ def test_file_creation(setup_syscheck_generator):
     assert any(path.iterdir()), "Files should be created in the directory"
 
 
-def test_file_modification(setup_syscheck_generator):
+def test_file_modification(setup_syscheck_generator: tuple):
     """
     Test if files are being modified by the generator.
 
@@ -70,7 +71,7 @@ def test_file_modification(setup_syscheck_generator):
     assert content != original_content, "File should be modified"
 
 
-def test_file_deletion(setup_syscheck_generator):
+def test_file_deletion(setup_syscheck_generator: tuple):
     """
     Test if files are being deleted by the generator.
 

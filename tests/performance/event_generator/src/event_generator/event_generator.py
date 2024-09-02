@@ -16,8 +16,9 @@ Classes:
 The library provides a configurable environment for testing system responses to a variety of file and log-related events.
 """
 
-import json
+from typing import Optional, Dict, List
 from datetime import datetime
+import json
 import os
 import random
 import threading
@@ -25,7 +26,7 @@ import time
 
 
 class EventGenerator:
-    def __init__(self, rate, path, operations):
+    def __init__(self, rate: int, path: str, operations: int):
         """
         Initialize the EventGenerator with a specific event generation rate, path for event storage and total number of operations.
 
@@ -40,7 +41,7 @@ class EventGenerator:
         self.stop_event = threading.Event()
         self.count = 0  # counter for events
 
-    def generate_event(self):
+    def generate_event(self) -> None:
         """
         Generate an event. This method should be overridden by subclasses to produce specific types of events.
 
@@ -50,7 +51,7 @@ class EventGenerator:
         raise NotImplementedError(
             "This method should be overridden by subclasses.")
 
-    def start(self):
+    def start(self) -> None:
         """
         Begin generating events at the specified rate until the stop condition is met or the operation count is reached.
         """
@@ -63,7 +64,7 @@ class EventGenerator:
             if sleep_time > 0:
                 time.sleep(sleep_time)
 
-    def stop(self):
+    def stop(self) -> None:
         """
         Stop the event generation by setting the stop event.
         """
@@ -75,7 +76,7 @@ class LogEventGenerator(EventGenerator):
     Subclass of EventGenerator specifically designed for generating log files at a specified rate.
     """
 
-    def __init__(self, rate, path, operations, max_file_size=10, template_path=None):
+    def __init__(self, rate: int, path: str, operations: int, max_file_size: int = 10, template_path: Optional[str] = None):
         """
         Initialize the LogEventGenerator subclass with parameters for rate, path, operations, file size limit, and optional template path.
 
@@ -100,7 +101,7 @@ class LogEventGenerator(EventGenerator):
                 "message": "{message}"
             }
 
-    def generate_event(self):
+    def generate_event(self) -> None:
         """
         Generate and write a log event based on a predefined template or a simple default format.
         """
@@ -114,7 +115,7 @@ class LogEventGenerator(EventGenerator):
 
         time.sleep(1)  # Sleep to simulate delay between logs
 
-    def write_log(self):
+    def write_log(self) -> None:
         """
         Write a log entry to the file based on the current date and time.
         """
@@ -134,7 +135,7 @@ class LogEventGenerator(EventGenerator):
         if os.path.getsize(self.path) > self.max_file_size:
             self.rotate_log()
 
-    def template_format(self, data):
+    def template_format(self, data: Dict[str, str]) -> str:
         """
         Format the log data based on the template provided during initialization.
 
@@ -149,7 +150,7 @@ class LogEventGenerator(EventGenerator):
             template_str = template_str.replace('{' + key + '}', value)
         return template_str
 
-    def rotate_log(self):
+    def rotate_log(self) -> None:
         """
         Rotate the log file when the size limit is exceeded.
         This creates a new log file by appending a sequence number or timestamp to the filename.
@@ -163,7 +164,7 @@ class LogEventGenerator(EventGenerator):
         open(self.path, 'w').close()  # Create a new log file
         print(f"Log file exceeded size limit, rotated to {new_path}")
 
-    def retry_write(self):
+    def retry_write(self) -> bool:
         """
         Attempt to write the log file up to a maximum number of retries.
 
@@ -187,7 +188,7 @@ class SyscheckEventGenerator(EventGenerator):
     Subclass of EventGenerator specifically designed for file creation, modification and deletion.
     """
 
-    def __init__(self, rate, path, operations):
+    def __init__(self, rate: int, path: str, operations: int):
         """
         Initialize the SyscheckEventGenerator with specific parameters to simulate file system events.
 
@@ -205,7 +206,7 @@ class SyscheckEventGenerator(EventGenerator):
         os.makedirs(self.path, exist_ok=True)  # Ensure the directory exists
         self.files = []  # List to keep track of created or modified files
 
-    def generate_event(self):
+    def generate_event(self) -> None:
         """
         Randomly generate file creation, modification, or deletion events at the specified path.
         """
@@ -227,7 +228,7 @@ class SyscheckEventGenerator(EventGenerator):
             self.delete_file(file_name)
             self.files.remove(file_name)  # Remove from list after deletion
 
-    def create_file(self, file_path):
+    def create_file(self, file_path: str) -> None:
         """
         Create a new file and write initial content to it.
         """
@@ -235,7 +236,7 @@ class SyscheckEventGenerator(EventGenerator):
             f.write("This is a new test file.\n")
         print(f"Created file: {file_path}")
 
-    def modify_file(self, file_path):
+    def modify_file(self, file_path: str) -> None:
         """
         Modify an existing file by appending new content. If the file does not exist, it creates it.
         """
@@ -243,7 +244,7 @@ class SyscheckEventGenerator(EventGenerator):
             f.write(f"Modified on {datetime.now().isoformat()}\n")
         print(f"Modified file: {file_path}")
 
-    def delete_file(self, file_path):
+    def delete_file(self, file_path: str) -> None:
         """
         Delete a file. If the file does not exist, it logs that fact.
         """

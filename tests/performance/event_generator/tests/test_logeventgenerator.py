@@ -4,14 +4,15 @@
 
 """Unit tests for the LogEventGenerator class."""
 
+from typing import Tuple
 import os
 import pytest
-import time
+from pathlib import Path
 from event_generator import LogEventGenerator
 
 
 @pytest.fixture
-def setup_log_generator(tmp_path):
+def setup_log_generator(tmp_path: Path) -> Tuple[LogEventGenerator, Path]:
     """
     Setup for LogEventGenerator with a temporary directory.
 
@@ -27,7 +28,7 @@ def setup_log_generator(tmp_path):
     return generator, path
 
 
-def test_log_creation(setup_log_generator):
+def test_log_creation(setup_log_generator: Tuple[LogEventGenerator, Path]) -> None:
     """
     Test if log files are created correctly.
 
@@ -39,7 +40,7 @@ def test_log_creation(setup_log_generator):
     assert path.exists(), "Log file should exist after generation start"
 
 
-def test_log_content(setup_log_generator):
+def test_log_content(setup_log_generator: Tuple[LogEventGenerator, Path]) -> None:
     """
     Test the content of log files to ensure logs are written.
 
@@ -53,7 +54,7 @@ def test_log_content(setup_log_generator):
     assert "This is a test log message" in content, "Log message should be in the log file"
 
 
-def test_zero_operations(tmp_path):
+def test_zero_operations(tmp_path: Path) -> None:
     """
     Test no log file creation when operations are set to zero.
 
@@ -67,7 +68,7 @@ def test_zero_operations(tmp_path):
     assert not path.exists(), "Log file should not exist when no operations are specified"
 
 
-def test_invalid_path():
+def test_invalid_path() -> None:
     """
     Test behavior when an invalid path is provided.
 
@@ -80,7 +81,7 @@ def test_invalid_path():
         generator.start()
 
 
-def test_high_rate(tmp_path):
+def test_high_rate(tmp_path: Path) -> None:
     """
     Test the system's response to a very high event generation rate.
 
