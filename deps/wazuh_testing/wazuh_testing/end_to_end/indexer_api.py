@@ -176,3 +176,36 @@ def delete_index(host_manager: HostManager, credentials: dict = {'user': 'admin'
 
     requests.delete(url=url, verify=False,
                     auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']), headers=headers)
+
+
+def extend_result_window(host_manager: HostManager, credentials: dict = {'user': 'admin', 'password': 'changeme'},
+                         index: str = 'wazuh-alerts*', new_max_result_window: int = 100000):
+    """Extend the max_result_window setting for a Wazuh Indexer index.
+
+    Args:
+        host_manager: An instance of the HostManager class containing information about hosts.
+        credentials (Optional): A dictionary containing the Indexer credentials. Defaults to
+                                 {'user': 'admin', 'password': 'changeme'}.
+        index (Optional): The Indexer index name. Defaults to 'wazuh-alerts*'.
+        new_max_result_window (Optional): The new maximum result window size. Defaults to 100,000.
+    """
+    logging.info(f"Extending max_result_window for {index} index to {new_max_result_window}")
+
+    url = f"https://{host_manager.get_master_ip()}:9200/{index}/_settings"
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    data = {
+        "index": {
+            "max_result_window": new_max_result_window
+        }
+    }
+
+    response = requests.put(url=url, json=data, verify=False,
+                            auth=requests.auth.HTTPBasicAuth(credentials['user'], credentials['password']),
+                            headers=headers)
+
+    if response.status_code == 200:
+        logging.info(f"Successfully updated max_result_window for {index} index.")
+    else:
+        logging.error(f"Failed to update max_result_window for {index} index. Response: {response.text}")
