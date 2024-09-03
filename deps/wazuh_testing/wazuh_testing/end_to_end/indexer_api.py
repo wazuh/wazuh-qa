@@ -31,6 +31,7 @@ from wazuh_testing.tools.system import HostManager
 
 
 WAZUH_STATES_VULNERABILITIES_INDEXNAME_TEMPLATE = 'wazuh-states-vulnerabilities-{cluster_name}'
+INDEXER_RESULT_WINDOWS_VULN_E2E = 50000
 
 
 def get_wazuh_states_vulnerabilities_indexname(cluster_name: str = 'wazuh') -> str:
