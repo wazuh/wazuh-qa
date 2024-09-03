@@ -102,9 +102,11 @@ def get_logcollector_generator(file_config: Dict[str, Any]) -> LogEventGenerator
     Raises:
         ValueError: If any required parameters are missing in file_config for logcollector.
     """
-    required_params = ['module', 'path', 'operations', 'rate', 'max_file_size', 'template_path']
+    required_params = ['module', 'path', 'operations',
+                       'rate', 'max_file_size', 'template_path']
     if not all(param in file_config for param in required_params):
-        raise ValueError("Missing required config parameters for logcollector.")
+        raise ValueError(
+            "Missing required config parameters for logcollector.")
     return LogEventGenerator(
         rate=file_config['rate'],
         path=file_config['path'],
@@ -137,6 +139,7 @@ def get_syscheck_generator(file_config: Dict[str, Any]) -> SyscheckEventGenerato
         operations=file_config['operations']
     )
 
+
 def main() -> None:
     """Main function to parse arguments and initiate event generation based on configurations."""
     args = parse_arguments()
@@ -151,7 +154,8 @@ def main() -> None:
         elif file_config['module'] == 'syscheck':
             generator = get_syscheck_generator(file_config)
         else:
-            raise ValueError("Unsupported module specified in the configuration.")
+            raise ValueError(
+                "Unsupported module specified in the configuration.")
 
         thread = threading.Thread(target=generator.start)
         thread.start()
