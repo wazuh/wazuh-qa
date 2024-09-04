@@ -27,7 +27,7 @@ def create_layout(config: Dict[str, Any]) -> dmc.Container:
 
     layout = dmc.Container([
         dmc.Title(f"DATA VISUALIZATION - {component_name}", align="center", c="blue", size="h1",
-                style={'text-decoration': 'underline', 'margin-bottom':'10px'}),
+                  style={'text-decoration': 'underline', 'margin-bottom': '10px'}),
         dmc.Card(
             dmc.Grid([
                 dmc.Col(
@@ -48,7 +48,7 @@ def create_layout(config: Dict[str, Any]) -> dmc.Container:
                         dmc.Title("Select Metric:", align="center", size="h3"),
                         dcc.RadioItems(
                             id='metric',
-                            options=[{'label': col, 'value': col} for col in column_names], 
+                            options=[{'label': col, 'value': col} for col in column_names],
                             value=column_names[0],
                             style=styles['checklist'],
                             inputStyle=styles['input']
@@ -79,8 +79,8 @@ def create_layout(config: Dict[str, Any]) -> dmc.Container:
                     ) for commit, files in organized_files.items()
                 ],
                 style={
-                    'display': 'flex', 
-                    'flex-direction': 'row', 
+                    'display': 'flex',
+                    'flex-direction': 'row',
                     'justify-content': 'center'
                 }
             ),
@@ -89,9 +89,8 @@ def create_layout(config: Dict[str, Any]) -> dmc.Container:
         dmc.Card(
             dcc.Graph(id='metric-graph'),
             style=styles['graph']
-        ),    
+        ),
         dcc.Store(id='filtered-data'),
-    ], 
-    style=container_style)
+    ], style=container_style)
 
     return layout

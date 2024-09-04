@@ -40,16 +40,15 @@ def callbacks(app: Dash, config: Dict[str, Any]) -> None:
         """
         if not processes or not versions:
             return []
-        
+
         all_selected_versions = []
         for version_list in versions:
             if version_list:
                 all_selected_versions.extend(version_list)
 
         filtered_df = load_csv_files_from_db(processes, all_selected_versions, component, process_name)
-        
-        return filtered_df.to_dict('records')    
-   
+
+        return filtered_df.to_dict('records')
 
     @app.callback(
         Output('metric-graph', 'figure'),

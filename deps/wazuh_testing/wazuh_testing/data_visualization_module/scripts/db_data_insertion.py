@@ -15,6 +15,7 @@ import sqlite3
 # Name of the SQLite database file
 database_file = "../data/data.db"
 
+
 def get_arguments() -> Tuple[str, str]:
     """Function that receives and returns the script parameters.
 
@@ -81,7 +82,7 @@ def load_csv_files_to_db(directory: str, component: str, conn: sqlite3.Connectio
             (filename, file_content, component)
         )
         conn.commit()
-    
+
     print("\nAll data have been inserted.")
 
 

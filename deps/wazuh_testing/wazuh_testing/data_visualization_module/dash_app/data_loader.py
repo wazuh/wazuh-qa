@@ -15,7 +15,8 @@ from cache import cache
 # Data base file containing all the information
 database_file = "../data/data.db"
 
-def query_db(query:str, params: Tuple[Any, ...] = ()) -> pd.DataFrame:
+
+def query_db(query: str, params: Tuple[Any, ...] = ()) -> pd.DataFrame:
     """Function that performs a query to the database, and may include parameters.
 
     Args:
@@ -92,7 +93,7 @@ def load_initial_data_from_db(config: Dict[str, Any]) -> Tuple[List[str], List[s
 
 
 @cache.memoize()
-def load_csv_files_from_db(processes: List[str], versions: List[str], 
+def load_csv_files_from_db(processes: List[str], versions: List[str],
                            component: str, process_name: str) -> pd.DataFrame:
     """Function that queries the database to extract the file to be displayed.
 

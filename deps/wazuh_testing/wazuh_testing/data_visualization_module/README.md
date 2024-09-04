@@ -6,7 +6,7 @@ This module contains a basic application developed with Dash and Plotly that all
 
 To run these tests, we need to install the package. So we can follow these steps:
 
-1. Move to the `wazuh_testing/test_data_analysis` directory.
+1. Move to the `wazuh_testing/data_visualization_module` directory.
 2. Create and activate the Python environment.
 
 ```shell script
@@ -62,9 +62,9 @@ Columns_to_avoid:
   - "Commit"
 ```
 
-The `Component` value can take one of these: `manager`, `indexer`, `agent` or `dashboard`.
+The `Component` value can take one of these: [`manager`, `indexer`, `agent` or `dashboard`].
 
-This file indicates that we want to visualize the manager data and, in addition, we want to visualize the daemon processes that are listed. In addition, it is indicated that in the CSV file there are some columns that are not necessary for the visualization, such as version, timestamp or commit, so they can be omitted. This only indicates to the application the columns that are not necessary to render. The rest of the columns are the ones that will be rendered and, typically, will be the metrics that contain the values taken during the tests. So, to resume, in the Columns_to_avoid section we should include those informative columns of the CSV, whose data type is usually string.
+This file indicates that we want to visualize the manager data and, in addition, we want to visualize the daemon processes that are listed. In addition, it is indicated that in the CSV file there are some columns that are not necessary for the visualization, such as version, timestamp or commit, so they can be omitted. This only indicates to the application the columns that are not necessary to render. The rest of the columns are the ones that will be rendered and, typically, will be the metrics that contain the values taken during the tests. So, to resume, in the `Columns_to_avoid` section we should include those informative columns of the CSV, whose data type is usually string.
 
 Another example of a configuration file:
 
@@ -87,7 +87,7 @@ This means that the visualization is not only valid for Wazuh daemons, but also 
 
 ### CSV format
 
-The CSV file name must match the value in the `Version` column. This is to improve the efficiency of database queries. For example: `4.8.0-beta4.csv`. In addition to the `Version` column, it should contain another column named `Commit`, indicating the commit in which the file was obtained (e.g. nightly, weekly, pre-release, etc.), and a column with the process to be displayed, which can be the wazuh daemons, the wazuh-dashboard itself, etc. The name of this same column must match the name specified in the YAML file.. The rest of the columns may be informative columns, of type string, which must be included in `Columns_to_avoid` in the YAML file, and data columns containing the metrics taken.
+The CSV file name must match the value in the `Version` column. This is to improve the efficiency of database queries. For example: `4.8.0-beta4.csv`. In addition to the `Version` column, it should contain another column named `Commit`, indicating the commit in which the file was obtained (e.g. nightly, weekly, pre-release, etc.), and a column with the process to be displayed, which can be the wazuh daemons, the wazuh-dashboard itself, etc. The name of this same column must match the name specified in the YAML file. The rest of the columns may be informative columns, of type string, which must be included in `Columns_to_avoid` in the YAML file, and data columns containing the metrics taken.
 
 Considering the two examples of YAML files above, the CSV files could be respectively:
 
@@ -126,4 +126,10 @@ The database has a column named `component` in order to differentiate the files 
 python3 db_data_insertion.py <directory> <component>
 ```
 
-Where `<directory>` refers to the path where the CSV files are stored and `<component>` refers to the component to which the CSV files belong. For this, it would be convenient to have a separate directory for each component. The `<component>` argument can take one of these values: `manager`, `indexer`, `agent` or `dashboard`.
+Where `<directory>` refers to the path where the CSV files are stored and `<component>` refers to the component to which the CSV files belong. For this, it would be convenient to have a separate directory for each component. The `<component>` argument can take one of these values: [`manager`, `indexer`, `agent` or `dashboard`].
+
+For example:
+
+```shell script
+python3 db_data_insertion.py ./data/manager_csv_files manager
+```
