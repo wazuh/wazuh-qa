@@ -75,7 +75,7 @@ def check_errors_in_environment(host_manager: HostManager, greater_than_timestam
         host_manager (HostManager): An instance of the HostManager class.
         greater_than_timestamp (str): Timestamp to filter the logs
         expected_errors (List): List of expected errors. Default None
-        error_levels (List): List of the error levels to check. Default ['ERROR', 'CRITICAL', 'WARNING']
+        error_levels (List): List of the error levels to check. Default None.
 
     Returns:
         dict: Errors found in the environment
