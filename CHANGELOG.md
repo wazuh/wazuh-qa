@@ -8,6 +8,9 @@ All notable changes to this project will be documented in this file.
 
 - Added support for macOS 14.6 to the Allocation module (Vagrant) ([#5671](https://github.com/wazuh/wazuh-qa/pull/5671)) \- (Framework)
 
+### Fixed
+- Fix unexpected warnings in E2E vulnerability detection tests ([#5711](https://github.com/wazuh/wazuh-qa/pull/5711/)) \- (Test)
+
 ## [4.9.0] - TBD
 
 ### Added
