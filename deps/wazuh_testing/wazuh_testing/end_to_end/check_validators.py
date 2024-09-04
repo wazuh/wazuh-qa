@@ -158,7 +158,7 @@ def equals_but_not_empty(x, y):
 empty = lambda x: len(x) == 0
 
 no_errors = lambda x: all(
-    not any(x[host][level] for level in ["ERROR", "CRITICAL"])
+    not any(x[host][level] for level in ['ERROR', 'CRITICAL'])
     for host in x
 )
 
