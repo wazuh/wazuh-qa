@@ -84,7 +84,7 @@ def check_errors_in_environment(host_manager: HostManager, greater_than_timestam
     if not expected_errors:
         expected_errors = []
     if not error_levels:
-        expected_errors = default_error_levels
+        error_levels = default_error_levels
 
     environment_logs = get_hosts_logs(host_manager)
     environment_level_logs = {}
