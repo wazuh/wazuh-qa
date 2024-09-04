@@ -311,7 +311,7 @@ class BinaryDatavisualizer(DataVisualizer):
                 self._basic_plot(ax, self.dataframe[self.dataframe.Daemon == daemon][element],
                                  label=daemon, color=color)
 
-            self._save_custom_plot(ax, element, plot_title)
+            self._save_custom_plot(ax, element, self.plot_title)
 
 
 class DaemonStatisticsVisualizer(DataVisualizer):
