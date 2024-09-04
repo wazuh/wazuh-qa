@@ -67,18 +67,24 @@ def get_hosts_logs(host_manager: HostManager, host_group: str = 'all') -> Dict[s
 
 
 def check_errors_in_environment(host_manager: HostManager, greater_than_timestamp: str = '',
-                                expected_errors: List[str] = None, error_levels=['ERROR', 'CRITICAL', 'WARNING']) -> dict:
-    """Check if there are errors in the environment
+                                expected_errors: List[str] = None,
+                                error_levels=None) -> dict:
+    """Check if there are errors in the environment.
 
     Args:
         host_manager (HostManager): An instance of the HostManager class.
         greater_than_timestamp (str): Timestamp to filter the logs
         expected_errors (List): List of expected errors. Default None
+        error_levels (List): List of the error levels to check. Default ['ERROR', 'CRITICAL', 'WARNING']
 
     Returns:
         dict: Errors found in the environment
     """
-    expected_errors = expected_errors or []
+    default_error_levels = ['ERROR', 'WARNING', 'CRITICAL']
+    if not expected_errors:
+        expected_errors = []
+    if not error_levels:
+        expected_errors = default_error_levels
 
     environment_logs = get_hosts_logs(host_manager)
     environment_level_logs = {}
