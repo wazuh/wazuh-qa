@@ -92,7 +92,6 @@ s
 - Added tests for checking agent status upon ungraceful closure.([#4146](https://github.com/wazuh/wazuh-qa/pull/4146)) \- (Tests)
 - Agent syncronization testing after group deleting ([#4143](https://github.com/wazuh/wazuh-qa/pull/4143)) \- (Tests)
 - Add test for AWS Custom Logs. ([#4675](https://github.com/wazuh/wazuh-qa/pull/4675)) \- (Tests)
-- Add new behaviour for endpoints marked as xfail in api_endpoints_performance test ([#4657](https://github.com/wazuh/wazuh-qa/pull/4657)) \ (Tests)
 
 ### Changed
 
