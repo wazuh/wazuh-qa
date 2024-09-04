@@ -10,11 +10,10 @@ are performed with Artillery and Playwright. Artillery and
 Playwright must be installed for it to work properly.
 """
 
-import argparse
 import json
 import time
 
-from argparse import Namespace
+from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
 from datetime import datetime
 from os import getcwd, makedirs
 from os.path import isabs, join
@@ -260,17 +259,17 @@ def run_artillery(args: Namespace) -> None:
     convert_json_to_csv(args, json_filename)
 
 
-def get_script_arguments() -> argparse:
+def get_script_arguments() -> Namespace:
     """Add and Receive the Script Parameters.
 
     Returns:
-        argparse: Script parameters.
+        Namespace: Script parameters.
     """
 
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         usage='%(prog)s [options]',
         description='Script to Run Dashboard Saturation Tests',
-        formatter_class=argparse.RawTextHelpFormatter
+        formatter_class=RawTextHelpFormatter
     )
 
     parser.add_argument(
