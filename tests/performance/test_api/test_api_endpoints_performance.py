@@ -50,14 +50,9 @@ def test_api_endpoints(test_case, set_api_test_environment, api_healthcheck):
     finally:
         # Add useful information to report as stdout
         try:
-            # If the test failed and it was expected as xfail, mark it
-            if test_case['endpoint'] in xfailed_items.keys() and \
-                    test_case['method'] == xfailed_items[test_case['endpoint']]['method']:
-                pytest.xfail(xfailed_items[test_case['endpoint']]['message'])
-            else:
-                print(f'Request elapsed time: {response.elapsed.total_seconds():.3f}s\n')
-                print(f'Status code: {response.status_code}\n')
-                print(f'Full response: \n{dumps(response.json(), indent=2)}')
+            print(f'Request elapsed time: {response.elapsed.total_seconds():.3f}s\n')
+            print(f'Status code: {response.status_code}\n')
+            print(f'Full response: \n{dumps(response.json(), indent=2)}')
         except KeyError:
             print('No response available')
 
