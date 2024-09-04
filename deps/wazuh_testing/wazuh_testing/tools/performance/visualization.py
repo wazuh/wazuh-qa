@@ -209,7 +209,7 @@ class BinaryDatavisualizer(DataVisualizer):
     binary_metrics_extra_fields = ["Daemon", "Version", "PID"]
     binary_metrics_fields = binary_metrics_fields_to_plot + binary_metrics_extra_fields
 
-    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None, unify_child_daemon_metrics=False):
+    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None, unify_child_daemon_metrics=False, plot_title=None):
         """Initialize the BinaryDatavisualizer.
 
         Args:
@@ -311,7 +311,7 @@ class BinaryDatavisualizer(DataVisualizer):
                 self._basic_plot(ax, self.dataframe[self.dataframe.Daemon == daemon][element],
                                  label=daemon, color=color)
 
-            self._save_custom_plot(ax, element, element['title'])
+            self._save_custom_plot(ax, element, plot_title)
 
 
 class DaemonStatisticsVisualizer(DataVisualizer):
