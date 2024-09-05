@@ -144,7 +144,7 @@ def start_server_manager(app: FastAPI, database_path: str, port: int,
     uvicorn.run(app, host='0.0.0.0', port=port, ssl_keyfile=ssl_keyfile, ssl_certfile=ssl_certfile)
 
 
-def set_database_path(db_path: str):
+def set_database_path(db_path: str) -> None:
     """Sets the global path for the database used by Management API.
 
     This function updates the global `DATABASE_PATH` variable to the provided path.
@@ -164,7 +164,7 @@ app = FastAPI(
 
 
 @app.post("/authentication")
-async def authenticate(data: AuthData):
+async def authenticate(data: AuthData) -> JSONResponse:
     """Authenticates a user and generates a JWT token.
 
     This endpoint receives authentication data, which includes user credentials, and
@@ -203,7 +203,7 @@ async def authenticate(data: AuthData):
 
 
 @app.post("/agents")
-async def agents(data: AgentData, authorization: str = Depends(get_token)):
+async def agents(data: AgentData, authorization: str = Depends(get_token)) -> JSONResponse:
     """Registers a new agent in the system.
 
     This endpoint accepts agent registration data and checks whether an agent

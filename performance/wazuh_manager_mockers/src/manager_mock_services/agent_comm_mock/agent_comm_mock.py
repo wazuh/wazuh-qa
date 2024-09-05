@@ -244,7 +244,7 @@ def count_stateless_events(stateless_events: StatelessEvents) -> None:
 
 
 @router_version.post('/events/stateless')
-async def stateless_event(event: StatelessEvents, authorization: str = Depends(get_token)):
+async def stateless_event(event: StatelessEvents, authorization: str = Depends(get_token)) -> dict[str, str]:
     """Handles stateless events and increments the count for the corresponding event type.
 
     Args:
@@ -260,7 +260,7 @@ async def stateless_event(event: StatelessEvents, authorization: str = Depends(g
 
 
 @router_version.get('/commands')
-async def get_commands(authorization: str = Depends(get_token)):
+async def get_commands(authorization: str = Depends(get_token)) -> None:
     """Mocked command endpoint.
 
     Emulate the behaviour of agent_comm commands endpoint in case of no new commands, returning a request timeout
