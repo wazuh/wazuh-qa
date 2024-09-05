@@ -322,7 +322,8 @@ def main():
     Example usage:
         python script.py --database-path /path/to/database --key /path/to/key.pem --cert /path/to/cert.pem --port 8000
 
-    This function does not return any value. It initiates the FastAPI server and blocks execution while the server is running.
+    This function does not return any value. It initiates the FastAPI server and blocks execution
+    while the server is running.
 
     Raises:
         ArgumentTypeError: If any of the provided arguments do not match the expected types.
