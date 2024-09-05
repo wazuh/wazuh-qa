@@ -1,4 +1,0 @@
-[console_scripts]
-simulate-agent-comm = manager_mock_services.agent_comm_mock.agent_comm_mock:main
-simulate-management-server = manager_mock_services.manager_server_mock.manager_server_mock:main
-simulate-manager = manager_mock.simulate_manager:main
