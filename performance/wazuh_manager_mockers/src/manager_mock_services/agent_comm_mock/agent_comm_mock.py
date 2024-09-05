@@ -141,7 +141,7 @@ async def reset_and_log_counts() -> None:
                                            statefull_events_counts[event_type], 'statefull'])
 
 
-def set_database_path(db_path: str):
+def set_database_path(db_path: str) -> None:
     """Sets the path to the SQLite database directory.
 
     Args:
