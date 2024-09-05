@@ -249,8 +249,8 @@ async def agents(data: AgentData, authorization: str = Depends(get_token)) -> JS
             "error": "Agent with this credential already registered",
             "uuid": "existing-agent-uuid"
         }
-
         Error:
+
         {
             "detail": "No input data provided" or "Missing parameters!" or "Unexpected database error <error-details>"
         }
@@ -328,20 +328,7 @@ def main():
     Raises:
         ArgumentTypeError: If any of the provided arguments do not match the expected types.
     """
-    parser = argparse.ArgumentParser(description='Start FastAPI with database path')
-    parser.add_argument('--database-path', type=str, required=True, help='Path to the database directory',
-                        dest="database_path")
-    parser.add_argument('--key', type=str, required=True, help='Key path', dest="key")
-    parser.add_argument('--cert', type=str, required=True, help='Cert path', dest="cert")
-    parser.add_argument('--port', type=int, required=True, help='Port', dest="port")
-    parser.add_argument('-v', '--debug',
-                            help='Enable debug mode',
-                            required=False,
-                            action='store_true',
-                            default=False,
-                            dest='debug')
-
-    args = parser.parse_args()
+    args = parse_arguments()
     start_server_manager(app, args.database_path, args.port, args.key, args.cert)
 
 
