@@ -52,7 +52,7 @@ def get_script_arguments():
                         help=f'Path to Json with Columns to Plot. Default {None}.')
     parser.add_argument('-u', '--unify', dest='unify', action='store_true',
                         help='Unify data of the binary processes with their subprocesses to plot.')
-    parser.add_argument('-x', '--title', dest='plot_title', default="4.9.0\n"
+    parser.add_argument('-x', '--title', dest='plot_title', default="4.9.0\n",
                         help='Title of the generated chart, add extra info here.')
 
     return parser.parse_args()
