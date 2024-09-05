@@ -335,7 +335,11 @@ def main():
     Parses the necessary command-line arguments, sets up the application, and starts the Uvicorn server
     to run the FastAPI application with the provided configuration.
     """
-    parser = argparse.ArgumentParser(description='Start FastAPI with database path')
+    parser = argparse.ArgumentParser(description='Start FastAPI with database path',
+                                     usage=('%(prog)s --database-path <db_path> --port '
+                                            '<port> --cert <cert_file> --key <key_file>'
+                                            '--report-path <report_file> [--api-version <api_version>] [-v]'),
+                                     formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('--database-path', type=str, required=True, help='Path to the database directory',
                         dest="database_path")
     parser.add_argument('--port', type=int, required=True, help='Port', dest="port")
