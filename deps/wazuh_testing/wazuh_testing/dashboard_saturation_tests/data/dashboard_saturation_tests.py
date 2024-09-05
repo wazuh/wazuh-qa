@@ -276,7 +276,7 @@ def get_script_arguments() -> Namespace:
         dest='logs',
         type=str,
         default='logs/',
-        help=f'Directory to store the logs. Default "logs".'
+        help='Directory to store the logs. Default "logs".'
     )
 
     parser.add_argument(
@@ -284,14 +284,15 @@ def get_script_arguments() -> Namespace:
         dest='screenshots',
         type=str,
         default='screenshots/',
-        help=f'Directory to store the screenshots. Default "screenshots".')
+        help='Directory to store the screenshots. Default "screenshots".'
+    )
 
     parser.add_argument(
         '-c', '--csv',
         dest='csv',
         type=str,
         default='csv/',
-        help=f'Directory to store the CSVs. Default "csv".'
+        help='Directory to store the CSVs. Default "csv".'
     )
 
     parser.add_argument(
@@ -299,7 +300,7 @@ def get_script_arguments() -> Namespace:
         dest='session',
         type=str,
         default='.auth/',
-        help=f'Directory to store the Sessions. Default ".auth".'
+        help='Directory to store the Sessions. Default ".auth".'
     )
 
     parser.add_argument(
@@ -307,7 +308,7 @@ def get_script_arguments() -> Namespace:
         dest='artillery',
         type=str,
         default="data/artillery.yml",
-        help=f'Path to the Artillery Script. Default "artillery.yml".'
+        help='Path to the Artillery Script. Default "artillery.yml".'
     )
 
     parser.add_argument(
@@ -315,7 +316,7 @@ def get_script_arguments() -> Namespace:
         dest='user',
         type=str,
         default='admin',
-        help=f'Wazuh User for the Dashboard. Default "admin".'
+        help='Wazuh User for the Dashboard. Default "admin".'
     )
 
     parser.add_argument(
@@ -323,7 +324,7 @@ def get_script_arguments() -> Namespace:
         dest='password',
         type=str,
         required=True,
-        help=f'Wazuh Password for the Dashboard.'
+        help='Wazuh Password for the Dashboard.'
     )
 
     parser.add_argument(
@@ -331,7 +332,7 @@ def get_script_arguments() -> Namespace:
         dest='iterations',
         type=int,
         default=1,
-        help=f'Number of Tests to Run. Default {1}'
+        help=f'Number of Tests to Run. Default 1.'
     )
 
     parser.add_argument(
@@ -339,7 +340,7 @@ def get_script_arguments() -> Namespace:
         dest='ip',
         type=str,
         required=True,
-        help=f'Set the Dashboard IP.'
+        help='Set the Dashboard IP.'
     )
 
     parser.add_argument(
@@ -349,7 +350,7 @@ def get_script_arguments() -> Namespace:
         nargs='+',
         action='store',
         default=['aggregate', 'intermediate'],
-        help=f'JSON data to create the CSV.'
+        help='JSON data to create the CSV.'
     )
 
     parser.add_argument(
@@ -357,7 +358,7 @@ def get_script_arguments() -> Namespace:
         dest='wait',
         type=int,
         default=5,
-        help=f'Waiting Time between Executions.'
+        help='Waiting Time between Executions.'
     )
 
     parser.add_argument(
@@ -365,7 +366,8 @@ def get_script_arguments() -> Namespace:
         dest='debug',
         action='store_true',
         required=False,
-        default=False, help='Enable Debug Mode'
+        default=False,
+        help='Enable Debug Mode.'
     )
 
     return parser.parse_args()
