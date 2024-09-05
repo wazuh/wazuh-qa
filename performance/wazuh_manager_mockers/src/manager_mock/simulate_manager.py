@@ -216,7 +216,6 @@ def main():
     if arguments.debug:
         logger.setLevel(logging.DEBUG)
 
-    database_path = os.path.join(arguments.server_path, 'agents.db')
     credentials_path = generate_certificates(arguments.server_path)
 
 
