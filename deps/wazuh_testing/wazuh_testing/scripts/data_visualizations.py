@@ -52,8 +52,6 @@ def get_script_arguments():
                         help=f'Path to Json with Columns to Plot. Default {None}.')
     parser.add_argument('-u', '--unify', dest='unify', action='store_true',
                         help='Unify data of the binary processes with their subprocesses to plot.')
-    parser.add_argument('-x', '--title', dest='plot_title', default="4.9.0\n",
-                        help='Title of the generated chart, add extra info here.')
 
     return parser.parse_args()
 
@@ -61,7 +59,7 @@ def get_script_arguments():
 def main():
     options = get_script_arguments()
     create_destination_directory(options.destination)
-
+    plot_title = "4.9.0\n"
     target = options.visualization_target
     validate_arguments(options)
 
@@ -80,7 +78,7 @@ def main():
 
     dv = strategy_plot_by_target[strategy](**visualization_options)
 
-    dv.plot(options.plot_title)
+    dv.plot(plot_title)
 
 
 if __name__ == '__main__':
