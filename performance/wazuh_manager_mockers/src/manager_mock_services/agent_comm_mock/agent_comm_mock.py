@@ -300,7 +300,7 @@ def set_report_file(report: str) -> None:
 def parse_parameters() -> argparse.Namespace:
     """Parse script parameters.
 
-    Rerturn:
+    Rerturns:
         argparse.Namespace: Namespace with parsed arguments.
     """
     parser = argparse.ArgumentParser(description='Start FastAPI with database path',
