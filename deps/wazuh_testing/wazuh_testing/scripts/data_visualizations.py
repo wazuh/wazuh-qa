@@ -52,7 +52,7 @@ def get_script_arguments():
                         help=f'Path to Json with Columns to Plot. Default {None}.')
     parser.add_argument('-u', '--unify', dest='unify', action='store_true',
                         help='Unify data of the binary processes with their subprocesses to plot.')
-    parser.add_argument('-x', dest='plot_title',
+    parser.add_argument('-x', '--title', dest='plot_title',
                         help='Title of the generated chart, add extra info here.')
 
     return parser.parse_args()
@@ -68,7 +68,7 @@ def main():
     visualization_options = {
         'dataframes_paths': options.csv_list,
         'store_path': options.destination,
-        'base_name': options.name
+        'base_name': options.name, 
         'plot_title': options.plot_title
     }
 
