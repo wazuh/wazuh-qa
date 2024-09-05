@@ -10,11 +10,11 @@ import pytest
 from _pytest.tmpdir import TempPathFactory
 from fastapi import status
 from fastapi.testclient import TestClient
-
 from manager_mock_services.manager_server_mock.manager_server_mock import (
     app,
     set_database_path,
 )
+
 
 client = TestClient(app)
 DATABASE_NAME = 'agents.db'

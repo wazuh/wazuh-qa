@@ -218,10 +218,9 @@ def main():
 
     credentials_path = generate_certificates(arguments.server_path)
 
-
     processes = []
     processes.append(run_server_management(arguments.manager_api_port, arguments.server_path,
-                     credentials_path, arguments.debug))
+                                           credentials_path, arguments.debug))
     time.sleep(3)
     processes.append(run_agent_comm(arguments.agent_comm_api_port, arguments.server_path,
                                     credentials_path,
@@ -247,7 +246,6 @@ def parse_parameters() -> argparse.Namespace:
     Raises:
         SystemExit: If there is an error in argument parsing or validation.
     """
-
     arg_parser = argparse.ArgumentParser()
 
     arg_parser.add_argument('--manager-api-port', metavar='<manager_port_address>', type=str, required=False,

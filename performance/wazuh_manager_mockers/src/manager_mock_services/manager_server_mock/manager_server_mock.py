@@ -20,7 +20,8 @@ Arguments:
     --port           Port number to run the server on.
 
 Example:
-    $ python3 manager_server_mock.py --port 2700 --key certs/private_key.pem --cert certs/certificate.pem --database_path database/agents.db
+    $ python3 manager_server_mock.py --port 2700 --key certs/private_key.pem --cert certs/certificate.pem \
+        --database_path database/agents.db
 
 Environment Variables:
     None.
@@ -48,22 +49,26 @@ import os
 import sqlite3
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Optional, AsyncGenerator
+from typing import AsyncGenerator, Optional
 
 import uvicorn
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.responses import JSONResponse
-
 from manager_mock_services.manager_server_mock.models import AgentData, AuthData
+from utils.agent_database_handler import (
+    check_if_agent_exists,
+    check_if_uuid_exists,
+    create_agents_database,
+    insert_new_agent,
+)
 from utils.token_manager import TokenManager
-from utils.agent_database_handler import insert_new_agent, check_if_agent_exists, check_if_uuid_exists, \
-    create_agents_database
 from utils.vars import (
     DEFAULT_AUD,
     DEFAULT_EXPIRATION_TIME,
     DEFAULT_ISS,
     MANAGER_MOCK_TOKEN_SECRET_KEY,
 )
+
 
 logger = logging.getLogger('uvicorn.error')
 logger.setLevel(logging.INFO)
@@ -125,7 +130,8 @@ async def get_token(authorization: Optional[str] = Header(None)) -> str:
 
     return token
 
-def start_server_manager(app: FastAPI, database_path: str, port: int,
+
+def start_server_manager(application: FastAPI, database_path: str, port: int,
                          ssl_keyfile: str, ssl_certfile: str) -> None:
     """Starts Management API service.
 
