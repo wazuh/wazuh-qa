@@ -4,16 +4,19 @@
 
 """Module that contains the functions necessary to obtain the data to be displayed from the database."""
 
+import os
+from typing import Dict, Tuple, Any, List
+
 import io
 import pandas as pd
 import sqlite3
-from typing import Dict, Tuple, Any, List
 
 from cache import cache
 
 
 # Data base file containing all the information
-database_file = "../data/data.db"
+script_dir = os.path.dirname(os.path.abspath(__file__))
+database_file = os.path.join(script_dir, "../data/data.db")
 
 
 def query_db(query: str, params: Tuple[Any, ...] = ()) -> pd.DataFrame:
@@ -45,6 +48,10 @@ def extract_config_parameters(config: Dict[str, Any]) -> Tuple[str, str, List[st
         process_name (str): name of the main process to be displayed.
     """
     component = config.get('Component', [])[0]
+
+    if component not in ["manager", "indexer", "dashboard", "agent"]:
+        raise ValueError("The component specified in YAML file is invalid")
+
     process_name = list(config.get('Processes', {}).keys())[0]
     processes = config.get('Processes', {}).get(process_name, [])
     columns_to_avoid = config.get('Columns_to_avoid', [])

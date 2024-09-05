@@ -9,11 +9,13 @@ from typing import Tuple
 
 import argparse
 import glob
+import pandas as pd
 import sqlite3
 
 
-# Name of the SQLite database file
-database_file = "../data/data.db"
+# SQLite database file
+script_dir = os.path.dirname(os.path.abspath(__file__))
+database_file = os.path.join(script_dir, "../data/data.db")
 
 
 def get_arguments() -> Tuple[str, str]:
@@ -58,6 +60,31 @@ def validate_arguments(directory: str, component: str) -> None:
     valid_components = {"agent", "dashboard", "manager", "indexer"}
     if component.lower() not in valid_components:
         raise ValueError(f"Invalid component '{component}'.")
+
+def validate_data(directory: str) -> None:
+    """Function that validates the consistency of the data provided in the CSV files.
+
+    Args:
+        directory (str): the path to the directory passed as an argument.
+    """
+    files = glob.glob(os.path.join(directory, "*.csv"))
+
+    for file in files:
+        filename = os.path.basename(file)
+        file_version = os.path.splitext(filename)[0]
+        df = pd.read_csv(file, nrows=1)        
+
+        if 'Commit' not in df.columns:
+            raise ValueError(f"Error: the '{filename}' file does not contain a 'Commit' column")
+
+        if 'Version' not in df.columns:
+            raise ValueError(f"Error: the '{filename}' file does not contain a 'Version' column")
+
+        version_in_csv = df['Version'].iloc[0]
+
+        if version_in_csv != file_version:
+            raise ValueError(f"Error: the name of the file '{filename}' not match with the "
+                             "value of the 'Version' column")
 
 
 def load_csv_files_to_db(directory: str, component: str, conn: sqlite3.Connection) -> None:
@@ -109,8 +136,9 @@ def main() -> None:
     # Get arguments
     directory, component = get_arguments()
 
-    # Validate input arguments
+    # Validate input arguments and data
     validate_arguments(directory, component)
+    validate_data(directory)
 
     # Connect to the database and create table
     conn = sqlite3.connect(database_file)
