@@ -3,7 +3,7 @@
 # This program is a free software; you can redistribute it and/or
 # modify it under the terms of GPLv2
 
-"""Dashboard Saturation Tests Module
+"""Dashboard Saturation Tests Module.
 
 This script allows you to run dashboard stress tests. These tests
 are performed with Artillery and Playwright. Artillery and
@@ -265,7 +265,6 @@ def get_script_arguments() -> Namespace:
     Returns:
         Namespace: Script parameters.
     """
-
     parser = ArgumentParser(
         usage='%(prog)s [options]',
         description='Script to Run Dashboard Saturation Tests',
