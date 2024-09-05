@@ -22,7 +22,7 @@ class BrotliMiddleware(BaseHTTPMiddleware):
     If so, and if the response status code is 200, it compresses the response body using Brotli
     compression and updates the response headers to reflect the encoding.
     """
-    async def dispatch(self, request: Request, call_next: Callable):
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Processes the incoming request and response, applying Brotli compression if applicable.
 
         Args:
@@ -41,4 +41,5 @@ class BrotliMiddleware(BaseHTTPMiddleware):
                 headers['Content-Encoding'] = 'br'
                 headers['Content-Length'] = str(len(compressed_content))
                 return Response(content=compressed_content, headers=headers, status_code=response.status_code)
+
         return response
