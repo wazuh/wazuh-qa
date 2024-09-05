@@ -46,6 +46,8 @@ clean: ## Delete Docker Container and Volume
 .PHONY: purge
 purge: ## Purge All Docker Resources
 	docker system prune -a -f
+.PHONY: destroy
+destroy: rm purge ## Destroy All Docker Resources
 .PHONY: style
 style: ## Check Python Style
 	docker exec -it $(APP) $(CONSOLE) -c "pycodestyle data/dashboard_saturation_tests.py" || true

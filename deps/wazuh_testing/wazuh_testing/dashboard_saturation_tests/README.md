@@ -116,7 +116,11 @@ make init
 make test COMMAND_OPTIONS='--password <wazuh_pass> --ip <dashboard_ip>'
 ```
 
-By default, test results are saved in an `artifacts` folder on the host machine.
+By default, test results are saved in an `artifacts` folder on the host machine. If you need help with the `makefile` it is possible to run `make help` to get an overview of all the available commands and what they do.
+
+The `make exec` command (and, by extension, the `make test` command) requires the `COMMAND_OPTIONS` parameter since Artillery needs at least two pieces of data to function correctly: the IP of the Wazuh Dashboard and the password of the `admin` user.
+
+In the Docker container, everything is in the `/app` directory. In `/app`, Artillery, Playwright and everything else necessary for them to work are installed. In `/app/dashboard_saturation_tests` are all the scripts. In that directory, the packages are installed and all the commands are executed.
 
 ## Example
 

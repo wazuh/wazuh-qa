@@ -1,6 +1,3 @@
-[tool.setuptools]
-packages = { find = { where = ["data"] } }
-
 [project]
 name = "dashboard_saturation_tests"
 version = "0.0.1"
