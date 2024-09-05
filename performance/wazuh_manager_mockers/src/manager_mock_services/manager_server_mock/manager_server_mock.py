@@ -237,21 +237,16 @@ async def agents(data: AgentData, authorization: str = Depends(get_token)) -> JS
             "key": "agent-key",
             "name": "agent-name"
         }
-
         Response:
-        Success:
-        {
+        Success: {
             "message": "Agent was correctly registered"
         }
 
-        Conflict:
-        {
+        Conflict: {
             "error": "Agent with this credential already registered",
             "uuid": "existing-agent-uuid"
         }
-        Error:
-
-        {
+        Error: {
             "detail": "No input data provided" or "Missing parameters!" or "Unexpected database error <error-details>"
         }
     """

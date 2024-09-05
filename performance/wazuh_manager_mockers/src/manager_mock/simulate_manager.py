@@ -50,6 +50,7 @@ def signal_handler(sig: int, frame: None) -> None:
 
     Args:
         sig (int): The signal number received.
+        frame (None): The current stack frame when the signal was received
 
     Actions:
         - Sets the global variable `is_killed` to True.
