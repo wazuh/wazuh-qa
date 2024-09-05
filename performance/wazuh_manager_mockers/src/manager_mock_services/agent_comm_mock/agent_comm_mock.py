@@ -297,6 +297,39 @@ def set_report_file(report: str) -> None:
     report_file = report
 
 
+def parse_parameters() -> argparse.Namespace:
+    """Parse script parameters.
+
+    Rerturn:
+        argparse.Namespace: Namespace with parsed arguments.
+    """
+    parser = argparse.ArgumentParser(description='Start FastAPI with database path',
+                                     usage=('%(prog)s --database-path <db_path> --port '
+                                            '<port> --cert <cert_file> --key <key_file>'
+                                            '--report-path <report_file> [--api-version <api_version>] [-v]'),
+                                     formatter_class=argparse.RawTextHelpFormatter)
+
+    parser.add_argument('--database-path', type=str, required=True, help='Path to the database directory',
+                        dest="database_path")
+    parser.add_argument('--port', type=int, required=True, help='Port', dest="port")
+    parser.add_argument('--cert', type=str, required=True, help='SSL certificate file', dest="cert")
+    parser.add_argument('--key', type=str, required=True, help='SSL key file', dest="key")
+    parser.add_argument('--report-path', type=str, required=True, help='Metrics report CSV file path',
+                        dest="report_path")
+    parser.add_argument('--api-version', type=str, required=False, help='API version', dest="api_version",
+                        default='/v1')
+    parser.add_argument('-v', '--debug',
+                        help='Enable debug mode',
+                        required=False,
+                        action='store_true',
+                        default=False,
+                        dest='debug')
+
+    args = parser.parse_args()
+
+    return args
+
+
 def validate_parameters(args: argparse.Namespace) -> None:
     """Validates command-line arguments for starting the FastAPI server.
 
@@ -335,30 +368,9 @@ def main():
     Parses the necessary command-line arguments, sets up the application, and starts the Uvicorn server
     to run the FastAPI application with the provided configuration.
     """
-    parser = argparse.ArgumentParser(description='Start FastAPI with database path',
-                                     usage=('%(prog)s --database-path <db_path> --port '
-                                            '<port> --cert <cert_file> --key <key_file>'
-                                            '--report-path <report_file> [--api-version <api_version>] [-v]'),
-                                     formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('--database-path', type=str, required=True, help='Path to the database directory',
-                        dest="database_path")
-    parser.add_argument('--port', type=int, required=True, help='Port', dest="port")
-    parser.add_argument('--cert', type=str, required=True, help='SSL certificate file', dest="cert")
-    parser.add_argument('--key', type=str, required=True, help='SSL key file', dest="key")
-    parser.add_argument('--report-path', type=str, required=True, help='Metrics report CSV file path',
-                        dest="report_path")
-    parser.add_argument('--api-version', type=str, required=False, help='API version', dest="api_version",
-                        default='/v1')
-    parser.add_argument('-v', '--debug',
-                        help='Enable debug mode',
-                        required=False,
-                        action='store_true',
-                        default=False,
-                        dest='debug')
-
     global database_directory
 
-    args = parser.parse_args()
+    args = parse_parameters()
     validate_parameters(args)
 
     set_report_file(args.report_path)
