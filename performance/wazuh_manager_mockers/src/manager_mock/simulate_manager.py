@@ -167,7 +167,6 @@ def run_agent_comm(port: str, database_path: str, certs_path: str, report_path: 
     ]
     if debug:
         command.extend(['-v'])
-    print(command)
 
     logger.info(f"Starting {service_name} on port {port}...")
     return subprocess.Popen(command)
