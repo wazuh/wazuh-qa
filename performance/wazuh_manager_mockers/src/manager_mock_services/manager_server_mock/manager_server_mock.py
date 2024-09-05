@@ -48,7 +48,7 @@ import os
 import sqlite3
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Optional
+from typing import Optional, AsyncGenerator
 
 import uvicorn
 from fastapi import Depends, FastAPI, Header, HTTPException
@@ -70,8 +70,9 @@ logger.setLevel(logging.INFO)
 
 DATABASE_PATH = None
 
+
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> None:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Context manager for managing the lifespan of a Management API.
 
     This context manager ensures that provided database exists before application starts.

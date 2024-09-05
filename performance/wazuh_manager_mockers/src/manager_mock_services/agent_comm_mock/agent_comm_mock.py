@@ -55,7 +55,7 @@ import os
 import sqlite3
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
-from typing import Dict, Optional
+from typing import Dict, Optional, AsyncGenerator
 
 import uvicorn
 from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException
@@ -89,7 +89,7 @@ database_directory = os.path.join(os.path.abspath(__file__), 'agents.db')
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Initializes the application lifespan.
 
     Set up the CSV file for metrics logging and verifying the existence of the database directory.
