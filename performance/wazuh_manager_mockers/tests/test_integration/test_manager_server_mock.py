@@ -49,7 +49,7 @@ def init_db(tmp_path_factory: TempPathFactory) -> Generator:
 
 
 @pytest.fixture(scope="function")
-def clean_database(init_db: str):
+def clean_database(init_db: str) -> None:
     """Clean up the database before each test.
 
     Deletes all entries from the 'agents' table in the database to ensure
