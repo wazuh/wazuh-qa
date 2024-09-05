@@ -282,9 +282,27 @@ async def agents(data: AgentData, authorization: str = Depends(get_token)) -> JS
         insert_new_agent(DATABASE_PATH, uuid, key, name)
     except sqlite3.Error as e:
         logger.error(f"Database error: {e}")
-        raise HTTPException(status_code=500, detail=f"Unexpected database error {e}")
+        raise HTTPException(status_code=500, detail=f"Unexpected database error {e}") from e
 
     return JSONResponse(content={'message': 'Agent was correctly registered'})
+
+
+def parse_arguments() -> argparse.Namespace:
+    """Parse script parameters."""
+    parser = argparse.ArgumentParser(description='Start FastAPI with database path')
+    parser.add_argument('--database-path', type=str, required=True, help='Path to the database directory',
+                        dest="database_path")
+    parser.add_argument('--key', type=str, required=True, help='Key path', dest="key")
+    parser.add_argument('--cert', type=str, required=True, help='Cert path', dest="cert")
+    parser.add_argument('--port', type=int, required=True, help='Port', dest="port")
+    parser.add_argument('-v', '--debug',
+                        help='Enable debug mode',
+                        required=False,
+                        action='store_true',
+                        default=False,
+                        dest='debug')
+
+    return parser.parse_args()
 
 
 def main():
