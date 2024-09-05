@@ -190,7 +190,7 @@ async def authenticate(data: AuthData) -> JSONResponse:
 
         Response:
         {
-            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJleGFtcGxlX3VzZXIiLCJleHBpcmF0aW9uX3RpbWVzdGFtcCI6MTY3NjExNjE2MiwiaWF0IjoxNjc2MTE2MTYyLCJhdWQiOiJleGFtcGxlX2F1ZCIsImlzcyI6ImV4YW1wbGVfc3ViamVjdCJ9.S2NqK_3g59TgT4VzA3AiSmcRfMMI1z6i4PLNlCw3YV8"
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp.."
         }
     """
     timestamp = int(datetime.now().timestamp())
