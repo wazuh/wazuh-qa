@@ -247,7 +247,7 @@ def run_artillery(args: Namespace) -> None:
     quiet = ''
 
     if not args.debug:
-        quiet = f'-q'
+        quiet = '-q'
 
     output = f"-o {json_filename}"
     script = f"{args.artillery}"
