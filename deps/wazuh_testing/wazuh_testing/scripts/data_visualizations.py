@@ -77,9 +77,9 @@ def main():
         strategy = 'daemon-statistics'
     elif target == 'binary':
         visualization_options['unify_child_daemon_metrics'] = options.unify
-
+    print("debug")
     dv = strategy_plot_by_target[strategy](**visualization_options)
-
+    print(options.plot_title)
     dv.plot(options.plot_title)
 
 
