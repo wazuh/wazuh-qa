@@ -12,7 +12,6 @@ Playwright must be installed for it to work properly.
 
 import json
 import time
-
 from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
 from datetime import datetime
 from os import getcwd, makedirs
