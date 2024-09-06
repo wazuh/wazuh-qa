@@ -10,10 +10,9 @@ Functions:
 - insert_new_agent(database_path, uuid, key, name): Inserts a new agent with the provided UUID, credential,
                                                     and name into the database.
 """
-import sqlite3
-import os
 import logging
-
+import os
+import sqlite3
 from typing import Union
 
 

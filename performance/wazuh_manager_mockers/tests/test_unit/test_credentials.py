@@ -7,7 +7,6 @@ import os
 from _pytest.tmpdir import TempPathFactory
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509 import Certificate
-
 from utils.credentials import (
     create_certificate,
     create_manager_credentials,

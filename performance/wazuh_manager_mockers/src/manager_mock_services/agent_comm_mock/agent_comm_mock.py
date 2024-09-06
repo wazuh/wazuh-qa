@@ -55,12 +55,11 @@ import os
 import sqlite3
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
-from typing import Dict, Optional, AsyncGenerator
+from typing import AsyncGenerator, Dict, Optional
 
 import uvicorn
 from fastapi import APIRouter, Depends, FastAPI, Header, HTTPException
 from fastapi.responses import JSONResponse
-
 from manager_mock_services.agent_comm_mock.middlewares.brotli import BrotliMiddleware
 from manager_mock_services.agent_comm_mock.models import AuthRequest, StatefullEvents, StatelessEvents
 from utils.csv import init_csv_header, write_row_to_csv

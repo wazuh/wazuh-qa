@@ -12,8 +12,9 @@ Classes:
     AuthData: Represents authentication credentials including user and password.
     AgentData: Represents information about an agent, including uuid, key, and name.
 """
-from pydantic import BaseModel
 from uuid import UUID
+
+from pydantic import BaseModel
 
 
 class AuthData(BaseModel):

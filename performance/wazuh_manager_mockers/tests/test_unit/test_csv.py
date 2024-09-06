@@ -8,7 +8,6 @@ from typing import Generator
 
 import pytest
 from _pytest.tmpdir import TempPathFactory
-
 from utils.csv import init_csv_header, write_row_to_csv
 
 

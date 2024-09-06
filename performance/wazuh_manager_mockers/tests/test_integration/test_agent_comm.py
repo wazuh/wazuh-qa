@@ -11,7 +11,6 @@ import pytest
 from _pytest.tmpdir import TempPathFactory
 from fastapi import status
 from fastapi.testclient import TestClient
-
 from manager_mock_services.agent_comm_mock.agent_comm_mock import (
     app,
     router_version,
