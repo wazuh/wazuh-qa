@@ -66,7 +66,8 @@ def main():
     visualization_options = {
         'dataframes_paths': options.csv_list,
         'store_path': options.destination,
-        'base_name': options.name 
+        'base_name': options.name,
+        'plot_title': options.plot_title
     }
 
     strategy = target
@@ -78,7 +79,7 @@ def main():
 
     dv = strategy_plot_by_target[strategy](**visualization_options)
 
-    dv.plot(options.plot_title)
+    dv.plot()
 
 
 if __name__ == '__main__':
