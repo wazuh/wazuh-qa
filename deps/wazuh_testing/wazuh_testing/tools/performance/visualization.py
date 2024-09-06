@@ -20,19 +20,22 @@ class DataVisualizer(ABC):
         dataframe (pandas.Dataframe): dataframe containing the info from all the CSVs.
         store_path (str): path to store the CSV images. Defaults to the temp directory.
         base_name (str, optional): base name used to store the images.
+        plot_title (str, optional): Title for the generated plots.
     """
 
-    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None):
+    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None, plot_title=None):
         """Initializes the DataVisualizer.
 
         Args:
             dataframes_paths (list): List of paths to CSV files.
             store_path (str, optional): Path to store the CSV images. Defaults to the temp directory.
             base_name (str, optional): Base name used to store the images.
+            plot_title (str, optional): Title for the generated plots.
         """
         self.dataframes_paths = dataframes_paths
         self.store_path = store_path
         self.base_name = base_name
+        self.plot_title = plot_title
         self.dataframe = pd.DataFrame()
 
         self._load_dataframes()
@@ -198,6 +201,7 @@ class BinaryDatavisualizer(DataVisualizer):
         dataframe (pandas.Dataframe): dataframe containing the info from all the CSVs.
         store_path (str): path to store the CSV images. Defaults to the temp directory.
         base_name (str, optional): base name used to store the images.
+        plot_title (str, optional): Title for the generated plots.
         binary_metrics_fields_to_plot (list): List of binary metrics fields to plot.
         binary_metrics_extra_fields (list): List of additional binary metrics fields.
         binary_metrics_fields (list): Combined list of binary metrics fields.
@@ -209,7 +213,7 @@ class BinaryDatavisualizer(DataVisualizer):
     binary_metrics_extra_fields = ["Daemon", "Version", "PID"]
     binary_metrics_fields = binary_metrics_fields_to_plot + binary_metrics_extra_fields
 
-    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None, unify_child_daemon_metrics=False):
+    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None, unify_child_daemon_metrics=False, plot_title=None):
         """Initialize the BinaryDatavisualizer.
 
         Args:
@@ -218,7 +222,7 @@ class BinaryDatavisualizer(DataVisualizer):
             base_name (str, optional): Base name for saved visualizations. Defaults to None.
             unify_child_daemon_metrics (bool, optional): Whether to unify child daemon metrics. Defaults to False.
         """
-        super().__init__(dataframes_paths, store_path, base_name)
+        super().__init__(dataframes_paths, store_path, base_name, plot_title)
         self._validate_dataframe()
         if unify_child_daemon_metrics:
             self.dataframe = self.dataframe.reset_index(drop=False)
@@ -311,7 +315,7 @@ class BinaryDatavisualizer(DataVisualizer):
                 self._basic_plot(ax, self.dataframe[self.dataframe.Daemon == daemon][element],
                                  label=daemon, color=color)
 
-            self._save_custom_plot(ax, element, plot_title)
+            self._save_custom_plot(ax, element, self.plot_title)
 
 
 class DaemonStatisticsVisualizer(DataVisualizer):
