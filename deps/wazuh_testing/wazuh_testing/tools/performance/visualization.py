@@ -301,7 +301,7 @@ class BinaryDatavisualizer(DataVisualizer):
         self.dataframe = self.dataframe.merge(pids[['Daemon', 'PID']], on='Daemon', how='left')
         self.dataframe = self.dataframe.merge(versions[['Daemon', 'Version']], on='Daemon', how='left')
 
-    def plot(self, plot_title):
+    def plot(self):
         """Plot the binary metrics data for each field to be plotted.
 
         This method creates and saves plots for each binary metric field.
