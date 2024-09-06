@@ -6,7 +6,6 @@
 
 import pandas as pd
 import pytest
-
 from statistical_data_analyzer import StatisticalComparator
 
 

@@ -6,7 +6,6 @@
 
 import pandas as pd
 from pytest_mock import MockerFixture
-
 from statistical_data_analyzer import DataLoader
 
 

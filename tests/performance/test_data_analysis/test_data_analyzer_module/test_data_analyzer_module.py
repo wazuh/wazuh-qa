@@ -19,14 +19,18 @@ Tests:
 Issue: https://github.com/wazuh/wazuh/issues/24688
 """
 
+import logging
 from collections.abc import Callable
 from typing import Tuple
 
 import pytest
 import yaml
-
 from _pytest.python import Metafunc
 from statistical_data_analyzer import DataLoader, StatisticalComparator, StatisticalTests
+
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 
 def pytest_generate_tests(metafunc: Metafunc) -> None:
@@ -35,11 +39,10 @@ def pytest_generate_tests(metafunc: Metafunc) -> None:
     Args:
         metafunc (Metafunc): Metafunc object that contains information about the test.
     """
-
     if "metric" in metafunc.fixturenames:
         config_file = metafunc.config.getoption("--items_yaml")
 
-        with open(config_file, 'r') as file:
+        with open(config_file) as file:
             config_data = yaml.safe_load(file)
 
         metrics = list(config_data.get('Metrics', {}).keys())
@@ -98,5 +101,5 @@ def test_comparison(get_data: Callable[[], Tuple[str, str, float]], get_comparis
     if errors:
         pytest.fail("\n".join(errors))
     else:
-        print(f"P-values for metric '{metric}':")
-        print("\n".join(p_values))
+        logging.info(f"P-values for metric '{metric}':")
+        logging.info("\n".join(p_values))

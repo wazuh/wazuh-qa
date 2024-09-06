@@ -15,7 +15,7 @@ Classes:
 
 import os
 from collections.abc import Callable
-from typing import Any, List, Dict, Tuple
+from typing import Any, Dict, List, Tuple
 
 import pandas as pd
 import yaml
@@ -72,7 +72,7 @@ class DataLoader:
 
         if not os.path.exists(self.items_path):
             raise ValueError("The YML file does not exit")
-        
+
     def validate_data(self) -> None:
         """Validate that the data provided is valid and consistent."""
         baseline_columns = set(self.baseline.columns)
@@ -89,7 +89,7 @@ class DataLoader:
                              "in both CSV files")
 
         items_yaml = set(self.processes)
-        items_csv = set(self.baseline[self.process_name].unique())        
+        items_csv = set(self.baseline[self.process_name].unique())
         missing_processes = items_yaml - items_csv
 
         if missing_processes:
@@ -105,8 +105,7 @@ class DataLoader:
                              f"found in the CSV: {', '.join(missing_metrics)}")
 
     def load_dataframe(self, csv_path: str) -> pd.DataFrame:
-        """Read the CSV and convert it to dataframe. Also check that the format is valid (CSV)
-        and that the file is not empty.
+        """Read the CSV and convert it to dataframe. Also check that the format is valid (CSV) and that it's not empty.
 
         Args:
             csv_path (str): path to the CSV file to be converted in Dataframe.

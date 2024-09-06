@@ -18,7 +18,6 @@ from typing import Generator, Tuple
 
 import pytest
 import pytest_html
-
 from statistical_data_analyzer import DataLoader
 
 
@@ -87,8 +86,7 @@ def get_data(pytestconfig: pytest.Config) -> Tuple[str, str, float]:
 
 @pytest.fixture(scope="session")
 def get_comparison_config(pytestconfig: pytest.Config) -> str:
-    """Fixture that collects the YML file with the elements to be analyzed
-    during the test.
+    """Fixture that collects the YML file with the elements to be analyzed during the test.
 
     Args:
         pytestconfig (pytest.Config): returns the :class:`_pytest.config.Config` object.
