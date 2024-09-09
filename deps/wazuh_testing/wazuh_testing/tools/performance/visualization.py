@@ -496,8 +496,9 @@ class ClusterStatisticsVisualizer(DataVisualizer):
         This method creates and saves plots for each cluster activity.
         """
         elements = list(self.dataframe['activity'].unique())
-
+        
         for element in elements:
+            p_title = self.title + element.replace(' ', '_').lower()
             _, ax = plt.subplots()
             nodes = self.dataframe[self.dataframe.activity == element]['node_name'].unique()
             current_df = self.dataframe[self.dataframe.activity == element]
@@ -505,7 +506,7 @@ class ClusterStatisticsVisualizer(DataVisualizer):
             for node, color in zip(nodes, self._color_palette(len(nodes))):
                 self._basic_plot(ax=ax, dataframe=current_df[current_df.node_name == node]['time_spent(s)'],
                                  label=node, color=color)
-            self._save_custom_plot(ax, 'time_spent(s)', self.plot_title, disable_x_labels=True,
+            self._save_custom_plot(ax, 'time_spent(s)', p_title, disable_x_labels=True,
                                    statistics=DataVisualizer._get_statistics(
                                         current_df['time_spent(s)'], calculate_mean=True, calculate_median=True))
 
