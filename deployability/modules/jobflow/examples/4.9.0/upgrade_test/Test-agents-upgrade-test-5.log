@@ -1,0 +1,29 @@
+[36m[2024-09-05 10:45:15] [DEBUG] [2003921] [MainThread] [jobflow]: Validating input file: modules/jobflow/examples/4.9.0/upgrade_test/Test-agents-upgrade-test.yaml[0m
+[36m[2024-09-05 10:45:15] [DEBUG] [2003921] [MainThread] [jobflow]: Loading schema file: /home/fcaffieri/repos/wazuh-qa/.venv/lib/python3.10/site-packages/jobflow/schemas/schema_v1.json[0m
+[36m[2024-09-05 10:45:15] [DEBUG] [2003921] [MainThread] [jobflow]: Loading yaml file: modules/jobflow/examples/4.9.0/upgrade_test/Test-agents-upgrade-test.yaml[0m
+[36m[2024-09-05 10:45:15] [DEBUG] [2003921] [MainThread] [jobflow]: Loading workflow file: modules/jobflow/examples/4.9.0/upgrade_test/Test-agents-upgrade-test.yaml[0m
+[36m[2024-09-05 10:45:15] [DEBUG] [2003921] [MainThread] [jobflow]: Process workflow.[0m
+[32m[2024-09-05 10:45:15] [INFO] [2003921] [MainThread] [jobflow]: Executing DAG tasks.[0m
+[32m[2024-09-05 10:45:15] [INFO] [2003921] [MainThread] [jobflow]: Executing tasks in parallel.[0m
+[32m[2024-09-05 10:45:15] [INFO] [2003921] [ThreadPoolExecutor-0_0] [jobflow]: [allocate-macos-agent-macos-sonoma-14-amd64] Starting task.[0m
+[36m[2024-09-05 10:45:15] [DEBUG] [2003921] [ThreadPoolExecutor-0_0] [jobflow]: Running task "allocate-macos-agent-macos-sonoma-14-amd64" with arguments: ['modules/allocation/main.py', '--action=create', '--provider=vagrant', '--size=small', '--composite-name=macos-sonoma-14-amd64', '--inventory-output=/tmp/dtt1-poc/agent-macos-sonoma-14-amd64/inventory.yaml', '--track-output=/tmp/dtt1-poc/agent-macos-sonoma-14-amd64/track.yaml', '--label-termination-date=1d', '--label-team=qa', '--label-issue=https://github.com/wazuh/wazuh-qa/issues/5722'][0m
+[36m[2024-09-05 10:49:14] [DEBUG] [2003921] [ThreadPoolExecutor-0_0] [jobflow]: Finished task "allocate-macos-agent-macos-sonoma-14-amd64" execution with result:
+[37m[2024-09-05 10:45:15] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m
+[37m[2024-09-05 10:45:15] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m
+[32m[2024-09-05 10:45:15] [INFO] ALLOCATOR: Creating instance at /tmp/wazuh-qa[0m
+[32m[2024-09-05 10:45:33] [INFO] ALLOCATOR: Using the macStadium Intel server to deploy.[0m
+[37m[2024-09-05 10:45:33] [DEBUG] ALLOCATOR: Checking if instance directory exists on remote host[0m
+[37m[2024-09-05 10:45:39] [DEBUG] ALLOCATOR: Creating instance directory on remote host[0m
+[37m[2024-09-05 10:45:45] [DEBUG] ALLOCATOR: No config provided. Generating from payload[0m
+[37m[2024-09-05 10:45:45] [DEBUG] ALLOCATOR: Generating new key pair[0m
+[37m[2024-09-05 10:45:48] [DEBUG] ALLOCATOR: Vagrantfile created. Creating instance.[0m
+[32m[2024-09-05 10:46:06] [INFO] ALLOCATOR: Instance qa-5722-sonoma-14-9138 created.[0m
+[32m[2024-09-05 10:47:40] [INFO] ALLOCATOR: Instance qa-5722-sonoma-14-9138 started.[0m
+[32m[2024-09-05 10:49:09] [INFO] ALLOCATOR: The inventory file generated at /tmp/dtt1-poc/agent-macos-sonoma-14-amd64/inventory.yaml[0m
+[32m[2024-09-05 10:49:09] [INFO] ALLOCATOR: The track file generated at /tmp/dtt1-poc/agent-macos-sonoma-14-amd64/track.yaml[0m
+[32m[2024-09-05 10:49:14] [INFO] ALLOCATOR: SSH connection successful.[0m
+[32m[2024-09-05 10:49:14] [INFO] ALLOCATOR: Instance qa-5722-sonoma-14-9138 created successfully.[0m
+[0m
+[32m[2024-09-05 10:49:14] [INFO] [2003921] [ThreadPoolExecutor-0_0] [jobflow]: [allocate-macos-agent-macos-sonoma-14-amd64] Finished task in 239.59 seconds.[0m
+[32m[2024-09-05 10:49:14] [INFO] [2003921] [MainThread] [jobflow]: Executing Reverse DAG tasks.[0m
+[32m[2024-09-05 10:49:14] [INFO] [2003921] [MainThread] [jobflow]: Executing tasks in parallel.[0m

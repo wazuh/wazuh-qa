@@ -1,0 +1,28 @@
+[36m[2024-09-05 10:58:41] [DEBUG] [2006393] [MainThread] [jobflow]: Validating input file: modules/jobflow/examples/4.9.0/upgrade_test/Test-agents-cleanup.yaml[0m
+[36m[2024-09-05 10:58:41] [DEBUG] [2006393] [MainThread] [jobflow]: Loading schema file: /home/fcaffieri/repos/wazuh-qa/.venv/lib/python3.10/site-packages/jobflow/schemas/schema_v1.json[0m
+[36m[2024-09-05 10:58:41] [DEBUG] [2006393] [MainThread] [jobflow]: Loading yaml file: modules/jobflow/examples/4.9.0/upgrade_test/Test-agents-cleanup.yaml[0m
+[36m[2024-09-05 10:58:41] [DEBUG] [2006393] [MainThread] [jobflow]: Loading workflow file: modules/jobflow/examples/4.9.0/upgrade_test/Test-agents-cleanup.yaml[0m
+[36m[2024-09-05 10:58:41] [DEBUG] [2006393] [MainThread] [jobflow]: Process workflow.[0m
+[32m[2024-09-05 10:58:41] [INFO] [2006393] [MainThread] [jobflow]: Executing DAG tasks.[0m
+[32m[2024-09-05 10:58:41] [INFO] [2006393] [MainThread] [jobflow]: Executing tasks in parallel.[0m
+[32m[2024-09-05 10:58:41] [INFO] [2006393] [ThreadPoolExecutor-0_0] [jobflow]: [allocate-manager-linux-ubuntu-22.04-amd64] Starting task.[0m
+[36m[2024-09-05 10:58:41] [DEBUG] [2006393] [ThreadPoolExecutor-0_0] [jobflow]: Running task "allocate-manager-linux-ubuntu-22.04-amd64" with arguments: ['modules/allocation/main.py', '--action=create', '--provider=aws', '--size=large', '--composite-name=linux-ubuntu-22.04-amd64', '--inventory-output=/tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml', '--track-output=/tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/track.yaml', '--label-termination-date=1d', '--label-team=qa', '--label-issue=https://github.com/wazuh/wazuh/issues/25497'][0m
+[36m[2024-09-05 10:59:36] [DEBUG] [2006393] [ThreadPoolExecutor-0_0] [jobflow]: Finished task "allocate-manager-linux-ubuntu-22.04-amd64" execution with result:
+[37m[2024-09-05 10:58:41] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m
+[37m[2024-09-05 10:58:41] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m
+[32m[2024-09-05 10:58:41] [INFO] ALLOCATOR: Creating instance at /tmp/wazuh-qa[0m
+[37m[2024-09-05 10:58:42] [DEBUG] ALLOCATOR: No config provided. Generating from payload[0m
+[37m[2024-09-05 10:58:42] [DEBUG] ALLOCATOR: Generating new key pair[0m
+[37m[2024-09-05 10:58:42] [DEBUG] ALLOCATOR: Creating base directory: /tmp/wazuh-qa/AWS-BDF46011-E230-49F2-B7B5-6458984B1B2A[0m
+[37m[2024-09-05 10:59:02] [DEBUG] ALLOCATOR: Renaming temp /tmp/wazuh-qa/AWS-BDF46011-E230-49F2-B7B5-6458984B1B2A directory to /tmp/wazuh-qa/wazuh-25497-ubuntu-22.04-9631[0m
+[32m[2024-09-05 10:59:02] [INFO] ALLOCATOR [WAZUH-25497-UBUNTU-22.04]: Instance i-0b5e601a513d4fadc created.[0m
+[32m[2024-09-05 10:59:03] [INFO] ALLOCATOR [WAZUH-25497-UBUNTU-22.04]: Instance i-0b5e601a513d4fadc started.[0m
+[32m[2024-09-05 10:59:04] [INFO] ALLOCATOR [WAZUH-25497-UBUNTU-22.04]: The inventory file generated at /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml[0m
+[32m[2024-09-05 10:59:04] [INFO] ALLOCATOR [WAZUH-25497-UBUNTU-22.04]: The track file generated at /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/track.yaml[0m
+[33m[2024-09-05 10:59:04] [WARNING] ALLOCATOR [WAZUH-25497-UBUNTU-22.04]: Error on attempt 1 of 30: [Errno None] Unable to connect to port 2200 on 44.211.220.35[0m
+[32m[2024-09-05 10:59:35] [INFO] ALLOCATOR [WAZUH-25497-UBUNTU-22.04]: SSH connection successful.[0m
+[32m[2024-09-05 10:59:35] [INFO] ALLOCATOR [WAZUH-25497-UBUNTU-22.04]: Instance i-0b5e601a513d4fadc created successfully.[0m
+[0m
+[32m[2024-09-05 10:59:36] [INFO] [2006393] [ThreadPoolExecutor-0_0] [jobflow]: [allocate-manager-linux-ubuntu-22.04-amd64] Finished task in 54.96 seconds.[0m
+[32m[2024-09-05 10:59:36] [INFO] [2006393] [MainThread] [jobflow]: Executing Reverse DAG tasks.[0m
+[32m[2024-09-05 10:59:36] [INFO] [2006393] [MainThread] [jobflow]: Executing tasks in parallel.[0m

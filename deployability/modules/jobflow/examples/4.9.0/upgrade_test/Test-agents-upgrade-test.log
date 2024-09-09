@@ -1,0 +1,314 @@
+[36m[2024-08-26 13:02:51] [DEBUG] [380392] [MainThread] [jobflow]: Validating input file: modules/jobflow/examples/4.9.0/upgrade_test/Test-agents-upgrade-test.yaml[0m
+[36m[2024-08-26 13:02:51] [DEBUG] [380392] [MainThread] [jobflow]: Loading schema file: /home/fcaffieri/repos/wazuh-qa/.venv/lib/python3.10/site-packages/jobflow/schemas/schema_v1.json[0m
+[36m[2024-08-26 13:02:51] [DEBUG] [380392] [MainThread] [jobflow]: Loading yaml file: modules/jobflow/examples/4.9.0/upgrade_test/Test-agents-upgrade-test.yaml[0m
+[36m[2024-08-26 13:02:51] [DEBUG] [380392] [MainThread] [jobflow]: Loading workflow file: modules/jobflow/examples/4.9.0/upgrade_test/Test-agents-upgrade-test.yaml[0m
+[36m[2024-08-26 13:02:51] [DEBUG] [380392] [MainThread] [jobflow]: Process workflow.[0m
+[32m[2024-08-26 13:02:51] [INFO] [380392] [MainThread] [jobflow]: Executing DAG tasks.[0m
+[32m[2024-08-26 13:02:51] [INFO] [380392] [MainThread] [jobflow]: Executing tasks in parallel.[0m
+[32m[2024-08-26 13:02:51] [INFO] [380392] [ThreadPoolExecutor-0_0] [jobflow]: [allocate-manager-linux-ubuntu-22.04-amd64] Starting task.[0m
+[36m[2024-08-26 13:02:51] [DEBUG] [380392] [ThreadPoolExecutor-0_0] [jobflow]: Running task "allocate-manager-linux-ubuntu-22.04-amd64" with arguments: ['modules/allocation/main.py', '--action=create', '--provider=aws', '--size=large', '--composite-name=linux-ubuntu-22.04-amd64', '--inventory-output=/tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml', '--track-output=/tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/track.yaml', '--label-termination-date=1d', '--label-team=qa', '--label-issue=https://github.com/wazuh/wazuh/issues/25345'][0m
+[36m[2024-08-26 13:03:50] [DEBUG] [380392] [ThreadPoolExecutor-0_0] [jobflow]: Finished task "allocate-manager-linux-ubuntu-22.04-amd64" execution with result:
+[37m[2024-08-26 13:02:51] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m
+[37m[2024-08-26 13:02:51] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m
+[32m[2024-08-26 13:02:52] [INFO] ALLOCATOR: Creating instance at /tmp/wazuh-qa[0m
+[37m[2024-08-26 13:02:55] [DEBUG] ALLOCATOR: No config provided. Generating from payload[0m
+[37m[2024-08-26 13:02:55] [DEBUG] ALLOCATOR: Generating new key pair[0m
+[37m[2024-08-26 13:02:55] [DEBUG] ALLOCATOR: Creating base directory: /tmp/wazuh-qa/AWS-06BC5F8D-0BA3-41CB-BE0D-11A4828D3FBF[0m
+[37m[2024-08-26 13:03:16] [DEBUG] ALLOCATOR: Renaming temp /tmp/wazuh-qa/AWS-06BC5F8D-0BA3-41CB-BE0D-11A4828D3FBF directory to /tmp/wazuh-qa/wazuh-25345-ubuntu-22.04-1310[0m
+[32m[2024-08-26 13:03:16] [INFO] ALLOCATOR [WAZUH-25345-UBUNTU-22.04]: Instance i-060aa3cf12da4d851 created.[0m
+[32m[2024-08-26 13:03:17] [INFO] ALLOCATOR [WAZUH-25345-UBUNTU-22.04]: Instance i-060aa3cf12da4d851 started.[0m
+[32m[2024-08-26 13:03:18] [INFO] ALLOCATOR [WAZUH-25345-UBUNTU-22.04]: The inventory file generated at /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml[0m
+[32m[2024-08-26 13:03:18] [INFO] ALLOCATOR [WAZUH-25345-UBUNTU-22.04]: The track file generated at /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/track.yaml[0m
+[33m[2024-08-26 13:03:18] [WARNING] ALLOCATOR [WAZUH-25345-UBUNTU-22.04]: Error on attempt 1 of 30: [Errno None] Unable to connect to port 2200 on 44.204.228.201[0m
+[32m[2024-08-26 13:03:50] [INFO] ALLOCATOR [WAZUH-25345-UBUNTU-22.04]: SSH connection successful.[0m
+[32m[2024-08-26 13:03:50] [INFO] ALLOCATOR [WAZUH-25345-UBUNTU-22.04]: Instance i-060aa3cf12da4d851 created successfully.[0m
+[0m
+[32m[2024-08-26 13:03:50] [INFO] [380392] [ThreadPoolExecutor-0_0] [jobflow]: [allocate-manager-linux-ubuntu-22.04-amd64] Finished task in 59.06 seconds.[0m
+[32m[2024-08-26 13:03:50] [INFO] [380392] [ThreadPoolExecutor-0_0] [jobflow]: [provision-manager-linux-ubuntu-22.04-amd64] Starting task.[0m
+[36m[2024-08-26 13:03:50] [DEBUG] [380392] [ThreadPoolExecutor-0_0] [jobflow]: Running task "provision-manager-linux-ubuntu-22.04-amd64" with arguments: ['modules/provision/main.py', '--inventory=/tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml', "--install={'component': 'wazuh-manager', 'type': 'assistant', 'version': '4.9.0', 'live': False}"][0m
+[36m[2024-08-26 13:10:34] [DEBUG] [380392] [ThreadPoolExecutor-0_0] [jobflow]: Finished task "provision-manager-linux-ubuntu-22.04-amd64" execution with result:
+[37m[2024-08-26 13:03:50] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m
+[37m[2024-08-26 13:03:50] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m
+[37m[2024-08-26 13:03:51] [DEBUG] PROVISIONER: Setting dependencies: {} for wazuh-manager component.[0m
+[32m[2024-08-26 13:03:51] [INFO] PROVISIONER: Initiating provisionment.[0m
+[37m[2024-08-26 13:03:51] [DEBUG] PROVISIONER: Running action install for components: [ComponentInfo(component='wazuh-manager', type='assistant', version='4.9.0', dependencies=None, live=False)][0m
+[32m[2024-08-26 13:03:51] [INFO] PROVISIONER: Provisioning "wazuh-manager"...[0m
+[37m[2024-08-26 13:03:51] [DEBUG] PROVISIONER: Get OS family for ec2-44-204-228-201.compute-1.amazonaws.com.[0m
+[37m[2024-08-26 13:03:51] [DEBUG] PROVISIONER: Using inventory: {'all': {'hosts': {'ec2-44-204-228-201.compute-1.amazonaws.com': {'ansible_port': 2200, 'ansible_user': 'ubuntu', 'ansible_ssh_private_key_file': '/tmp/wazuh-qa/wazuh-25345-ubuntu-22.04-1310/wazuh-25345-ubuntu-22.04-key-9191'}}}}[0m
+[37m[2024-08-26 13:03:51] [DEBUG] PROVISIONER: Running playbook: {'hosts': 'ec2-44-204-228-201.compute-1.amazonaws.com', 'become': True, 'gather_facts': True, 'tasks': [{'name': 'Capture ansible_os_family', 'set_fact': {'ansible_os_family': "{{ ansible_facts['distribution_file_variety'] }}", 'cacheable': 'yes'}}]}[0m
+[0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+
+PLAY [ec2-44-204-228-201.compute-1.amazonaws.com] ******************************
+
+TASK [Gathering Facts] *********************************************************
+[1;35mcore/2.17/reference_appendices/interpreter_discovery.html for more information.[0m
+[0;32mok: [ec2-44-204-228-201.compute-1.amazonaws.com][0m
+
+TASK [Capture ansible_os_family] ***********************************************
+[0;32mok: [ec2-44-204-228-201.compute-1.amazonaws.com] => changed=false [0m
+[0;32m  ansible_facts:[0m
+[0;32m    ansible_os_family: Debian[0m
+
+PLAY RECAP *********************************************************************
+[0;32mec2-44-204-228-201.compute-1.amazonaws.com[0m : [0;32mok=2   [0m changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[37m[2024-08-26 13:04:03] [DEBUG] PROVISIONER: Playbook {'hosts': 'ec2-44-204-228-201.compute-1.amazonaws.com', 'become': True, 'gather_facts': True, 'tasks': [{'name': 'Capture ansible_os_family', 'set_fact': {'ansible_os_family': "{{ ansible_facts['distribution_file_variety'] }}", 'cacheable': 'yes'}}]} finished with status {'skipped': {}, 'ok': {'ec2-44-204-228-201.compute-1.amazonaws.com': 2}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'ec2-44-204-228-201.compute-1.amazonaws.com': 1}, 'changed': {}}[0m
+[37m[2024-08-26 13:04:03] [DEBUG] PROVISIONER: OS family: Debian.[0m
+[37m[2024-08-26 13:04:03] [DEBUG] PROVISIONER: Render playbook with vars: {'component': 'wazuh-manager', 'version': '4.9.0', 'live': False, 'type': 'assistant', 'dependencies': None, 'templates_path': '/home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/playbooks/wazuh/assistant/install', 'templates_order': ['download.j2', 'install.j2'], 'ansible_os_family': 'Debian'}.[0m
+[37m[2024-08-26 13:04:03] [DEBUG] PROVISIONER: Templates found: ['download.j2', 'install.j2'][0m
+[37m[2024-08-26 13:04:03] [DEBUG] PROVISIONER: Rendering template download.j2[0m
+[37m[2024-08-26 13:04:03] [DEBUG] PROVISIONER: Rendering template install.j2[0m
+[37m[2024-08-26 13:04:03] [DEBUG] PROVISIONER: [{'name': 'Install the required packages', 'shell': '\nsudo apt-get update && apt-get -y install curl\n'}, {'name': 'Download the Wazuh installation assistant', 'shell': 'curl -sO https://packages-dev.wazuh.com/4.9/wazuh-install.sh'}, {'name': 'Install wazuh-manager with assistant', 'shell': 'bash ./wazuh-install.sh -a -i'}][0m
+[37m[2024-08-26 13:04:03] [DEBUG] PROVISIONER: Tasks to execute: [{'name': 'Install the required packages', 'shell': '\nsudo apt-get update && apt-get -y install curl\n'}, {'name': 'Download the Wazuh installation assistant', 'shell': 'curl -sO https://packages-dev.wazuh.com/4.9/wazuh-install.sh'}, {'name': 'Install wazuh-manager with assistant', 'shell': 'bash ./wazuh-install.sh -a -i'}].[0m
+[32m[2024-08-26 13:04:03] [INFO] PROVISIONER: Execute install for wazuh-manager.[0m
+[37m[2024-08-26 13:04:03] [DEBUG] PROVISIONER: Using inventory: {'all': {'hosts': {'ec2-44-204-228-201.compute-1.amazonaws.com': {'ansible_port': 2200, 'ansible_user': 'ubuntu', 'ansible_ssh_private_key_file': '/tmp/wazuh-qa/wazuh-25345-ubuntu-22.04-1310/wazuh-25345-ubuntu-22.04-key-9191'}}}}[0m
+[37m[2024-08-26 13:04:03] [DEBUG] PROVISIONER: Running playbook: {'hosts': 'ec2-44-204-228-201.compute-1.amazonaws.com', 'become': True, 'gather_facts': True, 'tasks': [{'name': 'Install the required packages', 'shell': '\nsudo apt-get update && apt-get -y install curl\n'}, {'name': 'Download the Wazuh installation assistant', 'shell': 'curl -sO https://packages-dev.wazuh.com/4.9/wazuh-install.sh'}, {'name': 'Install wazuh-manager with assistant', 'shell': 'bash ./wazuh-install.sh -a -i'}]}[0m
+[0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+
+PLAY [ec2-44-204-228-201.compute-1.amazonaws.com] ******************************
+
+TASK [Gathering Facts] *********************************************************
+[1;35mcore/2.17/reference_appendices/interpreter_discovery.html for more information.[0m
+[0;32mok: [ec2-44-204-228-201.compute-1.amazonaws.com][0m
+
+TASK [Install the required packages] *******************************************
+[0;33mchanged: [ec2-44-204-228-201.compute-1.amazonaws.com] => changed=true [0m
+[0;33m  cmd: |2-[0m
+[0;33m  [0m
+[0;33m    sudo apt-get update && apt-get -y install curl[0m
+[0;33m  delta: '0:00:17.031972'[0m
+[0;33m  end: '2024-08-26 16:04:31.186114'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-08-26 16:04:14.154142'[0m
+[0;33m  stderr: ''[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    Hit:1 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy InRelease[0m
+[0;33m    Get:2 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates InRelease [128 kB][0m
+[0;33m    Get:3 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports InRelease [127 kB][0m
+[0;33m    Get:4 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy/universe amd64 Packages [14.1 MB][0m
+[0;33m    Get:5 http://security.ubuntu.com/ubuntu jammy-security InRelease [129 kB][0m
+[0;33m    Get:6 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy/universe Translation-en [5652 kB][0m
+[0;33m    Get:7 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy/universe amd64 c-n-f Metadata [286 kB][0m
+[0;33m    Get:8 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy/multiverse amd64 Packages [217 kB][0m
+[0;33m    Get:9 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy/multiverse Translation-en [112 kB][0m
+[0;33m    Get:10 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy/multiverse amd64 c-n-f Metadata [8372 B][0m
+[0;33m    Get:11 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/main amd64 Packages [1987 kB][0m
+[0;33m    Get:12 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/main Translation-en [349 kB][0m
+[0;33m    Get:13 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/main amd64 c-n-f Metadata [17.8 kB][0m
+[0;33m    Get:14 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/restricted amd64 Packages [2384 kB][0m
+[0;33m    Get:15 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/restricted Translation-en [410 kB][0m
+[0;33m    Get:16 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/restricted amd64 c-n-f Metadata [604 B][0m
+[0;33m    Get:17 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/universe amd64 Packages [1112 kB][0m
+[0;33m    Get:18 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/universe Translation-en [260 kB][0m
+[0;33m    Get:19 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/universe amd64 c-n-f Metadata [26.0 kB][0m
+[0;33m    Get:20 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/multiverse amd64 Packages [43.3 kB][0m
+[0;33m    Get:21 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/multiverse Translation-en [10.8 kB][0m
+[0;33m    Get:22 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/multiverse amd64 c-n-f Metadata [444 B][0m
+[0;33m    Get:23 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/main amd64 Packages [67.8 kB][0m
+[0;33m    Get:24 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/main Translation-en [11.1 kB][0m
+[0;33m    Get:25 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/main amd64 c-n-f Metadata [388 B][0m
+[0;33m    Get:26 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/restricted amd64 c-n-f Metadata [116 B][0m
+[0;33m    Get:27 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/universe amd64 Packages [28.8 kB][0m
+[0;33m    Get:28 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/universe Translation-en [16.5 kB][0m
+[0;33m    Get:29 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/universe amd64 c-n-f Metadata [672 B][0m
+[0;33m    Get:30 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/multiverse amd64 c-n-f Metadata [116 B][0m
+[0;33m    Get:31 http://security.ubuntu.com/ubuntu jammy-security/main amd64 Packages [1769 kB][0m
+[0;33m    Get:32 http://security.ubuntu.com/ubuntu jammy-security/main Translation-en [290 kB][0m
+[0;33m    Get:33 http://security.ubuntu.com/ubuntu jammy-security/main amd64 c-n-f Metadata [13.2 kB][0m
+[0;33m    Get:34 http://security.ubuntu.com/ubuntu jammy-security/restricted amd64 Packages [2308 kB][0m
+[0;33m    Get:35 http://security.ubuntu.com/ubuntu jammy-security/restricted Translation-en [398 kB][0m
+[0;33m    Get:36 http://security.ubuntu.com/ubuntu jammy-security/restricted amd64 c-n-f Metadata [572 B][0m
+[0;33m    Get:37 http://security.ubuntu.com/ubuntu jammy-security/universe amd64 Packages [890 kB][0m
+[0;33m    Get:38 http://security.ubuntu.com/ubuntu jammy-security/universe Translation-en [175 kB][0m
+[0;33m    Get:39 http://security.ubuntu.com/ubuntu jammy-security/universe amd64 c-n-f Metadata [19.0 kB][0m
+[0;33m    Get:40 http://security.ubuntu.com/ubuntu jammy-security/multiverse amd64 Packages [37.2 kB][0m
+[0;33m    Get:41 http://security.ubuntu.com/ubuntu jammy-security/multiverse Translation-en [7588 B][0m
+[0;33m    Get:42 http://security.ubuntu.com/ubuntu jammy-security/multiverse amd64 c-n-f Metadata [228 B][0m
+[0;33m    Fetched 33.4 MB in 3s (9715 kB/s)[0m
+[0;33m    Reading package lists...[0m
+[0;33m    Reading package lists...[0m
+[0;33m    Building dependency tree...[0m
+[0;33m    Reading state information...[0m
+[0;33m    The following additional packages will be installed:[0m
+[0;33m      libcurl4[0m
+[0;33m    The following packages will be upgraded:[0m
+[0;33m      curl libcurl4[0m
+[0;33m    2 upgraded, 0 newly installed, 0 to remove and 214 not upgraded.[0m
+[0;33m    Need to get 484 kB of archives.[0m
+[0;33m    After this operation, 0 B of additional disk space will be used.[0m
+[0;33m    Get:1 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/main amd64 curl amd64 7.81.0-1ubuntu1.17 [194 kB][0m
+[0;33m    Get:2 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/main amd64 libcurl4 amd64 7.81.0-1ubuntu1.17 [290 kB][0m
+[0;33m    Fetched 484 kB in 0s (26.9 MB/s)[0m
+[0;33m    (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 64295 files and directories currently installed.)[0m
+[0;33m    Preparing to unpack .../curl_7.81.0-1ubuntu1.17_amd64.deb ...[0m
+[0;33m    Unpacking curl (7.81.0-1ubuntu1.17) over (7.81.0-1ubuntu1.10) ...[0m
+[0;33m    Preparing to unpack .../libcurl4_7.81.0-1ubuntu1.17_amd64.deb ...[0m
+[0;33m    Unpacking libcurl4:amd64 (7.81.0-1ubuntu1.17) over (7.81.0-1ubuntu1.10) ...[0m
+[0;33m    Setting up libcurl4:amd64 (7.81.0-1ubuntu1.17) ...[0m
+[0;33m    Setting up curl (7.81.0-1ubuntu1.17) ...[0m
+[0;33m    Processing triggers for man-db (2.10.2-1) ...[0m
+[0;33m    Processing triggers for libc-bin (2.35-0ubuntu3.1) ...[0m
+[0;33m  stdout_lines: <omitted>[0m
+
+TASK [Download the Wazuh installation assistant] *******************************
+[0;33mchanged: [ec2-44-204-228-201.compute-1.amazonaws.com] => changed=true [0m
+[0;33m  cmd: curl -sO https://packages-dev.wazuh.com/4.9/wazuh-install.sh[0m
+[0;33m  delta: '0:00:00.582369'[0m
+[0;33m  end: '2024-08-26 16:04:36.248491'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-08-26 16:04:35.666122'[0m
+[0;33m  stderr: ''[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: ''[0m
+[0;33m  stdout_lines: <omitted>[0m
+
+TASK [Install wazuh-manager with assistant] ************************************
+[0;33mchanged: [ec2-44-204-228-201.compute-1.amazonaws.com] => changed=true [0m
+[0;33m  cmd: bash ./wazuh-install.sh -a -i[0m
+[0;33m  delta: '0:05:52.523202'[0m
+[0;33m  end: '2024-08-26 16:10:33.256672'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-08-26 16:04:40.733470'[0m
+[0;33m  stderr: ''[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    26/08/2024 16:04:40 INFO: Starting Wazuh installation assistant. Wazuh version: 4.9.0[0m
+[0;33m    26/08/2024 16:04:40 INFO: Verbose logging redirected to /var/log/wazuh-install.log[0m
+[0;33m    26/08/2024 16:04:46 WARNING: Hardware checks ignored.[0m
+[0;33m    26/08/2024 16:04:46 INFO: Wazuh web interface port will be 443.[0m
+[0;33m    26/08/2024 16:04:51 INFO: --- Dependencies ----[0m
+[0;33m    26/08/2024 16:04:51 INFO: Installing apt-transport-https.[0m
+[0;33m    26/08/2024 16:04:56 INFO: Installing debhelper.[0m
+[0;33m    26/08/2024 16:05:19 INFO: Wazuh development repository added.[0m
+[0;33m    26/08/2024 16:05:19 INFO: --- Configuration files ---[0m
+[0;33m    26/08/2024 16:05:19 INFO: Generating configuration files.[0m
+[0;33m    26/08/2024 16:05:19 INFO: Generating the root certificate.[0m
+[0;33m    26/08/2024 16:05:19 INFO: Generating Admin certificates.[0m
+[0;33m    26/08/2024 16:05:20 INFO: Generating Wazuh indexer certificates.[0m
+[0;33m    26/08/2024 16:05:20 INFO: Generating Filebeat certificates.[0m
+[0;33m    26/08/2024 16:05:20 INFO: Generating Wazuh dashboard certificates.[0m
+[0;33m    26/08/2024 16:05:21 INFO: Created wazuh-install-files.tar. It contains the Wazuh cluster key, certificates, and passwords necessary for installation.[0m
+[0;33m    26/08/2024 16:05:21 INFO: --- Wazuh indexer ---[0m
+[0;33m    26/08/2024 16:05:21 INFO: Starting Wazuh indexer installation.[0m
+[0;33m    26/08/2024 16:05:52 INFO: Wazuh indexer installation finished.[0m
+[0;33m    26/08/2024 16:05:52 INFO: Wazuh indexer post-install configuration finished.[0m
+[0;33m    26/08/2024 16:05:52 INFO: Starting service wazuh-indexer.[0m
+[0;33m    26/08/2024 16:06:04 INFO: wazuh-indexer service started.[0m
+[0;33m    26/08/2024 16:06:04 INFO: Initializing Wazuh indexer cluster security settings.[0m
+[0;33m    26/08/2024 16:06:07 INFO: Wazuh indexer cluster security configuration initialized.[0m
+[0;33m    26/08/2024 16:06:07 INFO: Wazuh indexer cluster initialized.[0m
+[0;33m    26/08/2024 16:06:07 INFO: --- Wazuh server ---[0m
+[0;33m    26/08/2024 16:06:07 INFO: Starting the Wazuh manager installation.[0m
+[0;33m    26/08/2024 16:07:08 INFO: Wazuh manager installation finished.[0m
+[0;33m    26/08/2024 16:07:08 INFO: Wazuh manager vulnerability detection configuration finished.[0m
+[0;33m    26/08/2024 16:07:08 INFO: Starting service wazuh-manager.[0m
+[0;33m    26/08/2024 16:07:23 INFO: wazuh-manager service started.[0m
+[0;33m    26/08/2024 16:07:23 INFO: Starting Filebeat installation.[0m
+[0;33m    26/08/2024 16:07:35 INFO: Filebeat installation finished.[0m
+[0;33m    26/08/2024 16:07:36 INFO: Filebeat post-install configuration finished.[0m
+[0;33m    26/08/2024 16:07:36 INFO: Starting service filebeat.[0m
+[0;33m    26/08/2024 16:07:37 INFO: filebeat service started.[0m
+[0;33m    26/08/2024 16:07:37 INFO: --- Wazuh dashboard ---[0m
+[0;33m    26/08/2024 16:07:37 INFO: Starting Wazuh dashboard installation.[0m
+[0;33m    26/08/2024 16:09:52 INFO: Wazuh dashboard installation finished.[0m
+[0;33m    26/08/2024 16:09:52 INFO: Wazuh dashboard post-install configuration finished.[0m
+[0;33m    26/08/2024 16:09:52 INFO: Starting service wazuh-dashboard.[0m
+[0;33m    26/08/2024 16:09:52 INFO: wazuh-dashboard service started.[0m
+[0;33m    26/08/2024 16:09:53 INFO: Updating the internal users.[0m
+[0;33m    26/08/2024 16:09:56 INFO: A backup of the internal users has been saved in the /etc/wazuh-indexer/internalusers-backup folder.[0m
+[0;33m    26/08/2024 16:10:04 INFO: The filebeat.yml file has been updated to use the Filebeat Keystore username and password.[0m
+[0;33m    26/08/2024 16:10:32 INFO: Initializing Wazuh dashboard web application.[0m
+[0;33m    26/08/2024 16:10:33 INFO: Wazuh dashboard web application initialized.[0m
+[0;33m    26/08/2024 16:10:33 INFO: --- Summary ---[0m
+[0;33m    26/08/2024 16:10:33 INFO: You can access the web interface https://<wazuh-dashboard-ip>:443[0m
+[0;33m        User: admin[0m
+[0;33m        Password: 4Nf?TfwPo39wW4DJClG43juM*SACAs.D[0m
+[0;33m    26/08/2024 16:10:33 INFO: Installation finished.[0m
+[0;33m  stdout_lines: <omitted>[0m
+
+PLAY RECAP *********************************************************************
+[0;33mec2-44-204-228-201.compute-1.amazonaws.com[0m : [0;32mok=4   [0m [0;33mchanged=3   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[37m[2024-08-26 13:10:33] [DEBUG] PROVISIONER: Playbook {'hosts': 'ec2-44-204-228-201.compute-1.amazonaws.com', 'become': True, 'gather_facts': True, 'tasks': [{'name': 'Install the required packages', 'shell': '\nsudo apt-get update && apt-get -y install curl\n'}, {'name': 'Download the Wazuh installation assistant', 'shell': 'curl -sO https://packages-dev.wazuh.com/4.9/wazuh-install.sh'}, {'name': 'Install wazuh-manager with assistant', 'shell': 'bash ./wazuh-install.sh -a -i'}]} finished with status {'skipped': {}, 'ok': {'ec2-44-204-228-201.compute-1.amazonaws.com': 4}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'ec2-44-204-228-201.compute-1.amazonaws.com': 1}, 'changed': {'ec2-44-204-228-201.compute-1.amazonaws.com': 3}}[0m
+[32m[2024-08-26 13:10:33] [INFO] PROVISIONER: Provision of "wazuh-manager" complete successfully.[0m
+[32m[2024-08-26 13:10:33] [INFO] PROVISIONER: All components provisioned successfully.[0m
+[37m[2024-08-26 13:10:33] [DEBUG] PROVISIONER: Provision summary: {'skipped': {}, 'ok': {'ec2-44-204-228-201.compute-1.amazonaws.com': 4}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'ec2-44-204-228-201.compute-1.amazonaws.com': 1}, 'changed': {'ec2-44-204-228-201.compute-1.amazonaws.com': 3}}[0m
+[0m
+[32m[2024-08-26 13:10:34] [INFO] [380392] [ThreadPoolExecutor-0_0] [jobflow]: [provision-manager-linux-ubuntu-22.04-amd64] Finished task in 403.45 seconds.[0m
+[32m[2024-08-26 13:10:34] [INFO] [380392] [ThreadPoolExecutor-0_0] [jobflow]: [allocate-agent-linux-redhat-9-amd64] Starting task.[0m
+[36m[2024-08-26 13:10:34] [DEBUG] [380392] [ThreadPoolExecutor-0_0] [jobflow]: Running task "allocate-agent-linux-redhat-9-amd64" with arguments: ['modules/allocation/main.py', '--action=create', '--provider=aws', '--size=small', '--composite-name=linux-redhat-9-amd64', '--inventory-output=/tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml', '--track-output=/tmp/dtt1-poc/agent-linux-redhat-9-amd64/track.yaml', '--label-termination-date=1d', '--label-team=qa', '--label-issue=https://github.com/wazuh/wazuh/issues/25345'][0m
+[32m[2024-08-26 13:10:34] [INFO] [380392] [ThreadPoolExecutor-0_1] [jobflow]: [allocate-agent-linux-ubuntu-22.04-amd64] Starting task.[0m
+[32m[2024-08-26 13:10:34] [INFO] [380392] [ThreadPoolExecutor-0_2] [jobflow]: [allocate-macos-agent-macos-sonoma-14-arm64] Starting task.[0m
+[36m[2024-08-26 13:10:34] [DEBUG] [380392] [ThreadPoolExecutor-0_1] [jobflow]: Running task "allocate-agent-linux-ubuntu-22.04-amd64" with arguments: ['modules/allocation/main.py', '--action=create', '--provider=aws', '--size=small', '--composite-name=linux-ubuntu-22.04-amd64', '--inventory-output=/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml', '--track-output=/tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml', '--label-termination-date=1d', '--label-team=qa', '--label-issue=https://github.com/wazuh/wazuh/issues/25345'][0m
+[36m[2024-08-26 13:10:34] [DEBUG] [380392] [ThreadPoolExecutor-0_2] [jobflow]: Running task "allocate-macos-agent-macos-sonoma-14-arm64" with arguments: ['modules/allocation/main.py', '--action=create', '--provider=vagrant', '--size=small', '--composite-name=macos-sonoma-14-arm64', '--inventory-output=/tmp/dtt1-poc/agent-macos-sonoma-14-arm64/inventory.yaml', '--track-output=/tmp/dtt1-poc/agent-macos-sonoma-14-arm64/track.yaml', '--label-termination-date=1d', '--label-team=qa', '--label-issue=https://github.com/wazuh/wazuh/issues/25345'][0m
+[31m[2024-08-26 13:10:46] [ERROR] [380392] [ThreadPoolExecutor-0_2] [jobflow]: [allocate-macos-agent-macos-sonoma-14-arm64] Task failed with error: Error executing process task Traceback (most recent call last):
+  File "/home/fcaffieri/repos/wazuh-qa/deployability/modules/allocation/vagrant/provider.py", line 318, in __remote_host
+    tn = Telnet(server_ip, server_port, timeout)
+  File "/usr/lib/python3.10/telnetlib.py", line 218, in __init__
+    self.open(host, port, timeout)
+  File "/usr/lib/python3.10/telnetlib.py", line 235, in open
+    self.sock = socket.create_connection((host, port), timeout)
+  File "/usr/lib/python3.10/socket.py", line 845, in create_connection
+    raise err
+  File "/usr/lib/python3.10/socket.py", line 833, in create_connection
+    sock.connect(sa)
+TimeoutError: timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/fcaffieri/repos/wazuh-qa/deployability/modules/allocation/main.py", line 39, in <module>
+    main()
+  File "/home/fcaffieri/repos/wazuh-qa/deployability/modules/allocation/main.py", line 35, in main
+    Allocator.run(InputPayload(**vars(parse_arguments())))
+  File "/home/fcaffieri/repos/wazuh-qa/deployability/modules/allocation/allocation.py", line 40, in run
+    return cls.__create(payload)
+  File "/home/fcaffieri/repos/wazuh-qa/deployability/modules/allocation/allocation.py", line 59, in __create
+    instance = provider.create_instance(
+  File "/home/fcaffieri/repos/wazuh-qa/deployability/modules/allocation/generic/provider.py", line 71, in create_instance
+    return cls._create_instance(base_dir, params, config, ssh_key)
+  File "/home/fcaffieri/repos/wazuh-qa/deployability/modules/allocation/vagrant/provider.py", line 81, in _create_instance
+    remote_host_parameters = cls.__remote_host(arch, 'create')
+  File "/home/fcaffieri/repos/wazuh-qa/deployability/modules/allocation/vagrant/provider.py", line 322, in __remote_host
+    raise ValueError('Could not connect to macOS macStadium ARM server: ' + str(e) + '.')
+ValueError: Could not connect to macOS macStadium ARM server: timed out.
+[0m
+[36m[2024-08-26 13:11:33] [DEBUG] [380392] [ThreadPoolExecutor-0_1] [jobflow]: Finished task "allocate-agent-linux-ubuntu-22.04-amd64" execution with result:
+[37m[2024-08-26 13:10:34] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m
+[37m[2024-08-26 13:10:34] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m
+[32m[2024-08-26 13:10:34] [INFO] ALLOCATOR: Creating instance at /tmp/wazuh-qa[0m
+[37m[2024-08-26 13:10:39] [DEBUG] ALLOCATOR: No config provided. Generating from payload[0m
+[37m[2024-08-26 13:10:39] [DEBUG] ALLOCATOR: Generating new key pair[0m
+[37m[2024-08-26 13:10:39] [DEBUG] ALLOCATOR: Creating base directory: /tmp/wazuh-qa/AWS-E8AD1FC2-D7B8-411C-B0DD-7D718B8312C7[0m
+[37m[2024-08-26 13:10:59] [DEBUG] ALLOCATOR: Renaming temp /tmp/wazuh-qa/AWS-E8AD1FC2-D7B8-411C-B0DD-7D718B8312C7 directory to /tmp/wazuh-qa/wazuh-25345-ubuntu-22.04-9694[0m
+[32m[2024-08-26 13:10:59] [INFO] ALLOCATOR [WAZUH-25345-UBUNTU-22.04]: Instance i-0ba75e4ad7d7767d8 created.[0m
+[32m[2024-08-26 13:11:00] [INFO] ALLOCATOR [WAZUH-25345-UBUNTU-22.04]: Instance i-0ba75e4ad7d7767d8 started.[0m
+[32m[2024-08-26 13:11:00] [INFO] ALLOCATOR [WAZUH-25345-UBUNTU-22.04]: The inventory file generated at /tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/inventory.yaml[0m
+[32m[2024-08-26 13:11:00] [INFO] ALLOCATOR [WAZUH-25345-UBUNTU-22.04]: The track file generated at /tmp/dtt1-poc/agent-linux-ubuntu-22.04-amd64/track.yaml[0m
+[33m[2024-08-26 13:11:01] [WARNING] ALLOCATOR [WAZUH-25345-UBUNTU-22.04]: Error on attempt 1 of 30: [Errno None] Unable to connect to port 2200 on 34.201.40.190[0m
+[32m[2024-08-26 13:11:33] [INFO] ALLOCATOR [WAZUH-25345-UBUNTU-22.04]: SSH connection successful.[0m
+[32m[2024-08-26 13:11:33] [INFO] ALLOCATOR [WAZUH-25345-UBUNTU-22.04]: Instance i-0ba75e4ad7d7767d8 created successfully.[0m
+[0m
+[32m[2024-08-26 13:11:33] [INFO] [380392] [ThreadPoolExecutor-0_1] [jobflow]: [allocate-agent-linux-ubuntu-22.04-amd64] Finished task in 59.15 seconds.[0m
+[36m[2024-08-26 13:12:10] [DEBUG] [380392] [ThreadPoolExecutor-0_0] [jobflow]: Finished task "allocate-agent-linux-redhat-9-amd64" execution with result:
+[37m[2024-08-26 13:10:34] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m
+[37m[2024-08-26 13:10:34] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m
+[32m[2024-08-26 13:10:34] [INFO] ALLOCATOR: Creating instance at /tmp/wazuh-qa[0m
+[37m[2024-08-26 13:10:38] [DEBUG] ALLOCATOR: No config provided. Generating from payload[0m
+[37m[2024-08-26 13:10:38] [DEBUG] ALLOCATOR: Generating new key pair[0m
+[37m[2024-08-26 13:10:38] [DEBUG] ALLOCATOR: Creating base directory: /tmp/wazuh-qa/AWS-85582743-736E-444C-B061-6500E6767520[0m
+[37m[2024-08-26 13:10:58] [DEBUG] ALLOCATOR: Renaming temp /tmp/wazuh-qa/AWS-85582743-736E-444C-B061-6500E6767520 directory to /tmp/wazuh-qa/wazuh-25345-redhat-9-3738[0m
+[32m[2024-08-26 13:10:58] [INFO] ALLOCATOR [WAZUH-25345-REDHAT-9]: Instance i-04caf255a3d0e8687 created.[0m
+[32m[2024-08-26 13:11:00] [INFO] ALLOCATOR [WAZUH-25345-REDHAT-9]: Instance i-04caf255a3d0e8687 started.[0m
+[32m[2024-08-26 13:11:00] [INFO] ALLOCATOR [WAZUH-25345-REDHAT-9]: The inventory file generated at /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml[0m
+[32m[2024-08-26 13:11:00] [INFO] ALLOCATOR [WAZUH-25345-REDHAT-9]: The track file generated at /tmp/dtt1-poc/agent-linux-redhat-9-amd64/track.yaml[0m
+[33m[2024-08-26 13:11:08] [WARNING] ALLOCATOR [WAZUH-25345-REDHAT-9]: Error on attempt 1 of 30: [Errno None] Unable to connect to port 2200 on 98.82.4.33[0m
+[33m[2024-08-26 13:11:38] [WARNING] ALLOCATOR [WAZUH-25345-REDHAT-9]: Error on attempt 2 of 30: [Errno None] Unable to connect to port 2200 on 98.82.4.33[0m
+[32m[2024-08-26 13:12:10] [INFO] ALLOCATOR [WAZUH-25345-REDHAT-9]: SSH connection successful.[0m
+[32m[2024-08-26 13:12:10] [INFO] ALLOCATOR [WAZUH-25345-REDHAT-9]: Instance i-04caf255a3d0e8687 created successfully.[0m
+[0m
+[32m[2024-08-26 13:12:10] [INFO] [380392] [ThreadPoolExecutor-0_0] [jobflow]: [allocate-agent-linux-redhat-9-amd64] Finished task in 96.23 seconds.[0m
+[32m[2024-08-26 13:12:10] [INFO] [380392] [MainThread] [jobflow]: Executing Reverse DAG tasks.[0m
+[32m[2024-08-26 13:12:10] [INFO] [380392] [MainThread] [jobflow]: Executing tasks in parallel.[0m

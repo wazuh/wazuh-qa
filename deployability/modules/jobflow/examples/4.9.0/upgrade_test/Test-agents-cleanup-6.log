@@ -1,0 +1,1507 @@
+[36m[2024-09-04 16:03:48] [DEBUG] [1856228] [MainThread] [jobflow]: Validating input file: modules/jobflow/examples/4.9.0/upgrade_test/Test-agents-cleanup.yaml[0m
+[36m[2024-09-04 16:03:48] [DEBUG] [1856228] [MainThread] [jobflow]: Loading schema file: /home/fcaffieri/repos/wazuh-qa/.venv/lib/python3.10/site-packages/jobflow/schemas/schema_v1.json[0m
+[36m[2024-09-04 16:03:48] [DEBUG] [1856228] [MainThread] [jobflow]: Loading yaml file: modules/jobflow/examples/4.9.0/upgrade_test/Test-agents-cleanup.yaml[0m
+[36m[2024-09-04 16:03:48] [DEBUG] [1856228] [MainThread] [jobflow]: Loading workflow file: modules/jobflow/examples/4.9.0/upgrade_test/Test-agents-cleanup.yaml[0m
+[36m[2024-09-04 16:03:48] [DEBUG] [1856228] [MainThread] [jobflow]: Process workflow.[0m
+[32m[2024-09-04 16:03:48] [INFO] [1856228] [MainThread] [jobflow]: Executing DAG tasks.[0m
+[32m[2024-09-04 16:03:48] [INFO] [1856228] [MainThread] [jobflow]: Executing tasks in parallel.[0m
+[32m[2024-09-04 16:03:48] [INFO] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: [allocate-manager-linux-ubuntu-22.04-amd64] Starting task.[0m
+[36m[2024-09-04 16:03:48] [DEBUG] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: Running task "allocate-manager-linux-ubuntu-22.04-amd64" with arguments: ['modules/allocation/main.py', '--action=create', '--provider=aws', '--size=large', '--composite-name=linux-ubuntu-22.04-amd64', '--inventory-output=/tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml', '--track-output=/tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/track.yaml', '--label-termination-date=1d', '--label-team=qa', '--label-issue=https://github.com/wazuh/wazuh/issues/25497'][0m
+[36m[2024-09-04 16:04:44] [DEBUG] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: Finished task "allocate-manager-linux-ubuntu-22.04-amd64" execution with result:
+[37m[2024-09-04 16:03:49] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m
+[37m[2024-09-04 16:03:49] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m
+[32m[2024-09-04 16:03:49] [INFO] ALLOCATOR: Creating instance at /tmp/wazuh-qa[0m
+[37m[2024-09-04 16:03:50] [DEBUG] ALLOCATOR: No config provided. Generating from payload[0m
+[37m[2024-09-04 16:03:50] [DEBUG] ALLOCATOR: Generating new key pair[0m
+[37m[2024-09-04 16:03:50] [DEBUG] ALLOCATOR: Creating base directory: /tmp/wazuh-qa/AWS-29DA8F0E-606B-4F03-9C89-86DC82B8EE34[0m
+[37m[2024-09-04 16:04:10] [DEBUG] ALLOCATOR: Renaming temp /tmp/wazuh-qa/AWS-29DA8F0E-606B-4F03-9C89-86DC82B8EE34 directory to /tmp/wazuh-qa/wazuh-25497-ubuntu-22.04-6097[0m
+[32m[2024-09-04 16:04:10] [INFO] ALLOCATOR [WAZUH-25497-UBUNTU-22.04]: Instance i-0f8c59c9ae94030f2 created.[0m
+[32m[2024-09-04 16:04:12] [INFO] ALLOCATOR [WAZUH-25497-UBUNTU-22.04]: Instance i-0f8c59c9ae94030f2 started.[0m
+[32m[2024-09-04 16:04:12] [INFO] ALLOCATOR [WAZUH-25497-UBUNTU-22.04]: The inventory file generated at /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml[0m
+[32m[2024-09-04 16:04:12] [INFO] ALLOCATOR [WAZUH-25497-UBUNTU-22.04]: The track file generated at /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/track.yaml[0m
+[33m[2024-09-04 16:04:12] [WARNING] ALLOCATOR [WAZUH-25497-UBUNTU-22.04]: Error on attempt 1 of 30: [Errno None] Unable to connect to port 2200 on 54.198.198.61[0m
+[32m[2024-09-04 16:04:44] [INFO] ALLOCATOR [WAZUH-25497-UBUNTU-22.04]: SSH connection successful.[0m
+[32m[2024-09-04 16:04:44] [INFO] ALLOCATOR [WAZUH-25497-UBUNTU-22.04]: Instance i-0f8c59c9ae94030f2 created successfully.[0m
+[0m
+[32m[2024-09-04 16:04:44] [INFO] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: [allocate-manager-linux-ubuntu-22.04-amd64] Finished task in 55.47 seconds.[0m
+[32m[2024-09-04 16:04:44] [INFO] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: [provision-manager-linux-ubuntu-22.04-amd64] Starting task.[0m
+[36m[2024-09-04 16:04:44] [DEBUG] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: Running task "provision-manager-linux-ubuntu-22.04-amd64" with arguments: ['modules/provision/main.py', '--inventory=/tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml', "--install={'component': 'wazuh-manager', 'type': 'assistant', 'version': '4.9.0', 'live': False}"][0m
+[36m[2024-09-04 16:12:01] [DEBUG] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: Finished task "provision-manager-linux-ubuntu-22.04-amd64" execution with result:
+[37m[2024-09-04 16:04:44] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m
+[37m[2024-09-04 16:04:44] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m
+[37m[2024-09-04 16:04:44] [DEBUG] PROVISIONER: Setting dependencies: {} for wazuh-manager component.[0m
+[32m[2024-09-04 16:04:44] [INFO] PROVISIONER: Initiating provisionment.[0m
+[37m[2024-09-04 16:04:44] [DEBUG] PROVISIONER: Running action install for components: [ComponentInfo(component='wazuh-manager', type='assistant', version='4.9.0', dependencies=None, live=False)][0m
+[32m[2024-09-04 16:04:44] [INFO] PROVISIONER: Provisioning "wazuh-manager"...[0m
+[37m[2024-09-04 16:04:44] [DEBUG] PROVISIONER: Get OS family for ec2-54-198-198-61.compute-1.amazonaws.com.[0m
+[37m[2024-09-04 16:04:44] [DEBUG] PROVISIONER: Using inventory: {'all': {'hosts': {'ec2-54-198-198-61.compute-1.amazonaws.com': {'ansible_port': 2200, 'ansible_user': 'ubuntu', 'ansible_ssh_private_key_file': '/tmp/wazuh-qa/wazuh-25497-ubuntu-22.04-6097/wazuh-25497-ubuntu-22.04-key-6135'}}}}[0m
+[37m[2024-09-04 16:04:44] [DEBUG] PROVISIONER: Running playbook: {'hosts': 'ec2-54-198-198-61.compute-1.amazonaws.com', 'become': True, 'gather_facts': True, 'tasks': [{'name': 'Capture ansible_os_family', 'set_fact': {'ansible_os_family': "{{ ansible_facts['distribution_file_variety'] }}", 'cacheable': 'yes'}}]}[0m
+[0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+
+PLAY [ec2-54-198-198-61.compute-1.amazonaws.com] *******************************
+
+TASK [Gathering Facts] *********************************************************
+[1;35mcore/2.17/reference_appendices/interpreter_discovery.html for more information.[0m
+[0;32mok: [ec2-54-198-198-61.compute-1.amazonaws.com][0m
+
+TASK [Capture ansible_os_family] ***********************************************
+[0;32mok: [ec2-54-198-198-61.compute-1.amazonaws.com] => changed=false [0m
+[0;32m  ansible_facts:[0m
+[0;32m    ansible_os_family: Debian[0m
+
+PLAY RECAP *********************************************************************
+[0;32mec2-54-198-198-61.compute-1.amazonaws.com[0m : [0;32mok=2   [0m changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[37m[2024-09-04 16:04:55] [DEBUG] PROVISIONER: Playbook {'hosts': 'ec2-54-198-198-61.compute-1.amazonaws.com', 'become': True, 'gather_facts': True, 'tasks': [{'name': 'Capture ansible_os_family', 'set_fact': {'ansible_os_family': "{{ ansible_facts['distribution_file_variety'] }}", 'cacheable': 'yes'}}]} finished with status {'skipped': {}, 'ok': {'ec2-54-198-198-61.compute-1.amazonaws.com': 2}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'ec2-54-198-198-61.compute-1.amazonaws.com': 1}, 'changed': {}}[0m
+[37m[2024-09-04 16:04:55] [DEBUG] PROVISIONER: OS family: Debian.[0m
+[37m[2024-09-04 16:04:55] [DEBUG] PROVISIONER: Render playbook with vars: {'component': 'wazuh-manager', 'version': '4.9.0', 'live': False, 'type': 'assistant', 'dependencies': None, 'templates_path': '/home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/playbooks/wazuh/assistant/install', 'templates_order': ['download.j2', 'install.j2'], 'ansible_os_family': 'Debian'}.[0m
+[37m[2024-09-04 16:04:55] [DEBUG] PROVISIONER: Templates found: ['download.j2', 'install.j2'][0m
+[37m[2024-09-04 16:04:55] [DEBUG] PROVISIONER: Rendering template download.j2[0m
+[37m[2024-09-04 16:04:55] [DEBUG] PROVISIONER: Rendering template install.j2[0m
+[37m[2024-09-04 16:04:55] [DEBUG] PROVISIONER: [{'name': 'Install the required packages', 'shell': '\nsudo apt-get update && apt-get -y install curl\n'}, {'name': 'Download the Wazuh installation assistant', 'shell': 'curl -sO https://packages-dev.wazuh.com/4.9/wazuh-install.sh'}, {'name': 'Install wazuh-manager with assistant', 'shell': 'bash ./wazuh-install.sh -a -i'}][0m
+[37m[2024-09-04 16:04:55] [DEBUG] PROVISIONER: Tasks to execute: [{'name': 'Install the required packages', 'shell': '\nsudo apt-get update && apt-get -y install curl\n'}, {'name': 'Download the Wazuh installation assistant', 'shell': 'curl -sO https://packages-dev.wazuh.com/4.9/wazuh-install.sh'}, {'name': 'Install wazuh-manager with assistant', 'shell': 'bash ./wazuh-install.sh -a -i'}].[0m
+[32m[2024-09-04 16:04:55] [INFO] PROVISIONER: Execute install for wazuh-manager.[0m
+[37m[2024-09-04 16:04:55] [DEBUG] PROVISIONER: Using inventory: {'all': {'hosts': {'ec2-54-198-198-61.compute-1.amazonaws.com': {'ansible_port': 2200, 'ansible_user': 'ubuntu', 'ansible_ssh_private_key_file': '/tmp/wazuh-qa/wazuh-25497-ubuntu-22.04-6097/wazuh-25497-ubuntu-22.04-key-6135'}}}}[0m
+[37m[2024-09-04 16:04:55] [DEBUG] PROVISIONER: Running playbook: {'hosts': 'ec2-54-198-198-61.compute-1.amazonaws.com', 'become': True, 'gather_facts': True, 'tasks': [{'name': 'Install the required packages', 'shell': '\nsudo apt-get update && apt-get -y install curl\n'}, {'name': 'Download the Wazuh installation assistant', 'shell': 'curl -sO https://packages-dev.wazuh.com/4.9/wazuh-install.sh'}, {'name': 'Install wazuh-manager with assistant', 'shell': 'bash ./wazuh-install.sh -a -i'}]}[0m
+[0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+
+PLAY [ec2-54-198-198-61.compute-1.amazonaws.com] *******************************
+
+TASK [Gathering Facts] *********************************************************
+[1;35mcore/2.17/reference_appendices/interpreter_discovery.html for more information.[0m
+[0;32mok: [ec2-54-198-198-61.compute-1.amazonaws.com][0m
+
+TASK [Install the required packages] *******************************************
+[0;33mchanged: [ec2-54-198-198-61.compute-1.amazonaws.com] => changed=true [0m
+[0;33m  cmd: |2-[0m
+[0;33m  [0m
+[0;33m    sudo apt-get update && apt-get -y install curl[0m
+[0;33m  delta: '0:00:16.135723'[0m
+[0;33m  end: '2024-09-04 19:05:22.595918'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 19:05:06.460195'[0m
+[0;33m  stderr: ''[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    Hit:1 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy InRelease[0m
+[0;33m    Get:2 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates InRelease [128 kB][0m
+[0;33m    Get:3 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports InRelease [127 kB][0m
+[0;33m    Get:4 http://security.ubuntu.com/ubuntu jammy-security InRelease [129 kB][0m
+[0;33m    Get:5 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy/universe amd64 Packages [14.1 MB][0m
+[0;33m    Get:6 http://security.ubuntu.com/ubuntu jammy-security/main amd64 Packages [1771 kB][0m
+[0;33m    Get:7 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy/universe Translation-en [5652 kB][0m
+[0;33m    Get:8 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy/universe amd64 c-n-f Metadata [286 kB][0m
+[0;33m    Get:9 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy/multiverse amd64 Packages [217 kB][0m
+[0;33m    Get:10 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy/multiverse Translation-en [112 kB][0m
+[0;33m    Get:11 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy/multiverse amd64 c-n-f Metadata [8372 B][0m
+[0;33m    Get:12 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/main amd64 Packages [1988 kB][0m
+[0;33m    Get:13 http://security.ubuntu.com/ubuntu jammy-security/main Translation-en [291 kB][0m
+[0;33m    Get:14 http://security.ubuntu.com/ubuntu jammy-security/main amd64 c-n-f Metadata [13.3 kB][0m
+[0;33m    Get:15 http://security.ubuntu.com/ubuntu jammy-security/restricted amd64 Packages [2327 kB][0m
+[0;33m    Get:16 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/main Translation-en [349 kB][0m
+[0;33m    Get:17 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/main amd64 c-n-f Metadata [17.8 kB][0m
+[0;33m    Get:18 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/restricted amd64 Packages [2386 kB][0m
+[0;33m    Get:19 http://security.ubuntu.com/ubuntu jammy-security/restricted Translation-en [400 kB][0m
+[0;33m    Get:20 http://security.ubuntu.com/ubuntu jammy-security/restricted amd64 c-n-f Metadata [584 B][0m
+[0;33m    Get:21 http://security.ubuntu.com/ubuntu jammy-security/universe amd64 Packages [901 kB][0m
+[0;33m    Get:22 http://security.ubuntu.com/ubuntu jammy-security/universe Translation-en [176 kB][0m
+[0;33m    Get:23 http://security.ubuntu.com/ubuntu jammy-security/universe amd64 c-n-f Metadata [19.2 kB][0m
+[0;33m    Get:24 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/restricted Translation-en [410 kB][0m
+[0;33m    Get:25 http://security.ubuntu.com/ubuntu jammy-security/multiverse amd64 Packages [37.2 kB][0m
+[0;33m    Get:26 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/restricted amd64 c-n-f Metadata [616 B][0m
+[0;33m    Get:27 http://security.ubuntu.com/ubuntu jammy-security/multiverse Translation-en [7588 B][0m
+[0;33m    Get:28 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/universe amd64 Packages [1121 kB][0m
+[0;33m    Get:29 http://security.ubuntu.com/ubuntu jammy-security/multiverse amd64 c-n-f Metadata [228 B][0m
+[0;33m    Get:30 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/universe Translation-en [260 kB][0m
+[0;33m    Get:31 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/universe amd64 c-n-f Metadata [26.1 kB][0m
+[0;33m    Get:32 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/multiverse amd64 Packages [43.3 kB][0m
+[0;33m    Get:33 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/multiverse Translation-en [10.8 kB][0m
+[0;33m    Get:34 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/multiverse amd64 c-n-f Metadata [444 B][0m
+[0;33m    Get:35 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/main amd64 Packages [67.8 kB][0m
+[0;33m    Get:36 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/main Translation-en [11.1 kB][0m
+[0;33m    Get:37 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/main amd64 c-n-f Metadata [388 B][0m
+[0;33m    Get:38 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/restricted amd64 c-n-f Metadata [116 B][0m
+[0;33m    Get:39 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/universe amd64 Packages [28.8 kB][0m
+[0;33m    Get:40 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/universe Translation-en [16.5 kB][0m
+[0;33m    Get:41 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/universe amd64 c-n-f Metadata [672 B][0m
+[0;33m    Get:42 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-backports/multiverse amd64 c-n-f Metadata [116 B][0m
+[0;33m    Fetched 33.4 MB in 3s (9941 kB/s)[0m
+[0;33m    Reading package lists...[0m
+[0;33m    Reading package lists...[0m
+[0;33m    Building dependency tree...[0m
+[0;33m    Reading state information...[0m
+[0;33m    The following additional packages will be installed:[0m
+[0;33m      libcurl4[0m
+[0;33m    The following packages will be upgraded:[0m
+[0;33m      curl libcurl4[0m
+[0;33m    2 upgraded, 0 newly installed, 0 to remove and 214 not upgraded.[0m
+[0;33m    Need to get 484 kB of archives.[0m
+[0;33m    After this operation, 0 B of additional disk space will be used.[0m
+[0;33m    Get:1 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/main amd64 curl amd64 7.81.0-1ubuntu1.17 [194 kB][0m
+[0;33m    Get:2 http://us-east-1.ec2.archive.ubuntu.com/ubuntu jammy-updates/main amd64 libcurl4 amd64 7.81.0-1ubuntu1.17 [290 kB][0m
+[0;33m    Fetched 484 kB in 0s (17.6 MB/s)[0m
+[0;33m    (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 64295 files and directories currently installed.)[0m
+[0;33m    Preparing to unpack .../curl_7.81.0-1ubuntu1.17_amd64.deb ...[0m
+[0;33m    Unpacking curl (7.81.0-1ubuntu1.17) over (7.81.0-1ubuntu1.10) ...[0m
+[0;33m    Preparing to unpack .../libcurl4_7.81.0-1ubuntu1.17_amd64.deb ...[0m
+[0;33m    Unpacking libcurl4:amd64 (7.81.0-1ubuntu1.17) over (7.81.0-1ubuntu1.10) ...[0m
+[0;33m    Setting up libcurl4:amd64 (7.81.0-1ubuntu1.17) ...[0m
+[0;33m    Setting up curl (7.81.0-1ubuntu1.17) ...[0m
+[0;33m    Processing triggers for man-db (2.10.2-1) ...[0m
+[0;33m    Processing triggers for libc-bin (2.35-0ubuntu3.1) ...[0m
+[0;33m  stdout_lines: <omitted>[0m
+
+TASK [Download the Wazuh installation assistant] *******************************
+[0;33mchanged: [ec2-54-198-198-61.compute-1.amazonaws.com] => changed=true [0m
+[0;33m  cmd: curl -sO https://packages-dev.wazuh.com/4.9/wazuh-install.sh[0m
+[0;33m  delta: '0:00:00.599154'[0m
+[0;33m  end: '2024-09-04 19:05:27.215675'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 19:05:26.616521'[0m
+[0;33m  stderr: ''[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: ''[0m
+[0;33m  stdout_lines: <omitted>[0m
+
+TASK [Install wazuh-manager with assistant] ************************************
+[0;33mchanged: [ec2-54-198-198-61.compute-1.amazonaws.com] => changed=true [0m
+[0;33m  cmd: bash ./wazuh-install.sh -a -i[0m
+[0;33m  delta: '0:06:29.679488'[0m
+[0;33m  end: '2024-09-04 19:12:01.168482'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 19:05:31.488994'[0m
+[0;33m  stderr: ''[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    04/09/2024 19:05:31 INFO: Starting Wazuh installation assistant. Wazuh version: 4.9.0[0m
+[0;33m    04/09/2024 19:05:31 INFO: Verbose logging redirected to /var/log/wazuh-install.log[0m
+[0;33m    04/09/2024 19:05:35 WARNING: Hardware checks ignored.[0m
+[0;33m    04/09/2024 19:05:35 INFO: Wazuh web interface port will be 443.[0m
+[0;33m    04/09/2024 19:05:40 INFO: --- Dependencies ----[0m
+[0;33m    04/09/2024 19:05:40 INFO: Installing apt-transport-https.[0m
+[0;33m    04/09/2024 19:05:44 INFO: Installing debhelper.[0m
+[0;33m    04/09/2024 19:06:07 INFO: Wazuh development repository added.[0m
+[0;33m    04/09/2024 19:06:07 INFO: --- Configuration files ---[0m
+[0;33m    04/09/2024 19:06:07 INFO: Generating configuration files.[0m
+[0;33m    04/09/2024 19:06:08 INFO: Generating the root certificate.[0m
+[0;33m    04/09/2024 19:06:08 INFO: Generating Admin certificates.[0m
+[0;33m    04/09/2024 19:06:08 INFO: Generating Wazuh indexer certificates.[0m
+[0;33m    04/09/2024 19:06:09 INFO: Generating Filebeat certificates.[0m
+[0;33m    04/09/2024 19:06:09 INFO: Generating Wazuh dashboard certificates.[0m
+[0;33m    04/09/2024 19:06:09 INFO: Created wazuh-install-files.tar. It contains the Wazuh cluster key, certificates, and passwords necessary for installation.[0m
+[0;33m    04/09/2024 19:06:09 INFO: --- Wazuh indexer ---[0m
+[0;33m    04/09/2024 19:06:09 INFO: Starting Wazuh indexer installation.[0m
+[0;33m    04/09/2024 19:06:55 INFO: Wazuh indexer installation finished.[0m
+[0;33m    04/09/2024 19:06:55 INFO: Wazuh indexer post-install configuration finished.[0m
+[0;33m    04/09/2024 19:06:55 INFO: Starting service wazuh-indexer.[0m
+[0;33m    04/09/2024 19:07:06 INFO: wazuh-indexer service started.[0m
+[0;33m    04/09/2024 19:07:06 INFO: Initializing Wazuh indexer cluster security settings.[0m
+[0;33m    04/09/2024 19:07:10 INFO: Wazuh indexer cluster security configuration initialized.[0m
+[0;33m    04/09/2024 19:07:10 INFO: Wazuh indexer cluster initialized.[0m
+[0;33m    04/09/2024 19:07:10 INFO: --- Wazuh server ---[0m
+[0;33m    04/09/2024 19:07:10 INFO: Starting the Wazuh manager installation.[0m
+[0;33m    04/09/2024 19:08:15 INFO: Wazuh manager installation finished.[0m
+[0;33m    04/09/2024 19:08:15 INFO: Wazuh manager vulnerability detection configuration finished.[0m
+[0;33m    04/09/2024 19:08:15 INFO: Starting service wazuh-manager.[0m
+[0;33m    04/09/2024 19:08:31 INFO: wazuh-manager service started.[0m
+[0;33m    04/09/2024 19:08:31 INFO: Starting Filebeat installation.[0m
+[0;33m    04/09/2024 19:08:44 INFO: Filebeat installation finished.[0m
+[0;33m    04/09/2024 19:08:45 INFO: Filebeat post-install configuration finished.[0m
+[0;33m    04/09/2024 19:08:45 INFO: Starting service filebeat.[0m
+[0;33m    04/09/2024 19:08:46 INFO: filebeat service started.[0m
+[0;33m    04/09/2024 19:08:46 INFO: --- Wazuh dashboard ---[0m
+[0;33m    04/09/2024 19:08:46 INFO: Starting Wazuh dashboard installation.[0m
+[0;33m    04/09/2024 19:11:21 INFO: Wazuh dashboard installation finished.[0m
+[0;33m    04/09/2024 19:11:21 INFO: Wazuh dashboard post-install configuration finished.[0m
+[0;33m    04/09/2024 19:11:21 INFO: Starting service wazuh-dashboard.[0m
+[0;33m    04/09/2024 19:11:21 INFO: wazuh-dashboard service started.[0m
+[0;33m    04/09/2024 19:11:22 INFO: Updating the internal users.[0m
+[0;33m    04/09/2024 19:11:25 INFO: A backup of the internal users has been saved in the /etc/wazuh-indexer/internalusers-backup folder.[0m
+[0;33m    04/09/2024 19:11:33 INFO: The filebeat.yml file has been updated to use the Filebeat Keystore username and password.[0m
+[0;33m    04/09/2024 19:12:00 INFO: Initializing Wazuh dashboard web application.[0m
+[0;33m    04/09/2024 19:12:01 INFO: Wazuh dashboard web application initialized.[0m
+[0;33m    04/09/2024 19:12:01 INFO: --- Summary ---[0m
+[0;33m    04/09/2024 19:12:01 INFO: You can access the web interface https://<wazuh-dashboard-ip>:443[0m
+[0;33m        User: admin[0m
+[0;33m        Password: 1.ALkNbVx6Lt9prAh8rQIK?1cf9*emln[0m
+[0;33m    04/09/2024 19:12:01 INFO: Installation finished.[0m
+[0;33m  stdout_lines: <omitted>[0m
+
+PLAY RECAP *********************************************************************
+[0;33mec2-54-198-198-61.compute-1.amazonaws.com[0m : [0;32mok=4   [0m [0;33mchanged=3   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[37m[2024-09-04 16:12:01] [DEBUG] PROVISIONER: Playbook {'hosts': 'ec2-54-198-198-61.compute-1.amazonaws.com', 'become': True, 'gather_facts': True, 'tasks': [{'name': 'Install the required packages', 'shell': '\nsudo apt-get update && apt-get -y install curl\n'}, {'name': 'Download the Wazuh installation assistant', 'shell': 'curl -sO https://packages-dev.wazuh.com/4.9/wazuh-install.sh'}, {'name': 'Install wazuh-manager with assistant', 'shell': 'bash ./wazuh-install.sh -a -i'}]} finished with status {'skipped': {}, 'ok': {'ec2-54-198-198-61.compute-1.amazonaws.com': 4}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'ec2-54-198-198-61.compute-1.amazonaws.com': 1}, 'changed': {'ec2-54-198-198-61.compute-1.amazonaws.com': 3}}[0m
+[32m[2024-09-04 16:12:01] [INFO] PROVISIONER: Provision of "wazuh-manager" complete successfully.[0m
+[32m[2024-09-04 16:12:01] [INFO] PROVISIONER: All components provisioned successfully.[0m
+[37m[2024-09-04 16:12:01] [DEBUG] PROVISIONER: Provision summary: {'skipped': {}, 'ok': {'ec2-54-198-198-61.compute-1.amazonaws.com': 4}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'ec2-54-198-198-61.compute-1.amazonaws.com': 1}, 'changed': {'ec2-54-198-198-61.compute-1.amazonaws.com': 3}}[0m
+[0m
+[32m[2024-09-04 16:12:01] [INFO] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: [provision-manager-linux-ubuntu-22.04-amd64] Finished task in 437.66 seconds.[0m
+[32m[2024-09-04 16:12:01] [INFO] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: [allocate-agent-linux-redhat-9-amd64] Starting task.[0m
+[36m[2024-09-04 16:12:01] [DEBUG] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: Running task "allocate-agent-linux-redhat-9-amd64" with arguments: ['modules/allocation/main.py', '--action=create', '--provider=aws', '--size=small', '--composite-name=linux-redhat-9-amd64', '--inventory-output=/tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml', '--track-output=/tmp/dtt1-poc/agent-linux-redhat-9-amd64/track.yaml', '--label-termination-date=1d', '--label-team=qa'][0m
+[36m[2024-09-04 16:13:35] [DEBUG] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: Finished task "allocate-agent-linux-redhat-9-amd64" execution with result:
+[37m[2024-09-04 16:12:02] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m
+[37m[2024-09-04 16:12:02] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m
+[32m[2024-09-04 16:12:02] [INFO] ALLOCATOR: Creating instance at /tmp/wazuh-qa[0m
+[37m[2024-09-04 16:12:04] [DEBUG] ALLOCATOR: No config provided. Generating from payload[0m
+[37m[2024-09-04 16:12:04] [DEBUG] ALLOCATOR: Generating new key pair[0m
+[37m[2024-09-04 16:12:04] [DEBUG] ALLOCATOR: Creating base directory: /tmp/wazuh-qa/AWS-A15EF604-7CAF-47CD-8D82-2F40F840D2BF[0m
+[37m[2024-09-04 16:12:24] [DEBUG] ALLOCATOR: Renaming temp /tmp/wazuh-qa/AWS-A15EF604-7CAF-47CD-8D82-2F40F840D2BF directory to /tmp/wazuh-qa/redhat-9-amd64-1422[0m
+[32m[2024-09-04 16:12:24] [INFO] ALLOCATOR [REDHAT-9-AMD64]: Instance i-0bbcb3b0f998bbe1d created.[0m
+[32m[2024-09-04 16:12:25] [INFO] ALLOCATOR [REDHAT-9-AMD64]: Instance i-0bbcb3b0f998bbe1d started.[0m
+[32m[2024-09-04 16:12:25] [INFO] ALLOCATOR [REDHAT-9-AMD64]: The inventory file generated at /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml[0m
+[32m[2024-09-04 16:12:25] [INFO] ALLOCATOR [REDHAT-9-AMD64]: The track file generated at /tmp/dtt1-poc/agent-linux-redhat-9-amd64/track.yaml[0m
+[33m[2024-09-04 16:12:33] [WARNING] ALLOCATOR [REDHAT-9-AMD64]: Error on attempt 1 of 30: [Errno None] Unable to connect to port 2200 on 34.205.142.162[0m
+[33m[2024-09-04 16:13:03] [WARNING] ALLOCATOR [REDHAT-9-AMD64]: Error on attempt 2 of 30: [Errno None] Unable to connect to port 2200 on 34.205.142.162[0m
+[32m[2024-09-04 16:13:35] [INFO] ALLOCATOR [REDHAT-9-AMD64]: SSH connection successful.[0m
+[32m[2024-09-04 16:13:35] [INFO] ALLOCATOR [REDHAT-9-AMD64]: Instance i-0bbcb3b0f998bbe1d created successfully.[0m
+[0m
+[32m[2024-09-04 16:13:35] [INFO] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: [allocate-agent-linux-redhat-9-amd64] Finished task in 93.80 seconds.[0m
+[32m[2024-09-04 16:13:35] [INFO] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: [run-agent-linux-redhat-9-amd64-tests] Starting task.[0m
+[36m[2024-09-04 16:13:35] [DEBUG] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: Running task "run-agent-linux-redhat-9-amd64-tests" with arguments: ['modules/testing/main.py', "--targets={'wazuh-1': '/tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml'}", "--targets={'agent': '/tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml'}", '--tests=install,registration,connection,basic_info,restart,stop,uninstall', '--component=agent', '--wazuh-version=4.7.4', '--wazuh-revision=40717', '--live=False'][0m
+[36m[2024-09-04 16:21:27] [DEBUG] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: Finished task "run-agent-linux-redhat-9-amd64-tests" execution with result:
+[37m[2024-09-04 16:13:36] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m
+[37m[2024-09-04 16:13:36] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m
+[32m[2024-09-04 16:13:36] [INFO] TESTER: Running tests for ec2-54-198-198-61.compute-1.amazonaws.com[0m
+[32m[2024-09-04 16:13:36] [INFO] TESTER: Running tests for ec2-34-205-142-162.compute-1.amazonaws.com[0m
+[37m[2024-09-04 16:13:36] [DEBUG] TESTER: Using extra vars: {'component': 'agent', 'wazuh_version': '4.7.4', 'wazuh_revision': '40717', 'wazuh_branch': None, 'working_dir': '/tmp/tests', 'live': False, 'hosts_ip': ['ec2-54-198-198-61.compute-1.amazonaws.com', 'ec2-34-205-142-162.compute-1.amazonaws.com'], 'targets': '{wazuh-1: /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml, agent: /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml}', 'dependencies': '{}', 'local_host_path': '/home/fcaffieri/repos/wazuh-qa/deployability', 'current_user': 'fcaffieri'}[0m
+[37m[2024-09-04 16:13:36] [DEBUG] TESTER: Using inventory: {'all': {'hosts': {'ec2-54-198-198-61.compute-1.amazonaws.com': {'ansible_port': 2200, 'ansible_user': 'ubuntu', 'ansible_ssh_private_key_file': '/tmp/wazuh-qa/wazuh-25497-ubuntu-22.04-6097/wazuh-25497-ubuntu-22.04-key-6135'}}}}[0m
+[37m[2024-09-04 16:13:36] [DEBUG] TESTER: Running playbook: /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/setup.yml[0m
+[0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+
+PLAY [localhost] ***************************************************************
+
+TASK [Gathering Facts] *********************************************************
+[0;32mok: [localhost][0m
+
+TASK [Cleaning old key ssh-keygen registries] **********************************
+[0;33mchanged: [localhost] => (item=ec2-54-198-198-61.compute-1.amazonaws.com) => changed=true [0m
+[0;33m  ansible_loop_var: item[0m
+[0;33m  cmd:[0m
+[0;33m  - ssh-keygen[0m
+[0;33m  - -f[0m
+[0;33m  - ~/.ssh/known_hosts[0m
+[0;33m  - -R[0m
+[0;33m  - ec2-54-198-198-61.compute-1.amazonaws.com[0m
+[0;33m  delta: '0:00:00.010756'[0m
+[0;33m  end: '2024-09-04 16:13:40.049533'[0m
+[0;33m  item: ec2-54-198-198-61.compute-1.amazonaws.com[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:13:40.038777'[0m
+[0;33m  stderr: Host ec2-54-198-198-61.compute-1.amazonaws.com not found in /home/fcaffieri/.ssh/known_hosts[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: ''[0m
+[0;33m  stdout_lines: <omitted>[0m
+[0;33mchanged: [localhost] => (item=ec2-34-205-142-162.compute-1.amazonaws.com) => changed=true [0m
+[0;33m  ansible_loop_var: item[0m
+[0;33m  cmd:[0m
+[0;33m  - ssh-keygen[0m
+[0;33m  - -f[0m
+[0;33m  - ~/.ssh/known_hosts[0m
+[0;33m  - -R[0m
+[0;33m  - ec2-34-205-142-162.compute-1.amazonaws.com[0m
+[0;33m  delta: '0:00:00.011464'[0m
+[0;33m  end: '2024-09-04 16:13:40.357841'[0m
+[0;33m  item: ec2-34-205-142-162.compute-1.amazonaws.com[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:13:40.346377'[0m
+[0;33m  stderr: Host ec2-34-205-142-162.compute-1.amazonaws.com not found in /home/fcaffieri/.ssh/known_hosts[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: ''[0m
+[0;33m  stdout_lines: <omitted>[0m
+
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=2   [0m [0;33mchanged=1   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[37m[2024-09-04 16:13:40] [DEBUG] TESTER: Playbook /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/setup.yml finished with status {'skipped': {}, 'ok': {'localhost': 2}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'localhost': 1}, 'changed': {'localhost': 1}}[0m
+[37m[2024-09-04 16:13:40] [DEBUG] TESTER: Using inventory: {'all': {'hosts': {'ec2-54-198-198-61.compute-1.amazonaws.com': {'ansible_port': 2200, 'ansible_user': 'ubuntu', 'ansible_ssh_private_key_file': '/tmp/wazuh-qa/wazuh-25497-ubuntu-22.04-6097/wazuh-25497-ubuntu-22.04-key-6135'}}}}[0m
+[37m[2024-09-04 16:13:40] [DEBUG] TESTER: Running playbook: /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/test.yml[0m
+[0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+
+PLAY [localhost] ***************************************************************
+
+TASK [Gathering Facts] *********************************************************
+[0;32mok: [localhost][0m
+
+TASK [Test install for agent] **************************************************
+[0;33mchanged: [localhost] => changed=true [0m
+[0;33m  cmd:[0m
+[0;33m  - python3[0m
+[0;33m  - -m[0m
+[0;33m  - pytest[0m
+[0;33m  - modules/testing/tests/test_agent/test_install.py[0m
+[0;33m  - -v[0m
+[0;33m  - --wazuh_version=4.7.4[0m
+[0;33m  - --wazuh_revision=40717[0m
+[0;33m  - --component=agent[0m
+[0;33m  - --dependencies={}[0m
+[0;33m  - '--targets={wazuh-1: /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml, agent: /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml}'[0m
+[0;33m  - --live=False[0m
+[0;33m  - -s[0m
+[0;33m  delta: '0:01:08.312734'[0m
+[0;33m  end: '2024-09-04 16:14:52.284030'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:13:43.971296'[0m
+[0;33m  stderr: |-[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m      % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current[0m
+[0;33m                                     Dload  Upload   Total   Spent    Left  Speed[0m
+[0;33m      0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0 9247k    0 51687    0     0  77841      0  0:02:01 --:--:--  0:02:01 77959100 9247k  100 9247k    0     0  8047k      0  0:00:01  0:00:01 --:--:-- 8061k[0m
+[0;33m    warning: wazuh-agent-4.7.4-1.x86_64.rpm: Header V3 RSA/SHA256 Signature, key ID 29111145: NOKEY[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Created symlink /etc/systemd/system/multi-user.target.wants/wazuh-agent.service → /usr/lib/systemd/system/wazuh-agent.service.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Job for wazuh-agent.service failed because the control process exited with error code.[0m
+[0;33m    See "systemctl status wazuh-agent.service" and "journalctl -xeu wazuh-agent.service" for details.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    [37m[2024-09-04 16:13:44] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m[0m
+[0;33m    [37m[2024-09-04 16:13:44] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m[0m
+[0;33m    ============================= test session starts ==============================[0m
+[0;33m    platform linux -- Python 3.10.14, pytest-7.4.4, pluggy-1.5.0 -- /home/fcaffieri/repos/wazuh-qa/.venv/bin/python3[0m
+[0;33m    cachedir: .pytest_cache[0m
+[0;33m    rootdir: /home/fcaffieri/repos/wazuh-qa/deployability/modules[0m
+[0;33m    collecting ... collected 2 items[0m
+[0;33m  [0m
+[0;33m    modules/testing/tests/test_agent/test_install.py::test_installation [32m[2024-09-04 16:13:45] [INFO] TESTER: Checking connection to redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:13:46] [INFO] TESTER: Connection established successfully in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:13:49] [INFO] TESTER: Checking connection to ubuntu-22.04[0m[0m
+[0;33m    [32m[2024-09-04 16:13:51] [INFO] TESTER: Connection established successfully in ubuntu-22.04[0m[0m
+[0;33m    [32m[2024-09-04 16:13:54] [INFO] TESTER: No Firewall to disable on redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:13:57] [INFO] TESTER: Manager is already installed in ubuntu-22.04[0m[0m
+[0;33m    [32m[2024-09-04 16:14:00] [INFO] TESTER: Installing Agent in redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_install.py::test_status [32m[2024-09-04 16:14:49] [INFO] TESTER: Getting status of redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m  [0m
+[0;33m    =============================== warnings summary ===============================[0m
+[0;33m    modules/provision/models.py:36[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('dependencies', pre=True)[0m
+[0;33m  [0m
+[0;33m    modules/provision/models.py:64[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:64: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('install', 'uninstall', pre=True)[0m
+[0;33m  [0m
+[0;33m    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html[0m
+[0;33m    =================== 2 passed, 2 warnings in 67.08s (0:01:07) ===================[0m
+[0;33m  stdout_lines: <omitted>[0m
+
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=2   [0m [0;33mchanged=1   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[37m[2024-09-04 16:14:52] [DEBUG] TESTER: Playbook /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/test.yml finished with status {'skipped': {}, 'ok': {'localhost': 2}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'localhost': 1}, 'changed': {'localhost': 1}}[0m
+[32m[2024-09-04 16:14:52] [INFO] TESTER: Test install Finished with: [0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+[32m[2024-09-04 16:14:52] [INFO] TESTER: Test install Finished with: [0m
+[32m[2024-09-04 16:14:52] [INFO] TESTER: Test install Finished with: 
+PLAY [localhost] ***************************************************************[0m
+[32m[2024-09-04 16:14:52] [INFO] TESTER: Test install Finished with: 
+TASK [Gathering Facts] *********************************************************[0m
+[32m[2024-09-04 16:14:52] [INFO] TESTER: Test install Finished with: [0m
+[32m[2024-09-04 16:14:52] [INFO] TESTER: Test install Finished with: [0;32mok: [localhost][0m
+[32m[2024-09-04 16:14:52] [INFO] TESTER: Test install Finished with: 
+TASK [Test install for agent] **************************************************[0m
+[32m[2024-09-04 16:14:52] [INFO] TESTER: Test install Finished with: [0m
+[32m[2024-09-04 16:14:52] [INFO] TESTER: Test install Finished with: [0;33mchanged: [localhost] => changed=true [0m
+[0;33m  cmd:[0m
+[0;33m  - python3[0m
+[0;33m  - -m[0m
+[0;33m  - pytest[0m
+[0;33m  - modules/testing/tests/test_agent/test_install.py[0m
+[0;33m  - -v[0m
+[0;33m  - --wazuh_version=4.7.4[0m
+[0;33m  - --wazuh_revision=40717[0m
+[0;33m  - --component=agent[0m
+[0;33m  - --dependencies={}[0m
+[0;33m  - '--targets={wazuh-1: /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml, agent: /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml}'[0m
+[0;33m  - --live=False[0m
+[0;33m  - -s[0m
+[0;33m  delta: '0:01:08.312734'[0m
+[0;33m  end: '2024-09-04 16:14:52.284030'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:13:43.971296'[0m
+[0;33m  stderr: |-[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m      % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current[0m
+[0;33m                                     Dload  Upload   Total   Spent    Left  Speed[0m
+[0;33m      0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0 9247k    0 51687    0     0  77841      0  0:02:01 --:--:--  0:02:01 77959100 9247k  100 9247k    0     0  8047k      0  0:00:01  0:00:01 --:--:-- 8061k[0m
+[0;33m    warning: wazuh-agent-4.7.4-1.x86_64.rpm: Header V3 RSA/SHA256 Signature, key ID 29111145: NOKEY[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Created symlink /etc/systemd/system/multi-user.target.wants/wazuh-agent.service → /usr/lib/systemd/system/wazuh-agent.service.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Job for wazuh-agent.service failed because the control process exited with error code.[0m
+[0;33m    See "systemctl status wazuh-agent.service" and "journalctl -xeu wazuh-agent.service" for details.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    [37m[2024-09-04 16:13:44] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m[0m
+[0;33m    [37m[2024-09-04 16:13:44] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m[0m
+[0;33m    ============================= test session starts ==============================[0m
+[0;33m    platform linux -- Python 3.10.14, pytest-7.4.4, pluggy-1.5.0 -- /home/fcaffieri/repos/wazuh-qa/.venv/bin/python3[0m
+[0;33m    cachedir: .pytest_cache[0m
+[0;33m    rootdir: /home/fcaffieri/repos/wazuh-qa/deployability/modules[0m
+[0;33m    collecting ... collected 2 items[0m
+[0;33m  [0m
+[0;33m    modules/testing/tests/test_agent/test_install.py::test_installation [32m[2024-09-04 16:13:45] [INFO] TESTER: Checking connection to redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:13:46] [INFO] TESTER: Connection established successfully in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:13:49] [INFO] TESTER: Checking connection to ubuntu-22.04[0m[0m
+[0;33m    [32m[2024-09-04 16:13:51] [INFO] TESTER: Connection established successfully in ubuntu-22.04[0m[0m
+[0;33m    [32m[2024-09-04 16:13:54] [INFO] TESTER: No Firewall to disable on redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:13:57] [INFO] TESTER: Manager is already installed in ubuntu-22.04[0m[0m
+[0;33m    [32m[2024-09-04 16:14:00] [INFO] TESTER: Installing Agent in redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_install.py::test_status [32m[2024-09-04 16:14:49] [INFO] TESTER: Getting status of redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m  [0m
+[0;33m    =============================== warnings summary ===============================[0m
+[0;33m    modules/provision/models.py:36[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('dependencies', pre=True)[0m
+[0;33m  [0m
+[0;33m    modules/provision/models.py:64[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:64: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('install', 'uninstall', pre=True)[0m
+[0;33m  [0m
+[0;33m    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html[0m
+[0;33m    =================== 2 passed, 2 warnings in 67.08s (0:01:07) ===================[0m
+[0;33m  stdout_lines: <omitted>[0m
+[32m[2024-09-04 16:14:52] [INFO] TESTER: Test install Finished with: 
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=2   [0m [0;33mchanged=1   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   [0m
+[37m[2024-09-04 16:14:52] [DEBUG] TESTER: Using inventory: {'all': {'hosts': {'ec2-54-198-198-61.compute-1.amazonaws.com': {'ansible_port': 2200, 'ansible_user': 'ubuntu', 'ansible_ssh_private_key_file': '/tmp/wazuh-qa/wazuh-25497-ubuntu-22.04-6097/wazuh-25497-ubuntu-22.04-key-6135'}}}}[0m
+[37m[2024-09-04 16:14:52] [DEBUG] TESTER: Running playbook: /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/test.yml[0m
+[0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+
+PLAY [localhost] ***************************************************************
+
+TASK [Gathering Facts] *********************************************************
+[0;32mok: [localhost][0m
+
+TASK [Test registration for agent] *********************************************
+[0;33mchanged: [localhost] => changed=true [0m
+[0;33m  cmd:[0m
+[0;33m  - python3[0m
+[0;33m  - -m[0m
+[0;33m  - pytest[0m
+[0;33m  - modules/testing/tests/test_agent/test_registration.py[0m
+[0;33m  - -v[0m
+[0;33m  - --wazuh_version=4.7.4[0m
+[0;33m  - --wazuh_revision=40717[0m
+[0;33m  - --component=agent[0m
+[0;33m  - --dependencies={}[0m
+[0;33m  - '--targets={wazuh-1: /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml, agent: /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml}'[0m
+[0;33m  - --live=False[0m
+[0;33m  - -s[0m
+[0;33m  delta: '0:00:59.317067'[0m
+[0;33m  end: '2024-09-04 16:15:55.299819'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:14:55.982752'[0m
+[0;33m  stderr: |-[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    [37m[2024-09-04 16:14:56] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m[0m
+[0;33m    [37m[2024-09-04 16:14:56] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m[0m
+[0;33m    ============================= test session starts ==============================[0m
+[0;33m    platform linux -- Python 3.10.14, pytest-7.4.4, pluggy-1.5.0 -- /home/fcaffieri/repos/wazuh-qa/.venv/bin/python3[0m
+[0;33m    cachedir: .pytest_cache[0m
+[0;33m    rootdir: /home/fcaffieri/repos/wazuh-qa/deployability/modules[0m
+[0;33m    collecting ... collected 4 items[0m
+[0;33m  [0m
+[0;33m    modules/testing/tests/test_agent/test_registration.py::test_status [32m[2024-09-04 16:14:57] [INFO] TESTER: Checking connection to redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:14:58] [INFO] TESTER: Connection established successfully in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:15:02] [INFO] TESTER: Registering agent in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:15:20] [INFO] TESTER: Getting status of redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_registration.py::test_service PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_registration.py::test_connection PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_registration.py::test_clientKeys PASSED[0m
+[0;33m  [0m
+[0;33m    =============================== warnings summary ===============================[0m
+[0;33m    modules/provision/models.py:36[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('dependencies', pre=True)[0m
+[0;33m  [0m
+[0;33m    modules/provision/models.py:64[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:64: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('install', 'uninstall', pre=True)[0m
+[0;33m  [0m
+[0;33m    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html[0m
+[0;33m    ======================== 4 passed, 2 warnings in 57.78s ========================[0m
+[0;33m  stdout_lines: <omitted>[0m
+
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=2   [0m [0;33mchanged=1   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[37m[2024-09-04 16:15:55] [DEBUG] TESTER: Playbook /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/test.yml finished with status {'skipped': {}, 'ok': {'localhost': 2}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'localhost': 1}, 'changed': {'localhost': 1}}[0m
+[32m[2024-09-04 16:15:55] [INFO] TESTER: Test registration Finished with: [0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+[32m[2024-09-04 16:15:55] [INFO] TESTER: Test registration Finished with: [0m
+[32m[2024-09-04 16:15:55] [INFO] TESTER: Test registration Finished with: 
+PLAY [localhost] ***************************************************************[0m
+[32m[2024-09-04 16:15:55] [INFO] TESTER: Test registration Finished with: 
+TASK [Gathering Facts] *********************************************************[0m
+[32m[2024-09-04 16:15:55] [INFO] TESTER: Test registration Finished with: [0m
+[32m[2024-09-04 16:15:55] [INFO] TESTER: Test registration Finished with: [0;32mok: [localhost][0m
+[32m[2024-09-04 16:15:55] [INFO] TESTER: Test registration Finished with: 
+TASK [Test registration for agent] *********************************************[0m
+[32m[2024-09-04 16:15:55] [INFO] TESTER: Test registration Finished with: [0m
+[32m[2024-09-04 16:15:55] [INFO] TESTER: Test registration Finished with: [0;33mchanged: [localhost] => changed=true [0m
+[0;33m  cmd:[0m
+[0;33m  - python3[0m
+[0;33m  - -m[0m
+[0;33m  - pytest[0m
+[0;33m  - modules/testing/tests/test_agent/test_registration.py[0m
+[0;33m  - -v[0m
+[0;33m  - --wazuh_version=4.7.4[0m
+[0;33m  - --wazuh_revision=40717[0m
+[0;33m  - --component=agent[0m
+[0;33m  - --dependencies={}[0m
+[0;33m  - '--targets={wazuh-1: /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml, agent: /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml}'[0m
+[0;33m  - --live=False[0m
+[0;33m  - -s[0m
+[0;33m  delta: '0:00:59.317067'[0m
+[0;33m  end: '2024-09-04 16:15:55.299819'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:14:55.982752'[0m
+[0;33m  stderr: |-[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    [37m[2024-09-04 16:14:56] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m[0m
+[0;33m    [37m[2024-09-04 16:14:56] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m[0m
+[0;33m    ============================= test session starts ==============================[0m
+[0;33m    platform linux -- Python 3.10.14, pytest-7.4.4, pluggy-1.5.0 -- /home/fcaffieri/repos/wazuh-qa/.venv/bin/python3[0m
+[0;33m    cachedir: .pytest_cache[0m
+[0;33m    rootdir: /home/fcaffieri/repos/wazuh-qa/deployability/modules[0m
+[0;33m    collecting ... collected 4 items[0m
+[0;33m  [0m
+[0;33m    modules/testing/tests/test_agent/test_registration.py::test_status [32m[2024-09-04 16:14:57] [INFO] TESTER: Checking connection to redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:14:58] [INFO] TESTER: Connection established successfully in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:15:02] [INFO] TESTER: Registering agent in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:15:20] [INFO] TESTER: Getting status of redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_registration.py::test_service PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_registration.py::test_connection PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_registration.py::test_clientKeys PASSED[0m
+[0;33m  [0m
+[0;33m    =============================== warnings summary ===============================[0m
+[0;33m    modules/provision/models.py:36[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('dependencies', pre=True)[0m
+[0;33m  [0m
+[0;33m    modules/provision/models.py:64[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:64: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('install', 'uninstall', pre=True)[0m
+[0;33m  [0m
+[0;33m    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html[0m
+[0;33m    ======================== 4 passed, 2 warnings in 57.78s ========================[0m
+[0;33m  stdout_lines: <omitted>[0m
+[32m[2024-09-04 16:15:55] [INFO] TESTER: Test registration Finished with: 
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=2   [0m [0;33mchanged=1   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   [0m
+[37m[2024-09-04 16:15:55] [DEBUG] TESTER: Using inventory: {'all': {'hosts': {'ec2-54-198-198-61.compute-1.amazonaws.com': {'ansible_port': 2200, 'ansible_user': 'ubuntu', 'ansible_ssh_private_key_file': '/tmp/wazuh-qa/wazuh-25497-ubuntu-22.04-6097/wazuh-25497-ubuntu-22.04-key-6135'}}}}[0m
+[37m[2024-09-04 16:15:55] [DEBUG] TESTER: Running playbook: /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/test.yml[0m
+[0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+
+PLAY [localhost] ***************************************************************
+
+TASK [Gathering Facts] *********************************************************
+[0;32mok: [localhost][0m
+
+TASK [Test connection for agent] ***********************************************
+[0;33mchanged: [localhost] => changed=true [0m
+[0;33m  cmd:[0m
+[0;33m  - python3[0m
+[0;33m  - -m[0m
+[0;33m  - pytest[0m
+[0;33m  - modules/testing/tests/test_agent/test_connection.py[0m
+[0;33m  - -v[0m
+[0;33m  - --wazuh_version=4.7.4[0m
+[0;33m  - --wazuh_revision=40717[0m
+[0;33m  - --component=agent[0m
+[0;33m  - --dependencies={}[0m
+[0;33m  - '--targets={wazuh-1: /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml, agent: /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml}'[0m
+[0;33m  - --live=False[0m
+[0;33m  - -s[0m
+[0;33m  delta: '0:01:14.011199'[0m
+[0;33m  end: '2024-09-04 16:17:12.609060'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:15:58.597861'[0m
+[0;33m  stderr: |-[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    [37m[2024-09-04 16:15:59] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m[0m
+[0;33m    [37m[2024-09-04 16:15:59] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m[0m
+[0;33m    ============================= test session starts ==============================[0m
+[0;33m    platform linux -- Python 3.10.14, pytest-7.4.4, pluggy-1.5.0 -- /home/fcaffieri/repos/wazuh-qa/.venv/bin/python3[0m
+[0;33m    cachedir: .pytest_cache[0m
+[0;33m    rootdir: /home/fcaffieri/repos/wazuh-qa/deployability/modules[0m
+[0;33m    collecting ... collected 6 items[0m
+[0;33m  [0m
+[0;33m    modules/testing/tests/test_agent/test_connection.py::test_connection [32m[2024-09-04 16:15:59] [INFO] TESTER: Checking connection to redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:16:01] [INFO] TESTER: Connection established successfully in redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_connection.py::test_status [32m[2024-09-04 16:16:41] [INFO] TESTER: Getting status of redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_connection.py::test_service PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_connection.py::test_clientKeys PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_connection.py::test_port PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_connection.py::test_processes PASSED[0m
+[0;33m  [0m
+[0;33m    =============================== warnings summary ===============================[0m
+[0;33m    modules/provision/models.py:36[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('dependencies', pre=True)[0m
+[0;33m  [0m
+[0;33m    modules/provision/models.py:64[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:64: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('install', 'uninstall', pre=True)[0m
+[0;33m  [0m
+[0;33m    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html[0m
+[0;33m    =================== 6 passed, 2 warnings in 72.96s (0:01:12) ===================[0m
+[0;33m  stdout_lines: <omitted>[0m
+
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=2   [0m [0;33mchanged=1   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[37m[2024-09-04 16:17:12] [DEBUG] TESTER: Playbook /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/test.yml finished with status {'skipped': {}, 'ok': {'localhost': 2}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'localhost': 1}, 'changed': {'localhost': 1}}[0m
+[32m[2024-09-04 16:17:12] [INFO] TESTER: Test connection Finished with: [0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+[32m[2024-09-04 16:17:12] [INFO] TESTER: Test connection Finished with: [0m
+[32m[2024-09-04 16:17:12] [INFO] TESTER: Test connection Finished with: 
+PLAY [localhost] ***************************************************************[0m
+[32m[2024-09-04 16:17:12] [INFO] TESTER: Test connection Finished with: 
+TASK [Gathering Facts] *********************************************************[0m
+[32m[2024-09-04 16:17:12] [INFO] TESTER: Test connection Finished with: [0m
+[32m[2024-09-04 16:17:12] [INFO] TESTER: Test connection Finished with: [0;32mok: [localhost][0m
+[32m[2024-09-04 16:17:12] [INFO] TESTER: Test connection Finished with: 
+TASK [Test connection for agent] ***********************************************[0m
+[32m[2024-09-04 16:17:12] [INFO] TESTER: Test connection Finished with: [0m
+[32m[2024-09-04 16:17:12] [INFO] TESTER: Test connection Finished with: [0;33mchanged: [localhost] => changed=true [0m
+[0;33m  cmd:[0m
+[0;33m  - python3[0m
+[0;33m  - -m[0m
+[0;33m  - pytest[0m
+[0;33m  - modules/testing/tests/test_agent/test_connection.py[0m
+[0;33m  - -v[0m
+[0;33m  - --wazuh_version=4.7.4[0m
+[0;33m  - --wazuh_revision=40717[0m
+[0;33m  - --component=agent[0m
+[0;33m  - --dependencies={}[0m
+[0;33m  - '--targets={wazuh-1: /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml, agent: /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml}'[0m
+[0;33m  - --live=False[0m
+[0;33m  - -s[0m
+[0;33m  delta: '0:01:14.011199'[0m
+[0;33m  end: '2024-09-04 16:17:12.609060'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:15:58.597861'[0m
+[0;33m  stderr: |-[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    [37m[2024-09-04 16:15:59] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m[0m
+[0;33m    [37m[2024-09-04 16:15:59] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m[0m
+[0;33m    ============================= test session starts ==============================[0m
+[0;33m    platform linux -- Python 3.10.14, pytest-7.4.4, pluggy-1.5.0 -- /home/fcaffieri/repos/wazuh-qa/.venv/bin/python3[0m
+[0;33m    cachedir: .pytest_cache[0m
+[0;33m    rootdir: /home/fcaffieri/repos/wazuh-qa/deployability/modules[0m
+[0;33m    collecting ... collected 6 items[0m
+[0;33m  [0m
+[0;33m    modules/testing/tests/test_agent/test_connection.py::test_connection [32m[2024-09-04 16:15:59] [INFO] TESTER: Checking connection to redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:16:01] [INFO] TESTER: Connection established successfully in redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_connection.py::test_status [32m[2024-09-04 16:16:41] [INFO] TESTER: Getting status of redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_connection.py::test_service PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_connection.py::test_clientKeys PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_connection.py::test_port PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_connection.py::test_processes PASSED[0m
+[0;33m  [0m
+[0;33m    =============================== warnings summary ===============================[0m
+[0;33m    modules/provision/models.py:36[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('dependencies', pre=True)[0m
+[0;33m  [0m
+[0;33m    modules/provision/models.py:64[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:64: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('install', 'uninstall', pre=True)[0m
+[0;33m  [0m
+[0;33m    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html[0m
+[0;33m    =================== 6 passed, 2 warnings in 72.96s (0:01:12) ===================[0m
+[0;33m  stdout_lines: <omitted>[0m
+[32m[2024-09-04 16:17:12] [INFO] TESTER: Test connection Finished with: 
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=2   [0m [0;33mchanged=1   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   [0m
+[37m[2024-09-04 16:17:12] [DEBUG] TESTER: Using inventory: {'all': {'hosts': {'ec2-54-198-198-61.compute-1.amazonaws.com': {'ansible_port': 2200, 'ansible_user': 'ubuntu', 'ansible_ssh_private_key_file': '/tmp/wazuh-qa/wazuh-25497-ubuntu-22.04-6097/wazuh-25497-ubuntu-22.04-key-6135'}}}}[0m
+[37m[2024-09-04 16:17:12] [DEBUG] TESTER: Running playbook: /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/test.yml[0m
+[0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+
+PLAY [localhost] ***************************************************************
+
+TASK [Gathering Facts] *********************************************************
+[0;32mok: [localhost][0m
+
+TASK [Test basic_info for agent] ***********************************************
+[0;33mchanged: [localhost] => changed=true [0m
+[0;33m  cmd:[0m
+[0;33m  - python3[0m
+[0;33m  - -m[0m
+[0;33m  - pytest[0m
+[0;33m  - modules/testing/tests/test_agent/test_basic_info.py[0m
+[0;33m  - -v[0m
+[0;33m  - --wazuh_version=4.7.4[0m
+[0;33m  - --wazuh_revision=40717[0m
+[0;33m  - --component=agent[0m
+[0;33m  - --dependencies={}[0m
+[0;33m  - '--targets={wazuh-1: /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml, agent: /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml}'[0m
+[0;33m  - --live=False[0m
+[0;33m  - -s[0m
+[0;33m  delta: '0:00:34.804984'[0m
+[0;33m  end: '2024-09-04 16:17:50.425703'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:17:15.620719'[0m
+[0;33m  stderr: |-[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    [37m[2024-09-04 16:17:16] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m[0m
+[0;33m    [37m[2024-09-04 16:17:16] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m[0m
+[0;33m    ============================= test session starts ==============================[0m
+[0;33m    platform linux -- Python 3.10.14, pytest-7.4.4, pluggy-1.5.0 -- /home/fcaffieri/repos/wazuh-qa/.venv/bin/python3[0m
+[0;33m    cachedir: .pytest_cache[0m
+[0;33m    rootdir: /home/fcaffieri/repos/wazuh-qa/deployability/modules[0m
+[0;33m    collecting ... collected 3 items[0m
+[0;33m  [0m
+[0;33m    modules/testing/tests/test_agent/test_basic_info.py::test_wazuh_os_version [32m[2024-09-04 16:17:16] [INFO] TESTER: Checking connection to redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:17:17] [INFO] TESTER: Connection established successfully in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:17:43] [INFO] TESTER: OS Version get using systemd method.[0m[0m
+[0;33m    [37m[2024-09-04 16:17:43] [DEBUG] TESTER: Version obtained from agent: 9.2[0m[0m
+[0;33m    [37m[2024-09-04 16:17:43] [DEBUG] TESTER: Version obtained from Wazuh API: 9.2[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_basic_info.py::test_wazuh_version PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_basic_info.py::test_wazuh_revision PASSED[0m
+[0;33m  [0m
+[0;33m    =============================== warnings summary ===============================[0m
+[0;33m    modules/provision/models.py:36[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('dependencies', pre=True)[0m
+[0;33m  [0m
+[0;33m    modules/provision/models.py:64[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:64: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('install', 'uninstall', pre=True)[0m
+[0;33m  [0m
+[0;33m    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html[0m
+[0;33m    ======================== 3 passed, 2 warnings in 33.96s ========================[0m
+[0;33m  stdout_lines: <omitted>[0m
+
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=2   [0m [0;33mchanged=1   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[37m[2024-09-04 16:17:50] [DEBUG] TESTER: Playbook /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/test.yml finished with status {'skipped': {}, 'ok': {'localhost': 2}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'localhost': 1}, 'changed': {'localhost': 1}}[0m
+[32m[2024-09-04 16:17:50] [INFO] TESTER: Test basic_info Finished with: [0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+[32m[2024-09-04 16:17:50] [INFO] TESTER: Test basic_info Finished with: [0m
+[32m[2024-09-04 16:17:50] [INFO] TESTER: Test basic_info Finished with: 
+PLAY [localhost] ***************************************************************[0m
+[32m[2024-09-04 16:17:50] [INFO] TESTER: Test basic_info Finished with: 
+TASK [Gathering Facts] *********************************************************[0m
+[32m[2024-09-04 16:17:50] [INFO] TESTER: Test basic_info Finished with: [0m
+[32m[2024-09-04 16:17:50] [INFO] TESTER: Test basic_info Finished with: [0;32mok: [localhost][0m
+[32m[2024-09-04 16:17:50] [INFO] TESTER: Test basic_info Finished with: 
+TASK [Test basic_info for agent] ***********************************************[0m
+[32m[2024-09-04 16:17:50] [INFO] TESTER: Test basic_info Finished with: [0m
+[32m[2024-09-04 16:17:50] [INFO] TESTER: Test basic_info Finished with: [0;33mchanged: [localhost] => changed=true [0m
+[0;33m  cmd:[0m
+[0;33m  - python3[0m
+[0;33m  - -m[0m
+[0;33m  - pytest[0m
+[0;33m  - modules/testing/tests/test_agent/test_basic_info.py[0m
+[0;33m  - -v[0m
+[0;33m  - --wazuh_version=4.7.4[0m
+[0;33m  - --wazuh_revision=40717[0m
+[0;33m  - --component=agent[0m
+[0;33m  - --dependencies={}[0m
+[0;33m  - '--targets={wazuh-1: /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml, agent: /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml}'[0m
+[0;33m  - --live=False[0m
+[0;33m  - -s[0m
+[0;33m  delta: '0:00:34.804984'[0m
+[0;33m  end: '2024-09-04 16:17:50.425703'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:17:15.620719'[0m
+[0;33m  stderr: |-[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    [37m[2024-09-04 16:17:16] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m[0m
+[0;33m    [37m[2024-09-04 16:17:16] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m[0m
+[0;33m    ============================= test session starts ==============================[0m
+[0;33m    platform linux -- Python 3.10.14, pytest-7.4.4, pluggy-1.5.0 -- /home/fcaffieri/repos/wazuh-qa/.venv/bin/python3[0m
+[0;33m    cachedir: .pytest_cache[0m
+[0;33m    rootdir: /home/fcaffieri/repos/wazuh-qa/deployability/modules[0m
+[0;33m    collecting ... collected 3 items[0m
+[0;33m  [0m
+[0;33m    modules/testing/tests/test_agent/test_basic_info.py::test_wazuh_os_version [32m[2024-09-04 16:17:16] [INFO] TESTER: Checking connection to redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:17:17] [INFO] TESTER: Connection established successfully in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:17:43] [INFO] TESTER: OS Version get using systemd method.[0m[0m
+[0;33m    [37m[2024-09-04 16:17:43] [DEBUG] TESTER: Version obtained from agent: 9.2[0m[0m
+[0;33m    [37m[2024-09-04 16:17:43] [DEBUG] TESTER: Version obtained from Wazuh API: 9.2[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_basic_info.py::test_wazuh_version PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_basic_info.py::test_wazuh_revision PASSED[0m
+[0;33m  [0m
+[0;33m    =============================== warnings summary ===============================[0m
+[0;33m    modules/provision/models.py:36[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('dependencies', pre=True)[0m
+[0;33m  [0m
+[0;33m    modules/provision/models.py:64[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:64: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('install', 'uninstall', pre=True)[0m
+[0;33m  [0m
+[0;33m    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html[0m
+[0;33m    ======================== 3 passed, 2 warnings in 33.96s ========================[0m
+[0;33m  stdout_lines: <omitted>[0m
+[32m[2024-09-04 16:17:50] [INFO] TESTER: Test basic_info Finished with: 
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=2   [0m [0;33mchanged=1   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   [0m
+[37m[2024-09-04 16:17:50] [DEBUG] TESTER: Using inventory: {'all': {'hosts': {'ec2-54-198-198-61.compute-1.amazonaws.com': {'ansible_port': 2200, 'ansible_user': 'ubuntu', 'ansible_ssh_private_key_file': '/tmp/wazuh-qa/wazuh-25497-ubuntu-22.04-6097/wazuh-25497-ubuntu-22.04-key-6135'}}}}[0m
+[37m[2024-09-04 16:17:50] [DEBUG] TESTER: Running playbook: /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/test.yml[0m
+[0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+
+PLAY [localhost] ***************************************************************
+
+TASK [Gathering Facts] *********************************************************
+[0;32mok: [localhost][0m
+
+TASK [Test restart for agent] **************************************************
+[0;33mchanged: [localhost] => changed=true [0m
+[0;33m  cmd:[0m
+[0;33m  - python3[0m
+[0;33m  - -m[0m
+[0;33m  - pytest[0m
+[0;33m  - modules/testing/tests/test_agent/test_restart.py[0m
+[0;33m  - -v[0m
+[0;33m  - --wazuh_version=4.7.4[0m
+[0;33m  - --wazuh_revision=40717[0m
+[0;33m  - --component=agent[0m
+[0;33m  - --dependencies={}[0m
+[0;33m  - '--targets={wazuh-1: /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml, agent: /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml}'[0m
+[0;33m  - --live=False[0m
+[0;33m  - -s[0m
+[0;33m  delta: '0:00:44.742510'[0m
+[0;33m  end: '2024-09-04 16:18:37.872833'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:17:53.130323'[0m
+[0;33m  stderr: |-[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    [37m[2024-09-04 16:17:53] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m[0m
+[0;33m    [37m[2024-09-04 16:17:53] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m[0m
+[0;33m    ============================= test session starts ==============================[0m
+[0;33m    platform linux -- Python 3.10.14, pytest-7.4.4, pluggy-1.5.0 -- /home/fcaffieri/repos/wazuh-qa/.venv/bin/python3[0m
+[0;33m    cachedir: .pytest_cache[0m
+[0;33m    rootdir: /home/fcaffieri/repos/wazuh-qa/deployability/modules[0m
+[0;33m    collecting ... collected 7 items[0m
+[0;33m  [0m
+[0;33m    modules/testing/tests/test_agent/test_restart.py::test_restart [32m[2024-09-04 16:17:53] [INFO] TESTER: Checking connection to redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:17:55] [INFO] TESTER: Connection established successfully in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:18:04] [INFO] TESTER: Restarting wazuh-agent in redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_restart.py::test_status [32m[2024-09-04 16:18:14] [INFO] TESTER: Getting status of redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_restart.py::test_connection PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_restart.py::test_isActive PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_restart.py::test_clientKeys PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_restart.py::test_port PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_restart.py::test_processes PASSED[0m
+[0;33m  [0m
+[0;33m    =============================== warnings summary ===============================[0m
+[0;33m    modules/provision/models.py:36[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('dependencies', pre=True)[0m
+[0;33m  [0m
+[0;33m    modules/provision/models.py:64[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:64: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('install', 'uninstall', pre=True)[0m
+[0;33m  [0m
+[0;33m    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html[0m
+[0;33m    ======================== 7 passed, 2 warnings in 43.88s ========================[0m
+[0;33m  stdout_lines: <omitted>[0m
+
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=2   [0m [0;33mchanged=1   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[37m[2024-09-04 16:18:38] [DEBUG] TESTER: Playbook /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/test.yml finished with status {'skipped': {}, 'ok': {'localhost': 2}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'localhost': 1}, 'changed': {'localhost': 1}}[0m
+[32m[2024-09-04 16:18:38] [INFO] TESTER: Test restart Finished with: [0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+[32m[2024-09-04 16:18:38] [INFO] TESTER: Test restart Finished with: [0m
+[32m[2024-09-04 16:18:38] [INFO] TESTER: Test restart Finished with: 
+PLAY [localhost] ***************************************************************[0m
+[32m[2024-09-04 16:18:38] [INFO] TESTER: Test restart Finished with: 
+TASK [Gathering Facts] *********************************************************[0m
+[32m[2024-09-04 16:18:38] [INFO] TESTER: Test restart Finished with: [0m
+[32m[2024-09-04 16:18:38] [INFO] TESTER: Test restart Finished with: [0;32mok: [localhost][0m
+[32m[2024-09-04 16:18:38] [INFO] TESTER: Test restart Finished with: 
+TASK [Test restart for agent] **************************************************[0m
+[32m[2024-09-04 16:18:38] [INFO] TESTER: Test restart Finished with: [0m
+[32m[2024-09-04 16:18:38] [INFO] TESTER: Test restart Finished with: [0;33mchanged: [localhost] => changed=true [0m
+[0;33m  cmd:[0m
+[0;33m  - python3[0m
+[0;33m  - -m[0m
+[0;33m  - pytest[0m
+[0;33m  - modules/testing/tests/test_agent/test_restart.py[0m
+[0;33m  - -v[0m
+[0;33m  - --wazuh_version=4.7.4[0m
+[0;33m  - --wazuh_revision=40717[0m
+[0;33m  - --component=agent[0m
+[0;33m  - --dependencies={}[0m
+[0;33m  - '--targets={wazuh-1: /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml, agent: /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml}'[0m
+[0;33m  - --live=False[0m
+[0;33m  - -s[0m
+[0;33m  delta: '0:00:44.742510'[0m
+[0;33m  end: '2024-09-04 16:18:37.872833'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:17:53.130323'[0m
+[0;33m  stderr: |-[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    [37m[2024-09-04 16:17:53] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m[0m
+[0;33m    [37m[2024-09-04 16:17:53] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m[0m
+[0;33m    ============================= test session starts ==============================[0m
+[0;33m    platform linux -- Python 3.10.14, pytest-7.4.4, pluggy-1.5.0 -- /home/fcaffieri/repos/wazuh-qa/.venv/bin/python3[0m
+[0;33m    cachedir: .pytest_cache[0m
+[0;33m    rootdir: /home/fcaffieri/repos/wazuh-qa/deployability/modules[0m
+[0;33m    collecting ... collected 7 items[0m
+[0;33m  [0m
+[0;33m    modules/testing/tests/test_agent/test_restart.py::test_restart [32m[2024-09-04 16:17:53] [INFO] TESTER: Checking connection to redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:17:55] [INFO] TESTER: Connection established successfully in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:18:04] [INFO] TESTER: Restarting wazuh-agent in redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_restart.py::test_status [32m[2024-09-04 16:18:14] [INFO] TESTER: Getting status of redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_restart.py::test_connection PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_restart.py::test_isActive PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_restart.py::test_clientKeys PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_restart.py::test_port PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_restart.py::test_processes PASSED[0m
+[0;33m  [0m
+[0;33m    =============================== warnings summary ===============================[0m
+[0;33m    modules/provision/models.py:36[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('dependencies', pre=True)[0m
+[0;33m  [0m
+[0;33m    modules/provision/models.py:64[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:64: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('install', 'uninstall', pre=True)[0m
+[0;33m  [0m
+[0;33m    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html[0m
+[0;33m    ======================== 7 passed, 2 warnings in 43.88s ========================[0m
+[0;33m  stdout_lines: <omitted>[0m
+[32m[2024-09-04 16:18:38] [INFO] TESTER: Test restart Finished with: 
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=2   [0m [0;33mchanged=1   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   [0m
+[37m[2024-09-04 16:18:38] [DEBUG] TESTER: Using inventory: {'all': {'hosts': {'ec2-54-198-198-61.compute-1.amazonaws.com': {'ansible_port': 2200, 'ansible_user': 'ubuntu', 'ansible_ssh_private_key_file': '/tmp/wazuh-qa/wazuh-25497-ubuntu-22.04-6097/wazuh-25497-ubuntu-22.04-key-6135'}}}}[0m
+[37m[2024-09-04 16:18:38] [DEBUG] TESTER: Running playbook: /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/test.yml[0m
+[0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+
+PLAY [localhost] ***************************************************************
+
+TASK [Gathering Facts] *********************************************************
+[0;32mok: [localhost][0m
+
+TASK [Test stop for agent] *****************************************************
+[0;33mchanged: [localhost] => changed=true [0m
+[0;33m  cmd:[0m
+[0;33m  - python3[0m
+[0;33m  - -m[0m
+[0;33m  - pytest[0m
+[0;33m  - modules/testing/tests/test_agent/test_stop.py[0m
+[0;33m  - -v[0m
+[0;33m  - --wazuh_version=4.7.4[0m
+[0;33m  - --wazuh_revision=40717[0m
+[0;33m  - --component=agent[0m
+[0;33m  - --dependencies={}[0m
+[0;33m  - '--targets={wazuh-1: /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml, agent: /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml}'[0m
+[0;33m  - --live=False[0m
+[0;33m  - -s[0m
+[0;33m  delta: '0:01:07.319955'[0m
+[0;33m  end: '2024-09-04 16:19:47.784102'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:18:40.464147'[0m
+[0;33m  stderr: |-[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    [37m[2024-09-04 16:18:41] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m[0m
+[0;33m    [37m[2024-09-04 16:18:41] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m[0m
+[0;33m    ============================= test session starts ==============================[0m
+[0;33m    platform linux -- Python 3.10.14, pytest-7.4.4, pluggy-1.5.0 -- /home/fcaffieri/repos/wazuh-qa/.venv/bin/python3[0m
+[0;33m    cachedir: .pytest_cache[0m
+[0;33m    rootdir: /home/fcaffieri/repos/wazuh-qa/deployability/modules[0m
+[0;33m    collecting ... collected 3 items[0m
+[0;33m  [0m
+[0;33m    modules/testing/tests/test_agent/test_stop.py::test_service [32m[2024-09-04 16:18:41] [INFO] TESTER: Checking connection to redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:18:42] [INFO] TESTER: Connection established successfully in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:19:02] [INFO] TESTER: Stopping wazuh-agent in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:19:06] [INFO] TESTER: Getting status of redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_stop.py::test_port PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_stop.py::test_processes PASSED[32m[2024-09-04 16:19:38] [INFO] TESTER: Restarting wazuh-agent in redhat-9[0m[0m
+[0;33m  [0m
+[0;33m  [0m
+[0;33m    =============================== warnings summary ===============================[0m
+[0;33m    modules/provision/models.py:36[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('dependencies', pre=True)[0m
+[0;33m  [0m
+[0;33m    modules/provision/models.py:64[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:64: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('install', 'uninstall', pre=True)[0m
+[0;33m  [0m
+[0;33m    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html[0m
+[0;33m    =================== 3 passed, 2 warnings in 66.37s (0:01:06) ===================[0m
+[0;33m  stdout_lines: <omitted>[0m
+
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=2   [0m [0;33mchanged=1   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[37m[2024-09-04 16:19:48] [DEBUG] TESTER: Playbook /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/test.yml finished with status {'skipped': {}, 'ok': {'localhost': 2}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'localhost': 1}, 'changed': {'localhost': 1}}[0m
+[32m[2024-09-04 16:19:48] [INFO] TESTER: Test stop Finished with: [0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+[32m[2024-09-04 16:19:48] [INFO] TESTER: Test stop Finished with: [0m
+[32m[2024-09-04 16:19:48] [INFO] TESTER: Test stop Finished with: 
+PLAY [localhost] ***************************************************************[0m
+[32m[2024-09-04 16:19:48] [INFO] TESTER: Test stop Finished with: 
+TASK [Gathering Facts] *********************************************************[0m
+[32m[2024-09-04 16:19:48] [INFO] TESTER: Test stop Finished with: [0m
+[32m[2024-09-04 16:19:48] [INFO] TESTER: Test stop Finished with: [0;32mok: [localhost][0m
+[32m[2024-09-04 16:19:48] [INFO] TESTER: Test stop Finished with: 
+TASK [Test stop for agent] *****************************************************[0m
+[32m[2024-09-04 16:19:48] [INFO] TESTER: Test stop Finished with: [0m
+[32m[2024-09-04 16:19:48] [INFO] TESTER: Test stop Finished with: [0;33mchanged: [localhost] => changed=true [0m
+[0;33m  cmd:[0m
+[0;33m  - python3[0m
+[0;33m  - -m[0m
+[0;33m  - pytest[0m
+[0;33m  - modules/testing/tests/test_agent/test_stop.py[0m
+[0;33m  - -v[0m
+[0;33m  - --wazuh_version=4.7.4[0m
+[0;33m  - --wazuh_revision=40717[0m
+[0;33m  - --component=agent[0m
+[0;33m  - --dependencies={}[0m
+[0;33m  - '--targets={wazuh-1: /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml, agent: /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml}'[0m
+[0;33m  - --live=False[0m
+[0;33m  - -s[0m
+[0;33m  delta: '0:01:07.319955'[0m
+[0;33m  end: '2024-09-04 16:19:47.784102'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:18:40.464147'[0m
+[0;33m  stderr: |-[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    [37m[2024-09-04 16:18:41] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m[0m
+[0;33m    [37m[2024-09-04 16:18:41] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m[0m
+[0;33m    ============================= test session starts ==============================[0m
+[0;33m    platform linux -- Python 3.10.14, pytest-7.4.4, pluggy-1.5.0 -- /home/fcaffieri/repos/wazuh-qa/.venv/bin/python3[0m
+[0;33m    cachedir: .pytest_cache[0m
+[0;33m    rootdir: /home/fcaffieri/repos/wazuh-qa/deployability/modules[0m
+[0;33m    collecting ... collected 3 items[0m
+[0;33m  [0m
+[0;33m    modules/testing/tests/test_agent/test_stop.py::test_service [32m[2024-09-04 16:18:41] [INFO] TESTER: Checking connection to redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:18:42] [INFO] TESTER: Connection established successfully in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:19:02] [INFO] TESTER: Stopping wazuh-agent in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:19:06] [INFO] TESTER: Getting status of redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_stop.py::test_port PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_stop.py::test_processes PASSED[32m[2024-09-04 16:19:38] [INFO] TESTER: Restarting wazuh-agent in redhat-9[0m[0m
+[0;33m  [0m
+[0;33m  [0m
+[0;33m    =============================== warnings summary ===============================[0m
+[0;33m    modules/provision/models.py:36[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('dependencies', pre=True)[0m
+[0;33m  [0m
+[0;33m    modules/provision/models.py:64[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:64: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('install', 'uninstall', pre=True)[0m
+[0;33m  [0m
+[0;33m    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html[0m
+[0;33m    =================== 3 passed, 2 warnings in 66.37s (0:01:06) ===================[0m
+[0;33m  stdout_lines: <omitted>[0m
+[32m[2024-09-04 16:19:48] [INFO] TESTER: Test stop Finished with: 
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=2   [0m [0;33mchanged=1   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   [0m
+[37m[2024-09-04 16:19:48] [DEBUG] TESTER: Using inventory: {'all': {'hosts': {'ec2-54-198-198-61.compute-1.amazonaws.com': {'ansible_port': 2200, 'ansible_user': 'ubuntu', 'ansible_ssh_private_key_file': '/tmp/wazuh-qa/wazuh-25497-ubuntu-22.04-6097/wazuh-25497-ubuntu-22.04-key-6135'}}}}[0m
+[37m[2024-09-04 16:19:48] [DEBUG] TESTER: Running playbook: /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/test.yml[0m
+[0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+
+PLAY [localhost] ***************************************************************
+
+TASK [Gathering Facts] *********************************************************
+[0;32mok: [localhost][0m
+
+TASK [Test uninstall for agent] ************************************************
+[0;33mchanged: [localhost] => changed=true [0m
+[0;33m  cmd:[0m
+[0;33m  - python3[0m
+[0;33m  - -m[0m
+[0;33m  - pytest[0m
+[0;33m  - modules/testing/tests/test_agent/test_uninstall.py[0m
+[0;33m  - -v[0m
+[0;33m  - --wazuh_version=4.7.4[0m
+[0;33m  - --wazuh_revision=40717[0m
+[0;33m  - --component=agent[0m
+[0;33m  - --dependencies={}[0m
+[0;33m  - '--targets={wazuh-1: /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml, agent: /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml}'[0m
+[0;33m  - --live=False[0m
+[0;33m  - -s[0m
+[0;33m  delta: '0:01:30.227668'[0m
+[0;33m  end: '2024-09-04 16:21:20.692664'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:19:50.464996'[0m
+[0;33m  stderr: |-[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Failed to disable unit: Unit file wazuh-agent.service does not exist.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    [37m[2024-09-04 16:19:50] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m[0m
+[0;33m    [37m[2024-09-04 16:19:50] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m[0m
+[0;33m    ============================= test session starts ==============================[0m
+[0;33m    platform linux -- Python 3.10.14, pytest-7.4.4, pluggy-1.5.0 -- /home/fcaffieri/repos/wazuh-qa/.venv/bin/python3[0m
+[0;33m    cachedir: .pytest_cache[0m
+[0;33m    rootdir: /home/fcaffieri/repos/wazuh-qa/deployability/modules[0m
+[0;33m    collecting ... collected 5 items[0m
+[0;33m  [0m
+[0;33m    modules/testing/tests/test_agent/test_uninstall.py::test_uninstall [32m[2024-09-04 16:19:51] [INFO] TESTER: Checking connection to redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:19:52] [INFO] TESTER: Connection established successfully in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:20:08] [INFO] TESTER: Uninstalling Agent in redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_uninstall.py::test_agent_uninstalled_directory PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_uninstall.py::test_service PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_uninstall.py::test_port PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_uninstall.py::test_processes PASSED[0m
+[0;33m  [0m
+[0;33m    =============================== warnings summary ===============================[0m
+[0;33m    modules/provision/models.py:36[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('dependencies', pre=True)[0m
+[0;33m  [0m
+[0;33m    modules/provision/models.py:64[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:64: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('install', 'uninstall', pre=True)[0m
+[0;33m  [0m
+[0;33m    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html[0m
+[0;33m    =================== 5 passed, 2 warnings in 89.39s (0:01:29) ===================[0m
+[0;33m  stdout_lines: <omitted>[0m
+
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=2   [0m [0;33mchanged=1   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[37m[2024-09-04 16:21:20] [DEBUG] TESTER: Playbook /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/test.yml finished with status {'skipped': {}, 'ok': {'localhost': 2}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'localhost': 1}, 'changed': {'localhost': 1}}[0m
+[32m[2024-09-04 16:21:20] [INFO] TESTER: Test uninstall Finished with: [0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+[32m[2024-09-04 16:21:20] [INFO] TESTER: Test uninstall Finished with: [0m
+[32m[2024-09-04 16:21:20] [INFO] TESTER: Test uninstall Finished with: 
+PLAY [localhost] ***************************************************************[0m
+[32m[2024-09-04 16:21:20] [INFO] TESTER: Test uninstall Finished with: 
+TASK [Gathering Facts] *********************************************************[0m
+[32m[2024-09-04 16:21:20] [INFO] TESTER: Test uninstall Finished with: [0m
+[32m[2024-09-04 16:21:20] [INFO] TESTER: Test uninstall Finished with: [0;32mok: [localhost][0m
+[32m[2024-09-04 16:21:20] [INFO] TESTER: Test uninstall Finished with: 
+TASK [Test uninstall for agent] ************************************************[0m
+[32m[2024-09-04 16:21:20] [INFO] TESTER: Test uninstall Finished with: [0m
+[32m[2024-09-04 16:21:20] [INFO] TESTER: Test uninstall Finished with: [0;33mchanged: [localhost] => changed=true [0m
+[0;33m  cmd:[0m
+[0;33m  - python3[0m
+[0;33m  - -m[0m
+[0;33m  - pytest[0m
+[0;33m  - modules/testing/tests/test_agent/test_uninstall.py[0m
+[0;33m  - -v[0m
+[0;33m  - --wazuh_version=4.7.4[0m
+[0;33m  - --wazuh_revision=40717[0m
+[0;33m  - --component=agent[0m
+[0;33m  - --dependencies={}[0m
+[0;33m  - '--targets={wazuh-1: /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/inventory.yaml, agent: /tmp/dtt1-poc/agent-linux-redhat-9-amd64/inventory.yaml}'[0m
+[0;33m  - --live=False[0m
+[0;33m  - -s[0m
+[0;33m  delta: '0:01:30.227668'[0m
+[0;33m  end: '2024-09-04 16:21:20.692664'[0m
+[0;33m  msg: ''[0m
+[0;33m  rc: 0[0m
+[0;33m  start: '2024-09-04 16:19:50.464996'[0m
+[0;33m  stderr: |-[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Failed to disable unit: Unit file wazuh-agent.service does not exist.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-54-198-198-61.compute-1.amazonaws.com]:2200,[54.198.198.61]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m    Warning: Permanently added '[ec2-34-205-142-162.compute-1.amazonaws.com]:2200,[34.205.142.162]:2200' (ECDSA) to the list of known hosts.[0m
+[0;33m  stderr_lines: <omitted>[0m
+[0;33m  stdout: |-[0m
+[0;33m    [37m[2024-09-04 16:19:50] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m[0m
+[0;33m    [37m[2024-09-04 16:19:50] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m[0m
+[0;33m    ============================= test session starts ==============================[0m
+[0;33m    platform linux -- Python 3.10.14, pytest-7.4.4, pluggy-1.5.0 -- /home/fcaffieri/repos/wazuh-qa/.venv/bin/python3[0m
+[0;33m    cachedir: .pytest_cache[0m
+[0;33m    rootdir: /home/fcaffieri/repos/wazuh-qa/deployability/modules[0m
+[0;33m    collecting ... collected 5 items[0m
+[0;33m  [0m
+[0;33m    modules/testing/tests/test_agent/test_uninstall.py::test_uninstall [32m[2024-09-04 16:19:51] [INFO] TESTER: Checking connection to redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:19:52] [INFO] TESTER: Connection established successfully in redhat-9[0m[0m
+[0;33m    [32m[2024-09-04 16:20:08] [INFO] TESTER: Uninstalling Agent in redhat-9[0m[0m
+[0;33m    PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_uninstall.py::test_agent_uninstalled_directory PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_uninstall.py::test_service PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_uninstall.py::test_port PASSED[0m
+[0;33m    modules/testing/tests/test_agent/test_uninstall.py::test_processes PASSED[0m
+[0;33m  [0m
+[0;33m    =============================== warnings summary ===============================[0m
+[0;33m    modules/provision/models.py:36[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:36: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('dependencies', pre=True)[0m
+[0;33m  [0m
+[0;33m    modules/provision/models.py:64[0m
+[0;33m      /home/fcaffieri/repos/wazuh-qa/deployability/modules/provision/models.py:64: PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators, see the migration guide for more details. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.5/migration/[0m
+[0;33m        @validator('install', 'uninstall', pre=True)[0m
+[0;33m  [0m
+[0;33m    -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html[0m
+[0;33m    =================== 5 passed, 2 warnings in 89.39s (0:01:29) ===================[0m
+[0;33m  stdout_lines: <omitted>[0m
+[32m[2024-09-04 16:21:20] [INFO] TESTER: Test uninstall Finished with: 
+PLAY RECAP *********************************************************************
+[0;33mlocalhost[0m                  : [0;32mok=2   [0m [0;33mchanged=1   [0m unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   [0m
+[32m[2024-09-04 16:21:20] [INFO] TESTER: Cleaning up[0m
+[37m[2024-09-04 16:21:20] [DEBUG] TESTER: Using inventory: {'all': {'hosts': {'ec2-54-198-198-61.compute-1.amazonaws.com': {'ansible_port': 2200, 'ansible_user': 'ubuntu', 'ansible_ssh_private_key_file': '/tmp/wazuh-qa/wazuh-25497-ubuntu-22.04-6097/wazuh-25497-ubuntu-22.04-key-6135'}}}}[0m
+[37m[2024-09-04 16:21:20] [DEBUG] TESTER: Running playbook: /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/cleanup.yml[0m
+[0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+
+PLAY [localhost] ***************************************************************
+
+TASK [Gathering Facts] *********************************************************
+[0;32mok: [localhost][0m
+
+TASK [Clean test directory] ****************************************************
+[0;32mok: [localhost] => changed=false [0m
+[0;32m  path: /tmp/tests[0m
+[0;32m  state: absent[0m
+
+PLAY RECAP *********************************************************************
+[0;32mlocalhost[0m                  : [0;32mok=2   [0m changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[37m[2024-09-04 16:21:24] [DEBUG] TESTER: Playbook /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/cleanup.yml finished with status {'skipped': {}, 'ok': {'localhost': 2}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'localhost': 1}, 'changed': {}}[0m
+[32m[2024-09-04 16:21:24] [INFO] TESTER: Cleaning up[0m
+[37m[2024-09-04 16:21:24] [DEBUG] TESTER: Using inventory: {'all': {'hosts': {'ec2-54-198-198-61.compute-1.amazonaws.com': {'ansible_port': 2200, 'ansible_user': 'ubuntu', 'ansible_ssh_private_key_file': '/tmp/wazuh-qa/wazuh-25497-ubuntu-22.04-6097/wazuh-25497-ubuntu-22.04-key-6135'}}}}[0m
+[37m[2024-09-04 16:21:24] [DEBUG] TESTER: Running playbook: /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/cleanup.yml[0m
+[0;34mUsing /etc/ansible/ansible.cfg as config file[0m
+
+PLAY [localhost] ***************************************************************
+
+TASK [Gathering Facts] *********************************************************
+[0;32mok: [localhost][0m
+
+TASK [Clean test directory] ****************************************************
+[0;32mok: [localhost] => changed=false [0m
+[0;32m  path: /tmp/tests[0m
+[0;32m  state: absent[0m
+
+PLAY RECAP *********************************************************************
+[0;32mlocalhost[0m                  : [0;32mok=2   [0m changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+[37m[2024-09-04 16:21:27] [DEBUG] TESTER: Playbook /home/fcaffieri/repos/wazuh-qa/deployability/modules/testing/playbooks/cleanup.yml finished with status {'skipped': {}, 'ok': {'localhost': 2}, 'dark': {}, 'failures': {}, 'ignored': {}, 'rescued': {}, 'processed': {'localhost': 1}, 'changed': {}}[0m
+[0m
+[32m[2024-09-04 16:21:27] [INFO] [1856228] [ThreadPoolExecutor-0_0] [jobflow]: [run-agent-linux-redhat-9-amd64-tests] Finished task in 471.75 seconds.[0m
+[32m[2024-09-04 16:21:27] [INFO] [1856228] [MainThread] [jobflow]: Executing Reverse DAG tasks.[0m
+[32m[2024-09-04 16:21:27] [INFO] [1856228] [MainThread] [jobflow]: Executing tasks in parallel.[0m
+[32m[2024-09-04 16:21:27] [INFO] [1856228] [ThreadPoolExecutor-1_0] [jobflow]: [allocate-agent-linux-redhat-9-amd64] Starting task.[0m
+[36m[2024-09-04 16:21:27] [DEBUG] [1856228] [ThreadPoolExecutor-1_0] [jobflow]: Running task "allocate-agent-linux-redhat-9-amd64" with arguments: ['modules/allocation/main.py', '--action=delete', '--track-output=/tmp/dtt1-poc/agent-linux-redhat-9-amd64/track.yaml'][0m
+[36m[2024-09-04 16:22:32] [DEBUG] [1856228] [ThreadPoolExecutor-1_0] [jobflow]: Finished task "allocate-agent-linux-redhat-9-amd64" execution with result:
+[37m[2024-09-04 16:21:28] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m
+[37m[2024-09-04 16:21:28] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m
+[32m[2024-09-04 16:21:28] [INFO] ALLOCATOR: Deleting instance from trackfile /tmp/dtt1-poc/agent-linux-redhat-9-amd64/track.yaml[0m
+[37m[2024-09-04 16:21:29] [DEBUG] ALLOCATOR: Deleting credentials: redhat-9-amd64-key-3216[0m
+[32m[2024-09-04 16:22:32] [INFO] ALLOCATOR [REDHAT-9-AMD64]: Instance i-0bbcb3b0f998bbe1d deleted.[0m
+[0m
+[32m[2024-09-04 16:22:32] [INFO] [1856228] [ThreadPoolExecutor-1_0] [jobflow]: [allocate-agent-linux-redhat-9-amd64] Finished task in 65.43 seconds.[0m
+[32m[2024-09-04 16:22:32] [INFO] [1856228] [ThreadPoolExecutor-1_0] [jobflow]: [allocate-manager-linux-ubuntu-22.04-amd64] Starting task.[0m
+[36m[2024-09-04 16:22:32] [DEBUG] [1856228] [ThreadPoolExecutor-1_0] [jobflow]: Running task "allocate-manager-linux-ubuntu-22.04-amd64" with arguments: ['modules/allocation/main.py', '--action=delete', '--track-output=/tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/track.yaml'][0m
+[36m[2024-09-04 16:23:22] [DEBUG] [1856228] [ThreadPoolExecutor-1_0] [jobflow]: Finished task "allocate-manager-linux-ubuntu-22.04-amd64" execution with result:
+[37m[2024-09-04 16:22:34] [DEBUG] SPNEGO._GSS: Python gssapi not available, cannot use any GSSAPIProxy protocols: No module named 'gssapi'[0m
+[37m[2024-09-04 16:22:34] [DEBUG] SPNEGO._GSS: Python gssapi IOV extension not available: No module named 'gssapi'[0m
+[32m[2024-09-04 16:22:34] [INFO] ALLOCATOR: Deleting instance from trackfile /tmp/dtt1-poc/manager-linux-ubuntu-22.04-amd64/track.yaml[0m
+[37m[2024-09-04 16:22:35] [DEBUG] ALLOCATOR: Deleting credentials: wazuh-25497-ubuntu-22.04-key-6135[0m
+[32m[2024-09-04 16:23:22] [INFO] ALLOCATOR [WAZUH-25497-UBUNTU-22.04]: Instance i-0f8c59c9ae94030f2 deleted.[0m
+[0m
+[32m[2024-09-04 16:23:22] [INFO] [1856228] [ThreadPoolExecutor-1_0] [jobflow]: [allocate-manager-linux-ubuntu-22.04-amd64] Finished task in 49.96 seconds.[0m
