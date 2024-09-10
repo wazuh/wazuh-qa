@@ -499,7 +499,7 @@ class ClusterStatisticsVisualizer(DataVisualizer):
         This method creates and saves plots for each cluster activity.
         """
         elements = list(self.dataframe['activity'].unique())
-        result = sub(r'.*Version:\s*[\$\{]([^\}\s,]+)[\}\s,]?.*', r'\1', self.plot_title)
+        result = sub(r'.*Version:\s*([0-9]+\.[0-9]+(?:\.[0-9]+)?).*', r'\1', self.plot_title)
         for element in elements:
             p_title = result + "-" + element.replace(' ', '_').lower()
             _, ax = plt.subplots()
