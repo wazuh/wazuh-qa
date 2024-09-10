@@ -307,7 +307,7 @@ class BinaryDatavisualizer(DataVisualizer):
 
         This method creates and saves plots for each binary metric field.
         """
-        p_title = self.plot_title.replace('<<TAB>>', '\t')
+        p_title = self.plot_title.replace('<<TAB>>', ' ')
         columns_to_plot = self._get_fields_to_plot()
         for element in columns_to_plot:
             _, ax = plt.subplots()
@@ -391,7 +391,7 @@ class DaemonStatisticsVisualizer(DataVisualizer):
 
         This method creates and saves plots for each statistic field.
         """
-        p_title = self.plot_title.replace('<<TAB>>', '\t')
+        p_title = self.plot_title.replace('<<TAB>>', ' ')
         for element in self.plots_data.values():
             columns = element['columns']
             title = element['title']
@@ -448,7 +448,7 @@ class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
 
         This method creates and saves plots for each logcollector target.
         """
-        p_title = self.plot_title.replace('<<TAB>>', '\t')
+        p_title = self.plot_title.replace('<<TAB>>', ' ')
         for element in self.plots_data.values():
             _, ax = plt.subplots()
             targets = self._get_logcollector_location()
@@ -499,10 +499,9 @@ class ClusterStatisticsVisualizer(DataVisualizer):
         This method creates and saves plots for each cluster activity.
         """
         elements = list(self.dataframe['activity'].unique())
-        match = re.search(r'\${version}', self.plot_title)
-        title = match.group(0)
+        result = sub(r'.*Version:\s*[\$\{]([^\}\s,]+)[\}\s,]?.*', r'\1', self.plot_title)
         for element in elements:
-            p_title = title + "-" + element.replace(' ', '_').lower()
+            p_title = result + "-" + element.replace(' ', '_').lower()
             _, ax = plt.subplots()
             nodes = self.dataframe[self.dataframe.activity == element]['node_name'].unique()
             current_df = self.dataframe[self.dataframe.activity == element]
@@ -561,7 +560,7 @@ class IndexerAlerts(DataVisualizer):
 
         This method creates and saves a plot for the aggregated alerts.
         """
-        p_title = self.plot_title.replace('<<TAB>>', '\t')
+        p_title = self.plot_title.replace('<<TAB>>', ' ')
         _, ax = plt.subplots()
         self.dataframe['Difference'] = self.dataframe['Total alerts'].diff()
         self.dataframe['Difference'] = self.dataframe['Difference'] / self._calculate_timestamp_interval()
@@ -575,7 +574,7 @@ class IndexerAlerts(DataVisualizer):
 
         This method creates and saves a plot for the total alerts.
         """
-        p_title = self.plot_title.replace('<<TAB>>', '\t')
+        p_title = self.plot_title.replace('<<TAB>>', ' ')
         _, ax = plt.subplots()
         self._basic_plot(ax=ax, dataframe=self.dataframe['Total alerts'], label='Total alerts',
                          color=self._color_palette(1)[0])
@@ -627,7 +626,7 @@ class IndexerVulnerabilities(DataVisualizer):
 
         This method creates and saves a plot for the total vulnerabilities.
         """
-        p_title = self.plot_title.replace('<<TAB>>', '\t')
+        p_title = self.plot_title.replace('<<TAB>>', ' ')
         _, ax = plt.subplots()
         self._basic_plot(ax=ax, dataframe=self.dataframe['Total vulnerabilities'], label='Indexed Vulnerabilities',
                          color=self._color_palette(1)[0])
