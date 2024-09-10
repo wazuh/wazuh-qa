@@ -307,6 +307,7 @@ class BinaryDatavisualizer(DataVisualizer):
 
         This method creates and saves plots for each binary metric field.
         """
+        p_title = self.plot_title.replace('<<TAB>>', '\t')
         columns_to_plot = self._get_fields_to_plot()
         for element in columns_to_plot:
             _, ax = plt.subplots()
@@ -316,7 +317,7 @@ class BinaryDatavisualizer(DataVisualizer):
                 self._basic_plot(ax, self.dataframe[self.dataframe.Daemon == daemon][element],
                                  label=daemon, color=color)
 
-            self._save_custom_plot(ax, element, self.plot_title)
+            self._save_custom_plot(ax, element, p_title)
 
 
 class DaemonStatisticsVisualizer(DataVisualizer):
@@ -390,6 +391,7 @@ class DaemonStatisticsVisualizer(DataVisualizer):
 
         This method creates and saves plots for each statistic field.
         """
+        p_title = self.plot_title.replace('<<TAB>>', '\t')
         for element in self.plots_data.values():
             columns = element['columns']
             title = element['title']
@@ -398,7 +400,7 @@ class DaemonStatisticsVisualizer(DataVisualizer):
             _, ax = plt.subplots()
             for column, color in zip(columns, colors):
                 self._basic_plot(ax, self.dataframe[column], label=column, color=color)
-            self._save_custom_plot(ax, title, self.plot_title)
+            self._save_custom_plot(ax, title, p_title)
 
 
 class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
@@ -446,6 +448,7 @@ class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
 
         This method creates and saves plots for each logcollector target.
         """
+        p_title = self.plot_title.replace('<<TAB>>', '\t')
         for element in self.plots_data.values():
             _, ax = plt.subplots()
             targets = self._get_logcollector_location()
@@ -454,7 +457,7 @@ class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
                 self._basic_plot(ax, self.dataframe[self.dataframe.Location == target][element['columns']],
                                  label=target, color=color)
 
-            self._save_custom_plot(ax, element['title'], self.plot_title)
+            self._save_custom_plot(ax, element['title'], p_title)
 
 
 class ClusterStatisticsVisualizer(DataVisualizer):
@@ -496,9 +499,10 @@ class ClusterStatisticsVisualizer(DataVisualizer):
         This method creates and saves plots for each cluster activity.
         """
         elements = list(self.dataframe['activity'].unique())
-        
+        match = re.search(r'\${version}', self.plot_title)
+        title = match.group(0)
         for element in elements:
-            p_title = self.plot_title + "-" + element.replace(' ', '_').lower()
+            p_title = title + "-" + element.replace(' ', '_').lower()
             _, ax = plt.subplots()
             nodes = self.dataframe[self.dataframe.activity == element]['node_name'].unique()
             current_df = self.dataframe[self.dataframe.activity == element]
@@ -557,23 +561,25 @@ class IndexerAlerts(DataVisualizer):
 
         This method creates and saves a plot for the aggregated alerts.
         """
+        p_title = self.plot_title.replace('<<TAB>>', '\t')
         _, ax = plt.subplots()
         self.dataframe['Difference'] = self.dataframe['Total alerts'].diff()
         self.dataframe['Difference'] = self.dataframe['Difference'] / self._calculate_timestamp_interval()
 
         self._basic_plot(ax=ax, dataframe=self.dataframe['Difference'], label='Alerts per timestamp',
                          color=self._color_palette(1)[0])
-        self._save_custom_plot(ax, 'Different alerts', self.plot_title)
+        self._save_custom_plot(ax, 'Different alerts', p_title)
 
     def _plot_plain_alerts(self):
         """Plot the total alerts.
 
         This method creates and saves a plot for the total alerts.
         """
+        p_title = self.plot_title.replace('<<TAB>>', '\t')
         _, ax = plt.subplots()
         self._basic_plot(ax=ax, dataframe=self.dataframe['Total alerts'], label='Total alerts',
                          color=self._color_palette(1)[0])
-        self._save_custom_plot(ax, 'Total alerts', self.plot_title)
+        self._save_custom_plot(ax, 'Total alerts', p_title)
 
     def plot(self):
         """Plot the indexer alerts data.
@@ -621,7 +627,8 @@ class IndexerVulnerabilities(DataVisualizer):
 
         This method creates and saves a plot for the total vulnerabilities.
         """
+        p_title = self.plot_title.replace('<<TAB>>', '\t')
         _, ax = plt.subplots()
         self._basic_plot(ax=ax, dataframe=self.dataframe['Total vulnerabilities'], label='Indexed Vulnerabilities',
                          color=self._color_palette(1)[0])
-        self._save_custom_plot(ax, 'Total Vulnerabilities', self.plot_title)
+        self._save_custom_plot(ax, 'Total Vulnerabilities', p_title)
