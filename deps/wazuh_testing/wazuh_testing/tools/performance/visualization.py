@@ -498,7 +498,7 @@ class ClusterStatisticsVisualizer(DataVisualizer):
         elements = list(self.dataframe['activity'].unique())
         
         for element in elements:
-            p_title = self.plot_title + element.replace(' ', '_').lower()
+            p_title = self.plot_title + "-" + element.replace(' ', '_').lower()
             _, ax = plt.subplots()
             nodes = self.dataframe[self.dataframe.activity == element]['node_name'].unique()
             current_df = self.dataframe[self.dataframe.activity == element]
