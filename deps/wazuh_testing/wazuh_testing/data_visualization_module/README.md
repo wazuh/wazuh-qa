@@ -22,7 +22,13 @@ python3 -m pip install .
 
 ## Run module
 
-To run this module, we will need to use the following command:
+To run this module, first, we need to add the data we want to display to the database. For more information about this, you should read the Database section, and run the following command:
+
+```shell script
+python3 scripts/db_data_insertion.py <directory> <component>
+```
+
+Then, we will need to use the following command to launch the app:
 
 ```shell script
 python3 app.py --config items_config.yml
