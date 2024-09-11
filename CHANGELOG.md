@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Updated Debian 12 AMIs and Box to 12.7 version ([#5735](https://github.com/wazuh/wazuh-qa/pull/5735)) \- (Framework)
 - Increase Feed update timeout in waiters.py ([#5668](https://github.com/wazuh/wazuh-qa/pull/5668)) \- (Framework)
 - Set `/active-response` as xfail ([#5660](https://github.com/wazuh/wazuh-qa/pull/5660)) \- (Tests)
 - Modify the directory name for machines deployed in AWS ([#5635](https://github.com/wazuh/wazuh-qa/pull/5635)) \- (Framework)
