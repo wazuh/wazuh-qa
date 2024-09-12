@@ -2,6 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import os
 import requests
 import time
 
@@ -15,7 +16,7 @@ from .utils import Utils
 class WazuhManager:
 
     @staticmethod
-    def install_manager(inventory_path, node_name, wazuh_version, live) -> None:
+    def install_manager(inventory_path, node_name, wazuh_version, live, packages) -> None:
         """
         Installs Wazuh Manager in the host
 
@@ -23,35 +24,54 @@ class WazuhManager:
             inventory_path (str): host's inventory path
             node_name (str): manager node name
             wazuh_version (str): major.minor.patch
-
+            live (bool): indicates the use of development or production packages
+            packages (Dict[str, str]): dictionary with the URLs of the custom packages to use
         """
         os_name = HostInformation.get_os_name_from_inventory(inventory_path)
+        distribution = HostInformation.get_linux_distribution(inventory_path)
 
-        if live == "False":
-            s3_url = 'packages-dev.wazuh.com'
+        if packages:
+            logger.info(f'Installing the Wazuh manager with {packages}')
+
+            if distribution == 'deb':
+                package_filename = os.path.basename(packages['manager-deb'])
+                commands = [
+                        f"wget {packages['manager-deb']}",
+                        f"apt-get install -y ./{package_filename}"
+                ]
+            else:
+                package_filename = os.path.basename(packages['manager-rpm'])
+                commands = [
+                        f"wget {packages['manager-rpm']}",
+                        f"yum install {package_filename}"
+                ]
         else:
-            s3_url = 'packages.wazuh.com'
+            if live == "False":
+                s3_url = 'packages-dev.wazuh.com'
+            else:
+                s3_url = 'packages.wazuh.com'
 
-        release = '.'.join(wazuh_version.split('.')[:2])
+            release = '.'.join(wazuh_version.split('.')[:2])
 
-        logger.info(f'Installing the Wazuh manager with https://{s3_url}/{release}/wazuh-install.sh')
+            logger.info(f'Installing the Wazuh manager with https://{s3_url}/{release}/wazuh-install.sh')
 
-        if os_name == 'debian':
-            commands = [
-                    f"wget https://{s3_url}/{release}/wazuh-install.sh",
-                    f"bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
-            ]
-        else:
-            commands = [
-                    f"curl -sO https://{s3_url}/{release}/wazuh-install.sh",
-                    f"bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
-            ]
+            if os_name == 'debian':
+                commands = [
+                        f"wget https://{s3_url}/{release}/wazuh-install.sh",
+                        f"bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
+                ]
+            else:
+                commands = [
+                        f"curl -sO https://{s3_url}/{release}/wazuh-install.sh",
+                        f"bash wazuh-install.sh --wazuh-server {node_name} --ignore-check"
+                ]
+
         logger.info(f'Installing Manager in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         ConnectionManager.execute_commands(inventory_path, commands)
 
 
     @staticmethod
-    def install_managers(inventories_paths=[], node_names=[], wazuh_versions=[]) -> None:
+    def install_managers(inventories_paths=[], node_names=[], wazuh_versions=[], packages={}) -> None:
         """
         Install Wazuh Managers in the hosts
 
@@ -59,12 +79,12 @@ class WazuhManager:
             inventories_paths (list): list of hosts' inventory path
             node_name (list): managers node names' in the same order than inventories_paths
             wazuh_version (list): manager versions int he same order than inventories_paths
-
+            packages (Dict[str, str]): dictionary with the URLs of the custom packages to use
         """
         for inventory in inventories_paths:
             for node_name in node_names:
                 for wazuh_version in wazuh_versions:
-                    WazuhManager.install_manager(inventory, node_name, wazuh_version)
+                    WazuhManager.install_manager(inventory, node_name, wazuh_version, packages)
 
 
     @staticmethod
@@ -113,7 +133,7 @@ class WazuhManager:
 
     @staticmethod
     def _install_manager_callback(wazuh_params, manager_name, manager_params):
-        WazuhManager.install_manager(manager_params, manager_name, wazuh_params['wazuh_version'], wazuh_params['live'])
+        WazuhManager.install_manager(manager_params, manager_name, wazuh_params['wazuh_version'], wazuh_params['live'], wazuh_params['packages'])
 
 
     @staticmethod

@@ -12,6 +12,7 @@ def pytest_addoption(parser):
     parser.addoption('--dependencies', required=False, help='Dependency to be tested.')
     parser.addoption('--targets', required=False, help='Targets to be tested.')
     parser.addoption('--live', required=True, help='Packages repository.')
+    parser.addoption('--custom_packages', required=True, help='Custom packages for component deployment.')
 
 @pytest.fixture(scope='session')
 def wazuh_version(request):
@@ -46,6 +47,11 @@ def dependencies(request) -> dict | None:
 def targets(request) -> dict | None:
 
     return request.config.getoption('targets')
+
+@pytest.fixture(scope='session')
+def packages(request) -> dict | None:
+
+    return request.config.getoption('custom_packages')
 
 
 @pytest.fixture(scope='session')

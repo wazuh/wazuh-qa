@@ -28,72 +28,114 @@ class WazuhAgent:
 
 
     @staticmethod
-    def install_agent(inventory_path, agent_name, wazuh_version, wazuh_revision, live) -> None:
-        if live == "False":
-            s3_url = 'packages-dev'
-            release = 'pre-release'
-        else:
-            s3_url = 'packages'
-            release = wazuh_version[:1] + ".x"
-
+    def install_agent(inventory_path, agent_name, wazuh_version, wazuh_revision, live, packages) -> None:
         os_type = HostInformation.get_os_type(inventory_path)
         architecture = HostInformation.get_architecture(inventory_path)
+        distribution = HostInformation.get_linux_distribution(inventory_path)
         commands = []
 
-        if os_type == 'linux':
-            distribution = HostInformation.get_linux_distribution(inventory_path)
+        if packages:
+            if os_type == 'linux':
+                if distribution == 'deb':
+                    package_filename = os.path.basename(packages['agent-deb'])
+                    commands.extend([
+                        f"wget {packages['agent-deb']} && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' dpkg -i ./{package_filename}"
+                    ])
+                else:
+                    package_filename = os.path.basename(packages['agent-rpm'])
+                    commands.extend([
+                        f"curl -o {package_filename} {packages['agent-rpm']} && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv {package_filename}"
+                    ])
+                system_commands = [
+                        "systemctl daemon-reload",
+                        "systemctl enable wazuh-agent",
+                        "systemctl start wazuh-agent",
+                        "systemctl status wazuh-agent"
+                ]
+                commands.extend(system_commands)
 
-            if distribution == 'rpm' and 'amd64' in architecture:
+            elif os_type == 'windows':
                 commands.extend([
-                    f"curl -o wazuh-agent-{wazuh_version}-1.x86_64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.x86_64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.x86_64.rpm"
+                    f"Invoke-WebRequest -Uri {packages['agent-msi']}"
+                    "-OutFile $env:TEMP\wazuh-agent.msi"
                 ])
-            elif distribution == 'rpm' and 'arm64' in architecture:
                 commands.extend([
-                    f"curl -o wazuh-agent-{wazuh_version}-1.aarch64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.aarch64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.aarch64.rpm"
+                    "msiexec.exe /i $env:TEMP\wazuh-agent.msi /q "
+                    f"WAZUH_MANAGER='MANAGER_IP' "
+                    f"WAZUH_AGENT_NAME='{agent_name}' "
+                    f"WAZUH_REGISTRATION_SERVER='MANAGER_IP' "
                 ])
-            elif distribution == 'deb' and 'amd64' in architecture:
-                commands.extend([
-                    f"wget https://{s3_url}.wazuh.com/{release}/apt/pool/main/w/wazuh-agent/wazuh-agent_{wazuh_version}-1_amd64.deb && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' dpkg -i ./wazuh-agent_{wazuh_version}-1_amd64.deb"
-                ])
-            elif distribution == 'deb' and 'arm64' in architecture:
-                commands.extend([
-                    f"wget https://{s3_url}.wazuh.com/{release}/apt/pool/main/w/wazuh-agent/wazuh-agent_{wazuh_version}-1_arm64.deb && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' dpkg -i ./wazuh-agent_{wazuh_version}-1_arm64.deb"
-                ])
-            system_commands = [
-                    "systemctl daemon-reload",
-                    "systemctl enable wazuh-agent",
-                    "systemctl start wazuh-agent",
-                    "systemctl status wazuh-agent"
-            ]
+                commands.extend(["NET START WazuhSvc"])
 
-            commands.extend(system_commands)
-        elif os_type == 'windows' :
-            commands.extend([
-                f"Invoke-WebRequest -Uri https://{s3_url}.wazuh.com/{release}/windows/wazuh-agent-{wazuh_version}-1.msi "
-                "-OutFile $env:TEMP\wazuh-agent.msi"
-            ])
-            commands.extend([
-                "msiexec.exe /i $env:TEMP\wazuh-agent.msi /q "
-                f"WAZUH_MANAGER='MANAGER_IP' "
-                f"WAZUH_AGENT_NAME='{agent_name}' "
-                f"WAZUH_REGISTRATION_SERVER='MANAGER_IP' "
-            ])
-            commands.extend(["NET START WazuhSvc"])
+            elif os_type == 'macos':
+                commands.extend([
+                        f'curl -so wazuh-agent.pkg {packages['agent-pkg']} && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
+                ])
+                system_commands = [
+                        '/Library/Ossec/bin/wazuh-control start',
+                        '/Library/Ossec/bin/wazuh-control status'
+                ]
+                commands.extend(system_commands)
+        else:
+            if live == "False":
+                s3_url = 'packages-dev'
+                release = 'pre-release'
+            else:
+                s3_url = 'packages'
+                release = wazuh_version[:1] + ".x"
 
-        elif os_type == 'macos':
-            if architecture == 'amd64':
+            if os_type == 'linux':
+                if distribution == 'rpm' and 'amd64' in architecture:
+                    commands.extend([
+                        f"curl -o wazuh-agent-{wazuh_version}-1.x86_64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.x86_64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.x86_64.rpm"
+                    ])
+                elif distribution == 'rpm' and 'arm64' in architecture:
+                    commands.extend([
+                        f"curl -o wazuh-agent-{wazuh_version}-1.aarch64.rpm https://{s3_url}.wazuh.com/{release}/yum/wazuh-agent-{wazuh_version}-1.aarch64.rpm && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' rpm -ihv wazuh-agent-{wazuh_version}-1.aarch64.rpm"
+                    ])
+                elif distribution == 'deb' and 'amd64' in architecture:
+                    commands.extend([
+                        f"wget https://{s3_url}.wazuh.com/{release}/apt/pool/main/w/wazuh-agent/wazuh-agent_{wazuh_version}-1_amd64.deb && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' dpkg -i ./wazuh-agent_{wazuh_version}-1_amd64.deb"
+                    ])
+                elif distribution == 'deb' and 'arm64' in architecture:
+                    commands.extend([
+                        f"wget https://{s3_url}.wazuh.com/{release}/apt/pool/main/w/wazuh-agent/wazuh-agent_{wazuh_version}-1_arm64.deb && sudo WAZUH_MANAGER='MANAGER_IP' WAZUH_AGENT_NAME='{agent_name}' dpkg -i ./wazuh-agent_{wazuh_version}-1_arm64.deb"
+                    ])
+                system_commands = [
+                        "systemctl daemon-reload",
+                        "systemctl enable wazuh-agent",
+                        "systemctl start wazuh-agent",
+                        "systemctl status wazuh-agent"
+                ]
+
+                commands.extend(system_commands)
+            elif os_type == 'windows' :
                 commands.extend([
-                    f'curl -so wazuh-agent.pkg https://{s3_url}.wazuh.com/{release}/macos/wazuh-agent-{wazuh_version}-1.intel64.pkg && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
+                    f"Invoke-WebRequest -Uri https://{s3_url}.wazuh.com/{release}/windows/wazuh-agent-{wazuh_version}-1.msi "
+                    "-OutFile $env:TEMP\wazuh-agent.msi"
                 ])
-            elif architecture == 'arm64':
                 commands.extend([
-                    f'curl -so wazuh-agent.pkg https://{s3_url}.wazuh.com/{release}/macos/wazuh-agent-{wazuh_version}-1.arm64.pkg && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
+                    "msiexec.exe /i $env:TEMP\wazuh-agent.msi /q "
+                    f"WAZUH_MANAGER='MANAGER_IP' "
+                    f"WAZUH_AGENT_NAME='{agent_name}' "
+                    f"WAZUH_REGISTRATION_SERVER='MANAGER_IP' "
                 ])
-            system_commands = [
-                    '/Library/Ossec/bin/wazuh-control start',
-                    '/Library/Ossec/bin/wazuh-control status'
-            ]
-            commands.extend(system_commands)
+                commands.extend(["NET START WazuhSvc"])
+
+            elif os_type == 'macos':
+                if architecture == 'amd64':
+                    commands.extend([
+                        f'curl -so wazuh-agent.pkg https://{s3_url}.wazuh.com/{release}/macos/wazuh-agent-{wazuh_version}-1.intel64.pkg && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
+                    ])
+                elif architecture == 'arm64':
+                    commands.extend([
+                        f'curl -so wazuh-agent.pkg https://{s3_url}.wazuh.com/{release}/macos/wazuh-agent-{wazuh_version}-1.arm64.pkg && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
+                    ])
+                system_commands = [
+                        '/Library/Ossec/bin/wazuh-control start',
+                        '/Library/Ossec/bin/wazuh-control status'
+                ]
+                commands.extend(system_commands)
 
         logger.info(f'Installing Agent in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         ConnectionManager.execute_commands(inventory_path, commands)

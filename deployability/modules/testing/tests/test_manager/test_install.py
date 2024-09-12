@@ -19,13 +19,15 @@ def wazuh_params(request):
     dependencies = request.config.getoption('--dependencies')
     targets = request.config.getoption('--targets')
     live = request.config.getoption('--live')
+    custom_packages = request.config.getoption('--custom_packages')
 
     return {
         'wazuh_version': wazuh_version,
         'wazuh_revision': wazuh_revision,
         'dependencies': dependencies,
         'targets': targets,
-        'live': live
+        'live': live,
+        'custom_packages': custom_packages
     }
 
 
@@ -38,6 +40,13 @@ def setup_test_environment(wazuh_params):
     pairs = [pair.strip() for pair in targets.strip('{}').split(',')]
     targets_dict = dict(pair.split(':') for pair in pairs)
 
+    packages = wazuh_params['custom_packages']
+    if isinstance(packages, str):
+        packages_dict = json.loads(packages)
+    else:
+        packages_dict = packages
+
+    wazuh_params['packages'] = packages_dict
     wazuh_params['master'] = targets_dict.get('wazuh-1')
     wazuh_params['workers'] = [value for key, value in targets_dict.items() if key.startswith('wazuh-') and key != 'wazuh-1']
     wazuh_params['indexers'] = [value for key, value in targets_dict.items() if key.startswith('node-')]
@@ -48,6 +57,7 @@ def setup_test_environment(wazuh_params):
         wazuh_params['indexers'].append(wazuh_params['master'])
 
     wazuh_params['managers'] = {key: value for key, value in targets_dict.items() if key.startswith('wazuh-')}
+    wazuh_params['packages'] = {key: value for key, value in packages_dict.items()}
 
 def test_installation(wazuh_params):
     # Disabling firewall for all managers
@@ -63,7 +73,7 @@ def test_installation(wazuh_params):
 
     # Install managers and perform checkfile testing
     for manager_name, manager_params in wazuh_params['managers'].items():
-        WazuhManager.install_manager(manager_params, manager_name, wazuh_params['wazuh_version'], wazuh_params['live'])
+        WazuhManager.install_manager(manager_params, manager_name, wazuh_params['wazuh_version'], wazuh_params['live'], wazuh_params['packages'])
 
     # Validation of activity and directory of the managers
     for manager in wazuh_params['managers'].values():

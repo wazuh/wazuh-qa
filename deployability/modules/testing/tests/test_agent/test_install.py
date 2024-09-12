@@ -2,6 +2,7 @@
 # Created by Wazuh, Inc. <info@wazuh.com>.
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 
+import json
 import re
 import pytest
 
@@ -19,13 +20,15 @@ def wazuh_params(request):
     dependencies = request.config.getoption('--dependencies')
     targets = request.config.getoption('--targets')
     live = request.config.getoption('--live')
+    custom_packages = request.config.getoption('--custom_packages')
 
     return {
         'wazuh_version': wazuh_version,
         'wazuh_revision': wazuh_revision,
         'dependencies': dependencies,
         'targets': targets,
-        'live': live
+        'live': live,
+        'custom_packages': custom_packages
     }
 
 
@@ -38,6 +41,13 @@ def setup_test_environment(wazuh_params):
     pairs = [pair.strip() for pair in targets.strip('{}').split(',')]
     targets_dict = dict(pair.split(':') for pair in pairs)
 
+    packages = wazuh_params['custom_packages']
+    if isinstance(packages, str):
+        packages_dict = json.loads(packages)
+    else:
+        packages_dict = packages
+
+    wazuh_params['packages'] = packages_dict
     wazuh_params['master'] = targets_dict.get('wazuh-1')
     wazuh_params['workers'] = [value for key, value in targets_dict.items() if key.startswith('wazuh-') and key != 'wazuh-1']
     wazuh_params['agents'] = [value for key, value in targets_dict.items() if key.startswith('agent')]
@@ -77,12 +87,12 @@ def test_installation(wazuh_params):
     else:
         HostConfiguration.disable_firewall(manager_params)
         HostConfiguration.certs_create(wazuh_params['wazuh_version'], wazuh_params['master'], wazuh_params['dashboard'], wazuh_params['indexers'], wazuh_params['workers'], wazuh_params['live'])
-        WazuhManager.install_manager(wazuh_params['master'], 'wazuh-1', wazuh_params['wazuh_version'], wazuh_params['live'])
+        WazuhManager.install_manager(wazuh_params['master'], 'wazuh-1', wazuh_params['wazuh_version'], wazuh_params['live'], wazuh_params['packages'])
     assert HostInformation.dir_exists(wazuh_params['master'], WAZUH_ROOT), logger.error(f'The {WAZUH_ROOT} is not present in {HostInformation.get_os_name_and_version_from_inventory(wazuh_params["master"])}')
 
     # Agent installation
     for agent_name, agent_params in wazuh_params['agents'].items():
-        WazuhAgent.install_agent(agent_params, agent_name, wazuh_params['wazuh_version'], wazuh_params['wazuh_revision'], wazuh_params['live'])
+        WazuhAgent.install_agent(agent_params, agent_name, wazuh_params['wazuh_version'], wazuh_params['wazuh_revision'], wazuh_params['live'], wazuh_params['packages'])
 
 
     # Testing installation directory

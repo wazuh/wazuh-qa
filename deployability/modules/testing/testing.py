@@ -31,22 +31,28 @@ class Tester:
 
         targets = {}
         dependencies = {}
+        custom_packages = {}
         extra_vars['hosts_ip'] = []
 
         # Process targets and dependencies
-        for path_type, paths_list in [("targets", payload.targets), ("dependencies", payload.dependencies)]:
+        for path_type, paths_list in [("targets", payload.targets), ("dependencies", payload.dependencies), ("custom_packages", payload.custom_packages)]:
             for path in paths_list:
                 dictionary = eval(path)
-                inventory = Inventory(**Utils.load_from_yaml(', '.join(dictionary.values())))
-                extra_vars['hosts_ip'].extend([inventory.ansible_host] if path_type == "targets" else [])
-                logger.info(f"Running tests for {(inventory.ansible_host)}") if path_type == "targets" else logger.info(f"Dependencies {inventory.ansible_host}")
+                if path_type in ["targets", "dependencies"]:
+                    inventory = Inventory(**Utils.load_from_yaml(', '.join(dictionary.values())))
+                    extra_vars['hosts_ip'].extend([inventory.ansible_host] if path_type == "targets" else [])
+                    logger.info(f"Running tests for {(inventory.ansible_host)}") if path_type == "targets" else logger.info(f"Dependencies {inventory.ansible_host}")
+
                 if path_type == "targets":
                     targets.update(dictionary)
-                else:
+                elif path_type == "dependencies":
                     dependencies.update(dictionary)
+                elif path_type == "custom_packages":
+                    custom_packages.update(dictionary) 
 
         extra_vars['targets'] = json.dumps(targets).replace('"', "")
         extra_vars['dependencies'] = json.dumps(dependencies).replace('"', "")
+        extra_vars['custom_packages'] = json.dumps(custom_packages)
 
         # Set extra vars
         extra_vars['local_host_path'] = str(Path(__file__).parent.parent.parent)

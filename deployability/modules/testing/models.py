@@ -21,7 +21,7 @@ class InputPayload(ExtraVars):
     dependencies: list[str] | None = None
     cleanup: bool = True
     live: bool = False
-
+    custom_packages: list[str]
 
     @field_validator('tests', mode='before')
     def validate_tests(cls, value) -> list[str]:

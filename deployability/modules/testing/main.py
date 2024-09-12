@@ -23,6 +23,7 @@ def parse_arguments():
     parser.add_argument("--wazuh-revision", required=True)
     parser.add_argument("--wazuh-branch", required=False)
     parser.add_argument("--live", required=False, default=False)
+    parser.add_argument("--custom-packages", action='append', required=False, help="Custom packages for component deployment", default=[])
 
     return parser.parse_args()
 

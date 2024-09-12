@@ -7,6 +7,6 @@
   become_user: "{{ current_user }}"
   tasks:
     - name: Test {{ test }} for {{ component }}
-      command: "python3 -m pytest modules/testing/tests/test_{{component}}/test_{{ test }}.py  -v --wazuh_version={{ wazuh_version }} --wazuh_revision={{ wazuh_revision }}  --component={{ component }} --dependencies='{{ dependencies }}' --targets='{{ targets }}' --live={{ live }} -s"
+      command: "python3 -m pytest modules/testing/tests/test_{{component}}/test_{{ test }}.py  -v --wazuh_version={{ wazuh_version }} --wazuh_revision={{ wazuh_revision }}  --component={{ component }} --dependencies='{{ dependencies }}' --targets='{{ targets }}' --custom_packages='{{ custom_packages }}' --live={{ live }} -s"
       args:
         chdir: "{{ local_host_path }}"
