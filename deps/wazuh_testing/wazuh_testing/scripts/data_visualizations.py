@@ -67,7 +67,7 @@ def main():
     visualization_options = {
         'dataframes_paths': options.csv_list,
         'store_path': options.destination,
-        'base_name': options.name
+        'base_name': options.name,
         'plot_title': options.plot_title
     }
 
