@@ -35,7 +35,7 @@ vagrant:
     virtualizer: virtualbox
   linux-debian-12-amd64:
     box: debian/bookworm64
-    box_version: 12.20231211.1
+    box_version: 12.20240905.1
     virtualizer: virtualbox
   # Oracle Linux
   linux-oracle-7-amd64:
@@ -268,11 +268,11 @@ aws:
     zone: us-east-1
     user: admin
   linux-debian-12-amd64:
-    ami: ami-055c8118725fe3a84
+    ami: ami-014124f30c18be425
     zone: us-east-1
     user: admin
   linux-debian-12-arm64:
-    ami: ami-06703877c23c4ddf1
+    ami: ami-027a194fc587a2e82
     zone: us-east-1
     user: admin
   # Oracle Linux
@@ -422,7 +422,7 @@ aws:
     zone: us-east-1
     user: ec2-user
   macos-ventura-13-arm64:
-    ami: ami-01aa3973cdaf40134 
+    ami: ami-01aa3973cdaf40134
     zone: us-east-1
     user: ec2-user
   macos-sonoma-14-amd64:
