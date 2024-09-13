@@ -3,6 +3,7 @@
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 from typing import List, Optional
 from abc import abstractmethod
+import os
 import re
 import requests
 import yaml
@@ -68,8 +69,9 @@ class WazuhAgent:
                 commands.extend(["NET START WazuhSvc"])
 
             elif os_type == 'macos':
+                package_url = packages['agent-pkg']
                 commands.extend([
-                        f'curl -so wazuh-agent.pkg {packages['agent-pkg']} && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
+                        f'curl -so wazuh-agent.pkg {package_url} && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
                 ])
                 system_commands = [
                         '/Library/Ossec/bin/wazuh-control start',
@@ -142,9 +144,9 @@ class WazuhAgent:
 
 
     @staticmethod
-    def install_agents(inventories_paths=[], wazuh_versions=[], wazuh_revisions=[], agent_names=[], live=[]) -> None:
+    def install_agents(inventories_paths=[], wazuh_versions=[], wazuh_revisions=[], agent_names=[], live=[], packages={}) -> None:
         for index, inventory_path in enumerate(inventories_paths):
-            WazuhAgent.install_agent(inventory_path, wazuh_versions[index], wazuh_revisions[index], agent_names[index], live[index])
+            WazuhAgent.install_agent(inventory_path, wazuh_versions[index], wazuh_revisions[index], agent_names[index], live[index], packages)
 
 
     @staticmethod
@@ -294,7 +296,7 @@ class WazuhAgent:
 
     @staticmethod
     def _install_agent_callback(wazuh_params, agent_name, agent_params):
-        WazuhAgent.install_agent(agent_params, agent_name, wazuh_params['wazuh_version'], wazuh_params['wazuh_revision'], wazuh_params['live'])
+        WazuhAgent.install_agent(agent_params, agent_name, wazuh_params['wazuh_version'], wazuh_params['wazuh_revision'], wazuh_params['live'], wazuh_params['packages'])
 
 
     @staticmethod

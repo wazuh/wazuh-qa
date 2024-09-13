@@ -1,0 +1,75 @@
+version: 0.1
+description: This workflow is used to test manager deployment for DDT1 PoC
+variables:
+  manager-os:
+    - linux-ubuntu-20.04-arm64
+    - linux-ubuntu-22.04-amd64
+    - linux-amazon-2-amd64
+    - linux-redhat-8-amd64
+    - linux-centos-8-amd64
+    - linux-debian-11-amd64
+  infra-provider: vagrant
+  working-dir: /tmp/dtt1-poc
+
+tasks:
+  # Unique manager allocate task
+  - task: "allocate-manager-{manager}"
+    description: "Allocate resources for the manager."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - deployability/modules/allocation/main.py
+          - action: create
+          - provider: "{infra-provider}"
+          - size: large
+          - composite-name: "{manager}"
+          - inventory-output: "{working-dir}/manager-{manager}/inventory.yaml"
+          - track-output: "{working-dir}/manager-{manager}/track.yaml"
+          - label-termination-date: "1d"
+          - label-team: "qa"
+          - label-issue: "https://github.com/wazuh/wazuh-jenkins/issues/6686"
+    foreach:
+      - variable: manager-os
+        as: manager
+    cleanup:
+      this: process
+      with:
+        path: python3
+        args:
+          - deployability/modules/allocation/main.py
+          - action: delete
+          - track-output: "{working-dir}/manager-{manager}/track.yaml"
+
+  # Generic manager test task
+  - task: "run-manager-tests"
+    description: "Run tests install for the manager."
+    do:
+      this: process
+      with:
+        path: python3
+        args:
+          - deployability/modules/testing/main.py
+          - targets:
+            - wazuh-1: "{working-dir}/manager-linux-ubuntu-20.04-arm64/inventory.yaml"
+            - wazuh-2: "{working-dir}/manager-linux-ubuntu-22.04-amd64/inventory.yaml"
+            - wazuh-3: "{working-dir}/manager-linux-redhat-8-amd64/inventory.yaml"
+            - wazuh-4: "{working-dir}/manager-linux-centos-8-amd64/inventory.yaml"
+            - wazuh-5: "{working-dir}/manager-linux-debian-11-amd64/inventory.yaml"
+            - wazuh-6: "{working-dir}/manager-linux-amazon-2-amd64/inventory.yaml"
+          - tests: "install,restart,stop,uninstall"
+          - component: "manager"
+          - wazuh-version: "4.8.0"
+          - wazuh-revision: "40800"
+          - live: False
+          - custom-packages:
+            - manager-deb: "https://packages-dev.wazuh.com/trash/apt/pool/main/w/wazuh-manager/wazuh-manager_4.8.0-wj5952_amd64.deb"
+            - manager-rpm: "https://packages-dev.wazuh.com/trash/yum/wazuh-manager-4.8.0-wj5952.x86_64.rpm"
+    depends-on:
+      - "allocate-manager-linux-ubuntu-20.04-arm64"
+      - "allocate-manager-linux-ubuntu-22.04-amd64"
+      - "allocate-manager-linux-amazon-2-amd64"
+      - "allocate-manager-linux-redhat-8-amd64"
+      - "allocate-manager-linux-centos-8-amd64"
+      - "allocate-manager-linux-debian-11-amd64"
