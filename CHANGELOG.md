@@ -12,6 +12,10 @@ All notable changes to this project will be documented in this file.
 
 - Increase results windows in E2E Vulnerability detection ([#5712](https://github.com/wazuh/wazuh-qa/pull/5712/)) \- (Framework + Tests)
 
+### Deleted
+
+- Reverted an xfail behaviour change in the API performance test ([#5734](https://github.com/wazuh/wazuh-qa/pull/5734)) \ (Tests)
+
 ## [4.9.0] - TBD
 
 ### Added
@@ -102,6 +106,7 @@ s
 - Added tests for checking agent status upon ungraceful closure.([#4146](https://github.com/wazuh/wazuh-qa/pull/4146)) \- (Tests)
 - Agent syncronization testing after group deleting ([#4143](https://github.com/wazuh/wazuh-qa/pull/4143)) \- (Tests)
 - Add test for AWS Custom Logs. ([#4675](https://github.com/wazuh/wazuh-qa/pull/4675)) \- (Tests)
+- Add new behaviour for endpoints marked as xfail in api_endpoints_performance test ([#4657](https://github.com/wazuh/wazuh-qa/pull/4657)) \ (Tests)
 
 ### Changed
 
