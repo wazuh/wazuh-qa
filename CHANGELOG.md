@@ -12,6 +12,10 @@ All notable changes to this project will be documented in this file.
 
 - Increase results windows in E2E Vulnerability detection ([#5712](https://github.com/wazuh/wazuh-qa/pull/5712/)) \- (Framework + Tests)
 
+### Deleted
+
+- Reverted an xfail behaviour change in the API performance test ([#5734](https://github.com/wazuh/wazuh-qa/pull/5734)) \ (Tests)
+
 ## [4.9.0] - TBD
 
 ### Added
