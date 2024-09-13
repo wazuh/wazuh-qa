@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 
 - Added support for macOS 14.6 to the Allocation module (Vagrant) ([#5671](https://github.com/wazuh/wazuh-qa/pull/5671)) \- (Framework)
 
+### Changed
+
+- Change in VD E2E tests to use package feed instead of CTI feed ([#5739](https://github.com/wazuh/wazuh-qa/pull/5739)) \- (Tests)
+
 ### Fixed
 
 - Increase results windows in E2E Vulnerability detection ([#5712](https://github.com/wazuh/wazuh-qa/pull/5712/)) \- (Framework + Tests)
