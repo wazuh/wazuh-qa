@@ -8,13 +8,17 @@ All notable changes to this project will be documented in this file.
 
 - Added support for macOS 14.6 to the Allocation module (Vagrant) ([#5671](https://github.com/wazuh/wazuh-qa/pull/5671)) \- (Framework)
 
+### Changed
+
+- Improve VD plots title ([#5740](https://github.com/wazuh/wazuh-qa/pull/5740)) \- (Framework)
+
 ### Fixed
 
 - Increase results windows in E2E Vulnerability detection ([#5712](https://github.com/wazuh/wazuh-qa/pull/5712/)) \- (Framework + Tests)
 
 ### Deleted
 
-- Reverted an xfail behaviour change in the API performance test ([#5734](https://github.com/wazuh/wazuh-qa/pull/5734)) \ (Tests)
+- Reverted an xfail behaviour change in the API performance test ([#5734](https://github.com/wazuh/wazuh-qa/pull/5734)) \- (Tests)
 
 ## [4.9.0] - TBD
 
