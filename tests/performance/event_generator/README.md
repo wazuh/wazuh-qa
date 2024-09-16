@@ -66,7 +66,7 @@ event-generator --config config.yaml
 
 To run the package tests, follow these steps:
 
-1. Move to the 'event_generator' directory
+1. Move to the `event_generator` directory
 2. Create the Python environment
 
 ```bash
