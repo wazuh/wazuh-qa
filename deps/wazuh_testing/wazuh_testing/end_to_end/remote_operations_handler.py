@@ -243,9 +243,9 @@ def get_vulnerability_alerts(host_manager: HostManager, agent_list, packages_dat
 
 
 def get_vulnerabilities_index(host_manager: HostManager, agent_list, packages_data: List[Dict],
-                              greater_than_timestamp: str = "") -> Dict:
+                              greater_than_timestamp: str = "", size=10000) -> Dict:
     vulnerabilities = get_vulnerabilities_from_states_by_agent(host_manager, agent_list,
-                                                               greater_than_timestamp=greater_than_timestamp)
+                                                               greater_than_timestamp=greater_than_timestamp, size=size)
     package_vulnerabilities = filter_vulnerabilities_by_packages(host_manager, vulnerabilities, packages_data)
 
     return package_vulnerabilities
