@@ -1,0 +1,33 @@
+[project]
+name = "wazuh_manager_mockers"
+version = "0.0.1"
+authors = [
+  { name="Wazuh", email="hello@wazuh.com" },
+]
+description = "Wazuh Library for mocking manager services"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "Brotli==1.1.0",
+    "cryptography==43.0.0",
+    "fastapi==0.112.0",
+    "PyJWT==2.9.0",
+    "pyproject_hooks==1.1.0",
+    "uvicorn==0.30.5"
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest==8.3.2",
+    "httpx==0.27.0",
+]
+
+[project.scripts]
+simulate-manager = "manager_mock.simulate_manager:main"
+simulate-agent-comm = "manager_mock_services.agent_comm_mock.agent_comm_mock:main"
+simulate-management-server = "manager_mock_services.manager_server_mock.manager_server_mock:main"
