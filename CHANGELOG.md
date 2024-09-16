@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 
 - Added support for macOS 14.6 to the Allocation module (Vagrant) ([#5671](https://github.com/wazuh/wazuh-qa/pull/5671)) \- (Framework)
 
+### Fixed
+
+- Grafana package used for `upgrade_package_nonvulnerable_to_vulnerable` case is vulnerable ([#5719](https://github.com/wazuh/wazuh-qa/pull/5719)) \- (Tests)
+
 ## [4.9.0] - TBD
 
 ### Added
