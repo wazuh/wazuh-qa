@@ -5,15 +5,16 @@
 """Unit tests for the SyscheckEventGenerator class."""
 
 import os
-import pytest
 from pathlib import Path
+
+import pytest
+
 from event_generator import SyscheckEventGenerator
 
 
 @pytest.fixture
 def setup_syscheck_generator(tmp_path: Path) -> tuple:
-    """
-    Setup for SyscheckEventGenerator with a temporary directory.
+    """Setup for SyscheckEventGenerator with a temporary directory.
 
     Args:
         tmp_path (LocalPath): Temporary directory provided by pytest.
@@ -27,8 +28,7 @@ def setup_syscheck_generator(tmp_path: Path) -> tuple:
 
 
 def test_file_operations(setup_syscheck_generator: tuple):
-    """
-    Test file operations (create, modify, delete) performed by SyscheckEventGenerator.
+    """Test file operations (create, modify, delete) performed by SyscheckEventGenerator.
 
     Args:
         setup_syscheck_generator (fixture): Fixture that provides a SyscheckEventGenerator and a path.
@@ -41,8 +41,7 @@ def test_file_operations(setup_syscheck_generator: tuple):
 
 
 def test_file_creation(setup_syscheck_generator: tuple):
-    """
-    Test if files are being created by the generator.
+    """Test if files are being created by the generator.
 
     Args:
         setup_syscheck_generator (fixture): Fixture that provides a SyscheckEventGenerator and a path.
@@ -53,8 +52,7 @@ def test_file_creation(setup_syscheck_generator: tuple):
 
 
 def test_file_modification(setup_syscheck_generator: tuple):
-    """
-    Test if files are being modified by the generator.
+    """Test if files are being modified by the generator.
 
     Args:
         setup_syscheck_generator (fixture): Fixture that provides a SyscheckEventGenerator and a path.
@@ -66,14 +64,13 @@ def test_file_modification(setup_syscheck_generator: tuple):
     with open(str(path / "test_modify.txt"), 'w') as f:
         f.write(original_content)
     generator.modify_file(str(path / "test_modify.txt"))
-    with open(str(path / "test_modify.txt"), 'r') as f:
+    with open(str(path / "test_modify.txt")) as f:
         content = f.read()
     assert content != original_content, "File should be modified"
 
 
 def test_file_deletion(setup_syscheck_generator: tuple):
-    """
-    Test if files are being deleted by the generator.
+    """Test if files are being deleted by the generator.
 
     Args:
         setup_syscheck_generator (fixture): Fixture that provides a SyscheckEventGenerator and a path.
@@ -86,8 +83,7 @@ def test_file_deletion(setup_syscheck_generator: tuple):
 
 
 def test_invalid_rate():
-    """
-    Test the behavior when an invalid rate (zero or negative) is provided.
+    """Test the behavior when an invalid rate (zero or negative) is provided.
 
     Expectation:
         Raises an exception due to invalid rate.

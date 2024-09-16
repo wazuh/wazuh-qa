@@ -3,25 +3,34 @@
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 """Main execution script for event generator system.
 
-This script serves as the command center for initiating and managing the generation of log and file events based on user-defined configurations.
+This script serves as the command center for initiating and managing the
+generation of log and file events based on user-defined configurations.
 
-The script supports command-line arguments to specify configurations through a YAML file, facilitating complex setups with multiple event generators (log and file events). It manages concurrent event generation using threading to simulate real-world application loads and conditions.
+The script supports command-line arguments to specify configurations through a YAML file,
+facilitating complex setups with multiple event generators (log and file events).
+It manages concurrent event generation using threading to simulate real-world
+application loads and conditions.
 
 Usage:
     python3 main.py --config <path_to_config_file>
 
 Where:
-    --config: Path to the YAML configuration file that specifies various parameters for the event generators.
+    --config: Path to the YAML configuration file that specifies various
+              parameters for the event generators.
 
-This tool is ideal for testing the robustness and performance of systems that monitor or log file and system activities by simulating realistic operational loads.
+This tool is ideal for testing the robustness and performance of systems that
+monitor or log file and system activities by simulating realistic operational loads.
 """
 
-from typing import Any, Dict
 import argparse
-import yaml
-import threading
+import logging
 import os
 import shutil
+import threading
+from typing import Any
+
+import yaml
+
 from event_generator import LogEventGenerator, SyscheckEventGenerator
 
 
@@ -30,17 +39,16 @@ def delete_file(path: str) -> None:
     try:
         if os.path.isdir(path):
             shutil.rmtree(path)
-            print(f"Successfully deleted directory: {path}")
+            logging.info(f"Successfully deleted directory: {path}")
         else:
             os.remove(path)
-            print(f"Successfully deleted file: {path}")
+            logging.info(f"Successfully deleted file: {path}")
     except OSError as e:
-        print(f"Error deleting {path}: {e}")
+        logging.error(f"Error deleting {path}: {e}")
 
 
 def parse_arguments() -> argparse.Namespace:
-    """
-    Parse command line arguments using argparse and validate them.
+    """Parse command line arguments using argparse and validate them.
 
     This function sets up an argparse.ArgumentParser to read command line
     arguments. It specifically looks for a '--config' argument which is mandatory.
@@ -70,8 +78,7 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def validate_parameters(args: argparse.Namespace) -> None:
-    """
-    Validate the command line arguments provided.
+    """Validate the command line arguments provided.
 
     Args:
         args (argparse.Namespace): The arguments provided to the command line.
@@ -87,9 +94,8 @@ def validate_parameters(args: argparse.Namespace) -> None:
         raise ValueError("Invalid configuration file.")
 
 
-def get_logcollector_generator(file_config: Dict[str, Any]) -> LogEventGenerator:
-    """
-    Create and return a LogEventGenerator instance configured according to the provided file configuration.
+def get_logcollector_generator(file_config: dict[str, Any]) -> LogEventGenerator:
+    """Create and return a LogEventGenerator instance configured according to the provided file configuration.
 
     Args:
         file_config (dict): Configuration settings specific to the logcollector module. It must include
@@ -116,9 +122,8 @@ def get_logcollector_generator(file_config: Dict[str, Any]) -> LogEventGenerator
     )
 
 
-def get_syscheck_generator(file_config: Dict[str, Any]) -> SyscheckEventGenerator:
-    """
-    Create and return a SyscheckEventGenerator instance based on the provided file configuration.
+def get_syscheck_generator(file_config: dict[str, Any]) -> SyscheckEventGenerator:
+    """Create and return a SyscheckEventGenerator instance based on the provided file configuration.
 
     Args:
         file_config (dict): Configuration settings specific to the syscheck module. It should include
@@ -144,7 +149,7 @@ def main() -> None:
     """Main function to parse arguments and initiate event generation based on configurations."""
     args = parse_arguments()
 
-    with open(args.config, 'r') as file:
+    with open(args.config) as file:
         config = yaml.safe_load(file)
 
     threads = []

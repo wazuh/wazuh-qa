@@ -4,17 +4,16 @@
 
 """Unit tests for the LogEventGenerator class."""
 
-from typing import Tuple
-import os
-import pytest
 from pathlib import Path
+
+import pytest
+
 from event_generator import LogEventGenerator
 
 
 @pytest.fixture
-def setup_log_generator(tmp_path: Path) -> Tuple[LogEventGenerator, Path]:
-    """
-    Setup for LogEventGenerator with a temporary directory.
+def setup_log_generator(tmp_path: Path) -> tuple[LogEventGenerator, Path]:
+    """Setup for LogEventGenerator with a temporary directory.
 
     Args:
         tmp_path (LocalPath): Provides a temporary directory path fixture from pytest.
@@ -28,9 +27,8 @@ def setup_log_generator(tmp_path: Path) -> Tuple[LogEventGenerator, Path]:
     return generator, path
 
 
-def test_log_creation(setup_log_generator: Tuple[LogEventGenerator, Path]) -> None:
-    """
-    Test if log files are created correctly.
+def test_log_creation(setup_log_generator: tuple[LogEventGenerator, Path]) -> None:
+    """Test if log files are created correctly.
 
     Args:
         setup_log_generator (fixture): Fixture that provides a log generator and a path.
@@ -40,23 +38,21 @@ def test_log_creation(setup_log_generator: Tuple[LogEventGenerator, Path]) -> No
     assert path.exists(), "Log file should exist after generation start"
 
 
-def test_log_content(setup_log_generator: Tuple[LogEventGenerator, Path]) -> None:
-    """
-    Test the content of log files to ensure logs are written.
+def test_log_content(setup_log_generator: tuple[LogEventGenerator, Path]) -> None:
+    """Test the content of log files to ensure logs are written.
 
     Args:
         setup_log_generator (fixture): Fixture that provides a log generator and a path.
     """
     generator, path = setup_log_generator
     generator.start()
-    with open(path, 'r') as file:
+    with open(path) as file:
         content = file.read()
     assert "This is a test log message" in content, "Log message should be in the log file"
 
 
 def test_zero_operations(tmp_path: Path) -> None:
-    """
-    Test no log file creation when operations are set to zero.
+    """Test no log file creation when operations are set to zero.
 
     Args:
         tmp_path (LocalPath): Temporary directory path fixture provided by pytest.
@@ -69,21 +65,19 @@ def test_zero_operations(tmp_path: Path) -> None:
 
 
 def test_invalid_path() -> None:
-    """
-    Test behavior when an invalid path is provided.
+    """Test behavior when an invalid path is provided.
 
     Expectation:
-        Raises an exception due to invalid path.
+        Raises an IOError due to invalid path.
     """
     generator = LogEventGenerator(
         rate=1, path="/invalid/path", operations=1, max_file_size=1, template_path=None)
-    with pytest.raises(Exception):
+    with pytest.raises(IOError):
         generator.start()
 
 
 def test_high_rate(tmp_path: Path) -> None:
-    """
-    Test the system's response to a very high event generation rate.
+    """Test the system's response to a very high event generation rate.
 
     Args:
         tmp_path (LocalPath): Temporary directory path fixture provided by pytest.
@@ -93,6 +87,6 @@ def test_high_rate(tmp_path: Path) -> None:
         path), operations=100, max_file_size=1, template_path=None)
     generator.start()
     assert path.exists(), "Log file should still be created with high rate"
-    with open(path, 'r') as file:
+    with open(path) as file:
         lines = file.readlines()
     assert len(lines) == 100, "Exactly 100 log entries should be written"

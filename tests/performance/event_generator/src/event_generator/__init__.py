@@ -13,7 +13,8 @@ Use this module to instantiate log or system event generators based on specified
 
 ```python
 from event_generator import LogEventGenerator, SyscheckEventGenerator
-log_generator = LogEventGenerator(rate=1, path='/var/log/test.log', operations=100, max_file_size=10, template_path='template.json')
+log_generator = LogEventGenerator(rate=1, path='/var/log/test.log', operations=100,
+max_file_size=10, template_path='template.json')
 syscheck_generator = SyscheckEventGenerator(rate=1, path='/tmp', operations=50)
 ```
 
@@ -28,4 +29,12 @@ syscheck_generator = SyscheckEventGenerator(rate=1, path='/tmp', operations=50)
 This module aims to facilitate testing by simulating workload and monitoring system behaviors.
 """
 
+
 from .event_generator import EventGenerator, LogEventGenerator, SyscheckEventGenerator
+
+
+__all__ = [
+    'EventGenerator',
+    'LogEventGenerator',
+    'SyscheckEventGenerator'
+]
