@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Change in VD E2E tests to use package feed instead of CTI feed ([#5739](https://github.com/wazuh/wazuh-qa/pull/5739)) \- (Tests)
+- Improve VD plots title ([#5740](https://github.com/wazuh/wazuh-qa/pull/5740)) \- (Framework)
 
 ### Fixed
 
