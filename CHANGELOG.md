@@ -11,10 +11,15 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Change in VD E2E tests to use package feed instead of CTI feed ([#5739](https://github.com/wazuh/wazuh-qa/pull/5739)) \- (Tests)
+- Improve VD plots title ([#5740](https://github.com/wazuh/wazuh-qa/pull/5740)) \- (Framework)
 
 ### Fixed
 
 - Increase results windows in E2E Vulnerability detection ([#5712](https://github.com/wazuh/wazuh-qa/pull/5712/)) \- (Framework + Tests)
+
+### Deleted
+
+- Reverted an xfail behaviour change in the API performance test ([#5734](https://github.com/wazuh/wazuh-qa/pull/5734)) \- (Tests)
 
 ## [4.9.0] - TBD
 
@@ -29,6 +34,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Updated Debian 12 AMIs and Box to 12.7 version ([#5735](https://github.com/wazuh/wazuh-qa/pull/5735)) \- (Framework)
 - Increase Feed update timeout in waiters.py ([#5668](https://github.com/wazuh/wazuh-qa/pull/5668)) \- (Framework)
 - Set `/active-response` as xfail ([#5660](https://github.com/wazuh/wazuh-qa/pull/5660)) \- (Tests)
 - Modify the directory name for machines deployed in AWS ([#5635](https://github.com/wazuh/wazuh-qa/pull/5635)) \- (Framework)
