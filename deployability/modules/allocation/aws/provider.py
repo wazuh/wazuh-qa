@@ -48,7 +48,7 @@ class AWSProvider(Provider):
         temp_id = cls._generate_instance_id(cls.provider_name)
         temp_dir = base_dir / temp_id
         credentials = AWSCredentials()
-        teams = ['qa', 'core', 'framework', 'devops', 'frontend', 'operations', 'cloud', 'threat-intel', 'marketing', 'documentation']
+        teams = ['qa', 'cppserver', 'pyserver', 'devops', 'dashboard', 'operations', 'cloud', 'threat-intel', 'marketing', 'documentation', 'agent', 'indexer']
         platform = str(params.composite_name.split("-")[0])
         arch = str(params.composite_name.split("-")[3])
         if not config:
