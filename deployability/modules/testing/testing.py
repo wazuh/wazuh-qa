@@ -15,7 +15,6 @@ from modules.testing.utils import logger
 class Tester:
     _playbooks_dir = Path(__file__).parent / 'playbooks'
     _setup_playbook = _playbooks_dir / 'setup.yml'
-    _cleanup_playbook = _playbooks_dir / 'cleanup.yml'
     _test_template = _playbooks_dir / 'test.yml'
 
     @classmethod
@@ -60,14 +59,6 @@ class Tester:
         cls._setup(ansible, extra_vars)
         cls._run_tests(payload.tests, ansible, extra_vars)
 
-        # Clean up if required
-        if payload.cleanup:
-            for target_path in payload.targets:
-                target_value = eval(target_path).values()
-                target_inventory = Inventory(**Utils.load_from_yaml(str(list(target_value)[0])))
-                logger.info("Cleaning up")
-                cls._cleanup(ansible, extra_vars['working_dir'])
-
     @classmethod
     def _get_extra_vars(cls, payload: InputPayload) -> ExtraVars:
         """
@@ -96,13 +87,13 @@ class Tester:
             rendering_var = {**extra_vars, 'test': test}
             template = str(cls._test_template)
             result = ansible.run_playbook(template, rendering_var)
-            for event in result.events:
-                logger.info(f"{event['stdout']}")
-            if result.stats["failures"]:
-                for event in result.events:
-                    if "fatal" in event['stdout']:
-                        raise Exception(f"Test {test} failed with error")
 
+            for event in result.events:
+                if result.stats["failures"]:
+                    if "fatal" in event['stdout']:
+                        raise Exception(f"Test {test} failed with error: {event['stdout']}")
+                else:
+                    logger.info(f"Test {test} Finished with: {event['stdout']}")
 
     @classmethod
     def _setup(cls, ansible: Ansible, extra_vars: ExtraVars) -> None:
@@ -120,16 +111,3 @@ class Tester:
                 if "fatal" in event['stdout']:
                     raise Exception(f"Setup {template} failed with error: {event['stdout']}")
 
-
-    @classmethod
-    def _cleanup(cls, ansible: Ansible, remote_working_dir: str = '/tmp') -> None:
-        """
-        Cleanup the environment after the tests.
-
-        Args:
-            ansible (Ansible): The Ansible object to run the cleanup.
-            remote_working_dir (str): The remote working directory.
-        """
-        extra_vars = {'working_dir': remote_working_dir}
-        playbook = str(cls._cleanup_playbook)
-        ansible.run_playbook(playbook, extra_vars)
