@@ -96,7 +96,7 @@ class Monitor:
         self._thread: Optional[Thread] = None
         self._previous_read: Optional[str] = None
         self._previous_write: Optional[str] = None
-        self._csv_file: str = join(self._dst_dir, f'{self._process_name}.csv')
+        self._csv_file: str = join(self._dst_dir, f"{self._process_name.replace('.py', '')}.csv")
         self.set_process()
 
     @classmethod

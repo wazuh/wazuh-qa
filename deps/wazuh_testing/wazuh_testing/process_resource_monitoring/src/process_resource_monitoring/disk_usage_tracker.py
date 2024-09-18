@@ -55,7 +55,7 @@ class DiskUsageTracker:
         self._event: Optional[Event] = None
         self._thread: Optional[Thread] = None
         self._dst_dir: str = dst_dir
-        self._csv_file: str = os.path.join(self._dst_dir, f'{self._file_name}')
+        self._csv_file: str = os.path.join(self._dst_dir, f"{self._file_name.replace('.', '_')}.csv")
         self._partition: Optional[str] = self._get_partition_for_path(self._file_path)
 
     def get_file_info(self) -> Dict[str, Any]:
@@ -167,7 +167,7 @@ class DiskUsageTracker:
         self._event = Event()
         self._thread = Thread(target=self._monitor_file)
         self._thread.start()
-        logger.info(f'Started monitoring process {self._file_name} ({self._file_path})')
+        logger.info(f'Started monitoring file {self._file_name} ({self._file_path})')
 
     def shutdown(self) -> None:
         """Stop all the monitoring threads."""

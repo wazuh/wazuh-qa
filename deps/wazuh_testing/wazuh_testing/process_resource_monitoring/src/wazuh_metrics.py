@@ -158,9 +158,9 @@ def get_script_arguments() -> argparse.Namespace:
         '--store-disk',
         dest='store_disk_path',
         action='store',
-        default=CURRENT_SESSION,
+        default=f'{CURRENT_SESSION}/files',
         type=str,
-        help=f'Path to store the CSVs with the disk usage data. Default: \'{METRICS_FOLDER}/<id>\'.\n'
+        help=f'Path to store the CSVs with the disk usage data. Default: \'{METRICS_FOLDER}/<id>/files\'.\n'
         + 'Where <id> is the number of seconds since the epoch when the monitoring started.',
     )
 
