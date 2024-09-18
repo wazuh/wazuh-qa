@@ -1,6 +1,10 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [4.9.1] - TBD
+
+### Added
+- Add Ubuntu 24.04 support to Deployability testing tier 1 ([#5689])(https://github.com/wazuh/wazuh-qa/pull/5689) \- (Tests)
 
 ## [4.9.0] - TBD
 
