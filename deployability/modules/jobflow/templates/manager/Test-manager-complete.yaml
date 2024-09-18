@@ -79,8 +79,8 @@ tasks:
           - live: False
     depends-on:
       - "allocate-manager-linux-ubuntu-20.04-amd64"
-      - "allocate-manager-linux-ubuntu-24.04-amd64"
       - "allocate-manager-linux-ubuntu-22.04-amd64"
+      - "allocate-manager-linux-ubuntu-24.04-amd64"
       - "allocate-manager-linux-amazon-2-amd64"
       - "allocate-manager-linux-redhat-7-amd64"
       - "allocate-manager-linux-redhat-8-amd64"
