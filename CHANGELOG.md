@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.10.0] - TBD
 
+### Deleted
+
+- Removed allocator module from wazuh-qa repository ([#5748](https://github.com/wazuh/wazuh-qa/pull/5748)) \- (Framework)
+
 ## [4.9.1] - TBD
 
 ### Added
