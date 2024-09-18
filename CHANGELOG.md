@@ -8,14 +8,26 @@ All notable changes to this project will be documented in this file.
 
 - Added support for macOS 14.6 to the Allocation module (Vagrant) ([#5671](https://github.com/wazuh/wazuh-qa/pull/5671)) \- (Framework)
 
+### Changed
+
+- Update team labels and add 'agent' option ([#5725](https://github.com/wazuh/wazuh-qa/pull/5725)) \- (Framework)
+- Change in VD E2E tests to use package feed instead of CTI feed ([#5739](https://github.com/wazuh/wazuh-qa/pull/5739)) \- (Tests)
+- Improve VD plots title ([#5740](https://github.com/wazuh/wazuh-qa/pull/5740)) \- (Framework)
+
 ### Fixed
 
 - Grafana package used for `upgrade_package_nonvulnerable_to_vulnerable` case is vulnerable ([#5719](https://github.com/wazuh/wazuh-qa/pull/5719)) \- (Tests)
+- Increase results windows in E2E Vulnerability detection ([#5712](https://github.com/wazuh/wazuh-qa/pull/5712/)) \- (Framework + Tests)
+
+### Deleted
+
+- Reverted an xfail behaviour change in the API performance test ([#5734](https://github.com/wazuh/wazuh-qa/pull/5734)) \- (Tests)
 
 ## [4.9.0] - TBD
 
 ### Added
 
+- Adding jobflow templates ([#5680](https://github.com/wazuh/wazuh-qa/pull/5680/)) \- (Framework)
 - Add RockyLinux 8.10 to Allocator module ([#5524](https://github.com/wazuh/wazuh-qa/pull/5524)) \- (Framework)
 - Add Deployability testing tier 1 ([#5190](https://github.com/wazuh/wazuh-qa/pull/5190)) \- (Framework + Documentation + Tests)
 - Add Workflow module to Wazuh-qa repository ([#4990](https://github.com/wazuh/wazuh-qa/pull/4990)) \- (Tests)
@@ -24,6 +36,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- Updated Debian 12 AMIs and Box to 12.7 version ([#5735](https://github.com/wazuh/wazuh-qa/pull/5735)) \- (Framework)
 - Increase Feed update timeout in waiters.py ([#5668](https://github.com/wazuh/wazuh-qa/pull/5668)) \- (Framework)
 - Set `/active-response` as xfail ([#5660](https://github.com/wazuh/wazuh-qa/pull/5660)) \- (Tests)
 - Modify the directory name for machines deployed in AWS ([#5635](https://github.com/wazuh/wazuh-qa/pull/5635)) \- (Framework)
@@ -42,6 +55,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix playbook cleanup.yaml ([#5672](https://github.com/wazuh/wazuh-qa/pull/5672)) \- (Tests)
 - Fixed unnecesary reference to debian file in dashboard provisioning task ([#5643](https://github.com/wazuh/wazuh-qa/pull/5643)) \- (Framework)
 - Changed 'Ensure that the manager version is' expected warning to an agnostic version of regex ([#5630](https://github.com/wazuh/wazuh-qa/pull/5630)) \- (Tests)
 - Adding fixed and dynamic waits to port status checks ([#5627](https://github.com/wazuh/wazuh-qa/pull/5627)) (Framework)
