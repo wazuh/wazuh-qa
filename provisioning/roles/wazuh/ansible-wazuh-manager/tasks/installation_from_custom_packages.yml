@@ -6,27 +6,39 @@
           state: present
         when:
           - wazuh_custom_packages_installation_manager_enabled
+        register: wazuh_manager_installation
+        retries: 4
+        delay: 30
+        until: wazuh_manager_installation is succeeded
     when:
       - ansible_os_family|lower == "debian"
 
   - block:
-    - name: Install Wazuh Manager from .rpm packages | yum
-      yum:
-        name: "{{ wazuh_custom_packages_installation_manager_rpm_url }}"
-        state: present
-      when:
-        - wazuh_custom_packages_installation_manager_enabled
-        - not (ansible_distribution|lower == "centos" and ansible_distribution_major_version >= "8")
-        - not (ansible_distribution|lower == "redhat" and ansible_distribution_major_version >= "8")
+      - name: Install Wazuh Manager from .rpm packages | yum
+        yum:
+          name: "{{ wazuh_custom_packages_installation_manager_rpm_url }}"
+          state: present
+        when:
+          - wazuh_custom_packages_installation_manager_enabled
+          - not (ansible_distribution|lower == "centos" and ansible_distribution_major_version >= "8")
+          - not (ansible_distribution|lower == "redhat" and ansible_distribution_major_version >= "8")
+        register: wazuh_manager_installation_yum
+        retries: 4
+        delay: 30
+        until: wazuh_manager_installation_yum is succeeded
 
-    - name: Install Wazuh Manager from .rpm packages | dnf
-      dnf:
-        name: "{{ wazuh_custom_packages_installation_manager_rpm_url }}"
-        state: present
-        disable_gpg_check: True
-      when:
-        - wazuh_custom_packages_installation_manager_enabled
-        - (ansible_distribution|lower == "centos" and ansible_distribution_major_version >= "8") or
-          (ansible_distribution|lower == "redhat" and ansible_distribution_major_version >= "8")
+      - name: Install Wazuh Manager from .rpm packages | dnf
+        dnf:
+          name: "{{ wazuh_custom_packages_installation_manager_rpm_url }}"
+          state: present
+          disable_gpg_check: True
+        when:
+          - wazuh_custom_packages_installation_manager_enabled
+          - (ansible_distribution|lower == "centos" and ansible_distribution_major_version >= "8") or
+            (ansible_distribution|lower == "redhat" and ansible_distribution_major_version >= "8")
+        register: wazuh_manager_installation_dnf
+        retries: 4
+        delay: 30
+        until: wazuh_manager_installation_dnf is succeeded
     when:
       - ansible_os_family|lower == "redhat"
