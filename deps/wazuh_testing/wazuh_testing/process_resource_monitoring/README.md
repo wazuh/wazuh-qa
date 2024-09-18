@@ -80,17 +80,13 @@ The package also provides the script `wazuh-metrics`, designed to interact with 
 process_resource_monitoring/
 ├── pyproject.toml
 ├── README.md
-├── src
-│   ├── process_resource_monitoring
-│   │   ├── disk_usage_tracker.py
-│   │   ├── __init__.py
-│   │   ├── _logger.py
-│   │   └── monitor.py
-│   └── wazuh_metrics.py
-├── tests
-│   ├── test_data.yml
-│   └── test_disk_usage_tracker.py
-└── tmp.py
+└── src
+    ├── process_resource_monitoring
+    │   ├── disk_usage_tracker.py
+    │   ├── __init__.py
+    │   ├── _logger.py
+    │   └── monitor.py
+    └── wazuh_metrics.py
 ```
 
 
@@ -154,7 +150,7 @@ wazuh-metrics <process_name> [<process_name>,...]
 wazuh-metrics authd analysisd
 
 # Monitor api, cluster, mail and logcollector. Frequency 5s. Units to store the main memory values MB
-wazuh-metrics apid clusterd maild logcollector -s 5 -u 'MB'
+wazuh-metrics apid clusterd maild logcollector -s 5 -u MB
 
 # Monitor api and logcollector. Track usage of the file `/var/ossec/logs/archives/archives.json`
 wazuh-metrics apid logcollector --disk /var/ossec/logs/archives/archives.json
