@@ -174,14 +174,14 @@ class DiskUsageTracker:
         self._event.set()
         self._thread.join()
 
-    def _get_partition_for_path(self, path: str) -> str | None:
+    def _get_partition_for_path(self, path: str) -> str:
         """Get the *physical* partition that contains a file given its path.
 
         Args:
             path (str): path of the file to get its partition.
 
         Returns:
-            (str | None): Mount point of the partition containing the file. None if the file does not exist.
+            (str): Mount point of the partition containing the file. None if the file does not exist.
         """
         if os.path.exists(path):
             for partition in psutil.disk_partitions():

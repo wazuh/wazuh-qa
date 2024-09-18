@@ -43,10 +43,10 @@ PROCESS_MAPPING: Dict[str, str] = {
     'wazuh-syscheckd': 'syscheckd',
 
     # Indexer
-    'indexer': '/usr/share/wazuh-indexer',
+    'indexer': 'wazuh-indexer',
 
     # Dashboard
-    'dashboard': '/usr/share/wazuh-dashboard',
+    'dashboard': 'wazuh-dashboard',
 
     # Agent
     'agentd': 'wazuh-agentd',
@@ -107,7 +107,7 @@ def get_script_arguments() -> argparse.Namespace:
         '--disk-unit',
         dest='disk_unit',
         default='GB',
-        choices=['KB', 'MB', 'GB', 'TB'],
+        choices=['B', 'KB', 'MB', 'GB', 'TB'],
         type=str,
         help='Unit for the disk usage related values. Default \'GB\'',
     )
@@ -281,6 +281,8 @@ def main():
     options = get_script_arguments()
 
     makedirs(CURRENT_SESSION)
+    if options.disk_paths:
+        makedirs(f'{CURRENT_SESSION}/files')
     logging.basicConfig(
         filename=join(METRICS_FOLDER, 'wazuh-metrics.log'),
         filemode='a',
