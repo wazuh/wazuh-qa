@@ -1,15 +1,12 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
 ## [4.9.1] - TBD
 
 ### Added
+
 - Add Ubuntu 24.04 support to Deployability testing tier 1 ([#5689])(https://github.com/wazuh/wazuh-qa/pull/5689) \- (Tests)
-
-## [4.9.1] - TBD
-
-### Added
-
 - Added support for macOS 14.6 to the Allocation module (Vagrant) ([#5671](https://github.com/wazuh/wazuh-qa/pull/5671)) \- (Framework)
 
 ### Changed
