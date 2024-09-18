@@ -168,7 +168,6 @@ You can check the compliance of Python modules using ruff with the provided conf
 
 Here you can find the commands needed for installing ruff and checking the files:
 
-<!-- TODO: Update link to one that's not expected to be deprecated in the near future -->
 ```shell script
 # Install `ruff` (python linter)
 python -m pip install ruff
