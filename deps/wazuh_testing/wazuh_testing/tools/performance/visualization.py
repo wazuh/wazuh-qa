@@ -20,19 +20,22 @@ class DataVisualizer(ABC):
         dataframe (pandas.Dataframe): dataframe containing the info from all the CSVs.
         store_path (str): path to store the CSV images. Defaults to the temp directory.
         base_name (str, optional): base name used to store the images.
+        plot_title (str, optional): Title for the generated plots.
     """
 
-    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None):
+    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None, plot_title=None):
         """Initializes the DataVisualizer.
 
         Args:
             dataframes_paths (list): List of paths to CSV files.
             store_path (str, optional): Path to store the CSV images. Defaults to the temp directory.
             base_name (str, optional): Base name used to store the images.
+            plot_title (str, optional): Title for the generated plots.
         """
         self.dataframes_paths = dataframes_paths
         self.store_path = store_path
         self.base_name = base_name
+        self.plot_title = plot_title
         self.dataframe = pd.DataFrame()
 
         self._load_dataframes()
@@ -198,6 +201,7 @@ class BinaryDatavisualizer(DataVisualizer):
         dataframe (pandas.Dataframe): dataframe containing the info from all the CSVs.
         store_path (str): path to store the CSV images. Defaults to the temp directory.
         base_name (str, optional): base name used to store the images.
+        plot_title (str, optional): Title for the generated plots.
         binary_metrics_fields_to_plot (list): List of binary metrics fields to plot.
         binary_metrics_extra_fields (list): List of additional binary metrics fields.
         binary_metrics_fields (list): Combined list of binary metrics fields.
@@ -209,16 +213,17 @@ class BinaryDatavisualizer(DataVisualizer):
     binary_metrics_extra_fields = ["Daemon", "Version", "PID"]
     binary_metrics_fields = binary_metrics_fields_to_plot + binary_metrics_extra_fields
 
-    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None, unify_child_daemon_metrics=False):
+    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None, unify_child_daemon_metrics=False, plot_title=None):
         """Initialize the BinaryDatavisualizer.
 
         Args:
             dataframes (list): List of dataframes containing binary metrics data.
             store_path (str, optional): Path to store visualizations. Defaults to system temp directory.
             base_name (str, optional): Base name for saved visualizations. Defaults to None.
+            plot_title (str, optional): Title for the generated plots.
             unify_child_daemon_metrics (bool, optional): Whether to unify child daemon metrics. Defaults to False.
         """
-        super().__init__(dataframes_paths, store_path, base_name)
+        super().__init__(dataframes_paths, store_path, base_name, plot_title)
         self._validate_dataframe()
         if unify_child_daemon_metrics:
             self.dataframe = self.dataframe.reset_index(drop=False)
@@ -302,6 +307,7 @@ class BinaryDatavisualizer(DataVisualizer):
 
         This method creates and saves plots for each binary metric field.
         """
+        p_title = self.plot_title.replace('<<TAB>>', ' ')
         columns_to_plot = self._get_fields_to_plot()
         for element in columns_to_plot:
             _, ax = plt.subplots()
@@ -311,7 +317,7 @@ class BinaryDatavisualizer(DataVisualizer):
                 self._basic_plot(ax, self.dataframe[self.dataframe.Daemon == daemon][element],
                                  label=daemon, color=color)
 
-            self._save_custom_plot(ax, element, element)
+            self._save_custom_plot(ax, element, p_title)
 
 
 class DaemonStatisticsVisualizer(DataVisualizer):
@@ -322,6 +328,7 @@ class DaemonStatisticsVisualizer(DataVisualizer):
         dataframe (pandas.Dataframe): dataframe containing the info from all the CSVs.
         store_path (str): path to store the CSV images. Defaults to the temp directory.
         base_name (str, optional): base name used to store the images.
+        plot_title (str, optional): Title for the generated plots.
         daemon (str): Name of the daemon for which statistics are visualized.
         plots_data (dict): Data required for plotting statistics.
         expected_fields (list): List of expected fields for the daemon statistics.
@@ -331,17 +338,18 @@ class DaemonStatisticsVisualizer(DataVisualizer):
     statistics_plot_data_directory = join(dirname(realpath(__file__)), '..', '..', 'data', 'data_visualizer')
     statistics_filename_suffix = '_csv_headers.json'
 
-    def __init__(self, dataframes_paths, daemon, store_path=gettempdir(), base_name=None):
+    def __init__(self, dataframes_paths, daemon, store_path=gettempdir(), base_name=None, plot_title=None):
         """Initialize the DaemonStatisticsVisualizer.
 
         Args:
             dataframes (list): List of dataframes containing daemon statistics data.
             daemon (str): Name of the daemon for which statistics are visualized.
             store_path (str, optional): Path to store visualizations. Defaults to system temp directory.
+            plot_title (str, optional): Title for the generated plots.
             base_name (str, optional): Base name for saved visualizations. Defaults to None.
         """
         self.daemon = daemon
-        super().__init__(dataframes_paths, store_path, base_name)
+        super().__init__(dataframes_paths, store_path, base_name, plot_title)
         self.plots_data = self._load_plot_data()
         self.expected_fields = []
         for graph in self.plots_data.values():
@@ -383,6 +391,7 @@ class DaemonStatisticsVisualizer(DataVisualizer):
 
         This method creates and saves plots for each statistic field.
         """
+        p_title = self.plot_title.replace('<<TAB>>', ' ')
         for element in self.plots_data.values():
             columns = element['columns']
             title = element['title']
@@ -391,7 +400,7 @@ class DaemonStatisticsVisualizer(DataVisualizer):
             _, ax = plt.subplots()
             for column, color in zip(columns, colors):
                 self._basic_plot(ax, self.dataframe[column], label=column, color=color)
-            self._save_custom_plot(ax, title, title)
+            self._save_custom_plot(ax, title, p_title)
 
 
 class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
@@ -402,19 +411,21 @@ class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
         dataframe (pandas.Dataframe): dataframe containing the info from all the CSVs.
         store_path (str): path to store the CSV images. Defaults to the temp directory.
         base_name (str, optional): base name used to store the images.
+        plot_title (str, optional): Title for the generated plots.
         general_fields (list): List of general fields for logcollector statistics.
     """
     general_fields = ['Location', 'Target']
 
-    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None):
+    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None, plot_title=None):
         """Initialize the LogcollectorStatisticsVisualizer.
 
         Args:
             dataframes (list): List of dataframes containing logcollector statistics data.
             store_path (str, optional): Path to store visualizations. Defaults to system temp directory.
             base_name (str, optional): Base name for saved visualizations. Defaults to None.
+            plot_title (str, optional): Title for the generated plots.
         """
-        super().__init__(dataframes_paths, 'logcollector', store_path, base_name)
+        super().__init__(dataframes_paths, 'logcollector', store_path, base_name, plot_title)
 
     def _get_expected_fields(self):
         """Get the list of expected fields for logcollector statistics.
@@ -437,6 +448,7 @@ class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
 
         This method creates and saves plots for each logcollector target.
         """
+        p_title = self.plot_title.replace('<<TAB>>', ' ')
         for element in self.plots_data.values():
             _, ax = plt.subplots()
             targets = self._get_logcollector_location()
@@ -445,7 +457,7 @@ class LogcollectorStatisticsVisualizer(DaemonStatisticsVisualizer):
                 self._basic_plot(ax, self.dataframe[self.dataframe.Location == target][element['columns']],
                                  label=target, color=color)
 
-            self._save_custom_plot(ax, element['title'], element['title'])
+            self._save_custom_plot(ax, element['title'], p_title)
 
 
 class ClusterStatisticsVisualizer(DataVisualizer):
@@ -456,19 +468,21 @@ class ClusterStatisticsVisualizer(DataVisualizer):
         dataframe (pandas.Dataframe): dataframe containing the info from all the CSVs.
         store_path (str): path to store the CSV images. Defaults to the temp directory.
         base_name (str, optional): base name used to store the images.
+        plot_title (str, optional): Title for the generated plots.
         expected_cluster_fields (list): List of expected fields for cluster statistics.
     """
     expected_cluster_fields = ['node_name', 'activity', 'time_spent(s)']
 
-    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None):
+    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None, plot_title=None):
         """Initialize the ClusterStatisticsVisualizer.
 
         Args:
             dataframes_paths (list): List of paths to dataframes containing cluster statistics data.
             store_path (str, optional): Path to store visualizations. Defaults to system temp directory.
+            plot_title (str, optional): Title for the generated plots.
             base_name (str, optional): Base name for saved visualizations. Defaults to None.
         """
-        super().__init__(dataframes_paths, store_path, base_name)
+        super().__init__(dataframes_paths, store_path, base_name, plot_title)
         self._validate_dataframe()
 
     def _get_expected_fields(self) -> list:
@@ -485,16 +499,19 @@ class ClusterStatisticsVisualizer(DataVisualizer):
         This method creates and saves plots for each cluster activity.
         """
         elements = list(self.dataframe['activity'].unique())
-
+        result = self.plot_title.replace("<<TAB>>", "_").replace(":", "_").replace(",", "")
+        start = result.find("Version_")
+        output = result[start:]
         for element in elements:
             _, ax = plt.subplots()
+            p_title = element.replace(' ', '_').lower() + "-" + output
             nodes = self.dataframe[self.dataframe.activity == element]['node_name'].unique()
             current_df = self.dataframe[self.dataframe.activity == element]
             current_df.reset_index(drop=True, inplace=True)
             for node, color in zip(nodes, self._color_palette(len(nodes))):
                 self._basic_plot(ax=ax, dataframe=current_df[current_df.node_name == node]['time_spent(s)'],
                                  label=node, color=color)
-            self._save_custom_plot(ax, 'time_spent(s)', element.replace(' ', '_').lower(), disable_x_labels=True,
+            self._save_custom_plot(ax, 'time_spent(s)', p_title, disable_x_labels=True,
                                    statistics=DataVisualizer._get_statistics(
                                         current_df['time_spent(s)'], calculate_mean=True, calculate_median=True))
 
@@ -506,19 +523,21 @@ class IndexerAlerts(DataVisualizer):
         dataframes_paths (list): paths of the CSVs.
         dataframe (pandas.Dataframe): dataframe containing the info from all the CSVs.
         store_path (str): path to store the CSV images. Defaults to the temp directory.
+        plot_title (str, optional): Title for the generated plots.
         expected_fields (list): List of expected fields for indexer alerts.
     """
     expected_fields = ['Total alerts']
 
-    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None):
+    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None, plot_title=None):
         """Initialize the IndexerAlerts visualizer.
 
         Args:
             dataframes_paths (list): List of paths to dataframes containing indexer alerts data.
             store_path (str, optional): Path to store visualizations. Defaults to system temp directory.
+            plot_title (str, optional): Title for the generated plots.
             base_name (str, optional): Base name for saved visualizations. Defaults to None.
         """
-        super().__init__(dataframes_paths, store_path, base_name)
+        super().__init__(dataframes_paths, store_path, base_name, plot_title)
         self._validate_dataframe()
 
     def _get_expected_fields(self):
@@ -543,23 +562,25 @@ class IndexerAlerts(DataVisualizer):
 
         This method creates and saves a plot for the aggregated alerts.
         """
+        p_title = self.plot_title.replace('<<TAB>>', ' ')
         _, ax = plt.subplots()
         self.dataframe['Difference'] = self.dataframe['Total alerts'].diff()
         self.dataframe['Difference'] = self.dataframe['Difference'] / self._calculate_timestamp_interval()
 
         self._basic_plot(ax=ax, dataframe=self.dataframe['Difference'], label='Alerts per timestamp',
                          color=self._color_palette(1)[0])
-        self._save_custom_plot(ax, 'Different alerts', 'Difference alerts')
+        self._save_custom_plot(ax, 'Different alerts', p_title)
 
     def _plot_plain_alerts(self):
         """Plot the total alerts.
 
         This method creates and saves a plot for the total alerts.
         """
+        p_title = self.plot_title.replace('<<TAB>>', ' ')
         _, ax = plt.subplots()
         self._basic_plot(ax=ax, dataframe=self.dataframe['Total alerts'], label='Total alerts',
                          color=self._color_palette(1)[0])
-        self._save_custom_plot(ax, 'Total alerts', 'Total alerts')
+        self._save_custom_plot(ax, 'Total alerts', p_title)
 
     def plot(self):
         """Plot the indexer alerts data.
@@ -577,19 +598,21 @@ class IndexerVulnerabilities(DataVisualizer):
         dataframes_paths (list): paths of the CSVs.
         dataframe (pandas.Dataframe): dataframe containing the info from all the CSVs.
         store_path (str): path to store the CSV images. Defaults to the temp directory.
+        plot_title (str, optional): Title for the generated plots.
         expected_fields (list): List of expected fields for indexer vulnerabilities.
     """
     expected_fields = ['Total vulnerabilities']
 
-    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None):
+    def __init__(self, dataframes_paths, store_path=gettempdir(), base_name=None, plot_title=None):
         """Initialize the IndexerVulnerabilities visualizer.
 
         Args:
             dataframes_paths (list): List of paths to dataframes containing indexer vulnerabilities data.
             store_path (str, optional): Path to store visualizations. Defaults to system temp directory.
+            plot_title (str, optional): Title for the generated plots.
             base_name (str, optional): Base name for saved visualizations. Defaults to None.
         """
-        super().__init__(dataframes_paths, store_path, base_name)
+        super().__init__(dataframes_paths, store_path, base_name, plot_title)
         self._validate_dataframe()
 
     def _get_expected_fields(self):
@@ -605,7 +628,8 @@ class IndexerVulnerabilities(DataVisualizer):
 
         This method creates and saves a plot for the total vulnerabilities.
         """
+        p_title = self.plot_title.replace('<<TAB>>', ' ')
         _, ax = plt.subplots()
         self._basic_plot(ax=ax, dataframe=self.dataframe['Total vulnerabilities'], label='Indexed Vulnerabilities',
                          color=self._color_palette(1)[0])
-        self._save_custom_plot(ax, 'Total Vulnerabilities', 'Total vulnerabilities')
+        self._save_custom_plot(ax, 'Total Vulnerabilities', p_title)

@@ -18,6 +18,8 @@ variables:
     - linux-debian-11-arm64
     - linux-debian-12-amd64
     - linux-debian-12-arm64
+    - linux-ubuntu-24.04-amd64
+    - linux-ubuntu-24.04-arm64
     - linux-ubuntu-22.04-amd64
     - linux-ubuntu-22.04-arm64
     - linux-ubuntu-18.04-amd64
