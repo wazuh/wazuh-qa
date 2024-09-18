@@ -3,4 +3,3 @@
 # This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2
 from .provision import Provision
 from .generic import Ansible
-from .allocation import Allocator
