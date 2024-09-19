@@ -113,7 +113,6 @@ class LogEventGenerator(EventGenerator):
             if not self.retry_write():
                 logging.error("Failed to write to log after several attempts.")
 
-        time.sleep(1)  # Sleep to simulate delay between logs
 
     def write_log(self) -> None:
         """Write a log entry to the file based on the current date and time."""
