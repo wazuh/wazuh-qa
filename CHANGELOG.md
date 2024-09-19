@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix unexpected warnings in E2E vulnerability detection tests ([#5711](https://github.com/wazuh/wazuh-qa/pull/5711)) \- (Framework + Tests)
 - Grafana package used for `upgrade_package_nonvulnerable_to_vulnerable` case is vulnerable ([#5719](https://github.com/wazuh/wazuh-qa/pull/5719)) \- (Tests)
 - Increase results windows in E2E Vulnerability detection ([#5712](https://github.com/wazuh/wazuh-qa/pull/5712/)) \- (Framework + Tests)
 
