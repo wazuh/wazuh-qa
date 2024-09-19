@@ -30,11 +30,5 @@ Documentation = "https://documentation.wazuh.com/"
 Repository = "https://github.com/wazuh/"
 
 
-[project.optional-dependencies]
-dev = [
-    "ruff>=0.6.4"
-]
-
-
 [project.scripts]
 wazuh-metrics = "wazuh_metrics:main"
