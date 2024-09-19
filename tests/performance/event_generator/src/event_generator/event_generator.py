@@ -181,13 +181,15 @@ class LogEventGenerator(EventGenerator):
 class SyscheckEventGenerator(EventGenerator):
     """Subclass of EventGenerator specifically designed for file creation, modification and deletion."""
 
-    def __init__(self, rate: int, path: str, operations: int):
+    def __init__(self, rate: int, path: str, operations: int, num_files: int = 10, num_modifications: int = 5):
         """Initialize the SyscheckEventGenerator with specific parameters to simulate file system events.
 
         Args:
             rate (int): The rate at which file events are generated per second. Must be greater than zero.
             path (str): The base directory path where file events will occur.
             operations (int): The total number of file operations to perform.
+            num_files (int): The number of files to create.
+            num_modifications (int): The number of times each file should be modified.
 
         Raises:
             ValueError: If 'rate' is less than or equal to zero.
@@ -197,26 +199,57 @@ class SyscheckEventGenerator(EventGenerator):
         super().__init__(rate, path, operations)
         os.makedirs(self.path, exist_ok=True)  # Ensure the directory exists
         self.files = []  # List to keep track of created or modified files
+        self.operation_sequence = self.build_operation_sequence(num_files, num_modifications)
+        self.sequence_index = 0
+
+    def build_operation_sequence(self, num_files: int, num_modifications: int) -> list:
+        """Build a predefined sequence of operations.
+
+        Args:
+            num_files (int): Number of files to create.
+            num_modifications (int): Number of modifications per file.
+
+        Returns:
+            list: A list of operations to perform in order.
+        """
+        operations = []
+
+        # Step 1: Create files
+        for i in range(num_files):
+            file_name = f"{self.path}/test_file_{i}.txt"
+            operations.append(('create', file_name))
+
+        # Step 2: Modify files
+        for modification_round in range(num_modifications):
+            for i in range(num_files):
+                file_name = f"{self.path}/test_file_{i}.txt"
+                operations.append(('modify', file_name))
+
+        # Step 3: Delete files
+        for i in range(num_files):
+            file_name = f"{self.path}/test_file_{i}.txt"
+            operations.append(('delete', file_name))
+
+        return operations
 
     def generate_event(self) -> None:
-        """Randomly generate file creation, modification, or deletion events at the specified path."""
-        if not self.files or random.choice(['create', 'modify']) == 'create':
-            action = 'create'
-        else:
-            action = random.choice(['modify', 'delete'])
+        """Perform the next operation in the predefined sequence."""
+        if self.sequence_index >= len(self.operation_sequence):
+            self.stop_event.set()  # Stop if we have completed all operations
+            return
 
-        file_name = f"{self.path}/test_file_{datetime.now().strftime('%Y%m%d%H%M%S%f')}.txt"
+        action, file_name = self.operation_sequence[self.sequence_index]
 
         if action == 'create':
             self.create_file(file_name)
             self.files.append(file_name)  # Track created file
         elif action == 'modify':
-            file_name = random.choice(self.files)  # Choose a file to modify
             self.modify_file(file_name)
         elif action == 'delete':
-            file_name = random.choice(self.files)  # Choose a file to delete
             self.delete_file(file_name)
             self.files.remove(file_name)  # Remove from list after deletion
+
+        self.sequence_index += 1
 
     def create_file(self, file_path: str) -> None:
         """Create a new file and write initial content to it."""
@@ -225,15 +258,18 @@ class SyscheckEventGenerator(EventGenerator):
         logging.info(f"Created file: {file_path}")
 
     def modify_file(self, file_path: str) -> None:
-        """Modify an existing file by appending new content. If the file does not exist, it creates it."""
-        with open(file_path, 'a') as f:
-            f.write(f"Modified on {datetime.now().isoformat()}\n")
-        logging.info(f"Modified file: {file_path}")
+        """Modify an existing file by appending new content."""
+        if os.path.exists(file_path):
+            with open(file_path, 'a') as f:
+                f.write(f"Modified on {datetime.now().isoformat()}\n")
+            logging.info(f"Modified file: {file_path}")
+        else:
+            logging.error(f"File not found for modification: {file_path}")
 
     def delete_file(self, file_path: str) -> None:
-        """Delete a file. If the file does not exist, it logs that fact."""
+        """Delete a file."""
         try:
             os.remove(file_path)
             logging.info(f"Deleted file: {file_path}")
         except FileNotFoundError:
-            logging.error(f"File not found: {file_path}")
+            logging.error(f"File not found for deletion: {file_path}")

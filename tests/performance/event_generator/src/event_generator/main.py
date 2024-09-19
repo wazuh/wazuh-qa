@@ -126,8 +126,8 @@ def get_syscheck_generator(file_config: dict[str, Any]) -> SyscheckEventGenerato
     """Create and return a SyscheckEventGenerator instance based on the provided file configuration.
 
     Args:
-        file_config (dict): Configuration settings specific to the syscheck module. It should include
-                            necessary parameters like module, path, operations, and rate.
+        file_config (dict): Configuration settings specific to the syscheck module. It should include necessary
+                            parameters like module, path, operations, rate, num_files and num_modifications.
 
     Returns:
         SyscheckEventGenerator: An instance of SyscheckEventGenerator configured according to the file_config.
@@ -135,13 +135,22 @@ def get_syscheck_generator(file_config: dict[str, Any]) -> SyscheckEventGenerato
     Raises:
         ValueError: If any required parameters are missing in file_config for syscheck.
     """
-    required_params = ['module', 'path', 'operations', 'rate']
+    required_params = ['module', 'path', 'rate', 'num_files', 'num_modifications']
     if not all(param in file_config for param in required_params):
         raise ValueError("Missing required config parameters for syscheck.")
+
+    num_files = file_config['num_files']
+    num_modifications = file_config['num_modifications']
+
+    # Calculate total operations: create + (modify * num_modifications) + delete
+    operations = num_files + (num_files * num_modifications) + num_files
+
     return SyscheckEventGenerator(
         rate=file_config['rate'],
         path=file_config['path'],
-        operations=file_config['operations']
+        operations=operations,
+        num_files=num_files,
+        num_modifications=num_modifications
     )
 
 

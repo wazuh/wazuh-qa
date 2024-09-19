@@ -17,6 +17,7 @@ files:
 
   - module: syscheck
     path: ./syscheck_test
-    operations: 5
     rate: 1
+    num_files: 10
+    num_modifications: 5
     cleanup: false
