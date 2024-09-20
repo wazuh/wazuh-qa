@@ -182,6 +182,14 @@ vagrant:
     box: development/macos-sonoma-1460
     box_version: 0.0.0
     virtualizer: parallels
+  macos-sequoia-15-arm64:
+    box: macos-15
+    box_version: 0.0.0
+    virtualizer: parallels
+  macos-sequoia-15-amd64:
+    box: development/macos-sequoia
+    box_version: 0.0.0
+    virtualizer: parallels
   macos-ventura-sign-arm64:
     box: macos-ventura-sign
     box_version: 0.0.0
