@@ -103,14 +103,14 @@ To use the monitoring class in any other Python scripts it is highly recommended
 
 ```shell script
 # Create a virtual environment
-python -m venv virtualenv
+python3 -m venv virtualenv
 source virtualenv/bin/activate
 
 # Install the package using pip
-python -m pip install .
+python3 -m pip install .
 
 # Verify the correct installation
-python -m pip list | grep process_resource_monitoring
+python3 -m pip list | grep process_resource_monitoring
 ```
 
 > Note:  
