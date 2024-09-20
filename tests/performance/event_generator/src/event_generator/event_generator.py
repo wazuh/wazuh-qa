@@ -151,7 +151,6 @@ class LogEventGenerator(EventGenerator):
 
         This creates a new log file by appending a sequence number or timestamp to the filename.
         """
-        import time
         timestamp = int(time.time())  # Timestamp for uniqueness
         new_path = f"{self.path}_{timestamp}.old"
         os.rename(self.path, new_path)
