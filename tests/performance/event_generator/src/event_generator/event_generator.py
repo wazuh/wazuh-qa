@@ -260,7 +260,7 @@ class SyscheckEventGenerator(EventGenerator):
     def create_file(self, file_path: str) -> None:
         """Create a new file and write initial content to it."""
         with open(file_path, 'w') as f:
-            f.write("This is a new test file.\n")
+            pass
         logging.info(f"Created file: {file_path}")
 
     def modify_file(self, file_path: str) -> None:
