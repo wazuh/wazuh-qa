@@ -170,14 +170,13 @@ class LogEventGenerator(EventGenerator):
         open(self.path, 'w').close()  # Create a new log file
         logging.info(f"Log file exceeded size limit, rotated to {new_path}")
 
-    def retry_write(self) -> bool:
+    def retry_write(self, max_retries: int = 3) -> bool:
         """Attempt to write the log file up to a maximum number of retries.
 
         Returns:
             bool: True if writing succeeded, False otherwise.
         """
         retry_count = 0
-        max_retries = 3
         while retry_count < max_retries:
             try:
                 self.write_log()
