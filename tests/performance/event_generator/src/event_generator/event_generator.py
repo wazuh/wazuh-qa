@@ -90,7 +90,7 @@ class LogEventGenerator(EventGenerator):
             template_path (str, optional): Path to a JSON template file for log formatting. Defaults to None.
         """
         super().__init__(rate, path, operations)
-        self.max_file_size = max_file_size * 1024 * 1024  # Convert MB to bytes
+        self.max_file_size = self.convert_file_size(max_file_size)
         self.template_path = template_path
         if template_path:
             with open(template_path) as file:
@@ -102,6 +102,17 @@ class LogEventGenerator(EventGenerator):
                 "severity": "{severity}",
                 "message": "{message}"
             }
+
+    def convert_file_size(self, size_mb: int) -> int:
+        """Convert file size from megabytes to bytes.
+
+        Args:
+            size_mb (int): File size in megabytes.
+
+        Returns:
+            int: File size in bytes.
+        """
+        return size_mb * 1024 * 1024
 
     def generate_event(self) -> None:
         """Generate and write a log event based on a predefined template or a simple default format."""
