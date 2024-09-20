@@ -120,6 +120,7 @@ class LogEventGenerator(EventGenerator):
             logging.error(f"Error writing to log file: {e}")
             if not self.retry_write():
                 logging.error("Failed to write to log after several attempts.")
+                self.stop()
 
 
     def write_log(self) -> None:
