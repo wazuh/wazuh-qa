@@ -94,64 +94,66 @@ def validate_parameters(args: argparse.Namespace) -> None:
         raise ValueError("Invalid configuration file.")
 
 
-def get_logcollector_generator(file_config: dict[str, Any]) -> LogEventGenerator:
-    """Create and return a LogEventGenerator instance configured according to the provided file configuration.
+def create_event_generator(file_config: dict[str, Any]) -> EventGenerator:
+    """Create and return an EventGenerator instance based on the provided file configuration.
 
     Args:
-        file_config (dict): Configuration settings specific to the logcollector module. It must include
-                            necessary parameters like module, path, operations, rate, max_file size, and
-                            template path.
+        file_config (dict): Configuration settings specific to the module.
 
     Returns:
-        LogEventGenerator: An instance of LogEventGenerator configured as per the file_config.
+        EventGenerator: An instance of the appropriate EventGenerator subclass.
 
     Raises:
-        ValueError: If any required parameters are missing in file_config for logcollector.
+        ValueError: If any required parameters are missing or if the module is unsupported.
     """
-    required_params = ['module', 'path', 'operations',
-                       'rate', 'max_file_size', 'template_path']
-    if not all(param in file_config for param in required_params):
-        raise ValueError(
-            "Missing required config parameters for logcollector.")
-    return LogEventGenerator(
-        rate=file_config['rate'],
-        path=file_config['path'],
-        operations=file_config['operations'],
-        max_file_size=file_config['max_file_size'],
-        template_path=file_config['template_path']
-    )
+    module = file_config.get('module')
+    if not module:
+        raise ValueError("Missing 'module' parameter in configuration.")
 
+    # Mapping of module names to their classes and parameters
+    module_mapping = {
+        'logcollector': {
+            'class': LogEventGenerator,
+            'required_params': ['path', 'operations', 'rate'],
+            'optional_params': ['max_file_size', 'template_path', 'max_retries'],
+        },
+        'syscheck': {
+            'class': SyscheckEventGenerator,
+            'required_params': ['path', 'rate', 'num_files', 'num_modifications'],
+            'optional_params': ['max_retries'],
+        },
+    }
 
-def get_syscheck_generator(file_config: dict[str, Any]) -> SyscheckEventGenerator:
-    """Create and return a SyscheckEventGenerator instance based on the provided file configuration.
+    if module not in module_mapping:
+        raise ValueError(f"Unsupported module specified in the configuration: {module}")
 
-    Args:
-        file_config (dict): Configuration settings specific to the syscheck module. It should include necessary
-                            parameters like module, path, operations, rate, num_files and num_modifications.
+    module_info = module_mapping[module]
+    generator_class = module_info['class']
+    required_params = module_info['required_params']
+    optional_params = module_info.get('optional_params', [])
 
-    Returns:
-        SyscheckEventGenerator: An instance of SyscheckEventGenerator configured according to the file_config.
+    # Validate required parameters
+    missing_params = [param for param in required_params if param not in file_config]
+    if missing_params:
+        raise ValueError(f"Missing required config parameters for {module}: {', '.join(missing_params)}")
 
-    Raises:
-        ValueError: If any required parameters are missing in file_config for syscheck.
-    """
-    required_params = ['module', 'path', 'rate', 'num_files', 'num_modifications']
-    if not all(param in file_config for param in required_params):
-        raise ValueError("Missing required config parameters for syscheck.")
+    # Prepare arguments for the generator class
+    init_args = {param: file_config[param] for param in required_params}
+    # Include optional parameters if they are provided
+    init_args.update({param: file_config[param] for param in optional_params if param in file_config})
 
-    num_files = file_config['num_files']
-    num_modifications = file_config['num_modifications']
+    # Handle module-specific logic
+    if module == 'syscheck':
+        num_files = init_args['num_files']
+        num_modifications = init_args['num_modifications']
+        # Calculate total operations: create + (modify * num_modifications) + delete
+        operations = num_files + (num_files * num_modifications) + num_files
+        init_args['operations'] = operations
+    elif module == 'logcollector':
+        # For logcollector, operations are provided directly
+        pass
 
-    # Calculate total operations: create + (modify * num_modifications) + delete
-    operations = num_files + (num_files * num_modifications) + num_files
-
-    return SyscheckEventGenerator(
-        rate=file_config['rate'],
-        path=file_config['path'],
-        operations=operations,
-        num_files=num_files,
-        num_modifications=num_modifications
-    )
+    return generator_class(**init_args)
 
 
 def main() -> None:
@@ -163,13 +165,11 @@ def main() -> None:
 
     threads = []
     for file_config in config.get('files', []):
-        if file_config['module'] == 'logcollector':
-            generator = get_logcollector_generator(file_config)
-        elif file_config['module'] == 'syscheck':
-            generator = get_syscheck_generator(file_config)
-        else:
-            raise ValueError(
-                "Unsupported module specified in the configuration.")
+        try:
+            generator = create_event_generator(file_config)
+        except ValueError as e:
+            logging.error(f"Error creating event generator: {e}")
+            continue
 
         thread = threading.Thread(target=generator.start)
         thread.start()
