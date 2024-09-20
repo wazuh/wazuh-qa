@@ -99,6 +99,7 @@ class LogEventGenerator(EventGenerator):
                 "severity": "{severity}",
                 "message": "{message}"
             }
+        os.makedirs(os.path.dirname(self.path), exist_ok=True)
 
     def convert_file_size(self, size_mb: int) -> int:
         """Convert file size from megabytes to bytes.
@@ -113,7 +114,6 @@ class LogEventGenerator(EventGenerator):
 
     def _generate_event(self) -> None:
         """Generate and write a log event based on a predefined template or a simple default format."""
-        os.makedirs(os.path.dirname(self.path), exist_ok=True)
         try:
             self.write_log()
         except OSError as e:
