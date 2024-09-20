@@ -155,17 +155,10 @@ class LogEventGenerator(EventGenerator):
         return template_str
 
     def rotate_log(self) -> None:
-        """Rotate the log file when the size limit is exceeded.
-
-        This creates a new log file by appending a sequence number or timestamp to the filename.
-        """
-        timestamp = int(time.time())  # Timestamp for uniqueness
-        new_path = f"{self.path}_{timestamp}.old"
-        os.rename(self.path, new_path)
-        self.path = self.path.replace(
-            ".log", f"_{timestamp}.log")  # Reset to new log file
-        open(self.path, 'w').close()  # Create a new log file
-        logging.info(f"Log file exceeded size limit, rotated to {new_path}")
+    """Truncate the log file when the size limit is exceeded."""
+    with open(self.path, 'w') as log_file:
+        pass  # Truncate the file
+    logging.info(f"Log file exceeded size limit and was truncated: {self.path}")
 
     def retry_write(self, max_retries: int = 3) -> bool:
         """Attempt to write the log file up to a maximum number of retries.
