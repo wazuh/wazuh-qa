@@ -51,20 +51,16 @@ class EventGenerator(ABC):
         self.stop_event = threading.Event()
         self.count = 0  # counter for events
 
-    def generate_event(self) -> None:
-        """Generate an event. This method should be overridden by subclasses to produce specific types of events.
-
-        Raises:
-            NotImplementedError: If the subclass does not override this method.
-        """
-        raise NotImplementedError(
-            "This method should be overridden by subclasses.")
+    @abstractmethod
+    def _generate_event(self) -> None:
+        """Generate an event. This method should be overridden by subclasses to produce specific types of events."""
+        pass
 
     def start(self) -> None:
         """Begin generating events until the stop condition or operation count is met."""
         next_time = time.time() + 1 / self.rate
         while not self.stop_event.is_set() and self.count < self.operations:
-            self.generate_event()
+            self._generate_event()
             self.count += 1
             next_time += 1 / self.rate
             sleep_time = next_time - time.time()
@@ -115,7 +111,7 @@ class LogEventGenerator(EventGenerator):
         """
         return size_mb * 1024 * 1024
 
-    def generate_event(self) -> None:
+    def _generate_event(self) -> None:
         """Generate and write a log event based on a predefined template or a simple default format."""
         os.makedirs(os.path.dirname(self.path), exist_ok=True)
         try:
@@ -242,7 +238,7 @@ class SyscheckEventGenerator(EventGenerator):
 
         return operations
 
-    def generate_event(self) -> None:
+    def _generate_event(self) -> None:
         """Perform the next operation in the predefined sequence."""
         if self.sequence_index >= len(self.operation_sequence):
             self.stop_event.set()  # Stop if we have completed all operations
