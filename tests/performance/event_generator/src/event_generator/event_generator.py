@@ -76,7 +76,7 @@ class LogEventGenerator(EventGenerator):
     """Subclass of EventGenerator specifically designed for generating log files at a specified rate."""
 
     def __init__(self, rate: int, path: str, operations: int,
-                 max_file_size: int = 10, template_path: str | None = None):
+                 max_file_size: Optional[int] = None, template_path: str | None = None):
         """Initialize the LogEventGenerator subclass.
 
         Args:
@@ -137,7 +137,7 @@ class LogEventGenerator(EventGenerator):
         logging.info(f"Log event generated at {self.path}")
 
         # Check file size and manage if necessary
-        if os.path.getsize(self.path) > self.max_file_size:
+        if self.max_file_size and os.path.getsize(self.path) > self.max_file_size:
             self.rotate_log()
 
     def template_format(self, data: dict[str, str]) -> str:

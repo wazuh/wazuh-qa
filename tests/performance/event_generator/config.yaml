@@ -3,7 +3,7 @@ files:
     path: ./wazuh-logcollector1.log
     operations: 5
     rate: 1
-    max_file_size: 10
+    max_file_size: null
     template_path: ./templates/syslog_template.json
     cleanup: false
 
@@ -11,7 +11,7 @@ files:
     path: ./wazuh-logcollector2.log
     operations: 5
     rate: 1
-    max_file_size: 15
+    max_file_size: null
     template_path: ./templates/syslog_template.json
     cleanup: false
 
