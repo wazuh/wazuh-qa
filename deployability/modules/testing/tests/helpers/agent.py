@@ -62,7 +62,6 @@ class WazuhAgent:
             system_commands = [
                     "systemctl daemon-reload",
                     "systemctl enable wazuh-agent",
-                    "systemctl start wazuh-agent",
                     "systemctl status wazuh-agent"
             ]
 
@@ -124,7 +123,8 @@ class WazuhAgent:
                 host_ip = HostInformation.get_internal_ip_from_aws_dns(manager_host) if 'amazonaws' in manager_host else manager_host
                 commands = [
                     f"sed -i 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' {WAZUH_CONF}",
-                    "systemctl restart wazuh-agent"
+                    "systemctl start wazuh-agent",
+                    "systemctl status wazuh-agent"
                 ]
                 ConnectionManager.execute_commands(inventory_path, commands)
             except Exception as e:
