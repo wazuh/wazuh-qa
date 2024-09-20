@@ -26,10 +26,11 @@ import os
 import random
 import threading
 import time
+from abc import ABC, abstractmethod
 from datetime import datetime
 
 
-class EventGenerator:
+class EventGenerator(ABC):
     """Base class for generating simulation events.
 
     This class provides the foundational attributes and methods for generating events.
