@@ -4,6 +4,7 @@
 
 """Script to monitor Wazuh central components resource usage."""
 
+
 import argparse
 import logging
 from collections import defaultdict
