@@ -230,7 +230,11 @@ class Monitor:
         return info
 
     def is_event_set(self) -> bool:
-        """Check if the internal flag for the Monitor event is set."""
+        """Check if the internal flag for the Monitor event is set.
+
+        Returns:
+            (bool): True if the internal flag is set, False otherwise.
+        """
         return self._event.is_set()
 
     def set_process(self) -> None:

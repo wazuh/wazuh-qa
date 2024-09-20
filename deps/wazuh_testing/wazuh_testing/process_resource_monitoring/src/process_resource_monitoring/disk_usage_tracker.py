@@ -123,7 +123,7 @@ class DiskUsageTracker:
             path (str): Path of the file.
 
         Returns:
-            (int): Size of the file in the unit specified in the constructor.
+            (float): Size of the file in the unit specified in the constructor.
 
         Raises:
             ValueError: if there is no file nor directory with that path.
@@ -160,7 +160,11 @@ class DiskUsageTracker:
         return self.get_file_size(path) / partition_size
 
     def is_event_set(self) -> bool:
-        """Check if the internal flag for the tracker event is set."""
+        """Check if the internal flag for the tracker event is set.
+
+        Returns:
+            (bool): True if the internal flag is set, False otherwise.
+        """
         return self._event.is_set()
 
     def start(self) -> None:
