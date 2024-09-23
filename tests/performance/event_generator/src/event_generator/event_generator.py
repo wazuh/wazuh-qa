@@ -87,7 +87,7 @@ class LogEventGenerator(EventGenerator):
             template_path (str, optional): Path to a JSON template file for log formatting. Defaults to None.
         """
         super().__init__(rate, path, operations)
-        self.max_file_size = self.convert_file_size(max_file_size)
+        self.max_file_size = self._convert_file_size(max_file_size)
         self.template_path = template_path
         if template_path:
             with open(template_path) as file:
@@ -101,7 +101,7 @@ class LogEventGenerator(EventGenerator):
             }
         os.makedirs(os.path.dirname(self.path), exist_ok=True)
 
-    def convert_file_size(self, size_mb: int) -> int:
+    def _convert_file_size(self, size_mb: int) -> int:
         """Convert file size from megabytes to bytes.
 
         Args:
@@ -115,15 +115,15 @@ class LogEventGenerator(EventGenerator):
     def _generate_event(self) -> None:
         """Generate and write a log event based on a predefined template or a simple default format."""
         try:
-            self.write_log()
+            self._write_log()
         except OSError as e:
             logging.error(f"Error writing to log file: {e}")
-            if not self.retry_write():
+            if not self._retry_write():
                 logging.error("Failed to write to log after several attempts.")
                 self.stop()
 
 
-    def write_log(self) -> None:
+    def _write_log(self) -> None:
         """Write a log entry to the file based on the current date and time."""
         current_time = datetime.now()
         log_data = {
@@ -132,16 +132,16 @@ class LogEventGenerator(EventGenerator):
             "severity": "INFO",
             "message": "This is a test log message"
         }
-        log_entry = self.template_format(log_data)
+        log_entry = self._template_format(log_data)
         with open(self.path, "a") as log_file:
             log_file.write(log_entry + "\n")
         logging.info(f"Log event generated at {self.path}")
 
         # Check file size and manage if necessary
         if self.max_file_size and os.path.getsize(self.path) > self.max_file_size:
-            self.rotate_log()
+            self._rotate_log()
 
-    def template_format(self, data: dict[str, str]) -> str:
+    def _template_format(self, data: dict[str, str]) -> str:
         """Format the log data based on the template provided during initialization.
 
         Args:
@@ -155,13 +155,13 @@ class LogEventGenerator(EventGenerator):
             template_str = template_str.replace('{' + key + '}', value)
         return template_str
 
-    def rotate_log(self) -> None:
+    def _rotate_log(self) -> None:
     """Truncate the log file when the size limit is exceeded."""
     with open(self.path, 'w') as log_file:
         pass  # Truncate the file
     logging.info(f"Log file exceeded size limit and was truncated: {self.path}")
 
-    def retry_write(self, max_retries: int = 3) -> bool:
+    def _retry_write(self, max_retries: int = 3) -> bool:
         """Attempt to write the log file up to a maximum number of retries.
 
         Returns:
@@ -170,7 +170,7 @@ class LogEventGenerator(EventGenerator):
         retry_count = 0
         while retry_count < max_retries:
             try:
-                self.write_log()
+                self._write_log()
                 return True
             except OSError:
                 retry_count += 1
@@ -199,10 +199,10 @@ class SyscheckEventGenerator(EventGenerator):
         super().__init__(rate, path, operations)
         os.makedirs(self.path, exist_ok=True)  # Ensure the directory exists
         self.files = []  # List to keep track of created or modified files
-        self.operation_sequence = self.build_operation_sequence(num_files, num_modifications)
+        self.operation_sequence = self._build_operation_sequence(num_files, num_modifications)
         self.sequence_index = 0
 
-    def build_operation_sequence(self, num_files: int, num_modifications: int) -> list:
+    def _build_operation_sequence(self, num_files: int, num_modifications: int) -> list:
         """Build a predefined sequence of operations.
 
         Args:
@@ -241,23 +241,23 @@ class SyscheckEventGenerator(EventGenerator):
         action, file_name = self.operation_sequence[self.sequence_index]
 
         if action == 'create':
-            self.create_file(file_name)
+            self._create_file(file_name)
             self.files.append(file_name)  # Track created file
         elif action == 'modify':
-            self.modify_file(file_name)
+            self._modify_file(file_name)
         elif action == 'delete':
-            self.delete_file(file_name)
+            self._delete_file(file_name)
             self.files.remove(file_name)  # Remove from list after deletion
 
         self.sequence_index += 1
 
-    def create_file(self, file_path: str) -> None:
+    def _create_file(self, file_path: str) -> None:
         """Create a new file and write initial content to it."""
         with open(file_path, 'w') as f:
             pass
         logging.info(f"Created file: {file_path}")
 
-    def modify_file(self, file_path: str) -> None:
+    def _modify_file(self, file_path: str) -> None:
         """Modify an existing file by appending new content."""
         if os.path.exists(file_path):
             with open(file_path, 'a') as f:
@@ -266,7 +266,7 @@ class SyscheckEventGenerator(EventGenerator):
         else:
             logging.error(f"File not found for modification: {file_path}")
 
-    def delete_file(self, file_path: str) -> None:
+    def _delete_file(self, file_path: str) -> None:
         """Delete a file."""
         try:
             os.remove(file_path)
