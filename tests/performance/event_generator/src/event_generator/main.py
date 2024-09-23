@@ -172,8 +172,11 @@ def main() -> None:
             continue
 
         thread = threading.Thread(target=generator.start)
-        thread.start()
         threads.append(thread)
+
+    # Now, start all threads after processing is complete
+    for thread in threads:
+        thread.start()
 
     # Wait for all threads to complete
     for thread in threads:
