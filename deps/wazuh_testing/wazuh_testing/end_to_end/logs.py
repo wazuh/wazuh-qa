@@ -67,27 +67,31 @@ def get_hosts_logs(host_manager: HostManager, host_group: str = 'all') -> Dict[s
 
 
 def check_errors_in_environment(host_manager: HostManager, greater_than_timestamp: str = '',
-                                expected_errors: List[str] = None) -> dict:
-    """Check if there are errors in the environment
+                                expected_errors: List[str] = None,
+                                error_levels=None) -> dict:
+    """Check if there are errors in the environment.
 
     Args:
         host_manager (HostManager): An instance of the HostManager class.
         greater_than_timestamp (str): Timestamp to filter the logs
         expected_errors (List): List of expected errors. Default None
+        error_levels (List): List of the error levels to check. Default None.
 
     Returns:
         dict: Errors found in the environment
     """
-
-    error_level_to_search = ['ERROR', 'CRITICAL', 'WARNING']
-    expected_errors = expected_errors or []
+    default_error_levels = ['ERROR', 'WARNING', 'CRITICAL']
+    if not expected_errors:
+        expected_errors = []
+    if not error_levels:
+        error_levels = default_error_levels
 
     environment_logs = get_hosts_logs(host_manager)
     environment_level_logs = {}
 
     for host, environment_log in environment_logs.items():
         environment_level_logs[host] = {}
-        for level in error_level_to_search:
+        for level in error_levels:
             environment_level_logs[host][level] = []
             regex = re.compile(fr'((\d{{4}}\/\d{{2}}\/\d{{2}} \d{{2}}:\d{{2}}:\d{{2}}) (.+): ({level}):(.*))')
 
