@@ -1,0 +1,24 @@
+---
+Component:
+  - "manager"
+
+Processes:
+  Daemon:
+    - "wazuh-clusterd"
+    - "wazuh-integratord"
+    - "wazuh-execd"
+    - "wazuh-logcollector"
+    - "wazuh-analysisd"
+    - "wazuh-db"
+    - "wazuh-maild"
+    - "wazuh-authd"
+    - "wazuh-syscheckd"
+    - "wazuh-monitord"
+    - "wazuh-modulesd"
+    - "wazuh-remoted"
+
+Columns_to_avoid:
+  - "Daemon"
+  - "Version"
+  - "Timestamp"
+  - "Commit"
