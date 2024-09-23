@@ -27,17 +27,27 @@ def setup_syscheck_generator(tmp_path: Path) -> tuple:
     return generator, path
 
 
-def test_file_operations(setup_syscheck_generator: tuple):
-    """Test file operations (create, modify, delete) performed by SyscheckEventGenerator.
+def test_syscheck_operations(tmp_path: Path):
+    """Test that SyscheckEventGenerator performs create, modify, and delete operations as expected.
 
     Args:
-        setup_syscheck_generator (fixture): Fixture that provides a SyscheckEventGenerator and a path.
+        tmp_path (LocalPath): Temporary directory path fixture provided by pytest.
     """
-    generator, path = setup_syscheck_generator
+    path = tmp_path
+    num_files = 2
+    num_modifications = 1
+    operations = num_files + (num_files * num_modifications) + num_files  # create + modify + delete
+    generator = SyscheckEventGenerator(
+        rate=1,
+        path=str(path),
+        operations=operations,
+        num_files=num_files,
+        num_modifications=num_modifications
+    )
     generator.start()
-    # Since operations are random, we check if any file exists or not after operations
-    assert any(path.iterdir()
-               ), "There should be some file operations in the directory"
+    # After all operations, the directory should be empty
+    files = list(path.iterdir())
+    assert len(files) == 0, "All files should have been deleted after all operations."
 
 
 def test_file_creation(setup_syscheck_generator: tuple):
