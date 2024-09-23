@@ -27,28 +27,29 @@ def log_generator(tmp_path: Path) -> LogEventGenerator:
     return generator
 
 
-def test_log_creation(setup_log_generator: tuple[LogEventGenerator, Path]) -> None:
-    """Test if log files are created correctly.
-
-    Args:
-        setup_log_generator (fixture): Fixture that provides a log generator and a path.
-    """
-    generator, path = setup_log_generator
+def test_log_file_exists(log_generator: LogEventGenerator) -> None:
+    """Test if the log file is created."""
+    generator = log_generator
     generator.start()
-    assert path.exists(), "Log file should exist after generation start"
+    assert os.path.exists(generator.path), "Log file should exist after generation."
 
 
-def test_log_content(setup_log_generator: tuple[LogEventGenerator, Path]) -> None:
-    """Test the content of log files to ensure logs are written.
-
-    Args:
-        setup_log_generator (fixture): Fixture that provides a log generator and a path.
-    """
-    generator, path = setup_log_generator
+def test_log_event_count(log_generator: LogEventGenerator) -> None:
+    """Test if the correct number of log events are generated."""
+    generator = log_generator
     generator.start()
-    with open(path) as file:
+    with open(generator.path) as file:
+        lines = file.readlines()
+    assert len(lines) == generator.operations, f"Exactly {generator.operations} log entries should be written."
+
+
+def test_log_content(log_generator: LogEventGenerator) -> None:
+    """Test the content of the log file."""
+    generator = log_generator
+    generator.start()
+    with open(generator.path) as file:
         content = file.read()
-    assert "This is a test log message" in content, "Log message should be in the log file"
+    assert "This is a test log message" in content, "Log message should be in the log file."
 
 
 def test_zero_operations(tmp_path: Path) -> None:
