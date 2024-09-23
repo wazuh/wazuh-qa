@@ -31,7 +31,7 @@ from typing import Any
 
 import yaml
 
-from event_generator import LogEventGenerator, SyscheckEventGenerator
+from event_generator import EventGenerator, LogEventGenerator, SyscheckEventGenerator
 
 
 def delete_file(path: str) -> None:
