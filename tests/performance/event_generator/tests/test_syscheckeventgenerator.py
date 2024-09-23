@@ -4,7 +4,6 @@
 
 """Unit tests for the SyscheckEventGenerator class."""
 
-import os
 from pathlib import Path
 
 import pytest

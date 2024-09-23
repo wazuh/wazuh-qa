@@ -4,10 +4,10 @@
 
 """Unit tests for the LogEventGenerator class."""
 
-from pathlib import Path
-
 import json
 import os
+from pathlib import Path
+
 import pytest
 
 from event_generator import LogEventGenerator

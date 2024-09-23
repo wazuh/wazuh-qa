@@ -23,12 +23,10 @@ of file and log-related events.
 import json
 import logging
 import os
-import random
 import threading
 import time
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Optional
 
 
 class EventGenerator(ABC):
@@ -77,7 +75,7 @@ class LogEventGenerator(EventGenerator):
     """Subclass of EventGenerator specifically designed for generating log files at a specified rate."""
 
     def __init__(self, rate: int, path: str, operations: int,
-                 max_file_size: Optional[int] = None, template_path: Optional[str] = None):
+                 max_file_size: int | None = None, template_path: str | None = None):
         """Initialize the LogEventGenerator subclass.
 
         Args:
@@ -158,7 +156,7 @@ class LogEventGenerator(EventGenerator):
 
     def _rotate_log(self) -> None:
         """Truncate the log file when the size limit is exceeded."""
-        with open(self.path, 'w') as log_file:
+        with open(self.path, 'w'):
             pass  # Truncate the file
         logging.info(f"Log file exceeded size limit and was truncated: {self.path}")
 
@@ -221,7 +219,7 @@ class SyscheckEventGenerator(EventGenerator):
             operations.append(('create', file_name))
 
         # Step 2: Modify files
-        for modification_round in range(num_modifications):
+        for _modification_round in range(num_modifications):
             for i in range(num_files):
                 file_name = f"{self.path}/test_file_{i}.txt"
                 operations.append(('modify', file_name))
@@ -254,7 +252,7 @@ class SyscheckEventGenerator(EventGenerator):
 
     def _create_file(self, file_path: str) -> None:
         """Create a new file and write initial content to it."""
-        with open(file_path, 'w') as f:
+        with open(file_path, 'w'):
             pass
         logging.info(f"Created file: {file_path}")
 
