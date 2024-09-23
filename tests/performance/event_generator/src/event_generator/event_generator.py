@@ -59,7 +59,7 @@ class EventGenerator(ABC):
 
     def start(self) -> None:
         """Begin generating events until the stop condition or operation count is met."""
-        next_time = time.time() + 1 / self.rate
+        next_time = time.time()
         while not self.stop_event.is_set() and self.count < self.operations:
             self._generate_event()
             self.count += 1
@@ -129,7 +129,7 @@ class LogEventGenerator(EventGenerator):
         current_time = datetime.now()
         log_data = {
             "date": current_time.strftime("%Y-%m-%d"),
-            "time": current_time.strftime("%H:%M:%S"),
+            "time": current_time.strftime("%H:%M:%S.%f")[:-3],
             "severity": "INFO",
             "message": "This is a test log message"
         }
