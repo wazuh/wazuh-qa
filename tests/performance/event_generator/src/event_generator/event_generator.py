@@ -156,10 +156,10 @@ class LogEventGenerator(EventGenerator):
         return template_str
 
     def _rotate_log(self) -> None:
-    """Truncate the log file when the size limit is exceeded."""
-    with open(self.path, 'w') as log_file:
-        pass  # Truncate the file
-    logging.info(f"Log file exceeded size limit and was truncated: {self.path}")
+        """Truncate the log file when the size limit is exceeded."""
+        with open(self.path, 'w') as log_file:
+            pass  # Truncate the file
+        logging.info(f"Log file exceeded size limit and was truncated: {self.path}")
 
     def _retry_write(self, max_retries: int = 3) -> bool:
         """Attempt to write the log file up to a maximum number of retries.
