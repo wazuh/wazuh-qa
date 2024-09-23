@@ -75,7 +75,7 @@ class LogEventGenerator(EventGenerator):
     """Subclass of EventGenerator specifically designed for generating log files at a specified rate."""
 
     def __init__(self, rate: int, path: str, operations: int,
-                 max_file_size: int | None = None, template_path: str | None = None):
+                 max_file_size: float | None = None, template_path: str | None = None):
         """Initialize the LogEventGenerator subclass.
 
         Args:
