@@ -14,12 +14,10 @@ or version).
 import os
 from typing import Any, Dict
 
-import argparse
 import yaml
-
-from dash import Dash
-
+from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
 from cache import cache
+from dash import Dash
 from callbacks import callbacks
 from layout import create_layout
 
@@ -38,16 +36,16 @@ def load_config(config_file: str) -> Dict[str, Any]:
     return config
 
 
-def get_arguments() -> argparse:
+def get_arguments() -> Namespace:
     """Function that receives and returns the script parameters.
 
     Returns:
-        (argparse): script arguments.
+        (Namespace): script arguments.
     """
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         usage='%(prog)s [config_file]',
         description='Script to Run Data Visualization Module',
-        formatter_class=argparse.RawTextHelpFormatter
+        formatter_class=RawTextHelpFormatter
     )
 
     parser.add_argument(
@@ -61,11 +59,11 @@ def get_arguments() -> argparse:
     return parser.parse_args()
 
 
-def process_argument(args: argparse.Namespace) -> Dict[str, Any]:
+def process_argument(args: Namespace) -> Dict[str, Any]:
     """Function that checks the existence of the YAML file and returns its configuration in a dictionary.
 
     Args:
-        args (argparse.Namespace): scripts arguments.
+        args (Namespace): scripts arguments.
 
     Returns:
         (Dict[str, Any]): dictionary containing information from the YAML file.

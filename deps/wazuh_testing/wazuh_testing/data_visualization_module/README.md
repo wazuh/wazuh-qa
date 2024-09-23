@@ -4,7 +4,7 @@ This module contains a basic application developed with Dash and Plotly that all
 
 ## Initial setup
 
-To run these tests, we need to install the package. So we can follow these steps:
+To use this module, we need to install the package. So we can follow these steps:
 
 1. Move to the `wazuh_testing/data_visualization_module` directory.
 2. Create and activate the Python environment.

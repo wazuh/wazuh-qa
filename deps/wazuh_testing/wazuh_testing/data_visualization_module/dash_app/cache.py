@@ -6,6 +6,7 @@
 
 from flask_caching import Cache
 
+
 # The type of storage is simple and the expiration time of the information is 300 seconds.
 cache = Cache(config={
     'CACHE_TYPE': 'simple',
