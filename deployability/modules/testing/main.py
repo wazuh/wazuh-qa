@@ -18,7 +18,6 @@ def parse_arguments():
     parser.add_argument("--tests", required=True)
     parser.add_argument("--component", choices=['manager', 'agent', 'central_components'], required=True)
     parser.add_argument("--dependencies", action='append', default=[], required=False)
-    parser.add_argument("--cleanup", required=False, default=True)
     parser.add_argument("--wazuh-version", required=True)
     parser.add_argument("--wazuh-revision", required=True)
     parser.add_argument("--wazuh-branch", required=False)
