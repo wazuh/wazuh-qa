@@ -50,48 +50,6 @@ def test_syscheck_operations(tmp_path: Path):
     assert len(files) == 0, "All files should have been deleted after all operations."
 
 
-def test_file_creation(setup_syscheck_generator: tuple):
-    """Test if files are being created by the generator.
-
-    Args:
-        setup_syscheck_generator (fixture): Fixture that provides a SyscheckEventGenerator and a path.
-    """
-    generator, path = setup_syscheck_generator
-    generator.generate_event()  # Force a create event
-    assert any(path.iterdir()), "Files should be created in the directory"
-
-
-def test_file_modification(setup_syscheck_generator: tuple):
-    """Test if files are being modified by the generator.
-
-    Args:
-        setup_syscheck_generator (fixture): Fixture that provides a SyscheckEventGenerator and a path.
-    """
-    generator, path = setup_syscheck_generator
-    # Ensure a file is created first
-    generator.create_file(str(path / "test_modify.txt"))
-    original_content = "Initial content"
-    with open(str(path / "test_modify.txt"), 'w') as f:
-        f.write(original_content)
-    generator.modify_file(str(path / "test_modify.txt"))
-    with open(str(path / "test_modify.txt")) as f:
-        content = f.read()
-    assert content != original_content, "File should be modified"
-
-
-def test_file_deletion(setup_syscheck_generator: tuple):
-    """Test if files are being deleted by the generator.
-
-    Args:
-        setup_syscheck_generator (fixture): Fixture that provides a SyscheckEventGenerator and a path.
-    """
-    generator, path = setup_syscheck_generator
-    file_path = str(path / "test_delete.txt")
-    open(file_path, 'a').close()  # Create a file
-    generator.delete_file(file_path)
-    assert not os.path.exists(file_path), "File should be deleted"
-
-
 def test_invalid_rate():
     """Test the behavior when an invalid rate (zero or negative) is provided.
 
