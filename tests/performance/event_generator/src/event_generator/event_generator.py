@@ -88,7 +88,7 @@ class LogEventGenerator(EventGenerator):
             template_path (str, optional): Path to a JSON template file for log formatting. Defaults to None.
         """
         super().__init__(rate, path, operations)
-        self.max_file_size = self._convert_file_size(max_file_size)
+        self.max_file_size = self._convert_file_size(max_file_size) if max_file_size else None
         self.template_path = template_path
         if template_path:
             with open(template_path) as file:
