@@ -82,7 +82,7 @@ class LogEventGenerator(EventGenerator):
             rate (int): The rate at which logs are generated per second.
             path (str): The filesystem path where logs will be written.
             operations (int): The total number of logs to generate before stopping.
-            max_file_size (int): The maximum file size in megabytes before the log is rotated.
+            max_file_size (float): The maximum file size in megabytes before the log is rotated.
             template_path (str, optional): Path to a JSON template file for log formatting. Defaults to None.
         """
         super().__init__(rate, path, operations)
