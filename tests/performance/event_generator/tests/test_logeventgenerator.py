@@ -6,25 +6,25 @@
 
 from pathlib import Path
 
+import json
+import os
 import pytest
 
 from event_generator import LogEventGenerator
 
 
 @pytest.fixture
-def setup_log_generator(tmp_path: Path) -> tuple[LogEventGenerator, Path]:
-    """Setup for LogEventGenerator with a temporary directory.
-
-    Args:
-        tmp_path (LocalPath): Provides a temporary directory path fixture from pytest.
-
-    Returns:
-        tuple: A tuple containing an instance of LogEventGenerator and the path to the log file.
-    """
+def log_generator(tmp_path: Path) -> LogEventGenerator:
+    """Fixture that provides a LogEventGenerator instance with a unique log file for each test."""
     path = tmp_path / "test.log"
-    generator = LogEventGenerator(rate=1, path=str(
-        path), operations=5, max_file_size=1, template_path=None)
-    return generator, path
+    generator = LogEventGenerator(
+        rate=1,
+        path=str(path),
+        operations=5,
+        max_file_size=1,
+        template_path=None
+    )
+    return generator
 
 
 def test_log_creation(setup_log_generator: tuple[LogEventGenerator, Path]) -> None:
