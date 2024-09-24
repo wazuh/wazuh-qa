@@ -4,10 +4,10 @@
 
 """Unit tests for the SyscheckEventGenerator class."""
 
+import time
 from pathlib import Path
 
 import pytest
-import time
 
 from event_generator import SyscheckEventGenerator
 

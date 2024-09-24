@@ -218,7 +218,6 @@ class SyscheckEventGenerator(EventGenerator):
         # Assign leftover operations to modifications
         num_creates = base_ops_per_action
         num_modifies = base_ops_per_action + leftover_ops
-        num_deletes = base_ops_per_action
 
         # Determine the number of files to create
         num_files = num_creates if num_creates > 0 else 1  # Ensure at least one file

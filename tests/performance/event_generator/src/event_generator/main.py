@@ -27,11 +27,10 @@ import logging
 import os
 import shutil
 import threading
-from typing import Any
 
 import yaml
 
-from event_generator import EventGenerator, LogEventGenerator, SyscheckEventGenerator, EventGeneratorFactory
+from event_generator import EventGeneratorFactory
 
 
 def delete_file(path: str) -> None:
