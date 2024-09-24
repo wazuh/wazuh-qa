@@ -77,7 +77,22 @@ def test_log_event_count_parametrized(tmp_path: Path, rate: int, operations: int
         max_file_size=None,
         template_path=None
     )
+
+    expected_duration = operations / rate
+
+    start_time = time.time()
     generator.start()
+    end_time = time.time()
+    actual_duration = end_time - start_time
+
+    allowed_margin = expected_duration * 0.05  # Allow a 5% of margin
+    lower_bound = expected_duration - allowed_margin
+    upper_bound = expected_duration + allowed_margin
+
+    assert lower_bound <= actual_duration <= upper_bound, (
+        f"Generator took {actual_duration:.2f}s, expected approximately {expected_duration:.2f}s"
+    )
+
     with open(path) as file:
         lines = file.readlines()
     assert len(lines) == operations, f"Exactly {operations} log entries should be written."
