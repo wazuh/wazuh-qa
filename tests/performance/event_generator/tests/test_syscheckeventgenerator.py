@@ -7,23 +7,9 @@
 from pathlib import Path
 
 import pytest
+import time
 
 from event_generator import SyscheckEventGenerator
-
-
-@pytest.fixture
-def setup_syscheck_generator(tmp_path: Path) -> tuple:
-    """Setup for SyscheckEventGenerator with a temporary directory.
-
-    Args:
-        tmp_path (LocalPath): Temporary directory provided by pytest.
-
-    Returns:
-        tuple: A tuple containing an instance of SyscheckEventGenerator and the path to the directory.
-    """
-    path = tmp_path
-    generator = SyscheckEventGenerator(rate=1, path=str(path), operations=5)
-    return generator, path
 
 
 def test_syscheck_operations(tmp_path: Path):
