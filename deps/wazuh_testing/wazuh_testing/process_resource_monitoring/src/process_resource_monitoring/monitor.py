@@ -188,8 +188,6 @@ class Monitor:
             'Write_Ops': 0.0,
             f'Disk_Read({self._value_unit})': 0.0,
             f'Disk_Written({self._value_unit})': 0.0,
-            f'Disk_Read_Speed({self._value_unit}/s)': 0.0,
-            f'Disk_Write_Speed({self._value_unit}/s)': 0.0,
         }
 
         try:
@@ -210,11 +208,6 @@ class Monitor:
                     info[f'Disk_Read({self._value_unit})'] = unit_conversion(io_counters.read_bytes)
                     info[f'Disk_Written({self._value_unit})'] = unit_conversion(io_counters.write_bytes)
                     if self._previous_read is not None and self._previous_write is not None:
-                        read_speed = (info[f'Disk_Read({self._value_unit})'] - self._previous_read) / self._time_step
-                        write_speed = (info[f'Disk_Written({self._value_unit})'] - self._previous_write) \
-                            / self._time_step
-                        info[f'Disk_Read_Speed({self._value_unit}/s)'] = read_speed
-                        info[f'Disk_Write_Speed({self._value_unit}/s)'] = write_speed
                         self._previous_read = info[f'Disk_Read({self._value_unit})']
                         self._previous_write = info[f'Disk_Written({self._value_unit})']
                     else:
