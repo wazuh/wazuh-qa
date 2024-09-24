@@ -30,11 +30,12 @@ This module aims to facilitate testing by simulating workload and monitoring sys
 """
 
 
-from .event_generator import EventGenerator, LogEventGenerator, SyscheckEventGenerator
+from .event_generator import EventGenerator, LogEventGenerator, SyscheckEventGenerator, EventGeneratorFactory
 
 
 __all__ = [
     'EventGenerator',
     'LogEventGenerator',
-    'SyscheckEventGenerator'
+    'SyscheckEventGenerator',
+    'EventGeneratorFactory'
 ]

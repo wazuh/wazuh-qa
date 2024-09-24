@@ -31,7 +31,7 @@ from typing import Any
 
 import yaml
 
-from event_generator import EventGenerator, LogEventGenerator, SyscheckEventGenerator
+from event_generator import EventGenerator, LogEventGenerator, SyscheckEventGenerator, EventGeneratorFactory
 
 
 def delete_file(path: str) -> None:
@@ -94,68 +94,6 @@ def validate_parameters(args: argparse.Namespace) -> None:
         raise ValueError("Invalid configuration file.")
 
 
-def create_event_generator(file_config: dict[str, Any]) -> EventGenerator:
-    """Create and return an EventGenerator instance based on the provided file configuration.
-
-    Args:
-        file_config (dict): Configuration settings specific to the module.
-
-    Returns:
-        EventGenerator: An instance of the appropriate EventGenerator subclass.
-
-    Raises:
-        ValueError: If any required parameters are missing or if the module is unsupported.
-    """
-    module = file_config.get('module')
-    if not module:
-        raise ValueError("Missing 'module' parameter in configuration.")
-
-    # Mapping of module names to their classes and parameters
-    module_mapping = {
-        'logcollector': {
-            'class': LogEventGenerator,
-            'required_params': ['path', 'operations', 'rate'],
-            'optional_params': ['max_file_size', 'template_path', 'max_retries'],
-        },
-        'syscheck': {
-            'class': SyscheckEventGenerator,
-            'required_params': ['path', 'rate', 'num_files', 'num_modifications'],
-            'optional_params': ['max_retries'],
-        },
-    }
-
-    if module not in module_mapping:
-        raise ValueError(f"Unsupported module specified in the configuration: {module}")
-
-    module_info = module_mapping[module]
-    generator_class = module_info['class']
-    required_params = module_info['required_params']
-    optional_params = module_info.get('optional_params', [])
-
-    # Validate required parameters
-    missing_params = [param for param in required_params if param not in file_config]
-    if missing_params:
-        raise ValueError(f"Missing required config parameters for {module}: {', '.join(missing_params)}")
-
-    # Prepare arguments for the generator class
-    init_args = {param: file_config[param] for param in required_params}
-    # Include optional parameters if they are provided
-    init_args.update({param: file_config[param] for param in optional_params if param in file_config})
-
-    # Handle module-specific logic
-    if module == 'syscheck':
-        num_files = init_args['num_files']
-        num_modifications = init_args['num_modifications']
-        # Calculate total operations: create + (modify * num_modifications) + delete
-        operations = num_files + (num_files * num_modifications) + num_files
-        init_args['operations'] = operations
-    elif module == 'logcollector':
-        # For logcollector, operations are provided directly
-        pass
-
-    return generator_class(**init_args)
-
-
 def main() -> None:
     """Main function to parse arguments and initiate event generation based on configurations."""
     args = parse_arguments()
@@ -164,17 +102,34 @@ def main() -> None:
         config = yaml.safe_load(file)
 
     threads = []
+    generators_info = []
+
     for file_config in config.get('files', []):
+        # Make a copy of file_config to avoid modifying the original
+        config_copy = file_config.copy()
+
         try:
-            generator = create_event_generator(file_config)
+            module_name = config_copy.pop('module')
+            cleanup = config_copy.pop('cleanup', False)
+            path = config_copy.get('path')
+            generator = EventGeneratorFactory.create_event_generator(module_name, config_copy)
+
+            generators_info.append({
+                'generator': generator,
+                'cleanup': cleanup,
+                'path': path,
+                'module': module_name
+            })
         except ValueError as e:
             logging.error(f"Error creating event generator: {e}")
             continue
 
-        thread = threading.Thread(target=generator.start)
+    # Start all generators
+    for info in generators_info:
+        thread = threading.Thread(target=info['generator'].start)
         threads.append(thread)
 
-    # Now, start all threads after processing is complete
+    # Start all threads
     for thread in threads:
         thread.start()
 
@@ -182,11 +137,10 @@ def main() -> None:
     for thread in threads:
         thread.join()
 
-    # Clean up files after all logs have been generated if specified in the configuration
-    for file_config in config.get('files', []):
-        # Check if cleanup flag is true for the file
-        if file_config.get('cleanup', False):
-            delete_file(file_config['path'])
+    # Perform cleanup if needed
+    for info in generators_info:
+        if info['cleanup']:
+            delete_file(info['path'])
 
 
 if __name__ == "__main__":

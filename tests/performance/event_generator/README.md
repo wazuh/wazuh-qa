@@ -21,24 +21,16 @@ This command starts the event simulation as specified in config.yaml, handling b
 
 Modify the config.yaml file to set the types of events, frequency, target paths for logs and file operations, among other parameters. An example configuration might look like this:
 
-## Common parameters
+## Parameters
 
 - **module**: Specifies the type of event generator. Options are logcollector or syscheck.
 - **path**: The filesystem path where logs will be written or where file operations will occur.
 - **rate**: The rate at which events are generated per second.
-- **cleanup**: If true, the generated files or directories will be deleted after the event generation is complete.
-
-## Log event generator parameters
-
 - **operations**: The total number of events to generate before stopping.
 - **max_file_size**: The maximum file size before the log file is truncated. Value is in megabytes (MB).
 To disable the size limit, set max_file_size to null.
 - **template_path**: Path to a JSON template file for log formatting.
-
-## Syscheck event generator parameters
-
-- **num_files**: The number of files to create.
-- **num_modifications**: The number of times each file should be modified.
+- **cleanup**: If true, the generated files or directories will be deleted after the event generation is complete.
 
 ## Example configuration
 
@@ -54,8 +46,7 @@ files:
 
   - module: syscheck
     path: /path/to/test/directory
-    num_files: 50
-    num_modifications: 10
+    operations: 10
     rate: 1
     cleanup: true
 ```

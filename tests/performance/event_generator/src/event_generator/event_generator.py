@@ -27,6 +27,7 @@ import threading
 import time
 from abc import ABC, abstractmethod
 from datetime import datetime
+from typing import Any
 
 
 class EventGenerator(ABC):
@@ -180,53 +181,67 @@ class LogEventGenerator(EventGenerator):
 class SyscheckEventGenerator(EventGenerator):
     """Subclass of EventGenerator specifically designed for file creation, modification and deletion."""
 
-    def __init__(self, rate: int, path: str, operations: int, num_files: int = 10, num_modifications: int = 5):
+    def __init__(self, rate: int, path: str, operations: int):
         """Initialize the SyscheckEventGenerator with specific parameters to simulate file system events.
 
         Args:
             rate (int): The rate at which file events are generated per second. Must be greater than zero.
             path (str): The base directory path where file events will occur.
             operations (int): The total number of file operations to perform.
-            num_files (int): The number of files to create.
-            num_modifications (int): The number of times each file should be modified.
 
         Raises:
             ValueError: If 'rate' is less than or equal to zero.
         """
         if rate <= 0:
             raise ValueError("Rate must be a positive integer")
+        if operations <= 0:
+            raise ValueError("Operations must be a positive integer")
         super().__init__(rate, path, operations)
         os.makedirs(self.path, exist_ok=True)  # Ensure the directory exists
-        self.files = []  # List to keep track of created or modified files
-        self.operation_sequence = self._build_operation_sequence(num_files, num_modifications)
+        self.files = []
+        self.operation_sequence = self._build_operation_sequence()
         self.sequence_index = 0
 
-    def _build_operation_sequence(self, num_files: int, num_modifications: int) -> list:
-        """Build a predefined sequence of operations.
-
-        Args:
-            num_files (int): Number of files to create.
-            num_modifications (int): Number of modifications per file.
+    def _build_operation_sequence(self) -> list:
+        """Build a predefined sequence of operations based on the total number of operations.
 
         Returns:
             list: A list of operations to perform in order.
         """
         operations = []
 
+        # Determine the number of create, modify, and delete operations
+        num_actions = 3  # create, modify, delete
+        base_ops_per_action = self.operations // num_actions
+        leftover_ops = self.operations % num_actions
+
+        # Assign leftover operations to modifications
+        num_creates = base_ops_per_action
+        num_modifies = base_ops_per_action + leftover_ops
+        num_deletes = base_ops_per_action
+
+        # Determine the number of files to create
+        num_files = num_creates if num_creates > 0 else 1  # Ensure at least one file
+
+        # Generate file names
+        file_names = [f"{self.path}/test_file_{i}.txt" for i in range(num_files)]
+
         # Step 1: Create files
-        for i in range(num_files):
-            file_name = f"{self.path}/test_file_{i}.txt"
+        for file_name in file_names:
             operations.append(('create', file_name))
 
         # Step 2: Modify files
-        for _modification_round in range(num_modifications):
-            for i in range(num_files):
-                file_name = f"{self.path}/test_file_{i}.txt"
+        modify_ops_per_file = num_modifies // num_files
+        leftover_modifies = num_modifies % num_files
+        for i, file_name in enumerate(file_names):
+            num_modifies_for_file = modify_ops_per_file
+            if i < leftover_modifies:
+                num_modifies_for_file += 1
+            for _ in range(num_modifies_for_file):
                 operations.append(('modify', file_name))
 
         # Step 3: Delete files
-        for i in range(num_files):
-            file_name = f"{self.path}/test_file_{i}.txt"
+        for file_name in file_names:
             operations.append(('delete', file_name))
 
         return operations
@@ -272,3 +287,27 @@ class SyscheckEventGenerator(EventGenerator):
             logging.info(f"Deleted file: {file_path}")
         except FileNotFoundError:
             logging.error(f"File not found for deletion: {file_path}")
+
+class EventGeneratorFactory:
+    """Factory class for creating EventGenerator instances."""
+
+    @staticmethod
+    def create_event_generator(module_name: str, config: dict[str, Any]) -> EventGenerator:
+        """Create and return an EventGenerator instance based on the module name and configuration.
+
+        Args:
+            module_name (str): The name of the module.
+            config (dict): Configuration settings specific to the module.
+
+        Returns:
+            EventGenerator: An instance of the appropriate EventGenerator subclass.
+
+        Raises:
+            ValueError: If the module name is unsupported.
+        """
+        if module_name == "logcollector":
+            return LogEventGenerator(**config)
+        elif module_name == "syscheck":
+            return SyscheckEventGenerator(**config)
+        else:
+            raise ValueError(f"Unsupported module: {module_name}")
