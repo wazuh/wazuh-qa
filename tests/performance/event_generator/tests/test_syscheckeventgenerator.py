@@ -61,8 +61,11 @@ def test_syscheck_rate(tmp_path: Path):
     end_time = time.time()
     actual_duration = end_time - start_time
 
-    # Allow a small margin for processing time
-    assert abs(actual_duration - expected_duration) < 0.5, (
+    allowed_margin = expected_duration * 0.05 # Allow a 5% of margin
+    lower_bound = expected_duration - allowed_margin
+    upper_bound = expected_duration + allowed_margin
+
+    assert lower_bound <= actual_duration <= upper_bound, (
         f"Event generation took {actual_duration:.2f}s, expected approximately {expected_duration:.2f}s"
     )
 
