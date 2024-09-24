@@ -7,6 +7,7 @@
 import json
 import os
 import time
+import threading
 from pathlib import Path
 
 import pytest
@@ -158,19 +159,47 @@ def test_log_rotation(tmp_path: Path) -> None:
     """Test that log rotation occurs when the max file size is exceeded.
 
     Args:
-        tmp_path (LocalPath): Temporary directory path fixture provided by pytest.
+        tmp_path (Path): Temporary directory path fixture provided by pytest.
     """
     path = tmp_path / "test.log"
+    max_file_size_mb = 1 / 1024  # 1 KB in MB
+    max_file_size_bytes = int(max_file_size_mb * 1024 * 1024)  # Convert MB to bytes
+
     generator = LogEventGenerator(
-        rate=10,
+        rate=50,
         path=str(path),
-        operations=100,
-        max_file_size=1 / 1024,  # 1 KB in MB
+        operations=200,
+        max_file_size=max_file_size_mb,
         template_path=None
     )
-    generator.start()
-    file_size = os.path.getsize(path)
-    assert file_size <= 1024, "Log file should have been rotated and size should be less than or equal to 1 KB."
+
+    file_sizes = []
+    rotation_detected = False
+
+    # Run the generator in a separate thread
+    generator_thread = threading.Thread(target=generator.start)
+    generator_thread.start()
+
+    try:
+        # Monitor the file size while the generator is running
+        while generator_thread.is_alive():
+            if path.exists():
+                file_size = os.path.getsize(path)
+                file_sizes.append(file_size)
+                print(f"Current file size: {file_size} bytes")
+                # Check if file size exceeds max_file_size
+                assert file_size <= max_file_size_bytes, (
+                    f"File size exceeded max_file_size during execution: {file_size} bytes"
+                )
+                # Detect rotation by checking if file size decreases
+                if len(file_sizes) >= 2 and file_sizes[-1] < file_sizes[-2]:
+                    rotation_detected = True
+                    print("Rotation detected!")
+            time.sleep(0.1)
+    finally:
+        generator_thread.join()
+
+    assert rotation_detected, "Log file was not rotated during the test."
 
 
 def test_template_formatting(tmp_path: Path) -> None:
