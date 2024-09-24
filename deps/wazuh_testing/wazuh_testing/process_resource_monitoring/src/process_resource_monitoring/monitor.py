@@ -171,23 +171,23 @@ class Monitor:
             return number / (1024 ** self._DATA_UNITS[self._value_unit])
 
         # Pre-initialize the info dictionary. If there's a problem while taking metrics of the binary (i.e. it crashed)
-        # the CSV will set all its values to 0 to easily identify if there was a problem or not
+        # the CSV will set all its values to -1 to easily identify if there was a problem or not
         info = {
             'Daemon': self._process_name,
             'Version': self._version,
             'Timestamp': datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
             'PID': self._pid,
             'CPU(%)': 0.0,
-            f'VMS({self._value_unit})': 0.0,
-            f'RSS({self._value_unit})': 0.0,
-            f'USS({self._value_unit})': 0.0,
-            f'PSS({self._value_unit})': 0.0,
-            f'SWAP({self._value_unit})': 0.0,
-            'FD': 0.0,
-            'Read_Ops': 0.0,
-            'Write_Ops': 0.0,
-            f'Disk_Read({self._value_unit})': 0.0,
-            f'Disk_Written({self._value_unit})': 0.0,
+            f'VMS({self._value_unit})': -1.0,
+            f'RSS({self._value_unit})': -1.0,
+            f'USS({self._value_unit})': -1.0,
+            f'PSS({self._value_unit})': -1.0,
+            f'SWAP({self._value_unit})': -1.0,
+            'FD': -1.0,
+            'Read_Ops': -1.0,
+            'Write_Ops': -1.0,
+            f'Disk_Read({self._value_unit})': -1.0,
+            f'Disk_Written({self._value_unit})': -1.0,
         }
 
         try:

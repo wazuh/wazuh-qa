@@ -94,13 +94,13 @@ class DiskUsageTracker:
             return datetime.fromtimestamp(time).strftime('%d/%m/%Y-%H:%M:%S.%f')
 
         # Pre-initialize the info dictionary. If there's a problem while taking metrics of the file (i.e. it crashed)
-        # the CSV will set all its values to 0 to easily identify if there was a problem or not
+        # the CSV will set all its values to -1 to easily identify if there was a problem or not
         info = {
             'File': self._file_name,
             'Timestamp': datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
             'Path': self._file_path,
-            f'Size({self._value_unit})': 0.0,
-            'Usage(%)': 0.0,
+            f'Size({self._value_unit})': -1.0,
+            'Usage(%)': -1.0,
             'Modification_time': datetime.min,
             'Access_time': datetime.min,
             'Creation_time': datetime.min
