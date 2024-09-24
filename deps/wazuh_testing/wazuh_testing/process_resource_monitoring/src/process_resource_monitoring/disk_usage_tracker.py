@@ -25,7 +25,7 @@ from process_resource_monitoring._logger import logger
 
 
 class DiskUsageTracker:
-    """Class to track disk usage of the Wazuh installation components over time.
+    """Class to track disk usage of a file over time.
 
     Instance methods:
         __init__:
@@ -82,16 +82,16 @@ class DiskUsageTracker:
             data (Dict[str, Any]): dictionary containing the data collected from the file.
         """
 
-        def convert_time(t: float) -> str:
+        def convert_time(time: float) -> str:
             """Convert time in milliseconds since the epoch to %d/%m/%Y-%H:%M:%S.%f.
 
             Args:
-                t (float): time in milliseconds since the epoch.
+                time (float): time in milliseconds since the epoch.
 
             Returns:
                 (str): formatted time.
             """
-            return datetime.fromtimestamp(t).strftime('%d/%m/%Y-%H:%M:%S.%f')
+            return datetime.fromtimestamp(time).strftime('%d/%m/%Y-%H:%M:%S.%f')
 
         # Pre-initialize the info dictionary. If there's a problem while taking metrics of the file (i.e. it crashed)
         # the CSV will set all its values to 0 to easily identify if there was a problem or not
@@ -117,7 +117,7 @@ class DiskUsageTracker:
             if self._event is not None:
                 self.shutdown()
         finally:
-            info.update({key: round(value, 2) for key, value in info.items() if isinstance(value, (int, float))})
+            info.update({key: round(value, 3) for key, value in info.items() if isinstance(value, (int, float))})
             logger.debug(f'Recollected data for file {self._file_path}')
 
         return info
@@ -163,7 +163,7 @@ class DiskUsageTracker:
         partition_size_bytes = psutil.disk_usage(partition).total
         partition_size = self._unit_conversion(partition_size_bytes)
 
-        return self.get_file_size(path) / partition_size
+        return (self.get_file_size(path) / partition_size) * 100
 
     def is_event_set(self) -> bool:
         """Check if the internal flag for the tracker event is set.
