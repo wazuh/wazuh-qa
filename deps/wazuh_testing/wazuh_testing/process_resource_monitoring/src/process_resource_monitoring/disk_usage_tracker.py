@@ -32,10 +32,16 @@ class DiskUsageTracker:
             Creates a thread to track the usage of a file/directory.
         get_file_info:
             Collect the data from the file.
+        get_file_size:
+            Get size of the file in the selected unit.
+        get_disk_usage:
+            Get the disk usage of the file in the partition it is located.
+        is_event_set:
+            Check if the thread has the event set (unhealthy if it has).
         start:
-            Start the monitoring threads.
+            Start the monitoring thread.
         shutdown:
-            Stop all the monitoring threads.
+            Stop the monitoring thread.
     """
 
     _DATA_UNITS: Dict[str, int] = {'B': 0, 'KB': 1, 'MB': 2, 'GB': 3, 'TB': 4}
