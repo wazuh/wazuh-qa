@@ -31,9 +31,9 @@ The `disk_usage_tracker` module provides a class to monitor file and directory d
 - **Path:** Full path of the file.
 - **Size:** Size in selected units of the file.
 - **Usage:** Percentage of the space the file takes relative to the partition's size.
-- **Mod_time:** Last time the file was modified.
-- **Acc_time:** Last time the file was accessed.
-- **Creat_time:** Creation time (Windows) or metadata change time (Unix).
+- **Modification_time:** Last time the file was modified.
+- **Access_time:** Last time the file was accessed.
+- **Creation_time:** Creation time (Windows) or metadata change time (Unix).
 
 The package also provides the script `wazuh-metrics`, designed to interact with these modules. [More information](#script)
  

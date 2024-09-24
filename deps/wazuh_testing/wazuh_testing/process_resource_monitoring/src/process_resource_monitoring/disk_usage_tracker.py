@@ -74,9 +74,9 @@ class DiskUsageTracker:
             - Path: full path of the file.
             - Size: size in selected units of the file.
             - Usage: percentage of the space the file takes relative to the partition's size.
-            - Mod_time: last time the file was modified.
-            - Acc_time: last time the file was accessed.
-            - Creat_time: time of the creation (Windows) or metadata change time (Unix).
+            - Modification_time: last time the file was modified.
+            - Access_time: last time the file was accessed.
+            - Creation_time: time of the creation (Windows) or metadata change time (Unix).
 
         Returns:
             data (Dict[str, Any]): dictionary containing the data collected from the file.
@@ -101,17 +101,17 @@ class DiskUsageTracker:
             'Path': self._file_path,
             f'Size({self._value_unit})': 0.0,
             'Usage(%)': 0.0,
-            'Mod_time': datetime.min,
-            'Acc_time': datetime.min,
-            'Creat_time': datetime.min
+            'Modification_time': datetime.min,
+            'Access_time': datetime.min,
+            'Creation_time': datetime.min
         }
 
         try:
             info[f'Size({self._value_unit})'] = self.get_file_size(self._file_path)
             info['Usage(%)'] = self.get_disk_usage(self._file_path, self._partition)
-            info['Mod_time'] = convert_time(os.path.getmtime(self._file_path))
-            info['Acc_time'] = convert_time(os.path.getatime(self._file_path))
-            info['Creat_time'] = convert_time(os.path.getctime(self._file_path))
+            info['Modification_time'] = convert_time(os.path.getmtime(self._file_path))
+            info['Access_time'] = convert_time(os.path.getatime(self._file_path))
+            info['Creation_time'] = convert_time(os.path.getctime(self._file_path))
         except ValueError:
             logger.warning(f'File {self._file_path} is not accessible.')
             if self._event is not None:
