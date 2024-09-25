@@ -35,45 +35,8 @@ The `disk_usage_tracker` module provides a class to monitor file and directory d
 - **Access_time:** Last time the file was accessed.
 - **Creation_time:** Creation time (Windows) or metadata change time (Unix).
 
-The package also provides the script `wazuh-metrics`, designed to interact with these modules. [More information](#script)
+The package also provides the scripts `wazuh-disk-metrics` and `wazuh-process-metrics`, designed to interact with these modules. [More information](#script)
  
-### Process reference
-
-#### Wazuh manager
-
-| Process | Argument |
-| ------- | -------- |
-| wazuh-agentlessd | agentlessd |
-| wazuh-analysisd | analysisd |
-| wazuh_apid.py | apid |
-| wazuh-authd | authd |
-| wazuh_clusterd.py | clusterd |
-| wazuh-csyslogd | csyslogd |
-| wazuh-db | db |
-| wazuh-dbd | dbd |
-| wazuh-execd | execd |
-| wazuh-integratord | integratord |
-| wazuh-logcollector | logcollector |
-| wazuh-maild | maild |
-| wazuh-modulesd | modulesd |
-| wazuh-monitord | monitord |
-| wazuh-remoted | remoted |
-| wazuh-syscheckd | syscheckd |
-
-> Note:  
-> `wazuh_apid.py` and `wazuh_clusterd.py` are scripts run by the Python interpreter, not processes themselves.
-
-#### Wazuh agent
-
-| Process | Argument |
-| ------- | -------- |
-| wazuh-agentd | agentd |
-| wazuh-execd | execd |
-| wazuh-logcollector | logcollector |
-| wazuh-modulesd | modulesd |
-| wazuh-syscheckd | syscheckd |
-
-
 ## Directory structure
 
 ```shell script
@@ -117,41 +80,106 @@ python3 -m pip list | grep process_resource_monitoring
 > The use of a virtual environment is optional, but quite recommended to avoid polluting the global workspace.
 
 
-## Script
+## Scripts
+
+### wazuh-process-metrics
 
 This script takes as positional arguments the names of the processes to be monitored.
 
 ```shell script
-wazuh-metrics <process_name> [<process_name>,...]
+wazuh-process-metrics [options] <process_name> [<process_name>,...]
 ```
 
-### Parameters
-
+#### Parameters
 
 | Parameter | Description | Type | Default |
 | --------- | ----------- | ---- | ------- |
 | `<process_name_list>` | `Name of process/processes to monitor separated by whitespace.` | `str` | Required |
-| `--disk` | `Paths of the files/dirs to monitor their disk usage.` | `str` | `None` |
 | `-s`, `--sleep` | `Time in seconds between each entry.` | `float` | `1.0` |
 | `-u`, `--units` | `Unit for the process bytes-related values.` | `str` | `KB` |
-| `--disk-unit` | `Unit for the disk usage related values.` | `str` | `GB` |
 | `-v`, `--version` | `Version of the binaries.` | `str` | `None` |
 | `-d`, `--debug` | `Enable debug level logging.` | `store_true` | `False` |
 | `-H`, `--healthcheck-time` | `Time in seconds between each health check.` | `int` | `10` |
 | `-r`, `--retries` | `Number of reconnection retries before aborting the monitoring process.` | `int` | `10` |
 | `--store-process` | `Path to store the CSVs with the process resource usage data.` | `str` | `` |
-| `--store-disk` | `Path to store the CSVs with the disk usage data.` | `str` | `` |
 
 
-### Usage examples
+#### Usage examples
 
 ```shell script
 # Min arguments: names of the processes to monitor (Process reference section)
-wazuh-metrics authd analysisd
+wazuh-process-metrics authd analysisd
 
 # Monitor api, cluster, mail and logcollector. Frequency 5s. Units to store the main memory values MB
-wazuh-metrics apid clusterd maild logcollector -s 5 -u MB
+wazuh-process-metrics apid clusterd maild logcollector -s 5 -u MB
+```
 
-# Monitor api and logcollector. Track usage of the file `/var/ossec/logs/archives/archives.json`
-wazuh-metrics apid logcollector --disk /var/ossec/logs/archives/archives.json
+### Process reference
+
+#### Wazuh manager
+
+| Process | Argument |
+| ------- | -------- |
+| wazuh-agentlessd | agentlessd |
+| wazuh-analysisd | analysisd |
+| wazuh_apid.py | apid |
+| wazuh-authd | authd |
+| wazuh_clusterd.py | clusterd |
+| wazuh-csyslogd | csyslogd |
+| wazuh-db | db |
+| wazuh-dbd | dbd |
+| wazuh-execd | execd |
+| wazuh-integratord | integratord |
+| wazuh-logcollector | logcollector |
+| wazuh-maild | maild |
+| wazuh-modulesd | modulesd |
+| wazuh-monitord | monitord |
+| wazuh-remoted | remoted |
+| wazuh-syscheckd | syscheckd |
+
+> Note:  
+> `wazuh_apid.py` and `wazuh_clusterd.py` are scripts run by the Python interpreter, not processes themselves.
+
+#### Wazuh agent
+
+| Process | Argument |
+| ------- | -------- |
+| wazuh-agentd | agentd |
+| wazuh-execd | execd |
+| wazuh-logcollector | logcollector |
+| wazuh-modulesd | modulesd |
+| wazuh-syscheckd | syscheckd |
+
+
+### wazuh-disk-metrics
+
+This script takes as positional arguments the names of the files or directories to be monitored.
+
+```shell script
+wazuh-disk-metrics [options] <file_path> [<file_path>,...]
+```
+
+
+#### Parameters
+
+| Parameter | Description | Type | Default |
+| --------- | ----------- | ---- | ------- |
+| `<file_name_list>` | `Name of files/directories to monitor separated by whitespace.` | `str` | Required |
+| `-s`, `--sleep` | `Time in seconds between each entry.` | `float` | `1.0` |
+| `-u`, `--units` | `Unit for the disk usage related values.` | `str` | `GB` |
+| `-v`, `--version` | `Version of the binaries.` | `str` | `None` |
+| `-d`, `--debug` | `Enable debug level logging.` | `store_true` | `False` |
+| `-H`, `--healthcheck-time` | `Time in seconds between each health check.` | `int` | `10` |
+| `-r`, `--retries` | `Number of reconnection retries before aborting the monitoring process.` | `int` | `10` |
+| `--store-disk` | `Path to store the CSVs with the disk usage data.` | `str` | `` |
+
+
+#### Usage examples
+
+```shell script
+# Min arguments: names of the files to monitor
+wazuh-disk-metrics /var/ossec/logs/archives/archives.json
+
+# Monitor the archives file. Frequency 5s. Units to store the values MB
+wazuh-disk-metrics /var/ossec/logs/archives/archives.json -s 5 -u MB
 ```

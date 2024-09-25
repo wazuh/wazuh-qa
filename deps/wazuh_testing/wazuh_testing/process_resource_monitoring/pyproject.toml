@@ -31,4 +31,5 @@ Repository = "https://github.com/wazuh/"
 
 
 [project.scripts]
-wazuh-metrics = "wazuh_metrics:main"
+wazuh-disk-metrics = "wazuh_disk_metrics:main"
+wazuh-process-metrics = "wazuh_process_metrics:main"
