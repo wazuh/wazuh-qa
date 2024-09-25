@@ -172,13 +172,6 @@ def check_monitors_health(options) -> bool:
     """
     healthy = True
     for process, monitors in active_monitors.items():
-        try:
-            # Try to get all the process PIDs
-            process_pids = Monitor.get_process_pids(process)
-        except ValueError:
-            healthy = False
-            logger.warning(f'Process {process} is not running')
-
         # Check if there is any unhealthy monitor
         if any(filter(lambda monitor: monitor.is_event_set(), monitors)):
             logger.warning(f'Monitoring of {process} failed. Attempting to create new monitor instances')
@@ -231,6 +224,32 @@ def monitors_healthcheck(options) -> None:
             if errors >= options.health_retries:
                 logger.error('Reached maximum number of retries. Aborting')
                 exit(1)
+
+        # Periodically check for new processes that need to be monitored
+        process_list = map((lambda p: PROCESS_MAPPING[p]), options.process_name_list)
+        global processes_pids
+        for process in process_list:
+            # Get the current PIDs of the process
+            current_pids = Monitor.get_process_pids(process)
+
+            # Check for any new PIDs that are not already being monitored
+            for pid in current_pids:
+                if pid not in processes_pids:
+                    logger.info(f'New process detected: {process} with PID: {pid}')
+                    processes_pids.add(pid)
+
+                    # Start a new monitor for the detected process
+                    p_name = f'{process}_new_{pid}'  # Give a unique name for the new process
+                    monitor = Monitor(
+                        process_name=p_name,
+                        pid=pid,
+                        value_unit=options.data_unit,
+                        time_step=options.sleep_time,
+                        version=options.version,
+                        dst_dir=options.store_process_path,
+                    )
+                    monitor.start()
+                    active_monitors[process].append(monitor)
 
         sleep(options.healthcheck_time)
 
