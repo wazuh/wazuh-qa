@@ -90,7 +90,6 @@ class Monitor:
         self._value_unit: str = value_unit
         self._time_step: int = time_step
         self._version: Optional[str] = version
-        self._platform: str = platform
         self._dst_dir: str = dst_dir
         self._proc: Optional[psutil.Process] = None
         self._event: Optional[Event] = None
@@ -201,7 +200,7 @@ class Monitor:
                 info[f'SWAP({self._value_unit})'] = unit_conversion(memory_data.swap)
                 info['FD'] = proc.num_fds()
 
-                if self._platform == 'linux' or platform == 'win32':
+                if platform == 'linux' or platform == 'win32':
                     io_counters = proc.io_counters()
                     info['Read_Ops'] = io_counters.read_count
                     info['Write_Ops'] = io_counters.write_count
