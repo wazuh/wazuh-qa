@@ -35,7 +35,7 @@ The `disk_usage_tracker` module provides a class to monitor file and directory d
 - **Access_time:** Last time the file was accessed.
 - **Creation_time:** Creation time (Windows) or metadata change time (Unix).
 
-The package also provides the scripts `wazuh-disk-metrics` and `wazuh-process-metrics`, designed to interact with these modules. [More information](#script)
+The package also provides the scripts `wazuh-disk-metrics` and `wazuh-process-metrics`, designed to interact with these modules. [More information](#scripts)
  
 ## Directory structure
 
