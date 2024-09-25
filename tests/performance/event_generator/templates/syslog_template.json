@@ -1,0 +1,6 @@
+{
+    "date": "{date}",
+    "time": "{time}",
+    "severity": "{severity}",
+    "message": "{message}"
+}

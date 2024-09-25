@@ -1,0 +1,22 @@
+files:
+  - module: logcollector
+    path: ./wazuh-logcollector1.log
+    operations: 5
+    rate: 1
+    max_file_size: null
+    template_path: ./templates/syslog_template.json
+    cleanup: false
+
+  - module: logcollector
+    path: ./wazuh-logcollector2.log
+    operations: 5
+    rate: 1
+    max_file_size: null
+    template_path: ./templates/syslog_template.json
+    cleanup: false
+
+  - module: syscheck
+    path: ./syscheck_test
+    rate: 2
+    operations: 50
+    cleanup: false
