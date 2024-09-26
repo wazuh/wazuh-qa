@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.10.0] - TBD
 
+### Fixed
+
+- Fix failed to disable wazuh-manager.service ([#5775])(https://github.com/wazuh/wazuh-qa/pull/5775) \- (Tests)
+
 ## [4.9.1] - TBD
 
 ### Added
