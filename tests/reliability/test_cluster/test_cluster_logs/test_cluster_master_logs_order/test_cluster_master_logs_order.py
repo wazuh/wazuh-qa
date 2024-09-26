@@ -90,11 +90,15 @@ def test_check_logs_order_master(artifacts_path):
                                 tree_info['tree'].children(child.identifier) else 'root'
                             break
                     else:
-                        incorrect_order[name].append({'node': name, 'log_type': log_tag,
+                        if name not in incorrect_order:
+                            incorrect_order[name] = []
+
+                        data = {'node': name, 'log_type': log_tag,
                                                 'expected_logs': [log.tag for log in
                                                                   tree_info['tree'].children(tree_info['node'])],
-                                                'found_log': full_log})
-                        pytest.fail(f"[{incorrect_order[name]['node']}]"
-                                    f"\n - Log type: {incorrect_order[name]['log_type']}"
-                                    f"\n - Expected logs: {incorrect_order[name]['expected_logs']}"
-                                    f"\n - Found log: {incorrect_order[name]['found_log']}")
+                                                'found_log': full_log}
+                        incorrect_order[name].append(data)
+                        pytest.fail(f"[{data['node']}]"
+                                    f"\n - Log type: {data['log_type']}"
+                                    f"\n - Expected logs: {data['expected_logs']}"
+                                    f"\n - Found log: {data['found_log']}")
