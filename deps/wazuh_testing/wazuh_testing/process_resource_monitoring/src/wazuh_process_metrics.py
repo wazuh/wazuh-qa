@@ -209,11 +209,12 @@ def check_monitors_health(options) -> bool:
     return healthy
 
 
-def monitors_healthcheck(options) -> None:
+def monitors_healthcheck(options, process_list) -> None:
     """Check each monitor's health while the session is active.
 
     Args:
         options (argparse.Options): object containing the script options.
+        process_list (List[str]): list of the processes with monitors to be checked.
     """
     errors = 0
     while session_active:
@@ -226,30 +227,32 @@ def monitors_healthcheck(options) -> None:
                 exit(1)
 
         # Periodically check for new processes that need to be monitored
-        process_list = map((lambda p: PROCESS_MAPPING[p]), options.process_name_list)
         global processes_pids
         for process in process_list:
-            # Get the current PIDs of the process
-            current_pids = Monitor.get_process_pids(process)
+            try:
+                # Get the current PIDs of the process
+                current_pids = Monitor.get_process_pids(process)
 
-            # Check for any new PIDs that are not already being monitored
-            for pid in current_pids:
-                if pid not in processes_pids:
-                    logger.info(f'New process detected: {process} with PID: {pid}')
-                    processes_pids.add(pid)
+                # Check for any new PIDs that are not already being monitored
+                for pid in current_pids:
+                    if pid not in processes_pids:
+                        logger.info(f'New process {process} detected ({pid})')
+                        processes_pids.add(pid)
 
-                    # Start a new monitor for the detected process
-                    p_name = f'{process}_new_{pid}'  # Give a unique name for the new process
-                    monitor = Monitor(
-                        process_name=p_name,
-                        pid=pid,
-                        value_unit=options.data_unit,
-                        time_step=options.sleep_time,
-                        version=options.version,
-                        dst_dir=options.store_process_path,
-                    )
-                    monitor.start()
-                    active_monitors[process].append(monitor)
+                        # Start a new monitor for the detected process
+                        p_name = f'{process}_{pid}'
+                        monitor = Monitor(
+                            process_name=p_name,
+                            pid=pid,
+                            value_unit=options.data_unit,
+                            time_step=options.sleep_time,
+                            version=options.version,
+                            dst_dir=options.store_process_path,
+                        )
+                        monitor.start()
+                        active_monitors[process].append(monitor)
+            except ValueError:
+                logger.warning(f'Could not create new monitor instances for {process}')
 
         sleep(options.healthcheck_time)
 
@@ -278,25 +281,31 @@ def main():
     logger.info(f'Started new session: {CURRENT_SESSION}')
 
     # Start monitoring for processes
-    process_list = map((lambda p: PROCESS_MAPPING[p]), options.process_name_list)
+    process_list = list(map((lambda p: PROCESS_MAPPING[p]), options.process_name_list))
     global processes_pids
     for process in process_list:
-        # Launch a monitor for every possible child process
-        for i, pid in enumerate(Monitor.get_process_pids(process)):
-            processes_pids.add(pid)
-            p_name = process if i == 0 else f'{process}_child_{i}'
-            monitor = Monitor(
-                process_name=p_name,
-                pid=pid,
-                value_unit=options.data_unit,
-                time_step=options.sleep_time,
-                version=options.version,
-                dst_dir=options.store_process_path,
-            )
-            monitor.start()
-            active_monitors[process].append(monitor)
+        try:
+            process_pids = Monitor.get_process_pids(process)
+            # Launch a monitor for every possible child process
+            # for i, pid in enumerate(Monitor.get_process_pids(process)):
+            for i, pid in enumerate(process_pids):
+                processes_pids.add(pid)
+                p_name = process if i == 0 else f'{process}_child_{i}'
+                monitor = Monitor(
+                    process_name=p_name,
+                    pid=pid,
+                    value_unit=options.data_unit,
+                    time_step=options.sleep_time,
+                    version=options.version,
+                    dst_dir=options.store_process_path,
+                )
+                monitor.start()
+                active_monitors[process].append(monitor)
+        except ValueError:
+            logger.warning(f'Could not create initial monitor instances for {process}')
 
-    monitors_healthcheck(options)
+
+    monitors_healthcheck(options, process_list)
 
 
 if __name__ == '__main__':
