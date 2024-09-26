@@ -122,11 +122,11 @@ def shutdown_threads(signal_number: int, frame: Optional[FrameType]) -> None:
     logger.info('Process finished gracefully')
 
 
-def check_monitors_health(options) -> bool:
+def check_monitors_health(options: argparse.Namespace) -> bool:
     """Write the collected data in a CSV file.
 
     Args:
-        options (argparse.Options): object containing the script options.
+        options (argparse.Namespace): object containing the script options.
 
     Returns:
         (bool): False if there were any errors. True otherwise.
@@ -150,11 +150,11 @@ def check_monitors_health(options) -> bool:
     return healthy
 
 
-def monitors_healthcheck(options) -> None:
+def monitors_healthcheck(options: argparse.Namespace) -> None:
     """Check each monitor's health while the session is active.
 
     Args:
-        options (argparse.Options): object containing the script options.
+        options (argparse.Namespace): object containing the script options.
     """
     errors = 0
     while session_active:
