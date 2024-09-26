@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.10.0] - TBD
 
+### Fixed
+
+- Changed wazuh-agent service start from install test to registration test ([#5762](https://github.com/wazuh/wazuh-qa/pull/5762)) \- (Tests)
+
 ## [4.9.1] - TBD
 
 ### Added
