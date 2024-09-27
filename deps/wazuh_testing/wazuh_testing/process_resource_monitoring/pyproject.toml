@@ -1,0 +1,35 @@
+[project]
+name = "process_resource_monitoring"
+version = "0.0.1"
+authors = [
+    { name = "Wazuh", email = "hello@wazuh.com" }
+]
+description = "Monitoring resources and disk space usage of Wazuh components"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Operating System :: POSIX :: Linux"
+]
+keywords = ["wazuh", "process", "monitoring", "resource", "disk", "partition",
+            "usage"]
+
+dependencies = [
+    "psutil>=6.0.0"
+]
+
+
+[project.urls]
+Homepage = "https://wazuh.com/"
+Documentation = "https://documentation.wazuh.com/"
+Repository = "https://github.com/wazuh/"
+
+
+[project.scripts]
+wazuh-disk-metrics = "wazuh_disk_metrics:main"
+wazuh-process-metrics = "wazuh_process_metrics:main"
