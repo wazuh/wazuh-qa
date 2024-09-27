@@ -19,7 +19,6 @@ class InputPayload(ExtraVars):
     tests: list[str]
     targets: list[str]
     dependencies: list[str] | None = None
-    cleanup: bool = True
     live: bool = False
 
 

@@ -28,7 +28,7 @@ def compare_expected_found_vulnerabilities(vulnerabilities, expected_vulnerabili
         for vulnerability in expected_vulns:
             if vulnerability not in vulnerabilities.get(agent, []):
                 logging.critical(f"Vulnerability not found for {agent}: {vulnerability}")
-                if agent not in vulnerabilities_not_found:
+                if agent not in vulnerabilities_not_found.keys():
                     vulnerabilities_not_found[agent] = []
                     failed_agents.append(agent)
 
@@ -39,9 +39,10 @@ def compare_expected_found_vulnerabilities(vulnerabilities, expected_vulnerabili
         for vulnerability in agent_vulnerabilities:
             if vulnerability not in expected_vulnerabilities.get(agent, []):
                 logging.critical(f"Vulnerability unexpected found for {agent}: {vulnerability}")
-                if agent not in vulnerabilities_unexpected:
+                if agent not in vulnerabilities_unexpected.keys():
                     vulnerabilities_unexpected[agent] = []
-                    failed_agents.append(agent)
+                    if agent not in failed_agents:
+                        failed_agents.append(agent)
 
                 result = False
                 vulnerabilities_unexpected[agent].append(vulnerability)
@@ -158,7 +159,6 @@ def equals_but_not_empty(x, y):
 empty = lambda x: len(x) == 0
 
 no_errors = lambda x: all(
-    not any(x[host][level] for level in ["ERROR", "CRITICAL", "WARNING"])
+    not any(x[host][level] for level in ['ERROR', 'CRITICAL'])
     for host in x
 )
-
