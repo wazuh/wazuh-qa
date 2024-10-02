@@ -89,7 +89,6 @@ class WazuhManager:
             ])
 
         system_commands = [
-                "systemctl disable wazuh-manager",
                 "systemctl daemon-reload"
         ]
 
