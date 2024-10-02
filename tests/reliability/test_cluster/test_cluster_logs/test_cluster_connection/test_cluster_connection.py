@@ -53,7 +53,7 @@ def test_cluster_connection(artifacts_path):
         with open(log_file) as f:
             s = mmap(f.fileno(), 0, access=ACCESS_READ)
             # Search first successful connection message.
-            conn = re.search(rb'^.*Successfully connected to master.*$', s, flags=re.MULTILINE)
+            conn = re.search(rb'^.*Successful response from master: keepalive*$', s, flags=re.MULTILINE)
             if not conn:
                 pytest.fail(f'Could not find "Successfully connected to master" message in the '
                             f'{node_name.search(log_file)[1]}')

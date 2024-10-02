@@ -15,7 +15,7 @@ configuration = safe_load(open(join(test_data_path, 'configuration.yaml')))['con
 node_name = compile(r'.*/(master|worker_[\d]+)/logs/cluster.log')
 integrity_regex = compile(r'.*Compressing \'files_metadata.json\' of ([0-9]*) files.*|'
                           r'(.*Files to create: ([0-9]*) \| Files to update: '
-                          r'([0-9]*) \| Files to delete: ([0-9]*) \| Files to send: ([0-9]*).*)'.encode())
+                          r'([0-9]*) \| Files to delete: ([0-9]*).*)'.encode())
 repeated_syncs = {}
 
 
