@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Fix E2E VD tests not working if the Python version is different to 3.9 ([#5787](https://github.com/wazuh/wazuh-qa/pull/5787)) \- (Framework)
 - Fix failed to disable wazuh-manager.service ([#5775])(https://github.com/wazuh/wazuh-qa/pull/5775) \- (Tests)
 
 ## [4.9.1] - TBD
