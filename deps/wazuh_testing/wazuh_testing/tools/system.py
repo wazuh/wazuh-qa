@@ -513,8 +513,7 @@ class HostManager:
             return result
 
         def install_yum_package(host, url):
-            result = self.get_host(host).ansible("yum", f"name={url} state=present "
-                                                 'disable_gpg_check=True', check=False)
+            result = self.get_host(host).ansible("command", f"yum install -y {url}", check=False)
             return result
 
         def install_pkg_package(host, url):
