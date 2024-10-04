@@ -61,8 +61,7 @@ class WazuhAgent:
                 ])
             system_commands = [
                     "systemctl daemon-reload",
-                    "systemctl enable wazuh-agent",
-                    "systemctl status wazuh-agent"
+                    "systemctl enable wazuh-agent"
             ]
 
             commands.extend(system_commands)
@@ -87,10 +86,6 @@ class WazuhAgent:
                 commands.extend([
                     f'curl -so wazuh-agent.pkg https://{s3_url}.wazuh.com/{release}/macos/wazuh-agent-{wazuh_version}-1.arm64.pkg && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
                 ])
-            system_commands = [
-                    '/Library/Ossec/bin/wazuh-control status'
-            ]
-            commands.extend(system_commands)
 
         logger.info(f'Installing Agent in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         ConnectionManager.execute_commands(inventory_path, commands)
