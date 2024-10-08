@@ -61,9 +61,7 @@ class WazuhAgent:
                 ])
             system_commands = [
                     "systemctl daemon-reload",
-                    "systemctl enable wazuh-agent",
-                    "systemctl start wazuh-agent",
-                    "systemctl status wazuh-agent"
+                    "systemctl enable wazuh-agent"
             ]
 
             commands.extend(system_commands)
@@ -78,7 +76,6 @@ class WazuhAgent:
                 f"WAZUH_AGENT_NAME='{agent_name}' "
                 f"WAZUH_REGISTRATION_SERVER='MANAGER_IP' "
             ])
-            commands.extend(["NET START WazuhSvc"])
 
         elif os_type == 'macos':
             if architecture == 'amd64':
@@ -89,11 +86,6 @@ class WazuhAgent:
                 commands.extend([
                     f'curl -so wazuh-agent.pkg https://{s3_url}.wazuh.com/{release}/macos/wazuh-agent-{wazuh_version}-1.arm64.pkg && echo "WAZUH_MANAGER=\'MANAGER_IP\' && WAZUH_AGENT_NAME=\'{agent_name}\'" > /tmp/wazuh_envs && sudo installer -pkg ./wazuh-agent.pkg -target /'
                 ])
-            system_commands = [
-                    '/Library/Ossec/bin/wazuh-control start',
-                    '/Library/Ossec/bin/wazuh-control status'
-            ]
-            commands.extend(system_commands)
 
         logger.info(f'Installing Agent in {HostInformation.get_os_name_and_version_from_inventory(inventory_path)}')
         ConnectionManager.execute_commands(inventory_path, commands)
@@ -124,7 +116,8 @@ class WazuhAgent:
                 host_ip = HostInformation.get_internal_ip_from_aws_dns(manager_host) if 'amazonaws' in manager_host else manager_host
                 commands = [
                     f"sed -i 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' {WAZUH_CONF}",
-                    "systemctl restart wazuh-agent"
+                    "systemctl start wazuh-agent",
+                    "systemctl status wazuh-agent"
                 ]
                 ConnectionManager.execute_commands(inventory_path, commands)
             except Exception as e:
@@ -141,7 +134,8 @@ class WazuhAgent:
                     host_ip = HostInformation.get_public_ip_from_aws_dns(manager_host)
                 commands = [
                     f"sed -i '.bak' 's/<address>MANAGER_IP<\/address>/<address>{host_ip}<\/address>/g' {WAZUH_MACOS_CONF}",
-                    "/Library/Ossec/bin/wazuh-control restart"
+                    "/Library/Ossec/bin/wazuh-control start",
+                    "/Library/Ossec/bin/wazuh-control status"
                 ]
                 ConnectionManager.execute_commands(inventory_path, commands)
             except Exception as e:
