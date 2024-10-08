@@ -42,6 +42,7 @@ variables:
   macos-agent-os:
     - macos-ventura-13-amd64
     - macos-sonoma-14-amd64
+    - macos-sequoia-15-amd64
 
   manager-os: linux-ubuntu-22.04-amd64
   infra-provider: aws

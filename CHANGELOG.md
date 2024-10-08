@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [4.10.0] - TBD
 
+### Added
+
+- Add support for macOS 15 (Sequoia) to the DTT tests ([#5777](https://github.com/wazuh/wazuh-qa/pull/5777)) \- (Tests)
+
 ### Fixed
 
 - Fix E2E VD tests not working if the Python version is different to 3.9 ([#5787](https://github.com/wazuh/wazuh-qa/pull/5787)) \- (Framework)

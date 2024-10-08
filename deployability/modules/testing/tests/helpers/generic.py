@@ -872,12 +872,12 @@ class GeneralComponentActions:
             return result.get('success')
 
         elif os_type == 'macos':
-            result = ConnectionManager.execute_commands(inventory_path, f'ps aux | grep {host_role} | grep -v grep')
-            if result.get('output') == None:
-                return False
-            else:
+            result = ConnectionManager.execute_commands(inventory_path, f'/Library/Ossec/bin/wazuh-control status | grep {host_role}')
+            status = result.get('output')
+            if 'active' in status or 'Running' in status or 'is running' in status:
                 return result.get('success')
-
+            else:
+                return False
 
 class Waits:
 
