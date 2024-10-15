@@ -185,7 +185,7 @@ def gen_log_filename(log_path: str) -> str:
     Returns:
         str: File name of the log (include path).
     """
-    return log_path + datetime.now().strftime("log-%Y%m%d%H%M%S.log")
+    return log_path + datetime.now().strftime("log-%Y%m%d%H%M%S.json")
 
 
 def gen_url(ip: str) -> str:
