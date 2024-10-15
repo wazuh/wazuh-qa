@@ -99,14 +99,6 @@ dashboard-saturation-tests --password <wazuh_pass> --ip <dashboard_ip>
 - `--artillery` needs to receive a valid Artillery configuration file (for example, `artillery.yml`).
 - `--type` only accepts two values ​​(`aggregate` or `intermediate`). Either or both can be chosen.
 
-### Check PEP 8
-
-The Python script complies with the PEP 8 standard. To verify that it continues to comply with the standard (after making changes) you just have to execute the following commands:
-
-```shell script
-pycodestyle dashboard_saturation_tests.py
-```
-
 ## Using Docker
 
 It is possible to use the `Docker` image with the entire environment set up for running tests. To facilitate its use, there is a `makefile` file with the necessary instructions. An example of use would be:
