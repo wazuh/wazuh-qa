@@ -13,3 +13,4 @@ paramiko==3.4.0
 requests==2.31.0
 chardet==5.2.0
 pywinrm==0.4.3
+jinja2
