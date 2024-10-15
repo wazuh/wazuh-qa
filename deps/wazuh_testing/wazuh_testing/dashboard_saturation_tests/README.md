@@ -20,8 +20,10 @@ dashboard_saturation_tests/
 │   ├── artillery.xml
 │   ├── dashboard_saturation_tests.py
 │   └── processor.js
-├── README.md
-└── pyproject.toml
+├── Dockerfile
+├── Makefile
+├── pyproject.toml
+└── README.md
 ```
 
 ## Prerequisites
@@ -60,9 +62,21 @@ playwright --version
 
 To run the tests, it is necessary to install the dependencies and the package. This can be done by running the following command:
 
-```shell script
+1. Move to the `wazuh-qa/deps/wazuh_testing/wazuh_testing/dashboard_saturation_tests` directory
+
+2. Create the Python environment
+
+```bash
 python3 -m venv env
+```
+
+3. Activate the environment:
+```bash
 source env/bin/activate
+```
+
+4. Install the package
+```bash
 python3 -m pip install .
 ```
 
