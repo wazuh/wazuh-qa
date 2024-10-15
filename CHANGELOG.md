@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Added Jinja 2 as requirenment. ([#5814](https://github.com/wazuh/wazuh-qa/pull/5814)) \- (Framework)
 - Add support for macOS 15 (Sequoia) to the DTT tests ([#5777](https://github.com/wazuh/wazuh-qa/pull/5777)) \- (Tests)
 - Added support for macOS 15 (Vagrant) to the Allocation module ([#5743](https://github.com/wazuh/wazuh-qa/pull/5743)) \- (Framework)
 - Add Ubuntu 24.04 support to Deployability testing tier 1 ([#5689])(https://github.com/wazuh/wazuh-qa/pull/5689) \- (Tests)
