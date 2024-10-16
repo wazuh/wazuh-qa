@@ -19,5 +19,8 @@ Homepage = "https://wazuh.com/"
 Documentation = "https://documentation.wazuh.com/"
 Repository = "https://github.com/wazuh/"
 
+[tool.setuptools.packages.find]
+include = ["data"]
+
 [project.scripts]
 dashboard-saturation-tests = "data.dashboard_saturation_tests:main"
