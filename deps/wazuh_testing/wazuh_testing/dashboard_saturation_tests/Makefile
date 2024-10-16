@@ -1,12 +1,13 @@
 # Variables
-CONSOLE=/bin/bash
-APP=dashboard_saturation_tests
-DATA=data
-WORK=/app
-ARTIFACTS=artifacts
-LOGS=logs
-SCREENSHOTS=screenshots
-CSV=csv
+CONSOLE := /bin/bash
+APP := dashboard_saturation_tests
+DATA := data
+WORK := /app
+DATETIME := $(shell date +%Y%m%d_%H%M%S)
+ARTIFACTS := artifacts_$(DATETIME)
+LOGS := logs
+SCREENSHOTS := screenshots
+CSV := csv
 
 .PHONY: init
 init: rm purge build run ## Recreate Containers
