@@ -22,6 +22,19 @@ import pandas as pd
 import yaml
 
 
+LOGS = "logs/"
+SCREENSHOTS = "screenshots/"
+CSV = 'csv/'
+SESSION = '.auth/'
+ARTILLERY = 'data/artillery.yml'
+USER = 'admin'
+ITERATIONS = 1
+TYPE = ['aggregate', 'intermediate']
+WAIT = 5
+TIMEOUT = 10000
+DEBUG = False
+
+
 # Global Configuration Variables
 artillery_result_type = [
     # Final statistics printed to the console at the end of a test
@@ -118,7 +131,8 @@ def gen_artillery_params(args: Namespace) -> dict:
         'username': args.user,
         'password': args.password,
         'screenshots': args.screenshots,
-        'session': args.session
+        'session': args.session,
+        'timeout': args.timeout
     }
 
     return artillery_params
@@ -274,48 +288,48 @@ def get_script_arguments() -> Namespace:
         '-l', '--log',
         dest='logs',
         type=str,
-        default='logs/',
-        help='Directory to store the logs. Default "logs".'
+        default=LOGS,
+        help=f'Directory to store the logs. Default {LOGS}.'
     )
 
     parser.add_argument(
         '-s', '--screenshots',
         dest='screenshots',
         type=str,
-        default='screenshots/',
-        help='Directory to store the screenshots. Default "screenshots".'
+        default=SCREENSHOTS,
+        help=f'Directory to store the screenshots. Default {SCREENSHOTS}.'
     )
 
     parser.add_argument(
         '-c', '--csv',
         dest='csv',
         type=str,
-        default='csv/',
-        help='Directory to store the CSVs. Default "csv".'
+        default=CSV,
+        help=f'Directory to store the CSVs. Default {CSV}.'
     )
 
     parser.add_argument(
         '-o', '--session',
         dest='session',
         type=str,
-        default='.auth/',
-        help='Directory to store the Sessions. Default ".auth".'
+        default=SESSION,
+        help=f'Directory to store the Sessions. Default {SESSION}.'
     )
 
     parser.add_argument(
         '-a', '--artillery',
         dest='artillery',
         type=str,
-        default="data/artillery.yml",
-        help='Path to the Artillery Script. Default "artillery.yml".'
+        default=ARTILLERY,
+        help=f'Path to the Artillery Script. Default {ARTILLERY}.'
     )
 
     parser.add_argument(
         '-u', '--user',
         dest='user',
         type=str,
-        default='admin',
-        help='Wazuh User for the Dashboard. Default "admin".'
+        default=USER,
+        help=f'Wazuh User for the Dashboard. Default {USER}.'
     )
 
     parser.add_argument(
@@ -330,8 +344,8 @@ def get_script_arguments() -> Namespace:
         '-q', '--iterations',
         dest='iterations',
         type=int,
-        default=1,
-        help=f'Number of Tests to Run. Default 1.'
+        default=ITERATIONS,
+        help=f'Number of Tests to Run. Default {ITERATIONS}.'
     )
 
     parser.add_argument(
@@ -348,16 +362,24 @@ def get_script_arguments() -> Namespace:
         type=str,
         nargs='+',
         action='store',
-        default=['aggregate', 'intermediate'],
-        help='JSON data to create the CSV.'
+        default=TYPE,
+        help=f'JSON data to create the CSV. Default {TYPE}'
     )
 
     parser.add_argument(
         '-w', '--wait',
         dest='wait',
         type=int,
-        default=5,
-        help='Waiting Time between Executions.'
+        default=WAIT,
+        help=f'Waiting Time between Executions. Default {WAIT}'
+    )
+
+    parser.add_argument(
+        '-m', '--timeout',
+        dest='timeout',
+        type=int,
+        default=TIMEOUT,
+        help=f'Timeout in milliseconds. Default {TIMEOUT}.'
     )
 
     parser.add_argument(
@@ -365,8 +387,8 @@ def get_script_arguments() -> Namespace:
         dest='debug',
         action='store_true',
         required=False,
-        default=False,
-        help='Enable Debug Mode.'
+        default=DEBUG,
+        help=f'Enable Debug Mode. Default {DEBUG}'
     )
 
     return parser.parse_args()
