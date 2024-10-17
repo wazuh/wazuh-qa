@@ -1,5 +1,6 @@
 const { expect } = require("@playwright/test");
 const { PathManager } = require("./../lib/PathManager.js");
+const { ItemManager } = require("./../lib/ItemManager.js");
 const { CookieManager } = require("./../lib/CookieManager.js");
 const { ScreenshotManager } = require("./../lib/ScreenshotManager.js");
 
@@ -11,6 +12,8 @@ class EndpointTest {
     vuContext = null;
     // PathManager Instance
     pathManager = null;
+    // ItemManager Instance
+    itemManager = null;
     // CookieManager Instance
     cookieManager = null;
     // ScreenshotManager Instance
@@ -25,6 +28,7 @@ class EndpointTest {
         this.page = page;
         this.vuContext = vuContext;
         this.pathManager = new PathManager(page);
+        this.itemManager = new ItemManager(page, vuContext.vars.timeout);
         this.cookieManager = new CookieManager(page, vuContext.vars.username, vuContext.vars.session);
         this.screenshotManager = new ScreenshotManager(page, vuContext.vars.screenshots);
     }
@@ -46,41 +50,34 @@ class EndpointTest {
     async accessEndpoint() {
         // Go to Endpoint Section
         await this.pathManager.goto('endpoint-summary');
-        await this.pathManager.waitfor('endpoint-summary');
+
+        // Check that the Page has Loaded Correctly
+        await this.itemManager.waitForEndpointSummary();
 
         // Take a Browser Screenshot
         await this.screenshotManager.takeAnScreenshot('test_03_endpoint_summary_is_loaded');
-
-        // Check that the Page has Loaded Correctly
-        await expect(this.page.getByText('Endpoints')).toBeVisible();
-    }
-
-    /**
-     * Check Endpoints Information
-     */
-    async checkEndpointsInfo() {
-        // Take a Browser Screenshot
-        await this.screenshotManager.takeAnScreenshot('test_03_endpoint_summary_has_data');
-
-        // Check that the Information on the Endpoints Page Appears
-        await expect(this.page.getByText('Status').first()).toBeVisible();
-        await expect(this.page.getByText('Details')).toBeVisible();
-        await expect(this.page.getByText('Evolution')).toBeVisible();
-        await expect(this.page.getByText('Agents').last()).toBeVisible();
     }
 
     /**
      * Check Endpoints Status
      */
     async checkEndpointsStatus() {
+        // Check that the Status on the Endpoints Page Appears
+        await this.itemManager.waitForAgentStatus()
+
+        // Take a Browser Screenshot
+        await this.screenshotManager.takeAnScreenshot('test_03_endpoint_summary_has_statuses');
+    }
+
+    /**
+     * Check Info about Agents
+     */
+    async checkAgentInfo() {
         // Take a Browser Screenshot
         await this.screenshotManager.takeAnScreenshot('test_03_endpoint_summary_has_agents');
 
         // Check that the Status on the Endpoints Page Appears
-        await expect(this.page.getByText('Active').first()).toBeVisible();
-        await expect(this.page.getByText('Disconnected').first()).toBeVisible();
-        await expect(this.page.getByText('Pending').first()).toBeVisible();
-        await expect(this.page.getByText('Never connected').first()).toBeVisible();
+        await this.itemManager.waitForAgentInfo()        
     }
 
     /**
@@ -92,8 +89,8 @@ class EndpointTest {
         
         // Run the Tests
         await this.accessEndpoint();
-        await this.checkEndpointsInfo();
         await this.checkEndpointsStatus();
+        await this.checkAgentInfo();
 
         // Close the Browser
         await this.page.close();

@@ -1,5 +1,6 @@
 const { expect } = require("@playwright/test");
 const { PathManager } = require("./../lib/PathManager.js");
+const { ItemManager } = require("./../lib/ItemManager.js");
 const { CookieManager } = require("./../lib/CookieManager.js");
 const { ScreenshotManager } = require("./../lib/ScreenshotManager.js");
 
@@ -11,6 +12,8 @@ class LoginTest {
     vuContext = null;
     // PathManager Instance
     pathManager = null;
+    // ItemManager Instance
+    itemManager = null;
     // CookieManager Instance
     cookieManager = null;
     // ScreenshotManager Instance
@@ -25,6 +28,7 @@ class LoginTest {
         this.page = page;
         this.vuContext = vuContext;
         this.pathManager = new PathManager(page);
+        this.itemManager = new ItemManager(page, vuContext.vars.timeout);
         this.cookieManager = new CookieManager(page, vuContext.vars.username, vuContext.vars.session);
         this.screenshotManager = new ScreenshotManager(page, vuContext.vars.screenshots);
     }
@@ -35,13 +39,12 @@ class LoginTest {
     async accessLogin(){
         // Go to Login Page
         await this.pathManager.goto('login');
-        await this.pathManager.waitfor('login');
+
+        // Check that the Page is Loaded
+        await this.itemManager.waitForText('Log in');
 
         // Take a Browser Screenshot
         await this.screenshotManager.takeAnScreenshot('test_01_login_is_loaded');
-
-        // Check that the Login Page is Loaded
-        await expect(this.page.getByText('Log In')).toBeVisible();
     }
 
     /**
@@ -69,13 +72,10 @@ class LoginTest {
      */
     async checkLogin() {
         // Wait for the Overview Page to Load
-        await this.pathManager.waitfor('overview');
+        await this.itemManager.waitForOverview();
 
         // Take a Browser Screenshot
         await this.screenshotManager.takeAnScreenshot('test_01_overview_is_loaded');
-
-        // Check that the Page is Loaded
-        await expect(this.page.getByText('Overview')).toBeVisible();
     }
 
     /**

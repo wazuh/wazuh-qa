@@ -1,5 +1,5 @@
 # Use an official Python base image
-FROM python:3.10-slim-bookworm
+FROM python:3.13.0-slim-bookworm
 
 # ENV Variables
 ENV WORK_PATH=/app
@@ -30,6 +30,7 @@ COPY . ${WORK_PATH}/${APP_PATH}
 WORKDIR ${WORK_PATH}/${APP_PATH}
 
 # Install Python Dependencies
+RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install .
 
 # Default command

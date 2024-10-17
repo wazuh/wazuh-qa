@@ -1,5 +1,6 @@
 const { expect } = require("@playwright/test");
 const { PathManager } = require("./../lib/PathManager.js");
+const { ItemManager } = require("./../lib/ItemManager.js");
 const { CookieManager } = require("./../lib/CookieManager.js");
 const { ScreenshotManager } = require("./../lib/ScreenshotManager.js");
 
@@ -11,6 +12,8 @@ class OverviewTest {
     vuContext = null;
     // PathManager Instance
     pathManager = null;
+    // ItemManager Instance
+    itemManager = null;
     // CookieManager Instance
     cookieManager = null;
     // ScreenshotManager Instance
@@ -25,6 +28,7 @@ class OverviewTest {
         this.page = page;
         this.vuContext = vuContext;
         this.pathManager = new PathManager(page);
+        this.itemManager = new ItemManager(page, vuContext.vars.timeout);
         this.cookieManager = new CookieManager(page, vuContext.vars.username, vuContext.vars.session);
         this.screenshotManager = new ScreenshotManager(page, vuContext.vars.screenshots);
     }
@@ -41,38 +45,24 @@ class OverviewTest {
     }
 
     /**
-     * Access the Dashboard (Overview)
+     * Access the Dashboard (Overview) and check information
      */
     async accessOverview() {
         // Go to Overview Section
         await this.pathManager.goto('overview');
-        await this.pathManager.waitfor('overview');
 
         // Take a Browser Screenshot
         await this.screenshotManager.takeAnScreenshot('test_02_overview_is_loaded');
-        
-        // Check that the Overview Page is Loaded
-        await expect(this.page.getByText('Overview')).toBeVisible();
-    }
 
-    /**
-     * Check Overview Information
-     */
-    async checkOverviewInfo() {
+        // Check that the Page is Loaded
+        await this.itemManager.waitForOverview();
+
         // Take a Browser Screenshot
         await this.screenshotManager.takeAnScreenshot('test_02_overview_dashboard');
-
-        // Check that the Overview Information Appears
-        await expect(this.page.getByTitle('Agents Summary')).toBeVisible();
-        await expect(this.page.getByTitle('Last 24 hours alerts')).toBeVisible();
-        await expect(this.page.getByTitle('Endpoint security')).toBeVisible();
-        await expect(this.page.getByTitle('Threat intelligence')).toBeVisible();
-        await expect(this.page.getByTitle('Security operations')).toBeVisible();
-        await expect(this.page.getByTitle('Cloud security')).toBeVisible();
     }
 
     /**
-     * Run the Full Test
+     * Run the full test
      */
     async executeTest() {
         // Restore Browser Session
@@ -80,7 +70,6 @@ class OverviewTest {
         
         // Run the Tests
         await this.accessOverview();
-        await this.checkOverviewInfo();
 
         // Close the Browser
         await this.page.close();

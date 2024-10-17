@@ -3,7 +3,6 @@ name = "dashboard_saturation_tests"
 version = "0.0.1"
 dependencies = [
     "pandas>=2.2.2",
-    "pycodestyle>=2.12.1",
     "pyyaml>=6.0.2"
 ]
 requires-python = ">=3.10"
@@ -19,6 +18,9 @@ keywords = [ "dashboard", "saturation", "test", "artillery", "playwright" ]
 Homepage = "https://wazuh.com/"
 Documentation = "https://documentation.wazuh.com/"
 Repository = "https://github.com/wazuh/"
+
+[tool.setuptools.packages.find]
+include = ["data"]
 
 [project.scripts]
 dashboard-saturation-tests = "data.dashboard_saturation_tests:main"
