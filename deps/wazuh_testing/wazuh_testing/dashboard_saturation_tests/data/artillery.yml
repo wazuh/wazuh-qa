@@ -29,6 +29,6 @@ scenarios:
 - engine: playwright
   name: test_03_access_endpoint
   testFunction: test_accessEndpoint
-#- engine: playwright
-#  name: test_04_access_event
-#  testFunction: test_accessEvent
+- engine: playwright
+  name: test_04_access_event
+  testFunction: test_accessEvent
