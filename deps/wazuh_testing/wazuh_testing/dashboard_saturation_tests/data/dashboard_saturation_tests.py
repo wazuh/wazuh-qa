@@ -14,7 +14,7 @@ import json
 import time
 from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
 from datetime import datetime
-from os import getcwd, makedirs
+from os import getcwd, makedirs, scandir
 from os.path import isabs, join
 from subprocess import run
 
@@ -269,7 +269,9 @@ def run_artillery(args: Namespace) -> None:
     command = f'artillery run {params} {target} {quiet} {output} {script}'
 
     run(command, shell=True)
-    convert_json_to_csv(args, json_filename)
+
+    if any(scandir(args.logs)):
+        convert_json_to_csv(args, json_filename)
 
 
 def get_script_arguments() -> Namespace:
