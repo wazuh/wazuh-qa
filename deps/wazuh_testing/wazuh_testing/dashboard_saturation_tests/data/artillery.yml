@@ -18,6 +18,7 @@ config:
     screenshots: '{{ screenshots }}'
     session: '{{ session }}'
     username: '{{ username }}'
+    timeout: '{{ timeout }}'
 scenarios:
 - engine: playwright
   name: test_01_login

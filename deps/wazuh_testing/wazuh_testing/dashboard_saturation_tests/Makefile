@@ -1,12 +1,13 @@
 # Variables
-CONSOLE=/bin/bash
-APP=dashboard_saturation_tests
-DATA=data
-WORK=/app
-ARTIFACTS=artifacts
-LOGS=logs
-SCREENSHOTS=screenshots
-CSV=csv
+CONSOLE := /bin/bash
+APP := dashboard_saturation_tests
+DATA := data
+WORK := /app
+DATETIME := $(shell date +%Y%m%d_%H%M%S)
+ARTIFACTS := artifacts_$(DATETIME)
+LOGS := logs
+SCREENSHOTS := screenshots
+CSV := csv
 
 .PHONY: init
 init: rm purge build run ## Recreate Containers
@@ -48,9 +49,6 @@ purge: ## Purge All Docker Resources
 	docker system prune -a -f
 .PHONY: destroy
 destroy: rm purge ## Destroy All Docker Resources
-.PHONY: style
-style: ## Check Python Style
-	docker exec -it $(APP) $(CONSOLE) -c "pycodestyle data/dashboard_saturation_tests.py" || true
 .PHONY: help
 help: ## Display Help Message
 	@cat $(MAKEFILE_LIST) | grep -e "^[a-zA-Z_\-]*: *.*## *" | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
