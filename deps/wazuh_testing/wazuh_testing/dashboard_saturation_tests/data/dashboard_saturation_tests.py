@@ -14,7 +14,7 @@ import fnmatch
 import json
 import time
 from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
-from datetime import datetime
+from datetime import datetime, timezone
 from os import getcwd, makedirs, scandir, listdir
 from os.path import isabs, join
 from subprocess import run
@@ -280,6 +280,7 @@ def convert_json_to_csv(args: Namespace, json_output: str) -> None:
 
         for key in keys:
             csv_filename = gen_csv_filename(args.csv, type, key)
+            filtered_data[key]['timestamp'] = datetime.now(timezone.utc).isoformat()
             df = pd.json_normalize(filtered_data[key])
             df.to_csv(csv_filename, index=False)
 
