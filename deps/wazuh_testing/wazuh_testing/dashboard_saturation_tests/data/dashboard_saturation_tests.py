@@ -10,13 +10,15 @@ are performed with Artillery and Playwright. Artillery and
 Playwright must be installed for it to work properly.
 """
 
+import fnmatch
 import json
 import time
 from argparse import ArgumentParser, Namespace, RawTextHelpFormatter
 from datetime import datetime
-from os import getcwd, makedirs, scandir
+from os import getcwd, makedirs, scandir, listdir
 from os.path import isabs, join
 from subprocess import run
+from typing import Any
 
 import pandas as pd
 import yaml
@@ -216,17 +218,46 @@ def gen_url(ip: str) -> str:
     return f'{url_format}{ip}'
 
 
-def gen_csv_filename(csv_path: str, type: str) -> str:
+def gen_csv_filename(csv_path: str, type: str, entry: str = None) -> str:
     """Generate csv file name (per type).
 
     Args:
         csv_path (str): Path of the CSVs.
         type (str): CSV data type.
+        entry (str): Log Entry.
 
     Returns:
         str: File name of the csv (include type and path).
     """
-    return csv_path + datetime.now().strftime(f"{type}-%Y%m%d%H%M%S.csv")
+    return csv_path + datetime.now().strftime(f"{type}_{entry}_%Y%m%d%H%M%S.csv")
+
+
+def merge_dictionaries(list_of_dicts: list[dict[str, Any]]) -> dict[str, Any]:
+    """Merge a list of dictionaries into a single dictionary.
+
+    Args:
+        list_of_dicts (str): list of dictionaries.
+
+    Returns:
+        dict: Dictionary with merged data.
+    """
+    combined_dict = {
+        'counters': {},
+        'summaries': {},
+        'histograms': {},
+    }
+
+    keys_to_merge = ['counters', 'summaries', 'histograms']
+
+    for item in list_of_dicts:
+        for key in keys_to_merge:
+            if key in item:
+                if key in combined_dict:
+                    combined_dict[key].update(item[key])
+                else:
+                    combined_dict[key] = item[key]
+
+    return combined_dict
 
 
 def convert_json_to_csv(args: Namespace, json_output: str) -> None:
@@ -236,14 +267,21 @@ def convert_json_to_csv(args: Namespace, json_output: str) -> None:
         args (Namespace): Script parameters.
         json_output (str): Path and file name of the log.
     """
+    keys = ['counters', 'summaries', 'histograms']
+
+    with open(json_output) as f:
+        data = json.load(f)
+
     for type in args.type:
-        with open(json_output) as f:
-            data = json.load(f)
+        filtered_data = data[type]
 
-        csv_filename = gen_csv_filename(args.csv, type)
+        if isinstance(filtered_data, list):
+            filtered_data = merge_dictionaries(filtered_data)
 
-        df = pd.json_normalize(data[type])
-        df.to_csv(csv_filename, index=False)
+        for key in keys:
+            csv_filename = gen_csv_filename(args.csv, type, key)
+            df = pd.json_normalize(filtered_data[key])
+            df.to_csv(csv_filename, index=False)
 
 
 def run_artillery(args: Namespace) -> None:
@@ -272,6 +310,31 @@ def run_artillery(args: Namespace) -> None:
 
     if any(scandir(args.logs)):
         convert_json_to_csv(args, json_filename)
+
+
+def merge_csv(args: Namespace) -> None:
+    """Merge multiple CSV files into one.
+
+    Args:
+        args (Namespace): Script parameters.
+    """
+    for type in args.type:
+        keys = ['counters', 'summaries', 'histograms']
+
+        for key in keys:
+            pattern = f'{type}_{key}*'
+            files = fnmatch.filter(listdir(args.csv), pattern)
+
+            if len(files) > 1:
+                data_frames = []
+
+                for file in files:
+                    df = pd.read_csv(join(args.csv, file))
+                    data_frames.append(df)
+
+                combined_df = pd.concat(data_frames)
+                filename = gen_csv_filename(args.csv, f'combined_{type}', key)
+                combined_df.to_csv(filename, index=False)
 
 
 def get_script_arguments() -> Namespace:
@@ -405,6 +468,8 @@ def main() -> None:
     for _ in range(0, script_args.iterations):
         run_artillery(script_args)
         time.sleep(script_args.wait)
+
+    merge_csv(script_args)
 
 
 if __name__ == "__main__":
