@@ -2,7 +2,6 @@ class ItemManager {
 
     // Page provides methods to interact with a single tab in a Browser
     page = null;
-
     // Timeout defines the maximum waiting time in milliseconds
     timeout = null;
 

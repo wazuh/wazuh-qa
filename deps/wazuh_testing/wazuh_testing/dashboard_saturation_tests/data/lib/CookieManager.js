@@ -50,14 +50,14 @@ class CookieManager {
     getCookies() {
         return this.getSavedSession().cookies;
     }
-    
+
     /**
      * Use Stored Cookies for Login
      */
     async restoreSession() {
         await this.page.context().addCookies(this.getCookies());
     }
-  
+
 }
 
 module.exports = { CookieManager };

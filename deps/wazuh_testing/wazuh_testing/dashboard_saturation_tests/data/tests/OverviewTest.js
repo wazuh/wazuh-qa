@@ -39,7 +39,7 @@ class OverviewTest {
     async restoreSession() {
         // Clear Browser Cookies
         await this.cookieManager.clearCookies();
-        
+
         // Restore Browser Cookies
         await this.cookieManager.restoreSession();
     }
@@ -67,14 +67,14 @@ class OverviewTest {
     async executeTest() {
         // Restore Browser Session
         await this.restoreSession();
-        
+
         // Run the Tests
         await this.accessOverview();
 
         // Close the Browser
         await this.page.close();
     }
-  
+
 }
 
 module.exports = { OverviewTest };

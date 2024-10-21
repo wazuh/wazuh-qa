@@ -39,7 +39,7 @@ class EventTest {
     async restoreSession() {
         // Clear Browser Cookies
         await this.cookieManager.clearCookies();
-        
+
         // Restore Browser Cookies
         await this.cookieManager.restoreSession();
     }
@@ -92,7 +92,7 @@ class EventTest {
     async checkEvents() {
         // Click on Events Tab
         await this.page.getByText('Events').click();
-        
+
         // Check that the Page has Loaded Correctly
         await this.itemManager.waitForText('Threat Hunting');
         await this.itemManager.waitForText('Events');
@@ -110,7 +110,7 @@ class EventTest {
     async executeTest() {
         // Restore Browser Session
         await this.restoreSession();
-        
+
         // Run the Tests
         await this.accessEventTab();
         await this.accessAgent();

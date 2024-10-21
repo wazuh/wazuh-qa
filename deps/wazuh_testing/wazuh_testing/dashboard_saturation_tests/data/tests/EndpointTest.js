@@ -39,7 +39,7 @@ class EndpointTest {
     async restoreSession() {
         // Clear Browser Cookies
         await this.cookieManager.clearCookies();
-        
+
         // Restore Browser Cookies
         await this.cookieManager.restoreSession();
     }
@@ -86,7 +86,7 @@ class EndpointTest {
     async executeTest() {
         // Restore Browser Session
         await this.restoreSession();
-        
+
         // Run the Tests
         await this.accessEndpoint();
         await this.checkEndpointsStatus();
@@ -95,7 +95,7 @@ class EndpointTest {
         // Close the Browser
         await this.page.close();
     }
-  
+
 }
 
 module.exports = { EndpointTest };

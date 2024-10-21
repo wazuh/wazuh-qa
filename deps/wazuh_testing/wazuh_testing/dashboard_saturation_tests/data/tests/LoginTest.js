@@ -32,7 +32,7 @@ class LoginTest {
         this.cookieManager = new CookieManager(page, vuContext.vars.username, vuContext.vars.session);
         this.screenshotManager = new ScreenshotManager(page, vuContext.vars.screenshots);
     }
-  
+
     /**
      * Access to Login Page
      */
@@ -87,14 +87,14 @@ class LoginTest {
         await this.addUserPass();
         await this.sendLogin();
         await this.checkLogin();
-        
+
         // Save the Cookie in the Session File
         await this.cookieManager.saveSession();
 
         // Close the Browser
         await this.page.close();
     }
-  
+
 }
 
 module.exports = { LoginTest };

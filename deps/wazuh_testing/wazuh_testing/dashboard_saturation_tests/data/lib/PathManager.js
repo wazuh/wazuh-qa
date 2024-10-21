@@ -6,7 +6,6 @@ class PathManager {
     page = null;
     // Wazuh Dashboard Root Path
     root = '/app';
-
     // Wazuh Dashboard Paths to Access
     options = {
         'login': this.root + '/login?', 
@@ -54,7 +53,7 @@ class PathManager {
         // Go to Selected Page
         await this.page.goto(this.options[option]);
     }
-  
-  }
-  
-  module.exports = { PathManager };
+
+}
+
+module.exports = { PathManager };
