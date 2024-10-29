@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-- Updated Windows server AMis. ([#5831](https://github.com/wazuh/wazuh-qa/pull/5831))
+- Updated Windows server AMis. ([#5831](https://github.com/wazuh/wazuh-qa/pull/5831)) \- (Framework)
 
 ## [4.9.1] - TBD
 
