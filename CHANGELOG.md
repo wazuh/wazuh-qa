@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- Update macOS ventura sign Vagrant box ([#5834](https://github.com/wazuh/wazuh-qa/pull/5834)) \- (Framework)
 - Updated Windows server AMis. ([#5831](https://github.com/wazuh/wazuh-qa/pull/5831)) \- (Framework)
 
 ## [4.9.1] - TBD

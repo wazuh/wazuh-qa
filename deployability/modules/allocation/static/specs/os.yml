@@ -191,7 +191,7 @@ vagrant:
     box_version: 0.0.0
     virtualizer: parallels
   macos-ventura-sign-arm64:
-    box: macos-ventura-sign
+    box: macos-ventura-sign2
     box_version: 0.0.0
     virtualizer: parallels
   # Windows
