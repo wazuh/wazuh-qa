@@ -191,7 +191,7 @@ vagrant:
     box_version: 0.0.0
     virtualizer: parallels
   macos-ventura-sign-arm64:
-    box: macos-ventura-sign
+    box: macos-ventura-sign2
     box_version: 0.0.0
     virtualizer: parallels
   # Windows
@@ -463,14 +463,14 @@ aws:
     zone: us-east-1
     user: wazuh-user
   windows-server-2016-amd64:
-    ami: ami-0f279f6c0764bef8f
+    ami: ami-0d0ae05c222fd12ec
     zone: us-east-1
     user: wazuh-user
   windows-server-2019-amd64:
-    ami: ami-06cc514f1012a7431
+    ami: ami-073e3b46f8802d31b
     zone: us-east-1
     user: wazuh-user
   windows-server-2022-amd64:
-    ami: ami-0f9c44e98edf38a2b
+    ami: ami-0324a83b82023f0b3
     zone: us-east-1
     user: wazuh-user
