@@ -2,6 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
+
 ## [4.10.0] - TBD
 
 ### Fixed
@@ -10,6 +11,13 @@ All notable changes to this project will be documented in this file.
 - Fix E2E VD tests not working if the Python version is different to 3.9 ([#5787](https://github.com/wazuh/wazuh-qa/pull/5787)) \- (Framework)
 - Fix failed to disable wazuh-manager.service ([#5775](https://github.com/wazuh/wazuh-qa/pull/5775)) \- (Tests)
 - Fix reliability tests regex statements ([#5782](https://github.com/wazuh/wazuh-qa/pull/5782)) \- (Tests)
+
+## [4.9.2] - TBD
+
+### Fixed
+
+- Update macOS ventura sign Vagrant box ([#5834](https://github.com/wazuh/wazuh-qa/pull/5834)) \- (Framework)
+- Updated Windows server AMis. ([#5831](https://github.com/wazuh/wazuh-qa/pull/5831)) \- (Framework)
 
 ## [4.9.1] - TBD
 
