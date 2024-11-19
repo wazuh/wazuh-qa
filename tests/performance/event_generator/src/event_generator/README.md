@@ -4,9 +4,9 @@
 The Event Generator Library is designed to simulate log and file operation events for testing and validation purposes. It offers a versatile setup for generating a variety of simulated events that can help in monitoring and analyzing the behavior of different systems under various conditions.
 
 # Features
-- **Log Event Simulation: ** Simulate log generation with customizable templates and automatic log rotation based on size constraints.
-- **File System Event Simulation: ** Simulate file operations like creation, modification, and deletion to test system responses.
-- **Configurable Event Rate: ** Control the rate of event generation to simulate different load scenarios.
+- **Log Event Simulation:** Simulate log generation with customizable templates and automatic log rotation based on size constraints.
+- **File System Event Simulation:** Simulate file operations like creation, modification, and deletion to test system responses.
+- **Configurable Event Rate:** Control the rate of event generation to simulate different load scenarios.
 
 # Classes
 - `EventGenerator`: Abstract base class for generating events. Subclasses must implement the `generate_event()` method.
