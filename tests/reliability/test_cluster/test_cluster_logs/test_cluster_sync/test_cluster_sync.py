@@ -56,7 +56,7 @@ def test_cluster_sync(artifacts_path):
                                 repeat_counter += 1
                     # If only 1 shared file is synced, it could be the 'client.keys' so it doesn't count as a repeated
                     # log (agents could be registering).
-                    elif sync_logs[i][2:] != (b'0', b'1', b'0', b'0'):
+                    elif sync_logs[i][2:] != (b'0', b'1', b'0'):
                         repeat_counter += 1
 
                     if repeat_counter >= configuration['repeat_threshold']:
