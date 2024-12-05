@@ -25,9 +25,8 @@ Modify the config.yaml to set up the parameters for event generation, such as th
 
 A testing of the limitations of the event generation tool has been performed.
 
-It has been tested with Ubuntu 22, Ubuntu 20, Amazon Linux 2, Amazon Linux 2023 and CentOS 8 operating systems.
-With different RAM memory settings from 2GB to 16GB and from 1CPU to 12 CPUs.
-It has been performed on a pc with the following characteristics:
+It has been tested on Ubuntu 22.04, Ubuntu 20.04, Amazon Linux 2, Amazon Linux 2023 and CentOS 8 operating systems
+on a system with the following characteristics:
 
  - Model: Intel Core i7-10750H @ 2.60 GHz (6 cores, 12 threads).
  - CPU Features: The CPU has 6 physical cores and supports Hyper-Threading (12 threads).
