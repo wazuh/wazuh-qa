@@ -23,7 +23,7 @@ Modify the config.yaml to set up the parameters for event generation, such as th
 
 # Limitations
 
-A test of the limitations of the event creation tool has been carried out.
+A testing of the limitations of the event generation tool has been performed.
 
 It has been tested with Ubuntu 22, Ubuntu 20, Amaozn Linux 2, Amazon Linux 2023 and CentOS 8 operating systems.
 With different RAM memory settings from 2GB to 16GB and from 1CPU to 12 CPUs.
