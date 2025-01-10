@@ -16,14 +16,14 @@ All notable changes to this project will be documented in this file.
 - Fix failed to disable wazuh-manager.service ([#5775](https://github.com/wazuh/wazuh-qa/pull/5775)) \- (Tests)
 - Fix reliability tests regex statements ([#5782](https://github.com/wazuh/wazuh-qa/pull/5782)) \- (Tests)
 
-## [4.9.2] - TBD
+## [4.9.2] - 04/11/2024
 
 ### Fixed
 
 - Update macOS ventura sign Vagrant box ([#5834](https://github.com/wazuh/wazuh-qa/pull/5834)) \- (Framework)
 - Updated Windows server AMis. ([#5831](https://github.com/wazuh/wazuh-qa/pull/5831)) \- (Framework)
 
-## [4.9.1] - TBD
+## [4.9.1] - 18/10/2024
 
 ### Added
 
@@ -51,7 +51,7 @@ All notable changes to this project will be documented in this file.
 
 - Reverted an xfail behaviour change in the API performance test ([#5734](https://github.com/wazuh/wazuh-qa/pull/5734)) \- (Tests)
 
-## [4.9.0] - TBD
+## [4.9.0] - 10/09/2024
 
 ### Added
 
