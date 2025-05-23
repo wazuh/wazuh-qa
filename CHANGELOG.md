@@ -2,11 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [4.10.2] - TBD
+## [4.10.3] - TBD
+
+## [4.10.2] - 22/05/2025
 
 ## [4.10.1] - 17/01/2024
-
-
 
 ## [4.10.0] - 10/01/2025
 
